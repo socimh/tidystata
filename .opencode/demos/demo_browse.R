@@ -3,7 +3,7 @@
 
 library(dplyr)
 
-pkgload::load_all(".", quiet = TRUE, compile = FALSE)
+library(statart)
 
 cat("## Example 1: Browse basic data frame\n\n")
 cat("```r\n")

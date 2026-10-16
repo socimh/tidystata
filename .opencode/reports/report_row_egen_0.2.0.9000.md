@@ -1,6 +1,6 @@
 # Function: row_egen()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-15 22:21:39 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:56 | **Status:** PASS
 
 ## Example 1: row_min
 
@@ -76,7 +76,7 @@ row_non_miss(df_na)
 [1] 2 2 2
 ```
 
-## Example 7: In mutate context
+## Example 7: In mutate contex
 
 ```r
 df %>%

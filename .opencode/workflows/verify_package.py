@@ -63,6 +63,8 @@ def main():
     if options.demos:
         return run("demos", ["Rscript", root / ".opencode/workflows/generate_demo_reports.R"],
                    cwd=source, extra_env={"STATART_DEMO_SOURCE": str(source),
+                                         "STATART_DEMO_LIBRARY": str(library),
+                                         "R_LIBS_USER": str(library),
                                          "STATART_REPORT_DIR": str(root / ".opencode/reports")})
     if options.minimal:
         return run("minimal", ["Rscript", root / ".opencode/tests/minimal_dependencies.R",

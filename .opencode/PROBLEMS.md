@@ -2,12 +2,25 @@
 
 ## Current verified state (2026-10-16)
 
-The complete suite passes: 16,213 expectations, zero failures/errors, 15 test
-warnings and one skipped block across 2,996 blocks. Fresh installation/build
-and R CMD check --no-manual pass with Status: OK. Earlier required-dependency
-smoke evidence remains valid; dependencies and exports did not change.
-See [codebook/browse acceptance and current evidence](reports/project_status_codebook_browse_acceptance_2026-10-16.md). The previous
-[summary catalogue](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md) remains valid.
+The complete suite passes: **16,492 expectations across 3,053 blocks**, zero
+failures, errors, uncaptured warnings or skips. Fresh native installation/build,
+R CMD check --no-manual (Status: OK), required-dependency smoke and eleven demos
+pass. See [modern R adoption and evidence](reports/project_status_r_style_adoption_2026-10-16.md).
+
+Resolved in adoption: fifteen previously uncaptured warning emissions are now
+asserted, the empty interval-width test now checks exact boundaries, conversion
+assertions verify values/attributes, and shared style checks handle Unicode Git
+paths and exclude generated/archive Windows path aliases. CI style is check-only;
+website deployment requires an explicit manual input. Six dependency floors now
+reflect actual APIs and casting behavior. All 40 interfaces and 24 representative
+output records match baseline; both PDF artifacts remain unchanged.
+
+Remaining: remote R4.1/multi-platform execution, old dependency combinations,
+actual GUI viewing, and existing documented locale/display/legacy-binning limits.
+No new public behavior was introduced; broad API changes remain separate work.
+
+Earlier family acceptance summaries below are historical checkpoints, superseded
+by the complete current run above for aggregate totals and adoption status.
 
 summ() and tabstat() are locally accepted release candidates: 342 blocks and
 1,224 expectations with zero failures/errors/warnings/skips. Fixed SPSS missing
@@ -52,8 +65,8 @@ material defects in the reviewed summary scope. This coverage expansion changed 
 
 - The new [ten-page codebook/browse PDF](reports/project_status_codebook_browse_pdf_2026-10-16.md) shows current outputs and scripts for maintainer review. All ten sections execute cleanly and all pages are visually checked; package behavior is unchanged.
 - The maintainer approved the selective [console showcase](reports/project_status_console_showcase_2026-10-16.md). Its appearance is preserved; no output redesign is pending.
-- Replace the empty cut_length interval-width test; its skip is missing coverage.
-- Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The accepted summary, tabulation and inspection checks now have no uncaptured warnings. Test warnings are separate from package-check warnings (zero).
+- Resolved: the former empty cut_length test now checks exact interval boundaries.
+- Resolved: all retained intentional warning paths are explicitly asserted; the full suite has zero uncaptured warnings or skips.
 - Verify the declared R 4.1 minimum and other platforms before publishing; manually validate interactive viewer rendering.
 - Combined-header and literal-NA/missing-category cross-table collisions error explicitly; fre2 column category total must be recoded. An observed row label total remains alongside the final marginal row; callers should distinguish the final row.
 - Four regenerated README console lines retain pillar trailing spaces; no generated output was manually patched.

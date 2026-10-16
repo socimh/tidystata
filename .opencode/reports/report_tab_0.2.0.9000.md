@@ -1,6 +1,6 @@
 # Function: tab()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-15 22:21:41 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:57 | **Status:** PASS
 
 ## Example 1: Basic frequency table
 
@@ -16,7 +16,7 @@ tab(mtcars, cyl)
   <dbl> <int>   <dbl> <dbl> <dbl>     <dbl>
 1     4    11    34.4  34.4  34.4      34.4
 2     6     7    21.9  56.2  21.9      56.2
-3     8    14    43.8 100    43.8     100  
+3     8    14    43.8 100    43.8     100
 ```
 
 ## Example 2: With percentages
@@ -33,7 +33,7 @@ tab(mtcars, cyl)
   <dbl> <int>   <dbl> <dbl> <dbl>     <dbl>
 1     4    11    34.4  34.4  34.4      34.4
 2     6     7    21.9  56.2  21.9      56.2
-3     8    14    43.8 100    43.8     100  
+3     8    14    43.8 100    43.8     100
 ```
 
 ## Example 3: Sorted by frequency (descending)
@@ -50,7 +50,7 @@ tab(mtcars, cyl, .desc = TRUE)
   <dbl> <int>   <dbl> <dbl> <dbl>     <dbl>
 1     8    14    43.8  43.8  43.8      43.8
 2     4    11    34.4  78.1  34.4      78.1
-3     6     7    21.9 100    21.9     100  
+3     6     7    21.9 100    21.9     100
 ```
 
 ## Example 4: With grouping
@@ -89,8 +89,8 @@ tab(starwars, sex)
 1 female            16   18.4   18.4 19.3       19.3
 2 hermaphroditic     1    1.15  19.5  1.20      20.5
 3 male              60   69.0   88.5 72.3       92.8
-4 none               6    6.90  95.4  7.23     100  
-5 <NA>               4    4.60 100   NA         NA  
+4 none               6    6.90  95.4  7.23     100
+5 <NA>               4    4.60 100   NA         NA
 ```
 
 ## Example 6: Multiple variables
@@ -109,8 +109,8 @@ tab(starwars, sex, gender)
 2 hermaphroditic masculine     1    1.15  19.5  1.20      20.5
 3 male           masculine    60   69.0   88.5 72.3       92.8
 4 none           feminine      1    1.15  89.7  1.20      94.0
-5 none           masculine     5    5.75  95.4  6.02     100  
-6 <NA>           <NA>          4    4.60 100   NA         NA  
+5 none           masculine     5    5.75  95.4  6.02     100
+6 <NA>           <NA>          4    4.60 100   NA         NA
 ```
 
 ## Example 7: With boolean expression
@@ -125,9 +125,9 @@ tab(starwars, tall = height > 180)
 # A tibble: 3 x 6
   tall      n percent   cum valid valid_cum
   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
-1 FALSE    43   49.4   49.4  53.1      53.1
-2 TRUE     38   43.7   93.1  46.9     100  
-3 NA        6    6.90 100    NA        NA  
+1 FALSE    42   48.3   48.3  51.9      51.9
+2 TRUE     39   44.8   93.1  48.1     100
+3 NA        6    6.90 100    NA        NA
 ```
 
 ## Example 8: Cross-tabulation (tab2)

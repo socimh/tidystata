@@ -4,6 +4,11 @@ Current development version: **0.2.0.9000**. The package focuses on Stata-inspir
 exploration and data preparation. This is the first stabilization milestone for
 a future 0.3.0 release.
 
+The [coding standard](CONTRIBUTING.md#r-coding-standard) defines modern R style,
+compatibility boundaries and risk-based verification. Run `make style-check`
+for the adopted source list; formatting is explicit and local. See the
+[adoption ledger](.opencode/plans/r-style-adoption.md) for execution status.
+
 ## Active package
 
 The namespace exports 40 objects: 39 functions and the `%>%` operator.
@@ -45,6 +50,27 @@ results remain preserved and ignored by Git. make clean removes no files;
 artifact deletion requires a separately reviewed, explicitly approved list.
 
 ## Current verification
+
+Modern R adoption is verified locally: **16,492 passing expectations across
+3,053 blocks, zero failures, errors, uncaptured warnings or skips**. Fresh native
+installation, source build and `R CMD check --no-manual` pass with **Status: OK**.
+All 90 adopted R files pass pinned Air/lintr/parsing checks. Required-dependency
+smoke checks and all eleven demos pass; 40 public interfaces and 24 representative
+outputs/visibility/diagnostic records match the pre-adoption installation.
+See [adoption evidence](.opencode/reports/project_status_r_style_adoption_2026-10-16.md).
+
+The four conversion helpers, row calculations, binning, selectors/types and
+utilities now have risk-based contract review alongside retained suites.
+Existing numbered catalogues remain intact. Fifteen formerly uncaptured warnings
+are explicitly asserted; the empty interval-width test has real assertions.
+Six API/behavior dependency floors are now declared, retaining 13 Imports,
+40 exports, the R 4.1 minimum and existing public behavior. CI includes an
+explicit R 4.1 job; remote platform/minimum-version execution remains pending.
+
+## Earlier family milestones
+
+The following figures retain earlier acceptance evidence; the full-suite totals
+above are current.
 
 Latest codebook/browse acceptance: **16,213 passing expectations across 2,996
 blocks, zero failed expectations or error blocks**, with 15 test warnings and
@@ -153,15 +179,15 @@ matching build toolchain; the minimum version has not been exercised here.
 
 ## Next validation milestone
 
-Continue with as_character(), as_numeric(), na_if_value() and value_if_na(),
-then row helpers, binning, selector/type helpers and utilities using the
-function-level acceptance approach. Interactive viewer rendering also remains
-a manual validation task.
+1. Execute the declared R 4.1 minimum and Windows/macOS/Linux CI matrix after an
+   authorized remote update; current local execution is Windows R 4.6.0 only.
+2. Validate actual interactive viewer rendering manually.
+3. Review release metadata, migration guidance and preserved locale/display/binning
+   limitations before requesting publication.
 
-1. Replace the empty cut_length interval-width test with a meaningful assertion.
-2. Explicitly capture expected warnings and modernize legacy matrix fixtures.
-3. Exercise the declared R 4.1 minimum and other platforms in CI.
-4. Review release metadata and migration guidance before requesting publication.
+Function-family adoption is complete in the tested local scope; use
+`make style-check` and the documented protected verification workflows for future
+changes. Website building is separate from explicitly requested deployment.
 
 The approved summary policies, search matching, empty selections and list counts
 are implemented. Original-variable/category collisions and units recognition

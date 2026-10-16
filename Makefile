@@ -1,7 +1,7 @@
 # Statart Testing Workflow Makefile
 # Testing with testthat + Demo reports with actual function output
 
-.PHONY: test test-results demo-reports test-full clean help list-tests
+.PHONY: test test-results demo-reports test-full clean help list-tests style-check
 
 # Default target
 .DEFAULT_GOAL := help
@@ -30,6 +30,7 @@ help:
 	@echo "$(GREEN)Utilities:$(RESET)"
 	@echo "  $(YELLOW)make clean$(RESET)         - Preserve artifacts; show cleanup guidance"
 	@echo "  $(YELLOW)make list-tests$(RESET)    - List all test files"
+	@echo "  $(YELLOW)make style-check$(RESET)   - Check adopted R sources without editing"
 	@echo ""
 	@echo "$(GREEN)Examples:$(RESET)"
 	@echo "  make demo-reports   # Generate reports showing real function output"
@@ -39,6 +40,10 @@ help:
 test:
 	@echo "$(BLUE)Running testthat tests...$(RESET)"
 	python .opencode/workflows/verify_package.py
+
+# Pinned formatter and non-formatting lint checks; never rewrite sources.
+style-check:
+	python .opencode/workflows/check_style.py
 
 # Collect test results (both .Rds and .txt)
 test-results:

@@ -3,7 +3,7 @@
 
 library(dplyr)
 
-pkgload::load_all(".", quiet = TRUE, compile = FALSE)
+library(statart)
 
 cat("## Example 1: Basic one-way table\n\n")
 cat("```r\n")

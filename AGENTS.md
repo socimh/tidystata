@@ -9,6 +9,8 @@ This project (`statart`) aims to provide Stata-like functions in R for users fam
 
 * Read [DEVELOPMENT.md](DEVELOPMENT.md) for the current inventory, verified baseline, and restart roadmap.
 * Follow [CONTRIBUTING.md](CONTRIBUTING.md) for source locations and verification workflow.
+* The R coding standard in CONTRIBUTING.md is authoritative; use the pinned,
+  read-only `make style-check` workflow for adopted sources.
 * Current status lives in `.opencode/QUICK_STATUS.md`, `.opencode/PROBLEMS.md`, and `.opencode/TODO.md`; historical completion notes are not current verification.
 * Git history is restored: `master` tracks `origin/master` at https://github.com/socimh/statart.git. Preserve uncommitted local changes and inspect status before Git operations.
 * On Windows, every R/Rscript command must use `python C:/Users/socimh/.codex/scripts/run_r_safe.py -- ...`, including tests and documentation generation. Inspect exit status and stderr.

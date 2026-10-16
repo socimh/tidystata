@@ -1,5 +1,15 @@
 # To-do list
 
+## Modern R adoption
+
+- [x] Establish authoritative standards and pinned, read-only style tooling.
+- [x] Adopt all 90 maintained handwritten R sources/tests/examples in the scoped checker.
+- [x] Preserve numbered catalogues; add 57 distinct risk-based blocks/266 expectations.
+- [x] Correct six dependency floors, regenerate six help topics, verify eleven demos.
+- [x] Make /style check-only and website deployment explicit; add R4.1 CI configuration.
+- [x] Complete independent cross-review, path regression fixes, full native/build/check and preservation checks.
+- [ ] Execute remote platform/minimum-R jobs after an explicitly authorized push.
+
 ## Repository organization
 
 - [x] Review tracked, ignored, historical and package-distributed files without deleting anything; see [cleanup review](reports/project_status_cleanup_review_2026-10-16.md).
@@ -24,8 +34,8 @@
 - [x] Review ds, ds_as_column, names_as_column, variables and variables_search with 100 numbered scenarios each; fix query validation/letter-range warnings, regenerate help and pass full checks. See [acceptance](reports/project_status_inspection_acceptance_2026-10-16.md).
 - [x] Review codebook and browse with 100 numbered cases each, repair reproduced inventory/shared-selector defects, remove fixture warnings, regenerate help and pass fresh full checks. See [acceptance](reports/project_status_codebook_browse_acceptance_2026-10-16.md).
 - [ ] Validate actual interactive viewer rendering; current browse acceptance is headless/stubbed.
-- [ ] Review conversions next: as_character, as_numeric, na_if_value and value_if_na.
-- [ ] Continue through row helpers, binning, selector/type helpers and utilities.
+- [x] Review conversions: exact contracts, direct-call refactors, regenerated help and fresh full checks.
+- [x] Review row helpers, binning, selector/type helpers and utilities with risk-based contracts and fresh full checks.
 - [ ] Complete minimum-R/multi-platform validation before any publication request.
 
 ## Next stabilization milestone
@@ -45,9 +55,9 @@
 - [x] Repair the 11 invalid fixtures and 77 incorrect-expectation identities in focused batches, verifying each against its contract.
 - [x] Resolve the eight behavior contracts and fix the reproduced units, summary and naming defects.
 
-- [ ] Replace the skipped empty cut_length test and capture remaining expected warnings outside the accepted summary/tabulation/names families.
+- [x] Replace the empty cut_length test and explicitly assert all remaining expected warnings; current suite has no uncaptured warnings/skips.
 - [x] Remove repeated successful selector execution, retain warning/error behavior and document failed-probe side-effect limits. Preserve codebook name validation.
-- [ ] Complete dedicated selector/type acceptance beyond the retained regressions.
+- [x] Add dedicated selector/type/utility contracts for evaluation, diagnostics, RNG, visibility and metadata.
 
 ## Completed first milestone
 

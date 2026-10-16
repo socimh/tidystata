@@ -4,7 +4,7 @@
 library(dplyr)
 library(tibble)
 
-pkgload::load_all(".", quiet = TRUE, compile = FALSE)
+library(statart)
 
 cat("## Example 1: Basic numeric summary\n\n")
 cat("```r\n")

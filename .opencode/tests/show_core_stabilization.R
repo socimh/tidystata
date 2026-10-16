@@ -3,7 +3,10 @@ args <- commandArgs(trailingOnly = TRUE)
 library(statart)
 options(width = 90, cli.num_colors = 1)
 cat("SUMMARY ALIASES AND SUM\n")
-print(summ(tibble::tibble(x = c(1, 3, NA)), .stat = c("n", "missing", "sum", "p50")))
+print(summ(
+  tibble::tibble(x = c(1, 3, NA)),
+  .stat = c("n", "missing", "sum", "p50")
+))
 cat("\nZERO-OBSERVATION SUMMARY\n")
 print(summ(tibble::tibble(x = numeric())))
 cat("\nCROSS-TABLE CATEGORY MATCHING ROW VARIABLE\n")

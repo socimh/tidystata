@@ -1,6 +1,6 @@
 # Function: s_select()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-15 22:21:40 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:57 | **Status:** PASS
 
 ## Example 1: Select columns by name
 
@@ -143,7 +143,7 @@ s_select(mtcars, starts_with('d'))
 **Output:**
 
 ```
-                     disp drat
+                     disp dra
 Mazda RX4           160.0 3.90
 Mazda RX4 Wag       160.0 3.90
 Datsun 710          108.0 3.85
@@ -195,7 +195,7 @@ Error: Neither <tidy-select> nor <data-masking> recognised the input.
 x Column `nonexistent_col` doesn't exist.
   mutate() error: i In argument: `nonexistent_col`.
 Caused by error:
-! object 'nonexistent_col' not found 
+! object 'nonexistent_col' not found
 ```
 
 ## Example 6: With data.table
@@ -216,23 +216,18 @@ if (requireNamespace('data.table', quietly = TRUE)) {
 
 Attaching package: 'data.table'
 
- 
-The following object is masked from 'package:statart':
 
-    :=
-
- 
 The following objects are masked from 'package:dplyr':
 
-    between, first, last
+    between, first, las
 
- 
+
 The following object is masked from 'package:base':
 
     %notin%
 
- 
-Class: data.table, data.frame 
+
+Class: data.table, data.frame
       mpg    hp
     <num> <num>
  1:  21.0   110

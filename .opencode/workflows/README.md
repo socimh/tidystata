@@ -52,3 +52,26 @@ Old root setup/test/release files and the interactive build scratchpad are
 preserved in [development-history](../../extra_functions/development-history/README.md),
 excluded from package builds. See [DEVELOPMENT.md](../../DEVELOPMENT.md) for
 source locations and the protected execution requirements.
+# Current maintained workflow
+
+Start with `verify_package.py` for fresh native installation, tests, checking,
+minimal-dependency smoke checks and demos. It calls the protected Windows R
+launcher. `run_suite.R` collects results; `generate_demo_reports.R` owns demo
+reports and their index. The family `verify_*.R` acceptance runners listed in
+`../style-scope.json` retain their established numbered catalogues.
+The demo workflow passes its fresh installed library explicitly. Individual
+demos attach statart normally; they no longer repeatedly load development
+namespaces or depend on an old DLL in the working folder.
+After adding a development report, run the report generator with `--index-only`
+through the protected launcher to rebuild the index from existing demo reports
+without rerunning demos. Missing or malformed demo status records fail clearly.
+
+`check_style.py` is the read-only entry point for pinned Air 0.12.0 and lintr
+3.4.0 checks. Use `make style-check`; see CONTRIBUTING.md for installation,
+scope and the documented namespace exception. The manifest lists maintained
+handwritten R sources. Generated showcase scripts are rebuilt by their Python
+authoring sources and are deliberately outside manual formatting.
+
+Older esttab automation, scratch runners, challenge-header utilities and saved
+reports are preserved historical material. They are not alternative current
+entry points. No historical files or generated results are deleted by adoption.

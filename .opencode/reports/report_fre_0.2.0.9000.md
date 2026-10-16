@@ -1,6 +1,6 @@
 # Function: fre()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-15 22:21:39 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:56 | **Status:** PASS
 
 ## Example 1: Basic frequency with Total
 
@@ -16,11 +16,11 @@ fre(mtcars, cyl)
   <chr> <int>   <dbl> <dbl> <dbl>     <dbl>
 1 4        11    34.4  34.4  34.4      34.4
 2 6         7    21.9  56.2  21.9      56.2
-3 8        14    43.8 100    43.8     100  
-4 Total    32   100    NA    NA        NA  
+3 8        14    43.8 100    43.8     100
+4 Total    32   100    NA    NA        NA
 ```
 
-## Example 2: With tibble output
+## Example 2: With tibble outpu
 
 ```r
 fre(mtcars, cyl, .type = 'tibble')
@@ -34,8 +34,8 @@ fre(mtcars, cyl, .type = 'tibble')
   <chr> <int>   <dbl> <dbl> <dbl>     <dbl>
 1 4        11    34.4  34.4  34.4      34.4
 2 6         7    21.9  56.2  21.9      56.2
-3 8        14    43.8 100    43.8     100  
-4 Total    32   100    NA    NA        NA  
+3 8        14    43.8 100    43.8     100
+4 Total    32   100    NA    NA        NA
 ```
 
 ## Example 3: With grouping
@@ -51,16 +51,16 @@ fre(mtcars, gear, .by = cyl, .type = 'tibble')
      cyl gear      n percent    cum valid valid_cum
    <dbl> <chr> <int>   <dbl>  <dbl> <dbl>     <dbl>
  1     4 3         1    9.09   9.09  9.09      9.09
- 2     4 4         8   72.7   81.8  72.7      81.8 
- 3     4 5         2   18.2  100    18.2     100   
- 4     4 Total    11  100     NA    NA        NA   
- 5     6 3         2   28.6   28.6  28.6      28.6 
- 6     6 4         4   57.1   85.7  57.1      85.7 
- 7     6 5         1   14.3  100    14.3     100   
- 8     6 Total     7  100     NA    NA        NA   
- 9     8 3        12   85.7   85.7  85.7      85.7 
-10     8 5         2   14.3  100    14.3     100   
-11     8 Total    14  100     NA    NA        NA   
+ 2     4 4         8   72.7   81.8  72.7      81.8
+ 3     4 5         2   18.2  100    18.2     100
+ 4     4 Total    11  100     NA    NA        NA
+ 5     6 3         2   28.6   28.6  28.6      28.6
+ 6     6 4         4   57.1   85.7  57.1      85.7
+ 7     6 5         1   14.3  100    14.3     100
+ 8     6 Total     7  100     NA    NA        NA
+ 9     8 3        12   85.7   85.7  85.7      85.7
+10     8 5         2   14.3  100    14.3     100
+11     8 Total    14  100     NA    NA        NA
 ```
 
 ## Example 4: With starwars data
@@ -78,10 +78,10 @@ fre(starwars, sex, .type = 'tibble')
 1 female            16   18.4   18.4  19.3       19.3
 2 hermaphroditic     1    1.15  19.5   1.20      20.5
 3 male              60   69.0   88.5  72.3       92.8
-4 none               6    6.90  95.4   7.23     100  
-5 Valid Total       83   95.4   NA   100         NA  
-6 <NA>               4    4.60 100    NA         NA  
-7 Total             87  100     NA    NA         NA  
+4 none               6    6.90  95.4   7.23     100
+5 Valid Total       83   95.4   NA   100         NA
+6 <NA>               4    4.60 100    NA         NA
+7 Total             87  100     NA    NA         NA
 ```
 
 ## Example 5: With missing values
@@ -119,14 +119,14 @@ fre1(starwars, sex, gender, .type = 'tibble')
  1 sex      female            16   18.4   18.4  19.3       19.3
  2 sex      hermaphroditic     1    1.15  19.5   1.20      20.5
  3 sex      male              60   69.0   88.5  72.3       92.8
- 4 sex      none               6    6.90  95.4   7.23     100  
- 5 sex      Valid Total       83   95.4   NA   100         NA  
- 6 sex      <NA>               4    4.60 100    NA         NA  
- 7 sex      Total             87  100     NA    NA         NA  
+ 4 sex      none               6    6.90  95.4   7.23     100
+ 5 sex      Valid Total       83   95.4   NA   100         NA
+ 6 sex      <NA>               4    4.60 100    NA         NA
+ 7 sex      Total             87  100     NA    NA         NA
  8 gender   feminine          17   19.5   19.5  20.5       20.5
- 9 gender   masculine         66   75.9   95.4  79.5      100  
-10 gender   Valid Total       83   95.4   NA   100         NA  
-11 gender   <NA>               4    4.60 100    NA         NA  
-12 gender   Total             87  100     NA    NA         NA  
+ 9 gender   masculine         66   75.9   95.4  79.5      100
+10 gender   Valid Total       83   95.4   NA   100         NA
+11 gender   <NA>               4    4.60 100    NA         NA
+12 gender   Total             87  100     NA    NA         NA
 ```
 

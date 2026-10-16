@@ -59,21 +59,20 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
 
-      - name: Install dependencies
-        run: install.packages("styler")
-        shell: Rscript {0}
-
-      - name: Style
-        run: styler::style_pkg()
-        shell: Rscript {0}
-
-      - name: commit
-        run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add \*.R
-          git commit -m 'Style'
-
-      - uses: r-lib/actions/pr-push@v2
+      - uses: actions/setup-python@v5
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          python-version: '3.11'
+
+      - name: Install pinned Air
+        run: python -m pip install air-formatter==0.12.0
+
+      - name: Install pinned lint dependencies
+        run: |
+          install.packages(c("remotes", "jsonlite"))
+          remotes::install_version("lintr", version = "3.4.0", upgrade = "never")
+        shell: Rscript {0}
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+
+      - name: Check adopted sources (read only)
+        run: python .opencode/workflows/check_style.py

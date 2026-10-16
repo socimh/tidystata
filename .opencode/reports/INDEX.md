@@ -7,6 +7,7 @@ A passing demo is not a passing full package test suite.
 | --- | --- | ---: | --- | --- |
 | browse | Browse data | 5 | PASS | [View](report_browse_0.2.0.9000.md) |
 | codebook | Variable metadata | 6 | PASS | [View](report_codebook_0.2.0.9000.md) |
+| conversion | Conversion and missing-value preparation | 4 | PASS | [View](report_conversion_0.2.0.9000.md) |
 | cut | Numeric bins | 7 | PASS | [View](report_cut_0.2.0.9000.md) |
 | fre | Frequencies and totals | 6 | PASS | [View](report_fre_0.2.0.9000.md) |
 | row_egen | Row calculations | 8 | PASS | [View](report_row_egen_0.2.0.9000.md) |
@@ -30,6 +31,7 @@ A passing demo is not a passing full package test suite.
 - [project_status_failure_triage_2026-10-16.md](project_status_failure_triage_2026-10-16.md)
 - [project_status_git_comparison_2026-10-15.md](project_status_git_comparison_2026-10-15.md)
 - [project_status_inspection_acceptance_2026-10-16.md](project_status_inspection_acceptance_2026-10-16.md)
+- [project_status_r_style_adoption_2026-10-16.md](project_status_r_style_adoption_2026-10-16.md)
 - [project_status_summ_tabstat_100_scenarios_2026-10-16.md](project_status_summ_tabstat_100_scenarios_2026-10-16.md)
 - [project_status_summ_tabstat_acceptance_2026-10-16.md](project_status_summ_tabstat_acceptance_2026-10-16.md)
 - [project_status_tabulation_acceptance_2026-10-16.md](project_status_tabulation_acceptance_2026-10-16.md)

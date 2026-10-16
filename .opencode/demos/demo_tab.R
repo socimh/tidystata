@@ -4,7 +4,7 @@
 library(dplyr)
 library(tibble)
 
-pkgload::load_all(".", quiet = TRUE, compile = FALSE)
+library(statart)
 
 cat("## Example 1: Basic frequency table\n\n")
 cat("```r\n")
@@ -35,12 +35,17 @@ cat("```\n\n")
 
 cat("## Example 4: With grouping\n\n")
 cat("```r\n")
-cat("df <- data.frame(x = c('a', 'b', NA, 'a', 'b', NA), g = c('x', 'x', 'x', 'y', 'y', 'y'))\n")
+cat(
+  "df <- data.frame(x = c('a', 'b', NA, 'a', 'b', NA), g = c('x', 'x', 'x', 'y', 'y', 'y'))\n"
+)
 cat("tab(df, x, .by = g)\n")
 cat("```\n\n")
 cat("**Output:**\n\n")
 cat("```\n")
-df <- data.frame(x = c("a", "b", NA, "a", "b", NA), g = c("x", "x", "x", "y", "y", "y"))
+df <- data.frame(
+  x = c("a", "b", NA, "a", "b", NA),
+  g = c("x", "x", "x", "y", "y", "y")
+)
 print(tab(df, x, .by = g))
 cat("```\n\n")
 

@@ -5,7 +5,8 @@
 For every modified or new function, you must generate a verification report demonstrating that it works error-free on sample data.
 
 **Rigorous Testing Rule**:
-*   Test at least **20 different scenarios** with diverse settings to ensure the function is robust.
+*   Use risk-based scenarios with diverse settings. Preserve existing numbered
+    acceptance catalogues; do not add repetitive cases to satisfy a fixed quota.
 *   Cover edge cases, different input types, argument combinations, error conditions, and boundary values.
 
 ## Directory Structure
@@ -29,7 +30,8 @@ For every modified or new function, you must generate a verification report demo
 *   Create a standalone R script in `.opencode/tests/` (e.g., `.opencode/tests/test_esttab.R`).
 *   Load the package (or source relevant files) and necessary libraries.
 *   Use **pkgdown examples** or standard datasets (`mtcars`, `iris`, `sleepstudy`, `starwars`, etc.).
-*   Implement **20+ distinct test cases** (numbered or labeled) to verify behavior under various conditions.
+*   Implement distinct, meaningful test cases (numbered or labeled), reusing
+    retained suites where appropriate. A family report may cover related functions.
 *   Script should output PASS/FAIL for each scenario.
 
 ### 2. Execute the Script

@@ -15,4 +15,5 @@
 ^MIGRATION\.md$
 ^Makefile$
 ^run_tests\.R$
+^air\.toml$
 ^\.Rhistory$

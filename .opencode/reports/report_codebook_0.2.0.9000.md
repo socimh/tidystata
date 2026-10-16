@@ -1,6 +1,6 @@
 # Function: codebook()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-15 22:21:39 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:56 | **Status:** PASS
 
 ## Example 1: Basic codebook
 
@@ -42,7 +42,7 @@ codebook(starwars)
  1 name       character    87     87
  2 height     integer      81     45
  3 mass       double       59     38
- 4 hair_color character    82     12
+ 4 hair_color character    82     11
  5 skin_color character    87     31
  6 eye_color  character    87     15
  7 birth_year double       43     36
@@ -52,7 +52,7 @@ codebook(starwars)
 11 species    character    83     37
 12 films      list         87     24
 13 vehicles   list         87     11
-14 starships  list         87     17
+14 starships  list         87     16
 ```
 
 ## Example 3: Select specific columns
@@ -72,7 +72,7 @@ codebook(mtcars, mpg, hp, wt)
 3 wt       double    32     29
 ```
 
-## Example 4: With tidyselect
+## Example 4: With tidyselec
 
 ```r
 codebook(starwars, ends_with('color'))
@@ -84,7 +84,7 @@ codebook(starwars, ends_with('color'))
 # A tibble: 3 x 4
   variable   type          n unique
   <chr>      <chr>     <int>  <int>
-1 hair_color character    82     12
+1 hair_color character    82     11
 2 skin_color character    87     31
 3 eye_color  character    87     15
 ```

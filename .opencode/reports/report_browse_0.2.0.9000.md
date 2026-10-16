@@ -1,21 +1,26 @@
 # Function: browse()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-15 22:21:38 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:56 | **Status:** PASS
 
 
 Attaching package: 'dplyr'
 
- 
+
+The following object is masked from 'package:statart':
+
+    starwars
+
+
 The following objects are masked from 'package:stats':
 
     filter, lag
 
- 
+
 The following objects are masked from 'package:base':
 
     intersect, setdiff, setequal, union
 
- 
+
 ## Example 1: Browse basic data frame
 
 ```r
@@ -113,7 +118,7 @@ browse(mtcars, mpg, hp, wt)
 **Output:**
 
 ```
-                     mpg  hp    wt
+                     mpg  hp    w
 Mazda RX4           21.0 110 2.620
 Mazda RX4 Wag       21.0 110 2.875
 Datsun 710          22.8  93 2.320
@@ -210,7 +215,7 @@ browse(starwars, species == 'Human', name, height, mass)
  4 TRUE                 Darth Vader           202   136
  5 TRUE                 Leia Organa           150    49
  6 TRUE                 Owen Lars             178   120
- 7 TRUE                 Beru Whitesun lars    165    75
+ 7 TRUE                 Beru Whitesun Lars    165    75
  8 FALSE                R5-D4                  97    32
  9 TRUE                 Biggs Darklighter     183    84
 10 TRUE                 Obi-Wan Kenobi        182    77

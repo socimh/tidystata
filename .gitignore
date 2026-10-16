@@ -4,6 +4,7 @@
 .httr-oauth
 .DS_Store
 .quarto
+**/__pycache__/
 docs
 
 # Keep selected milestone evidence; retain other generated results locally.
@@ -92,3 +93,18 @@ docs
 .opencode/results/codebook-browse-showcase/*
 !.opencode/results/codebook-browse-showcase/statart_codebook_browse_console.pdf
 .opencode/workflows/__pycache__/
+
+# Reproducible modern-R adoption evidence; preserve larger intermediates locally.
+!.opencode/results/style-adoption-final.csv
+!.opencode/results/style-adoption-final-details.csv
+!.opencode/results/style-adoption-final-install.log
+!.opencode/results/style-adoption-final-tests.log
+!.opencode/results/style-adoption-final-build.log
+!.opencode/results/style-adoption-final-check.log
+!.opencode/results/style-adoption-demos-demos.log
+!.opencode/results/style-adoption-minimal-minimal.log
+!.opencode/results/style-adoption-tooling.json
+!.opencode/results/style-adoption-style.log
+!.opencode/results/style-adoption-python-tests.log
+!.opencode/results/style-adoption-compatibility.log
+!.opencode/results/style-adoption-baseline.rds

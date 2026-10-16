@@ -4,7 +4,7 @@
 library(dplyr)
 library(tibble)
 
-pkgload::load_all(".", quiet = TRUE, compile = FALSE)
+library(statart)
 
 cat("## Example 1: row_min\n\n")
 cat("```r\n")
@@ -74,11 +74,13 @@ cat("  )\n")
 cat("```\n\n")
 cat("**Output:**\n\n")
 cat("```\n")
-print(df %>%
-  mutate(
-    min_val = row_min(a, b, c),
-    max_val = row_max(a, b, c)
-  ))
+print(
+  df %>%
+    mutate(
+      min_val = row_min(a, b, c),
+      max_val = row_max(a, b, c)
+    )
+)
 cat("```\n\n")
 
 cat("## Example 8: With scalar values\n\n")
@@ -88,6 +90,8 @@ cat("  mutate(above_2 = row_min(a, 2))\n")
 cat("```\n\n")
 cat("**Output:**\n\n")
 cat("```\n")
-print(df %>%
-  mutate(above_2 = row_min(a, 2)))
+print(
+  df %>%
+    mutate(above_2 = row_min(a, 2))
+)
 cat("```\n\n")

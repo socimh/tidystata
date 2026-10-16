@@ -1,6 +1,7 @@
 # 01-git-workflow.md
 
-At the end of each completed coding task, if any files were changed, you must commit and push the changes to GitHub.
+At the end of each completed coding task, review and commit relevant local
+changes. Push, merge, publish or release only when explicitly requested.
 
 ## Required Git behavior
 
@@ -12,7 +13,7 @@ At the end of each completed coding task, if any files were changed, you must co
   1. review the changed files briefly
   2. stage the relevant changes
   3. create a concise, descriptive Git commit
-  4. push the commit to the current branch's remote
+  4. report the local checkpoint; push only after an explicit request
 * If the push fails, do not keep retrying blindly. Stop and clearly report the Git error.
 
 ## Commit message rules
