@@ -79,27 +79,46 @@ summ(mtcars, mpg, wt)
 ```
 
 Choose numeric variables deliberately: means and standard deviations of factor
-codes may have no substantive interpretation.
+codes may have no substantive interpretation. Numeric and logical columns with
+no observed values are retained: `n` and `unique` are zero and summary statistics
+are `NA`, including `sum`.
+
+Select statistics with `.stat`. Aliases `missing`, `p25`, `p50`, and `p75` retain
+their requested names and order; `sum` is available for numeric summaries.
+Unsupported statistics produce an error. See the [migration guide](MIGRATION.md)
+for the date/datetime restrictions and cross-tabulation naming rules.
+
+```{r}
+summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
+```
+
+With `.mode = "table"`, numeric and calendar summaries share character columns
+for formatted statistics; counts remain numeric. Default list mode preserves
+numeric statistic types in the numeric summary.
 
 ### tab()
 
 Tabulate a single variable:
 
 ```{r}
-tab(starwars, sex)
+tab(statart::starwars, sex)
 ```
 
 `tab1()` tabulates variables one by one as a list, and `s_match()` can select variables in a Stata style.
 
 
 ```{r}
-tab1(starwars, s_match("*color"))
+tab1(statart::starwars, s_match("*color"))
 ```
+
+One-way tabulation also counts list-column values. Selecting no variables
+returns an empty result; `tab1()` and `fre1()` return empty lists by default.
+Matrix columns are unsupported.
 
 `tab2()` cross-tabulates two variables.
 
 ```{r}
-tab2(starwars, sex, gender)
+tab2(statart::starwars, sex, gender)
 ```
 
 
@@ -110,13 +129,13 @@ tab2(starwars, sex, gender)
 `fre()` and `fre2()` return tibbles by default. `fre1()` returns a list of tibbles.
 
 ```{r}
-fre(starwars, sex)
+fre(statart::starwars, sex)
 ```
 
 For optional rich formatting, install `flextable` and request it explicitly:
 
 ```r
-fre(starwars, sex, .type = "flextable")
+fre(statart::starwars, sex, .type = "flextable")
 ```
 
 ### Row calculations and binning

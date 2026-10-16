@@ -9,6 +9,9 @@
 #' <[`data-masking`][args_data_masking]> Variables to include in the codebook.
 #' *This argument can be omitted*.
 #' @param string A string to search for in the variable names or labels.
+#' Search is case-insensitive and matches substrings by default. Wildcards
+#' `*`, `?`, and `~` represent any sequence, one character, and one or more
+#' characters. Use `^` and `$` anchors to require a complete-name/label match.
 #'
 #' @return  A tibble.
 #' @name variables

@@ -67,8 +67,7 @@ is_summable <- function(.x) {
 check_summarise <- function(.data) {
   out <- .data %>%
     dplyr::select(tidyselect::where(
-      ~ is_summable(.x) &
-        mean(is.na(.x)) < 1L
+      ~ is_summable(.x)
     ))
   summ_vars <- names(out)
 
@@ -124,14 +123,13 @@ check_numeric <- function(.data, .keep_all) {
 check_missing <- function(.data, .keep_all) {
   na_vars <- .data %>%
     ds(tidyselect::where(
-      ~ is_summable(.x) &
-        mean(is.na(.)) == 1L
+      ~ is_summable(.x) && length(.x) > 0L && all(is.na(.x))
     ))
 
   suffix <- dplyr::if_else(
     .keep_all,
     "entirely missing.",
-    "entirely missing and thus removed."
+    "entirely missing; retained with n = 0."
   )
   warning_vars(na_vars, suffix)
 }
@@ -165,55 +163,75 @@ check_label <- function(.data) {
   warning_vars(lbl_vars, suffix)
 }
 
-summ_var <- function(var, stat = character(0), .detail = FALSE) {
-  # Convert once for performance (avoids 8+ repeated calls to as_numeric)
-  num_var <- as_numeric(var)
-  n_val   <- sum(!is.na(var), na.rm = TRUE)
-
-  type_str <- dplyr::if_else(
-    !is.na(s_unit(var)),
-    stringr::str_glue("{s_type(var, .abbr = TRUE)} [{s_unit(var)}]"),
-    s_type(var, .abbr = TRUE)
-  ) %>% as.character()
-
-  if (length(stat) == 0 && !.detail) {
-    stat_tb <- tibble::tibble(
-      type   = type_str,
-      n      = n_val,
-      unique = dplyr::n_distinct(var, na.rm = TRUE),
-      min    = min(num_var, na.rm = TRUE),
-      mean   = mean(num_var, na.rm = TRUE),
-      sd     = sd(num_var, na.rm = TRUE),
-      max    = max(num_var, na.rm = TRUE)
-    )
-    return(stat_tb)
-  } else {
-    miss_n_val <- dplyr::n() - n_val
-    stat_tb <- tibble::tibble(
-      type       = type_str,
-      n          = n_val,
-      unique     = dplyr::n_distinct(var, na.rm = TRUE),
-      miss_n     = miss_n_val,
-      valid_pct  = 1 - miss_n_val / (n_val + miss_n_val),
-      min        = min(num_var, na.rm = TRUE),
-      q1         = quantile(num_var, .25, na.rm = TRUE),
-      median     = median(num_var, na.rm = TRUE),
-      mean       = mean(num_var, na.rm = TRUE),
-      mad        = mad(num_var, na.rm = TRUE),
-      sd         = sd(num_var, na.rm = TRUE),
-      q3         = quantile(num_var, .75, na.rm = TRUE),
-      max        = max(num_var, na.rm = TRUE),
-      iqr        = IQR(num_var, na.rm = TRUE),
-      skew       = skew(num_var, n_val),
-      kurtosis   = kurtosis(num_var, n_val),
-      se         = sd(num_var, na.rm = TRUE) / sqrt(n_val)
-    )
-    if (length(stat) > 0) {
-      stat_tb <- stat_tb %>%
-        dplyr::select(type, tidyselect::all_of(stat))
-    }
-    return(stat_tb)
+summ_stat_names <- function(stat) {
+  if (length(stat) == 0L) return(stats::setNames(character(), character()))
+  if (!is.character(stat) || anyNA(stat) || any(!nzchar(stat))) {
+    stop("`.stat` must be a character vector of non-missing statistic names.", call. = FALSE)
   }
+  aliases <- c(missing = "miss_n", p25 = "q1", p50 = "median", p75 = "q3")
+  supported <- c("type", "n", "unique", "miss_n", "valid_pct", "min", "q1",
+                 "median", "mean", "mad", "sd", "q3", "max", "iqr", "skew",
+                 "kurtosis", "se", "sum", names(aliases))
+  unknown <- setdiff(stat, supported)
+  if (length(unknown)) {
+    stop("Unsupported statistic: ", paste(unknown, collapse = ", "),
+         ". See ?summ for supported names.", call. = FALSE)
+  }
+  stat <- unique(stat)
+  mapped <- stat
+  selected <- stat %in% names(aliases)
+  mapped[selected] <- unname(aliases[stat[selected]])
+  stats::setNames(mapped, stat)
+}
+
+select_summ_stats <- function(data, stat) {
+  mapped <- summ_stat_names(stat)
+  unavailable <- setdiff(unname(mapped), names(data))
+  if (length(unavailable)) {
+    stop("Unsupported statistic for this variable type: ",
+         paste(unavailable, collapse = ", "), call. = FALSE)
+  }
+  dplyr::select(data, type, tidyselect::all_of(mapped))
+}
+
+summ_var <- function(var, stat = character(0), .detail = FALSE) {
+  num_var <- as_numeric(var)
+  n_val <- sum(!is.na(var))
+  observed <- num_var[!is.na(num_var)]
+  has_values <- length(observed) > 0L
+  type_str <- if (!is.na(s_unit(var))) {
+    paste0(s_type(var, .abbr = TRUE), " [", s_unit(var), "]")
+  } else {
+    s_type(var, .abbr = TRUE)
+  }
+  stat_tb <- tibble::tibble(
+    type = type_str,
+    n = n_val,
+    unique = dplyr::n_distinct(var, na.rm = TRUE),
+    min = if (has_values) min(observed) else NA_real_,
+    mean = if (has_values) mean(observed) else NA_real_,
+    sd = if (has_values) stats::sd(observed) else NA_real_,
+    max = if (has_values) max(observed) else NA_real_
+  )
+  if (.detail || length(stat)) {
+    stat_tb$miss_n <- length(var) - n_val
+    stat_tb$valid_pct <- if (length(var)) n_val / length(var) else NA_real_
+    stat_tb$q1 <- if (has_values) unname(stats::quantile(observed, .25)) else NA_real_
+    stat_tb$median <- if (has_values) stats::median(observed) else NA_real_
+    stat_tb$mad <- if (has_values) stats::mad(observed) else NA_real_
+    stat_tb$q3 <- if (has_values) unname(stats::quantile(observed, .75)) else NA_real_
+    stat_tb$iqr <- if (has_values) stats::IQR(observed) else NA_real_
+    stat_tb$skew <- if (has_values) skew(num_var, n_val) else NA_real_
+    stat_tb$kurtosis <- if (has_values) kurtosis(num_var, n_val) else NA_real_
+    stat_tb$se <- if (n_val) stat_tb$sd / sqrt(n_val) else NA_real_
+    stat_tb$sum <- if (has_values) sum(observed) else NA_real_
+    stat_tb <- dplyr::select(stat_tb, tidyselect::all_of(c(
+      "type", "n", "unique", "miss_n", "valid_pct", "min", "q1", "median",
+      "mean", "mad", "sd", "q3", "max", "iqr", "skew", "kurtosis", "se", "sum"
+    )))
+  }
+  if (length(stat)) stat_tb <- select_summ_stats(stat_tb, stat)
+  stat_tb
 }
 
 fmt_date <- function(x, var) {
@@ -290,17 +308,22 @@ fmt_date_sd <- function(sd_secs, var, format = "compact") {
 
 summ_date <- function(var, stat = character(0), .detail = FALSE, 
                         .duration_format = "compact", return_raw = FALSE) {
+  if ("sum" %in% stat) stop("`sum` is not supported for date/datetime variables.", call. = FALSE)
   n_val    <- sum(!is.na(var), na.rm = TRUE)
   miss_val <- sum(is.na(var), na.rm = TRUE)
   num_var  <- as_numeric(var)
 
-  min_raw    <- min(num_var, na.rm = TRUE)
-  median_raw <- median(num_var, na.rm = TRUE)
-  mean_raw   <- mean(num_var, na.rm = TRUE)
-  sd_raw     <- sd(num_var, na.rm = TRUE)
-  max_raw    <- max(num_var, na.rm = TRUE)
-  iqr_raw    <- IQR(num_var, na.rm = TRUE)
-  mad_raw    <- mad(num_var, na.rm = TRUE)
+  observed <- num_var[!is.na(num_var)]
+  has_values <- length(observed) > 0L
+  min_raw <- if (has_values) min(observed) else NA_real_
+  median_raw <- if (has_values) median(observed) else NA_real_
+  q1_raw <- if (has_values) unname(quantile(observed, .25)) else NA_real_
+  q3_raw <- if (has_values) unname(quantile(observed, .75)) else NA_real_
+  mean_raw <- if (has_values) mean(observed) else NA_real_
+  sd_raw <- if (has_values) sd(observed) else NA_real_
+  max_raw <- if (has_values) max(observed) else NA_real_
+  iqr_raw <- if (has_values) IQR(observed) else NA_real_
+  mad_raw <- if (has_values) mad(observed) else NA_real_
 
   vtype <- s_type(var, .abbr = TRUE)
   
@@ -316,7 +339,7 @@ summ_date <- function(var, stat = character(0), .detail = FALSE,
         n         = n_val,
         unique    = dplyr::n_distinct(var, na.rm = TRUE),
         miss_n    = miss_val,
-        valid_pct = 1 - miss_val / (n_val + miss_val),
+        valid_pct = if (length(var)) n_val / length(var) else NA_real_,
         min       = as.Date(min_raw, origin = "1970-01-01"),
         mean      = as.Date(round(mean_raw), origin = "1970-01-01"),
         max       = as.Date(max_raw, origin = "1970-01-01"),
@@ -335,7 +358,7 @@ summ_date <- function(var, stat = character(0), .detail = FALSE,
         n         = n_val,
         unique    = dplyr::n_distinct(var, na.rm = TRUE),
         miss_n    = miss_val,
-        valid_pct = 1 - miss_val / (n_val + miss_val),
+        valid_pct = if (length(var)) n_val / length(var) else NA_real_,
         min       = as.POSIXct(min_raw, origin = "1970-01-01", tz = "UTC"),
         mean      = as.POSIXct(round(mean_raw), origin = "1970-01-01", tz = "UTC"),
         max       = as.POSIXct(max_raw, origin = "1970-01-01", tz = "UTC"),
@@ -356,9 +379,11 @@ summ_date <- function(var, stat = character(0), .detail = FALSE,
       n         = n_val,
       unique    = dplyr::n_distinct(var, na.rm = TRUE),
       miss_n    = miss_val,
-      valid_pct = 1 - miss_val / (n_val + miss_val),
+      valid_pct = if (length(var)) n_val / length(var) else NA_real_,
       min       = fmt_date(min_raw, var),
+      q1        = fmt_date(q1_raw, var),
       median    = fmt_date(median_raw, var),
+      q3        = fmt_date(q3_raw, var),
       mean      = fmt_date(mean_raw, var),
       sd        = fmt_date_sd(sd_raw, var, .duration_format),
       mad       = fmt_date_sd(mad_raw, var, .duration_format),
@@ -369,8 +394,7 @@ summ_date <- function(var, stat = character(0), .detail = FALSE,
   }
   
   if (length(stat) > 0) {
-    stat_tb <- stat_tb %>%
-      dplyr::select(type, tidyselect::all_of(stat))
+    stat_tb <- select_summ_stats(stat_tb, stat)
   } else if (!.detail) {
     stat_tb <- stat_tb %>%
       dplyr::select(type, n, unique, mean, sd, min, max)
@@ -476,6 +500,18 @@ summ_list <- function(.data, group_vars, .detail, .stat,
 
   if (.mode == "table") {
     if (length(out) > 0) {
+      # Calendar summaries format locations and spreads as text. Use the same
+      # representation for shared statistic columns when stacking numeric rows.
+      text_stats <- unique(unlist(lapply(out, function(data) {
+        names(data)[vapply(data, is.character, logical(1))]
+      })))
+      text_stats <- setdiff(text_stats, c(group_vars, "name", "type"))
+      out <- lapply(out, function(data) {
+        for (stat in intersect(text_stats, names(data))) {
+          data[[stat]] <- as.character(data[[stat]])
+        }
+        data
+      })
       out <- dplyr::bind_rows(out)
     }
   } else if (length(out) == 1) {

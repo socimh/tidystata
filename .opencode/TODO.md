@@ -3,10 +3,10 @@
 ## Next stabilization milestone
 
 - [x] Repair invalid labelled, incompatible-length, and sampling fixtures.
-- [ ] Settle summary/date output contracts and invalid-statistic handling.
-- [ ] Reconcile cross-tabulation dimensions/count-column expectations and category collisions.
-- [ ] Review selector evaluation, names/types, and remaining utility discrepancies.
-- [ ] Reach a passing retained suite and clean R CMD check before release.
+- [x] Settle summary missing-input/statistic and mixed numeric/date output contracts.
+- [x] Reconcile cross-table dimensions/counts, original-name collisions and explicit ambiguous-name errors.
+- [x] Resolve retained selection/name/type/utility test discrepancies; preserve explicit substring semantics.
+- [x] Reach a passing retained suite and clean local R CMD check.
 - [ ] Exercise the supported R-version range; current verification used R 4.6.0 only.
 - [x] Restore original Git history from socimh/statart, establish master tracking origin/master, and verify all existing file hashes are unchanged.
 
@@ -15,7 +15,10 @@
 - [x] Reconcile upstream-to-local migration notes and review result-artifact staging scope before integration.
 - [x] Prepare a reviewed local development checkpoint with selected evidence and a complete saved-failure classification.
 - [x] Repair the 11 invalid fixtures and 77 incorrect-expectation identities in focused batches, verifying each against its contract.
-- [ ] Resolve eight open behavior contracts and reproduce seven likely source defects before fixes.
+- [x] Resolve the eight behavior contracts and fix the reproduced units, summary and naming defects.
+
+- [ ] Replace the skipped empty cut_length test and capture expected warnings explicitly.
+- [ ] Review selector side effects and additional naming boundaries beyond the retained scenarios before release.
 
 ## Completed first milestone
 

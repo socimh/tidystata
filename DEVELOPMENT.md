@@ -33,7 +33,13 @@ Retained exploration/preparation helpers remain exported; MIGRATION.md also maps
 
 ## Current verification
 
-Latest test-only stabilization: **5 failed expectations, 10 error blocks, 33 warnings, one skip**, with 5,357 passing expectations across the same 1,358 blocks. Fresh installation succeeds. See the [test stabilization report](.opencode/reports/project_status_test_stabilization_2026-10-16.md). The first-milestone evidence below is historical.
+Latest stabilization: **5,617 passing expectations across 1,410 blocks, zero
+failed expectations or error blocks**, with 33 test warnings and one pre-existing
+empty test skipped. Fresh native installation, source build, required-dependency
+smoke check, and `R CMD check --no-manual` all pass. Package check reports
+**Status: OK**, with no check errors, warnings or notes. See the
+[core verification report](.opencode/reports/project_status_core_stabilization_2026-10-16.md).
+The first-milestone evidence below is historical.
 
 - [Milestone contract report](.opencode/reports/milestone_contracts_0.2.0.9000.md):
   622 passing scenarios and 4,098 passing expectations, with no failures,
@@ -103,19 +109,22 @@ organization. Regenerate help, namespace, README, and report indexes from their
 sources. Do not hand-edit generated outputs. Source requires R >= 4.1 and a
 matching build toolchain; the minimum version has not been exercised here.
 
-## Next milestone
+## Next validation milestone
 
-1. Resolve remaining invalid fixtures separately from implementation defects.
-2. Stabilize summary/date output contracts and unsupported-statistic errors.
-3. Reconcile cross-tabulation shape, category-name collisions, and totals tests.
-4. Review selection evaluation and remaining name/type/utility discrepancies.
-5. Reach a passing retained suite and clean package check before release.
+1. Replace the empty cut_length interval-width test with a meaningful assertion.
+2. Explicitly capture expected warnings and modernize legacy matrix fixtures.
+3. Exercise the declared R 4.1 minimum and other platforms in CI.
+4. Review release metadata and migration guidance before requesting publication.
+
+The approved summary policies, search matching, empty selections and list counts
+are implemented. Original-variable/category collisions and units recognition
+are fixed. No push, merge, publication or release has been performed.
 
 Git history was restored on 2026-10-15 from https://github.com/socimh/statart.git.
 Local master tracks origin/master. The 2026-10-16 development checkpoint preserves the newer local work with known test failures documented.
 No push, publication, or release is included in this milestone.
 
-## Stabilization preparation checkpoint
+## Stabilization preparation checkpoint (historical)
 
 Prepared 2026-10-16: the local development checkpoint preserves source, tests,
 archives, documentation and selected verification evidence. Other generated
@@ -147,9 +156,10 @@ switching branches or integrating changes. See the
 [verified comparison](.opencode/reports/project_status_git_comparison_2026-10-15.md).
 
 The upstream migration mapping and result-artifact versioning policy are now documented.
-Before publishing, address the recorded whitespace findings and resolve the known
-package test failures. The Git
-connection is ready for maintenance; the package is not release-ready. Push,
+Before publishing, address the remaining test-warning/empty-test coverage,
+exercise supported R versions/platforms, and review generated whitespace. The Git
+connection is ready for maintenance; passing local checks do not replace
+cross-platform and minimum-version release validation. Push,
 merge, and release require an explicit maintainer request.
 
 ## Entry points

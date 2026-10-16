@@ -10,6 +10,13 @@
 #' @param .detail A logical. If `TRUE`, the detailed summary is returned.
 #' @param .stat A character vector.
 #' If specified, only the listed statistics are returned.
+#' Supported names are `type`, `n`, `unique`, `miss_n`, `valid_pct`, `min`, `q1`,
+#' `median`, `mean`, `mad`, `sd`, `q3`, `max`, `iqr`, `skew`, `kurtosis`,
+#' `se`, and `sum`. Aliases `missing`, `p25`, `p50`, and `p75` select
+#' `miss_n`, `q1`, `median`, and `q3`; requested names and order are retained.
+#' `sum` applies to numeric summaries, not calendar dates or datetimes.
+#' Date/datetime summaries support counts, percentiles, location and spread,
+#' but not skewness or kurtosis.
 #' @param .na.rm A logical. If `TRUE`, rows where the `.by` grouping variable
 #' is `NA` are dropped before summarising. Default is `FALSE`.
 #' @param .name A logical. If `TRUE` (default), the `name` column is always
@@ -18,9 +25,15 @@
 #' @param .mode A character string. Either "list" (default) or "table". 
 #' If "list", returns a list of tables grouped by variable type (numeric, date, datetime).
 #' If "table", returns a single table with all variables (dates formatted as strings).
+#' When numeric and calendar summaries share a table, common formatted
+#' statistic columns are character; count columns remain numeric.
 #' @param .duration_format A character string. Either "long" (default) or "compact".
 #' Controls how durations (SD for dates) are formatted:
 #' "long" shows "548 days", "compact" shows "548d".
+#' @details Numeric/logical columns with no observed values are retained,
+#' including zero-row inputs: `n` and `unique` are zero and summary statistics
+#' are `NA` (including `sum`). Missing counts retain the number of input rows.
+#' Zero-row grouped inputs do not create artificial groups.
 #' @name summ
 #'
 #' @return A tibble, data.frame, data.table, or list (depending on .mode and input class)
@@ -60,6 +73,7 @@ summ <- function(
     .duration_format = c("long", "compact")) {
   
   # Match arguments
+  summ_stat_names(.stat)
   .mode <- match.arg(.mode)
   .duration_format <- match.arg(.duration_format)
   

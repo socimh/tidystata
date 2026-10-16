@@ -16,7 +16,10 @@ s_unit(.x)
 of the type is returned.}
 }
 \value{
-A character.
+A character. \code{s_type()} returns \code{"units"} for measured vectors
+in either abbreviation mode. \code{s_unit()} returns the unit string for measured
+or duration vectors, including empty or all-missing measured vectors, and
+\code{NA_character_} for vectors without units.
 }
 \description{
 Know the type of an object.

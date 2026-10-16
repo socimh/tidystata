@@ -41,12 +41,17 @@ test_that("tab: variables with reserved names (n, percent, cum)", {
   )
 })
 
-test_that("tab: deeply nested list columns should fail gracefully", {
+test_that("tab: list columns retain vector identities", {
   df <- tibble(
     x = 1:5,
     y = I(list(1:3, 2:4, 3:5, 4:6, 5:7))
   )
-  expect_error(tab(df, x, y))
+  before <- df
+  result <- tab(df, x, y)
+  expect_identical(result$x, 1:5)
+  expect_equal(result$y, df$y)
+  expect_equal(result$n, rep(1L, 5))
+  expect_identical(df, before)
 })
 
 test_that("tab: matrix column input", {
@@ -404,7 +409,10 @@ test_that("tab: many columns selected", {
 
 test_that("tab: gracefully handle data.frame with no columns", {
   df <- data.frame()[1:5, ]
-  expect_error(tab(df))
+  result <- tab(df)
+  expect_equal(nrow(result), 0)
+  expect_named(result, c("n", "percent", "cum", "valid", "valid_cum"))
+  expect_identical(result$n, integer())
 })
 
 test_that("tab: NULL input should error", {

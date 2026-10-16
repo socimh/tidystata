@@ -95,6 +95,53 @@ statart::fre(mtcars, cyl, .type = "flextable")
 The default return type is independent of whether `flextable` is installed.
 Requesting rich output without it installed produces an installation message.
 
+One-way tabulation accepts list columns and counts their distinct values.
+Matrix columns are unsupported. Selecting no variables returns an empty result:
+`tab1()` and `fre1()` return empty lists by default, while tibble output has zero
+rows. `tab2()` and `fre2()` return an empty tibble for a zero-column selection;
+other selections must contain exactly two variables.
+
+## Column summary statistics
+
+`summ()` and `tabstat()` retain numeric and logical columns with no observed
+values, including zero-row inputs. They return `n = 0`, `unique = 0`, and `NA`
+for summary statistics, including `sum`. `miss_n` counts missing input rows.
+Zero-row grouped inputs do not create artificial groups.
+
+Select statistics through `.stat`. The aliases `missing`, `p25`, `p50`, and
+`p75` select `miss_n`, `q1`, `median`, and `q3`, respectively. Requested names
+and order are retained, and aliases can coexist with canonical names:
+
+```r
+statart::summ(mtcars, mpg, .stat = c("missing", "miss_n", "p50", "median", "sum"))
+```
+
+Unknown statistics produce an error. `sum` is supported for numeric summaries;
+calendar dates and datetimes support neither `sum` nor `skew`/`kurtosis`.
+
+When `.mode = "table"` combines numeric and calendar summaries, shared formatted
+statistic columns become character so the rows can coexist. Count columns remain
+numeric, and numeric-only summary tables retain numeric statistic columns.
+Default `.mode = "list"` separates variable types and preserves numeric statistic
+types in the numeric summary.
+
+## Cross-tabulation category names
+
+`tab2()` and `fre2()` preserve categories matching the original variable names,
+`n`, or internal pivot names. A category matching the combined row-header name,
+or a literal `"NA"` alongside a missing column category, cannot be represented
+as unique output columns and produces a clear error.
+
+The column category `"total"` is reserved for the marginal total in `fre2()`.
+Recode that category or use `tab2()` to avoid silently replacing category counts.
+
+## Measured vectors
+
+`s_type()` identifies measured vectors as `"units"` in either abbreviation mode,
+including compound units such as `m/s`. `s_unit()` returns the unit string even
+for empty and all-missing measured vectors; ordinary vectors return
+`NA_character_`.
+
 ## Quantile bins and row summaries
 
 `cut_quantile()` uses type-7 quantiles and keeps equal values in the same group.

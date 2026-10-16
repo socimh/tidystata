@@ -1,10 +1,29 @@
 # Problems and issues
 
-## Latest test-only stabilization
+## Current verified state (2026-10-16)
+
+The complete suite passes: 5,617 expectations, zero failures/errors, 33 test
+warnings and one skipped block across 1,410 blocks. Fresh installation/build,
+minimal-dependency smoke, and R CMD check --no-manual pass with Status: OK.
+See [current evidence](reports/project_status_core_stabilization_2026-10-16.md).
+All previously failing/erroring retained scenarios are resolved without removing
+or disabling coverage; 52 regression blocks were added.
+
+## Remaining follow-up
+
+- Replace the empty cut_length interval-width test; its skip is missing coverage.
+- Capture intentional warning paths explicitly and repair legacy matrix-name fixtures. Test warnings are separate from package-check warnings (zero).
+- Verify the declared R 4.1 minimum and other platforms before publishing.
+- Combined-header and literal-NA/missing-category cross-table collisions error explicitly; fre2 column category total must be recoded. An observed row label total remains alongside the final marginal row; callers should distinguish the final row.
+- Four regenerated README console lines retain pillar trailing spaces; no generated output was manually patched.
+
+## Historical status (superseded by current verification)
+
+### Latest test-only stabilization
 
 Fresh full suite: **five failed expectations, ten error blocks, 33 warnings, one skip**, with 5,357 passing expectations across 1,358 blocks. All remaining failure/error identities were present in the previous baseline. See [current evidence](reports/project_status_test_stabilization_2026-10-16.md).
 
-## Historical baseline after first milestone
+### Historical baseline after first milestone
 
 Full retained suite: **94 failed expectations, 22 error blocks, 54 warnings,
 one skip**, with 5,129 passing expectations across 1,358 blocks. These are
@@ -23,7 +42,7 @@ This is not release-ready. The 622 targeted milestone scenarios all pass.
 | Compatibility | Exercise the minimum R version and multiple platforms; current validation used R 4.6.0 on Windows. |
 | Git history | Resolved 2026-10-15: fetched socimh/statart and established master tracking origin/master; all 537 existing file hashes preserved. |
 
-## Stabilization triage (2026-10-16)
+### Stabilization triage (2026-10-16)
 
 The [complete saved-failure inventory](reports/project_status_failure_triage_2026-10-16.md)
 accounts for all 104 failing/erroring identities. Eleven fixtures fail before
@@ -38,7 +57,7 @@ checkpoint also exposes whitespace in newly included historical files (895 findi
 before excluding four scratch files). This preparation pass does not reformat
 existing code or generated reports. The full suite and package check remain failing.
 
-## First milestone resolved
+### First milestone resolved
 
 - Four isolated wrappers retired with source/tests/help/demo preserved outside builds.
 - Required Imports reduced to 13; optional formatting no longer affects default result types.
@@ -54,13 +73,13 @@ The SAS export mismatch and estimation-table issues now belong to archived
 unsupported code, not the active package. Import/export, PCA and regression
 extensions are outside the chosen core scope.
 
-## Historical resolutions before scope reduction
+### Historical resolutions before scope reduction
 
 The following notes are historical claims and do not override the current test baseline.
 
-## Resolved Issues ✓
+### Resolved Issues ✓
 
-### Summary Statistics (summ) - All Fixed v0.2.x
+#### Summary Statistics (summ) - All Fixed v0.2.x
 
 | ID | Resolution |
 |----|------------|
@@ -70,7 +89,7 @@ The following notes are historical claims and do not override the current test b
 | 3.4 | Added .na.rm arg (default FALSE) |
 | 3.5 | Added .name arg (default TRUE) |
 
-### Tabulation (tab, tab1, fre) - All Fixed v0.2.x
+#### Tabulation (tab, tab1, fre) - All Fixed v0.2.x
 
 | ID | Resolution |
 |----|------------|
@@ -80,7 +99,7 @@ The following notes are historical claims and do not override the current test b
 | 2.4 | .n renaming documented (known behaviour) |
 | 2.5 | .desc now sorts non-NA desc, NA last |
 
-### Helper Functions - All Fixed v0.2.x
+#### Helper Functions - All Fixed v0.2.x
 
 | ID | Resolution |
 |----|------------|
@@ -88,14 +107,14 @@ The following notes are historical claims and do not override the current test b
 | 4.2 | row_min/max/mean/sum return plain vectors |
 | 4.3 | codebook() Hmisc warning suppressed |
 
-### Feature Requests - Fixed
+#### Feature Requests - Fixed
 
 | Feature | Resolution |
 |---------|------------|
 | timer() output | Compact format: 1m5s, 0.05s |
 | s_select errors | Shows exact column name + both error messages |
 
-### Estimation Tables (esttab) - All Fixed v0.2.0
+#### Estimation Tables (esttab) - All Fixed v0.2.0
 
 | ID | Version | Resolution |
 |----|---------|------------|
@@ -105,4 +124,4 @@ The following notes are historical claims and do not override the current test b
 | 1.4 | v0.2.0 | stats arg with Stata aliases |
 | 1.5 | v0.2.0 | Simplified output |
 
-### Visualization (s_plot) - Moved to extra_functions/
+#### Visualization (s_plot) - Moved to extra_functions/

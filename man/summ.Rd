@@ -50,7 +50,14 @@ details and examples, see \link[dplyr:dplyr_by]{?dplyr_by}.}
 \item{.detail}{A logical. If \code{TRUE}, the detailed summary is returned.}
 
 \item{.stat}{A character vector.
-If specified, only the listed statistics are returned.}
+If specified, only the listed statistics are returned.
+Supported names are \code{type}, \code{n}, \code{unique}, \code{miss_n}, \code{valid_pct}, \code{min}, \code{q1},
+\code{median}, \code{mean}, \code{mad}, \code{sd}, \code{q3}, \code{max}, \code{iqr}, \code{skew}, \code{kurtosis},
+\code{se}, and \code{sum}. Aliases \code{missing}, \code{p25}, \code{p50}, and \code{p75} select
+\code{miss_n}, \code{q1}, \code{median}, and \code{q3}; requested names and order are retained.
+\code{sum} applies to numeric summaries, not calendar dates or datetimes.
+Date/datetime summaries support counts, percentiles, location and spread,
+but not skewness or kurtosis.}
 
 \item{.na.rm}{A logical. If \code{TRUE}, rows where the \code{.by} grouping variable
 is \code{NA} are dropped before summarising. Default is \code{FALSE}.}
@@ -61,7 +68,9 @@ summarised.}
 
 \item{.mode}{A character string. Either "list" (default) or "table".
 If "list", returns a list of tables grouped by variable type (numeric, date, datetime).
-If "table", returns a single table with all variables (dates formatted as strings).}
+If "table", returns a single table with all variables (dates formatted as strings).
+When numeric and calendar summaries share a table, common formatted
+statistic columns are character; count columns remain numeric.}
 
 \item{.duration_format}{A character string. Either "long" (default) or "compact".
 Controls how durations (SD for dates) are formatted:
@@ -73,6 +82,12 @@ A tibble, data.frame, data.table, or list (depending on .mode and input class)
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Enhanced \code{summarise()}.
+}
+\details{
+Numeric/logical columns with no observed values are retained,
+including zero-row inputs: \code{n} and \code{unique} are zero and summary statistics
+are \code{NA} (including \code{sum}). Missing counts retain the number of input rows.
+Zero-row grouped inputs do not create artificial groups.
 }
 \examples{
 summ(lifeexp)

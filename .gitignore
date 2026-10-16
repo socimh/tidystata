@@ -32,3 +32,12 @@ docs
 !.opencode/results/stabilization-tests-full.csv
 !.opencode/results/stabilization-tests-full-details.csv
 !.opencode/results/stabilization-tests-full-tests.log
+
+# Verified core stabilization evidence.
+!.opencode/results/stabilization-core-clean.csv
+!.opencode/results/stabilization-core-clean-details.csv
+!.opencode/results/stabilization-core-clean-tests.log
+!.opencode/results/stabilization-core-clean-build.log
+!.opencode/results/stabilization-core-clean-check.log
+!.opencode/results/stabilization-core-minimal-minimal.log
+!.opencode/results/stabilization-core-examples.txt

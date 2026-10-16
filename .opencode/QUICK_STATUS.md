@@ -2,29 +2,22 @@
 
 Updated 2026-10-16. Development version **0.2.0.9000**.
 
-- First scope-reduction and priority-repair milestone implemented.
-- Four wrappers retired and archived: read_data, write_data, esttab, codebook_detail.
-- 13 required Imports; 40 exported objects; current C++/Rfast backend retained.
-- fre/fre2 return tibbles; fre1 returns a list; flextable formatting is optional.
-- Focused verification: 622 passing scenarios and 4,098 passing expectations;
-  zero failures, errors, warnings, or skips.
-- Fresh build, required-dependencies-only smoke, and ten demos pass.
-- Latest full suite after test-only repairs: 5,357 passing expectations, five failed expectations, ten error blocks, 33 warnings and one skip across the same 1,358 blocks.
-- All 11 invalid fixtures and the incorrect assertions were repaired; no package source changed. Existing source defects and open contracts remain exposed. [Evidence](reports/project_status_test_stabilization_2026-10-16.md).
-- Git history restored; master tracks origin/master over authenticated HTTPS.
-- Local development checkpoint prepared on 2026-10-16; no push, publication, or release.
-- Upstream migration mapping completed; selected evidence is versioned and remaining generated results are preserved locally and ignored.
-- [Failure triage](reports/project_status_failure_triage_2026-10-16.md): 104 identities = 11 invalid fixtures, 77 incorrect expectations, seven likely defects, eight contract decisions, one environmental flake.
-- Fresh isolated installation and minimal-dependency smoke check passed on 2026-10-16. No function fixes or full-suite rerun in this preparation pass.
+- Core scope retained: 13 required Imports, 40 exports, cpp11/Rfast backend; four retired wrappers preserved in extra_functions.
+- Full suite: **5,617 passing expectations, zero failures/errors**, 33 warnings and one skipped empty test across **1,410 blocks**.
+- Fresh native installation, source build and required-dependency smoke passed.
+- **R CMD check --no-manual: Status: OK** (zero check errors/warnings/notes).
+- Fixed invalid test fixtures/assertions, summary missing-data/statistic contracts, tabulation collisions/empty selections, and units recognition. Substring search is retained with explicit anchors for complete matches.
+- Numeric/logical summaries retain zero-observation rows; aliases and numeric sum are supported. Mixed table statistics format consistently; counts stay numeric.
+- List-column tabulation preserves identities; no measured variables yields empty outputs using the established list/tibble container.
+- Original datasets and native artifacts preserved. No new dependencies or exports.
+- Work is on local branch test/stabilize-fixtures; master retains origin/master tracking. No push, merge, publication or release.
 
-## Resume here
+## Evidence and next steps
 
-- [Development guide](../DEVELOPMENT.md)
-- [Migration guide](../MIGRATION.md)
-- [Milestone status](reports/milestone_status_0.2.0.9000.md)
-- [Focused report](reports/milestone_contracts_0.2.0.9000.md)
-- [Remaining issues](PROBLEMS.md) and [tasks](TODO.md)
+- [Current core verification](reports/project_status_core_stabilization_2026-10-16.md)
+- [Test-only stage](reports/project_status_test_stabilization_2026-10-16.md)
+- [Development guide](../DEVELOPMENT.md), [migration](../MIGRATION.md), [issues](PROBLEMS.md), [tasks](TODO.md).
 
-Next: repair reproduced naming/units defects and settle summary/date/cross-tabulation contracts, then
-resolve the remaining name/type/utility discrepancies before a release check.
-Use the protected isolated build/test commands documented in DEVELOPMENT.md.
+Next: replace the empty cut_length test, clarify expected-warning assertions,
+and validate R 4.1 and other platforms before publication. Known ambiguous
+cross-table labels remain explicit errors; see the core report for boundaries.

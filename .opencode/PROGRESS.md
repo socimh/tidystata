@@ -2,6 +2,13 @@
 
 Last 3 entries only. Full history: .opencode/PROGRESS_ARCHIVE.md
 
+## 2026-10-16 - Core Contracts and Defects Stabilized
+- **Changes**: Implemented maintainer choices for zero-observation summaries, aliases/sum, substring anchors, list counts and empty selections. Fixed units detection and cross-table name collisions; guarded total-category overwrite. Added 52 regression blocks across summary/type/tabulation families.
+- **Documentation**: Updated source help, NEWS/MIGRATION/README and regenerated Rd/README; preserved datasets/native artifacts and 0.2.0.9000/13 Imports/40 exports.
+- **Verification**: Protected fresh native install/build and full suite pass: 5617 expectations, zero failures/errors, 33 warnings, one pre-existing empty skip across 1410 blocks. R CMD check --no-manual Status: OK (zero errors/warnings/notes), after clearing an initial selection NOTE. Required-dependency smoke and focused package review pass.
+- **Evidence**: Added reproducible core verification report and actual-output script; retained final CSV/log evidence. Local commits only; no push, merge or release.
+- **Next**: Empty-test coverage, expected-warning assertions, minimum R version and multi-platform validation before publication.
+
 ## 2026-10-16 - Test Fixtures and Assertions Repaired
 - **Changes**: Corrected 11 invalid fixtures, 77 stale/incorrect expectation identities and the timing flake across 11 test files; preserved all scenarios and production code.
 - **Verification**: Fresh native installation passed. Full retained suite: 5357 passing expectations, five failures, ten errors, 33 warnings, one skip across unchanged1358 blocks; all residual failure/error identities were known. Protected launcher correctly exits1 for the failing suite.
@@ -14,9 +21,3 @@ Last 3 entries only. Full history: .opencode/PROGRESS_ARCHIVE.md
 - **Triage**: Package QA reviewed all 104 saved failing/erroring identities: 11 invalid fixtures, 77 incorrect expectations, seven likely defects, eight contract decisions, one environmental flake. Added a reproducible CSV-to-report workflow and linked repair queue.
 - **Verification**: Fresh isolated native installation and minimal-dependency smoke check passed through the protected launcher. Full suite and check not rerun; known failures remain documented. Active source parsing, index regeneration and precommit checks accompany this checkpoint.
 - **Next**: Repair invalid fixtures/assertions in small batches, then settle summary contracts and reproduce source defects.
-
-## 2026-10-15 - GitHub Maintenance Setup Completed
-- **Verified**: Fresh authenticated fetch as socimh (ADMIN); master tracks origin/master; local, fetched, and live GitHub revisions match 12709f6, with zero incoming/outgoing commits. Existing identity, HTTPS helper, and exact trust configuration suffice.
-- **Preserved**: All 538 existing working-file SHA-256 hashes and Git index bytes matched before/after fetch. No package code, results, archives, staging, commits, or remote content changed.
-- **Documentation**: Refreshed the existing comparison report, DEVELOPMENT.md, quick status, issues and tasks; archived oldest progress entry. Inventory is 33 modified/15 deleted tracked paths and 274 untracked files, including 135 result artifacts.
-- **Remaining**: Upstream migration notes, artifact staging decisions, 26 whitespace findings, and recorded package failures before publication. No R/tests rerun; previous milestone evidence remains historical.

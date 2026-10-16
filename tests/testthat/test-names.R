@@ -230,7 +230,9 @@ test_that("variables_search: single character with ?", {
     y1 = 16:20
   )
   result <- variables_search(df, "x?")
-  expect_equal(nrow(result), 2)  # x1 and x2, not x10
+  expect_setequal(result$name, c("x1", "x2", "x10"))
+  anchored <- variables_search(df, "^x?$")
+  expect_setequal(anchored$name, c("x1", "x2"))
 })
 
 test_that("variables_search: numeric range", {
@@ -239,7 +241,9 @@ test_that("variables_search: numeric range", {
     item_10 = 16:20, other = 21:25
   )
   result <- variables_search(df, "item_[1-3]")
-  expect_equal(nrow(result), 3)
+  expect_setequal(result$name, c("item_1", "item_2", "item_3", "item_10"))
+  anchored <- variables_search(df, "^item_[1-3]$")
+  expect_setequal(anchored$name, c("item_1", "item_2", "item_3"))
 })
 
 test_that("variables_search: no matches returns empty tibble", {

@@ -85,14 +85,34 @@ summ(mtcars, mpg, wt)
 ```
 
 Choose numeric variables deliberately: means and standard deviations of
-factor codes may have no substantive interpretation.
+factor codes may have no substantive interpretation. Numeric and logical
+columns with no observed values are retained: `n` and `unique` are zero
+and summary statistics are `NA`, including `sum`.
+
+Select statistics with `.stat`. Aliases `missing`, `p25`, `p50`, and
+`p75` retain their requested names and order; `sum` is available for
+numeric summaries. Unsupported statistics produce an error. See the
+[migration guide](MIGRATION.md) for the date/datetime restrictions and
+cross-tabulation naming rules.
+
+``` r
+summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
+#> # A tibble: 1 x 5
+#>   name  type  missing   p50   sum
+#>   <chr> <chr>   <int> <dbl> <dbl>
+#> 1 mpg   dbl         0  19.2  643.
+```
+
+With `.mode = "table"`, numeric and calendar summaries share character
+columns for formatted statistics; counts remain numeric. Default list
+mode preserves numeric statistic types in the numeric summary.
 
 ### tab()
 
 Tabulate a single variable:
 
 ``` r
-tab(starwars, sex)
+tab(statart::starwars, sex)
 #> # A tibble: 5 x 6
 #>   sex                n percent   cum valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
@@ -107,9 +127,9 @@ tab(starwars, sex)
 select variables in a Stata style.
 
 ``` r
-tab1(starwars, s_match("*color"))
+tab1(statart::starwars, s_match("*color"))
 #> $hair_color
-#> # A tibble: 12 x 6
+#> # A tibble: 13 x 6
 #>    value             n percent    cum valid valid_cum
 #>    <chr>         <int>   <dbl>  <dbl> <dbl>     <dbl>
 #>  1 auburn            1    1.15   1.15  1.22      1.22
@@ -121,9 +141,10 @@ tab1(starwars, s_match("*color"))
 #>  7 brown            18   20.7   43.7  22.0      46.3 
 #>  8 brown, grey       1    1.15  44.8   1.22     47.6 
 #>  9 grey              1    1.15  46.0   1.22     48.8 
-#> 10 none             38   43.7   89.7  46.3      95.1 
-#> 11 white             4    4.60  94.3   4.88    100   
-#> 12 <NA>              5    5.75 100    NA        NA   
+#> 10 none             37   42.5   88.5  45.1      93.9 
+#> 11 unknown           1    1.15  89.7   1.22     95.1 
+#> 12 white             4    4.60  94.3   4.88    100   
+#> 13 <NA>              5    5.75 100    NA        NA   
 #> 
 #> $skin_color
 #> # A tibble: 31 x 6
@@ -162,10 +183,14 @@ tab1(starwars, s_match("*color"))
 #> 15 yellow           11   12.6  100   12.6      100
 ```
 
+One-way tabulation also counts list-column values. Selecting no
+variables returns an empty result; `tab1()` and `fre1()` return empty
+lists by default. Matrix columns are unsupported.
+
 `tab2()` cross-tabulates two variables.
 
 ``` r
-tab2(starwars, sex, gender)
+tab2(statart::starwars, sex, gender)
 #> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
@@ -185,7 +210,7 @@ tab2(starwars, sex, gender)
 of tibbles.
 
 ``` r
-fre(starwars, sex)
+fre(statart::starwars, sex)
 #> # A tibble: 7 x 6
 #>   sex                n percent   cum  valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
@@ -202,7 +227,7 @@ For optional rich formatting, install `flextable` and request it
 explicitly:
 
 ``` r
-fre(starwars, sex, .type = "flextable")
+fre(statart::starwars, sex, .type = "flextable")
 ```
 
 ### Row calculations and binning

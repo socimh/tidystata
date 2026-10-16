@@ -129,6 +129,15 @@ tab_data <- function(
     stop("Matrix columns are not supported in tabulation.", call. = FALSE)
   }
   .data <- tibble::as_tibble(.data)
+  if (length(setdiff(names(.data), group_vars)) == 0L) {
+    return(dplyr::bind_cols(
+      .data[0L, group_vars, drop = FALSE],
+      tibble::tibble(
+        n = integer(), percent = double(), cum = double(),
+        valid = double(), valid_cum = double(), ...any_miss = logical()
+      )
+    ))
+  }
   out <- .data %>%
     dplyr::count(
       dplyr::across(
@@ -333,6 +342,9 @@ tab2_data <- function(.data) {
     stringr::str_flatten(" \\ ")
 
   out <- .data %>%
+    dplyr::rename(
+      {{ join_name }} := 1
+    ) %>%
     dplyr::count(
       dplyr::across(
         dplyr::everything()
@@ -344,9 +356,6 @@ tab2_data <- function(.data) {
     ) %>%
     dplyr::mutate(
       dplyr::across(-1, ~ tidyr::replace_na(.x, 0))
-    ) %>%
-    dplyr::rename(
-      {{ join_name }} := 1
     )
 
   return(out)
@@ -354,24 +363,24 @@ tab2_data <- function(.data) {
 
 add_total2 <- function(out, .data) {
   if (nrow(out) == 0L) return(out)
-  join_name <- .data %>%
-    names() %>%
-    stringr::str_flatten(" \\ ")
+  if ("total" %in% names(out)[-1L]) {
+    stop(
+      "Column category `total` is reserved for totals in `fre2()`. ",
+      "Recode this category before calling `fre2()`, or use `tab2()`.",
+      call. = FALSE
+    )
+  }
 
   out <- out %>%
-    dplyr::rename(
-      ...tmp := 1
-    ) %>%
     dplyr::mutate(
       dplyr::across(
         -1, ~ tidyr::replace_na(.x, 0)
-      ),
-      ...tmp := ...tmp %>%
-        as_character()
+      )
     )
+  out[[1L]] <- as_character(out[[1L]])
 
   out_sum <- out[1L, , drop = FALSE]
-  out_sum$...tmp <- "total"
+  out_sum[[1L]] <- "total"
   for (col in names(out)[-1L]) out_sum[[col]] <- sum(out[[col]])
 
   out <- out %>%
@@ -381,10 +390,7 @@ add_total2 <- function(out, .data) {
       total = dplyr::c_across(-1) %>%
         sum()
     ) %>%
-    dplyr::ungroup() %>%
-    dplyr::rename(
-      {{ join_name }} := ...tmp
-    )
+    dplyr::ungroup()
 
   return(out)
 }

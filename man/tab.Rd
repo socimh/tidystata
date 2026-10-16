@@ -69,6 +69,19 @@ The tabulation and frequency functions return data by default. The \code{fre()}
 family adds totals; rich output is available with \code{.type = "flextable"}
 when the optional flextable package is installed.
 
+\code{tab()} counts list-column values by their complete identities without
+flattening their contents. Selecting no measured variables returns no rows:
+\code{tab()} and \code{fre()} retain their count and percentage columns and any grouping
+keys; \code{tab1()} and \code{fre1()} return an empty list by default or an empty table
+with \code{.type = "tibble"}. \code{tab2()} and \code{fre2()} return an empty tibble when no
+variables are selected; otherwise exactly two variables are required.
+
+Cross-tabulation keeps category names unchanged. Categories may match the
+original variable names. A category matching the combined row-header name,
+or literal \code{"NA"} alongside a missing column category, causes a name-collision
+error. In \code{fre2()}, the column category \code{"total"} is reserved for marginal
+totals; recode it first or use \code{tab2()}.
+
 If the output tibble has many rows, consider using
 \code{print()} to display the output.
 }

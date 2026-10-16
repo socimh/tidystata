@@ -16,7 +16,10 @@ variables_search(.data, string, ...)
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to include in the codebook.
 \emph{This argument can be omitted}.}
 
-\item{string}{A string to search for in the variable names or labels.}
+\item{string}{A string to search for in the variable names or labels.
+Search is case-insensitive and matches substrings by default. Wildcards
+\code{*}, \verb{?}, and \code{~} represent any sequence, one character, and one or more
+characters. Use \code{^} and \code{$} anchors to require a complete-name/label match.}
 }
 \value{
 A tibble.

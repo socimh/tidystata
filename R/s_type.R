@@ -4,7 +4,10 @@
 #' @param .x An object.
 #' @param .abbr A logical. If `TRUE`, the abbreviation
 #' of the type is returned.
-#' @return A character.
+#' @return A character. `s_type()` returns `"units"` for measured vectors
+#' in either abbreviation mode. `s_unit()` returns the unit string for measured
+#' or duration vectors, including empty or all-missing measured vectors, and
+#' `NA_character_` for vectors without units.
 #' @export
 #'
 #' @examples
@@ -18,16 +21,16 @@ s_type <- function(.x, .abbr = FALSE) {
     pillar::type_sum() %>%
     stringr::str_extract("^(\\w|\\+)+")
 
-  if (type == "hvn_lbll") {
-    type <- unclass(.x) %>%
-      pillar::type_sum() %>%
-      paste0("+lbl")
-  }
-
   if (vctrs::obj_is_vector(.x)) {
     if (vctrs::vec_ptype_abbr(.x) == "units") {
       type <- "units"
     }
+  }
+
+  if (type == "hvn_lbll") {
+    type <- unclass(.x) %>%
+      pillar::type_sum() %>%
+      paste0("+lbl")
   }
 
   if (!.abbr) {

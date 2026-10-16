@@ -208,6 +208,67 @@ test_that("s_unit: units object", {
   expect_false(is.na(result))
 })
 
+test_that("s_type and s_unit: measured length metadata", {
+  skip_if_not_installed("units")
+  x <- units::set_units(c(1, 2, 3), "m")
+  original <- x
+
+  expect_identical(s_type(x), "units")
+  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_unit(x), "m")
+  expect_identical(x, original)
+})
+
+test_that("s_type and s_unit: compound speed metadata", {
+  skip_if_not_installed("units")
+  x <- units::set_units(c(1, 2, 3), "m/s")
+
+  expect_identical(s_type(x), "units")
+  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_unit(x), "m/s")
+})
+
+test_that("s_type and s_unit: dimensionless metadata", {
+  skip_if_not_installed("units")
+  x <- units::set_units(c(1, 2, 3), "1")
+
+  expect_identical(s_type(x), "units")
+  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_unit(x), "1")
+})
+
+test_that("s_type and s_unit: empty measured vector metadata", {
+  skip_if_not_installed("units")
+  x <- units::set_units(numeric(0), "m")
+
+  expect_identical(s_type(x), "units")
+  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_unit(x), "m")
+})
+
+test_that("s_type and s_unit: all-missing measured vector metadata", {
+  skip_if_not_installed("units")
+  x <- units::set_units(c(NA_real_, NA_real_), "m")
+
+  expect_identical(s_type(x), "units")
+  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_unit(x), "m")
+})
+
+test_that("s_type and s_unit: codebook retains measurement metadata", {
+  skip_if_not_installed("units")
+  df <- tibble(distance = units::set_units(c(1, NA, 3), "m"))
+  original <- df
+
+  result <- codebook(df)
+
+  expect_equal(result$variable, "distance")
+  expect_equal(result$type, "units [m]")
+  expect_equal(result$n, 2)
+  expect_equal(result$unique, 2)
+  expect_identical(df, original)
+})
+
 test_that("s_unit: difftime with units", {
   x <- as.difftime(c(1, 2, 3), units = "hours")
   result <- s_unit(x)

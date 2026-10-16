@@ -21,6 +21,7 @@ A passing demo is not a passing full package test suite.
 - [milestone_contracts_0.2.0.9000.md](milestone_contracts_0.2.0.9000.md)
 - [milestone_status_0.2.0.9000.md](milestone_status_0.2.0.9000.md)
 - [project_status_2026-10-15.md](project_status_2026-10-15.md)
+- [project_status_core_stabilization_2026-10-16.md](project_status_core_stabilization_2026-10-16.md)
 - [project_status_failure_triage_2026-10-16.md](project_status_failure_triage_2026-10-16.md)
 - [project_status_git_comparison_2026-10-15.md](project_status_git_comparison_2026-10-15.md)
 - [project_status_test_stabilization_2026-10-16.md](project_status_test_stabilization_2026-10-16.md)

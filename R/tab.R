@@ -15,6 +15,19 @@
 #' family adds totals; rich output is available with `.type = "flextable"`
 #' when the optional flextable package is installed.
 #'
+#' `tab()` counts list-column values by their complete identities without
+#' flattening their contents. Selecting no measured variables returns no rows:
+#' `tab()` and `fre()` retain their count and percentage columns and any grouping
+#' keys; `tab1()` and `fre1()` return an empty list by default or an empty table
+#' with `.type = "tibble"`. `tab2()` and `fre2()` return an empty tibble when no
+#' variables are selected; otherwise exactly two variables are required.
+#'
+#' Cross-tabulation keeps category names unchanged. Categories may match the
+#' original variable names. A category matching the combined row-header name,
+#' or literal `"NA"` alongside a missing column category, causes a name-collision
+#' error. In `fre2()`, the column category `"total"` is reserved for marginal
+#' totals; recode it first or use `tab2()`.
+#'
 #' If the output tibble has many rows, consider using
 #' `print()` to display the output.
 #'
@@ -136,6 +149,12 @@ tab1 <- function(
       dplyr::select(-...any_miss)
   })
 
+  if (length(out) == 0L && .type[1] == "tibble") {
+    return(dplyr::bind_cols(
+      .data[0L, group_vars, drop = FALSE], append_tab_list(out)
+    ))
+  }
+
   # Bind rows if the type is a tibble
   if (.type[1] == "tibble") {
     out <- append_tab_list(out)
@@ -153,6 +172,7 @@ tab2 <- function(
   .data <- .data %>%
     s_select(...)
   .data <- s_ungroup(.data)
+  if (ncol(.data) == 0L) return(tibble::tibble())
 
   # Confirm names
   check_two_vars(.data)
@@ -235,6 +255,12 @@ fre1 <- function(
       dplyr::select(-...any_miss)
   })
 
+  if (length(out) == 0L && .type[1] == "tibble") {
+    return(dplyr::bind_cols(
+      .data[0L, group_vars, drop = FALSE], append_tab_list(out)
+    ))
+  }
+
   if (.type[1] == "flextable") {
     out <- out %>%
       append_tab_list(blank_row = TRUE) %>%
@@ -262,6 +288,7 @@ fre2 <- function(
   .data <- .data %>%
     s_select(...)
   .data <- s_ungroup(.data)
+  if (ncol(.data) == 0L) return(tibble::tibble())
 
   # Confirm names
   check_two_vars(.data)
