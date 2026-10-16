@@ -9,6 +9,9 @@
 
 ## Function-by-function acceptance
 
+- [x] Build and visually verify a ten-page codebook/browse PDF with executed scripts, console output, selector examples and research pipelines.
+- [ ] Review maintainer feedback on the codebook/browse PDF before revising presentation.
+
 - [x] Build and visually verify a selective four-page PDF showing input scripts, actual console output and a downstream research pipeline.
 - [x] Review maintainer feedback: the selective console PDF is approved; preserve its current presentation.
 

@@ -50,6 +50,7 @@ material defects in the reviewed summary scope. This coverage expansion changed 
 
 ## Remaining follow-up
 
+- The new [ten-page codebook/browse PDF](reports/project_status_codebook_browse_pdf_2026-10-16.md) shows current outputs and scripts for maintainer review. All ten sections execute cleanly and all pages are visually checked; package behavior is unchanged.
 - The maintainer approved the selective [console showcase](reports/project_status_console_showcase_2026-10-16.md). Its appearance is preserved; no output redesign is pending.
 - Replace the empty cut_length interval-width test; its skip is missing coverage.
 - Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The accepted summary, tabulation and inspection checks now have no uncaptured warnings. Test warnings are separate from package-check warnings (zero).

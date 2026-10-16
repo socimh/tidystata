@@ -86,3 +86,9 @@ docs
 !.opencode/results/codebook-browse-accepted-check.log
 !.opencode/results/codebook-browse-accepted-scenarios.csv
 !.opencode/results/codebook-browse-accepted-examples.log
+
+# Keep the requested codebook/browse PDF; preserve captures and render files locally.
+!.opencode/results/codebook-browse-showcase/
+.opencode/results/codebook-browse-showcase/*
+!.opencode/results/codebook-browse-showcase/statart_codebook_browse_console.pdf
+.opencode/workflows/__pycache__/

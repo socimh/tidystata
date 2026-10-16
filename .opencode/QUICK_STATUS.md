@@ -14,6 +14,7 @@ Updated 2026-10-16. Development version **0.2.0.9000**.
 
 ## Evidence and next steps
 
+- [Ten-page codebook/browse console PDF](reports/project_status_codebook_browse_pdf_2026-10-16.md): input scripts, real printed outputs and research pipelines for maintainer review.
 - [Codebook/browse: 100 scenarios each](reports/project_status_codebook_browse_acceptance_2026-10-16.md)
 - [Five inspection helpers: 100 scenarios each](reports/project_status_inspection_acceptance_2026-10-16.md)
 - [Selective console PDF and input-script showcase](reports/project_status_console_showcase_2026-10-16.md): four pages approved by the maintainer; package behavior unchanged.

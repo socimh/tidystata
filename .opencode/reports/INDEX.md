@@ -24,6 +24,7 @@ A passing demo is not a passing full package test suite.
 - [project_status_cleanup_2026-10-16.md](project_status_cleanup_2026-10-16.md)
 - [project_status_cleanup_review_2026-10-16.md](project_status_cleanup_review_2026-10-16.md)
 - [project_status_codebook_browse_acceptance_2026-10-16.md](project_status_codebook_browse_acceptance_2026-10-16.md)
+- [project_status_codebook_browse_pdf_2026-10-16.md](project_status_codebook_browse_pdf_2026-10-16.md)
 - [project_status_console_showcase_2026-10-16.md](project_status_console_showcase_2026-10-16.md)
 - [project_status_core_stabilization_2026-10-16.md](project_status_core_stabilization_2026-10-16.md)
 - [project_status_failure_triage_2026-10-16.md](project_status_failure_triage_2026-10-16.md)
