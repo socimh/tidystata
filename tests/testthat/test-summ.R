@@ -24,7 +24,7 @@ test_that("summ: list mode with multiple variable types", {
     datetime_var = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 100),
     char_var = sample(letters[1:5], 100, replace = TRUE)
   )
-  result <- summ(df, .mode = "list")
+  expect_warning(result <- summ(df, .mode = "list"), "char_var.*non-numeric")
   expect_type(result, "list")
 })
 
@@ -184,13 +184,13 @@ test_that("summ: variables with varying missing percentages", {
     ninety_pct = c(1:10, rep(NA, 90)),
     all_missing = rep(NA, 100)
   )
-  result <- summ(df)
+  expect_warning(result <- summ(df), "all_missing.*entirely missing")
   expect_true("missing" %in% names(result) || "n" %in% names(result))
 })
 
 test_that("summ: all NA variable handling", {
   df <- tibble(x = rep(NA, 100))
-  result <- summ(df)
+  expect_warning(result <- summ(df), "x.*entirely missing")
   expect_equal(nrow(result), 1)
 })
 
@@ -335,7 +335,7 @@ test_that("summ: haven labelled numeric", {
   df <- tibble(
     x = labelled(rnorm(100), labels = c("Low" = -1, "High" = 1))
   )
-  result <- summ(df, x)
+  expect_warning(result <- summ(df, x), "x.*labelled variable")
   expect_s3_class(result, "data.frame")
 })
 
@@ -393,7 +393,7 @@ test_that("summ: 10000 rows with multiple variables", {
 })
 
 test_that("summ: many variables (50+)", {
-  df <- as_tibble(replicate(50, rnorm(100)))
+  df <- as_tibble(replicate(50, rnorm(100)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:50)
   result <- summ(df)
   expect_equal(nrow(result), 50)
@@ -424,7 +424,7 @@ test_that("summ: NULL input should error", {
 
 test_that("summ: character only data frame should error or skip", {
   df <- tibble(x = letters[1:10], y = letters[11:20])
-  expect_error(summ(df))
+  expect_warning(expect_error(summ(df)), "non-numeric")
 })
 
 test_that("summ: non-existent column should error", {

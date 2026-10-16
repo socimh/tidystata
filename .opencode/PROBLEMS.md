@@ -2,12 +2,19 @@
 
 ## Current verified state (2026-10-16)
 
-The complete suite passes: 5,617 expectations, zero failures/errors, 33 test
-warnings and one skipped block across 1,410 blocks. Fresh installation/build,
-minimal-dependency smoke, and R CMD check --no-manual pass with Status: OK.
-See [current evidence](reports/project_status_core_stabilization_2026-10-16.md).
-All previously failing/erroring retained scenarios are resolved without removing
-or disabling coverage; 52 regression blocks were added.
+The complete suite passes: 5,922 expectations, zero failures/errors, 27 test
+warnings and one skipped block across 1,468 blocks. Fresh installation/build
+and R CMD check --no-manual pass with Status: OK. Earlier required-dependency
+smoke evidence remains valid; dependencies and exports did not change.
+See [summary acceptance evidence](reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
+
+summ() and tabstat() are locally accepted release candidates: 142 blocks and
+454 expectations with zero failures/errors/warnings/skips. Fixed SPSS missing
+masks, reserved grouping/measured names, grouped .by override, compact datetime
+formatting, empty .name behavior and the approved counts-only nonnumeric policy.
+Large integer64 conversion warnings are now visible. The standalone runner
+passes 86 scenarios and 388 expectations; independent review found no remaining
+material defects in the reviewed summary scope.
 
 ## Repository organization resolved (2026-10-16)
 
@@ -18,7 +25,7 @@ or disabling coverage; 52 regression blocks were added.
 ## Remaining follow-up
 
 - Replace the empty cut_length interval-width test; its skip is missing coverage.
-- Capture intentional warning paths explicitly and repair legacy matrix-name fixtures. Test warnings are separate from package-check warnings (zero).
+- Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The summary family now has no uncaptured warnings. Test warnings are separate from package-check warnings (zero).
 - Verify the declared R 4.1 minimum and other platforms before publishing.
 - Combined-header and literal-NA/missing-category cross-table collisions error explicitly; fre2 column category total must be recoded. An observed row label total remains alongside the final marginal row; callers should distinguish the final row.
 - Four regenerated README console lines retain pillar trailing spaces; no generated output was manually patched.

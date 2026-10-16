@@ -125,6 +125,36 @@ numeric, and numeric-only summary tables retain numeric statistic columns.
 Default `.mode = "list"` separates variable types and preserves numeric statistic
 types in the numeric summary.
 
+With `.keep_all = TRUE`, character/list columns retain observed counts,
+missing counts and distinct observed values. Their numeric statistics are `NA`,
+even for numeric-looking text. The default `.keep_all = FALSE` removes these
+columns and errors if no supported columns remain. SPSS user-missing values and
+ranges are excluded before computing counts or numeric statistics. `valid_pct`
+is a fraction from zero to one, rather than a percentage from zero to 100.
+
+An explicit `.by` overrides existing `group_by()` groups. A grouping key that
+collides with summary metadata is renamed with leading dots until unique among
+input names, with a message; input data remain unchanged. `.na.rm` removes
+missing grouping keys only: numeric statistics always omit missing measured
+values. `.name = FALSE` drops the variable-name column only for one measured
+variable, including an empty grouped result.
+
+List mode returns a single table for one type family, or named tables for mixed
+`numeric`, `date` and `datetime` families. Calendar statistics are formatted text
+in both modes. Dates display calendar days; datetimes display UTC to minute
+precision, and compact sub-minute spreads round to whole seconds. Use the raw
+input with base R statistics when full calendar precision is needed.
+
+Numeric calculations use double precision; converting large `integer64` values
+can lose precision and emits a warning.
+
+Factors use level codes with a warning; numeric labelled vectors use underlying
+values, excluding SPSS missing codes. Measured vectors and `difftime` retain
+original numeric units. SD is sample SD, quantiles use type 7, and MAD uses R's
+default scaling. Skewness and excess kurtosis standardize central moments by
+sample SD; these are not claims of exact Stata equivalence. Undefined moments
+for singleton or constant data may be `NA` or `NaN`. See `?summ` for details.
+
 ## Cross-tabulation category names
 
 `tab2()` and `fre2()` preserve categories matching the original variable names,

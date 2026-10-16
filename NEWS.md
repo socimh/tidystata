@@ -43,6 +43,12 @@
   conflicts, including retained all-missing numeric columns. Shared formatted
   statistic columns become character; count columns remain numeric. Default
   list mode preserves numeric statistic types in the numeric summary.
+* Make `summ()`/`tabstat()` retain counts and unique values for character/list
+  columns with `.keep_all = TRUE`, with numeric statistics set to `NA`. Exclude
+  SPSS user-missing codes before conversion. Repair reserved grouping-key and
+  measured-column names, honor explicit `.by` over existing groups, and handle
+  single-variable names in empty grouped output and compact datetime spreads.
+  Clarify numeric conventions and calendar output in the shared help.
 * Allow list columns in one-way frequency counts. Selections with no variables
   return empty results, including empty lists for the default `tab1()`/`fre1()`
   output. Matrix columns remain unsupported.

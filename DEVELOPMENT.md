@@ -46,12 +46,16 @@ artifact deletion requires a separately reviewed, explicitly approved list.
 
 ## Current verification
 
-Latest stabilization: **5,617 passing expectations across 1,410 blocks, zero
-failed expectations or error blocks**, with 33 test warnings and one pre-existing
+Latest summary acceptance: **5,922 passing expectations across 1,468 blocks, zero
+failed expectations or error blocks**, with 27 test warnings and one pre-existing
 empty test skipped. Fresh native installation, source build, required-dependency
 smoke check, and `R CMD check --no-manual` all pass. Package check reports
 **Status: OK**, with no check errors, warnings or notes. See the
-[core verification report](.opencode/reports/project_status_core_stabilization_2026-10-16.md).
+[summary acceptance report](.opencode/reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
+summ() and tabstat() are locally accepted release candidates: all 142 summary
+blocks and 454 expectations pass without uncaptured warnings or skips. The
+standalone acceptance runner passes 86 scenarios and 388 expectations. Other
+function families and minimum-R/multi-platform publication checks remain.
 The first-milestone evidence below is historical.
 
 - [Milestone contract report](.opencode/reports/milestone_contracts_0.2.0.9000.md):
@@ -60,9 +64,9 @@ The first-milestone evidence below is historical.
 - A fresh native installation succeeds. A separate smoke check loads the core
   with required dependencies only and verifies the error for absent formatting.
 - All ten active demos execute successfully and have versioned output reports.
-- Package checking passes installation, namespace/dependency declarations,
-  documentation, compiled code, and examples. Full-suite legacy failures still
-  prevent a clean release check; use the milestone status report for totals.
+- Historically, first-milestone package checking passed non-test stages but
+  failed at tests. The current passing full-suite check above supersedes that
+  result; the milestone status report retains its original totals.
 - [Original baseline](.opencode/reports/project_status_2026-10-15.md) is historical:
   134 failed expectations and 38 error blocks before this milestone.
 

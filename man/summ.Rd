@@ -32,83 +32,124 @@ tabstat(
 )
 }
 \arguments{
-\item{.data}{A data frame, data frame extension (e.g. a tibble), or a vector.}
+\item{.data}{A data frame, data frame extension (e.g. a tibble), or a vector.
+Matrix and data-frame columns are unsupported; use atomic or list columns.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to tabulate.
+\item{...}{Variables to summarise, using tidyselect or data-masking
+expressions (for example, \code{dplyr::where(is.numeric)} or \code{x_sq = x^2}).
+If omitted, select all columns except grouping keys.}
 
-Both tidyselect (e.g., \code{starts_with()}) and
-data masking (e.g., \code{x_sq = x^2}) are supported.
-See examples below.}
+\item{.by}{Optional grouping columns, selected with tidyselect. An explicit
+selection overrides existing \code{group_by()} groups; when omitted, existing
+groups are used. Grouping columns are excluded from the measured variables.}
 
-\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optionally, a selection of columns to
-group by for just this operation, functioning as an alternative to \code{\link[dplyr:group_by]{group_by()}}. For
-details and examples, see \link[dplyr:dplyr_by]{?dplyr_by}.}
+\item{.keep_all}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), unsupported
+nonnumeric columns are removed with a warning; an error is raised if none
+of the selected columns can be summarised. If \code{TRUE}, character/list columns
+retain counts and unique values, with numeric statistics set to \code{NA}.
+Numeric-looking character values are not parsed.}
 
-\item{.keep_all}{A logical. If \code{TRUE}, all variables are kept.}
+\item{.detail}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, return all statistics
+available for each variable type unless \code{.stat} selects a subset.}
 
-\item{.detail}{A logical. If \code{TRUE}, the detailed summary is returned.}
-
-\item{.stat}{A character vector.
-If specified, only the listed statistics are returned.
+\item{.stat}{A character vector. If nonempty, return only the listed
+statistics, plus variable names, types and any grouping columns.
 Supported names are \code{type}, \code{n}, \code{unique}, \code{miss_n}, \code{valid_pct}, \code{min}, \code{q1},
 \code{median}, \code{mean}, \code{mad}, \code{sd}, \code{q3}, \code{max}, \code{iqr}, \code{skew}, \code{kurtosis},
 \code{se}, and \code{sum}. Aliases \code{missing}, \code{p25}, \code{p50}, and \code{p75} select
 \code{miss_n}, \code{q1}, \code{median}, and \code{q3}; requested names and order are retained.
-\code{sum} applies to numeric summaries, not calendar dates or datetimes.
-Date/datetime summaries support counts, percentiles, location and spread,
-but not skewness or kurtosis.}
+Identical requested names are deduplicated; aliases and canonical names
+may coexist. \code{sum} applies to numeric summaries, not calendar dates or
+datetimes. Calendar summaries do not support \code{skew} or \code{kurtosis} either.}
 
-\item{.na.rm}{A logical. If \code{TRUE}, rows where the \code{.by} grouping variable
-is \code{NA} are dropped before summarising. Default is \code{FALSE}.}
+\item{.na.rm}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, remove rows missing
+any grouping key before summarising. Default is \code{FALSE}. Missing measured
+values are always omitted from numeric statistics, regardless of this flag.}
 
-\item{.name}{A logical. If \code{TRUE} (default), the \code{name} column is always
-shown. If \code{FALSE}, the \code{name} column is dropped when only one variable is
-summarised.}
+\item{.name}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), retain the
+\code{name} column. If \code{FALSE}, drop it only when one measured variable is
+summarised, including zero-row grouped output.}
 
-\item{.mode}{A character string. Either "list" (default) or "table".
-If "list", returns a list of tables grouped by variable type (numeric, date, datetime).
-If "table", returns a single table with all variables (dates formatted as strings).
-When numeric and calendar summaries share a table, common formatted
-statistic columns are character; count columns remain numeric.}
+\item{.mode}{A character string. Either \code{"list"} (default) or \code{"table"}.
+List mode returns a single table when one variable-type family is present,
+otherwise a list named \code{numeric}, \code{date}, and/or \code{datetime}. The \code{numeric}
+family also contains nonnumeric columns retained by \code{.keep_all}.
+Table mode combines all families. Shared formatted statistic columns become
+character when numeric and calendar summaries are combined; counts remain
+numeric. Calendar locations and spreads are strings in both modes.}
 
-\item{.duration_format}{A character string. Either "long" (default) or "compact".
-Controls how durations (SD for dates) are formatted:
-"long" shows "548 days", "compact" shows "548d".}
+\item{.duration_format}{A character string, \code{"long"} (default) or \code{"compact"}.
+Controls calendar spread statistics such as SD: \code{"548 days"} versus \code{"548d"}.
+Sub-minute datetime spreads are rounded to whole seconds for display.}
 }
 \value{
-A tibble, data.frame, data.table, or list (depending on .mode and input class)
+A tibble, or a list of tibbles in list mode when multiple
+variable-type families are present. Table mode restores a base data.frame
+or data.table for those input classes. Vector input uses its expression
+as the variable name (or \code{value} for a multiline expression).
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Enhanced \code{summarise()}.
+Compute one row of summary statistics per selected variable and group.
+\code{tabstat()} delegates to \code{summ()} with \code{.stat = "mean"} by default.
 }
 \details{
-Numeric/logical columns with no observed values are retained,
-including zero-row inputs: \code{n} and \code{unique} are zero and summary statistics
-are \code{NA} (including \code{sum}). Missing counts retain the number of input rows.
+Counts and missing values:
+
+\code{n} counts observed values and \code{unique} counts distinct observed values.
+\code{miss_n} counts missing values; \code{valid_pct} is the fraction observed, from
+zero to one, and is \code{NA} for zero-row inputs. Missingness follows the original
+vector's \code{is.na()} method, including SPSS user-missing values and ranges.
+Retained list columns count complete element identities without flattening.
+Columns with no observed values remain in the result: \code{n} and \code{unique} are
+zero and location/spread statistics, including \code{sum}, are \code{NA}.
 Zero-row grouped inputs do not create artificial groups.
+
+Numeric statistics:
+
+Numeric calculations use double precision. Large \code{integer64} values may
+lose precision during conversion, with a warning.
+
+Logical values are treated as zero/one. Factors and ordered factors use
+their underlying level codes with a warning. Numeric labelled vectors use
+underlying values, excluding user-missing codes; label metadata is flagged
+with a warning. Measured vectors and \code{difftime} use their original units.
+In variable names, \code{*} marks labelled vectors, \verb{**} marks factors and \verb{***}
+marks retained nonnumeric columns.
+
+SD uses the sample denominator (\code{n - 1}); \code{se} is SD divided by \code{sqrt(n)}.
+Quantiles use R's default type 7, \code{mad} uses \code{\link[stats:mad]{stats::mad()}} with its default
+scaling, and \code{iqr} uses \code{\link[stats:IQR]{stats::IQR()}}. \code{skew} is the mean cubed deviation
+divided by the sample SD cubed. \code{kurtosis} is the mean fourth-power deviation
+divided by the sample SD to the fourth power, minus three (excess kurtosis).
+These conventions are not promised to match Stata. For singleton or constant
+inputs, undefined spread or moment statistics may be \code{NA} or \code{NaN}.
+
+Calendar output and grouping names:
+
+Date locations are displayed as \code{YYYY-MM-DD}; fractional days are not shown.
+Datetime locations are displayed in UTC as \verb{YYYY-MM-DD HH:MM}, without
+seconds. Calendar spread statistics are formatted durations, not raw numbers.
+Grouping keys that collide with summary metadata or internal pivot names
+are renamed by prepending dots until unique among the input names, with
+a message. The input data are not modified.
 }
 \examples{
 summ(lifeexp)
-
 summ(lifeexp, .by = region)
-
 tabstat(lifeexp, .by = region)
 
 lifeexp \%>\%
   summ(
     dplyr::where(is.numeric),
     .by = region,
-    .stat = c("mean", "sd")
+    .stat = c("n", "mean", "sd", "p50")
   )
 
-# Drop NA in grouping variable
+# Remove rows missing a grouping key; measured NAs are always omitted
 summ(lifeexp, .by = region, .na.rm = TRUE)
 
-# Return list grouped by type
-summ(lifeexp, .mode = "list")
-
-# Use long duration format
-summ(lifeexp, .duration_format = "long")
+# Keep numeric and calendar summaries in separate tables
+mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
+summ(mixed, .mode = "list", .duration_format = "compact")
 }

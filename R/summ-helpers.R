@@ -195,9 +195,12 @@ select_summ_stats <- function(data, stat) {
 }
 
 summ_var <- function(var, stat = character(0), .detail = FALSE) {
-  num_var <- as_numeric(var)
-  n_val <- sum(!is.na(var))
-  observed <- num_var[!is.na(num_var)]
+  # Preserve class-specific missingness (including SPSS user-missing codes)
+  # before numeric conversion strips those attributes.
+  observed_values <- var[!is.na(var)]
+  n_val <- length(observed_values)
+  observed <- if (is_summable(var)) as_numeric(observed_values) else numeric()
+  num_var <- observed
   has_values <- length(observed) > 0L
   type_str <- if (!is.na(s_unit(var))) {
     paste0(s_type(var, .abbr = TRUE), " [", s_unit(var), "]")
@@ -207,7 +210,7 @@ summ_var <- function(var, stat = character(0), .detail = FALSE) {
   stat_tb <- tibble::tibble(
     type = type_str,
     n = n_val,
-    unique = dplyr::n_distinct(var, na.rm = TRUE),
+    unique = dplyr::n_distinct(observed_values),
     min = if (has_values) min(observed) else NA_real_,
     mean = if (has_values) mean(observed) else NA_real_,
     sd = if (has_values) stats::sd(observed) else NA_real_,
@@ -283,7 +286,7 @@ fmt_duration <- function(secs, format = "compact") {
     if (secs >= 86400) sprintf("%.1fd", secs / 86400)
     else if (secs >= 3600) sprintf("%.1fh", secs / 3600)
     else if (secs >= 60) sprintf("%.1fm", secs / 60)
-    else sprintf("%ds", secs)
+    else sprintf("%.0fs", round(secs))
   }
 }
 
@@ -414,15 +417,17 @@ summ_data <- function(.data, .fn, summ_vars, group_vars, .detail, .stat,
       }
     }
     
+    # Explicit column lookup also supports columns named .data or .env;
+    # across() may expand those names into the data-mask pronouns.
+    summaries <- lapply(summ_vars, function(column) {
+      rlang::expr(fn_wrapper(.data[[!!column]]))
+    })
+    names(summaries) <- summ_vars
     out <- .data %>%
       dplyr::summarise(
-        dplyr::across(
-          tidyselect::all_of(summ_vars),
-          ~ fn_wrapper(.x)
-        ),
+        !!!summaries,
         .by = tidyselect::all_of(group_vars)
       ) %>%
-      suppressWarnings() %>%
       tidyr::pivot_longer(
         !tidyselect::all_of(group_vars)
       ) %>%
@@ -517,10 +522,7 @@ summ_list <- function(.data, group_vars, .detail, .stat,
   } else if (length(out) == 1) {
     out <- out[[1]]
   } else {
-    message(
-      "A list is returned as statistics are heterogeneous.",
-      call. = FALSE
-    )
+    message("A list is returned as statistics are heterogeneous.")
   }
 
   return(out)

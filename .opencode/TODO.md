@@ -7,6 +7,14 @@
 - [x] Make clean non-destructive and verify it preserves all reports and artifacts.
 - [ ] Review an exact generated-artifact list before requesting any deletion.
 
+## Function-by-function acceptance
+
+- [x] Review summ/tabstat, repair reproduced defects, implement counts-only nonnumeric retention, regenerate help and verify real output; see [acceptance report](reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
+- [x] Verify summary tests have no uncaptured warnings/skips and fresh full package checks remain green.
+- [ ] Review tab/tab1/tab2 and fre/fre1/fre2 next, using existing evidence and documented naming limits.
+- [ ] Continue through variable inspection, conversions, row helpers, binning and utilities.
+- [ ] Complete minimum-R/multi-platform validation before any publication request.
+
 ## Next stabilization milestone
 
 - [x] Repair invalid labelled, incompatible-length, and sampling fixtures.
@@ -24,7 +32,7 @@
 - [x] Repair the 11 invalid fixtures and 77 incorrect-expectation identities in focused batches, verifying each against its contract.
 - [x] Resolve the eight behavior contracts and fix the reproduced units, summary and naming defects.
 
-- [ ] Replace the skipped empty cut_length test and capture expected warnings explicitly.
+- [ ] Replace the skipped empty cut_length test and capture remaining expected warnings outside the now-clean summary family.
 - [ ] Review selector side effects and additional naming boundaries beyond the retained scenarios before release.
 
 ## Completed first milestone

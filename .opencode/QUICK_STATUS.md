@@ -3,7 +3,7 @@
 Updated 2026-10-16. Development version **0.2.0.9000**.
 
 - Core scope retained: 13 required Imports, 40 exports, cpp11/Rfast backend; four retired wrappers preserved in extra_functions.
-- Full suite: **5,617 passing expectations, zero failures/errors**, 33 warnings and one skipped empty test across **1,410 blocks**.
+- Full suite: **5,922 passing expectations, zero failures/errors**, 27 warnings and one skipped empty test across **1,468 blocks**.
 - Fresh native installation, source build and required-dependency smoke passed.
 - **R CMD check --no-manual: Status: OK** (zero check errors/warnings/notes).
 - Fixed invalid test fixtures/assertions, summary missing-data/statistic contracts, tabulation collisions/empty selections, and units recognition. Substring search is retained with explicit anchors for complete matches.
@@ -14,7 +14,8 @@ Updated 2026-10-16. Development version **0.2.0.9000**.
 
 ## Evidence and next steps
 
-- [Current core verification](reports/project_status_core_stabilization_2026-10-16.md)
+- [Summ/tabstat acceptance](reports/project_status_summ_tabstat_acceptance_2026-10-16.md)
+- [Earlier core verification](reports/project_status_core_stabilization_2026-10-16.md)
 - [Test-only stage](reports/project_status_test_stabilization_2026-10-16.md)
 - [Development guide](../DEVELOPMENT.md), [migration](../MIGRATION.md), [issues](PROBLEMS.md), [tasks](TODO.md).
 
@@ -23,3 +24,5 @@ and validate R 4.1 and other platforms before publication. Known ambiguous
 cross-table labels remain explicit errors; see the core report for boundaries.
 
 Repository cleanup completed: six historical files archived byte-for-byte, build scratchpad excluded, and make clean preserves artifacts. Fresh full suite/build/check pass unchanged; see [cleanup verification](reports/project_status_cleanup_2026-10-16.md). Generated artifacts remain on disk.
+
+Function review: summ() and tabstat() are locally accepted release candidates. Their 142 test blocks/454 expectations have zero failures, errors, warnings or skips; standalone acceptance has 86 scenarios/388 expectations. Next function family: tabulation. Publication still requires minimum-R/multi-platform validation.

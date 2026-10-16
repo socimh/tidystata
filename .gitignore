@@ -46,3 +46,10 @@ docs
 !.opencode/results/cleanup-final.csv
 !.opencode/results/cleanup-final-build.log
 !.opencode/results/cleanup-final-check.log
+
+# Function-level summary acceptance evidence.
+!.opencode/results/summ-acceptance-clean.csv
+!.opencode/results/summ-acceptance-clean-details.csv
+!.opencode/results/summ-acceptance-clean-check.log
+!.opencode/results/summ-acceptance-clean-scenarios.csv
+!.opencode/results/summ-acceptance-examples-clean.log
