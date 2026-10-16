@@ -3,8 +3,12 @@
 #' @description
 #' `timer()` works like the `timer` command in Stata.
 #'
-#' @param .x The function
-#' @return The function output
+#' @param .x An expression to evaluate and time.
+#' @return The evaluated result, invisibly.
+#' @details
+#' The expression is evaluated once. On success, elapsed time is emitted as a
+#' message. Warnings and errors propagate normally; a failed expression emits
+#' no completion-time message.
 #' @export
 #'
 #' @examples
@@ -15,9 +19,7 @@ timer <- function(.x) {
   out <- .x
   end_time <- Sys.time()
   time <- end_time - begin_time
-  duration_to_chr(time) %>%
-    paste0("Time spent: ", .) %>%
-    message()
+  message("Time spent: ", duration_to_chr(time))
   invisible(out)
 }
 

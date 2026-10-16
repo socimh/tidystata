@@ -83,19 +83,30 @@ test_that("s_try: warning returns TRUE (not error)", {
 })
 
 test_that("s_try: explicit warning returns TRUE", {
-  result <- s_try({
-    warning("Test warning")
-    42
-  })
+  expect_warning(
+    result <- s_try({
+      warning("Test warning")
+      42
+    }),
+    "Test warning"
+  )
   expect_true(result)
 })
 
 test_that("s_try: multiple warnings returns TRUE", {
-  result <- s_try({
-    warning("Warning 1")
-    warning("Warning 2")
-    "result"
-  })
+  warnings <- character()
+  result <- withCallingHandlers(
+    s_try({
+      warning("Warning 1")
+      warning("Warning 2")
+      "result"
+    }),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_identical(warnings, c("Warning 1", "Warning 2"))
   expect_true(result)
 })
 
@@ -249,7 +260,10 @@ test_that("s_try: safe file operations", {
   expect_true(can_read)
   
   # This should fail
-  cannot_read <- s_try(read.csv("/nonexistent/path/file.csv"))
+  expect_warning(
+    cannot_read <- s_try(read.csv("/nonexistent/path/file.csv")),
+    "cannot open file"
+  )
   expect_false(cannot_read)
 })
 

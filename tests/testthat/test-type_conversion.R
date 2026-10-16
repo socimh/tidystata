@@ -1,11 +1,3 @@
-# Comprehensive Test Suite for Type Conversion Functions
-# as_character, as_numeric
-
-# CHALLENGE: Comprehensive testing for as_character, as_numeric
-# FUNCTIONS: as_character, as_numeric
-# KEY BEHAVIORS: type coercion, format preservation
-# EDGE CASES: lossy conversions, factor handling
-
 library(testthat)
 library(statart)
 library(dplyr)
@@ -60,8 +52,7 @@ test_that("as_character: haven labelled with partial labels", {
   )
   result <- as_character(x)
   expect_type(result, "character")
-  # Unlabelled values should be converted to character representation
-  expect_true(all(is.character(result)))
+  expect_identical(result, c("Yes", "No", "99", "Yes"))
 })
 
 test_that("as_character: logical to character", {
@@ -74,13 +65,13 @@ test_that("as_character: logical to character", {
 test_that("as_character: Date to character", {
   x <- as.Date(c("2024-01-01", "2024-06-15"))
   result <- as_character(x)
-  expect_type(result, "character")
+  expect_identical(result, c("2024-01-01", "2024-06-15"))
 })
 
 test_that("as_character: POSIXct to character", {
-  x <- as.POSIXct(c("2024-01-01 10:00:00", "2024-06-15 14:30:00"))
+  x <- as.POSIXct(c("2024-01-01 10:00:00", "2024-06-15 14:30:00"), tz = "UTC")
   result <- as_character(x)
-  expect_type(result, "character")
+  expect_identical(result, c("2024-01-01 10:00:00", "2024-06-15 14:30:00"))
 })
 
 test_that("as_character: NA handling", {
@@ -212,10 +203,8 @@ test_that("as_numeric: Inf and -Inf handling", {
 })
 
 test_that("as_numeric: character with currency symbols", {
-  x <- c("$1,234.56", "€500.00", "£1,000")
-  result <- as_numeric(x)
-  expect_type(result, "double")
-  expect_false(all(is.na(result)))  # Should parse at least some
+  x <- c("$1,234.56", "\u20ac500.00", "\u00a31,000")
+  expect_identical(as_numeric(x), c(1234.56, 500, 1000))
 })
 
 test_that("as_numeric: within mutate context", {
@@ -246,7 +235,7 @@ test_that("type conversion: round-trip character -> numeric -> character", {
   character_version <- as_character(numeric_version)
   
   expect_equal(numeric_version, c(1, 2.5, 3.14))
-  expect_type(character_version, "character")
+  expect_identical(character_version, original)
 })
 
 test_that("type conversion: haven labelled preserves labels in character", {
@@ -326,7 +315,7 @@ test_that("type conversion: all NA handling", {
 test_that("type conversion: NaN handling", {
   x <- c(1, NaN, 3)
   result <- as_character(x)
-  expect_type(result, "character")
+  expect_identical(result, c("1", "NaN", "3"))
   
   result_num <- as_numeric(c("1", "NaN", "3"))
   expect_true(is.nan(result_num[2]))
@@ -355,7 +344,8 @@ test_that("type conversion: survey data import workflow", {
   
   expect_type(analysis_data$gender_chr, "character")
   expect_equal(analysis_data$gender_chr, c("Male", "Female", "Male", "Female", "Male"))
-  expect_type(analysis_data$satisfaction_num, "double")
+  expect_identical(analysis_data$satisfaction_num, c(4, 5, 3, 4, 5))
+  expect_identical(analysis_data$age_chr, c("18-25", "26-35", "36+", "26-35", "18-25"))
 })
 
 test_that("type conversion: financial data parsing", {
@@ -369,5 +359,5 @@ test_that("type conversion: financial data parsing", {
     mutate(amount_num = as_numeric(amount_chr))
   
   expect_type(result$amount_num, "double")
-  expect_false(all(is.na(result$amount_num)))
+  expect_identical(result$amount_num, c(1234.56, 500, 2000, 750.5))
 })

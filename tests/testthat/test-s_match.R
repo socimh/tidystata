@@ -280,7 +280,10 @@ test_that("s_match: pattern with multiple ranges", {
 test_that("s_match: invalid pattern errors", {
   df <- tibble(x = 1:5, y = 6:10)
   # Invalid regex pattern should error
-  expect_error(df %>% select(s_match("[")))
+  expect_warning(
+    expect_error(df %>% select(s_match("["))),
+    "TRE pattern compilation error"
+  )
 })
 
 test_that("s_match: NULL pattern", {

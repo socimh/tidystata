@@ -51,7 +51,7 @@ s_type <- function(.x, .abbr = FALSE) {
       stringr::str_replace("lbl", "label")
   }
 
-  return(type)
+  type
 }
 
 #' @export
@@ -60,8 +60,8 @@ s_unit <- function(.x) {
   unit <- NA_character_
 
   if (s_type(.x, .abbr = TRUE) %in% c("units", "drtn", "time")) {
-    unit <- units(.x) %>% as.character()
+    unit <- as.character(units(.x))
   }
 
-  return(unit)
+  unit
 }

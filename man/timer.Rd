@@ -7,13 +7,18 @@
 timer(.x)
 }
 \arguments{
-\item{.x}{The function}
+\item{.x}{An expression to evaluate and time.}
 }
 \value{
-The function output
+The evaluated result, invisibly.
 }
 \description{
 \code{timer()} works like the \code{timer} command in Stata.
+}
+\details{
+The expression is evaluated once. On success, elapsed time is emitted as a
+message. Warnings and errors propagate normally; a failed expression emits
+no completion-time message.
 }
 \examples{
 x <- seq_len(1e6)

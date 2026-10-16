@@ -7,8 +7,8 @@
 s_match(string, ignore.case = TRUE, vars = NULL)
 }
 \arguments{
-\item{string}{A character vector of column names
-like selecting a varlist in Stata \code{keep} command.}
+\item{string}{A single character string containing patterns, separated by
+spaces, like selecting a varlist in Stata's \code{keep} command.}
 
 \item{ignore.case}{If \code{TRUE}, the default, ignores case when matching
 names.}
@@ -16,6 +16,9 @@ names.}
 \item{vars}{A character vector of variable names. If not supplied,
 the variables are taken from the current selection context (as
 established by functions like \code{select()} or \code{pivot_longer()}).}
+}
+\value{
+An integer vector of positions in the available column names.
 }
 \description{
 \code{s_match()} is a simpler version of \code{matches()}

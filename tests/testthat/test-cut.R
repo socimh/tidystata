@@ -11,6 +11,20 @@ library(statart)
 library(dplyr)
 library(tibble)
 
+# Record and assert every expected warning, including min/max warning pairs.
+cut_test_warnings <- function(code) {
+  messages <- character()
+  withCallingHandlers(force(code), warning = function(condition) {
+    messages <<- c(messages, conditionMessage(condition))
+    invokeRestart("muffleWarning")
+  })
+  messages
+}
+cut_empty_range_warnings <- c(
+  "no non-missing arguments to min; returning Inf",
+  "no non-missing arguments to max; returning -Inf"
+)
+
 # ============================================================================
 # CHALLENGING TESTS - cut_quantile
 # ============================================================================
@@ -64,9 +78,8 @@ test_that("cut_quantile: ties handling - collapsed cutpoints", {
 
 test_that("cut_quantile: heavy ties preserve equal values", {
   x <- c(rep(1, 33), rep(2, 33), rep(3, 34))
-  result <- cut_quantile(x, n = 3)
-  # May create fewer groups with heavy ties
-  expect_true(nlevels(result) >= 2)
+  expect_warning(result <- cut_quantile(x, n = 3), "collapsed")
+  expect_identical(as.integer(result), c(rep(1L, 66), rep(2L, 34)))
 })
 
 test_that("cut_quantile: single value returns error", {
@@ -110,15 +123,12 @@ test_that("cut_length: creates equal-length intervals", {
 })
 
 test_that("cut_length: interval ranges are equal", {
-  x <- 1:100
-  result <- cut_length(x, n = 4)
-  # Each interval should cover approximately 25 units
-  # Check that breaks are evenly spaced
-  breaks <- attr(result, "breaks")
-  if (!is.null(breaks)) {
-    diffs <- diff(breaks)
-    expect_true(max(diffs) - min(diffs) < 0.001)
-  }
+  # Probe both sides of the actual width-2 boundaries and each boundary itself.
+  x <- c(0, 1.9, 2, 2.1, 3.9, 4, 4.1, 5.9, 6, 6.1, 8)
+  result <- cut_length(x, n = 4, labels = FALSE)
+  expect_identical(result, c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L, 4L, 4L))
+  expect_identical(levels(cut_length(x, n = 4)),
+                   c("[0,2]", "(2,4]", "(4,6]", "(6,8]"))
 })
 
 test_that("cut_length: handles NA values", {
@@ -338,21 +348,36 @@ test_that("all cut functions: empty vector errors or handles gracefully", {
   x <- numeric(0)
   # Quantiles require at least one observed value.
   expect_error(cut_quantile(x, n = 4), "non-missing")
-  expect_error(cut_length(x, n = 4))
-  expect_error(cut_breaks(x, breaks = 50), NA)
+  expect_identical(
+    cut_test_warnings(expect_error(cut_length(x, n = 4), "finite")),
+    cut_empty_range_warnings
+  )
+  expect_identical(
+    cut_test_warnings(result <- cut_breaks(x, breaks = 50)),
+    cut_empty_range_warnings
+  )
+  expect_s3_class(result, "ordered")
+  expect_length(result, 0)
 })
 
 test_that("all cut functions: all NA errors", {
   x <- rep(NA, 100)
   expect_error(cut_quantile(x, n = 4))
-  expect_error(cut_length(x, n = 4))
-  expect_error(cut_breaks(x, breaks = 50))
+  expect_identical(
+    cut_test_warnings(expect_error(cut_length(x, n = 4), "finite")),
+    cut_empty_range_warnings
+  )
+  expect_identical(
+    cut_test_warnings(expect_error(cut_breaks(x, breaks = 50), "numeric")),
+    cut_empty_range_warnings
+  )
 })
 
 test_that("cut_breaks: non-numeric breaks errors or converts", {
   x <- 1:100
-  # Non-numeric breaks may error or be converted
-  expect_error(cut_breaks(x, breaks = "invalid"), NA)
+  expect_warning(result <- cut_breaks(x, breaks = "invalid"),
+                 "NAs introduced by coercion")
+  expect_identical(as.integer(result), rep(1L, 100))
 })
 
 # ============================================================================

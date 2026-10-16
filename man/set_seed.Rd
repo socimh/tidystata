@@ -7,15 +7,20 @@
 set_seed(.fn, seed)
 }
 \arguments{
-\item{.fn}{A function call.}
+\item{.fn}{An expression evaluated after setting the seed.}
 
 \item{seed}{An integer for reproducibility.}
 }
 \value{
-Return the function result with a seed set.
+The expression's result, preserving its visibility.
 }
 \description{
 Attach a seed to a specific function.
+}
+\details{
+Calls \code{\link[=set.seed]{set.seed()}} before evaluating \code{.fn} once. The global random-number
+state is changed and is not restored, including when \code{.fn} fails. Subsequent
+random draws continue from the state left by \code{.fn}.
 }
 \examples{
 sample(1:10, 8) \%>\% 

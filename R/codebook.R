@@ -62,7 +62,6 @@
 #' @export
 codebook <- function(.data, ...) {
   .data <- dplyr::ungroup(.data)
-  # if ... is empty, select all variables
   if (!missing(...)) {
     .data <- s_select(.data, ...)
   }
@@ -93,10 +92,9 @@ codebook <- function(.data, ...) {
     out <- dplyr::relocate(out, label, .after = variable)
   }
 
-  return(out)
+  out
 }
 
-# Helper function:
 codebook_var <- function(var) {
   observed <- if (is.null(dim(var))) {
     !is.na(var)
@@ -104,11 +102,10 @@ codebook_var <- function(var) {
     rowSums(is.na(var)) == 0L
   }
   values <- vctrs::vec_slice(var, observed)
-  stat_tb <- tibble::tibble(
+  tibble::tibble(
     type = s_type(var),
     unit = s_unit(var),
     n = sum(observed),
     unique = dplyr::n_distinct(values)
   )
-  return(stat_tb)
 }

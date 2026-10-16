@@ -34,14 +34,9 @@
 #' @export
 ds <- function(.data, ...) {
   if (missing(...)) {
-    names(.data) %>%
-      return()
-  } else {
-    .data %>%
-      dplyr::select(...) %>%
-      names() %>%
-      return()
+    return(names(.data))
   }
+  names(dplyr::select(.data, ...))
 }
 
 #' @rdname names
@@ -53,6 +48,5 @@ ds_as_column <- function(.data, ...) {
 #' @rdname names
 #' @export
 names_as_column <- function(.data, ...) {
-  ds(.data, ...) %>%
-    tibble::as_tibble_col("name")
+  tibble::as_tibble_col(ds(.data, ...), "name")
 }

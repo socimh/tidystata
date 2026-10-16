@@ -7,15 +7,20 @@
 s_try(.fn)
 }
 \arguments{
-\item{.fn}{A function call.}
+\item{.fn}{An expression to evaluate once.}
 }
 \value{
-A logical value.
+A single logical value.
 }
 \description{
 This function tries to evaluate a function,
 and if the function throws an error, it returns FALSE.
 Otherwise, it returns TRUE.
+}
+\details{
+Errors are caught without printing their messages; warnings and messages
+propagate normally. For compatibility with \code{\link[=try]{try()}}, a successful expression
+that returns an object inheriting from \code{try-error} also yields \code{FALSE}.
 }
 \examples{
 s_try(mean(1:10))

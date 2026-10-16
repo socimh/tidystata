@@ -301,7 +301,7 @@ test_that("set_seed: reproducible cross-validation", {
 # CHALLENGING TESTS - Seed Persistence
 # ============================================================================
 
-test_that("set_seed: doesn't affect subsequent random operations", {
+test_that("set_seed: subsequent random operations continue from the seeded state", {
   # First operation with seed
   result1 <- rnorm(5) %>% set_seed(123)
   

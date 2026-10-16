@@ -4,7 +4,7 @@
 \alias{na_conversion}
 \alias{na_if_value}
 \alias{value_if_na}
-\title{NA Conversion}
+\title{Replace values with missing values or fill missing values}
 \usage{
 na_if_value(.x, .value)
 
@@ -13,16 +13,24 @@ value_if_na(.x, .value)
 \arguments{
 \item{.x}{A vector.}
 
-\item{.value}{A value to convert to NA.}
+\item{.value}{For \code{na_if_value()}, values to replace with \code{NA}; these are cast
+to the type of \code{.x} and recycled to its size. For \code{value_if_na()}, a single
+replacement value for missing elements, cast to the type of \code{.x}.}
+}
+\value{
+A vector with the same type and size as \code{.x}, with matching values
+replaced or missing values filled.
 }
 \description{
 \itemize{
-\item \code{na_if_value()} converts a value to NA. The same as \code{dplyr::na_if()}.
-\item \code{value_if_na()} converts NA to a value. The same as \code{tidyr::replace_na()}.
+\item \code{na_if_value()} replaces values equal to \code{.value} with \code{NA}, using
+\code{\link[dplyr:na_if]{dplyr::na_if()}}.
+\item \code{value_if_na()} replaces missing values with \code{.value}, using
+\code{\link[tidyr:replace_na]{tidyr::replace_na()}}.
 }
-}
-\details{
-Convert NAs easily.
+
+Both wrappers preserve the underlying function's casting, recycling,
+and error behavior.
 }
 \examples{
 x <- c(1, 2, NA, 4)

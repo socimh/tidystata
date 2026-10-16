@@ -2,9 +2,13 @@
 #'
 #' Attach a seed to a specific function.
 #'
-#' @param .fn A function call.
+#' @param .fn An expression evaluated after setting the seed.
 #' @param seed An integer for reproducibility.
-#' @returns Return the function result with a seed set.
+#' @returns The expression's result, preserving its visibility.
+#' @details
+#' Calls [set.seed()] before evaluating `.fn` once. The global random-number
+#' state is changed and is not restored, including when `.fn` fails. Subsequent
+#' random draws continue from the state left by `.fn`.
 #'
 #' @export
 #' @examples 
@@ -16,5 +20,5 @@
 #'  set_seed(123)
 set_seed <- function(.fn, seed) {
   set.seed(seed)
-  return(.fn)
+  .fn
 }

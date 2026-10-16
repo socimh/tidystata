@@ -55,20 +55,18 @@
 #' @rdname variables
 #' @export
 variables <- function(.data, ...) {
-  # if ... is empty, select all variables
   if (!missing(...)) {
     .data <- dplyr::select(.data, ...)
   }
 
-  out <- .data %>%
-    names_as_column()
+  out <- names_as_column(.data)
 
   labels <- variable_labels(.data)
   if (any(!is.na(labels))) {
     out$label <- unname(labels)
   }
 
-  return(out)
+  out
 }
 
 #' @rdname variables
@@ -88,18 +86,13 @@ variables_search <- function(.data, string, ...) {
 
   out <- variables(.data, ...)
   if ("label" %in% colnames(out)) {
-    out %>%
-      dplyr::filter(
-        stringr::str_detect(name, string) |
-          stringr::str_detect(label, string)
-      ) %>%
-      return()
+    dplyr::filter(
+      out,
+      stringr::str_detect(name, string) |
+        stringr::str_detect(label, string)
+    )
   } else {
-    out %>%
-      dplyr::filter(
-        stringr::str_detect(name, string)
-      ) %>%
-      return()
+    dplyr::filter(out, stringr::str_detect(name, string))
   }
 }
 

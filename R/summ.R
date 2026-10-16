@@ -136,7 +136,7 @@ summ <- function(
   
   # Store original class for later restoration
   original_class <- class(.data)[1]
-# Handle vector input
+  # Normalize vectors before grouping and selection.
   if (!is.data.frame(.data)) {
     var_name <- deparse(substitute(.data))
     if (length(var_name) > 1) var_name <- "value"
@@ -162,7 +162,7 @@ summ <- function(
   .data <- dplyr::ungroup(.data)
   input_names <- names(.data)
 
-  # 3.4: Drop NA rows in grouping variables if requested
+  # Missing-key filtering does not change how measured missing values are handled.
   if (.na.rm && length(group_vars) > 0) {
     .data <- .data %>%
       dplyr::filter(
@@ -217,7 +217,7 @@ summ <- function(
   measured_count <- ncol(.data) - length(group_vars)
   out <- summ_list(.data, group_vars, .detail, .stat, .mode, .duration_format)
 
-  # 3.5: Drop name column when summarising a single variable
+  # A single measured variable can omit its otherwise redundant name column.
   if (!.name && is.data.frame(out) && "name" %in% names(out)) {
     if (measured_count == 1L) {
       out <- dplyr::select(out, -name)

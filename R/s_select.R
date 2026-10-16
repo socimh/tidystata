@@ -34,7 +34,9 @@
 #' starwars %>%
 #'   s_select(height > 50)
 s_select <- function(.data, ...) {
-  if (missing(...)) return(.data)
+  if (missing(...)) {
+    return(.data)
+  }
 
   errors <- list(select = NULL, transmute = NULL)
   for (mode in c("select", "transmute")) {
@@ -53,7 +55,9 @@ s_select <- function(.data, ...) {
       NULL
     })
     if (is.null(errors[[mode]])) {
-      for (w in warnings) warning(w)
+      for (w in warnings) {
+        warning(w)
+      }
       return(result)
     }
   }

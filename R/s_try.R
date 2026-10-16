@@ -4,8 +4,12 @@
 #' and if the function throws an error, it returns FALSE.
 #' Otherwise, it returns TRUE.
 #' 
-#' @param .fn A function call.
-#' @returns A logical value.
+#' @param .fn An expression to evaluate once.
+#' @returns A single logical value.
+#' @details
+#' Errors are caught without printing their messages; warnings and messages
+#' propagate normally. For compatibility with [try()], a successful expression
+#' that returns an object inheriting from `try-error` also yields `FALSE`.
 #'
 #' @export
 #' @examples
@@ -17,7 +21,6 @@
 #' # This throws an error, so s_try() returns FALSE
 #' s_try(means(1:10))
 s_try <- function(.fn) {
-  try_result <- try(.fn, TRUE)
-  s_try <- !inherits(try_result, "try-error")
-  return(s_try)
+  try_result <- try(.fn, silent = TRUE)
+  !inherits(try_result, "try-error")
 }

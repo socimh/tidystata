@@ -76,7 +76,9 @@ row_min <- function(...) {
 #' @export
 row_median <- function(...) {
   data <- row_input(...)
-  if (nrow(data) == 0L) return(numeric())
+  if (nrow(data) == 0L) {
+    return(numeric())
+  }
   out <- Rfast::rowMedians(as.matrix(data), na.rm = TRUE)
   out[rowSums(!is.na(data)) == 0L] <- NA_real_
   as.double(out)
@@ -86,8 +88,12 @@ row_median <- function(...) {
 #' @export
 row_var <- function(...) {
   data <- row_input(...)
-  if (nrow(data) == 0L) return(numeric())
-  if (ncol(data) == 1L) return(rep(NA_real_, nrow(data)))
+  if (nrow(data) == 0L) {
+    return(numeric())
+  }
+  if (ncol(data) == 1L) {
+    return(rep(NA_real_, nrow(data)))
+  }
   out <- Rfast::rowVars(as.matrix(data), na.rm = TRUE)
   out[rowSums(!is.na(data)) < 2L] <- NA_real_
   as.double(out)
@@ -163,11 +169,14 @@ row_input <- function(..., .numeric = TRUE) {
            paste(names(data)[!valid], collapse = ", "), call. = FALSE)
     }
     # Rfast's na.rm path needs ordinary NA rather than NaN inputs.
-    data <- dplyr::mutate(data, dplyr::across(dplyr::everything(), ~ {
-      values <- as.double(.x)
-      values[is.nan(values)] <- NA_real_
-      values
-    }))
+    data <- dplyr::mutate(
+      data,
+      dplyr::across(dplyr::everything(), function(x) {
+        values <- as.double(x)
+        values[is.nan(values)] <- NA_real_
+        values
+      })
+    )
   }
   data
 }

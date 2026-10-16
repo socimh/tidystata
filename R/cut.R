@@ -65,24 +65,22 @@ cut_quantile <- function(x, n = 4, labels = NULL) {
 #' @export
 cut_length <- function(x, n = 4, labels = NULL) {
   breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = n + 1)
-  cut_breaks(x, breaks = breaks, labels = labels) %>%
-    return()
+  cut_breaks(x, breaks = breaks, labels = labels)
 }
 
 #' @rdname cut
 #' @export
 cut_breaks <- function(x, breaks = NULL, labels = NULL, right = TRUE) {
   if (is.null(breaks)) {
-    breaks <- median(x, na.rm = TRUE)
+    breaks <- stats::median(x, na.rm = TRUE)
   }
-  min <- min(x, na.rm = TRUE)
-  max <- max(x, na.rm = TRUE)
-  if (min == max) {
+  x_min <- min(x, na.rm = TRUE)
+  x_max <- max(x, na.rm = TRUE)
+  if (x_min == x_max) {
     stop("Cannot cut a vector with only one unique value.")
   }
 
-  breaks <- c(min, breaks, max) %>%
-    unique()
+  breaks <- unique(c(x_min, breaks, x_max))
 
   cut(x,
     breaks = breaks,
@@ -90,6 +88,5 @@ cut_breaks <- function(x, breaks = NULL, labels = NULL, right = TRUE) {
     right = right,
     labels = labels,
     ordered_result = TRUE
-  ) %>%
-    return()
+  )
 }

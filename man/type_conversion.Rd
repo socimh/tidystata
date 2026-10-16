@@ -4,7 +4,7 @@
 \alias{type_conversion}
 \alias{as_character}
 \alias{as_numeric}
-\title{Better type conversion}
+\title{Convert vectors for data preparation}
 \usage{
 as_character(.x)
 
@@ -13,9 +13,16 @@ as_numeric(.x)
 \arguments{
 \item{.x}{A vector or matrix.}
 }
+\value{
+\code{as_character()} returns a character vector. \code{as_numeric()} returns
+a double vector; unsupported types such as lists, raw vectors, and complex
+vectors return missing values of the same length. Empty inputs return
+typed empty vectors. Names, dimensions, labels, and units are dropped.
+Parsing failures retain \code{\link[readr:problems]{readr::problems()}} diagnostics on the result.
+Conversion of large \code{integer64} values to double may lose precision and
+emits the underlying conversion warning.
+}
 \description{
-It improves the performance of converting
-several types of variables.
 Character input to \code{as_numeric()} is parsed with \code{\link[readr:parse_number]{readr::parse_number()}},
 preserving its length. Invalid numbers generate parsing warnings. Factors
 return their level codes; labelled numeric variables return their values.
@@ -23,8 +30,14 @@ return their level codes; labelled numeric variables return their values.
 \code{labels} attribute. Without value labels, it uses ordinary character
 conversion, including for tagged missing values.
 }
+\details{
+SPSS user-missing codes remain values in both conversions. Numeric conversion
+preserves tagged missing values. Dates become days since 1970-01-01;
+date-times become seconds since the Unix epoch. Durations and measured
+vectors retain their numeric values in their existing units.
+}
 \examples{
-lifeexp \%>\%
+lifeexp |>
   dplyr::mutate(
     region_chr = as_character(region),
     region_num = as_numeric(region),

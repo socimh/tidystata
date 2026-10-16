@@ -10,8 +10,9 @@
 #' `ds()` or
 #' `dplyr::across()`.
 #'
-#' @param string A character vector of column names
-#' like selecting a varlist in Stata `keep` command.
+#' @param string A single character string containing patterns, separated by
+#' spaces, like selecting a varlist in Stata's `keep` command.
+#' @return An integer vector of positions in the available column names.
 #' @inheritParams tidyselect::starts_with
 #'
 #' @details
@@ -78,14 +79,12 @@ s_match <- function(
     out,
     ignore.case,
     vars = vars
-  ) %>%
-    return()
+  )
 }
 
 # Helper function
 num_range_to_regex <- function(string) {
-  any_range <- string %>%
-    stringr::str_detect("\\[.*\\]")
+  any_range <- stringr::str_detect(string, "\\[.*\\]")
 
   if (!any_range) {
     return(string)
@@ -101,9 +100,7 @@ num_range_to_regex <- function(string) {
     stop("Only one range is allowed.", call. = FALSE)
   }
 
-  letter_range <- start_end %in%
-    c(letters, LETTERS) %>%
-    sum(.) == 2
+  letter_range <- sum(start_end %in% c(letters, LETTERS)) == 2
   if (letter_range) {
     return(string)
   }
