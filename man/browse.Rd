@@ -7,22 +7,38 @@
 browse(.data, ...)
 }
 \arguments{
-\item{.data}{A data frame}
+\item{.data}{A data frame or tibble.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to browse.
-\emph{This argument can be omitted}.}
+Omit to browse all columns. Selection and computed expressions follow
+\code{\link[=s_select]{s_select()}}.}
 }
 \value{
-A character vector of column names.
+The viewed data, invisibly, with its data-frame class preserved.
+With no selection this is the input data; otherwise it is the result of
+\code{\link[=s_select]{s_select()}}. The input is not modified.
 }
 \description{
-Browse columns like Stata's \code{browse} command
+Open all or selected columns in an interactive data viewer. Outside an
+interactive session, no viewer is opened.
+}
+\details{
+Viewing uses \code{\link[tibble:view]{tibble::view()}}. Existing grouping and grouping-key retention
+follow \code{\link[=s_select]{s_select()}}. Assign the invisible return value to keep the viewed
+columns for subsequent analysis. Precompute expressions with side effects
+before passing them to the selection interface.
 }
 \examples{
-browse(starwars)
-browse(starwars, name:mass)
-browse(starwars, s_match("*color"))
+if (interactive()) {
+  browse(starwars)
+  browse(starwars, name:mass)
+  browse(starwars, s_match("*color"))
+
+  # Retain the viewed columns for the next pipeline stage.
+  selected <- browse(starwars, name, height, mass)
+  summ(selected, height, mass)
+}
 }
 \seealso{
 \code{\link[=ds]{ds()}}, \code{\link[=variables]{variables()}}, \code{\link[=codebook]{codebook()}}

@@ -116,7 +116,7 @@ test_that("browse: empty data frame with columns", {
 })
 
 test_that("browse: many columns", {
-  df <- as_tibble(replicate(100, 1:5))
+  df <- as_tibble(replicate(100, 1:5), .name_repair = "minimal")
   names(df) <- paste0("var", 1:100)
   result <- browse(df)
   expect_equal(ncol(result), 100)

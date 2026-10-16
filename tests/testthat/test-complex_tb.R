@@ -122,7 +122,7 @@ test_that("codebook: matrix column handling", {
 })
 
 test_that("codebook: data frame with 50+ variables", {
-  df <- as_tibble(replicate(50, sample(1:10, 100, replace = TRUE)))
+  df <- as_tibble(replicate(50, sample(1:10, 100, replace = TRUE)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:50)
   result <- codebook(df)
   expect_equal(nrow(result), 50)

@@ -1,8 +1,25 @@
 #' Enhanced select() with data-masking
 #'
-#' @inheritParams tab
+#' @param .data A data frame or tibble.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> selections or
+#' <[`data-masking`][args_data_masking]> expressions. Omit to return the input
+#' unchanged.
 #'
-#' @return A tibble
+#' @return The result of [dplyr::select()] when selection succeeds, otherwise
+#' the result of [dplyr::transmute()]. Data-frame classes and grouping follow
+#' the successful operation; a tibble input returns a tibble.
+#'
+#' @details
+#' Selection is attempted first. Its successful result is returned directly,
+#' without trying data masking or repeating the operation. If selection fails,
+#' expressions are evaluated with [dplyr::transmute()]. Warnings from the
+#' successful operation are emitted; warnings from a failed attempt are not.
+#' If both operations fail, the error includes both underlying messages.
+#'
+#' A failed selection can evaluate user code before the data-masking fallback.
+#' For random draws or other expressions with side effects, compute the columns
+#' with [dplyr::mutate()] first, then select their names. Grouping columns are
+#' retained according to dplyr's selection and transformation rules.
 #' @export
 #'
 #' @examples
@@ -17,45 +34,34 @@
 #' starwars %>%
 #'   s_select(height > 50)
 s_select <- function(.data, ...) {
-  select_err  <- NULL
-  mutate_err  <- NULL
-  empty_dots  <- missing(...)
+  if (missing(...)) return(.data)
 
-  select_works <- tryCatch({
-    suppressWarnings(dplyr::select(.data, ...))
-    TRUE
-  }, error = function(e) {
-    select_err <<- conditionMessage(e)
-    FALSE
-  })
-
-  mutate_works <- tryCatch({
-    suppressWarnings(dplyr::transmute(.data, ...))
-    TRUE
-  }, error = function(e) {
-    mutate_err <<- conditionMessage(e)
-    FALSE
-  })
-
-  if (!select_works && !mutate_works && !empty_dots) {
-    # Build a more informative message showing both underlying errors
-    detail <- paste0(
-      "  select() error: ", select_err, "\n",
-      "  mutate() error: ", mutate_err
-    )
-    stop(
-      "Neither <tidy-select> nor <data-masking> recognised the input.\n",
-      detail,
-      call. = FALSE
-    )
-  }
-
-  if (!empty_dots) {
-    if (select_works) {
-      .data <- dplyr::select(.data, ...)
-    } else {
-      .data <- dplyr::transmute(.data, ...)
+  errors <- list(select = NULL, transmute = NULL)
+  for (mode in c("select", "transmute")) {
+    warnings <- list()
+    result <- tryCatch(withCallingHandlers({
+      if (mode == "select") {
+        dplyr::select(.data, ...)
+      } else {
+        dplyr::transmute(.data, ...)
+      }
+    }, warning = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }), error = function(e) {
+      errors[[mode]] <<- conditionMessage(e)
+      NULL
+    })
+    if (is.null(errors[[mode]])) {
+      for (w in warnings) warning(w)
+      return(result)
     }
   }
-  return(.data)
+
+  stop(
+    "Neither <tidy-select> nor <data-masking> recognised the input.\n",
+    "  select() error: ", errors$select, "\n",
+    "  mutate() error: ", errors$transmute,
+    call. = FALSE
+  )
 }

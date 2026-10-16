@@ -21,6 +21,17 @@
 
 ## Improvements and fixes
 
+* Make `codebook()` return a global inventory of selected columns even for
+  grouped input, without reinserting unselected grouping keys. Count SPSS
+  user-missing values and scalar missing list elements consistently; structured
+  columns count complete rows. Preserve Unicode names during inventory creation.
+* Return the first successful `s_select()` operation without rerunning it or
+  probing data masking after successful selection. Preserve warnings from the
+  successful operation. Document fallback evaluation and precomputation for
+  expressions with side effects.
+* Correct `browse()` help: the viewed data are returned invisibly with their
+  data-frame class preserved, and the interactive viewer is omitted in batch use.
+
 * Reduce required imports to 13 packages. Rich formatting with `flextable` is
   optional; import/export and model-formatting dependencies are no longer
   required. Preserve the existing C++ and `Rfast` row-calculation backend.

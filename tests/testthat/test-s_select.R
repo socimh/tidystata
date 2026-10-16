@@ -220,7 +220,7 @@ test_that("s_select: zero row data frame", {
 })
 
 test_that("s_select: many columns", {
-  df <- as_tibble(replicate(100, 1:10))
+  df <- as_tibble(replicate(100, 1:10), .name_repair = "minimal")
   names(df) <- paste0("var", 1:100)
   result <- s_select(df, var1, var50, var100)
   expect_equal(ncol(result), 3)
@@ -360,7 +360,7 @@ test_that("s_select: works with data.table input", {
 # ============================================================================
 
 test_that("s_select: handles wide data frames efficiently", {
-  df <- as_tibble(replicate(1000, rnorm(100)))
+  df <- as_tibble(replicate(1000, rnorm(100)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:1000)
   
   start_time <- Sys.time()

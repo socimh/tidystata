@@ -46,12 +46,20 @@ artifact deletion requires a separately reviewed, explicitly approved list.
 
 ## Current verification
 
-Latest names/metadata acceptance: **15,366 passing expectations across 2,784
-blocks, zero failed expectations or error blocks**, with 19 test warnings and
+Latest codebook/browse acceptance: **16,213 passing expectations across 2,996
+blocks, zero failed expectations or error blocks**, with 15 test warnings and
 one pre-existing empty test skipped. Fresh native installation, source build
 and `R CMD check --no-manual` pass with **Status: OK**, no check errors,
 warnings or notes. Earlier required-dependency smoke evidence remains valid;
-dependencies and exports did not change. See [inspection acceptance and all numbered cases](.opencode/reports/project_status_inspection_acceptance_2026-10-16.md).
+dependencies and exports did not change. See [codebook/browse acceptance and all numbered cases](.opencode/reports/project_status_codebook_browse_acceptance_2026-10-16.md).
+
+codebook() and browse() are locally accepted in the documented/headless scope:
+297 blocks/985 expectations pass with zero failures/errors/uncaptured warnings
+or skips, including 100 numbered scenarios each (200 cases/817 expectations).
+Fixed global grouped inventories, SPSS/list missingness, structured-row counts,
+Unicode names and repeated successful selector execution. Failed selection can
+still execute callbacks before data-masking fallback; precompute random or
+side-effecting expressions with mutate. Actual GUI viewing remains unverified.
 
 ds, ds_as_column, names_as_column, variables and variables_search are locally
 accepted: 548 blocks/1,169 expectations pass without failures/errors/uncaptured
@@ -71,7 +79,7 @@ warnings under Windows LC_CTYPE=C. See the acceptance report for precise limits.
 
 summ() and tabstat() remain locally accepted: all 342 summary blocks and 1,224
 expectations pass. Their [100-case catalogue](.opencode/reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md)
-remains valid. codebook() and browse() are the next inspection functions; minimum-R/multi-platform
+remains valid. Conversion helpers are next; minimum-R/multi-platform
 publication checks and remaining warning/empty-test coverage still remain.
 The first-milestone evidence below is historical.
 
@@ -145,8 +153,10 @@ matching build toolchain; the minimum version has not been exercised here.
 
 ## Next validation milestone
 
-Finish variable inspection with codebook() and browse(), then continue through conversions,
-row helpers, binning and utilities using the function-level acceptance approach.
+Continue with as_character(), as_numeric(), na_if_value() and value_if_na(),
+then row helpers, binning, selector/type helpers and utilities using the
+function-level acceptance approach. Interactive viewer rendering also remains
+a manual validation task.
 
 1. Replace the empty cut_length interval-width test with a meaningful assertion.
 2. Explicitly capture expected warnings and modernize legacy matrix fixtures.

@@ -143,6 +143,29 @@ ranges expand into alternatives; use unanchored patterns such as `item[1-12]`
 for substring matching. Multiple ranges and arbitrary regular expressions are
 outside the supported pattern language.
 
+## Compact inventories and browsing
+
+`codebook()` returns one row per selected variable for the complete input,
+including grouped inputs. It ungroups before selection, so grouping keys are
+included only if selected or if all columns are requested. Counts `n` and
+`unique` exclude missing values using the original column's missingness rules,
+including tagged and SPSS user-missing values. List elements are counted without
+flattening: scalar missing elements are excluded, but `NULL` and empty elements
+remain observed identities. Matrix and nested data-frame columns count complete
+rows and omit rows containing any missing cell. Labels and units remain metadata;
+a zero-column selection returns an empty inventory.
+
+`browse()` opens the selected data through `tibble::view()` interactively and
+returns those data invisibly. In a noninteractive script it returns the data
+without opening a viewer. It returns data, rather than a vector of column names;
+use `ds()` for names. Existing grouping follows `s_select()`.
+
+`s_select()` first tries `dplyr::select()` and uses `dplyr::transmute()` only
+when selection fails. A successful operation is no longer repeated, and its
+warnings are visible. A failed selection can still evaluate user code before
+fallback, so compute random draws and expressions with side effects in a prior
+`mutate()` step, then select the resulting column names.
+
 ## Column summary statistics
 
 `summ()` and `tabstat()` retain numeric and logical columns with no observed

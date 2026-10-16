@@ -79,3 +79,10 @@ docs
 !.opencode/results/inspection-accepted-check.log
 !.opencode/results/inspection-accepted-scenarios.csv
 !.opencode/results/inspection-accepted-examples.log
+
+# Codebook/browse acceptance and shared-selector regression evidence.
+!.opencode/results/codebook-browse-accepted.csv
+!.opencode/results/codebook-browse-accepted-details.csv
+!.opencode/results/codebook-browse-accepted-check.log
+!.opencode/results/codebook-browse-accepted-scenarios.csv
+!.opencode/results/codebook-browse-accepted-examples.log

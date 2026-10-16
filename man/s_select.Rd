@@ -7,21 +7,31 @@
 s_select(.data, ...)
 }
 \arguments{
-\item{.data}{A data frame, data frame extension
-(e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).}
+\item{.data}{A data frame or tibble.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to tabulate.
-
-Both tidyselect (e.g., \code{starts_with()}) and
-data masking (e.g., \code{x_sq = x^2}) are supported.
-See examples below.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> selections or
+<\code{\link[rlang:args_data_masking]{data-masking}}> expressions. Omit to return the input
+unchanged.}
 }
 \value{
-A tibble
+The result of \code{\link[dplyr:select]{dplyr::select()}} when selection succeeds, otherwise
+the result of \code{\link[dplyr:transmute]{dplyr::transmute()}}. Data-frame classes and grouping follow
+the successful operation; a tibble input returns a tibble.
 }
 \description{
 Enhanced select() with data-masking
+}
+\details{
+Selection is attempted first. Its successful result is returned directly,
+without trying data masking or repeating the operation. If selection fails,
+expressions are evaluated with \code{\link[dplyr:transmute]{dplyr::transmute()}}. Warnings from the
+successful operation are emitted; warnings from a failed attempt are not.
+If both operations fail, the error includes both underlying messages.
+
+A failed selection can evaluate user code before the data-masking fallback.
+For random draws or other expressions with side effects, compute the columns
+with \code{\link[dplyr:mutate]{dplyr::mutate()}} first, then select their names. Grouping columns are
+retained according to dplyr's selection and transformation rules.
 }
 \examples{
 starwars \%>\%

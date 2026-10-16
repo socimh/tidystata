@@ -19,8 +19,10 @@
 - [x] Review tab/tab1/tab2 and fre/fre1/fre2, fix reproduced grouping/conversion defects and verify 100 numbered scenarios per export; see [acceptance](reports/project_status_tabulation_acceptance_2026-10-16.md).
 - [x] Regenerate shared help, verify actual output and pass fresh full-suite/build/check after tabulation changes.
 - [x] Review ds, ds_as_column, names_as_column, variables and variables_search with 100 numbered scenarios each; fix query validation/letter-range warnings, regenerate help and pass full checks. See [acceptance](reports/project_status_inspection_acceptance_2026-10-16.md).
-- [ ] Review codebook and browse next, including remaining fixture warnings.
-- [ ] Continue through conversions, row helpers, binning and utilities after codebook/browse.
+- [x] Review codebook and browse with 100 numbered cases each, repair reproduced inventory/shared-selector defects, remove fixture warnings, regenerate help and pass fresh full checks. See [acceptance](reports/project_status_codebook_browse_acceptance_2026-10-16.md).
+- [ ] Validate actual interactive viewer rendering; current browse acceptance is headless/stubbed.
+- [ ] Review conversions next: as_character, as_numeric, na_if_value and value_if_na.
+- [ ] Continue through row helpers, binning, selector/type helpers and utilities.
 - [ ] Complete minimum-R/multi-platform validation before any publication request.
 
 ## Next stabilization milestone
@@ -41,7 +43,8 @@
 - [x] Resolve the eight behavior contracts and fix the reproduced units, summary and naming defects.
 
 - [ ] Replace the skipped empty cut_length test and capture remaining expected warnings outside the accepted summary/tabulation/names families.
-- [ ] Review selector side effects and additional naming boundaries beyond the retained scenarios before release.
+- [x] Remove repeated successful selector execution, retain warning/error behavior and document failed-probe side-effect limits. Preserve codebook name validation.
+- [ ] Complete dedicated selector/type acceptance beyond the retained regressions.
 
 ## Completed first milestone
 

@@ -11,16 +11,38 @@ codebook(.data, ...)
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to include in the codebook.
-\emph{This argument can be omitted}.}
+Omit to include all columns. Selection is attempted first; expressions that
+are not valid selections are evaluated as computed columns by \code{\link[=s_select]{s_select()}}.}
 }
 \value{
-A tibble. The label column is included when at least one selected
-variable has a label attribute; unlabelled variables then have \code{NA} labels.
+An ungrouped tibble with one row per selected variable, in selection
+order. Columns are \code{variable}, optional \code{label}, \code{type}, \code{n}, and \code{unique}.
+\code{n} counts observed values and \code{unique} counts distinct observed values.
+Empty and all-missing columns have zero counts. A zero-column selection
+returns zero rows with \code{variable}, \code{type}, \code{n}, and \code{unique} columns.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-\code{codebook()} is a function to view the
-codebook of a dataset or selected variables.
+Inspect the types, observed counts, distinct observed values, and variable
+labels of a dataset or selected columns.
+}
+\details{
+Counts describe the complete input, irrespective of existing grouping. Data
+are ungrouped before selection, so omitted grouping keys are not reinserted.
+With no selection, grouping-key columns are included like other columns.
+The input data are not modified.
+
+Missingness is determined on the original column before counting. Ordinary
+missing values, \code{NaN}, tagged missing values and SPSS user-missing codes or
+ranges are excluded. List columns are counted by element identity without
+flattening: scalar missing elements are excluded, while \code{NULL} and empty
+elements remain observed values. Matrix and nested data-frame columns count
+complete rows as observations; a row with any missing cell is excluded.
+
+Units are appended to \code{type} when available. Variable labels are read from
+each column's \code{label} attribute, not its value-label mapping. The \code{label}
+column appears only when at least one selected variable has a usable label;
+unlabelled variables then have \code{NA} labels.
 }
 \examples{
 starwars
@@ -34,6 +56,13 @@ codebook(starwars, ends_with("color"))
 codebook(starwars, where(is.numeric))
 
 codebook(lifeexp)
+
+# Save a compact inventory before preparing an analysis sample.
+survey <- tibble::tibble(age = c(30, NA, 45), income = c(2000, 3000, 4000))
+attr(survey$income, "label") <- "Monthly earnings"
+inventory <- codebook(survey, age, income)
+inventory
+codebook(survey, income_thousands = income / 1000)
 
 }
 \seealso{
