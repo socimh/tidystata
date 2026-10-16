@@ -1,143 +1,54 @@
-# Automated Testing Workflows
+# Package verification workflows
 
-This directory contains automation scripts for the statart package testing system.
+Run from the repository root. The current supported workflow is
+[verify_package.py](verify_package.py). It builds native code in a temporary
+source copy, preserves local artifacts, and returns a failure status when
+installation, tests, build or package checks fail.
 
-## Quick Start
+```powershell
+# Full retained test suite.
+python .opencode/workflows/verify_package.py
 
-### Run Tests for a Specific Function
+# One test family.
+python .opencode/workflows/verify_package.py --filter summ
 
-```r
-# Run tests for esttab
-Rscript .opencode/tests/test_esttab_automated.R
+# Fresh native install, suite, source build and R CMD check.
+python .opencode/workflows/verify_package.py --check
 
-# Run tests for summ
-Rscript .opencode/tests/test_summ.R
+# Required-dependency smoke check.
+python .opencode/workflows/verify_package.py --minimal
 
-# Run tests for tab/codebook
-Rscript .opencode/tests/test_tab_codebook.R
+# Current versioned demo reports; preserves historical reports.
+make demo-reports
 ```
 
-### View Test Reports
+The Python workflow invokes the protected Windows R launcher for every R
+command. Any direct Rscript invocation, including the root run_tests.R wrapper,
+must also use that launcher:
 
-All human-readable reports are in `.opencode/reports/`:
-
-```bash
-# View master index
-open .opencode/reports/INDEX.md
-
-# View specific report
-open .opencode/reports/report_esttab_latest.md
-open .opencode/reports/report_summ.md
+```powershell
+python C:/Users/socimh/.codex/scripts/run_r_safe.py -- Rscript run_tests.R summ
 ```
 
-## Directory Structure
+Results are written to .opencode/results. Use --prefix to retain a distinct
+run. Only selected reviewed evidence is versioned; other outputs remain local.
+See [the evidence policy](../results/README.md). The
+[report index](../reports/INDEX.md) distinguishes versioned examples and
+historical reports; [.opencode/QUICK_STATUS.md](../QUICK_STATUS.md) is the
+current status entry point.
 
-```
-.opencode/
-├── reports/                    # Markdown reports (human-readable summaries)
-│   ├── INDEX.md               # Master index of all reports
-│   ├── report_esttab_latest.md
-│   ├── report_summ.md
-│   ├── report_tab.md
-│   ├── report_cut_row.md
-│   └── report_timer_fre.md
-│
-├── tests/                      # Test scripts (.R files)
-│   ├── test_esttab_automated.R
-│   ├── test_summ.R
-│   ├── test_tab_codebook.R
-│   ├── test_cut_row.R
-│   └── test_timer_sselect_fre.R
-│
-└── workflows/                  # Automation scripts
-    ├── esttab_automation.R    # Main orchestrator (legacy)
-    ├── watch_esttab.R         # File watcher daemon
-    └── lib/
-        ├── test_runner.R      # Core test execution
-        ├── error_handler.R    # Error capture & logging
-        └── problem_updater.R  # Auto-update PROBLEMS.md
-```
+make clean is a non-destructive notice. It does not delete reports, results,
+data, compiled files or session state. Review an exact list and obtain
+maintainer approval before any artifact deletion.
 
-## Available Reports
+## Historical tooling
 
-| Report | Function | Scenarios | Status |
-|--------|----------|-----------|--------|
-| [report_esttab_latest.md](../reports/report_esttab_latest.md) | `esttab()` | 26 | ✅ Complete |
-| [report_summ.md](../reports/report_summ.md) | `summ()`, `tabstat()` | 27 | ✅ Complete |
-| [report_tab.md](../reports/report_tab.md) | `tab()`, `tab1()`, `fre()`, `codebook()` | 26 | ✅ Complete |
-| [report_cut_row.md](../reports/report_cut_row.md) | `cut_quantile()`, `row_*` | 22 | ✅ Complete |
-| [report_timer_fre.md](../reports/report_timer_fre.md) | `timer()`, `s_select()`, `fre()` | 22 | ✅ Complete |
+esttab_automation.R, watch_esttab.R and related older tests remain for historical
+reference. They target retired functionality and are not the active package
+verification workflow. Do not source all scripts in .opencode/tests as a test
+runner: that folder also contains historical and specialized scripts.
 
-## Manual Operations
-
-### Run All Tests
-
-```r
-# Run all test scripts
-for (f in list.files(".opencode/tests", pattern="test_.*\\.R", full.names=TRUE)) {
-  message("\n=== Running: ", f, " ===")
-  source(f)
-}
-```
-
-### Check Watcher Status
-
-```r
-source(".opencode/workflows/watch_esttab.R")
-watch_esttab_status()
-```
-
-### Generate New Report
-
-After fixing a function and creating tests:
-
-1. Create test script: `.opencode/tests/test_[function].R`
-2. Run tests and verify all pass
-3. Create markdown report: `.opencode/reports/report_[function].md`
-4. Update `.opencode/reports/INDEX.md`
-5. Commit both files
-
-## Configuration
-
-Edit `watch_esttab.R` to change:
-- `watch_interval`: Check frequency (default: 2 seconds)
-- `esttab_file`: Path to source file
-- `verbose`: Console output level
-
-## Troubleshooting
-
-### "later package not found"
-```r
-install.packages("later")
-```
-
-### "Could not find esttab.R"
-Check file paths and update if needed.
-
-### Tests not running
-Ensure all required packages are installed:
-```r
-install.packages(c("jsonlite", "digest", "dplyr", "lme4", "broom", "broom.mixed"))
-```
-
-### PROBLEMS.md not updating
-Check file permissions or run manually:
-```r
-source(".opencode/workflows/lib/problem_updater.R")
-update_problems_md()
-```
-
-## For Other Agents
-
-If you're fixing an issue:
-
-1. **Find the issue** in `.opencode/PROBLEMS.md`
-2. **Read the report** in `.opencode/reports/report_[function].md` to understand what was tested
-3. **Run the tests**:
-   ```r
-   source(".opencode/tests/test_[function].R")
-   ```
-4. **Fix the issue** in `R/[file].R`
-5. **Re-run tests** to verify all pass
-6. **Update the report** if behavior changed significantly
-7. **Update PROBLEMS.md** to mark issue as resolved
+Old root setup/test/release files and the interactive build scratchpad are
+preserved in [development-history](../../extra_functions/development-history/README.md),
+excluded from package builds. See [DEVELOPMENT.md](../../DEVELOPMENT.md) for
+source locations and the protected execution requirements.

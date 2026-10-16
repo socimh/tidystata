@@ -1,5 +1,12 @@
 # To-do list
 
+## Repository organization
+
+- [x] Review tracked, ignored, historical and package-distributed files without deleting anything; see [cleanup review](reports/project_status_cleanup_review_2026-10-16.md).
+- [x] Archive six obsolete scripts/release notes with byte preservation and build exclusions verified; see [cleanup results](reports/project_status_cleanup_2026-10-16.md).
+- [x] Make clean non-destructive and verify it preserves all reports and artifacts.
+- [ ] Review an exact generated-artifact list before requesting any deletion.
+
 ## Next stabilization milestone
 
 - [x] Repair invalid labelled, incompatible-length, and sampling fixtures.

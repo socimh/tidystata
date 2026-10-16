@@ -9,6 +9,12 @@ See [current evidence](reports/project_status_core_stabilization_2026-10-16.md).
 All previously failing/erroring retained scenarios are resolved without removing
 or disabling coverage; 52 regression blocks were added.
 
+## Repository organization resolved (2026-10-16)
+
+- Six historical scripts/release notes are preserved in extra_functions/development-history. The interactive Build_Package.R scratchpad is absent from the new source tarball; the archive is build-excluded.
+- make clean now removes no files. All prior artifacts remain preserved. See [cleanup verification](reports/project_status_cleanup_2026-10-16.md).
+- Older esttab tooling/duplicate notes remain historical. Optional generated-artifact deletion is deferred pending an exact approved list.
+
 ## Remaining follow-up
 
 - Replace the empty cut_length interval-width test; its skip is missing coverage.

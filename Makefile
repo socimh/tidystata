@@ -28,7 +28,7 @@ help:
 	@echo "  $(YELLOW)make test-full$(RESET)     - Run tests AND generate demo reports"
 	@echo ""
 	@echo "$(GREEN)Utilities:$(RESET)"
-	@echo "  $(YELLOW)make clean$(RESET)         - Remove all generated results and reports"
+	@echo "  $(YELLOW)make clean$(RESET)         - Preserve artifacts; show cleanup guidance"
 	@echo "  $(YELLOW)make list-tests$(RESET)    - List all test files"
 	@echo ""
 	@echo "$(GREEN)Examples:$(RESET)"
@@ -62,14 +62,10 @@ test-%:
 	@echo "$(BLUE)Running test file: test-$*.R$(RESET)"
 	python .opencode/workflows/verify_package.py --filter "$*"
 
-# Clean all generated files
+# Preserve reports, results and local artifacts; deletion needs a reviewed list.
 clean:
-	@echo "$(YELLOW)Cleaning generated files...$(RESET)"
-	rm -f .opencode/results/*_results.Rds
-	rm -f .opencode/results/*_output.txt
-	rm -f .opencode/results/*_previous.Rds
-	rm -f .opencode/reports/report_*.md
-	@echo "$(GREEN)Cleaned all results and reports$(RESET)"
+	@echo "No files removed. Reports, results, datasets and native artifacts are preserved."
+	@echo "Review an exact artifact list and obtain maintainer approval before deleting files."
 
 # List available test files
 list-tests:

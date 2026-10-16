@@ -124,7 +124,7 @@ make test              # Run all testthat tests
 make demo-reports      # Generate reports with actual function output
 make test-full         # Run both tests and demo reports
 make test-<name>       # Run specific test file (e.g., make test-summ)
-make clean             # Remove all generated files
+make clean             # Preserve artifacts; show cleanup guidance
 ```
 
 ### Demo Report Structure

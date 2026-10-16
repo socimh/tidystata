@@ -31,6 +31,19 @@ under extra_functions and excluded from builds and active discovery. See
 [MIGRATION.md](MIGRATION.md) for direct alternatives and breaking changes.
 Retained exploration/preparation helpers remain exported; MIGRATION.md also maps earlier upstream helper removals.
 
+## Repository layout and historical files
+
+Current entry points are this guide, CONTRIBUTING.md, and
+.opencode/QUICK_STATUS.md. Retired implementations remain in extra_functions;
+[historical development files](extra_functions/development-history/README.md)
+now hold the old build scratchpad, exploratory test/dependency scripts and
+0.2.0 release notes. The archive is excluded from package builds.
+
+Keep run_tests.R, README source/output, generated help, bundled datasets and
+native sources. Local docs, IDE state, compiled objects and intermediate
+results remain preserved and ignored by Git. make clean removes no files;
+artifact deletion requires a separately reviewed, explicitly approved list.
+
 ## Current verification
 
 Latest stabilization: **5,617 passing expectations across 1,410 blocks, zero
@@ -79,7 +92,7 @@ collects real test results, and returns a failure status when tests fail.
 Original compiled artifacts and datasets are preserved.
 
 ```powershell
-# Entire retained suite (known legacy failures remain).
+# Entire retained suite.
 python .opencode/workflows/verify_package.py
 
 # Focused milestone regressions, fresh native build, and scenario report.

@@ -21,3 +21,5 @@ Updated 2026-10-16. Development version **0.2.0.9000**.
 Next: replace the empty cut_length test, clarify expected-warning assertions,
 and validate R 4.1 and other platforms before publication. Known ambiguous
 cross-table labels remain explicit errors; see the core report for boundaries.
+
+Repository cleanup completed: six historical files archived byte-for-byte, build scratchpad excluded, and make clean preserves artifacts. Fresh full suite/build/check pass unchanged; see [cleanup verification](reports/project_status_cleanup_2026-10-16.md). Generated artifacts remain on disk.

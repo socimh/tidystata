@@ -41,3 +41,8 @@ docs
 !.opencode/results/stabilization-core-clean-check.log
 !.opencode/results/stabilization-core-minimal-minimal.log
 !.opencode/results/stabilization-core-examples.txt
+
+# Post-cleanup package-content and verification evidence.
+!.opencode/results/cleanup-final.csv
+!.opencode/results/cleanup-final-build.log
+!.opencode/results/cleanup-final-check.log
