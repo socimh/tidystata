@@ -56,5 +56,5 @@ mtcars \%>\%
   regress(mpg20 ~ wt + hp, model = "logit")
 }
 \seealso{
-\code{\link[=tidy_coef]{tidy_coef()}}
+\code{\link[=etable]{etable()}}
 }

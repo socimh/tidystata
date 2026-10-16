@@ -40,146 +40,83 @@ using namespace std;
     return mat;
 }
 
-[[cpp11::register]] writable::doubles row_max_dbl(data_frame tb)
+// Allocate results independently of the input columns and skip missing values.
+writable::doubles row_extreme(data_frame tb, bool maximum)
 {
+    if (tb.size() == 0) stop("Select at least one column.");
     int nrow = tb.nrow();
-    int ncol = tb.size();
-    writable::doubles col;
-    writable::doubles out_vec = tb[0];
-
-    if (ncol == 1)
-    {
-        return out_vec;
-    }
-    else
-    {
-        for (int i = 1; i < ncol; i++)
-        {
-            col = tb[i];
-            for (int j = 0; j < nrow; j++)
-            {
-                double value = col[j];
-                if (out_vec[j] < value)
-                {
-                    out_vec[j] = value;
-                }
+    writable::doubles out(nrow);
+    for (int i = 0; i < nrow; ++i) {
+        double best = NA_REAL;
+        bool observed = false;
+        for (int j = 0; j < tb.size(); ++j) {
+            doubles col = tb[j];
+            double value = col[i];
+            if (std::isnan(value)) continue;
+            if (!observed || (maximum ? value > best : value < best)) {
+                best = value;
+                observed = true;
             }
         }
-        return out_vec;
+        out[i] = best;
     }
+    return out;
+}
+
+[[cpp11::register]] writable::doubles row_max_dbl(data_frame tb)
+{
+    return row_extreme(tb, true);
 }
 
 [[cpp11::register]] writable::doubles row_min_dbl(data_frame tb)
 {
-    int nrow = tb.nrow();
-    int ncol = tb.size();
-    writable::doubles col;
-    writable::doubles out_vec = tb[0];
+    return row_extreme(tb, false);
+}
 
-    if (ncol == 1)
-    {
-        return out_vec;
-    }
-    else
-    {
-        for (int i = 1; i < ncol; i++)
-        {
-            col = tb[i];
-            for (int j = 0; j < nrow; j++)
-            {
-                double value = col[j];
-                if (out_vec[j] > value)
-                {
-                    out_vec[j] = value;
-                }
-            }
+writable::doubles row_total(data_frame tb, bool average)
+{
+    if (tb.size() == 0) stop("Select at least one column.");
+    int nrow = tb.nrow();
+    writable::doubles out(nrow);
+    for (int i = 0; i < nrow; ++i) {
+        double total = 0;
+        int observed = 0;
+        for (int j = 0; j < tb.size(); ++j) {
+            doubles col = tb[j];
+            if (std::isnan(col[i])) continue;
+            total += col[i];
+            ++observed;
         }
-        return out_vec;
+        out[i] = average ? (observed ? total / observed : NA_REAL) : total;
     }
+    return out;
 }
 
 [[cpp11::register]] writable::doubles row_sum_dbl(data_frame tb)
 {
-    int nrow = tb.nrow();
-    int ncol = tb.size();
-    writable::doubles col;
-    writable::doubles out_vec = tb[0];
-
-    if (ncol == 1)
-    {
-        return out_vec;
-    }
-    else
-    {
-        for (int i = 1; i < ncol; i++)
-        {
-            col = tb[i];
-            for (int j = 0; j < nrow; j++)
-            {
-                double value = col[j];
-                out_vec[j] += value;
-            }
-        }
-        return out_vec;
-    }
+    return row_total(tb, false);
 }
 
 [[cpp11::register]] writable::doubles row_mean_dbl(data_frame tb)
 {
-    int nrow = tb.nrow();
-    int ncol = tb.size();
-    writable::doubles col;
-    writable::doubles out_vec = tb[0];
-
-    if (ncol == 1)
-    {
-        return out_vec;
-    }
-    else
-    {
-        for (int i = 1; i < ncol; i++)
-        {
-            col = tb[i];
-            for (int j = 0; j < nrow; j++)
-            {
-                double value = col[j];
-                out_vec[j] += value;
-            }
-        }
-        for (int j = 0; j < nrow; j++)
-        {
-            out_vec[j] /= ncol;
-        }
-        return out_vec;
-    }
+    return row_total(tb, true);
 }
 
 [[cpp11::register]] writable::integers row_unique_dbl(data_frame tb)
 {
+    if (tb.size() == 0) stop("Select at least one column.");
     int nrow = tb.nrow();
-    int ncol = tb.size();
-    std::vector<std::vector<double>> mat(nrow, vector<double>(ncol, 0));
-
-    for (int i = 0; i < ncol; i++)
-    {
-        writable::doubles col = as_cpp<vector<double>>(tb[i]);
-
-        for (int j = 0; j < nrow; j++)
-        {
-            double val = col[j];
-            mat[j][i] = val;
+    writable::integers out(nrow);
+    for (int i = 0; i < nrow; ++i) {
+        std::set<double> values;
+        bool missing = false;
+        for (int j = 0; j < tb.size(); ++j) {
+            doubles col = tb[j];
+            double value = col[i];
+            if (std::isnan(value)) missing = true;
+            else values.insert(value);
         }
+        out[i] = static_cast<int>(values.size()) + (missing ? 1 : 0);
     }
-
-    writable::integers out_vec;
-
-    for (auto row : mat)
-    {
-        sort(row.begin(), row.end());
-        int out = std::unique(row.begin(), row.end()) - row.begin();
-        out_vec.push_back(out);
-        out = 0;
-    }
-
-    return out_vec;
+    return out;
 }

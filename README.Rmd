@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+  github_document:
+    html_preview: false
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -24,12 +26,19 @@ knitr::opts_chunk$set(
 
 [statart](https://socimh.github.io/statart/) is a set of functions that combines Stata-inspired features with tidyverse-style operations.
 
-<!-- These functions are built in the tidyverse framework, including
+The package focuses on exploring and preparing data:
 
-- `codebook()` for codebook (like `codebook` in Stata)
-- `summ()` for summary statistics (like `summarize` in Stata)
-- `tab()`, `tab1()`, and `tab2()` for frequency tables (like `tab`, `tab1`, and `tab2` in Stata)
-- `fre()`, `fre1()`, and `fre2()` for frequency tables with total rows and total columns (like `fre` in Stata) -->
+- `tab()`, `tab1()`, and `tab2()` for frequency tables.
+- `fre()`, `fre1()`, and `fre2()` for frequency tables with totals.
+- `summ()` and `tabstat()` for summary statistics.
+- `codebook()` and `variables()` for variable inspection.
+- `s_select()`, row calculations, conversion helpers, and binning for data preparation.
+
+The `0.2.0.9000` development series retires the import/export, regression-table,
+and detailed-codebook wrappers in preparation for `0.3.0`. See the
+[migration guide](MIGRATION.md) for direct package alternatives and breaking
+changes. This experimental package is undergoing stabilization; see
+[DEVELOPMENT.md](DEVELOPMENT.md) for the verified status and remaining work.
 
 ## Installation
 
@@ -39,15 +48,18 @@ You can install the development version of statart like so:
 devtools::install_github("socimh/statart")
 ```
 
+R 4.1.0 or later and a suitable build toolchain are required to install from
+source. Rich table formatting is optional and requires `flextable`.
+
 ## Example
 
 ### Load the package
 
-I highly recommend using `tidyverse` with `statart` for better performance.
+Load `statart` and the data-manipulation package used in these examples.
 
 ```{r, warning=FALSE, message=FALSE}
 library(statart)
-library(tidyverse)
+library(dplyr)
 ```
 
 ### codebook()
@@ -60,13 +72,14 @@ codebook(lifeexp)
 
 ### summ()
 
-Summarise the numeric variables in `lifeexp`.
+Summarise selected numeric variables in `mtcars`.
 
-```{r, error=TRUE}
-summ(lifeexp)
+```{r}
+summ(mtcars, mpg, wt)
 ```
 
-Not that `region` is a factor variable, so the mean and standard deviation of it may be meaningless.
+Choose numeric variables deliberately: means and standard deviations of factor
+codes may have no substantive interpretation.
 
 ### tab()
 
@@ -76,7 +89,7 @@ Tabulate a single variable:
 tab(starwars, sex)
 ```
 
-`tab1()` tabulates variables one by one as a list, and `s_match()` can select variables in a stata style.
+`tab1()` tabulates variables one by one as a list, and `s_match()` can select variables in a Stata style.
 
 
 ```{r}
@@ -94,9 +107,29 @@ tab2(starwars, sex, gender)
 
 `fre()` family functions simply add total rows (and total columns in `fre2()`) to their `tab()` counterparts.
 
+`fre()` and `fre2()` return tibbles by default. `fre1()` returns a list of tibbles.
+
 ```{r}
 fre(starwars, sex)
 ```
+
+For optional rich formatting, install `flextable` and request it explicitly:
+
+```r
+fre(starwars, sex, .type = "flextable")
+```
+
+### Row calculations and binning
+
+Row helpers return vectors that can be used in `mutate()`:
+
+```{r}
+tibble(a = c(1, NA, 3), b = c(3, NA, 5)) |>
+  mutate(row_average = row_mean(a, b))
+```
+
+`cut_quantile()` keeps equal values in the same group. Ties can reduce the number
+of intervals, with a warning, rather than splitting equal values by row order.
 
 ## Code of Conduct
 

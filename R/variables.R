@@ -30,16 +30,9 @@ variables <- function(.data, ...) {
   out <- .data %>%
     names_as_column()
 
-  label <- Hmisc::contents(.data)$contents %>%
-    tibble::as_tibble() %>%
-    dplyr::select(dplyr::any_of(c("Labels")))
-
-  if (ncol(label) == 1) {
-    out <- out %>%
-      dplyr::bind_cols(
-        label %>%
-          dplyr::rename(label = Labels)
-      )
+  labels <- variable_labels(.data)
+  if (any(!is.na(labels))) {
+    out$label <- unname(labels)
   }
 
   return(out)
@@ -57,18 +50,31 @@ variables_search <- function(.data, string, ...) {
     string <- stringr::str_glue("(?i).*{string}.*")
   }
 
-  if ("label" %in% colnames(.data)) {
-    variables(.data, ...) %>%
+  out <- variables(.data, ...)
+  if ("label" %in% colnames(out)) {
+    out %>%
       dplyr::filter(
         stringr::str_detect(name, string) |
           stringr::str_detect(label, string)
       ) %>%
       return()
   } else {
-    variables(.data, ...) %>%
+    out %>%
       dplyr::filter(
         stringr::str_detect(name, string)
       ) %>%
       return()
   }
+}
+
+# Variable labels are column attributes, independent of the values' classes.
+variable_labels <- function(.data) {
+  vapply(.data, function(x) {
+    label <- attr(x, "label", exact = TRUE)
+    if (length(label) != 1L || is.na(label) || !nzchar(as.character(label))) {
+      NA_character_
+    } else {
+      as.character(label)
+    }
+  }, character(1))
 }

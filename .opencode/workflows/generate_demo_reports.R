@@ -1,0 +1,72 @@
+# Generate versioned actual-output reports, preserving historical reports.
+if (!nzchar(Sys.getenv("STATART_DEMO_SOURCE"))) {
+  status <- system2("python", c(".opencode/workflows/verify_package.py", "--demos",
+                                "--prefix", ".opencode/results/demos"))
+  quit(status = status)
+}
+reports_dir <- Sys.getenv("STATART_REPORT_DIR", ".opencode/reports")
+dir.create(reports_dir, recursive = TRUE, showWarnings = FALSE)
+version <- read.dcf("DESCRIPTION")[1, "Version"]
+demo_files <- list.files(".opencode/demos", pattern = "^demo_.*[.]R$", full.names = TRUE)
+func_descriptions <- c(
+  browse = "Browse data", codebook = "Variable metadata", cut = "Numeric bins",
+  fre = "Frequencies and totals", row_egen = "Row calculations",
+  s_select = "Selection and expressions", summ = "Summary statistics",
+  tab = "Frequency tables", tab1 = "Separate frequency tables", timer = "Timing"
+)
+all_reports <- list()
+for (file in demo_files) {
+  name <- sub("[.]R$", "", sub("^demo_", "", basename(file)))
+  failure <- NULL
+  output <- capture.output({
+    tryCatch(withCallingHandlers({
+      source(file, local = TRUE, encoding = "UTF-8")
+    }, message = function(m) {
+      cat(conditionMessage(m), "\n")
+      invokeRestart("muffleMessage")
+    }, warning = function(w) {
+      cat("Warning: ", conditionMessage(w), "\n", sep = "")
+      invokeRestart("muffleWarning")
+    }), error = function(e) {
+      failure <<- conditionMessage(e)
+      cat("ERROR: ", failure, "\n", sep = "")
+    })
+  })
+  if (sum(grepl("^```", output)) %% 2L) output <- c(output, "```")
+  report_file <- sprintf("report_%s_%s.md", name, version)
+  status <- if (is.null(failure)) "PASS" else "FAIL"
+  writeLines(enc2utf8(c(
+    sprintf("# Function: %s()", name), "",
+    sprintf("**Version:** %s | **Generated:** %s | **Status:** %s",
+            version, format(Sys.time(), "%Y-%m-%d %H:%M:%S"), status),
+    "", output
+  )), file.path(reports_dir, report_file), useBytes = TRUE)
+  all_reports[[name]] <- list(file = report_file, status = status,
+                              examples = sum(grepl("^## Example", output)))
+  cat(name, status, "\n")
+}
+index <- c(
+  "# Function Reports Index", "",
+  sprintf("Current development version: %s. Reports contain actual console output.", version),
+  "A passing demo is not a passing full package test suite.", "",
+  "| Function | Description | Examples | Status | Report |",
+  "| --- | --- | ---: | --- | --- |"
+)
+for (name in names(all_reports)) {
+  item <- all_reports[[name]]
+  description <- func_descriptions[[name]]
+  index <- c(index, sprintf("| %s | %s | %s | %s | [View](%s) |",
+                           name, description, item$examples, item$status, item$file))
+}
+reviews <- list.files(reports_dir, pattern = "^(project_status|milestone_).*\\.md$")
+index <- c(index, "", "## Development reviews", "",
+           sprintf("- [%s](%s)", reviews, reviews), "", "## Historical reports", "")
+history <- setdiff(list.files(reports_dir, pattern = "^report_.*[.]md$"),
+                   vapply(all_reports, function(x) x$file, character(1)))
+index <- c(index, sprintf("- [%s](%s)", history, history), "",
+           "## Regeneration", "", "Run `make demo-reports` from the project root.",
+           "The workflow builds native code in a fresh temporary copy and preserves historical reports.")
+writeLines(enc2utf8(index), file.path(reports_dir, "INDEX.md"), useBytes = TRUE)
+if (any(vapply(all_reports, function(x) x$status == "FAIL", logical(1)))) {
+  quit(status = 1L)
+}

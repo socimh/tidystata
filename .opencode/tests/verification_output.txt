@@ -1,0 +1,475 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'rlang'
+
+The following objects are masked from 'package:purrr':
+
+    %@%, flatten, flatten_chr, flatten_dbl, flatten_int, flatten_lgl,
+    flatten_raw, invoke, splice
+
+
+Attaching package: 'pillar'
+
+The following object is masked from 'package:dplyr':
+
+    dim_desc
+
+
+Attaching package: 'vctrs'
+
+The following object is masked from 'package:tibble':
+
+    data_frame
+
+The following object is masked from 'package:dplyr':
+
+    data_frame
+
+Loading required package: Matrix
+
+Attaching package: 'Matrix'
+
+The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack
+
+
+========================================
+MASTER VERIFICATION: ACTUAL OUTPUTS
+========================================
+
+
+
+========================================
+PART 1: summ() / tabstat()
+========================================
+
+--- Test 1.1: Basic numeric summary ---
+# A tibble: 1 × 8
+  name  type      n unique   min  mean    sd   max
+  <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
+1 mpg   dbl      32     25  10.4  20.1  6.03  33.9
+
+--- Test 1.2: Multiple numeric variables ---
+# A tibble: 3 × 8
+  name  type      n unique   min   mean     sd    max
+  <chr> <chr> <int>  <int> <dbl>  <dbl>  <dbl>  <dbl>
+1 mpg   dbl      32     25 10.4   20.1   6.03   33.9 
+2 hp    dbl      32     22 52    147.   68.6   335   
+3 wt    dbl      32     29  1.51   3.22  0.978   5.42
+
+--- Test 1.3: Group by one variable ---
+# A tibble: 3 × 9
+    cyl name  type      n unique   min  mean    sd   max
+  <dbl> <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
+1     6 mpg   dbl       7      6  17.8  19.7  1.45  21.4
+2     4 mpg   dbl      11      9  21.4  26.7  4.51  33.9
+3     8 mpg   dbl      14     12  10.4  15.1  2.56  19.2
+
+--- Test 1.4: tabstat() wrapper ---
+# A tibble: 30 × 4
+     cyl name  type     mean
+   <dbl> <chr> <chr>   <dbl>
+ 1     6 mpg   dbl    19.7  
+ 2     6 disp  dbl   183.   
+ 3     6 hp    dbl   122.   
+ 4     6 drat  dbl     3.59 
+ 5     6 wt    dbl     3.12 
+ 6     6 qsec  dbl    18.0  
+ 7     6 vs    dbl     0.571
+ 8     6 am    dbl     0.429
+ 9     6 gear  dbl     3.86 
+10     6 carb  dbl     3.43 
+# ℹ 20 more rows
+
+--- Test 1.5: Custom .stat selection ---
+# A tibble: 1 × 4
+  name  type   mean    sd
+  <chr> <chr> <dbl> <dbl>
+1 mpg   dbl    20.1  6.03
+
+--- Test 1.6: .detail = TRUE ---
+# A tibble: 1 × 18
+  name  type      n unique miss_n valid_pct   min    q1 median  mean   mad    sd
+  <chr> <chr> <int>  <int>  <int>     <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>
+1 mpg   dbl      32     25      0         1  10.4  15.4   19.2  20.1  5.41  6.03
+# ℹ 6 more variables: q3 <dbl>, max <dbl>, iqr <dbl>, skew <dbl>,
+#   kurtosis <dbl>, se <dbl>
+
+--- Test 2.1: Inf/-Inf handling ---
+# A tibble: 1 × 8
+  name  type      n unique   min  mean    sd   max
+  <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
+1 x     dbl       5      5  -Inf   NaN   NaN   Inf
+
+--- Test 3.1: Date formatting (table mode) ---
+  name type n unique        min       mean       sd        max
+1    d date 3      3 2020-01-01 2021-06-26 548 days 2022-12-31
+
+--- Test 3.1b: Date formatting (list mode with long duration) ---
+# A tibble: 1 × 8
+  name  type      n unique min        mean       sd       max       
+  <chr> <chr> <int>  <int> <date>     <date>     <chr>    <date>    
+1 d     date      3      3 2020-01-01 2021-06-26 548 days 2022-12-31
+
+Structure:
+tibble [1 × 8] (S3: tbl_df/tbl/data.frame)
+ $ name  : chr "d"
+ $ type  : chr "date"
+ $ n     : int 3
+ $ unique: int 3
+ $ min   : Date[1:1], format: "2020-01-01"
+ $ mean  : Date[1:1], format: "2021-06-26"
+ $ sd    : chr "548 days"
+ $ max   : Date[1:1], format: "2022-12-31"
+NULL
+
+--- Test 3.3: POSIXct formatting ---
+# A tibble: 1 × 8
+  name  type         n unique min                 mean                sd      
+  <chr> <chr>    <int>  <int> <dttm>              <dttm>              <chr>   
+1 dt    datetime     2      2 2020-01-01 12:00:00 2020-09-22 22:15:00 375 days
+# ℹ 1 more variable: max <dttm>
+
+--- Test 4.1: .na.rm=TRUE ---
+# A tibble: 2 × 9
+  g     name  type      n unique   min  mean     sd   max
+  <chr> <chr> <chr> <int>  <int> <dbl> <dbl>  <dbl> <dbl>
+1 a     x     dbl       2      2     1   1.5  0.707     2
+2 b     x     dbl       1      1     4   4   NA         4
+
+--- Test 5.1: .name=FALSE ---
+# A tibble: 1 × 7
+  type      n unique   min  mean    sd   max
+  <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
+1 dbl      32     25  10.4  20.1  6.03  33.9
+
+--- Test 6.4: Zero-variance column ---
+# A tibble: 1 × 8
+  name  type      n unique   min  mean    sd   max
+  <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
+1 x     dbl      10      1     5     5     0     5
+
+
+========================================
+PART 2: tab() / tab1() / fre() / codebook()
+========================================
+
+--- Test 2.1a: tab1 with boolean expression ---
+$tall
+# A tibble: 3 × 6
+  value     n percent   cum valid valid_cum
+  <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
+1 FALSE    42   48.3   48.3  51.9      51.9
+2 TRUE     39   44.8   93.1  48.1     100  
+3 NA        6    6.90 100    NA        NA  
+
+
+--- Test 2.1d: tab1 with column names ---
+$sex
+# A tibble: 5 × 6
+  value              n percent   cum valid valid_cum
+  <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
+1 female            16   18.4   18.4 19.3       19.3
+2 hermaphroditic     1    1.15  19.5  1.20      20.5
+3 male              60   69.0   88.5 72.3       92.8
+4 none               6    6.90  95.4  7.23     100  
+5 <NA>               4    4.60 100   NA         NA  
+
+$gender
+# A tibble: 3 × 6
+  value         n percent   cum valid valid_cum
+  <chr>     <int>   <dbl> <dbl> <dbl>     <dbl>
+1 feminine     17   19.5   19.5  20.5      20.5
+2 masculine    66   75.9   95.4  79.5     100  
+3 <NA>          4    4.60 100    NA        NA  
+
+
+--- Test G1: tab basic usage ---
+# A tibble: 5 × 6
+  sex                n percent   cum valid valid_cum
+  <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
+1 female            16   18.4   18.4 19.3       19.3
+2 hermaphroditic     1    1.15  19.5  1.20      20.5
+3 male              60   69.0   88.5 72.3       92.8
+4 none               6    6.90  95.4  7.23     100  
+5 <NA>               4    4.60 100   NA         NA  
+
+--- Test G3: tab with multiple vars ---
+# A tibble: 6 × 7
+  sex            gender        n percent   cum valid valid_cum
+  <chr>          <chr>     <int>   <dbl> <dbl> <dbl>     <dbl>
+1 female         feminine     16   18.4   18.4 19.3       19.3
+2 hermaphroditic masculine     1    1.15  19.5  1.20      20.5
+3 male           masculine    60   69.0   88.5 72.3       92.8
+4 none           feminine      1    1.15  89.7  1.20      94.0
+5 none           masculine     5    5.75  95.4  6.02     100  
+6 <NA>           <NA>          4    4.60 100   NA         NA  
+
+--- Test G4: tab2 cross-tabulation ---
+# A tibble: 5 × 4
+  `sex \\ gender` feminine masculine  `NA`
+  <chr>              <int>     <int> <int>
+1 female                16         0     0
+2 hermaphroditic         0         1     0
+3 male                   0        60     0
+4 none                   1         5     0
+5 <NA>                   0         0     4
+
+--- Test G5: fre with Total row ---
+# A tibble: 7 × 6
+  sex                n percent   cum  valid valid_cum
+  <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
+1 female            16   18.4   18.4  19.3       19.3
+2 hermaphroditic     1    1.15  19.5   1.20      20.5
+3 male              60   69.0   88.5  72.3       92.8
+4 none               6    6.90  95.4   7.23     100  
+5 Valid Total       83   95.4   NA   100         NA  
+6 <NA>               4    4.60 100    NA         NA  
+7 Total             87  100     NA    NA         NA  
+
+--- Test 2.3a: Missing NA rows at bottom ---
+# A tibble: 6 × 7
+  g     x         n percent   cum valid valid_cum
+  <chr> <chr> <int>   <dbl> <dbl> <dbl>     <dbl>
+1 x     a         1    33.3  33.3    50        50
+2 x     b         1    33.3  66.7    50       100
+3 x     <NA>      1    33.3 100      NA        NA
+4 y     a         1    33.3  33.3    50        50
+5 y     b         1    33.3  66.7    50       100
+6 y     <NA>      1    33.3 100      NA        NA
+
+--- Test 2.5a: .desc=TRUE ---
+# A tibble: 5 × 6
+  sex                n percent   cum valid valid_cum
+  <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
+1 male              60   69.0   69.0 72.3       72.3
+2 female            16   18.4   87.4 19.3       91.6
+3 none               6    6.90  94.3  7.23      98.8
+4 hermaphroditic     1    1.15  95.4  1.20     100  
+5 <NA>               4    4.60 100   NA         NA  
+
+--- Test C1: codebook basic output ---
+# A tibble: 14 × 4
+   variable   type          n unique
+   <chr>      <chr>     <int>  <int>
+ 1 name       character    87     87
+ 2 height     integer      81     45
+ 3 mass       double       59     38
+ 4 hair_color character    82     11
+ 5 skin_color character    87     31
+ 6 eye_color  character    87     15
+ 7 birth_year double       43     36
+ 8 sex        character    83      4
+ 9 gender     character    83      2
+10 homeworld  character    77     48
+11 species    character    83     37
+12 films      list         87     24
+13 vehicles   list         87     11
+14 starships  list         87     16
+
+--- Test C3: codebook with tidyselect ---
+# A tibble: 3 × 4
+  variable   type          n unique
+  <chr>      <chr>     <int>  <int>
+1 hair_color character    82     11
+2 skin_color character    87     31
+3 eye_color  character    87     15
+
+--- Test C4: codebook with numeric filter ---
+# A tibble: 3 × 4
+  variable   type        n unique
+  <chr>      <chr>   <int>  <int>
+1 height     integer    81     45
+2 mass       double     59     38
+3 birth_year double     43     36
+
+
+========================================
+PART 3: esttab()
+========================================
+
+--- Test 1.1: Simple linear regression ---
+# A tibble: 2 × 3
+  term        coef             star 
+  <chr>       <glue>           <chr>
+1 (Intercept) 37.285***
+(1.878) ***  
+2 wt          -5.344***
+(0.559) ***  
+
+--- Test 1.2: Multiple regression ---
+# A tibble: 4 × 3
+  term        coef             star 
+  <chr>       <glue>           <chr>
+1 (Intercept) 37.106***
+(2.111) "***"
+2 wt          -3.801**
+(1.066)  "**" 
+3 hp          -0.031*
+(0.011)   "*"  
+4 disp        -0.001
+(0.010)    ""   
+
+--- Test 1.3: Logistic regression ---
+# A tibble: 3 × 3
+  term        coef            star 
+  <chr>       <glue>          <chr>
+1 (Intercept) 25.887*
+(12.194) "*"  
+2 wt          -6.416*
+(2.547)  "*"  
+3 mpg         -0.324
+(0.239)   ""   
+
+--- Test 1.4: Linear mixed effects (lmer) ---
+# A tibble: 4 × 5
+  term            coef               star  effect   group   
+  <chr>           <glue>             <chr> <chr>    <chr>   
+1 (Intercept)     254.819***
+(10.524) "***" fixed    <NA>    
+2 Days            9.023***
+(0.989)    "***" fixed    <NA>    
+3 sd__(Intercept) 38.860
+()           ""    ran_pars Subject 
+4 sd__Observation 27.424
+()           ""    ran_pars Residual
+
+--- Test 1.6: Regression with factors ---
+# A tibble: 4 × 3
+  term         coef             star 
+  <chr>        <glue>           <chr>
+1 (Intercept)  33.991***
+(1.888) ***  
+2 wt           -3.206***
+(0.754) ***  
+3 factor(cyl)6 -4.256**
+(1.386)  **   
+4 factor(cyl)8 -6.071***
+(1.652) ***  
+
+--- Test 3.4: Statistics n.obs and r.squared ---
+# A tibble: 4 × 3
+  term        coef             star 
+  <chr>       <glue>           <chr>
+1 (Intercept) 37.285***
+(1.878) "***"
+2 wt          -5.344***
+(0.559) "***"
+3 n.obs       32               ""   
+4 r.squared   0.753            ""   
+
+--- Test 3.1: Custom format ---
+# A tibble: 2 × 3
+  term        coef           star 
+  <chr>       <glue>         <chr>
+1 (Intercept) 37.285 (1.878) ***  
+2 wt          -5.344 (0.559) ***  
+
+
+========================================
+PART 4: cut_quantile() / row functions
+========================================
+
+--- Test 4.1a: cut_quantile heavy ties ---
+
+ 1  2 
+50 50 
+
+--- Test 4.1c: cut_quantile normal case ---
+
+   [1,25.8] (25.8,50.5] (50.5,75.2]  (75.2,100] 
+         25          25          25          25 
+
+--- Test 4.1e: cut_quantile with NA ---
+
+   [1,25.2] (25.2,49.5] (49.5,73.8]   (73.8,98]        <NA> 
+         25          24          24          25           2 
+
+--- Test R1: row_min on tibble ---
+[1] 1 2 1
+
+--- Test R2: row_max on tibble ---
+[1] 3 3 1
+
+--- Test R3: row_mean ---
+[1] 2.666667 2.666667 1.000000
+
+--- Test R4: row_sum ---
+[1] 8 8 3
+
+--- Test R5: row_miss ---
+[1] 1 1 1
+
+--- Test R6: row_non_miss ---
+[1] 2 2 2
+
+
+========================================
+PART 5: timer() / s_select() / fre()
+========================================
+
+--- Test T1: timer sub-second ---
+Time spent: 0.106s
+
+--- Test T3: timer minutes ---
+
+--- Test S3: s_select with valid columns ---
+  a  b
+1 1  6
+2 2  7
+3 3  8
+4 4  9
+5 5 10
+
+--- Test S4: s_select with expressions ---
+  a  d
+1 1 12
+2 2 14
+3 3 16
+4 4 18
+5 5 20
+
+--- Test S5: s_select empty returns full data ---
+  a  b  c
+1 1  6 11
+2 2  7 12
+3 3  8 13
+4 4  9 14
+5 5 10 15
+
+--- Test F2: fre Total row ---
+    cyl  n percent     cum  valid valid_cum
+1     4 11  34.375  34.375 34.375    34.375
+2     6  7  21.875  56.250 21.875    56.250
+3     8 14  43.750 100.000 43.750   100.000
+4 Total 32 100.000      NA     NA        NA
+
+--- Test F7: fre with .by group ---
+# A tibble: 9 × 7
+    cyl gear      n percent    cum valid valid_cum
+  <dbl> <chr> <int>   <dbl>  <dbl> <dbl>     <dbl>
+1     4 3         1    9.09   9.09  9.09      9.09
+2     4 4         8   72.7   81.8  72.7      81.8 
+3     4 5         2   18.2  100    18.2     100   
+4     6 3         2   28.6   28.6  28.6      28.6 
+5     6 4         4   57.1   85.7  57.1      85.7 
+6     6 5         1   14.3  100    14.3     100   
+7     8 3        12   85.7   85.7  85.7      85.7 
+8     8 5         2   14.3  100    14.3     100   
+9    NA Total    32  100     NA    NA        NA   
+
+
+========================================
+VERIFICATION COMPLETE
+========================================

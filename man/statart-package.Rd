@@ -2,25 +2,16 @@
 % Please edit documentation in R/statart-package.R, R/statart.R
 \docType{package}
 \name{statart-package}
-\alias{statart}
 \alias{statart-package}
 \title{statart: Tidy Functions with Stata Functionality}
 \description{
-To learn more about statart, start with the vignettes:
-\code{browseVignettes(package = "statart")}
+Stata-inspired tools for frequency tables, summary statistics,
+variable inspection, column selection, row calculations, and binning.
+Use \code{\link[=tab]{tab()}}, \code{\link[=summ]{summ()}}, and \code{\link[=codebook]{codebook()}} to start exploring a dataset.
 
-To learn more about statart, start with the vignettes:
-\code{browseVignettes(package = "statart")}
+Stata-inspired tools for exploring and preparing data in R. Provides frequency tables, summary statistics, variable inspection, column selection, row calculations, and binning with tidyverse-style interfaces and support for labelled data.
 }
 \seealso{
-Useful links:
-\itemize{
-  \item \url{https://github.com/socimh/statart}
-  \item \url{https://socimh.github.io/statart/}
-  \item Report bugs at \url{https://github.com/socimh/statart/issues}
-}
-
-
 Useful links:
 \itemize{
   \item \url{https://github.com/socimh/statart}
@@ -31,6 +22,11 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Minghong Shen \email{mhshenaa@connect.ust.hk} [copyright holder]
+
+Authors:
+\itemize{
+  \item Minghong Shen \email{mhshenaa@connect.ust.hk} [copyright holder]
+}
 
 }
 \keyword{internal}

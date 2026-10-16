@@ -1,16 +1,29 @@
 Package: statart
 Title: Tidy Functions with Stata Functionality
-Version: 0.2.0
+Version: 0.2.0.9000
 Authors@R: 
     person("Minghong", "Shen", , "mhshenaa@connect.ust.hk", role = c("aut", "cre", "cph"))
-Description: Enhanced versions of core Stata functions like tab(), fre(), summ(), codebook(), and row_mean(), among others. Designed to work smoothly with tidyverse packages, it also includes functions for data import/export, regression, plotting, and other useful tools.
+Description: Stata-inspired tools for exploring and preparing data in R.
+    Provides frequency tables, summary statistics, variable inspection,
+    column selection, row calculations, and binning with tidyverse-style
+    interfaces and support for labelled data.
 License: MIT + file LICENSE
 Suggests: 
-    testthat (>= 3.0.0)
+    bit64,
+    testthat (>= 3.0.0),
+    data.table,
+    flextable,
+    ggplot2,
+    hms,
+    knitr,
+    lifecycle,
+    rmarkdown,
+    roxygen2,
+    sf,
+    units
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
 Imports: 
     magrittr,
     tidyselect,
@@ -22,33 +35,14 @@ Imports:
     rlang,
     haven,
     purrr,
-    ggplot2,
     pillar,
-    hms,
-    flextable,
-    Hmisc,
-    datawizard,
     readr,
-    readxl,
-    vroom,
-    arrow,
-    jsonlite,
-    rvest,
-    openxlsx,
-    htmlTable,
-    officer,
-    kableExtra,
-    Rfast,
-    broom,
-    broom.mixed,
-    lme4,
-    nnet,
-    ordinal,
-    lifecycle
+    Rfast
 URL: https://github.com/socimh/statart, https://socimh.github.io/statart/
 BugReports: https://github.com/socimh/statart/issues
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 LazyData: true
 LinkingTo: 
     cpp11
+Config/roxygen2/version: 8.0.0

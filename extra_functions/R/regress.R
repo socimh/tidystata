@@ -19,7 +19,7 @@
 #'
 #' @return Return the regression results as a list or a tibble.
 #'
-#' @seealso [tidy_coef()]
+#' @seealso [etable()]
 #'
 #' @name regress
 #' @examples

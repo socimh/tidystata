@@ -10,8 +10,8 @@ s_select(.data, ...)
 \item{.data}{A data frame, data frame extension
 (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).}
 
-\item{...}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[=args_data_masking]{data-masking}}> Variables to tabulate.
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to tabulate.
 
 Both tidyselect (e.g., \code{starts_with()}) and
 data masking (e.g., \code{x_sq = x^2}) are supported.

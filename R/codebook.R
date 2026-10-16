@@ -5,18 +5,13 @@
 #' `codebook()` is a function to view the
 #' codebook of a dataset or selected variables.
 #'
-#' `codebook_detail()` would show more detailed information.
-#' It is a wrapper of `datawizard::data_codebook()` with a better output format.
-#'
 #' @param .data The input data (data frame or tibble).
 #' @param ...  <[`tidy-select`][dplyr_tidy_select]> or
 #' <[`data-masking`][args_data_masking]> Variables to include in the codebook.
 #' *This argument can be omitted*.
-#' @param .type The output type. Default for `codebook_detail()` is `"flextable"`.
-#' @param n The number of rows to display. Default is `Inf`.
-#' @inheritParams datawizard::data_codebook
 #'
-#' @return  A tibble or a flextable.
+#' @return A tibble. The label column is included when at least one selected
+#' variable has a label attribute; unlabelled variables then have `NA` labels.
 #' @name codebook
 #' @seealso [ds()], [variables()], [browse()]
 #'
@@ -33,11 +28,6 @@
 #'
 #' codebook(lifeexp)
 #'
-#' # codebook_detail() is less stable than codebook().
-#' # Some column types may not be recognized.
-#' lifeexp %>%
-#'  dplyr::select(-region) %>%
-#'  codebook_detail()
 
 #' @rdname codebook
 #' @export
@@ -45,6 +35,12 @@ codebook <- function(.data, ...) {
   # if ... is empty, select all variables
   if (!missing(...)) {
     .data <- s_select(.data, ...)
+  }
+  if (ncol(.data) == 0L) {
+    return(tibble::tibble(
+      variable = character(), type = character(),
+      n = integer(), unique = integer()
+    ))
   }
 
   out <- dplyr::summarise(
@@ -65,53 +61,14 @@ codebook <- function(.data, ...) {
     ) %>%
     dplyr::select(-unit)
 
-  contents <- Hmisc::contents(.data)$contents %>%
-    tibble::as_tibble() %>%
-    dplyr::select(dplyr::any_of(c("Labels")))
-
-  if (ncol(contents) == 1) {
-    out <- out %>%
-      dplyr::bind_cols(
-        contents %>%
-          dplyr::rename(label = Labels)
-      ) %>%
-      dplyr::relocate(label, .after = variable)
+  labels <- variable_labels(.data)
+  if (any(!is.na(labels))) {
+    out$label <- unname(labels[out$variable])
+    out <- dplyr::relocate(out, label, .after = variable)
   }
 
   return(out)
 }
-
-#' @rdname codebook
-#' @export
-codebook_detail <- function(.data, ..., .type = c("flextable", "tibble"), n = Inf, max_values = 10, range_at = 6, verbose = TRUE) {
-  # if ... is empty, select all variables
-  if (!missing(...)) {
-    .data <- s_select(.data, ...)
-  }
-
-  out <- .data %>%
-    datawizard::data_codebook(
-      max_values = max_values,
-      range_at = range_at,
-      verbose = verbose
-    ) %>%
-    tibble::as_tibble() %>%
-    dplyr::rename_with(
-      stringr::str_to_lower
-    ) %>%
-    dplyr::rename_with(
-      ~ stringr::str_replace_all(., " ", "_")
-    ) %>%
-    dplyr::rename(row_id = .row_id)
-
-  if (.type[1] == "flextable") {
-    flextable::as_flextable(out, max_row = n) %>%
-      return()
-  } else {
-    print(out, n = n)
-  }
-}
-
 
 # Helper function:
 codebook_var <- function(var) {

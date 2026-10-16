@@ -1,0 +1,152 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'data.table'
+
+The following objects are masked from 'package:dplyr':
+
+    between, first, last
+
+Warning message:
+package 'data.table' was built under R version 4.4.3 
+
+========================================
+NEW FEATURES VERIFICATION
+========================================
+
+
+========================================
+TEST 1: List Mode (Default)
+========================================
+A list is returned as statistics are heterogeneous.FALSE
+
+List mode result:
+$numeric
+# A tibble: 2 × 8
+  name  type      n unique   min   mean    sd    max
+  <chr> <chr> <int>  <int> <dbl>  <dbl> <dbl>  <dbl>
+1 num1  int      10     10  1     5.5   3.03  10    
+2 num2  dbl      11     11 -2.32 -0.549 0.837  0.716
+
+$date
+# A tibble: 1 × 8
+  name     type      n unique min        mean       sd     max       
+  <chr>    <chr> <int>  <int> <date>     <date>     <chr>  <date>    
+1 date_var date     10     10 2020-01-01 2020-01-05 3 days 2020-01-10
+
+$datetime
+# A tibble: 1 × 8
+  name         type       n unique min                 mean                sd   
+  <chr>        <chr>  <int>  <int> <dttm>              <dttm>              <chr>
+1 datetime_var datet…    10     10 2020-01-01 12:00:00 2020-01-06 00:00:00 3 da…
+# ℹ 1 more variable: max <dttm>
+
+
+========================================
+TEST 2: Table Mode
+========================================
+
+Table mode result:
+          name type  n unique              min             mean     sd
+1         num1  int 10     10             1.00           5.5000 3.0277
+2         num2  dbl 11     11            -2.32          -0.5489 0.8373
+3     date_var date 10     10       2020-01-01       2020-01-05 3 days
+4 datetime_var dttm 10     10 2020-01-01 12:00 2020-01-06 00:00 3 days
+               max
+1          10.0000
+2           0.7159
+3       2020-01-10
+4 2020-01-10 12:00
+
+========================================
+TEST 3: Duration Format - Long
+========================================
+
+Long format (should show 'X days'):
+# A tibble: 1 × 8
+  name     type      n unique min        mean       sd     max       
+  <chr>    <chr> <int>  <int> <date>     <date>     <chr>  <date>    
+1 date_var date     10     10 2020-01-01 2020-01-05 3 days 2020-01-10
+
+========================================
+TEST 4: Duration Format - Compact
+========================================
+
+Compact format (should show 'Xd'):
+# A tibble: 1 × 8
+  name     type      n unique min        mean       sd    max       
+  <chr>    <chr> <int>  <int> <date>     <date>     <chr> <date>    
+1 date_var date     10     10 2020-01-01 2020-01-05 3d    2020-01-10
+
+========================================
+TEST 5: data.frame Input → data.frame Output
+========================================
+
+Input class: data.frame 
+Output class: data.frame 
+  name type  n unique   min    mean     sd     max
+1 num1  int 10     10  1.00  5.5000 3.0277 10.0000
+2 num2  dbl 11     11 -2.32 -0.5489 0.8373  0.7159
+
+========================================
+TEST 6: tibble Input → tibble Output
+========================================
+
+Input class: tbl_df 
+Output class: tbl_df 
+# A tibble: 2 × 8
+  name  type  n     unique min     mean      sd     max      
+  <chr> <chr> <chr> <chr>  <chr>   <chr>     <chr>  <chr>    
+1 num1  int   10    10     " 1.00" " 5.5000" 3.0277 "10.0000"
+2 num2  dbl   11    11     "-2.32" "-0.5489" 0.8373 " 0.7159"
+
+========================================
+TEST 7: data.table Input → data.table Output
+========================================
+
+Input class: data.table 
+Output class: data.table 
+     name   type      n unique    min    mean     sd     max
+   <char> <char> <char> <char> <char>  <char> <char>  <char>
+1:   num1    int     10     10   1.00  5.5000 3.0277 10.0000
+2:   num2    dbl     11     11  -2.32 -0.5489 0.8373  0.7159
+
+========================================
+TEST 8: List Mode Returns Raw Date Types
+========================================
+A list is returned as statistics are heterogeneous.FALSE
+
+Result structure:
+List of 2
+ $ date    : tibble [1 × 8] (S3: tbl_df/tbl/data.frame)
+  ..$ name  : chr "date_var"
+  ..$ type  : chr "date"
+  ..$ n     : int 10
+  ..$ unique: int 10
+  ..$ min   : Date[1:1], format: "2020-01-01"
+  ..$ mean  : Date[1:1], format: "2020-01-05"
+  ..$ sd    : chr "3 days"
+  ..$ max   : Date[1:1], format: "2020-01-10"
+ $ datetime: tibble [1 × 8] (S3: tbl_df/tbl/data.frame)
+  ..$ name  : chr "datetime_var"
+  ..$ type  : chr "datetime"
+  ..$ n     : int 10
+  ..$ unique: int 10
+  ..$ min   : POSIXct[1:1], format: "2020-01-01 12:00:00"
+  ..$ mean  : POSIXct[1:1], format: "2020-01-06"
+  ..$ sd    : chr "3 days"
+  ..$ max   : POSIXct[1:1], format: "2020-01-10 12:00:00"
+NULL
+
+========================================
+VERIFICATION COMPLETE
+========================================

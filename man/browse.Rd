@@ -9,8 +9,8 @@ browse(.data, ...)
 \arguments{
 \item{.data}{A data frame}
 
-\item{...}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[=args_data_masking]{data-masking}}> Variables to browse.
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to browse.
 \emph{This argument can be omitted}.}
 }
 \value{

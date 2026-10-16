@@ -15,38 +15,38 @@ tab1(.data, ..., .by = NULL, .desc = FALSE, .type = c("list", "tibble"))
 
 tab2(.data, ..., .flip = FALSE)
 
-fre(.data, ..., .by = NULL, .desc = FALSE, .type = c("flextable", "tibble"))
+fre(.data, ..., .by = NULL, .desc = FALSE, .type = c("tibble", "flextable"))
 
 fre1(
   .data,
   ...,
   .by = NULL,
   .desc = FALSE,
-  .type = c("flextable", "list", "tibble")
+  .type = c("list", "tibble", "flextable")
 )
 
-fre2(.data, ..., .flip = FALSE, .type = c("flextable", "tibble"))
+fre2(.data, ..., .flip = FALSE, .type = c("tibble", "flextable"))
 }
 \arguments{
 \item{.data}{A data frame, data frame extension
 (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).}
 
-\item{...}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[=args_data_masking]{data-masking}}> Variables to tabulate.
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to tabulate.
 
 Both tidyselect (e.g., \code{starts_with()}) and
 data masking (e.g., \code{x_sq = x^2}) are supported.
 See examples below.}
 
-\item{.by}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optionally, a selection of columns to
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optionally, a selection of columns to
 group by for just this operation, functioning as an alternative to \code{\link[dplyr:group_by]{group_by()}}. For
 details and examples, see \link[dplyr:dplyr_by]{?dplyr_by}.}
 
 \item{.desc}{If TRUE, will show the largest groups at the top.}
 
-\item{.type}{Output type. tab1() returns a list by default, and fre() functions return flextables by default.}
+\item{.type}{Output type. \code{tab1()} and \code{fre1()} default to a list of
+tibbles; \code{fre()} and \code{fre2()} default to a tibble. Explicit flextable
+output requires the optional flextable package.}
 
 \item{.flip}{If TRUE, will transpose the output tibble.}
 }
@@ -65,10 +65,12 @@ Enhanced \code{count()}.
 \item \code{fre2()} - Adds a “Total” row and a “total” column to the output of \code{tab2()}.
 }
 
-\code{tab()} functions are suitable for subsequent data analysis, while \code{fre()} functions return flextables by default and are suitable for reporting.
+The tabulation and frequency functions return data by default. The \code{fre()}
+family adds totals; rich output is available with \code{.type = "flextable"}
+when the optional flextable package is installed.
 
 If the output tibble has many rows, consider using
-\code{print()} or \code{\link[=print_headtail]{print_headtail()}} to display the output.
+\code{print()} to display the output.
 }
 \examples{
 # tabulate the 8th column

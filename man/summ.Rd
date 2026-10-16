@@ -11,7 +11,11 @@ summ(
   .by = NULL,
   .keep_all = FALSE,
   .detail = FALSE,
-  .stat = character(0)
+  .stat = character(0),
+  .na.rm = FALSE,
+  .name = TRUE,
+  .mode = c("list", "table"),
+  .duration_format = c("long", "compact")
 )
 
 tabstat(
@@ -20,23 +24,24 @@ tabstat(
   .by = NULL,
   .keep_all = FALSE,
   .detail = FALSE,
-  .stat = "mean"
+  .stat = "mean",
+  .na.rm = FALSE,
+  .name = TRUE,
+  .mode = c("list", "table"),
+  .duration_format = c("long", "compact")
 )
 }
 \arguments{
-\item{.data}{A data frame, data frame extension
-(e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).}
+\item{.data}{A data frame, data frame extension (e.g. a tibble), or a vector.}
 
-\item{...}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[=args_data_masking]{data-masking}}> Variables to tabulate.
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to tabulate.
 
 Both tidyselect (e.g., \code{starts_with()}) and
 data masking (e.g., \code{x_sq = x^2}) are supported.
 See examples below.}
 
-\item{.by}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optionally, a selection of columns to
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optionally, a selection of columns to
 group by for just this operation, functioning as an alternative to \code{\link[dplyr:group_by]{group_by()}}. For
 details and examples, see \link[dplyr:dplyr_by]{?dplyr_by}.}
 
@@ -46,9 +51,24 @@ details and examples, see \link[dplyr:dplyr_by]{?dplyr_by}.}
 
 \item{.stat}{A character vector.
 If specified, only the listed statistics are returned.}
+
+\item{.na.rm}{A logical. If \code{TRUE}, rows where the \code{.by} grouping variable
+is \code{NA} are dropped before summarising. Default is \code{FALSE}.}
+
+\item{.name}{A logical. If \code{TRUE} (default), the \code{name} column is always
+shown. If \code{FALSE}, the \code{name} column is dropped when only one variable is
+summarised.}
+
+\item{.mode}{A character string. Either "list" (default) or "table".
+If "list", returns a list of tables grouped by variable type (numeric, date, datetime).
+If "table", returns a single table with all variables (dates formatted as strings).}
+
+\item{.duration_format}{A character string. Either "long" (default) or "compact".
+Controls how durations (SD for dates) are formatted:
+"long" shows "548 days", "compact" shows "548d".}
 }
 \value{
-A tibble
+A tibble, data.frame, data.table, or list (depending on .mode and input class)
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -67,4 +87,13 @@ lifeexp \%>\%
     .by = region,
     .stat = c("mean", "sd")
   )
+
+# Drop NA in grouping variable
+summ(lifeexp, .by = region, .na.rm = TRUE)
+
+# Return list grouped by type
+summ(lifeexp, .mode = "list")
+
+# Use long duration format
+summ(lifeexp, .duration_format = "long")
 }

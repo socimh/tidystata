@@ -16,7 +16,7 @@ names_as_column(.data, ...)
 \arguments{
 \item{.data}{A data frame}
 
-\item{...}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Variables to select.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Variables to select.}
 }
 \value{
 A character vector of column names.

@@ -3,20 +3,27 @@
 #' @description
 #' `r lifecycle::badge("experimental")`
 #'
-#' * `row_mean()` - Calculate the row-wise mean of selected varaibles.
-#' * `row_sum()` - Calculate the row-wise sum of selected varaibles.
-#' * `row_max()` - Calculate the row-wise maximum of selected varaibles.
-#' * `row_min()` - Calculate the row-wise minimum of selected varaibles.
-#' * `row_median()` - Calculate the row-wise median of selected varaibles.
-#' * `row_var()` - Calculate the row-wise variance of selected varaibles.
-#' * `row_sd()` - Calculate the row-wise standard deviation of selected varaibles.
-#' * `row_unique()` - Calculate the row-wise number of unique values of selected varaibles.
-#' * `row_miss()` - Calculate the row-wise number of missing values of selected varaibles.
-#' * `row_non_miss()` - Calculate the row-wise number of non-missing values of selected varaibles.
+#' * `row_mean()` - Calculate the row-wise mean of selected variables.
+#' * `row_sum()` - Calculate the row-wise sum of selected variables.
+#' * `row_max()` - Calculate the row-wise maximum of selected variables.
+#' * `row_min()` - Calculate the row-wise minimum of selected variables.
+#' * `row_median()` - Calculate the row-wise median of selected variables.
+#' * `row_var()` - Calculate the row-wise variance of selected variables.
+#' * `row_sd()` - Calculate the row-wise standard deviation of selected variables.
+#' * `row_unique()` - Calculate the row-wise number of unique values of selected variables.
+#' * `row_miss()` - Calculate the row-wise number of missing values of selected variables.
+#' * `row_non_miss()` - Calculate the row-wise number of non-missing values of selected variables.
 #'
 #' @param ... a data frame or tibble, or <[`tidy-select`][dplyr_tidy_select]> within the mutate() function.
 #'
-#' @return A numeric vector.
+#' @details Missing values (including NaN) are ignored in numeric summaries.
+#' All-missing rows return NA, except row_sum() returns zero. Variance and SD
+#' use the sample denominator and need two observed values. row_unique() counts
+#' a missing category once. NULL or zero selected columns are rejected; zero
+#' rows return an empty vector. Numeric summaries accept numeric and logical
+#' columns; missing-value counts also accept other column types.
+#'
+#' @return An atomic numeric or integer vector with one value per input row.
 #' @name row_egen
 #'
 #' @examples
@@ -41,274 +48,126 @@
 #' @rdname row_egen
 #' @export
 row_mean <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      rowMeans(na.rm = TRUE) %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      rowMeans(na.rm = TRUE)
-  }
+  data <- row_input(...)
+  out <- rowMeans(data, na.rm = TRUE)
+  out[rowSums(!is.na(data)) == 0L] <- NA_real_
+  as.double(out)
 }
 
 #' @rdname row_egen
 #' @export
 row_sum <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      rowSums(na.rm = TRUE) %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      rowSums(na.rm = TRUE)
-  }
+  as.double(rowSums(row_input(...), na.rm = TRUE))
 }
-
-# row_max <- function(...) {
-#   if (dots_is_tibble(...)) {
-#     tibble::tibble(...) %>%
-#       dplyr::mutate(dplyr::across(
-#         dplyr::everything(),
-#         as.double
-#       )) %>%
-#       df_to_mat(-Inf) %>%
-#       Rfast::rowMaxs(value = TRUE) %>%
-#       tibble::as_tibble()
-#   } else {
-#     dplyr::pick(...) %>%
-#       dplyr::mutate(dplyr::across(
-#         dplyr::everything(),
-#         as.double
-#       )) %>%
-#       df_to_mat(-Inf) %>%
-#       Rfast::rowMaxs(value = TRUE)
-#   }
-# }
 
 #' @rdname row_egen
 #' @export
 row_max <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      row_max_dbl() %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      row_max_dbl()
-  }
+  row_max_dbl(row_input(...))
 }
-
-#' @rdname row_egen
-#' @export
-row_miss <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        is.na
-      )) %>%
-      row_sum()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        is.na
-      )) %>%
-      row_sum()
-  }
-}
-
-#' @rdname row_egen
-#' @export
-row_non_miss <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        ~ !is.na(.)
-      )) %>%
-      row_sum()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        ~ !is.na(.)
-      )) %>%
-      row_sum()
-  }
-}
-
-# row_min <- function(...) {
-#   if (dots_is_tibble(...)) {
-#     tibble::tibble(...) %>%
-#       dplyr::mutate(dplyr::across(
-#         dplyr::everything(),
-#         as.double
-#       )) %>%
-#       df_to_mat(Inf) %>%
-#       Rfast::rowMins(value = TRUE) %>%
-#       tibble::as_tibble()
-#   } else {
-#     dplyr::pick(...) %>%
-#       dplyr::mutate(dplyr::across(
-#         dplyr::everything(),
-#         as.double
-#       )) %>%
-#       df_to_mat(Inf) %>%
-#       Rfast::rowMins(value = TRUE)
-#   }
-# }
 
 #' @rdname row_egen
 #' @export
 row_min <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      row_min_dbl() %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      row_min_dbl()
-  }
+  row_min_dbl(row_input(...))
 }
 
 #' @rdname row_egen
 #' @export
 row_median <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      as.matrix() %>%
-      Rfast::rowMedians(na.rm = TRUE) %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      as.matrix() %>%
-      Rfast::rowMedians(na.rm = TRUE)
-  }
+  data <- row_input(...)
+  if (nrow(data) == 0L) return(numeric())
+  out <- Rfast::rowMedians(as.matrix(data), na.rm = TRUE)
+  out[rowSums(!is.na(data)) == 0L] <- NA_real_
+  as.double(out)
 }
 
 #' @rdname row_egen
 #' @export
 row_var <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      as.matrix() %>%
-      Rfast::rowVars(na.rm = TRUE) %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      as.matrix() %>%
-      Rfast::rowVars(na.rm = TRUE)
-  }
+  data <- row_input(...)
+  if (nrow(data) == 0L) return(numeric())
+  if (ncol(data) == 1L) return(rep(NA_real_, nrow(data)))
+  out <- Rfast::rowVars(as.matrix(data), na.rm = TRUE)
+  out[rowSums(!is.na(data)) < 2L] <- NA_real_
+  as.double(out)
 }
 
 #' @rdname row_egen
 #' @export
 row_sd <- function(...) {
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      as.matrix() %>%
-      Rfast::rowVars(std = TRUE, na.rm = TRUE) %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      as.matrix() %>%
-      Rfast::rowVars(std = TRUE, na.rm = TRUE)
-  }
+  sqrt(row_var(...))
 }
 
 #' @rdname row_egen
 #' @export
 row_unique <- function(...) {
-  # Only if ... is double.
-  if (dots_is_tibble(...)) {
-    tibble::tibble(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      row_unique_dbl() %>%
-      tibble::as_tibble()
-  } else {
-    dplyr::pick(...) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::everything(),
-        as.double
-      )) %>%
-      row_unique_dbl()
-  }
+  row_unique_dbl(row_input(...))
 }
 
+#' @rdname row_egen
+#' @export
+row_miss <- function(...) {
+  as.integer(rowSums(is.na(row_input(..., .numeric = FALSE))))
+}
 
-# Helpers
+#' @rdname row_egen
+#' @export
+row_non_miss <- function(...) {
+  as.integer(rowSums(!is.na(row_input(..., .numeric = FALSE))))
+}
+
+# Test the context without evaluating selections or computed arguments twice.
 dots_is_tibble <- function(...) {
-  if (s_try(dplyr::pick(...))) {
-    return(FALSE)
-  } else {
-    return(TRUE)
-  }
+  tryCatch({
+    dplyr::cur_group_id()
+    FALSE
+  }, error = function(e) TRUE)
 }
 
-# not ready yet
-# row_count_value <- function(..., value = NULL) {
-#   if (is.logical(value)) {
-#     if (value) {
-#       f <- function(x) Rfast::rowTrue(x)
-#     } else {
-#       f <- function(x) Rfast::rowFalse(x)
-#     }
-#   } else {
-#     # Only one value is returned by the function.
-#     f <- function(x) Rfast::rowCountValues(x, values = value)
-#   }
-
-#   if (dots_is_tibble(...)) {
-#     tibble::tibble(...) %>%
-#       as.matrix() %>%
-#       f() %>%
-#       tibble::as_tibble()
-#   } else {
-#     dplyr::pick(...) %>%
-#       f()
-#   }
-# }
+row_input <- function(..., .numeric = TRUE) {
+  if (dots_is_tibble(...)) {
+    data <- tibble::tibble(...)
+  } else {
+    # Capture selectors before probing a single data-frame expression, so their
+    # original expressions/environments survive evaluation of the promise.
+    dots <- rlang::enquos(...)
+    candidate <- NULL
+    probe_warnings <- list()
+    if (length(dots) == 1L) {
+      candidate <- tryCatch(withCallingHandlers(
+        rlang::eval_tidy(dots[[1L]]),
+        warning = function(w) {
+          probe_warnings[[length(probe_warnings) + 1L]] <<- w
+          invokeRestart("muffleWarning")
+        }
+      ), error = function(e) NULL)
+    }
+    if (is.data.frame(candidate)) {
+      data <- candidate
+      for (condition in probe_warnings) warning(condition)
+    } else {
+      data <- dplyr::pick(!!!dots)
+    }
+  }
+  if (ncol(data) == 0L) {
+    stop("Select at least one column; NULL and zero columns are not supported.",
+         call. = FALSE)
+  }
+  if (.numeric) {
+    valid <- vapply(data, function(x) {
+      (is.numeric(x) || is.logical(x)) && !is.complex(x) && is.null(dim(x))
+    }, logical(1))
+    if (!all(valid)) {
+      stop("Numeric row calculations require numeric or logical columns: ",
+           paste(names(data)[!valid], collapse = ", "), call. = FALSE)
+    }
+    # Rfast's na.rm path needs ordinary NA rather than NaN inputs.
+    data <- dplyr::mutate(data, dplyr::across(dplyr::everything(), ~ {
+      values <- as.double(.x)
+      values[is.nan(values)] <- NA_real_
+      values
+    }))
+  }
+  data
+}

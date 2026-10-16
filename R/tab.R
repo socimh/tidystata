@@ -11,10 +11,12 @@
 #' * `fre1()` - Adds “Total” row(s) to the output of `tab1()`.
 #' * `fre2()` - Adds a “Total” row and a “total” column to the output of `tab2()`.
 #'
-#' `tab()` functions are suitable for subsequent data analysis, while `fre()` functions return flextables by default and are suitable for reporting.
+#' The tabulation and frequency functions return data by default. The `fre()`
+#' family adds totals; rich output is available with `.type = "flextable"`
+#' when the optional flextable package is installed.
 #'
 #' If the output tibble has many rows, consider using
-#' `print()` or [`print_headtail()`][print_headtail] to display the output.
+#' `print()` to display the output.
 #'
 #' @param .data A data frame, data frame extension
 #' (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).
@@ -26,7 +28,9 @@
 #' See examples below.
 #' @inheritParams dplyr::summarise
 #' @param .desc If TRUE, will show the largest groups at the top.
-#' @param .type Output type. tab1() returns a list by default, and fre() functions return flextables by default.
+#' @param .type Output type. `tab1()` and `fre1()` default to a list of
+#' tibbles; `fre()` and `fre2()` default to a tibble. Explicit flextable
+#' output requires the optional flextable package.
 #' @param .flip If TRUE, will transpose the output tibble.
 #'
 #' @return
@@ -93,7 +97,9 @@ tab <- function(
     dplyr::bind_cols(.data_nogroup)
 
   # Confirm names
+  old_names <- names(.data)
   .data <- modify_invalid_names(.data, "tab()")
+  group_vars <- names(.data)[match(group_vars, old_names)]
 
   # Tabulate
   out <- tab_data(
@@ -116,22 +122,19 @@ tab1 <- function(
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(.data, by)
 
-  # Prepare data
-  .data <- prepare_tab_data(.data, ..., group_vars)
-
-  # Confirm names
+  .type <- match.arg(.type)
+  keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))
+  values <- prepare_tab_data(.data, ..., group_vars = group_vars)
+  .data <- dplyr::bind_cols(keys, values)
+  old_names <- names(.data)
   .data <- modify_invalid_names(.data, "tab1()")
+  group_vars <- names(.data)[match(group_vars, old_names)]
 
-  # Tabulate as a list
-  out <- .data %>%
-    purrr::map(
-      ~ .data %>%
-        dplyr::select(dplyr::any_of(group_vars)) %>%
-        dplyr::bind_cols(tibble::tibble(value = .x)) %>%
-        tab_data(group_vars, .desc) %>%
-        dplyr::select(-...any_miss)
-    ) %>%
-    purrr::discard_at(group_vars)
+  out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
+    dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
+      tab_data(group_vars, .desc) %>%
+      dplyr::select(-...any_miss)
+  })
 
   # Bind rows if the type is a tibble
   if (.type[1] == "tibble") {
@@ -174,7 +177,8 @@ fre <- function(
     .data, ...,
     .by = NULL,
     .desc = FALSE,
-    .type = c("flextable", "tibble")) {
+    .type = c("tibble", "flextable")) {
+  .type <- match.arg(.type)
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(.data, by)
@@ -186,12 +190,14 @@ fre <- function(
     dplyr::bind_cols(.data_nogroup)
 
   # Confirm names
+  old_names <- names(.data)
   .data <- modify_invalid_names(.data, "fre()")
+  group_vars <- names(.data)[match(group_vars, old_names)]
 
   # Tabulate
   out <- .data %>%
     tab_data(group_vars, .desc) %>%
-    add_total() %>%
+    add_total(group_vars) %>%
     dplyr::select(-...any_miss)
 
   if (.type[1] == "flextable") {
@@ -209,28 +215,25 @@ fre1 <- function(
     .data, ...,
     .by = NULL,
     .desc = FALSE,
-    .type = c("flextable", "list", "tibble")) {
+    .type = c("list", "tibble", "flextable")) {
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(.data, by)
 
-  # Prepare data
-  .data <- prepare_tab_data(.data, ..., group_vars)
-
-  # Confirm names
+  .type <- match.arg(.type)
+  keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))
+  values <- prepare_tab_data(.data, ..., group_vars = group_vars)
+  .data <- dplyr::bind_cols(keys, values)
+  old_names <- names(.data)
   .data <- modify_invalid_names(.data, "fre1()")
+  group_vars <- names(.data)[match(group_vars, old_names)]
 
-  # Tabulate as a list
-  out <- .data %>%
-    purrr::map(
-      ~ .data %>%
-        dplyr::select(dplyr::any_of(group_vars)) %>%
-        dplyr::bind_cols(tibble::tibble(value = .x)) %>%
-        tab_data(group_vars, .desc) %>%
-        add_total() %>%
-        dplyr::select(-...any_miss)
-    ) %>%
-    purrr::discard_at(group_vars)
+  out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
+    dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
+      tab_data(group_vars, .desc) %>%
+      add_total(group_vars) %>%
+      dplyr::select(-...any_miss)
+  })
 
   if (.type[1] == "flextable") {
     out <- out %>%
@@ -240,7 +243,7 @@ fre1 <- function(
   } else if (.type[1] == "tibble") {
     out <- append_tab_list(
       out,
-      blank_row = TRUE
+      blank_row = FALSE
     )
   }
 
@@ -253,7 +256,8 @@ fre1 <- function(
 #' @rdname tab
 fre2 <- function(
     .data, ..., .flip = FALSE,
-    .type = c("flextable", "tibble")) {
+    .type = c("tibble", "flextable")) {
+  .type <- match.arg(.type)
   # Prepare data
   .data <- .data %>%
     s_select(...)
@@ -276,7 +280,7 @@ fre2 <- function(
 
   if (.type[1] == "flextable") {
     out <- out %>%
-      result_to_flextable(group_vars, fre2 = TRUE)
+      result_to_flextable(character(0), fre2 = TRUE)
   }
 
   # Output

@@ -1,0 +1,51 @@
+# Demo: browse() function
+# Shows actual output of browse() for data exploration
+
+library(dplyr)
+
+pkgload::load_all(".", quiet = TRUE, compile = FALSE)
+
+cat("## Example 1: Browse basic data frame\n\n")
+cat("```r\n")
+cat("browse(mtcars)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(browse(mtcars))
+cat("```\n\n")
+
+cat("## Example 2: Browse with filter\n\n")
+cat("```r\n")
+cat("browse(mtcars, cyl == 4)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(browse(mtcars, cyl == 4))
+cat("```\n\n")
+
+cat("## Example 3: Browse with selection\n\n")
+cat("```r\n")
+cat("browse(mtcars, mpg, hp, wt)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(browse(mtcars, mpg, hp, wt))
+cat("```\n\n")
+
+cat("## Example 4: Browse with both filter and selection\n\n")
+cat("```r\n")
+cat("browse(mtcars, cyl == 4, mpg, hp)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(browse(mtcars, cyl == 4, mpg, hp))
+cat("```\n\n")
+
+cat("## Example 5: Browse starwars\n\n")
+cat("```r\n")
+cat("browse(starwars, species == 'Human', name, height, mass)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(browse(starwars, species == "Human", name, height, mass))
+cat("```\n\n")

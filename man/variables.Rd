@@ -12,8 +12,8 @@ variables_search(.data, string, ...)
 \arguments{
 \item{.data}{The input data (data frame or tibble).}
 
-\item{...}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[=args_data_masking]{data-masking}}> Variables to include in the codebook.
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to include in the codebook.
 \emph{This argument can be omitted}.}
 
 \item{string}{A string to search for in the variable names or labels.}

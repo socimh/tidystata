@@ -31,11 +31,16 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = TRUE)
     the right (and open on the left) or vice versa.}
 }
 \value{
-Print the selected rows of the data.
-Return the input data frame invisibly.
+An ordered factor, or integer interval codes when \code{labels = FALSE}.
 }
 \description{
 Cut a numeric vector into intervals.
+}
+\details{
+\code{cut_quantile()} uses type-7 quantiles and collapses duplicate
+cutpoints with a warning. Equal values stay in the same group, so ties may
+produce fewer intervals than \code{n}. Custom labels must match the effective
+number of intervals. Empty, all-missing, and constant vectors are rejected.
 }
 \examples{
 cut_quantile(1:20)

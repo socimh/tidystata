@@ -166,52 +166,47 @@ check_label <- function(.data) {
 }
 
 summ_var <- function(var, stat = character(0), .detail = FALSE) {
+  # Convert once for performance (avoids 8+ repeated calls to as_numeric)
+  num_var <- as_numeric(var)
+  n_val   <- sum(!is.na(var), na.rm = TRUE)
+
+  type_str <- dplyr::if_else(
+    !is.na(s_unit(var)),
+    stringr::str_glue("{s_type(var, .abbr = TRUE)} [{s_unit(var)}]"),
+    s_type(var, .abbr = TRUE)
+  ) %>% as.character()
+
   if (length(stat) == 0 && !.detail) {
     stat_tb <- tibble::tibble(
-      type = dplyr::if_else(
-        !is.na(s_unit(var)),
-        stringr::str_glue(
-          "{s_type(var, .abbr = TRUE)} [{s_unit(var)}]"
-        ),
-        s_type(var, .abbr = TRUE)
-      ) %>% as.character(),
-      n = sum(!is.na(var), na.rm = TRUE),
+      type   = type_str,
+      n      = n_val,
       unique = dplyr::n_distinct(var, na.rm = TRUE),
-      min = min(as_numeric(var), na.rm = TRUE),
-      mean = mean(as_numeric(var), na.rm = TRUE),
-      sd = sd(as_numeric(var), na.rm = TRUE),
-      max = max(as_numeric(var), na.rm = TRUE)
+      min    = min(num_var, na.rm = TRUE),
+      mean   = mean(num_var, na.rm = TRUE),
+      sd     = sd(num_var, na.rm = TRUE),
+      max    = max(num_var, na.rm = TRUE)
     )
     return(stat_tb)
   } else {
+    miss_n_val <- dplyr::n() - n_val
     stat_tb <- tibble::tibble(
-      type = dplyr::if_else(
-        !is.na(s_unit(var)),
-        stringr::str_glue(
-          "{s_type(var, .abbr = TRUE)} [{s_unit(var)}]"
-        ),
-        s_type(var, .abbr = TRUE)
-      ) %>% as.character(),
-      n = sum(!is.na(var), na.rm = TRUE),
-      unique = dplyr::n_distinct(var, na.rm = TRUE),
-      miss_n = dplyr::n() - n,
-      valid_pct = 1 - miss_n / (n + miss_n),
-      min = min(as_numeric(var), na.rm = TRUE),
-      q1 = quantile(as_numeric(var), .25, na.rm = TRUE),
-      median = median(as_numeric(var), na.rm = TRUE),
-      mean = mean(as_numeric(var), na.rm = TRUE),
-      mad = mad(as_numeric(var), na.rm = TRUE),
-      sd = sd(as_numeric(var), na.rm = TRUE),
-      q3 = quantile(as_numeric(var), .75, na.rm = TRUE),
-      max = max(as_numeric(var), na.rm = TRUE),
-      iqr = IQR(as_numeric(var), na.rm = TRUE),
-      skew = skew(as_numeric(var), sum(!is.na(var), na.rm = TRUE)),
-      kurtosis = kurtosis(as_numeric(var), sum(!is.na(var), na.rm = TRUE)),
-      se = sd / sqrt(n),
-      # mean_sd0 = paste0(sprintf("%.0f", mean), " (", sprintf("%.0f", sd, ")")),
-      # mean_sd1 = paste0(sprintf("%.1f", mean), " (", sprintf("%.1f", sd, ")")),
-      # mean_sd2 = paste0(sprintf("%.2f", mean), " (", sprintf("%.2f", sd, ")")),
-      # mean_sd3 = paste0(sprintf("%.3f", mean), " (", sprintf("%.3f", sd, ")"))
+      type       = type_str,
+      n          = n_val,
+      unique     = dplyr::n_distinct(var, na.rm = TRUE),
+      miss_n     = miss_n_val,
+      valid_pct  = 1 - miss_n_val / (n_val + miss_n_val),
+      min        = min(num_var, na.rm = TRUE),
+      q1         = quantile(num_var, .25, na.rm = TRUE),
+      median     = median(num_var, na.rm = TRUE),
+      mean       = mean(num_var, na.rm = TRUE),
+      mad        = mad(num_var, na.rm = TRUE),
+      sd         = sd(num_var, na.rm = TRUE),
+      q3         = quantile(num_var, .75, na.rm = TRUE),
+      max        = max(num_var, na.rm = TRUE),
+      iqr        = IQR(num_var, na.rm = TRUE),
+      skew       = skew(num_var, n_val),
+      kurtosis   = kurtosis(num_var, n_val),
+      se         = sd(num_var, na.rm = TRUE) / sqrt(n_val)
     )
     if (length(stat) > 0) {
       stat_tb <- stat_tb %>%
@@ -221,54 +216,185 @@ summ_var <- function(var, stat = character(0), .detail = FALSE) {
   }
 }
 
-summ_date <- function(var, stat = character(0), .detail = FALSE) {
-  stat_tb <- tibble::tibble(
-    type = dplyr::if_else(
-      !is.na(s_unit(var)),
-      stringr::str_glue("[{s_unit(var)}]"),
-      s_type(var, .abbr = TRUE)
-    ) %>% as.character(),
-    n = sum(!is.na(var), na.rm = TRUE),
-    unique = dplyr::n_distinct(var, na.rm = TRUE),
-    miss_n = sum(is.na(as_numeric(var)), na.rm = TRUE),
-    valid_pct = 1 - miss_n / n,
-    min = min(as_numeric(var), na.rm = TRUE),
-    # q1 = quantile(as_numeric(var), .25, na.rm = TRUE),
-    median = median(as_numeric(var), na.rm = TRUE),
-    mean = mean(as_numeric(var), na.rm = TRUE),
-    mad = mad(as_numeric(var), na.rm = TRUE),
-    sd = sd(as_numeric(var), na.rm = TRUE),
-    # q3 = quantile(as_numeric(var), .75, na.rm = TRUE),
-    max = max(as_numeric(var), na.rm = TRUE),
-    iqr = IQR(as_numeric(var), na.rm = TRUE),
-    # skew = skew(as_numeric(var), n),
-    # kurtosis = kurtosis(as_numeric(var), n),
-    se = sd / sqrt(n),
-    # mean_sd0 = paste0(sprintf("%.0f", mean), " (", sprintf("%.0f", sd), ")"),
-    # mean_sd1 = paste0(sprintf("%.1f", mean), " (", sprintf("%.1f", sd), ")"),
-    # mean_sd2 = paste0(sprintf("%.2f", mean), " (", sprintf("%.2f", sd), ")"),
-    # mean_sd3 = paste0(sprintf("%.3f", mean), " (", sprintf("%.3f", sd), ")")
-  )
+fmt_date <- function(x, var) {
+  # Format a numeric date/datetime value back to a readable string
+  vtype <- s_type(var, .abbr = TRUE)
+  if (is.na(x) || !is.finite(x)) return(NA_character_)
+  if (vtype == "date") {
+    format(as.Date(x, origin = "1970-01-01"), "%Y-%m-%d")
+  } else {
+    format(as.POSIXct(x, origin = "1970-01-01", tz = "UTC"), "%Y-%m-%d %H:%M")
+  }
+}
+
+fmt_duration <- function(secs, format = "compact") {
+  # Format duration in seconds as human-readable string
+  if (is.na(secs) || !is.finite(secs)) return(NA_character_)
+  
+  if (format == "long") {
+    # Long format: "548 days", "2 hours 15 minutes", "30 seconds"
+    if (secs >= 86400) {
+      days <- round(secs / 86400)
+      if (days == 1) return("1 day")
+      else return(paste(days, "days"))
+    } else if (secs >= 3600) {
+      hours <- floor(secs / 3600)
+      mins <- round((secs %% 3600) / 60)
+      if (mins == 0) {
+        if (hours == 1) return("1 hour")
+        else return(paste(hours, "hours"))
+      } else {
+        return(paste(hours, "hours", mins, "minutes"))
+      }
+    } else if (secs >= 60) {
+      mins <- floor(secs / 60)
+      secs_rem <- round(secs %% 60)
+      if (secs_rem == 0) {
+        if (mins == 1) return("1 minute")
+        else return(paste(mins, "minutes"))
+      } else {
+        return(paste(mins, "minutes", secs_rem, "seconds"))
+      }
+    } else {
+      secs_round <- round(secs)
+      if (secs_round == 1) return("1 second")
+      else return(paste(secs_round, "seconds"))
+    }
+  } else {
+    # Compact format: "548d", "2h 15m", "30s"
+    if (secs >= 86400) sprintf("%.1fd", secs / 86400)
+    else if (secs >= 3600) sprintf("%.1fh", secs / 3600)
+    else if (secs >= 60) sprintf("%.1fm", secs / 60)
+    else sprintf("%ds", secs)
+  }
+}
+
+fmt_date_sd <- function(sd_secs, var, format = "compact") {
+  # Format sd (in seconds for datetime, in days for date) as a human-readable span
+  if (is.na(sd_secs) || !is.finite(sd_secs)) return(NA_character_)
+  vtype <- s_type(var, .abbr = TRUE)
+  if (vtype == "date") {
+    # For dates, sd_secs is in days
+    days <- round(sd_secs)
+    if (format == "long") {
+      if (days == 1) return("1 day")
+      else return(paste(days, "days"))
+    } else {
+      sprintf("%dd", days)
+    }
+  } else {
+    # For datetime, sd_secs is in seconds
+    fmt_duration(sd_secs, format)
+  }
+}
+
+summ_date <- function(var, stat = character(0), .detail = FALSE, 
+                        .duration_format = "compact", return_raw = FALSE) {
+  n_val    <- sum(!is.na(var), na.rm = TRUE)
+  miss_val <- sum(is.na(var), na.rm = TRUE)
+  num_var  <- as_numeric(var)
+
+  min_raw    <- min(num_var, na.rm = TRUE)
+  median_raw <- median(num_var, na.rm = TRUE)
+  mean_raw   <- mean(num_var, na.rm = TRUE)
+  sd_raw     <- sd(num_var, na.rm = TRUE)
+  max_raw    <- max(num_var, na.rm = TRUE)
+  iqr_raw    <- IQR(num_var, na.rm = TRUE)
+  mad_raw    <- mad(num_var, na.rm = TRUE)
+
+  vtype <- s_type(var, .abbr = TRUE)
+  
+  if (return_raw) {
+    # Return actual Date/POSIXct types for list mode
+    if (vtype == "date") {
+      stat_tb <- tibble::tibble(
+        type      = dplyr::if_else(
+          !is.na(s_unit(var)),
+          stringr::str_glue("[{s_unit(var)}]"),
+          "date"
+        ) %>% as.character(),
+        n         = n_val,
+        unique    = dplyr::n_distinct(var, na.rm = TRUE),
+        miss_n    = miss_val,
+        valid_pct = 1 - miss_val / (n_val + miss_val),
+        min       = as.Date(min_raw, origin = "1970-01-01"),
+        mean      = as.Date(round(mean_raw), origin = "1970-01-01"),
+        max       = as.Date(max_raw, origin = "1970-01-01"),
+        sd        = fmt_date_sd(sd_raw, var, .duration_format),
+        mad       = fmt_date_sd(mad_raw, var, .duration_format),
+        iqr       = fmt_date_sd(iqr_raw, var, .duration_format),
+        se        = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
+      )
+    } else {
+      stat_tb <- tibble::tibble(
+        type      = dplyr::if_else(
+          !is.na(s_unit(var)),
+          stringr::str_glue("[{s_unit(var)}]"),
+          "datetime"
+        ) %>% as.character(),
+        n         = n_val,
+        unique    = dplyr::n_distinct(var, na.rm = TRUE),
+        miss_n    = miss_val,
+        valid_pct = 1 - miss_val / (n_val + miss_val),
+        min       = as.POSIXct(min_raw, origin = "1970-01-01", tz = "UTC"),
+        mean      = as.POSIXct(round(mean_raw), origin = "1970-01-01", tz = "UTC"),
+        max       = as.POSIXct(max_raw, origin = "1970-01-01", tz = "UTC"),
+        sd        = fmt_date_sd(sd_raw, var, .duration_format),
+        mad       = fmt_date_sd(mad_raw, var, .duration_format),
+        iqr       = fmt_date_sd(iqr_raw, var, .duration_format),
+        se        = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
+      )
+    }
+  } else {
+    # Return formatted strings for table mode
+    stat_tb <- tibble::tibble(
+      type      = dplyr::if_else(
+        !is.na(s_unit(var)),
+        stringr::str_glue("[{s_unit(var)}]"),
+        s_type(var, .abbr = TRUE)
+      ) %>% as.character(),
+      n         = n_val,
+      unique    = dplyr::n_distinct(var, na.rm = TRUE),
+      miss_n    = miss_val,
+      valid_pct = 1 - miss_val / (n_val + miss_val),
+      min       = fmt_date(min_raw, var),
+      median    = fmt_date(median_raw, var),
+      mean      = fmt_date(mean_raw, var),
+      sd        = fmt_date_sd(sd_raw, var, .duration_format),
+      mad       = fmt_date_sd(mad_raw, var, .duration_format),
+      max       = fmt_date(max_raw, var),
+      iqr       = fmt_date_sd(iqr_raw, var, .duration_format),
+      se        = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
+    )
+  }
+  
   if (length(stat) > 0) {
     stat_tb <- stat_tb %>%
       dplyr::select(type, tidyselect::all_of(stat))
   } else if (!.detail) {
     stat_tb <- stat_tb %>%
-      dplyr::select(
-        type, n, unique,
-        mean, sd, min, max
-      )
+      dplyr::select(type, n, unique, mean, sd, min, max)
   }
   return(stat_tb)
 }
 
-summ_data <- function(.data, .fn, summ_vars, group_vars, .detail, .stat) {
+summ_data <- function(.data, .fn, summ_vars, group_vars, .detail, .stat, 
+                       .duration_format = "compact", return_raw = FALSE) {
   if (length(summ_vars) > 0) {
+    # Create a wrapper function that passes the extra arguments
+    fn_wrapper <- function(x) {
+      if (identical(.fn, summ_date)) {
+        .fn(x, .stat, .detail, .duration_format, return_raw)
+      } else {
+        .fn(x, .stat, .detail)
+      }
+    }
+    
     out <- .data %>%
       dplyr::summarise(
         dplyr::across(
           tidyselect::all_of(summ_vars),
-          ~ .fn(.x, .stat, .detail)
+          ~ fn_wrapper(.x)
         ),
         .by = tidyselect::all_of(group_vars)
       ) %>%
@@ -283,7 +409,12 @@ summ_data <- function(.data, .fn, summ_vars, group_vars, .detail, .stat) {
   return(out)
 }
 
-summ_list <- function(.data, group_vars, .detail, .stat) {
+summ_list <- function(.data, group_vars, .detail, .stat, 
+                        .mode = c("list", "table"),
+                        .duration_format = c("compact", "long")) {
+  .mode <- match.arg(.mode)
+  .duration_format <- match.arg(.duration_format)
+  
   numeric <- .data %>%
     ds(
       !tidyselect::all_of(group_vars) &
@@ -316,16 +447,6 @@ summ_list <- function(.data, group_vars, .detail, .stat) {
   if (!is.null(numeric) && nrow(numeric) > 0) {
     numeric <- numeric %>%
       dplyr::mutate(
-        dplyr::across(
-          type:tidyselect::last_col() &
-            tidyselect::where(
-              ~ is.numeric(.x)
-            ),
-          ~ dplyr::if_else(
-            is.na(.x) | !is.finite(.x),
-            NA_real_, .x
-          )
-        ),
         name = dplyr::case_when(
           !is_summable_chr(type) ~
             stringr::str_glue("***{name}"),
@@ -339,11 +460,11 @@ summ_list <- function(.data, group_vars, .detail, .stat) {
   }
 
   date <- summ_data(
-    .data, summ_date, date, group_vars, .detail, .stat
+    .data, summ_date, date, group_vars, .detail, .stat, .duration_format
   )
 
   datetime <- summ_data(
-    .data, summ_date, datetime, group_vars, .detail, .stat
+    .data, summ_date, datetime, group_vars, .detail, .stat, .duration_format
   )
 
   out <- list(
@@ -353,7 +474,11 @@ summ_list <- function(.data, group_vars, .detail, .stat) {
   ) %>%
     purrr::discard(~ is.null(.))
 
-  if (length(out) == 1) {
+  if (.mode == "table") {
+    if (length(out) > 0) {
+      out <- dplyr::bind_rows(out)
+    }
+  } else if (length(out) == 1) {
     out <- out[[1]]
   } else {
     message(

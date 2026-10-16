@@ -16,11 +16,21 @@ status](https://www.r-pkg.org/badges/version/statart)](https://CRAN.R-project.or
 [statart](https://socimh.github.io/statart/) is a set of functions that
 combines Stata-inspired features with tidyverse-style operations.
 
-<!-- These functions are built in the tidyverse framework, including
-&#10;- `codebook()` for codebook (like `codebook` in Stata)
-- `summ()` for summary statistics (like `summarize` in Stata)
-- `tab()`, `tab1()`, and `tab2()` for frequency tables (like `tab`, `tab1`, and `tab2` in Stata)
-- `fre()`, `fre1()`, and `fre2()` for frequency tables with total rows and total columns (like `fre` in Stata) -->
+The package focuses on exploring and preparing data:
+
+- `tab()`, `tab1()`, and `tab2()` for frequency tables.
+- `fre()`, `fre1()`, and `fre2()` for frequency tables with totals.
+- `summ()` and `tabstat()` for summary statistics.
+- `codebook()` and `variables()` for variable inspection.
+- `s_select()`, row calculations, conversion helpers, and binning for
+  data preparation.
+
+The `0.2.0.9000` development series retires the import/export,
+regression-table, and detailed-codebook wrappers in preparation for
+`0.3.0`. See the [migration guide](MIGRATION.md) for direct package
+alternatives and breaking changes. This experimental package is
+undergoing stabilization; see [DEVELOPMENT.md](DEVELOPMENT.md) for the
+verified status and remaining work.
 
 ## Installation
 
@@ -30,16 +40,18 @@ You can install the development version of statart like so:
 devtools::install_github("socimh/statart")
 ```
 
+R 4.1.0 or later and a suitable build toolchain are required to install
+from source. Rich table formatting is optional and requires `flextable`.
+
 ## Example
 
 ### Load the package
 
-I highly recommend using `tidyverse` with `statart` for better
-performance.
+Load `statart` and the data-manipulation package used in these examples.
 
 ``` r
 library(statart)
-library(tidyverse)
+library(dplyr)
 ```
 
 ### codebook()
@@ -48,7 +60,7 @@ View the codebook of `lifeexp`.
 
 ``` r
 codebook(lifeexp)
-#> # A tibble: 6 × 5
+#> # A tibble: 6 x 5
 #>   variable  label                    type             n unique
 #>   <chr>     <chr>                    <chr>        <int>  <int>
 #> 1 region    Region                   double+label    68      3
@@ -61,24 +73,19 @@ codebook(lifeexp)
 
 ### summ()
 
-Summarise the numeric variables in `lifeexp`.
+Summarise selected numeric variables in `mtcars`.
 
 ``` r
-summ(lifeexp)
-#> Warning: country is non-numeric and thus removed.
-#> Warning: region is a labelled variable (*).
-#> # A tibble: 5 × 8
-#>   name      type        n unique   min     mean        sd   max
-#>   <chr>     <chr>   <dbl>  <dbl> <dbl>    <dbl>     <dbl> <dbl>
-#> 1 *region   dbl+lbl    68      3   1      1.5       0.743     3
-#> 2 popgrowth dbl        68     30  -0.5    0.972     0.931     3
-#> 3 lexp      dbl        68     18  54     72.3       4.72     79
-#> 4 gnppc     dbl        63     62 370   8675.    10635.    39980
-#> 5 safewater dbl        40     29  28     76.1      17.9     100
+summ(mtcars, mpg, wt)
+#> # A tibble: 2 x 8
+#>   name  type      n unique   min  mean    sd   max
+#>   <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
+#> 1 mpg   dbl      32     25 10.4  20.1  6.03  33.9 
+#> 2 wt    dbl      32     29  1.51  3.22 0.978  5.42
 ```
 
-Not that `region` is a factor variable, so the mean and standard
-deviation of it may be meaningless.
+Choose numeric variables deliberately: means and standard deviations of
+factor codes may have no substantive interpretation.
 
 ### tab()
 
@@ -86,7 +93,7 @@ Tabulate a single variable:
 
 ``` r
 tab(starwars, sex)
-#> # A tibble: 5 × 6
+#> # A tibble: 5 x 6
 #>   sex                n percent   cum valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 female            16   18.4   18.4 19.3       19.3
@@ -97,12 +104,12 @@ tab(starwars, sex)
 ```
 
 `tab1()` tabulates variables one by one as a list, and `s_match()` can
-select variables in a stata style.
+select variables in a Stata style.
 
 ``` r
 tab1(starwars, s_match("*color"))
 #> $hair_color
-#> # A tibble: 13 × 6
+#> # A tibble: 12 x 6
 #>    value             n percent    cum valid valid_cum
 #>    <chr>         <int>   <dbl>  <dbl> <dbl>     <dbl>
 #>  1 auburn            1    1.15   1.15  1.22      1.22
@@ -114,13 +121,12 @@ tab1(starwars, s_match("*color"))
 #>  7 brown            18   20.7   43.7  22.0      46.3 
 #>  8 brown, grey       1    1.15  44.8   1.22     47.6 
 #>  9 grey              1    1.15  46.0   1.22     48.8 
-#> 10 none             37   42.5   88.5  45.1      93.9 
-#> 11 unknown           1    1.15  89.7   1.22     95.1 
-#> 12 white             4    4.60  94.3   4.88    100   
-#> 13 <NA>              5    5.75 100    NA        NA   
+#> 10 none             38   43.7   89.7  46.3      95.1 
+#> 11 white             4    4.60  94.3   4.88    100   
+#> 12 <NA>              5    5.75 100    NA        NA   
 #> 
 #> $skin_color
-#> # A tibble: 31 × 6
+#> # A tibble: 31 x 6
 #>    value                   n percent   cum valid valid_cum
 #>    <chr>               <int>   <dbl> <dbl> <dbl>     <dbl>
 #>  1 blue                    2    2.30  2.30  2.30      2.30
@@ -133,10 +139,10 @@ tab1(starwars, s_match("*color"))
 #>  8 fair, green, yellow     1    1.15 39.1   1.15     39.1 
 #>  9 gold                    1    1.15 40.2   1.15     40.2 
 #> 10 green                   6    6.90 47.1   6.90     47.1 
-#> # ℹ 21 more rows
+#> # i 21 more rows
 #> 
 #> $eye_color
-#> # A tibble: 15 × 6
+#> # A tibble: 15 x 6
 #>    value             n percent   cum valid valid_cum
 #>    <chr>         <int>   <dbl> <dbl> <dbl>     <dbl>
 #>  1 black            10   11.5   11.5 11.5       11.5
@@ -160,7 +166,7 @@ tab1(starwars, s_match("*color"))
 
 ``` r
 tab2(starwars, sex, gender)
-#> # A tibble: 5 × 4
+#> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
 #> 1 female                16         0     0
@@ -175,11 +181,48 @@ tab2(starwars, sex, gender)
 `fre()` family functions simply add total rows (and total columns in
 `fre2()`) to their `tab()` counterparts.
 
+`fre()` and `fre2()` return tibbles by default. `fre1()` returns a list
+of tibbles.
+
 ``` r
 fre(starwars, sex)
+#> # A tibble: 7 x 6
+#>   sex                n percent   cum  valid valid_cum
+#>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
+#> 1 female            16   18.4   18.4  19.3       19.3
+#> 2 hermaphroditic     1    1.15  19.5   1.20      20.5
+#> 3 male              60   69.0   88.5  72.3       92.8
+#> 4 none               6    6.90  95.4   7.23     100  
+#> 5 Valid Total       83   95.4   NA   100         NA  
+#> 6 <NA>               4    4.60 100    NA         NA  
+#> 7 Total             87  100     NA    NA         NA
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+For optional rich formatting, install `flextable` and request it
+explicitly:
+
+``` r
+fre(starwars, sex, .type = "flextable")
+```
+
+### Row calculations and binning
+
+Row helpers return vectors that can be used in `mutate()`:
+
+``` r
+tibble(a = c(1, NA, 3), b = c(3, NA, 5)) |>
+  mutate(row_average = row_mean(a, b))
+#> # A tibble: 3 x 3
+#>       a     b row_average
+#>   <dbl> <dbl>       <dbl>
+#> 1     1     3           2
+#> 2    NA    NA          NA
+#> 3     3     5           4
+```
+
+`cut_quantile()` keeps equal values in the same group. Ties can reduce
+the number of intervals, with a warning, rather than splitting equal
+values by row order.
 
 ## Code of Conduct
 

@@ -1,14 +1,13 @@
 #' @description
-#' To learn more about statart, start with the vignettes:
-#' `browseVignettes(package = "statart")`
+#' Stata-inspired tools for frequency tables, summary statistics,
+#' variable inspection, column selection, row calculations, and binning.
+#' Use [tab()], [summ()], and [codebook()] to start exploring a dataset.
 #' 
 #' @keywords internal
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @importFrom lifecycle deprecated
 #' @importFrom magrittr %>%
-#' @importFrom ggplot2 %+replace% theme_bw theme
 #' @importFrom rlang :=
 #' @importFrom utils apropos
 #' @importFrom stats IQR mad median quantile sd Gamma as.formula binomial coef df.residual glm lm poisson pt setNames

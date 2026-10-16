@@ -5,3 +5,25 @@
 .DS_Store
 .quarto
 docs
+
+# Keep selected milestone evidence; retain other generated results locally.
+.opencode/results/*
+!.opencode/results/README.md
+!.opencode/results/baseline-0.2.0.json
+!.opencode/results/milestone-contracts.csv
+!.opencode/results/milestone-contracts-details.csv
+!.opencode/results/milestone-contracts-tests.log
+!.opencode/results/milestone-contracts-install.log
+!.opencode/results/milestone-retained-final.csv
+!.opencode/results/milestone-retained-final-details.csv
+!.opencode/results/milestone-retained-final-tests.log
+!.opencode/results/milestone-verification-check.log
+!.opencode/results/milestone-minimal-final-minimal.log
+!.opencode/results/milestone-timer-recheck.csv
+!.opencode/results/milestone-timing-probe.txt
+
+# Historical scratch/debug files remain local.
+.opencode/tests/debug_issue_a1.R
+.opencode/tests/debug_issue_a1_step.R
+.opencode/tests/test_esttab_output.txt
+.opencode/tests/test_esttab_comprehensive_output.txt

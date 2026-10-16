@@ -5,13 +5,13 @@
 \alias{row_mean}
 \alias{row_sum}
 \alias{row_max}
-\alias{row_miss}
-\alias{row_non_miss}
 \alias{row_min}
 \alias{row_median}
 \alias{row_var}
 \alias{row_sd}
 \alias{row_unique}
+\alias{row_miss}
+\alias{row_non_miss}
 \title{Generate a variable based on row-wise operations.}
 \usage{
 row_mean(...)
@@ -19,10 +19,6 @@ row_mean(...)
 row_sum(...)
 
 row_max(...)
-
-row_miss(...)
-
-row_non_miss(...)
 
 row_min(...)
 
@@ -33,27 +29,39 @@ row_var(...)
 row_sd(...)
 
 row_unique(...)
+
+row_miss(...)
+
+row_non_miss(...)
 }
 \arguments{
-\item{...}{a data frame or tibble, or <\code{\link[=dplyr_tidy_select]{tidy-select}}> within the mutate() function.}
+\item{...}{a data frame or tibble, or <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> within the mutate() function.}
 }
 \value{
-A numeric vector.
+An atomic numeric or integer vector with one value per input row.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 \itemize{
-\item \code{row_mean()} - Calculate the row-wise mean of selected varaibles.
-\item \code{row_sum()} - Calculate the row-wise sum of selected varaibles.
-\item \code{row_max()} - Calculate the row-wise maximum of selected varaibles.
-\item \code{row_min()} - Calculate the row-wise minimum of selected varaibles.
-\item \code{row_median()} - Calculate the row-wise median of selected varaibles.
-\item \code{row_var()} - Calculate the row-wise variance of selected varaibles.
-\item \code{row_sd()} - Calculate the row-wise standard deviation of selected varaibles.
-\item \code{row_unique()} - Calculate the row-wise number of unique values of selected varaibles.
-\item \code{row_miss()} - Calculate the row-wise number of missing values of selected varaibles.
-\item \code{row_non_miss()} - Calculate the row-wise number of non-missing values of selected varaibles.
+\item \code{row_mean()} - Calculate the row-wise mean of selected variables.
+\item \code{row_sum()} - Calculate the row-wise sum of selected variables.
+\item \code{row_max()} - Calculate the row-wise maximum of selected variables.
+\item \code{row_min()} - Calculate the row-wise minimum of selected variables.
+\item \code{row_median()} - Calculate the row-wise median of selected variables.
+\item \code{row_var()} - Calculate the row-wise variance of selected variables.
+\item \code{row_sd()} - Calculate the row-wise standard deviation of selected variables.
+\item \code{row_unique()} - Calculate the row-wise number of unique values of selected variables.
+\item \code{row_miss()} - Calculate the row-wise number of missing values of selected variables.
+\item \code{row_non_miss()} - Calculate the row-wise number of non-missing values of selected variables.
 }
+}
+\details{
+Missing values (including NaN) are ignored in numeric summaries.
+All-missing rows return NA, except row_sum() returns zero. Variance and SD
+use the sample denominator and need two observed values. row_unique() counts
+a missing category once. NULL or zero selected columns are rejected; zero
+rows return an empty vector. Numeric summaries accept numeric and logical
+columns; missing-value counts also accept other column types.
 }
 \examples{
 tb <- tibble::tibble(

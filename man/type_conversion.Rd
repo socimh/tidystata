@@ -16,6 +16,9 @@ as_numeric(.x)
 \description{
 It improves the performance of converting
 several types of variables.
+Character input to \code{as_numeric()} is parsed with \code{\link[readr:parse_number]{readr::parse_number()}},
+preserving its length. Invalid numbers generate parsing warnings. Factors
+return their level codes; labelled numeric variables return their values.
 }
 \examples{
 lifeexp \%>\%

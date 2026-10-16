@@ -19,7 +19,7 @@ established by functions like \code{select()} or \code{pivot_longer()}).}
 }
 \description{
 \code{s_match()} is a simpler version of \code{matches()}
-in <\code{\link[=dplyr_tidy_select]{tidy-select}}>.
+in <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}>.
 It is designed to select columns in a Stata-like style.
 
 As \code{matches()}, \code{s_match()} must be used

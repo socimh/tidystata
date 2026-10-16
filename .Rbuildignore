@@ -9,3 +9,15 @@
 ^docs$
 ^pkgdown$
 ^CRAN-SUBMISSION$
+^DEVELOPMENT\.md$
+^CONTRIBUTING\.md$
+^extra_functions$
+^\.opencode$
+^AGENTS\.md$
+^MIGRATION\.md$
+^TEST_SUMMARY\.md$
+^Makefile$
+^install_statart_deps\.R$
+^run_tests\.R$
+^test\.R$
+^\.Rhistory$

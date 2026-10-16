@@ -1,0 +1,78 @@
+# Demo: s_select() function
+# Shows actual output of s_select() for column selection
+
+library(dplyr)
+
+pkgload::load_all(".", quiet = TRUE, compile = FALSE)
+
+cat("## Example 1: Select columns by name\n\n")
+cat("```r\n")
+cat("s_select(mtcars, mpg, cyl, hp)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(s_select(mtcars, mpg, cyl, hp))
+cat("```\n\n")
+
+cat("## Example 2: With expressions\n\n")
+cat("```r\n")
+cat("s_select(mtcars, mpg, kml = mpg * 0.425)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(s_select(mtcars, mpg, kml = mpg * 0.425))
+cat("```\n\n")
+
+cat("## Example 3: Empty selection returns full data\n\n")
+cat("```r\n")
+cat("s_select(mtcars)\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(s_select(mtcars))
+cat("```\n\n")
+
+cat("## Example 4: With tidyselect helpers\n\n")
+cat("```r\n")
+cat("s_select(mtcars, starts_with('d'))\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+print(s_select(mtcars, starts_with("d")))
+cat("```\n\n")
+
+cat("## Example 5: Error handling for non-existent column\n\n")
+cat("```r\n")
+cat("tryCatch(\n")
+cat("  s_select(mtcars, nonexistent_col),\n")
+cat("  error = function(e) cat('Error:', e$message, '\\n')\n")
+cat(")\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+tryCatch(
+  s_select(mtcars, nonexistent_col),
+  error = function(e) cat("Error:", e$message, "\n")
+)
+cat("```\n\n")
+
+cat("## Example 6: With data.table\n\n")
+cat("```r\n")
+cat("if (requireNamespace('data.table', quietly = TRUE)) {\n")
+cat("  library(data.table)\n")
+cat("  dt <- as.data.table(mtcars)\n")
+cat("  result <- s_select(dt, mpg, hp)\n")
+cat("  class(result)\n")
+cat("  print(result)\n")
+cat("}\n")
+cat("```\n\n")
+cat("**Output:**\n\n")
+cat("```\n")
+if (requireNamespace("data.table", quietly = TRUE)) {
+  library(data.table)
+  dt <- as.data.table(mtcars)
+  result <- s_select(dt, mpg, hp)
+  cat("Class:", paste(class(result), collapse = ", "), "\n")
+  print(result)
+}
+cat("```\n\n")
