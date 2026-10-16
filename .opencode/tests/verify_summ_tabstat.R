@@ -6,14 +6,22 @@ if (!length(args) || !dir.exists(args[[1]])) {
 }
 .libPaths(c(normalizePath(args[[1]]), .libPaths()))
 library(statart)
-prefix <- if (length(args) > 1L) args[[2]] else ".opencode/results/summ-acceptance"
+prefix <- if (length(args) > 1L) args[[2]] else ".opencode/results/summ-100-clean"
 started <- proc.time()[["elapsed"]]
 results <- testthat::test_dir(
-  "tests/testthat", filter = "^summ-(acceptance|missing-statistics|contracts)$",
+  "tests/testthat", filter = "^summ-(acceptance|missing-statistics|contracts|coverage-(numeric|structure))$",
   reporter = "silent", stop_on_failure = FALSE, stop_on_warning = FALSE,
   load_package = "none"
 )
 summary <- as.data.frame(results)
+for (function_name in c("summ", "tabstat")) {
+  selected <- summary$test[startsWith(summary$test, paste(function_name, "coverage"))]
+  ids <- as.integer(sub(".* coverage ([0-9]{3}) .*", "\\1", selected))
+  if (length(ids) != 100L || !identical(sort(ids), seq_len(100L))) {
+    stop("Expected each numbered scenario 001-100 exactly once for ", function_name)
+  }
+  cat("NUMBERED COVERAGE", function_name, length(ids), "scenarios\n")
+}
 write.csv(summary[setdiff(names(summary), "result")], paste0(prefix, "-scenarios.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")
 for (i in seq_len(nrow(summary))) {

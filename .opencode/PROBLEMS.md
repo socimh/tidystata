@@ -2,19 +2,19 @@
 
 ## Current verified state (2026-10-16)
 
-The complete suite passes: 5,922 expectations, zero failures/errors, 27 test
-warnings and one skipped block across 1,468 blocks. Fresh installation/build
+The complete suite passes: 6,692 expectations, zero failures/errors, 27 test
+warnings and one skipped block across 1,668 blocks. Fresh installation/build
 and R CMD check --no-manual pass with Status: OK. Earlier required-dependency
 smoke evidence remains valid; dependencies and exports did not change.
-See [summary acceptance evidence](reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
+See [the 100-scenario catalogue and current evidence](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md).
 
-summ() and tabstat() are locally accepted release candidates: 142 blocks and
-454 expectations with zero failures/errors/warnings/skips. Fixed SPSS missing
+summ() and tabstat() are locally accepted release candidates: 342 blocks and
+1,224 expectations with zero failures/errors/warnings/skips. Fixed SPSS missing
 masks, reserved grouping/measured names, grouped .by override, compact datetime
 formatting, empty .name behavior and the approved counts-only nonnumeric policy.
 Large integer64 conversion warnings are now visible. The standalone runner
-passes 86 scenarios and 388 expectations; independent review found no remaining
-material defects in the reviewed summary scope.
+passes 286 scenarios and 1,158 expectations, including all 100 numbered cases for each function; independent review found no remaining
+material defects in the reviewed summary scope. This coverage expansion changed no package behavior; finite tests do not prove every possible input/platform.
 
 ## Repository organization resolved (2026-10-16)
 

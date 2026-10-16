@@ -53,3 +53,10 @@ docs
 !.opencode/results/summ-acceptance-clean-check.log
 !.opencode/results/summ-acceptance-clean-scenarios.csv
 !.opencode/results/summ-acceptance-examples-clean.log
+
+# Reviewed 100-scenario matrix for each summary function.
+!.opencode/results/summ-100-reviewed.csv
+!.opencode/results/summ-100-reviewed-details.csv
+!.opencode/results/summ-100-reviewed-check.log
+!.opencode/results/summ-100-reviewed-scenarios.csv
+!.opencode/results/summ-100-reviewed-examples.log

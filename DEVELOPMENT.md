@@ -46,15 +46,16 @@ artifact deletion requires a separately reviewed, explicitly approved list.
 
 ## Current verification
 
-Latest summary acceptance: **5,922 passing expectations across 1,468 blocks, zero
+Latest summary acceptance: **6,692 passing expectations across 1,668 blocks, zero
 failed expectations or error blocks**, with 27 test warnings and one pre-existing
 empty test skipped. Fresh native installation, source build, required-dependency
 smoke check, and `R CMD check --no-manual` all pass. Package check reports
 **Status: OK**, with no check errors, warnings or notes. See the
-[summary acceptance report](.opencode/reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
-summ() and tabstat() are locally accepted release candidates: all 142 summary
-blocks and 454 expectations pass without uncaptured warnings or skips. The
-standalone acceptance runner passes 86 scenarios and 388 expectations. Other
+[100-scenario catalogue and current verification](.opencode/reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md).
+summ() and tabstat() are locally accepted release candidates: all 342 summary
+blocks and 1,224 expectations pass without uncaptured warnings or skips. The
+standalone acceptance runner passes 286 scenarios and 1,158 expectations,
+including 100 explicitly numbered cases for each function. Other
 function families and minimum-R/multi-platform publication checks remain.
 The first-milestone evidence below is historical.
 

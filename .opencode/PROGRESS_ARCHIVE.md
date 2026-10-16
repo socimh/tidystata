@@ -118,3 +118,8 @@ Created extra_functions/, moved non-core functions (s_ggsave, s_plot, etc.).
 - **Verification**: Protected fresh native install/build and full suite pass: 5617 expectations, zero failures/errors, 33 warnings, one pre-existing empty skip across 1410 blocks. R CMD check --no-manual Status: OK (zero errors/warnings/notes), after clearing an initial selection NOTE. Required-dependency smoke and focused package review pass.
 - **Evidence**: Added reproducible core verification report and actual-output script; retained final CSV/log evidence. Local commits only; no push, merge or release.
 - **Next**: Empty-test coverage, expected-warning assertions, minimum R version and multi-platform validation before publication.
+
+## 2026-10-16 - Repository Cleanup Review
+- **Scope**: Read-only package/file inventory and cleanup recommendations; no moves, deletion, package edits, push or release.
+- **Findings**: 670 non-Git files at review start: 250 tracked, 420 ignored. Retired functions are already build-excluded. Identified stale root scripts/notes and an installed historical inst/Build_Package.R scratchpad; make clean would remove preserved reports.
+- **Verification**: Inspected Git status/tracking, filesystem sizes, ignore rules, script contents/references and prior checked source tarball. Recorded a staged archival proposal and artifact boundaries; no package tests rerun.

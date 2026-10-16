@@ -9,6 +9,8 @@
 
 ## Function-by-function acceptance
 
+- [x] Provide a numbered 100-scenario catalogue and run every case independently for summ and tabstat; preserve all prior checks. See [cases and results](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md).
+
 - [x] Review summ/tabstat, repair reproduced defects, implement counts-only nonnumeric retention, regenerate help and verify real output; see [acceptance report](reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
 - [x] Verify summary tests have no uncaptured warnings/skips and fresh full package checks remain green.
 - [ ] Review tab/tab1/tab2 and fre/fre1/fre2 next, using existing evidence and documented naming limits.
