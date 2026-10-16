@@ -75,8 +75,8 @@ test_that("codebook: extreme missing value patterns", {
 
 test_that("codebook: haven labelled variables with complex labels", {
   df <- tibble(
-    simple_label = labelled(1:3, labels = c("A" = 1, "B" = 2, "C" = 3)),
-    with_na = labelled(c(1, 1, 2, -99), 
+    simple_label = labelled(rep(1:3, length.out = 100), labels = c("A" = 1, "B" = 2, "C" = 3)),
+    with_na = labelled_spss(rep(c(1, 1, 2, -99), length.out = 100),
                        labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
                        na_values = -99),
     extended = labelled(rep(1:5, 20), 
@@ -131,10 +131,10 @@ test_that("codebook: data frame with 50+ variables", {
 test_that("codebook: extreme numeric values", {
   df <- tibble(
     normal = 1:10,
-    large = c(.Machine$double.xmax, .Machine$double.xmax / 2),
-    small = c(.Machine$double.xmin, .Machine$double.xmin * 2),
-    inf = c(Inf, -Inf, Inf, -Inf),
-    nan = c(NaN, NaN, 1, 2)
+    large = rep(c(.Machine$double.xmax, .Machine$double.xmax / 2), length.out = 10),
+    small = rep(c(.Machine$double.xmin, .Machine$double.xmin * 2), length.out = 10),
+    inf = rep(c(Inf, -Inf, Inf, -Inf), length.out = 10),
+    nan = rep(c(NaN, NaN, 1, 2), length.out = 10)
   )
   result <- codebook(df)
   expect_equal(nrow(result), 5)
@@ -154,9 +154,9 @@ test_that("codebook: unicode and special characters in column names", {
 
 test_that("codebook: logical variables with NA", {
   df <- tibble(
-    all_true = rep(TRUE, 50),
-    all_false = rep(FALSE, 50),
-    mixed = sample(c(TRUE, FALSE), 50, replace = TRUE),
+    all_true = rep(TRUE, 100),
+    all_false = rep(FALSE, 100),
+    mixed = sample(c(TRUE, FALSE), 100, replace = TRUE),
     with_na = c(rep(TRUE, 25), rep(FALSE, 25), rep(NA, 50))
   )
   result <- codebook(df)
@@ -168,7 +168,7 @@ test_that("codebook: difftime and hms time variables", {
   skip_if_not_installed("hms")
   df <- tibble(
     duration = as.difftime(c(1, 2, 3, 4, 5), units = "hours"),
-    time_of_day = hms::as_hms(c("08:00:00", "12:00:00", "18:00:00"))
+    time_of_day = hms::as_hms(rep(c("08:00:00", "12:00:00", "18:00:00"), length.out = 5))
   )
   result <- codebook(df)
   expect_equal(nrow(result), 2)
@@ -230,7 +230,7 @@ test_that("codebook: where() with complex predicate", {
   df <- tibble(
     num1 = 1:10, num2 = 11:20,
     char = letters[1:10],
-    logi = c(TRUE, FALSE),
+    logi = rep(c(TRUE, FALSE), length.out = 10),
     fac = factor(rep(1:2, 5))
   )
   result <- codebook(df, where(is.numeric))
@@ -256,14 +256,18 @@ test_that("codebook: survey data simulation", {
                    replace = TRUE, prob = c(0.48, 0.48, 0.02, 0.02)),
     satisfaction = sample(1:5, 1000, replace = TRUE, 
                          prob = c(0.1, 0.15, 0.3, 0.3, 0.15)),
-    comments = ifelse(sample(c(TRUE, FALSE), 1000, prob = c(0.3, 0.7)),
+    comments = ifelse(sample(c(TRUE, FALSE), 1000, replace = TRUE, prob = c(0.3, 0.7)),
                      sample(c("Great!", "Needs work", "OK"), 1000, replace = TRUE),
                      NA),
     completed = sample(c(TRUE, FALSE), 1000, replace = TRUE, prob = c(0.9, 0.1))
   )
   result <- codebook(df)
-  expect_equal(nrow(result), 7)
-  expect_equal(sum(result$n), 6000)
+  expect_equal(nrow(result), ncol(df))
+  expect_setequal(result$variable, names(df))
+  expect_equal(
+    result$n[match(names(df), result$variable)],
+    unname(vapply(df, function(x) sum(!is.na(x)), integer(1)))
+  )
 })
 
 test_that("codebook: time series data", {
@@ -286,14 +290,15 @@ test_that("codebook: clinical trial data", {
     treatment = sample(c("Drug", "Placebo"), 200, replace = TRUE),
     age = sample(18:80, 200, replace = TRUE),
     baseline_score = sample(0:100, 200, replace = TRUE),
-    followup_score = ifelse(sample(c(TRUE, FALSE), 200, prob = c(0.8, 0.2)),
+    followup_score = ifelse(sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.8, 0.2)),
                            sample(0:100, 200, replace = TRUE), NA),
-    adverse_event = ifelse(sample(c(TRUE, FALSE), 200, prob = c(0.15, 0.85)),
+    adverse_event = ifelse(sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.15, 0.85)),
                           sample(c("Mild", "Moderate", "Severe"), 200, replace = TRUE),
                           NA)
   )
   result <- codebook(df)
-  expect_equal(nrow(result), 8)
+  expect_equal(nrow(result), ncol(df))
+  expect_setequal(result$variable, names(df))
 })
 
 # ============================================================================

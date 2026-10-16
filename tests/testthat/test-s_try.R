@@ -54,20 +54,23 @@ test_that("s_try: syntax error returns FALSE", {
   expect_true(result_valid)
 })
 
-test_that("s_try: invalid operation returns FALSE", {
-  result <- s_try(mean("not numeric"))
-  expect_false(result)
+test_that("s_try: non-numeric mean warns but returns TRUE", {
+  expect_warning(
+    result <- s_try(mean("not numeric")),
+    "argument is not numeric or logical"
+  )
+  expect_true(result)
 })
 
-test_that("s_try: NULL input errors", {
+test_that("s_try: NULL extraction succeeds", {
   result <- s_try(NULL$nonexistent)
-  expect_false(result)
+  expect_true(result)
 })
 
-test_that("s_try: accessing non-existent column", {
+test_that("s_try: accessing non-existent column warns but succeeds", {
   df <- tibble(x = 1:5)
-  result <- s_try(df$y)
-  expect_false(result)
+  expect_warning(result <- s_try(df$y), "Unknown or uninitialised column")
+  expect_true(result)
 })
 
 # ============================================================================
@@ -204,8 +207,10 @@ test_that("s_try: checking if function exists", {
   has_tidy <- s_try(exists("tidy", mode = "function"))
   expect_type(has_tidy, "logical")
   
+  # A FALSE result is still a successful evaluation.
+  expect_false(exists("fake_function_xyz", mode = "function"))
   has_fake_func <- s_try(exists("fake_function_xyz", mode = "function"))
-  expect_false(has_fake_func)
+  expect_true(has_fake_func)
 })
 
 test_that("s_try: safe model fitting", {

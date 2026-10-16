@@ -211,7 +211,8 @@ test_that("browse: works in dplyr pipeline", {
     select(mpg, wt, hp) %>%
     browse(mpg, wt, hp)
   
-  expect_s3_class(result, "tbl_df")
+  expected <- mtcars %>% filter(mpg > 20) %>% select(mpg, wt, hp)
+  expect_identical(result, expected)
   expect_true(all(result$mpg > 20))
 })
 

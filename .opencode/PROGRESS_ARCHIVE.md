@@ -85,3 +85,10 @@ Created extra_functions/, moved non-core functions (s_ggsave, s_plot, etc.).
 - **Environment**: Sandboxed execution still fails with setup refresh errors; approved outside-sandbox execution works. Added the exact D:/R/statart safe.directory exception for differing sandbox ownership and repository-local HTTPS credential helper. SSH strict host verification failed, so HTTPS was used.
 - **Verification**: Authenticated ls-remote succeeds, HEAD matches origin/master, upstream is configured, and staged diff is empty. Updated current Git-status guidance and task trackers; archived the oldest progress entry. No package code or behavior changed; R checks were not needed for this connection task.
 
+
+## 2026-10-15 - Upstream Comparison Completed
+- **Verified**: Authenticated fetch, master tracking origin/master, matching 12709f6 revision, zero ahead/behind, and empty staged diff.
+- **Compared**: 48 tracked changes, 273 initially untracked files, 54-to-40 exports, and all 15 removed source/help paths against archives or replacements.
+- **Findings**: Upstream migration documentation is incomplete; 135 result artifacts need staging review; diff whitespace check reports 26 locations. Existing test failures remain recorded, not rerun.
+- **Files**: Added project_status_git_comparison_2026-10-15.md; refreshed report index and status trackers; archived oldest progress entry. No package changes, commit, or push.
+

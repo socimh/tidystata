@@ -24,8 +24,12 @@ test_that("tab2: two numeric variables", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 5)
-  expect_equal(ncol(result), 6)
-  expect_equal(sum(result$n), 20)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
+  expect_equal(sum(as.matrix(result[-1])), 20)
 })
 
 test_that("tab2: two character variables", {
@@ -35,7 +39,11 @@ test_that("tab2: two character variables", {
   )
   result <- tab2(df, row_var, col_var)
   expect_equal(nrow(result), 4)
-  expect_equal(ncol(result), 5)
+  expect_setequal(names(result)[-1], as.character(unique(df$col_var)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$col_var)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: numeric row, character column", {
@@ -45,7 +53,11 @@ test_that("tab2: numeric row, character column", {
   )
   result <- tab2(df, age_group, gender)
   expect_equal(nrow(result), 5)
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$gender)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$gender)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: factor row, numeric column", {
@@ -79,7 +91,11 @@ test_that("tab2: flip with many levels", {
   )
   result <- tab2(df, rows, cols, .flip = TRUE)
   expect_equal(nrow(result), 5)
-  expect_equal(ncol(result), 12)
+  expect_setequal(names(result)[-1], as.character(unique(df$rows)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$rows)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: flip preserves cell values", {
@@ -89,7 +105,11 @@ test_that("tab2: flip preserves cell values", {
   )
   result1 <- tab2(df, x, y)
   result2 <- tab2(df, x, y, .flip = TRUE)
-  expect_equal(result1$n[1], result2$n[1])
+  expect_equal(
+    unname(as.matrix(result1[-1])),
+    unname(t(as.matrix(result2[-1])))
+  )
+  expect_equal(sum(as.matrix(result1[-1])), nrow(df))
 })
 
 # ============================================================================
@@ -130,7 +150,11 @@ test_that("tab2: all rows have at least one NA", {
     y = c(NA, "a", NA, "b")
   )
   result <- tab2(df, x, y)
-  expect_equal(sum(result$n), 0)
+  expect_setequal(names(result)[-1], c("a", "b", "NA"))
+  expect_equal(result$`NA`[!is.na(result[[1]])], c(1, 1))
+  expect_equal(result$a[is.na(result[[1]])], 1)
+  expect_equal(result$b[is.na(result[[1]])], 1)
+  expect_equal(sum(as.matrix(result[-1])), nrow(df))
 })
 
 test_that("tab2: factor with NA level", {
@@ -139,7 +163,10 @@ test_that("tab2: factor with NA level", {
     y = c("x", "y", "x")
   )
   result <- tab2(df, x, y)
-  expect_true(any(is.na(result[[1]])))
+  # An explicit NA factor level has a valid code, unlike a missing factor code.
+  expect_equal(levels(result[[1]]), levels(df$x))
+  expect_equal(as.integer(result[[1]]), 1:3)
+  expect_equal(rowSums(as.matrix(result[-1])), rep(1, 3))
 })
 
 # ============================================================================
@@ -150,16 +177,24 @@ test_that("tab2: single row dataset", {
   df <- tibble(x = "A", y = "X")
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 1)
-  expect_equal(ncol(result), 3)
-  expect_equal(result$n, 1)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
+  expect_equal(result$X, 1)
 })
 
 test_that("tab2: all identical values", {
   df <- tibble(x = rep("same", 100), y = rep("value", 100))
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 1)
-  expect_equal(ncol(result), 3)
-  expect_equal(result$n, 100)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
+  expect_equal(result$value, 100)
 })
 
 test_that("tab2: row var all unique, column var few levels", {
@@ -169,7 +204,11 @@ test_that("tab2: row var all unique, column var few levels", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 100)
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: row var few levels, column var all unique", {
@@ -179,15 +218,24 @@ test_that("tab2: row var few levels, column var all unique", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 102)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: both variables all unique", {
   df <- tibble(x = 1:50, y = 51:100)
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 50)
-  expect_equal(ncol(result), 52)
-  expect_true(all(result$n <= 1))
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
+  expect_true(all(as.matrix(result[-1]) %in% c(0, 1)))
+  expect_equal(rowSums(as.matrix(result[-1])), rep(1, nrow(df)))
 })
 
 test_that("tab2: empty data frame", {
@@ -208,8 +256,12 @@ test_that("tab2: 10x10 cross-tabulation", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 10)
-  expect_equal(ncol(result), 12)
-  expect_equal(sum(result$n), 1000)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
+  expect_equal(sum(as.matrix(result[-1])), 1000)
 })
 
 test_that("tab2: 50x5 cross-tabulation", {
@@ -220,7 +272,11 @@ test_that("tab2: 50x5 cross-tabulation", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 50)
-  expect_equal(ncol(result), 7)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: 5x50 cross-tabulation", {
@@ -231,7 +287,11 @@ test_that("tab2: 5x50 cross-tabulation", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 5)
-  expect_equal(ncol(result), 52)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: sparse cross-tabulation with many empty cells", {
@@ -256,7 +316,11 @@ test_that("tab2: unicode characters in both dimensions", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: emoji as values", {
@@ -266,7 +330,11 @@ test_that("tab2: emoji as values", {
   )
   result <- tab2(df, emotion, category)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$category)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$category)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: special whitespace characters", {
@@ -299,7 +367,11 @@ test_that("tab2: Date vs character", {
   )
   result <- tab2(df, date, status)
   expect_s3_class(result[[1]], "Date")
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$status)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$status)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: logical vs numeric", {
@@ -309,7 +381,11 @@ test_that("tab2: logical vs numeric", {
   )
   result <- tab2(df, flag, value)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$value)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$value)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: ordered factor vs regular factor", {
@@ -388,7 +464,11 @@ test_that("tab2: mixed numeric classes (integer vs double)", {
   )
   result <- tab2(df, int_col, dbl_col)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$dbl_col)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$dbl_col)[names(result)[-1]])
+  )
 })
 
 # ============================================================================
@@ -402,8 +482,12 @@ test_that("tab2: clinical trial data", {
   )
   result <- tab2(df, treatment, response)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 5)
-  expect_equal(sum(result$n), 200)
+  expect_setequal(names(result)[-1], as.character(unique(df$response)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$response)[names(result)[-1]])
+  )
+  expect_equal(sum(as.matrix(result[-1])), 200)
 })
 
 test_that("tab2: demographic breakdown", {
@@ -413,7 +497,11 @@ test_that("tab2: demographic breakdown", {
   )
   result <- tab2(df, age_group, gender)
   expect_equal(nrow(result), 4)
-  expect_equal(ncol(result), 5)
+  expect_setequal(names(result)[-1], as.character(unique(df$gender)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$gender)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: time series cross-tab", {
@@ -423,7 +511,11 @@ test_that("tab2: time series cross-tab", {
   )
   result <- tab2(df, quarter, region)
   expect_equal(nrow(result), 4)
-  expect_equal(ncol(result), 6)
+  expect_setequal(names(result)[-1], as.character(unique(df$region)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$region)[names(result)[-1]])
+  )
 })
 
 test_that("tab2: survey cross-tabulation", {
@@ -433,7 +525,11 @@ test_that("tab2: survey cross-tabulation", {
   )
   result <- tab2(df, question_1, question_2)
   expect_equal(nrow(result), 3)
-  expect_equal(ncol(result), 5)
+  expect_setequal(names(result)[-1], as.character(unique(df$question_2)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$question_2)[names(result)[-1]])
+  )
 })
 
 # ============================================================================
@@ -447,7 +543,9 @@ test_that("tab2: factor with unused levels", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 4)
+  expect_equal(ncol(result), 3)  # Row key and two observed column levels.
+  expect_equal(result[[1]], df$x)
+  expect_equal(sort(unlist(result[-1], use.names = FALSE)), c(0L, 0L, 1L, 1L))
 })
 
 test_that("tab2: factor levels not alphabetically ordered", {
@@ -488,5 +586,9 @@ test_that("tab2: everything() with two columns", {
   df <- tibble(x = c("A", "B", "A", "B"), y = c(1, 2, 1, 2))
   result <- tab2(df, everything())
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 4)
+  expect_setequal(names(result)[-1], as.character(unique(df$y)))
+  expect_equal(
+    unname(colSums(as.matrix(result[-1]))),
+    as.numeric(table(df$y)[names(result)[-1]])
+  )
 })

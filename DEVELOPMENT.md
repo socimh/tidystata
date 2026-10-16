@@ -33,6 +33,8 @@ Retained exploration/preparation helpers remain exported; MIGRATION.md also maps
 
 ## Current verification
 
+Latest test-only stabilization: **5 failed expectations, 10 error blocks, 33 warnings, one skip**, with 5,357 passing expectations across the same 1,358 blocks. Fresh installation succeeds. See the [test stabilization report](.opencode/reports/project_status_test_stabilization_2026-10-16.md). The first-milestone evidence below is historical.
+
 - [Milestone contract report](.opencode/reports/milestone_contracts_0.2.0.9000.md):
   622 passing scenarios and 4,098 passing expectations, with no failures,
   errors, warnings, or skips. Coverage includes the independent review fixes.

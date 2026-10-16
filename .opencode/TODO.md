@@ -2,7 +2,7 @@
 
 ## Next stabilization milestone
 
-- [ ] Repair remaining invalid labelled, incompatible-length, and sampling fixtures.
+- [x] Repair invalid labelled, incompatible-length, and sampling fixtures.
 - [ ] Settle summary/date output contracts and invalid-statistic handling.
 - [ ] Reconcile cross-tabulation dimensions/count-column expectations and category collisions.
 - [ ] Review selector evaluation, names/types, and remaining utility discrepancies.
@@ -14,7 +14,7 @@
 - [x] Complete maintenance setup verification: fresh fetch, configured identity/helper/trust, no incoming commits, and unchanged working-file hashes/index during fetch.
 - [x] Reconcile upstream-to-local migration notes and review result-artifact staging scope before integration.
 - [x] Prepare a reviewed local development checkpoint with selected evidence and a complete saved-failure classification.
-- [ ] Repair the 11 invalid fixtures and 77 incorrect-expectation identities in focused batches, verifying each against its contract.
+- [x] Repair the 11 invalid fixtures and 77 incorrect-expectation identities in focused batches, verifying each against its contract.
 - [ ] Resolve eight open behavior contracts and reproduce seven likely source defects before fixes.
 
 ## Completed first milestone

@@ -41,7 +41,7 @@ test_that("fre: multiple variables with tibble output", {
   df <- tibble(x = c("a", "a", "b"), y = c(1, 1, 2))
   result <- fre(df, x, y, .type = "tibble")
   expect_s3_class(result, "tbl_df")
-  expect_true(any(grepl("Total", result$x)))
+  expect_equal(sum(result$n[result$y == "Total"]), nrow(df))
 })
 
 # ============================================================================
@@ -76,7 +76,7 @@ test_that("fre: Total with grouped data", {
 test_that("fre: Total with missing values included", {
   df <- tibble(x = c("a", "a", "b", NA, NA))
   result <- fre(df, x, .type = "tibble")
-  total_row <- result[grepl("Total", result$x, ignore.case = TRUE), ]
+  total_row <- result[result$x %in% "Total", ]
   expect_equal(total_row$n, 5)
 })
 
@@ -166,8 +166,9 @@ test_that("fre: complex multi-level grouping", {
 
 test_that("fre: boolean expression as computed variable", {
   df <- tibble(x = 1:20, y = sample(letters[1:3], 20, replace = TRUE))
-  result <- fre(df, y, x > 10, .type = "tibble")
-  expect_true(any(result$x == "TRUE" | result$x == "FALSE"))
+  result <- fre(df, y, above_10 = x > 10, .type = "tibble")
+  expect_setequal(result$above_10, c("FALSE", "TRUE", "Total"))
+  expect_equal(sum(result$n[result$above_10 == "Total"]), nrow(df))
 })
 
 test_that("fre: complex boolean with multiple conditions", {
@@ -210,7 +211,7 @@ test_that("fre: factor with NA level explicitly included", {
 })
 
 test_that("fre: haven labelled with NA values", {
-  df <- tibble(x = labelled(c(1, 1, 2, -99), 
+  df <- tibble(x = labelled_spss(c(1, 1, 2, -99), 
                             labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
                             na_values = -99))
   result <- fre(df, x, .type = "tibble")
@@ -288,7 +289,7 @@ test_that("fre: five variables with tibble output", {
   )
   result <- fre(df, v1:v5, .type = "tibble")
   expect_s3_class(result, "tbl_df")
-  expect_true(any(grepl("Total", result$x, ignore.case = TRUE)))
+  expect_equal(sum(result$n[result$v5 == "Total"]), nrow(df))
 })
 
 test_that("fre: mixed variable types with Total", {
@@ -298,8 +299,9 @@ test_that("fre: mixed variable types with Total", {
     fac = factor(c("x", "x", "y", "y", "z"))
   )
   result <- fre(df, num, char, fac, .type = "tibble")
-  total_rows <- result[grepl("Total", result$x, ignore.case = TRUE), ]
-  expect_true(nrow(total_rows) >= 1)
+  total_rows <- result[result$fac == "Total", ]
+  expect_equal(nrow(total_rows), 1L)
+  expect_equal(total_rows$n, nrow(df))
 })
 
 # ============================================================================
@@ -407,7 +409,7 @@ test_that("fre: survey frequency distribution", {
   )
   result <- fre(df, satisfaction, would_recommend, .type = "tibble")
   expect_s3_class(result, "tbl_df")
-  expect_true(any(grepl("Total", result$x, ignore.case = TRUE)))
+  expect_equal(sum(result$n[result$would_recommend == "Total"]), nrow(df))
 })
 
 test_that("fre: demographic breakdown with grouping", {
@@ -417,7 +419,7 @@ test_that("fre: demographic breakdown with grouping", {
   )
   result <- fre(df, age_group, .by = gender, .type = "tibble")
   expect_true("gender" %in% names(result))
-  expect_true(any(grepl("Total", result$x, ignore.case = TRUE)))
+  expect_equal(sum(result$n[result$age_group == "Total"]), nrow(df))
 })
 
 test_that("fre: quality control frequencies", {

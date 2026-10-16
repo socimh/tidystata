@@ -141,10 +141,13 @@ test_that("timer: handles errors in expression", {
 test_that("timer: handles warnings in expression", {
   result <- NULL
   messages <- capture_messages({
-    result <<- timer({
-      warning("Test warning")
-      42
-    })
+    expect_warning(
+      result <- timer({
+        warning("Test warning")
+        42
+      }),
+      "Test warning"
+    )
   })
   expect_equal(result, 42)
   expect_true(any(grepl("Time spent", messages)))
@@ -160,7 +163,10 @@ test_that("timer: works with multiple pipes", {
     summarise(avg_wt = mean(wt)) %>%
     timer()
   
-  expect_s3_class(result, "tbl_df")
+  expected <- mtcars %>%
+    filter(mpg > 20) %>%
+    summarise(avg_wt = mean(wt))
+  expect_identical(result, expected)
   expect_equal(nrow(result), 1)
 })
 
@@ -256,15 +262,24 @@ test_that("timer: simulation workflow", {
 # CHALLENGING TESTS - Comparison with system.time
 # ============================================================================
 
-test_that("timer: timing is reasonable compared to system.time", {
-  # Run same operation with both
-  st <- system.time(Sys.sleep(0.05))
-  
-  messages <- capture_messages(timer(Sys.sleep(0.05)))
-  
-  # Both should indicate approximately the same time
-  expect_true(st["elapsed"] >= 0.04)  # Should be at least close to 0.05
-  expect_true(any(grepl("Time spent", messages)))
+test_that("timer: reports duration and preserves the result compared to system.time", {
+  st <- system.time(expected <- {
+    Sys.sleep(0.05)
+    "done"
+  })
+  messages <- capture_messages(result <- timer({
+    Sys.sleep(0.05)
+    "done"
+  }))
+
+  # Sleep and clock resolution vary; validate the reported duration and result.
+  expect_true(is.finite(st[["elapsed"]]))
+  expect_identical(result, expected)
+  expect_length(messages, 1)
+  expect_match(
+    trimws(messages),
+    "^Time spent: [0-9]+(h[0-9]+m|m[0-9]+s|[.][0-9]+s)$"
+  )
 })
 
 # ============================================================================

@@ -28,7 +28,7 @@ test_that("tab: five variables with complex interactions", {
   )
   result <- tab(df, v1, v2, v3, v4, v5)
   expect_true(nrow(result) > 10)
-  expect_equal(ncol(result), 6)
+  expect_named(result, c(paste0("v", 1:5), "n", "percent", "cum", "valid", "valid_cum"))
   expect_equal(sum(result$n), 200)
 })
 
@@ -79,7 +79,8 @@ test_that("tab: cascading NAs - each row has NA in different column", {
   expect_true(any(is.na(result$x)))
   expect_true(any(is.na(result$y)))
   expect_true(any(is.na(result$z)))
-  expect_equal(nrow(result), 7)
+  expect_equal(nrow(result), 3L)
+  expect_equal(result$n, rep(1L, 3))
 })
 
 test_that("tab: all combinations of NA patterns", {
@@ -88,7 +89,8 @@ test_that("tab: all combinations of NA patterns", {
     y = c("a", "a", NA, "a", "a", NA)
   )
   result <- tab(df, x, y)
-  expect_equal(nrow(result), 5)
+  expect_equal(nrow(result), 4L)
+  expect_equal(sort(result$n), c(1L, 1L, 2L, 2L))
   expect_true(any(is.na(result$x) & result$y == "a"))
   expect_true(any(is.na(result$x) & is.na(result$y)))
 })
@@ -96,12 +98,14 @@ test_that("tab: all combinations of NA patterns", {
 test_that("tab: factor with NA level explicitly set", {
   df <- tibble(x = factor(c("a", "b", NA), exclude = NULL))
   result <- tab(df, x)
-  expect_true(any(is.na(result$x)))
+  expect_true(anyNA(levels(result$x)))
+  expect_false(anyNA(result$x))
+  expect_equal(result$n[is.na(as.character(result$x))], 1L)
   expect_equal(sum(result$n), 3)
 })
 
 test_that("tab: haven labelled with NA value labelled", {
-  df <- tibble(x = labelled(c(1, 2, -99, 1), 
+  df <- tibble(x = labelled_spss(c(1, 2, -99, 1), 
                             labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
                             na_values = -99))
   result <- tab(df, x)
@@ -124,9 +128,11 @@ test_that("tab: group with empty groups after filtering", {
     group = rep(c("A", "B", "C"), each = 10),
     x = c(1:10, 11:20, 21:30)
   )
-  result <- tab(df, x > 15, .by = group)
-  expect_true(any(result$group == "C"))
-  expect_false(any(result$group == "A" & result$n > 0))
+  result <- tab(df, above_15 = x > 15, .by = group)
+  expect_setequal(result$group, c("A", "B", "C"))
+  expect_equal(result$n[result$group == "A" & !result$above_15], 10L)
+  expect_equal(result$n[result$group == "C" & result$above_15], 10L)
+  expect_equal(sum(result$n), nrow(df))
 })
 
 test_that("tab: many grouping variables with complex hierarchy", {
@@ -138,7 +144,7 @@ test_that("tab: many grouping variables with complex hierarchy", {
     category = sample(c("X", "Y", "Z"), 90, replace = TRUE)
   )
   result <- tab(df, category, .by = c(country, region))
-  expect_equal(ncol(result), 4)
+  expect_named(result, c("country", "region", "category", "n", "percent", "cum", "valid", "valid_cum"))
   expect_true(nrow(result) <= 27)
 })
 
@@ -149,7 +155,7 @@ test_that("tab: group where grouping variable has many NA levels", {
   )
   result <- tab(df, x, .by = group)
   expect_true(sum(is.na(result$group)) > 0)
-  expect_equal(sum(result$n[result$group == "A" | result$group == "B"]), 10)
+  expect_equal(sum(result$n[result$group %in% c("A", "B")]), 10)
 })
 
 test_that("tab: group with single unique value in group", {
@@ -165,30 +171,35 @@ test_that("tab: group with single unique value in group", {
 
 test_that("tab: boolean with OR and AND combined", {
   df <- tibble(x = 1:100, y = rep(letters[1:5], 20))
-  result <- tab(df, y, (x > 20 & x < 40) | (x > 60 & x < 80))
-  expect_true(nrow(result) <= 5)
-  total_count <- sum(result$n)
-  expect_true(total_count <= 38)
+  result <- tab(df, y, selected = (x > 20 & x < 40) | (x > 60 & x < 80))
+  expect_equal(sum(result$n), nrow(df))
+  expect_equal(sum(result$n[result$selected]), 38L)
+  expected <- count(mutate(df, selected = (x > 20 & x < 40) | (x > 60 & x < 80)), y, selected)
+  expect_equal(select(result, y, selected, n), expected)
 })
 
 test_that("tab: boolean expression creating all FALSE", {
   df <- tibble(x = 1:50, y = sample(1:3, 50, replace = TRUE))
-  result <- tab(df, y, x > 100)
-  expect_equal(nrow(result), 0)
+  result <- tab(df, y, selected = x > 100)
+  expect_false(any(result$selected))
+  expect_equal(sum(result$n), nrow(df))
+  expect_equal(select(result, y, n), count(df, y))
 })
 
 test_that("tab: boolean with is.na() function", {
   df <- tibble(x = c(1:5, NA, 7:10), y = c("a", "b", NA, "a", "b", "c", "a", "b", "a", "b"))
-  result <- tab(df, y, is.na(x))
-  expect_equal(nrow(result), 1)
-  expect_equal(result$y, "c")
+  result <- tab(df, y, missing_x = is.na(x))
+  expect_equal(sum(result$n), nrow(df))
+  expect_equal(result$y[result$missing_x], "c")
+  expect_equal(result$n[result$missing_x], 1L)
 })
 
 test_that("tab: boolean with %in% operator", {
   df <- tibble(x = 1:20, y = rep(1:4, 5))
-  result <- tab(df, y, x %in% c(3, 7, 11, 15, 19))
-  expect_equal(nrow(result), 4)
-  expect_equal(sum(result$n), 5)
+  result <- tab(df, y, selected = x %in% c(3, 7, 11, 15, 19))
+  expect_equal(nrow(result), 4L)
+  expect_equal(sum(result$n), nrow(df))
+  expect_equal(sum(result$n[result$selected]), 5L)
 })
 
 test_that("tab: complex nested boolean with multiple variables", {
@@ -331,13 +342,13 @@ test_that("tab: everything() with hidden columns", {
   df <- tibble(x = 1:3, y = 1:3)
   attr(df$y, "hidden") <- TRUE
   result <- tab(df, everything())
-  expect_equal(ncol(result), 3)
+  expect_named(result, c("x", "y", "n", "percent", "cum", "valid", "valid_cum"))
 })
 
 test_that("tab: where() with complex predicate", {
   df <- tibble(a = 1:3, b = c("x", "y", "z"), c = c(TRUE, FALSE, TRUE))
   result <- tab(df, where(~ is.numeric(.x) | is.logical(.x)))
-  expect_equal(ncol(result), 3)
+  expect_named(result, c("a", "c", "n", "percent", "cum", "valid", "valid_cum"))
 })
 
 # ============================================================================
@@ -384,7 +395,7 @@ test_that("tab: many columns selected", {
   df <- as_tibble(replicate(15, sample(1:3, 100, replace = TRUE)))
   names(df) <- paste0("var", 1:15)
   result <- tab(df, var1:var10)
-  expect_equal(ncol(result), 11)
+  expect_named(result, c(paste0("var", 1:10), "n", "percent", "cum", "valid", "valid_cum"))
 })
 
 # ============================================================================

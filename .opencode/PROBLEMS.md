@@ -1,6 +1,10 @@
 # Problems and issues
 
-## Current baseline after first milestone
+## Latest test-only stabilization
+
+Fresh full suite: **five failed expectations, ten error blocks, 33 warnings, one skip**, with 5,357 passing expectations across 1,358 blocks. All remaining failure/error identities were present in the previous baseline. See [current evidence](reports/project_status_test_stabilization_2026-10-16.md).
+
+## Historical baseline after first milestone
 
 Full retained suite: **94 failed expectations, 22 error blocks, 54 warnings,
 one skip**, with 5,129 passing expectations across 1,358 blocks. These are
@@ -25,7 +29,7 @@ The [complete saved-failure inventory](reports/project_status_failure_triage_202
 accounts for all 104 failing/erroring identities. Eleven fixtures fail before
 statart is reached; 77 identities have incorrect expectations. Seven likely
 implementation defects need focused reproduction, eight need explicit behavior
-decisions, and one is a reproduced environmental timing flake. No fixes applied.
+decisions, and one is a reproduced environmental timing flake. Those classifications are historical. The 2026-10-16 test-only pass repaired the invalid fixtures and incorrect expectations, retaining the source defects and unresolved contracts.
 
 Git setup and comparison are complete. NEWS/MIGRATION now document the full
 upstream API transition. The artifact allowlist retains selected evidence while

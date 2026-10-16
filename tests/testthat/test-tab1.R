@@ -93,7 +93,11 @@ test_that("tab1: factor with NA vs character with NA", {
   result <- tab1(df, fac_na, char_na, .type = "list")
   expect_s3_class(result$fac_na$value, "factor")
   expect_type(result$char_na$value, "character")
-  expect_true(all(is.na(result$fac_na$value) == is.na(result$char_na$value)))
+  expect_true(anyNA(levels(result$fac_na$value)))
+  expect_false(anyNA(result$fac_na$value))
+  expect_true(anyNA(result$char_na$value))
+  expect_equal(as.character(result$fac_na$value), result$char_na$value)
+  expect_equal(result$fac_na$n, result$char_na$n)
 })
 
 # ============================================================================
@@ -262,7 +266,7 @@ test_that("tab1: where() selection with complex predicate", {
   df <- tibble(
     num1 = 1:10, num2 = 11:20,
     char1 = letters[1:10],
-    log1 = c(TRUE, FALSE),
+    log1 = rep(c(TRUE, FALSE), length.out = 10),
     num3 = 21:30
   )
   result <- tab1(df, where(is.numeric), .type = "list")
@@ -285,8 +289,10 @@ test_that("tab1: .desc=TRUE applied to all variables", {
     y = c(1, 1, 2, 2, 3)
   )
   result <- tab1(df, x, y, .desc = TRUE, .type = "list")
-  expect_equal(result$x$value[1], "z")
-  expect_equal(result$y$value[1], 3)
+  expect_equal(result$x$n, c(2L, 2L, 1L))
+  expect_equal(result$y$n, c(2L, 2L, 1L))
+  expect_setequal(result$x$value[1:2], c("a", "z"))
+  expect_setequal(result$y$value[1:2], c(1, 2))
 })
 
 test_that("tab1: .desc=FALSE preserves factor order", {
@@ -303,7 +309,8 @@ test_that("tab1: frequency ties handling in sorting", {
   )
   result <- tab1(df, x, .desc = TRUE, .type = "list")
   expect_equal(result$x$n[1], 2)
-  expect_true(all(result$x$n[2:4] == 2))
+  expect_equal(result$x$n, c(2L, 2L, 2L, 1L))
+  expect_setequal(result$x$value[1:3], c("a", "b", "c"))
 })
 
 # ============================================================================

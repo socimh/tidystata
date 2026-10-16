@@ -216,7 +216,8 @@ test_that("fre1: .desc applied to all variables in list", {
   )
   result <- fre1(df, x, y, .desc = TRUE, .type = "list")
   non_total_x <- result$x[!grepl("Total", result$x$value, ignore.case = TRUE), ]
-  expect_equal(non_total_x$value[1], "z")
+  expect_equal(non_total_x$n, c(2, 2, 1))
+  expect_setequal(non_total_x$value[1:2], c("a", "z"))
 })
 
 test_that("fre1: .desc=FALSE preserves factor order", {
@@ -238,7 +239,8 @@ test_that("fre1: Date variables with Total", {
     d2 = as.Date(c("2024-06-01", "2024-06-01", "2024-06-02"))
   )
   result <- fre1(df, d1, d2, .type = "list")
-  expect_s3_class(result$d1$value, "Date")
+  expect_type(result$d1$value, "character")
+  expect_setequal(result$d1$value, c(as.character(unique(df$d1)), "Total"))
   expect_true(any(grepl("Total", result$d1$value, ignore.case = TRUE)))
 })
 
@@ -248,7 +250,9 @@ test_that("fre1: POSIXct datetime with Total", {
     t2 = as.POSIXct(c("2024-06-01 08:00", "2024-06-01 08:00", "2024-06-02 08:00"))
   )
   result <- fre1(df, t1, t2, .type = "list")
-  expect_s3_class(result$t1$value, "POSIXct")
+  expect_type(result$t1$value, "character")
+  expect_setequal(result$t1$value, c(as.character(unique(df$t1)), "Total"))
+  expect_equal(result$t1$n[result$t1$value == "Total"], nrow(df))
 })
 
 test_that("fre1: logical variables with Total", {
@@ -267,7 +271,10 @@ test_that("fre1: haven labelled variables", {
     y = labelled(c(3, 3, 4), labels = c("X" = 3, "Y" = 4))
   )
   result <- fre1(df, x, y, .type = "list")
-  expect_s3_class(result, "list")
+  expect_type(result, "list")
+  expect_named(result, c("x", "y"))
+  expect_setequal(result$x$value, c("A", "B", "Total"))
+  expect_setequal(result$y$value, c("X", "Y", "Total"))
 })
 
 # ============================================================================

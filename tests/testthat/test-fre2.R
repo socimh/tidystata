@@ -55,7 +55,7 @@ test_that("fre2: Total row sum equals grand total", {
   )
   result <- fre2(df, x, y, .type = "tibble")
   total_row <- result[grepl("Total", result[[1]], ignore.case = TRUE), ]
-  expect_equal(total_row$n, 4)
+  expect_equal(total_row$total, 4)
 })
 
 test_that("fre2: Total column sum equals row totals", {
@@ -93,8 +93,14 @@ test_that("fre2: .flip=TRUE swaps dimensions", {
   )
   result_normal <- fre2(df, x, y, .type = "tibble")
   result_flipped <- fre2(df, x, y, .flip = TRUE, .type = "tibble")
-  expect_equal(nrow(result_normal), ncol(result_flipped))
-  expect_equal(ncol(result_normal), nrow(result_flipped))
+  expect_equal(nrow(result_normal), ncol(result_flipped) - 1)
+  expect_equal(ncol(result_normal) - 1, nrow(result_flipped))
+  expect_equal(
+    unname(as.matrix(result_normal[-nrow(result_normal), -c(1, ncol(result_normal))])),
+    unname(t(as.matrix(result_flipped[-nrow(result_flipped), -c(1, ncol(result_flipped))])))
+  )
+  expect_equal(result_normal$total[nrow(result_normal)], nrow(df))
+  expect_equal(result_flipped$total[nrow(result_flipped)], nrow(df))
 })
 
 test_that("fre2: flip with many levels", {
@@ -154,15 +160,35 @@ test_that("fre2: factor with NA level", {
 test_that("fre2: single row dataset", {
   df <- tibble(x = "A", y = "X")
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(nrow(result), 3)  # A, Total row
-  expect_equal(ncol(result), 4)  # x, X, Total col, n
+  expect_equal(result[[1]], c("A", "total"))
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: all identical values", {
   df <- tibble(x = rep("same", 100), y = rep("value", 100))
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(nrow(result), 2)  # same, Total
-  expect_equal(ncol(result), 4)  # x, value, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: row var all unique, column var few levels", {
@@ -180,7 +206,17 @@ test_that("fre2: row var few levels, column var all unique", {
     y = 1:100
   )
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(ncol(result), 103)  # x, 100 cols, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: empty data frame", {
@@ -201,7 +237,17 @@ test_that("fre2: 10x10 cross-tabulation with totals", {
   )
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(nrow(result), 11)  # 10 + Total
-  expect_equal(ncol(result), 13)  # x, 10, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: sparse matrix with totals", {
@@ -227,7 +273,17 @@ test_that("fre2: unicode in both dimensions", {
   )
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(nrow(result), 3)  # 2 + Total
-  expect_equal(ncol(result), 5)  # x, 2, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: emoji as values", {
@@ -237,7 +293,17 @@ test_that("fre2: emoji as values", {
   )
   result <- fre2(df, emotion, category, .type = "tibble")
   expect_equal(nrow(result), 3)
-  expect_equal(ncol(result), 5)
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$category)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$category)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 # ============================================================================
@@ -250,7 +316,11 @@ test_that("fre2: Date vs character", {
     status = c("Active", "Inactive", "Active", "Inactive")
   )
   result <- fre2(df, date, status, .type = "tibble")
-  expect_s3_class(result[[1]], "Date")
+  expect_type(result[[1]], "character")
+  expect_equal(result[[1]], c("2024-01-01", "2024-01-02", "total"))
+  expect_equal(result$total, c(2, 2, 4))
+  expect_equal(result$Active, c(1, 1, 2))
+  expect_equal(result$Inactive, c(1, 1, 2))
 })
 
 test_that("fre2: logical vs numeric", {
@@ -260,7 +330,17 @@ test_that("fre2: logical vs numeric", {
   )
   result <- fre2(df, flag, value, .type = "tibble")
   expect_equal(nrow(result), 3)
-  expect_equal(ncol(result), 6)
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$value)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$value)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: ordered factor vs regular factor", {
@@ -269,7 +349,11 @@ test_that("fre2: ordered factor vs regular factor", {
     color = factor(c("Red", "Blue", "Red", "Blue", "Red"))
   )
   result <- fre2(df, size, color, .type = "tibble")
-  expect_s3_class(result[[1]], "ordered")
+  expect_type(result[[1]], "character")
+  expect_equal(result[[1]], c("S", "M", "L", "total"))
+  expect_equal(result$Blue, c(1, 1, 0, 2))
+  expect_equal(result$Red, c(1, 1, 1, 3))
+  expect_equal(result$total, c(2, 2, 1, 5))
 })
 
 # ============================================================================
@@ -322,7 +406,17 @@ test_that("fre2: clinical trial contingency table", {
   )
   result <- fre2(df, treatment, response, .type = "tibble")
   expect_equal(nrow(result), 3)  # 2 + Total
-  expect_equal(ncol(result), 6)  # treatment, 3 responses, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$response)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$response)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: demographic breakdown with totals", {
@@ -332,7 +426,17 @@ test_that("fre2: demographic breakdown with totals", {
   )
   result <- fre2(df, age_group, gender, .type = "tibble")
   expect_equal(nrow(result), 5)  # 4 + Total
-  expect_equal(ncol(result), 6)  # age_group, 3 genders, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$gender)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$gender)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: time series cross-tab with totals", {
@@ -342,7 +446,17 @@ test_that("fre2: time series cross-tab with totals", {
   )
   result <- fre2(df, quarter, region, .type = "tibble")
   expect_equal(nrow(result), 5)  # 4 + Total
-  expect_equal(ncol(result), 7)  # quarter, 4 regions, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$region)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$region)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 test_that("fre2: survey cross-tab with totals", {
@@ -352,7 +466,17 @@ test_that("fre2: survey cross-tab with totals", {
   )
   result <- fre2(df, question_1, question_2, .type = "tibble")
   expect_equal(nrow(result), 4)  # 3 + Total
-  expect_equal(ncol(result), 6)  # q1, 3 q2, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$question_2)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$question_2)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 # ============================================================================
@@ -365,8 +489,10 @@ test_that("fre2: factor with unused levels", {
     y = factor(c("x", "y"), levels = c("x", "y", "z"))
   )
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(nrow(result), 3)  # 2 + Total
-  expect_equal(ncol(result), 5)  # x, 2, Total, n
+  expect_equal(result[[1]], c("a", "b", "total"))
+  expect_equal(ncol(result), 4)  # Row key, two observed levels, and total.
+  expect_equal(result$total, c(1, 1, 2))
+  expect_equal(sort(unlist(result[3, 2:3], use.names = FALSE)), c(1L, 1L))
 })
 
 test_that("fre2: factor levels not alphabetically ordered", {
@@ -392,7 +518,17 @@ test_that("fre2: everything() with two columns", {
   df <- tibble(x = c("A", "B", "A", "B"), y = c("X", "Y", "X", "Y"))
   result <- fre2(df, everything(), .type = "tibble")
   expect_equal(nrow(result), 3)
-  expect_equal(ncol(result), 5)
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 # ============================================================================
@@ -438,11 +574,21 @@ test_that("fre2: defect analysis by shift", {
   )
   result <- fre2(df, shift, defect_type, .type = "tibble")
   expect_equal(nrow(result), 4)  # 3 shifts + Total
-  expect_equal(ncol(result), 7)  # shift, 4 defects, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$defect_type)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$defect_type)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
   
   # Verify grand total equals nrow(df)
   total_row <- result[grepl("Total", result[[1]], ignore.case = TRUE), ]
-  expect_equal(total_row$n, 500)
+  expect_equal(total_row$total, 500)
 })
 
 test_that("fre2: product sales by region", {
@@ -452,7 +598,17 @@ test_that("fre2: product sales by region", {
   )
   result <- fre2(df, product, region, .type = "tibble")
   expect_equal(nrow(result), 4)  # 3 products + Total
-  expect_equal(ncol(result), 7)  # product, 4 regions, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$region)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$region)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })
 
 # ============================================================================
@@ -466,8 +622,18 @@ test_that("fre2: highly concentrated data", {
   )
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(nrow(result), 3)
-  expect_equal(ncol(result), 5)
-  expect_equal(result$n[1], 950)
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
+  expect_equal(result$total[result[[1]] == "A"], 950)
 })
 
 test_that("fre2: uniformly distributed data", {
@@ -478,5 +644,15 @@ test_that("fre2: uniformly distributed data", {
   )
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(nrow(result), 11)  # 10 + Total
-  expect_equal(ncol(result), 13)  # x, 10, Total, n
+  category_cols <- names(result)[2:(ncol(result) - 1)]
+  expect_setequal(category_cols, as.character(unique(df$y)))
+  expect_equal(
+    as.numeric(unlist(result[nrow(result), category_cols], use.names = FALSE)),
+    as.numeric(table(df$y)[category_cols])
+  )
+  expect_equal(result$total[nrow(result)], nrow(df))
+  expect_equal(
+    result$total[-nrow(result)],
+    rowSums(as.matrix(result[-nrow(result), category_cols]))
+  )
 })

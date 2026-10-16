@@ -27,3 +27,8 @@ docs
 .opencode/tests/debug_issue_a1_step.R
 .opencode/tests/test_esttab_output.txt
 .opencode/tests/test_esttab_comprehensive_output.txt
+
+# Complete post-repair regression evidence.
+!.opencode/results/stabilization-tests-full.csv
+!.opencode/results/stabilization-tests-full-details.csv
+!.opencode/results/stabilization-tests-full-tests.log

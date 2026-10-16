@@ -300,8 +300,8 @@ test_that("s_type: data audit workflow", {
 test_that("s_type: ETL pipeline type checking", {
   raw_data <- tibble(
     id = as.character(1:100),  # IDs stored as character
-    value = c("100.5", "200.3", "150.0"),  # Values as character
-    date = c("2024-01-01", "2024-01-02", "2024-01-03")  # Dates as character
+    value = rep(c("100.5", "200.3", "150.0"), length.out = 100),  # Values as character
+    date = rep(c("2024-01-01", "2024-01-02", "2024-01-03"), length.out = 100)  # Dates as character
   )
   
   # Check types before conversion
