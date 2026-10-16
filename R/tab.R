@@ -7,13 +7,28 @@
 #' * `tab()` - Tabulates variable(s) simultaneously, similar to `count()`.
 #' * `tab1()` - Tabulates variable(s) one by one.
 #' * `tab2()` - Cross-tabulates two variables.
-#' * `fre()` - Adds “Total” row(s) to the output of `tab()`.
-#' * `fre1()` - Adds “Total” row(s) to the output of `tab1()`.
-#' * `fre2()` - Adds a “Total” row and a “total” column to the output of `tab2()`.
+#' * `fre()` - Adds "Total" row(s) to the output of `tab()`.
+#' * `fre1()` - Adds "Total" row(s) to the output of `tab1()`.
+#' * `fre2()` - Adds a "Total" row and a "total" column to the output of `tab2()`.
 #'
 #' The tabulation and frequency functions return data by default. The `fre()`
 #' family adds totals; rich output is available with `.type = "flextable"`
 #' when the optional flextable package is installed.
+#'
+#' For `tab()`, `tab1()`, `fre()` and `fre1()`, `n` counts observations.
+#' `percent` and `cum` are percentages from zero to 100 using all observations
+#' within each group; `cum` follows the displayed category order. `valid` and
+#' `valid_cum` use only observations with no missing measured values. Missing
+#' group keys are retained and do not make an otherwise observed value invalid.
+#' Missing measured categories have `NA` valid percentages and appear last.
+#'
+#' `fre()` and `fre1()` append a `"Total"` row within each group and may add
+#' `"Valid Total"` and `"Missing Total"` subtotals. In tables with up to five
+#' measured variables, the final measured column is converted to character to
+#' hold these labels; wider tables use a separate `total` label column.
+#' Displayed value labels can coincide for distinct underlying values, or with
+#' an observed `"Total"` category. Counts remain separate; use `tab()` or
+#' `tab1()` when original category values and types are needed.
 #'
 #' `tab()` counts list-column values by their complete identities without
 #' flattening their contents. Selecting no measured variables returns no rows:
@@ -27,6 +42,8 @@
 #' or literal `"NA"` alongside a missing column category, causes a name-collision
 #' error. In `fre2()`, the column category `"total"` is reserved for marginal
 #' totals; recode it first or use `tab2()`.
+#' The final row in `fre2()` is the marginal total, labelled `"total"`; an
+#' observed row category with the same label remains a separate row.
 #'
 #' If the output tibble has many rows, consider using
 #' `print()` to display the output.
@@ -39,7 +56,10 @@
 #' Both tidyselect (e.g., `starts_with()`) and
 #' data masking (e.g., `x_sq = x^2`) are supported.
 #' See examples below.
-#' @inheritParams dplyr::summarise
+#' @param .by Optional grouping columns, selected with tidyselect. For `tab()`,
+#' `tab1()`, `fre()` and `fre1()`, `NULL` inherits existing `group_by()` groups;
+#' an explicit selection replaces them. Grouping columns are not measured
+#' variables. `tab2()` and `fre2()` do not accept `.by`.
 #' @param .desc If TRUE, will show the largest groups at the top.
 #' @param .type Output type. `tab1()` and `fre1()` default to a list of
 #' tibbles; `fre()` and `fre2()` default to a tibble. Explicit flextable
@@ -101,7 +121,10 @@ tab <- function(
     .desc = FALSE) {
   # Identify group variables
   by <- rlang::enquo(.by)
-  group_vars <- extract_group_var(.data, by)
+  group_vars <- extract_group_var(
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+  )
+  .data <- dplyr::ungroup(.data)
 
   # Prepare data
   .data_nogroup <- prepare_tab_data(.data, ..., group_vars = group_vars)
@@ -133,7 +156,10 @@ tab1 <- function(
     .type = c("list", "tibble")) {
   # Identify group variables
   by <- rlang::enquo(.by)
-  group_vars <- extract_group_var(.data, by)
+  group_vars <- extract_group_var(
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+  )
+  .data <- dplyr::ungroup(.data)
 
   .type <- match.arg(.type)
   keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))
@@ -201,7 +227,10 @@ fre <- function(
   .type <- match.arg(.type)
   # Identify group variables
   by <- rlang::enquo(.by)
-  group_vars <- extract_group_var(.data, by)
+  group_vars <- extract_group_var(
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+  )
+  .data <- dplyr::ungroup(.data)
 
   # Prepare data
   .data_nogroup <- prepare_tab_data(.data, ..., group_vars = group_vars)
@@ -238,7 +267,10 @@ fre1 <- function(
     .type = c("list", "tibble", "flextable")) {
   # Identify group variables
   by <- rlang::enquo(.by)
-  group_vars <- extract_group_var(.data, by)
+  group_vars <- extract_group_var(
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+  )
+  .data <- dplyr::ungroup(.data)
 
   .type <- match.arg(.type)
   keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))

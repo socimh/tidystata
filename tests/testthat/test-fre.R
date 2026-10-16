@@ -339,7 +339,7 @@ test_that("fre: 10000 rows with tibble", {
 })
 
 test_that("fre: many variables (20+) with tibble", {
-  df <- as_tibble(replicate(20, sample(1:3, 100, replace = TRUE)))
+  df <- as_tibble(replicate(20, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:20)
   result <- fre(df, everything(), .type = "tibble")
   expect_s3_class(result, "tbl_df")

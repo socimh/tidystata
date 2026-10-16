@@ -95,6 +95,25 @@ statart::fre(mtcars, cyl, .type = "flextable")
 The default return type is independent of whether `flextable` is installed.
 Requesting rich output without it installed produces an installation message.
 
+For `tab()`, `tab1()`, `fre()` and `fre1()`, an explicit `.by` replaces existing
+`group_by()` groups; the default `NULL` inherits them. Percentages `percent` and
+`cum` use all observations within each group and range from zero to 100.
+`valid` and `valid_cum` exclude observations with missing measured values, while
+retaining missing grouping keys as ordinary groups. Cumulative percentages
+follow displayed order.
+
+Frequency tables append total rows. With up to five measured columns, the final
+measured column becomes character to hold total labels; wider joint tables use
+a separate label column. Value labels for distinct original values can look
+identical, and observed categories can match total labels. Use `tab()` or
+`tab1()` when original category values and types are needed. The final row of
+`fre2()` is the marginal total even if an observed row category is also
+`"total"`.
+
+`as_character()` uses value labels only when the labelled vector has a nonempty
+`labels` attribute. Vectors without value labels use ordinary character
+conversion, including tagged missing values.
+
 One-way tabulation accepts list columns and counts their distinct values.
 Matrix columns are unsupported. Selecting no variables returns an empty result:
 `tab1()` and `fre1()` return empty lists by default, while tibble output has zero

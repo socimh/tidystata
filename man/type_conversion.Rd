@@ -19,6 +19,9 @@ several types of variables.
 Character input to \code{as_numeric()} is parsed with \code{\link[readr:parse_number]{readr::parse_number()}},
 preserving its length. Invalid numbers generate parsing warnings. Factors
 return their level codes; labelled numeric variables return their values.
+\code{as_character()} uses value labels when a labelled vector has a nonempty
+\code{labels} attribute. Without value labels, it uses ordinary character
+conversion, including for tagged missing values.
 }
 \examples{
 lifeexp \%>\%

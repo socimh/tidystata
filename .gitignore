@@ -60,3 +60,10 @@ docs
 !.opencode/results/summ-100-reviewed-check.log
 !.opencode/results/summ-100-reviewed-scenarios.csv
 !.opencode/results/summ-100-reviewed-examples.log
+
+# Function-level tabulation acceptance evidence.
+!.opencode/results/tabulation-accepted.csv
+!.opencode/results/tabulation-accepted-details.csv
+!.opencode/results/tabulation-accepted-check.log
+!.opencode/results/tabulation-accepted-scenarios.csv
+!.opencode/results/tabulation-accepted-examples.log

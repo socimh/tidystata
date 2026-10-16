@@ -2,11 +2,12 @@
 
 ## Current verified state (2026-10-16)
 
-The complete suite passes: 6,692 expectations, zero failures/errors, 27 test
-warnings and one skipped block across 1,668 blocks. Fresh installation/build
+The complete suite passes: 14,255 expectations, zero failures/errors, 22 test
+warnings and one skipped block across 2,274 blocks. Fresh installation/build
 and R CMD check --no-manual pass with Status: OK. Earlier required-dependency
 smoke evidence remains valid; dependencies and exports did not change.
-See [the 100-scenario catalogue and current evidence](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md).
+See [tabulation acceptance and current evidence](reports/project_status_tabulation_acceptance_2026-10-16.md). The previous
+[summary catalogue](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md) remains valid.
 
 summ() and tabstat() are locally accepted release candidates: 342 blocks and
 1,224 expectations with zero failures/errors/warnings/skips. Fixed SPSS missing
@@ -15,6 +16,15 @@ formatting, empty .name behavior and the approved counts-only nonnumeric policy.
 Large integer64 conversion warnings are now visible. The standalone runner
 passes 286 scenarios and 1,158 expectations, including all 100 numbered cases for each function; independent review found no remaining
 material defects in the reviewed summary scope. This coverage expansion changed no package behavior; finite tests do not prove every possible input/platform.
+
+## Tabulation acceptance resolved (2026-10-16)
+
+- tab, tab1, tab2, fre, fre1 and fre2 each pass 100 numbered scenarios. All retained tabulation tests plus shared conversion regressions pass: 897 blocks/8258 expectations, zero failures/errors/uncaptured warnings/skips.
+- Explicit .by now replaces inherited grouping, including empty selections; missing keys and within-group denominators are preserved. A labelled vector without value labels no longer breaks frequency rendering when it contains tagged missing values.
+- Five unnamed-matrix fixtures now explicitly allow minimal names before assigning their intended names, eliminating five fixture-only warnings.
+- Frequency display labels may coincide for distinct original values or synthetic totals. Rows/counts remain separate; use tab/tab1 for original types. Identify fre2 marginal totals by final row position.
+- Some non-ASCII column names under Windows LC_CTYPE=C emit native-encoding warnings from R/dplyr. Tests narrowly assert those diagnostics and verify names/counts; this limitation remains. Other warning types stay visible. UTF-8 locales and other platforms remain unverified.
+- Independent review found no material remaining defects in this scope. Local acceptance does not imply universal input/platform correctness or permission to publish.
 
 ## Repository organization resolved (2026-10-16)
 
@@ -25,7 +35,7 @@ material defects in the reviewed summary scope. This coverage expansion changed 
 ## Remaining follow-up
 
 - Replace the empty cut_length interval-width test; its skip is missing coverage.
-- Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The summary family now has no uncaptured warnings. Test warnings are separate from package-check warnings (zero).
+- Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The summary and tabulation families now have no uncaptured warnings. Test warnings are separate from package-check warnings (zero).
 - Verify the declared R 4.1 minimum and other platforms before publishing.
 - Combined-header and literal-NA/missing-category cross-table collisions error explicitly; fre2 column category total must be recoded. An observed row label total remains alongside the final marginal row; callers should distinguish the final row.
 - Four regenerated README console lines retain pillar trailing spaces; no generated output was manually patched.

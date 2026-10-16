@@ -312,7 +312,7 @@ test_that("fre1: where() selection", {
 })
 
 test_that("fre1: many variables (20+) with list output", {
-  df <- as_tibble(replicate(20, sample(1:3, 50, replace = TRUE)))
+  df <- as_tibble(replicate(20, sample(1:3, 50, replace = TRUE)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:20)
   result <- fre1(df, everything(), .type = "list")
   expect_equal(length(result), 20)
@@ -409,7 +409,7 @@ test_that("fre1: moderate size dataset with list output", {
 })
 
 test_that("fre1: many variables with tibble output", {
-  df <- as_tibble(replicate(15, sample(1:3, 100, replace = TRUE)))
+  df <- as_tibble(replicate(15, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:15)
   result <- fre1(df, everything(), .type = "tibble")
   expect_s3_class(result, "tbl_df")

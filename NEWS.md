@@ -30,6 +30,11 @@
   positions and exposing parsing warnings.
 * Calculate grouped one-way tabulation statistics and totals within each group,
   retaining missing group keys and placing missing categories last.
+* Make explicit `.by` replace inherited groups in `tab()`, `tab1()`, `fre()`
+  and `fre1()`, including a zero-column grouping selection. Document percentage
+  denominators and display-label ambiguity in frequency totals. Handle labelled
+  vectors without value labels in `as_character()`, including tagged missing
+  values, without attempting factor conversion.
 * Make row summaries return atomic vectors consistently, handle empty and missing
   rows, and use sample variance and standard deviation.
 * Retain numeric and logical columns with no observed values in `summ()` and

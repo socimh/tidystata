@@ -13,7 +13,9 @@
 
 - [x] Review summ/tabstat, repair reproduced defects, implement counts-only nonnumeric retention, regenerate help and verify real output; see [acceptance report](reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
 - [x] Verify summary tests have no uncaptured warnings/skips and fresh full package checks remain green.
-- [ ] Review tab/tab1/tab2 and fre/fre1/fre2 next, using existing evidence and documented naming limits.
+- [x] Review tab/tab1/tab2 and fre/fre1/fre2, fix reproduced grouping/conversion defects and verify 100 numbered scenarios per export; see [acceptance](reports/project_status_tabulation_acceptance_2026-10-16.md).
+- [x] Regenerate shared help, verify actual output and pass fresh full-suite/build/check after tabulation changes.
+- [ ] Review variable inspection next: codebook, browse, ds, ds_as_column, names_as_column, variables and variables_search.
 - [ ] Continue through variable inspection, conversions, row helpers, binning and utilities.
 - [ ] Complete minimum-R/multi-platform validation before any publication request.
 

@@ -414,7 +414,7 @@ test_that("tab1: variable named 'variable' in tibble output", {
 # ============================================================================
 
 test_that("tab1: many variables (30+) with list output", {
-  df <- as_tibble(replicate(30, sample(1:3, 100, replace = TRUE)))
+  df <- as_tibble(replicate(30, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:30)
   result <- tab1(df, everything(), .type = "list")
   expect_equal(length(result), 30)

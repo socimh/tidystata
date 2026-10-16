@@ -5,6 +5,9 @@
 #' Character input to `as_numeric()` is parsed with [readr::parse_number()],
 #' preserving its length. Invalid numbers generate parsing warnings. Factors
 #' return their level codes; labelled numeric variables return their values.
+#' `as_character()` uses value labels when a labelled vector has a nonempty
+#' `labels` attribute. Without value labels, it uses ordinary character
+#' conversion, including for tagged missing values.
 #'
 #' @name type_conversion
 #' @param .x A vector or matrix.
@@ -22,7 +25,7 @@
 #' @rdname type_conversion
 as_character <- function(.x) {
   type <- s_type(.x, .abbr = TRUE)
-  if (type %>% stringr::str_detect("lbl")) {
+  if (type %>% stringr::str_detect("lbl") && length(attr(.x, "labels")) > 0L) {
     vec <- .x %>%
       haven::as_factor() %>%
       as.character()

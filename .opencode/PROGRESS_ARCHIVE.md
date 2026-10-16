@@ -123,3 +123,8 @@ Created extra_functions/, moved non-core functions (s_ggsave, s_plot, etc.).
 - **Scope**: Read-only package/file inventory and cleanup recommendations; no moves, deletion, package edits, push or release.
 - **Findings**: 670 non-Git files at review start: 250 tracked, 420 ignored. Retired functions are already build-excluded. Identified stale root scripts/notes and an installed historical inst/Build_Package.R scratchpad; make clean would remove preserved reports.
 - **Verification**: Inspected Git status/tracking, filesystem sizes, ignore rules, script contents/references and prior checked source tarball. Recorded a staged archival proposal and artifact boundaries; no package tests rerun.
+
+## 2026-10-16 - Repository Cleanup Implemented
+- **Changes**: Archived six obsolete maintenance/test/release files unchanged under extra_functions/development-history; removed stale root build-ignore entries. Kept run_tests.R and active source/data/tests/native artifacts. Updated maintenance entry points and made make clean non-destructive.
+- **Verification**: Six SHA-256 move matches and all baseline artifacts preserved; actual make clean exited 0 without changes. Fresh protected suite: 1410 blocks, 5617 passes, zero failures/errors, 33 warnings, one empty skip. Fresh build/check: Status OK. New tarball differs only by removal of inst/Build_Package.R, apart from packaging timestamp.
+- **Review**: Read-only package validation found no material issues. Updated cleanup report, evidence selection and tracking. No artifact deletion, push, merge or release.

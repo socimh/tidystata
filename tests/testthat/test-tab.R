@@ -397,7 +397,7 @@ test_that("tab: 10000 rows with 100 unique combinations", {
 
 test_that("tab: many columns selected", {
   set.seed(42)
-  df <- as_tibble(replicate(15, sample(1:3, 100, replace = TRUE)))
+  df <- as_tibble(replicate(15, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:15)
   result <- tab(df, var1:var10)
   expect_named(result, c(paste0("var", 1:10), "n", "percent", "cum", "valid", "valid_cum"))

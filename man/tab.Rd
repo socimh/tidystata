@@ -38,9 +38,10 @@ Both tidyselect (e.g., \code{starts_with()}) and
 data masking (e.g., \code{x_sq = x^2}) are supported.
 See examples below.}
 
-\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optionally, a selection of columns to
-group by for just this operation, functioning as an alternative to \code{\link[dplyr:group_by]{group_by()}}. For
-details and examples, see \link[dplyr:dplyr_by]{?dplyr_by}.}
+\item{.by}{Optional grouping columns, selected with tidyselect. For \code{tab()},
+\code{tab1()}, \code{fre()} and \code{fre1()}, \code{NULL} inherits existing \code{group_by()} groups;
+an explicit selection replaces them. Grouping columns are not measured
+variables. \code{tab2()} and \code{fre2()} do not accept \code{.by}.}
 
 \item{.desc}{If TRUE, will show the largest groups at the top.}
 
@@ -60,14 +61,29 @@ Enhanced \code{count()}.
 \item \code{tab()} - Tabulates variable(s) simultaneously, similar to \code{count()}.
 \item \code{tab1()} - Tabulates variable(s) one by one.
 \item \code{tab2()} - Cross-tabulates two variables.
-\item \code{fre()} - Adds “Total” row(s) to the output of \code{tab()}.
-\item \code{fre1()} - Adds “Total” row(s) to the output of \code{tab1()}.
-\item \code{fre2()} - Adds a “Total” row and a “total” column to the output of \code{tab2()}.
+\item \code{fre()} - Adds "Total" row(s) to the output of \code{tab()}.
+\item \code{fre1()} - Adds "Total" row(s) to the output of \code{tab1()}.
+\item \code{fre2()} - Adds a "Total" row and a "total" column to the output of \code{tab2()}.
 }
 
 The tabulation and frequency functions return data by default. The \code{fre()}
 family adds totals; rich output is available with \code{.type = "flextable"}
 when the optional flextable package is installed.
+
+For \code{tab()}, \code{tab1()}, \code{fre()} and \code{fre1()}, \code{n} counts observations.
+\code{percent} and \code{cum} are percentages from zero to 100 using all observations
+within each group; \code{cum} follows the displayed category order. \code{valid} and
+\code{valid_cum} use only observations with no missing measured values. Missing
+group keys are retained and do not make an otherwise observed value invalid.
+Missing measured categories have \code{NA} valid percentages and appear last.
+
+\code{fre()} and \code{fre1()} append a \code{"Total"} row within each group and may add
+\code{"Valid Total"} and \code{"Missing Total"} subtotals. In tables with up to five
+measured variables, the final measured column is converted to character to
+hold these labels; wider tables use a separate \code{total} label column.
+Displayed value labels can coincide for distinct underlying values, or with
+an observed \code{"Total"} category. Counts remain separate; use \code{tab()} or
+\code{tab1()} when original category values and types are needed.
 
 \code{tab()} counts list-column values by their complete identities without
 flattening their contents. Selecting no measured variables returns no rows:
@@ -81,6 +97,8 @@ original variable names. A category matching the combined row-header name,
 or literal \code{"NA"} alongside a missing column category, causes a name-collision
 error. In \code{fre2()}, the column category \code{"total"} is reserved for marginal
 totals; recode it first or use \code{tab2()}.
+The final row in \code{fre2()} is the marginal total, labelled \code{"total"}; an
+observed row category with the same label remains a separate row.
 
 If the output tibble has many rows, consider using
 \code{print()} to display the output.
