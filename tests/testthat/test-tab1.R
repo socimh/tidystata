@@ -38,7 +38,9 @@ test_that("tab1: list output with 10 variables", {
 
 test_that("tab1: tibble output with many variables", {
   df <- tibble(
-    a = 1:50, b = letters[1:50], c = factor(rep(1:5, 10)),
+    a = 1:50,
+    b = letters[1:50],
+    c = factor(rep(1:5, 10)),
     d = sample(c(TRUE, FALSE), 50, replace = TRUE)
   )
   result <- tab1(df, a:d, .type = "tibble")
@@ -211,10 +213,13 @@ test_that("tab1: all identical values in each variable", {
     c = rep(TRUE, 1000)
   )
   result <- tab1(df, a:c, .type = "list")
-  purrr::walk(result, ~ {
-    expect_equal(nrow(.x), 1)
-    expect_equal(.x$n, 1000)
-  })
+  purrr::walk(
+    result,
+    ~ {
+      expect_equal(nrow(.x), 1)
+      expect_equal(.x$n, 1000)
+    }
+  )
 })
 
 test_that("tab1: extreme cardinality differences", {
@@ -235,9 +240,12 @@ test_that("tab1: extreme cardinality differences", {
 
 test_that("tab1: starts_with selection across many vars", {
   df <- tibble(
-    pref_a_1 = 1:10, pref_a_2 = 1:10,
-    pref_b_1 = 1:10, pref_b_2 = 1:10,
-    other_x = 1:10, other_y = 1:10
+    pref_a_1 = 1:10,
+    pref_a_2 = 1:10,
+    pref_b_1 = 1:10,
+    pref_b_2 = 1:10,
+    other_x = 1:10,
+    other_y = 1:10
   )
   result <- tab1(df, starts_with("pref_"), .type = "list")
   expect_equal(length(result), 4)
@@ -245,8 +253,10 @@ test_that("tab1: starts_with selection across many vars", {
 
 test_that("tab1: ends_with selection", {
   df <- tibble(
-    x_test = 1:10, y_test = 1:10,
-    x_prod = 1:10, y_prod = 1:10,
+    x_test = 1:10,
+    y_test = 1:10,
+    x_prod = 1:10,
+    y_prod = 1:10,
     z_dev = 1:10
   )
   result <- tab1(df, ends_with("_test"), .type = "list")
@@ -255,8 +265,10 @@ test_that("tab1: ends_with selection", {
 
 test_that("tab1: contains selection", {
   df <- tibble(
-    var_1_temp = 1:10, var_2_temp = 1:10,
-    var_1_press = 1:10, temp_reading = 1:10
+    var_1_temp = 1:10,
+    var_2_temp = 1:10,
+    var_1_press = 1:10,
+    temp_reading = 1:10
   )
   result <- tab1(df, contains("temp"), .type = "list")
   expect_equal(length(result), 3)
@@ -264,7 +276,8 @@ test_that("tab1: contains selection", {
 
 test_that("tab1: where() selection with complex predicate", {
   df <- tibble(
-    num1 = 1:10, num2 = 11:20,
+    num1 = 1:10,
+    num2 = 11:20,
     char1 = letters[1:10],
     log1 = rep(c(TRUE, FALSE), length.out = 10),
     num3 = 21:30
@@ -329,8 +342,16 @@ test_that("tab1: Date variables", {
 
 test_that("tab1: POSIXct datetime variables", {
   df <- tibble(
-    t1 = as.POSIXct(c("2024-01-01 10:00", "2024-01-01 14:00", "2024-01-02 10:00")),
-    t2 = as.POSIXct(c("2024-06-01 08:00", "2024-06-01 08:00", "2024-06-02 08:00"))
+    t1 = as.POSIXct(c(
+      "2024-01-01 10:00",
+      "2024-01-01 14:00",
+      "2024-01-02 10:00"
+    )),
+    t2 = as.POSIXct(c(
+      "2024-06-01 08:00",
+      "2024-06-01 08:00",
+      "2024-06-02 08:00"
+    ))
   )
   result <- tab1(df, t1, t2, .type = "list")
   expect_s3_class(result$t1$value, "POSIXct")
@@ -414,7 +435,10 @@ test_that("tab1: variable named 'variable' in tibble output", {
 # ============================================================================
 
 test_that("tab1: many variables (30+) with list output", {
-  df <- as_tibble(replicate(30, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
+  df <- as_tibble(
+    replicate(30, sample(1:3, 100, replace = TRUE)),
+    .name_repair = "minimal"
+  )
   names(df) <- paste0("var", 1:30)
   result <- tab1(df, everything(), .type = "list")
   expect_equal(length(result), 30)
@@ -467,10 +491,17 @@ test_that("tab1: NULL input errors", {
 
 test_that("tab1: survey responses with skip patterns", {
   df <- tibble(
-    age_group = sample(c("18-25", "26-35", "36-50", "50+"), 100, replace = TRUE),
+    age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      100,
+      replace = TRUE
+    ),
     completed = sample(c(TRUE, FALSE), 100, replace = TRUE),
-    satisfaction = ifelse(sample(c(TRUE, FALSE), 100, replace = TRUE),
-                         sample(1:5, 100, replace = TRUE), NA)
+    satisfaction = ifelse(
+      sample(c(TRUE, FALSE), 100, replace = TRUE),
+      sample(1:5, 100, replace = TRUE),
+      NA
+    )
   )
   result <- tab1(df, age_group, completed, satisfaction, .type = "list")
   expect_equal(length(result), 3)
@@ -492,9 +523,24 @@ test_that("tab1: multi-country data with mixed formats", {
 
 test_that("tab1: quality control flags", {
   df <- tibble(
-    valid_id = sample(c(TRUE, FALSE), 500, replace = TRUE, prob = c(0.95, 0.05)),
-    valid_date = sample(c(TRUE, FALSE), 500, replace = TRUE, prob = c(0.98, 0.02)),
-    valid_amount = sample(c(TRUE, FALSE), 500, replace = TRUE, prob = c(0.9, 0.1))
+    valid_id = sample(
+      c(TRUE, FALSE),
+      500,
+      replace = TRUE,
+      prob = c(0.95, 0.05)
+    ),
+    valid_date = sample(
+      c(TRUE, FALSE),
+      500,
+      replace = TRUE,
+      prob = c(0.98, 0.02)
+    ),
+    valid_amount = sample(
+      c(TRUE, FALSE),
+      500,
+      replace = TRUE,
+      prob = c(0.9, 0.1)
+    )
   )
   result <- tab1(df, valid_id:valid_amount, .type = "list")
   expect_true(all(purrr::map_lgl(result, ~ nrow(.x) <= 2)))

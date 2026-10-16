@@ -114,7 +114,7 @@ test_that("s_type: data frame", {
 })
 
 test_that("s_type: complex numbers", {
-  x <- c(1+2i, 3+4i)
+  x <- c(1 + 2i, 3 + 4i)
   result <- s_type(x)
   expect_equal(result, "complex")
 })
@@ -171,10 +171,10 @@ test_that("s_type: applied to each column with summarise", {
     fct_col = factor(letters[1:5]),
     logi_col = c(TRUE, FALSE, TRUE, FALSE, TRUE)
   )
-  
+
   result <- df %>%
     summarise(across(everything(), s_type))
-  
+
   expect_s3_class(result, "tbl_df")
   expect_equal(result$int_col, "integer")
   expect_equal(result$dbl_col, "double")
@@ -188,10 +188,10 @@ test_that("s_type: within mutate for type checking", {
     x = 1:5,
     y = letters[1:5]
   )
-  
+
   result <- df %>%
     mutate(x_type = s_type(x), y_type = s_type(y))
-  
+
   expect_equal(result$x_type[1], "integer")
   expect_equal(result$y_type[1], "character")
 })
@@ -312,14 +312,17 @@ test_that("s_type: used in codebook workflow", {
     gender = sample(c("M", "F"), 100, replace = TRUE),
     score = sample(1:100, 100)
   )
-  
+
   # Simulate codebook variable summary
   var_summary <- df %>%
-    summarise(across(everything(), list(
-      type = s_type,
-      n = ~ sum(!is.na(.))
-    )))
-  
+    summarise(across(
+      everything(),
+      list(
+        type = s_type,
+        n = ~ sum(!is.na(.))
+      )
+    ))
+
   expect_s3_class(var_summary, "tbl_df")
 })
 
@@ -328,7 +331,7 @@ test_that("s_type: type validation function", {
     type <- s_type(x, .abbr = TRUE)
     type %in% c("int", "dbl")
   }
-  
+
   expect_true(is_numeric_type(1:5))
   expect_true(is_numeric_type(c(1.5, 2.5)))
   expect_false(is_numeric_type(letters[1:5]))
@@ -347,11 +350,11 @@ test_that("s_type: data audit workflow", {
     timestamp = Sys.time() + 1:1000,
     is_valid = sample(c(TRUE, FALSE), 1000, replace = TRUE)
   )
-  
+
   # Get type summary for all columns
   type_summary <- audit_data %>%
     summarise(across(everything(), s_type))
-  
+
   expect_equal(type_summary$transaction_id, "integer")
   expect_equal(type_summary$amount, "double")
   expect_equal(type_summary$currency, "character")
@@ -360,17 +363,17 @@ test_that("s_type: data audit workflow", {
 
 test_that("s_type: ETL pipeline type checking", {
   raw_data <- tibble(
-    id = as.character(1:100),  # IDs stored as character
-    value = rep(c("100.5", "200.3", "150.0"), length.out = 100),  # Values as character
-    date = rep(c("2024-01-01", "2024-01-02", "2024-01-03"), length.out = 100)  # Dates as character
+    id = as.character(1:100), # IDs stored as character
+    value = rep(c("100.5", "200.3", "150.0"), length.out = 100), # Values as character
+    date = rep(c("2024-01-01", "2024-01-02", "2024-01-03"), length.out = 100) # Dates as character
   )
-  
+
   # Check types before conversion
   original_types <- raw_data %>%
     summarise(across(everything(), s_type))
-  
+
   expect_equal(unique(unlist(original_types)), "character")
-  
+
   # After conversion
   clean_data <- raw_data %>%
     mutate(
@@ -378,10 +381,10 @@ test_that("s_type: ETL pipeline type checking", {
       value = as.numeric(value),
       date = as.Date(date)
     )
-  
+
   clean_types <- clean_data %>%
     summarise(across(everything(), s_type))
-  
+
   expect_equal(clean_types$id, "integer")
   expect_equal(clean_types$value, "double")
   expect_equal(clean_types$date, "date")

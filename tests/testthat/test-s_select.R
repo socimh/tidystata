@@ -71,9 +71,11 @@ test_that("s_select: multiple computed columns", {
 
 test_that("s_select: complex expressions", {
   df <- tibble(a = 1:10, b = 11:20, c = 21:30)
-  result <- s_select(df, 
-                     weighted = a * 0.5 + b * 0.3 + c * 0.2,
-                     ratio = (b - a) / c)
+  result <- s_select(
+    df,
+    weighted = a * 0.5 + b * 0.3 + c * 0.2,
+    ratio = (b - a) / c
+  )
   expect_equal(ncol(result), 2)
   expect_type(result$weighted, "double")
   expect_type(result$ratio, "double")
@@ -111,7 +113,8 @@ test_that("s_select: contains selection", {
 
 test_that("s_select: where() with is.numeric", {
   df <- tibble(
-    num1 = 1:5, num2 = 6:10,
+    num1 = 1:5,
+    num2 = 6:10,
     char = letters[1:5],
     logi = c(TRUE, FALSE, TRUE, FALSE, TRUE)
   )
@@ -166,11 +169,13 @@ test_that("s_select: mix of named columns and expressions", {
 
 test_that("s_select: mix of selection and computed columns", {
   df <- tibble(
-    temp_1 = 1:5, temp_2 = 6:10,
-    pressure_1 = 11:15, pressure_2 = 16:20
+    temp_1 = 1:5,
+    temp_2 = 6:10,
+    pressure_1 = 11:15,
+    pressure_2 = 16:20
   )
   # First select temp columns, then add computed column in separate step
-  result <- df %>% 
+  result <- df %>%
     s_select(starts_with("temp")) %>%
     mutate(total_pressure = df$pressure_1 + df$pressure_2)
   expect_equal(ncol(result), 3)
@@ -292,16 +297,24 @@ test_that("s_select: survey data variable selection", {
     respondent_id = 1:100,
     q1_satisfaction = sample(1:5, 100, replace = TRUE),
     q2_recommend = sample(c("Yes", "No", "Maybe"), 100, replace = TRUE),
-    q3_age_group = sample(c("18-25", "26-35", "36-50", "50+"), 100, replace = TRUE),
+    q3_age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      100,
+      replace = TRUE
+    ),
     completion_time = runif(100, 1, 10)
   )
-  
+
   # Select only question columns
   questions <- s_select(survey, starts_with("q"))
   expect_equal(ncol(questions), 3)
-  
+
   # Calculate satisfaction score
-  satisfaction_with_id <- s_select(survey, respondent_id, is_satisfied = q1_satisfaction >= 4)
+  satisfaction_with_id <- s_select(
+    survey,
+    respondent_id,
+    is_satisfied = q1_satisfaction >= 4
+  )
   expect_equal(ncol(satisfaction_with_id), 2)
   expect_type(satisfaction_with_id$is_satisfied, "logical")
 })
@@ -313,12 +326,14 @@ test_that("s_select: financial data analysis", {
     close_price = cumsum(rnorm(30, 0.1, 1)) + 101,
     volume = sample(1000000:10000000, 30)
   )
-  
-  result <- s_select(financial, 
-                     date, 
-                     price_range = close_price - open_price,
-                     volume_millions = volume / 1e6)
-  
+
+  result <- s_select(
+    financial,
+    date,
+    price_range = close_price - open_price,
+    volume_millions = volume / 1e6
+  )
+
   expect_equal(ncol(result), 3)
   expect_equal(result$price_range, financial$close_price - financial$open_price)
 })
@@ -330,14 +345,18 @@ test_that("s_select: feature engineering for modeling", {
     x3 = rnorm(100),
     target = rnorm(100)
   )
-  
-  features <- s_select(data,
-                       x1, x2, x3,
-                       x1_sq = x1^2,
-                       x2_sq = x2^2,
-                       interaction = x1 * x2,
-                       target)
-  
+
+  features <- s_select(
+    data,
+    x1,
+    x2,
+    x3,
+    x1_sq = x1^2,
+    x2_sq = x2^2,
+    interaction = x1 * x2,
+    target
+  )
+
   expect_equal(ncol(features), 7)
   expect_equal(features$x1_sq, data$x1^2)
   expect_equal(features$interaction, data$x1 * data$x2)
@@ -362,11 +381,11 @@ test_that("s_select: works with data.table input", {
 test_that("s_select: handles wide data frames efficiently", {
   df <- as_tibble(replicate(1000, rnorm(100)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:1000)
-  
+
   start_time <- Sys.time()
   result <- s_select(df, where(~ mean(.x) > 0))
   end_time <- Sys.time()
-  
+
   expect_s3_class(result, "tbl_df")
-  expect_true(as.numeric(end_time - start_time) < 5)  # Should complete in 5 seconds
+  expect_true(as.numeric(end_time - start_time) < 5) # Should complete in 5 seconds
 })

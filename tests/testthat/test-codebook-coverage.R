@@ -3,8 +3,14 @@
 # internals. Structured columns count complete observed rows; lists retain the
 # established element identity semantics (NULL and empty vectors are elements).
 
-cb_expect <- function(data, n, unique, type = NULL,
-                      variables = names(data), labels = NULL) {
+cb_expect <- function(
+  data,
+  n,
+  unique,
+  type = NULL,
+  variables = names(data),
+  labels = NULL
+) {
   out <- codebook(data)
   expect_s3_class(out, "tbl_df")
   expect_false(inherits(out, "grouped_df"))
@@ -12,11 +18,20 @@ cb_expect <- function(data, n, unique, type = NULL,
   expect_identical(out$variable, variables)
   expect_equal(out$n, n)
   expect_equal(out$unique, unique)
-  expect_identical(names(out), if (is.null(labels)) {
-    c("variable", "type", "n", "unique")
-  } else c("variable", "label", "type", "n", "unique"))
-  if (!is.null(type)) expect_identical(out$type, type)
-  if (!is.null(labels)) expect_identical(out$label, labels)
+  expect_identical(
+    names(out),
+    if (is.null(labels)) {
+      c("variable", "type", "n", "unique")
+    } else {
+      c("variable", "label", "type", "n", "unique")
+    }
+  )
+  if (!is.null(type)) {
+    expect_identical(out$type, type)
+  }
+  if (!is.null(labels)) {
+    expect_identical(out$label, labels)
+  }
   invisible(out)
 }
 
@@ -33,16 +48,38 @@ test_that("codebook coverage 004: character blanks are observed distinct values"
   cb_expect(tibble::tibble(x = c("", " ", "a", "", NA)), 4, 3, "character")
 })
 test_that("codebook coverage 005: Unicode character values retain identity", {
-  cb_expect(tibble::tibble(x = c("\u4e2d", "\u6587", "\u4e2d", NA)), 3, 2, "character")
+  cb_expect(
+    tibble::tibble(x = c("\u4e2d", "\u6587", "\u4e2d", NA)),
+    3,
+    2,
+    "character"
+  )
 })
 test_that("codebook coverage 006: factor counts omit unused levels", {
-  cb_expect(tibble::tibble(x = factor(c("a", "a", NA), levels = c("a", "b"))), 2, 1, "factor")
+  cb_expect(
+    tibble::tibble(x = factor(c("a", "a", NA), levels = c("a", "b"))),
+    2,
+    1,
+    "factor"
+  )
 })
 test_that("codebook coverage 007: ordered factors preserve their type", {
-  cb_expect(tibble::tibble(x = ordered(c("low", "high", NA), levels = c("low", "middle", "high"))), 2, 2, "ordered")
+  cb_expect(
+    tibble::tibble(
+      x = ordered(c("low", "high", NA), levels = c("low", "middle", "high"))
+    ),
+    2,
+    2,
+    "ordered"
+  )
 })
 test_that("codebook coverage 008: complex missing values are excluded", {
-  cb_expect(tibble::tibble(x = c(1 + 2i, 1 + 2i, 2 + 1i, NA_complex_)), 3, 2, "complex")
+  cb_expect(
+    tibble::tibble(x = c(1 + 2i, 1 + 2i, 2 + 1i, NA_complex_)),
+    3,
+    2,
+    "complex"
+  )
 })
 test_that("codebook coverage 009: raw zero is observed", {
   cb_expect(tibble::tibble(x = as.raw(c(0, 0, 255))), 3, 2, "raw")
@@ -63,13 +100,23 @@ test_that("codebook coverage 014: singleton observation", {
   cb_expect(tibble::tibble(x = 42), 1, 1, "double")
 })
 test_that("codebook coverage 015: typed zero-row columns retain type and zero counts", {
-  cb_expect(tibble::tibble(i = integer(), c = character(), l = logical()), c(0, 0, 0), c(0, 0, 0), c("integer", "character", "logical"))
+  cb_expect(
+    tibble::tibble(i = integer(), c = character(), l = logical()),
+    c(0, 0, 0),
+    c(0, 0, 0),
+    c("integer", "character", "logical")
+  )
 })
 test_that("codebook coverage 016: no columns return the fixed empty schema", {
   cb_expect(tibble::tibble(), integer(), integer(), character())
 })
 test_that("codebook coverage 017: zero-column data frame with rows remains empty", {
-  cb_expect(data.frame(row.names = seq_len(4)), integer(), integer(), character())
+  cb_expect(
+    data.frame(row.names = seq_len(4)),
+    integer(),
+    integer(),
+    character()
+  )
 })
 test_that("codebook coverage 018: all unique values have unique count equal to n", {
   cb_expect(tibble::tibble(x = seq_len(1000)), 1000, 1000, "integer")
@@ -79,59 +126,120 @@ test_that("codebook coverage 019: repetition changes n but not unique count", {
   cb_expect(tibble::tibble(x = x), 100, 3, "double")
 })
 test_that("codebook coverage 020: mixed storage reports in input column order", {
-  cb_expect(tibble::tibble(z = c("a", NA), a = c(1L, 2L), m = c(TRUE, NA)), c(1, 2, 1), c(1, 2, 1), c("character", "integer", "logical"))
+  cb_expect(
+    tibble::tibble(z = c("a", NA), a = c(1L, 2L), m = c(TRUE, NA)),
+    c(1, 2, 1),
+    c(1, 2, 1),
+    c("character", "integer", "logical")
+  )
 })
 test_that("codebook coverage 021: leap dates use observed date identity", {
-  cb_expect(tibble::tibble(x = as.Date(c("2024-02-29", "2024-02-29", "2024-03-01", NA))), 3, 2, "date")
+  cb_expect(
+    tibble::tibble(
+      x = as.Date(c("2024-02-29", "2024-02-29", "2024-03-01", NA))
+    ),
+    3,
+    2,
+    "date"
+  )
 })
 test_that("codebook coverage 022: datetime fractions count separate instants", {
   x <- as.POSIXct(c(0, 0.1, 0.1, NA), origin = "1970-01-01", tz = "UTC")
   cb_expect(tibble::tibble(x = x), 3, 2, "datetime")
 })
 test_that("codebook coverage 023: timezone does not change instant counts", {
-  x <- as.POSIXct(c(0, 0, 3600, NA), origin = "1970-01-01", tz = "America/New_York")
+  x <- as.POSIXct(
+    c(0, 0, 3600, NA),
+    origin = "1970-01-01",
+    tz = "America/New_York"
+  )
   cb_expect(tibble::tibble(x = x), 3, 2, "datetime")
 })
 test_that("codebook coverage 024: duration includes its declared unit", {
-  cb_expect(tibble::tibble(x = as.difftime(c(1, 1, 2, NA), units = "hours")), 3, 2, "duration [hours]")
+  cb_expect(
+    tibble::tibble(x = as.difftime(c(1, 1, 2, NA), units = "hours")),
+    3,
+    2,
+    "duration [hours]"
+  )
 })
 test_that("codebook coverage 025: all missing duration retains unit metadata", {
-  cb_expect(tibble::tibble(x = as.difftime(c(NA_real_, NA_real_), units = "mins")), 0, 0, "duration [mins]")
+  cb_expect(
+    tibble::tibble(x = as.difftime(c(NA_real_, NA_real_), units = "mins")),
+    0,
+    0,
+    "duration [mins]"
+  )
 })
 test_that("codebook coverage 026: hms reports seconds and missingness", {
   skip_if_not_installed("hms")
-  cb_expect(tibble::tibble(x = hms::as_hms(c(0, 3600, 3600, NA))), 3, 2, "time [secs]")
+  cb_expect(
+    tibble::tibble(x = hms::as_hms(c(0, 3600, 3600, NA))),
+    3,
+    2,
+    "time [secs]"
+  )
 })
 test_that("codebook coverage 027: measured units are displayed without conversion", {
   skip_if_not_installed("units")
-  cb_expect(tibble::tibble(x = units::set_units(c(1, 1, 2, NA), "cm")), 3, 2, "units [cm]")
+  cb_expect(
+    tibble::tibble(x = units::set_units(c(1, 1, 2, NA), "cm")),
+    3,
+    2,
+    "units [cm]"
+  )
 })
 test_that("codebook coverage 028: empty measured vector retains unit", {
   skip_if_not_installed("units")
-  cb_expect(tibble::tibble(x = units::set_units(numeric(), "m")), 0, 0, "units [m]")
+  cb_expect(
+    tibble::tibble(x = units::set_units(numeric(), "m")),
+    0,
+    0,
+    "units [m]"
+  )
 })
 test_that("codebook coverage 029: integer64 identity survives values above double precision", {
   skip_if_not_installed("bit64")
-  x <- bit64::as.integer64(c("9007199254740992", "9007199254740993", "9007199254740993", NA))
+  x <- bit64::as.integer64(c(
+    "9007199254740992",
+    "9007199254740993",
+    "9007199254740993",
+    NA
+  ))
   cb_expect(tibble::tibble(x = x), 3, 2, "integer64")
 })
 test_that("codebook coverage 030: deterministic wider data agree with base counts", {
-  x <- tibble::as_tibble(stats::setNames(lapply(seq_len(30), function(i) {
-    replace((seq_len(100) * i) %% 17, seq(i, 100, by = 31), NA)
-  }), paste0("v", seq_len(30))))
-  cb_expect(x, unname(vapply(x, function(z) sum(!is.na(z)), integer(1))),
-            unname(vapply(x, function(z) length(unique(z[!is.na(z)])), integer(1))))
+  x <- tibble::as_tibble(stats::setNames(
+    lapply(seq_len(30), function(i) {
+      replace((seq_len(100) * i) %% 17, seq(i, 100, by = 31), NA)
+    }),
+    paste0("v", seq_len(30))
+  ))
+  cb_expect(
+    x,
+    unname(vapply(x, function(z) sum(!is.na(z)), integer(1))),
+    unname(vapply(x, function(z) length(unique(z[!is.na(z)])), integer(1)))
+  )
 })
 test_that("codebook coverage 031: numeric haven labels do not merge value codes", {
   x <- haven::labelled(c(1, 2, 2, NA), labels = c(Same = 1, Same = 2))
   cb_expect(tibble::tibble(x = x), 3, 2, "double+label")
 })
 test_that("codebook coverage 032: character haven labels preserve raw identities", {
-  x <- haven::labelled(c("a", "b", "a", NA), labels = c(Alpha = "a", Beta = "b"))
+  x <- haven::labelled(
+    c("a", "b", "a", NA),
+    labels = c(Alpha = "a", Beta = "b")
+  )
   cb_expect(tibble::tibble(x = x), 3, 2, "character+label")
 })
 test_that("codebook coverage 033: tagged missing codes are all excluded", {
-  x <- haven::labelled(c(1, haven::tagged_na("a"), haven::tagged_na("z"), NA, 1))
+  x <- haven::labelled(c(
+    1,
+    haven::tagged_na("a"),
+    haven::tagged_na("z"),
+    NA,
+    1
+  ))
   cb_expect(tibble::tibble(x = x), 2, 1, "double+label")
 })
 test_that("codebook coverage 034: SPSS discrete user missing codes are excluded from unique", {
@@ -147,7 +255,11 @@ test_that("codebook coverage 036: SPSS missing range includes its endpoints", {
   cb_expect(tibble::tibble(x = x), 3, 3, "double+label")
 })
 test_that("codebook coverage 037: SPSS range and discrete exclusions compose", {
-  x <- haven::labelled_spss(c(1, 1, 9, 97, 98, 99, NA), na_values = 9, na_range = c(97, 99))
+  x <- haven::labelled_spss(
+    c(1, 1, 9, 97, 98, 99, NA),
+    na_values = 9,
+    na_range = c(97, 99)
+  )
   cb_expect(tibble::tibble(x = x), 2, 1, "double+label")
 })
 test_that("codebook coverage 038: SPSS all user missing has no observed identities", {
@@ -155,21 +267,42 @@ test_that("codebook coverage 038: SPSS all user missing has no observed identiti
   cb_expect(tibble::tibble(x = x), 0, 0, "double+label")
 })
 test_that("codebook coverage 039: SPSS character missing code is omitted", {
-  x <- haven::labelled_spss(c("yes", "yes", "missing", NA), na_values = "missing")
+  x <- haven::labelled_spss(
+    c("yes", "yes", "missing", NA),
+    na_values = "missing"
+  )
   cb_expect(tibble::tibble(x = x), 2, 1, "character+label")
 })
 test_that("codebook coverage 040: one variable label adds the ordered label column", {
-  cb_expect(tibble::tibble(x = structure(c(1, NA), label = "Age in years")), 1, 1, "double", labels = "Age in years")
+  cb_expect(
+    tibble::tibble(x = structure(c(1, NA), label = "Age in years")),
+    1,
+    1,
+    "double",
+    labels = "Age in years"
+  )
 })
 test_that("codebook coverage 041: mixed labels use NA for unlabelled variables", {
-  cb_expect(tibble::tibble(a = structure(1:2, label = "Identifier"), b = c("a", "b")), c(2, 2), c(2, 2), c("integer", "character"), labels = c("Identifier", NA_character_))
+  cb_expect(
+    tibble::tibble(a = structure(1:2, label = "Identifier"), b = c("a", "b")),
+    c(2, 2),
+    c(2, 2),
+    c("integer", "character"),
+    labels = c("Identifier", NA_character_)
+  )
 })
 test_that("codebook coverage 042: empty string label is treated as absent metadata", {
   cb_expect(tibble::tibble(x = structure(1:2, label = "")), 2, 2, "integer")
 })
 test_that("codebook coverage 043: Unicode and multiline labels are unchanged", {
   label <- "\u5e74\u9f84\nAge"
-  cb_expect(tibble::tibble(x = structure(1:2, label = label)), 2, 2, "integer", labels = label)
+  cb_expect(
+    tibble::tibble(x = structure(1:2, label = label)),
+    2,
+    2,
+    "integer",
+    labels = label
+  )
 })
 test_that("codebook coverage 044: unselected labels do not add a label column", {
   x <- tibble::tibble(a = structure(1:2, label = "Hidden"), b = 1:2)
@@ -178,14 +311,31 @@ test_that("codebook coverage 044: unselected labels do not add a label column", 
   expect_identical(out$variable, "b")
 })
 test_that("codebook coverage 045: labelled empty column retains its label", {
-  cb_expect(tibble::tibble(x = structure(integer(), label = "Empty measurement")), 0, 0, "integer", labels = "Empty measurement")
+  cb_expect(
+    tibble::tibble(x = structure(integer(), label = "Empty measurement")),
+    0,
+    0,
+    "integer",
+    labels = "Empty measurement"
+  )
 })
 test_that("codebook coverage 046: value labels and variable labels remain distinct", {
-  x <- haven::labelled(c(1, 2, NA), labels = c(No = 1, Yes = 2), label = "Response")
+  x <- haven::labelled(
+    c(1, 2, NA),
+    labels = c(No = 1, Yes = 2),
+    label = "Response"
+  )
   cb_expect(tibble::tibble(x = x), 2, 2, "double+label", labels = "Response")
 })
 test_that("codebook coverage 047: labelled source is not mutated", {
-  x <- tibble::tibble(x = haven::labelled_spss(c(1, 99, NA), labels = c(Yes = 1), na_values = 99, label = "Response"))
+  x <- tibble::tibble(
+    x = haven::labelled_spss(
+      c(1, 99, NA),
+      labels = c(Yes = 1),
+      na_values = 99,
+      label = "Response"
+    )
+  )
   before <- serialize(x, NULL)
   out <- codebook(x)
   expect_identical(serialize(x, NULL), before)
@@ -200,7 +350,11 @@ test_that("codebook coverage 048: measured source is not mutated", {
   expect_identical(serialize(x, NULL), before)
 })
 test_that("codebook coverage 049: all missing labelled source retains type and metadata", {
-  x <- haven::labelled(c(NA_real_, haven::tagged_na("a")), labels = c(Yes = 1), label = "Unobserved")
+  x <- haven::labelled(
+    c(NA_real_, haven::tagged_na("a")),
+    labels = c(Yes = 1),
+    label = "Unobserved"
+  )
   cb_expect(tibble::tibble(x = x), 0, 0, "double+label", labels = "Unobserved")
 })
 test_that("codebook coverage 050: list column label describes the whole variable", {
@@ -209,7 +363,8 @@ test_that("codebook coverage 050: list column label describes the whole variable
 })
 test_that("codebook coverage 051: bare selection returns only requested variable", {
   out <- codebook(tibble::tibble(a = 1:2, b = c(3, NA)), b)
-  expect_identical(out$variable, "b"); expect_equal(out$n, 1)
+  expect_identical(out$variable, "b")
+  expect_equal(out$n, 1)
 })
 test_that("codebook coverage 052: positive positions preserve requested order", {
   out <- codebook(tibble::tibble(a = 1:2, b = 1:2, c = 1:2), 3, 1)
@@ -220,20 +375,32 @@ test_that("codebook coverage 053: negative selection omits specified columns", {
   expect_identical(out$variable, c("a", "c"))
 })
 test_that("codebook coverage 054: starts_with selects matching names", {
-  out <- codebook(tibble::tibble(pre_a = 1:2, z = 1:2, pre_b = 1:2), tidyselect::starts_with("pre_"))
+  out <- codebook(
+    tibble::tibble(pre_a = 1:2, z = 1:2, pre_b = 1:2),
+    tidyselect::starts_with("pre_")
+  )
   expect_identical(out$variable, c("pre_a", "pre_b"))
 })
 test_that("codebook coverage 055: ends_with selects matching names", {
-  out <- codebook(tibble::tibble(a_id = 1:2, id_b = 1:2, c_id = 1:2), tidyselect::ends_with("_id"))
+  out <- codebook(
+    tibble::tibble(a_id = 1:2, id_b = 1:2, c_id = 1:2),
+    tidyselect::ends_with("_id")
+  )
   expect_identical(out$variable, c("a_id", "c_id"))
 })
 test_that("codebook coverage 056: where selects numeric storage types", {
-  out <- codebook(tibble::tibble(i = 1:2, c = c("a", "b"), d = c(1, 2)), tidyselect::where(is.numeric))
+  out <- codebook(
+    tibble::tibble(i = 1:2, c = c("a", "b"), d = c(1, 2)),
+    tidyselect::where(is.numeric)
+  )
   expect_identical(out$variable, c("i", "d"))
 })
 test_that("codebook coverage 057: all_of supports programmatic selection order", {
   wanted <- c("b", "a")
-  out <- codebook(tibble::tibble(a = 1:2, b = 1:2, c = 1:2), tidyselect::all_of(wanted))
+  out <- codebook(
+    tibble::tibble(a = 1:2, b = 1:2, c = 1:2),
+    tidyselect::all_of(wanted)
+  )
   expect_identical(out$variable, wanted)
 })
 test_that("codebook coverage 058: absent any_of selection has fixed empty schema", {
@@ -242,40 +409,61 @@ test_that("codebook coverage 058: absent any_of selection has fixed empty schema
   expect_identical(names(out), c("variable", "type", "n", "unique"))
 })
 test_that("codebook coverage 059: renamed selection retains original label", {
-  out <- codebook(tibble::tibble(a = structure(1:2, label = "Original")), renamed = a)
+  out <- codebook(
+    tibble::tibble(a = structure(1:2, label = "Original")),
+    renamed = a
+  )
   expect_identical(out$variable, "renamed")
   expect_identical(out$label, "Original")
 })
 test_that("codebook coverage 060: computed column counts transformed values", {
   out <- codebook(tibble::tibble(x = c(1, 1, 2, NA)), squared = x^2)
-  expect_identical(out$variable, "squared"); expect_equal(out$n, 3); expect_equal(out$unique, 2)
+  expect_identical(out$variable, "squared")
+  expect_equal(out$n, 3)
+  expect_equal(out$unique, 2)
 })
 test_that("codebook coverage 061: logical computed columns retain logical type", {
   out <- codebook(tibble::tibble(x = c(1, 2, 3, NA)), positive = x > 1)
-  expect_identical(out$type, "logical"); expect_equal(out$n, 3); expect_equal(out$unique, 2)
+  expect_identical(out$type, "logical")
+  expect_equal(out$n, 3)
+  expect_equal(out$unique, 2)
 })
 test_that("codebook coverage 062: multiple computed columns follow expression order", {
-  out <- codebook(tibble::tibble(x = c(1, 2, NA)), square = x^2, present = !is.na(x))
+  out <- codebook(
+    tibble::tibble(x = c(1, 2, NA)),
+    square = x^2,
+    present = !is.na(x)
+  )
   expect_identical(out$variable, c("square", "present"))
-  expect_equal(out$n, c(2, 3)); expect_equal(out$unique, c(2, 2))
+  expect_equal(out$n, c(2, 3))
+  expect_equal(out$unique, c(2, 2))
 })
 test_that("codebook coverage 063: programmatic unquoting selects a column", {
   var <- rlang::sym("b")
   out <- codebook(tibble::tibble(a = 1:2, b = c(1, NA)), !!var)
-  expect_identical(out$variable, "b"); expect_equal(out$n, 1)
+  expect_identical(out$variable, "b")
+  expect_equal(out$n, 1)
 })
 test_that("codebook coverage 064: data pronoun computes without column ambiguity", {
   out <- codebook(tibble::tibble(x = c(1, 2, NA)), shifted = .data$x + 1)
-  expect_identical(out$variable, "shifted"); expect_equal(out$n, 2); expect_equal(out$unique, 2)
+  expect_identical(out$variable, "shifted")
+  expect_equal(out$n, 2)
+  expect_equal(out$unique, 2)
 })
 test_that("codebook coverage 065: environment pronoun is available in computation", {
   offset <- 5
-  out <- codebook(tibble::tibble(x = c(1, 1, NA), offset = c(10, 20, 30)), shifted = x + .env$offset)
-  expect_identical(out$variable, "shifted"); expect_equal(out$n, 2); expect_equal(out$unique, 1)
+  out <- codebook(
+    tibble::tibble(x = c(1, 1, NA), offset = c(10, 20, 30)),
+    shifted = x + .env$offset
+  )
+  expect_identical(out$variable, "shifted")
+  expect_equal(out$n, 2)
+  expect_equal(out$unique, 1)
 })
 test_that("codebook coverage 066: no-match prefix returns an empty result", {
   out <- codebook(tibble::tibble(a = 1:2), tidyselect::starts_with("none"))
-  expect_equal(nrow(out), 0); expect_identical(out$variable, character())
+  expect_equal(nrow(out), 0)
+  expect_identical(out$variable, character())
 })
 test_that("codebook coverage 067: explicit everything matches omitted selection", {
   x <- tibble::tibble(a = c(1, NA), b = c("a", "b"))
@@ -283,32 +471,48 @@ test_that("codebook coverage 067: explicit everything matches omitted selection"
 })
 test_that("codebook coverage 068: repeated selection does not duplicate variables", {
   out <- codebook(tibble::tibble(a = 1:2, b = 1:2), a, a)
-  expect_identical(out$variable, "a"); expect_equal(nrow(out), 1)
+  expect_identical(out$variable, "a")
+  expect_equal(nrow(out), 1)
 })
 test_that("codebook coverage 069: accepted computation is not rerun", {
   counter <- new.env(parent = emptyenv())
   counter$n <- 0L
-  transform <- function(a) { force(a); counter$n <- counter$n + 1L; a * 2 }
+  transform <- function(a) {
+    force(a)
+    counter$n <- counter$n + 1L
+    a * 2
+  }
   x <- tibble::tibble(a = 1:3)
   out <- codebook(x, doubled = transform(a))
   expect_identical(counter$n, 1L)
-  expect_identical(out$variable, "doubled"); expect_equal(out$unique, 3)
+  expect_identical(out$variable, "doubled")
+  expect_equal(out$unique, 3)
 })
 test_that("codebook coverage 070: filtering and selection compose in a pipeline", {
   x <- tibble::tibble(id = 1:5, score = c(10, 10, NA, 20, 30))
   out <- x |> dplyr::filter(id <= 4) |> codebook(score)
-  expect_identical(out$variable, "score"); expect_equal(out$n, 3); expect_equal(out$unique, 2)
+  expect_identical(out$variable, "score")
+  expect_equal(out$n, 3)
+  expect_equal(out$unique, 2)
 })
 test_that("codebook coverage 071: existing groups do not partition the codebook", {
   x <- dplyr::group_by(tibble::tibble(g = c("a", "b", "a"), x = c(1, 1, NA)), g)
   cb_expect(x, c(3, 2), c(2, 1), c("character", "double"))
 })
 test_that("codebook coverage 072: multiple groups still yield one row per variable", {
-  x <- dplyr::group_by(tibble::tibble(g = c("a", "a", "b"), h = c(1L, 2L, 1L), x = c(1, NA, 3)), g, h)
+  x <- dplyr::group_by(
+    tibble::tibble(g = c("a", "a", "b"), h = c(1L, 2L, 1L), x = c(1, NA, 3)),
+    g,
+    h
+  )
   cb_expect(x, c(3, 3, 2), c(2, 2, 2), c("character", "integer", "double"))
 })
 test_that("codebook coverage 073: grouped factor includes only observed levels", {
-  x <- dplyr::group_by(tibble::tibble(g = factor(c("a", "a"), levels = c("a", "b")), x = c(1, NA)), g, .drop = FALSE)
+  x <- dplyr::group_by(
+    tibble::tibble(g = factor(c("a", "a"), levels = c("a", "b")), x = c(1, NA)),
+    g,
+    .drop = FALSE
+  )
   cb_expect(x, c(2, 1), c(1, 1), c("factor", "double"))
 })
 test_that("codebook coverage 074: zero-row grouped data retain all variables", {
@@ -332,7 +536,8 @@ test_that("codebook coverage 078: grouped selection omits keys and preserves inp
   before <- serialize(x, NULL)
   out <- codebook(x, x)
   expect_identical(serialize(x, NULL), before)
-  expect_identical(out$variable, "x"); expect_equal(out$n, 2)
+  expect_identical(out$variable, "x")
+  expect_equal(out$n, 2)
 })
 test_that("codebook coverage 079: row permutation leaves codebook counts invariant", {
   x <- tibble::tibble(a = c(1, 2, 1, NA), b = c("a", "b", "a", NA))
@@ -341,7 +546,8 @@ test_that("codebook coverage 079: row permutation leaves codebook counts invaria
 test_that("codebook coverage 080: duplicating rows doubles n and preserves unique", {
   x <- tibble::tibble(a = c(1, NA, 1), b = c("a", "b", "b"))
   out <- codebook(dplyr::bind_rows(x, x))
-  expect_equal(out$n, c(4, 6)); expect_equal(out$unique, c(1, 2))
+  expect_equal(out$n, c(4, 6))
+  expect_equal(out$unique, c(1, 2))
 })
 test_that("codebook coverage 081: list duplicate vectors count one identity", {
   cb_expect(tibble::tibble(x = list(1:2, 1:2, 3:4, NA)), 3, 2, "list")
@@ -350,7 +556,12 @@ test_that("codebook coverage 082: NULL and empty vectors remain list elements", 
   cb_expect(tibble::tibble(x = list(NULL, integer(), NULL, NA)), 3, 2, "list")
 })
 test_that("codebook coverage 083: nested list structure is compared by identity", {
-  cb_expect(tibble::tibble(x = list(list(a = 1), list(a = 1), list(a = 2))), 3, 2, "list")
+  cb_expect(
+    tibble::tibble(x = list(list(a = 1), list(a = 1), list(a = 2))),
+    3,
+    2,
+    "list"
+  )
 })
 test_that("codebook coverage 084: empty list column keeps one metadata row", {
   cb_expect(tibble::tibble(x = list()), 0, 0, "list")
@@ -386,7 +597,10 @@ test_that("codebook coverage 090: data.table input returns tibble without mutati
 })
 test_that("codebook coverage 091: metadata-like input names do not collide", {
   nms <- c("value", "variable", "label", "unit", "type", "n", "unique")
-  x <- tibble::as_tibble(stats::setNames(rep(list(c(1, 1, NA)), length(nms)), nms))
+  x <- tibble::as_tibble(stats::setNames(
+    rep(list(c(1, 1, NA)), length(nms)),
+    nms
+  ))
   cb_expect(x, rep(2, 7), rep(1, 7), rep("double", 7))
 })
 test_that("codebook coverage 092: Unicode non-syntactic names remain exact", {
@@ -395,7 +609,13 @@ test_that("codebook coverage 092: Unicode non-syntactic names remain exact", {
   cb_expect(x, rep(1, 4), rep(1, 4), rep("double", 4))
 })
 test_that("codebook coverage 093: reserved value name carries a variable label", {
-  cb_expect(tibble::tibble(value = structure(c(1, NA), label = "Response")), 1, 1, "double", labels = "Response")
+  cb_expect(
+    tibble::tibble(value = structure(c(1, NA), label = "Response")),
+    1,
+    1,
+    "double",
+    labels = "Response"
+  )
 })
 test_that("codebook coverage 094: NULL is rejected as non-data-frame input", {
   expect_error(codebook(NULL))
@@ -416,12 +636,24 @@ test_that("codebook coverage 099: invalid computed output size errors", {
   expect_error(codebook(tibble::tibble(a = 1:3), bad = a[1:2]))
 })
 test_that("codebook coverage 100: codebook integrates labelled survey preparation", {
-  raw <- tibble::tibble(id = 1:6, age = c(20, 30, NA, 40, 50, 60), response = haven::labelled_spss(c(1, 2, 99, 1, 2, 99), labels = c(Yes = 1, No = 2), na_values = 99, label = "Response"))
-  prepared <- raw |> dplyr::filter(!is.na(age)) |> dplyr::mutate(adult = age >= 30)
+  raw <- tibble::tibble(
+    id = 1:6,
+    age = c(20, 30, NA, 40, 50, 60),
+    response = haven::labelled_spss(
+      c(1, 2, 99, 1, 2, 99),
+      labels = c(Yes = 1, No = 2),
+      na_values = 99,
+      label = "Response"
+    )
+  )
+  prepared <- raw |>
+    dplyr::filter(!is.na(age)) |>
+    dplyr::mutate(adult = age >= 30)
   before <- serialize(prepared, NULL)
   out <- codebook(prepared, response, adult)
   expect_identical(out$variable, c("response", "adult"))
   expect_identical(out$label, c("Response", NA_character_))
-  expect_equal(out$n, c(4, 5)); expect_equal(out$unique, c(2, 2))
+  expect_equal(out$n, c(4, 5))
+  expect_equal(out$unique, c(2, 2))
   expect_identical(serialize(prepared, NULL), before)
 })

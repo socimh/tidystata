@@ -68,8 +68,10 @@ codebook <- function(.data, ...) {
   vctrs::vec_as_names(names(.data), repair = "check_unique")
   if (ncol(.data) == 0L) {
     return(tibble::tibble(
-      variable = character(), type = character(),
-      n = integer(), unique = integer()
+      variable = character(),
+      type = character(),
+      n = integer(),
+      unique = integer()
     ))
   }
 

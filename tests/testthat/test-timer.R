@@ -53,8 +53,10 @@ test_that("timer: displays sub-second timing", {
   )
   expect_true(any(grepl("Time spent", result)))
   # Should show milliseconds format
-  expect_true(any(grepl("\\d+\\.\\d+s", result)) || 
-              any(grepl("\\d+\\.\\d{2,3}s", result)))
+  expect_true(
+    any(grepl("\\d+\\.\\d+s", result)) ||
+      any(grepl("\\d+\\.\\d{2,3}s", result))
+  )
 })
 
 test_that("timer: displays seconds format", {
@@ -96,7 +98,7 @@ test_that("timer: works with model fitting", {
 test_that("timer: works with iterative operations", {
   result <- timer({
     total <- 0
-    for(i in 1:1000) {
+    for (i in 1:1000) {
       total <- total + i
     }
     total
@@ -162,7 +164,7 @@ test_that("timer: works with multiple pipes", {
     filter(mpg > 20) %>%
     summarise(avg_wt = mean(wt)) %>%
     timer()
-  
+
   expected <- mtcars %>%
     filter(mpg > 20) %>%
     summarise(avg_wt = mean(wt))
@@ -215,12 +217,12 @@ test_that("timer: data analysis workflow", {
     result <- timer({
       # Simulate a data analysis pipeline
       data <- mtcars
-      
+
       # Data cleaning
       clean_data <- data %>%
         filter(!is.na(mpg)) %>%
         mutate(hp_per_cyl = hp / cyl)
-      
+
       # Summary statistics
       stats <- clean_data %>%
         group_by(cyl) %>%
@@ -229,15 +231,15 @@ test_that("timer: data analysis workflow", {
           avg_hp = mean(hp),
           count = n()
         )
-      
+
       # Model fitting
       model <- lm(mpg ~ wt + hp + cyl, data = clean_data)
-      
+
       list(stats = stats, model_r2 = summary(model)$r.squared)
     })
     result
   })
-  
+
   expect_true(any(grepl("Time spent", analysis_result)))
 })
 
@@ -252,7 +254,7 @@ test_that("timer: simulation workflow", {
     })
     c(mean_est = mean(estimates), sd_est = sd(estimates))
   })
-  
+
   expect_equal(length(result), 2)
   expect_equal(names(result), c("mean_est", "sd_est"))
   expect_true(abs(result["mean_est"] - 5) < 0.1)
@@ -263,14 +265,18 @@ test_that("timer: simulation workflow", {
 # ============================================================================
 
 test_that("timer: reports duration and preserves the result compared to system.time", {
-  st <- system.time(expected <- {
-    Sys.sleep(0.05)
-    "done"
-  })
-  messages <- capture_messages(result <- timer({
-    Sys.sleep(0.05)
-    "done"
-  }))
+  st <- system.time(
+    expected <- {
+      Sys.sleep(0.05)
+      "done"
+    }
+  )
+  messages <- capture_messages(
+    result <- timer({
+      Sys.sleep(0.05)
+      "done"
+    })
+  )
 
   # Sleep and clock resolution vary; validate the reported duration and result.
   expect_true(is.finite(st[["elapsed"]]))
@@ -297,10 +303,10 @@ test_that("timer: preserves call stack on error", {
   inner_fn <- function() {
     stop("Inner error")
   }
-  
+
   outer_fn <- function() {
     timer(inner_fn())
   }
-  
+
   expect_error(outer_fn(), "Inner error")
 })

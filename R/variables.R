@@ -73,7 +73,10 @@ variables <- function(.data, ...) {
 #' @export
 variables_search <- function(.data, string, ...) {
   if (!is.character(string) || length(string) != 1L || is.na(string)) {
-    stop("`string` must be a single non-missing character string.", call. = FALSE)
+    stop(
+      "`string` must be a single non-missing character string.",
+      call. = FALSE
+    )
   }
   if (is.character(string)) {
     string <- string %>%
@@ -98,12 +101,16 @@ variables_search <- function(.data, string, ...) {
 
 # Variable labels are column attributes, independent of the values' classes.
 variable_labels <- function(.data) {
-  vapply(.data, function(x) {
-    label <- attr(x, "label", exact = TRUE)
-    if (length(label) != 1L || is.na(label) || !nzchar(as.character(label))) {
-      NA_character_
-    } else {
-      as.character(label)
-    }
-  }, character(1))
+  vapply(
+    .data,
+    function(x) {
+      label <- attr(x, "label", exact = TRUE)
+      if (length(label) != 1L || is.na(label) || !nzchar(as.character(label))) {
+        NA_character_
+      } else {
+        as.character(label)
+      }
+    },
+    character(1)
+  )
 }

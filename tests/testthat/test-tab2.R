@@ -492,7 +492,11 @@ test_that("tab2: clinical trial data", {
 
 test_that("tab2: demographic breakdown", {
   df <- tibble(
-    age_group = sample(c("18-25", "26-35", "36-50", "50+"), 500, replace = TRUE),
+    age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      500,
+      replace = TRUE
+    ),
     gender = sample(c("Male", "Female", "Other"), 500, replace = TRUE)
   )
   result <- tab2(df, age_group, gender)
@@ -543,7 +547,7 @@ test_that("tab2: factor with unused levels", {
   )
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 2)
-  expect_equal(ncol(result), 3)  # Row key and two observed column levels.
+  expect_equal(ncol(result), 3) # Row key and two observed column levels.
   expect_equal(result[[1]], df$x)
   expect_equal(sort(unlist(result[-1], use.names = FALSE)), c(0L, 0L, 1L, 1L))
 })

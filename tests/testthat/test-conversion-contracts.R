@@ -8,7 +8,11 @@ test_that("conversion drops vector metadata without modifying inputs", {
 })
 
 test_that("conversion flattens matrices in column order", {
-  x <- matrix(c(1, NA, 2, 3), nrow = 2, dimnames = list(c("a", "b"), c("x", "y")))
+  x <- matrix(
+    c(1, NA, 2, 3),
+    nrow = 2,
+    dimnames = list(c("a", "b"), c("x", "y"))
+  )
   original <- x
 
   expect_identical(as_character(x), c("1", NA_character_, "2", "3"))
@@ -18,7 +22,15 @@ test_that("conversion flattens matrices in column order", {
 })
 
 test_that("conversion returns typed empty vectors", {
-  inputs <- list(NULL, numeric(), character(), logical(), factor(), list(), matrix(numeric(), 0, 2))
+  inputs <- list(
+    NULL,
+    numeric(),
+    character(),
+    logical(),
+    factor(),
+    list(),
+    matrix(numeric(), 0, 2)
+  )
 
   for (x in inputs) {
     expect_identical(as_character(x), character())
@@ -31,7 +43,10 @@ test_that("conversion distinguishes numeric missing values from their text", {
 
   expect_identical(as_character(x), c(NA_character_, "NaN", "Inf", "-Inf"))
   expect_identical(as_numeric(x), x)
-  expect_identical(as_numeric(c("NaN", " NaN ", "NA", "", NA)), c(NaN, NaN, NA, NA, NA))
+  expect_identical(
+    as_numeric(c("NaN", " NaN ", "NA", "", NA)),
+    c(NaN, NaN, NA, NA, NA)
+  )
 })
 
 test_that("number parsing retains exact diagnostic rows and positions", {
@@ -78,13 +93,18 @@ test_that("tagged missing values without labels use ordinary character coercion"
   x <- haven::labelled(c(1, haven::tagged_na("b"), NA_real_))
 
   expect_identical(as_character(x), c("1", NA_character_, NA_character_))
-  expect_identical(haven::na_tag(as_numeric(x)), c(NA_character_, "b", NA_character_))
+  expect_identical(
+    haven::na_tag(as_numeric(x)),
+    c(NA_character_, "b", NA_character_)
+  )
 })
 
 test_that("SPSS user missing codes remain values during conversion", {
   x <- haven::labelled_spss(
-    c(1, 99, 95, NA), labels = c(Yes = 1, Missing = 99),
-    na_values = 99, na_range = c(90, 100)
+    c(1, 99, 95, NA),
+    labels = c(Yes = 1, Missing = 99),
+    na_values = 99,
+    na_range = c(90, 100)
   )
   original <- x
 
@@ -117,12 +137,21 @@ test_that("lists and unsupported numeric inputs retain element count", {
 
 test_that("calendar conversion uses days and UTC seconds", {
   dates <- as.Date(c("1970-01-01", "1970-01-02", NA))
-  times <- as.POSIXct(c("1970-01-01 00:00:00", "1970-01-02 00:00:00", NA), tz = "UTC")
+  times <- as.POSIXct(
+    c("1970-01-01 00:00:00", "1970-01-02 00:00:00", NA),
+    tz = "UTC"
+  )
 
   expect_identical(as_numeric(dates), c(0, 1, NA_real_))
   expect_identical(as_numeric(times), c(0, 86400, NA_real_))
-  expect_identical(as_character(dates), c("1970-01-01", "1970-01-02", NA_character_))
-  expect_identical(as_character(times), c("1970-01-01", "1970-01-02", NA_character_))
+  expect_identical(
+    as_character(dates),
+    c("1970-01-01", "1970-01-02", NA_character_)
+  )
+  expect_identical(
+    as_character(times),
+    c("1970-01-01", "1970-01-02", NA_character_)
+  )
 })
 
 test_that("duration conversion retains its stated units", {
@@ -158,14 +187,23 @@ test_that("missing replacement preserves vector type and names", {
   x <- c(a = 1L, b = NA_integer_, c = 3L)
   original <- x
 
-  expect_identical(na_if_value(x, 1L), c(a = NA_integer_, b = NA_integer_, c = 3L))
+  expect_identical(
+    na_if_value(x, 1L),
+    c(a = NA_integer_, b = NA_integer_, c = 3L)
+  )
   expect_identical(value_if_na(x, 2L), c(a = 1L, b = 2L, c = 3L))
   expect_identical(x, original)
 })
 
 test_that("missing replacement supports vector comparisons and NaN", {
-  expect_identical(na_if_value(c(1, 2, 3), c(1, 9, 3)), c(NA_real_, 2, NA_real_))
-  expect_identical(na_if_value(c(1, NaN, NA_real_), NaN), c(1, NA_real_, NA_real_))
+  expect_identical(
+    na_if_value(c(1, 2, 3), c(1, 9, 3)),
+    c(NA_real_, 2, NA_real_)
+  )
+  expect_identical(
+    na_if_value(c(1, NaN, NA_real_), NaN),
+    c(1, NA_real_, NA_real_)
+  )
   expect_identical(value_if_na(c(1, NaN, NA_real_), 0), c(1, 0, 0))
 })
 
@@ -173,9 +211,18 @@ test_that("missing replacement preserves categorical and date classes", {
   x <- factor(c("a", NA, "b"), levels = c("a", "b", "unused"))
   dates <- as.Date(c("2024-01-01", NA))
 
-  expect_identical(na_if_value(x, "a"), factor(c(NA, NA, "b"), levels = levels(x)))
-  expect_identical(value_if_na(x, "b"), factor(c("a", "b", "b"), levels = levels(x)))
-  expect_identical(value_if_na(dates, as.Date("2024-01-02")), as.Date(c("2024-01-01", "2024-01-02")))
+  expect_identical(
+    na_if_value(x, "a"),
+    factor(c(NA, NA, "b"), levels = levels(x))
+  )
+  expect_identical(
+    value_if_na(x, "b"),
+    factor(c("a", "b", "b"), levels = levels(x))
+  )
+  expect_identical(
+    value_if_na(dates, as.Date("2024-01-02")),
+    as.Date(c("2024-01-01", "2024-01-02"))
+  )
 })
 
 test_that("missing replacement returns typed empty inputs", {
@@ -188,7 +235,10 @@ test_that("missing replacement returns typed empty inputs", {
 test_that("missing replacement reports incompatible sizes and lossy casts", {
   expect_error(na_if_value(1:3, 1:2), class = "vctrs_error_incompatible_size")
   expect_error(na_if_value(1:3, 1.5), class = "vctrs_error_cast_lossy")
-  expect_error(value_if_na(c(1L, NA_integer_), 1.5), class = "vctrs_error_cast_lossy")
+  expect_error(
+    value_if_na(c(1L, NA_integer_), 1.5),
+    class = "vctrs_error_cast_lossy"
+  )
   expect_error(value_if_na(c(1, NA_real_), c(2, 3)))
 })
 

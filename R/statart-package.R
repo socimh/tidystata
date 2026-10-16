@@ -2,7 +2,7 @@
 #' Stata-inspired tools for frequency tables, summary statistics,
 #' variable inspection, column selection, row calculations, and binning.
 #' Use [tab()], [summ()], and [codebook()] to start exploring a dataset.
-#' 
+#'
 #' @keywords internal
 "_PACKAGE"
 

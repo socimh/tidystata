@@ -66,7 +66,7 @@ test_that("fre2: Total column sum equals row totals", {
   result <- fre2(df, x, y, .type = "tibble")
   total_col <- result[[ncol(result)]]
   total_row_idx <- which(grepl("Total", result[[1]], ignore.case = TRUE))
-  if(length(total_row_idx) > 0) {
+  if (length(total_row_idx) > 0) {
     expect_equal(total_col[total_row_idx], nrow(df))
   }
 })
@@ -96,8 +96,14 @@ test_that("fre2: .flip=TRUE swaps dimensions", {
   expect_equal(nrow(result_normal), ncol(result_flipped) - 1)
   expect_equal(ncol(result_normal) - 1, nrow(result_flipped))
   expect_equal(
-    unname(as.matrix(result_normal[-nrow(result_normal), -c(1, ncol(result_normal))])),
-    unname(t(as.matrix(result_flipped[-nrow(result_flipped), -c(1, ncol(result_flipped))])))
+    unname(as.matrix(result_normal[
+      -nrow(result_normal),
+      -c(1, ncol(result_normal))
+    ])),
+    unname(t(as.matrix(result_flipped[
+      -nrow(result_flipped),
+      -c(1, ncol(result_flipped))
+    ])))
   )
   expect_equal(result_normal$total[nrow(result_normal)], nrow(df))
   expect_equal(result_flipped$total[nrow(result_flipped)], nrow(df))
@@ -109,7 +115,7 @@ test_that("fre2: flip with many levels", {
     cols = rep(LETTERS[1:5], 10)
   )
   result <- fre2(df, rows, cols, .flip = TRUE, .type = "tibble")
-  expect_equal(nrow(result), 6)  # 5 cols + Total
+  expect_equal(nrow(result), 6) # 5 cols + Total
 })
 
 # ============================================================================
@@ -177,7 +183,7 @@ test_that("fre2: single row dataset", {
 test_that("fre2: all identical values", {
   df <- tibble(x = rep("same", 100), y = rep("value", 100))
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(nrow(result), 2)  # same, Total
+  expect_equal(nrow(result), 2) # same, Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$y)))
   expect_equal(
@@ -197,7 +203,7 @@ test_that("fre2: row var all unique, column var few levels", {
     y = rep(c("A", "B"), 50)
   )
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(nrow(result), 101)  # 100 unique + Total
+  expect_equal(nrow(result), 101) # 100 unique + Total
 })
 
 test_that("fre2: row var few levels, column var all unique", {
@@ -236,7 +242,7 @@ test_that("fre2: 10x10 cross-tabulation with totals", {
     y = sample(letters[1:10], 1000, replace = TRUE)
   )
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(nrow(result), 11)  # 10 + Total
+  expect_equal(nrow(result), 11) # 10 + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$y)))
   expect_equal(
@@ -272,7 +278,7 @@ test_that("fre2: unicode in both dimensions", {
     y = c("مرحبا", "مرحبا", "שלום", "שלום")
   )
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(nrow(result), 3)  # 2 + Total
+  expect_equal(nrow(result), 3) # 2 + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$y)))
   expect_equal(
@@ -405,7 +411,7 @@ test_that("fre2: clinical trial contingency table", {
     response = sample(c("Complete", "Partial", "None"), 200, replace = TRUE)
   )
   result <- fre2(df, treatment, response, .type = "tibble")
-  expect_equal(nrow(result), 3)  # 2 + Total
+  expect_equal(nrow(result), 3) # 2 + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$response)))
   expect_equal(
@@ -421,11 +427,15 @@ test_that("fre2: clinical trial contingency table", {
 
 test_that("fre2: demographic breakdown with totals", {
   df <- tibble(
-    age_group = sample(c("18-25", "26-35", "36-50", "50+"), 500, replace = TRUE),
+    age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      500,
+      replace = TRUE
+    ),
     gender = sample(c("Male", "Female", "Other"), 500, replace = TRUE)
   )
   result <- fre2(df, age_group, gender, .type = "tibble")
-  expect_equal(nrow(result), 5)  # 4 + Total
+  expect_equal(nrow(result), 5) # 4 + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$gender)))
   expect_equal(
@@ -445,7 +455,7 @@ test_that("fre2: time series cross-tab with totals", {
     region = sample(c("North", "South", "East", "West"), 100, replace = TRUE)
   )
   result <- fre2(df, quarter, region, .type = "tibble")
-  expect_equal(nrow(result), 5)  # 4 + Total
+  expect_equal(nrow(result), 5) # 4 + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$region)))
   expect_equal(
@@ -465,7 +475,7 @@ test_that("fre2: survey cross-tab with totals", {
     question_2 = sample(c("Agree", "Disagree", "Neutral"), 300, replace = TRUE)
   )
   result <- fre2(df, question_1, question_2, .type = "tibble")
-  expect_equal(nrow(result), 4)  # 3 + Total
+  expect_equal(nrow(result), 4) # 3 + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$question_2)))
   expect_equal(
@@ -490,7 +500,7 @@ test_that("fre2: factor with unused levels", {
   )
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(result[[1]], c("a", "b", "total"))
-  expect_equal(ncol(result), 4)  # Row key, two observed levels, and total.
+  expect_equal(ncol(result), 4) # Row key, two observed levels, and total.
   expect_equal(result$total, c(1, 1, 2))
   expect_equal(sort(unlist(result[3, 2:3], use.names = FALSE)), c(1L, 1L))
 })
@@ -509,7 +519,12 @@ test_that("fre2: factor levels not alphabetically ordered", {
 # ============================================================================
 
 test_that("fre2: using numeric column positions", {
-  df <- tibble(a = 1:4, x = c("A", "B", "A", "B"), b = 1:4, y = c("X", "Y", "X", "Y"))
+  df <- tibble(
+    a = 1:4,
+    x = c("A", "B", "A", "B"),
+    b = 1:4,
+    y = c("X", "Y", "X", "Y")
+  )
   result <- fre2(df, 2, 4, .type = "tibble")
   expect_equal(nrow(result), 3)
 })
@@ -569,11 +584,15 @@ test_that("fre2: very small numbers near zero", {
 test_that("fre2: defect analysis by shift", {
   df <- tibble(
     shift = sample(c("Morning", "Afternoon", "Night"), 500, replace = TRUE),
-    defect_type = sample(c("None", "Minor", "Major", "Critical"), 500, 
-                        replace = TRUE, prob = c(0.85, 0.1, 0.04, 0.01))
+    defect_type = sample(
+      c("None", "Minor", "Major", "Critical"),
+      500,
+      replace = TRUE,
+      prob = c(0.85, 0.1, 0.04, 0.01)
+    )
   )
   result <- fre2(df, shift, defect_type, .type = "tibble")
-  expect_equal(nrow(result), 4)  # 3 shifts + Total
+  expect_equal(nrow(result), 4) # 3 shifts + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$defect_type)))
   expect_equal(
@@ -585,7 +604,7 @@ test_that("fre2: defect analysis by shift", {
     result$total[-nrow(result)],
     rowSums(as.matrix(result[-nrow(result), category_cols]))
   )
-  
+
   # Verify grand total equals nrow(df)
   total_row <- result[grepl("Total", result[[1]], ignore.case = TRUE), ]
   expect_equal(total_row$total, 500)
@@ -597,7 +616,7 @@ test_that("fre2: product sales by region", {
     region = sample(c("North", "South", "East", "West"), 1000, replace = TRUE)
   )
   result <- fre2(df, product, region, .type = "tibble")
-  expect_equal(nrow(result), 4)  # 3 products + Total
+  expect_equal(nrow(result), 4) # 3 products + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$region)))
   expect_equal(
@@ -643,7 +662,7 @@ test_that("fre2: uniformly distributed data", {
     y = sample(LETTERS[1:10], 1000, replace = TRUE)
   )
   result <- fre2(df, x, y, .type = "tibble")
-  expect_equal(nrow(result), 11)  # 10 + Total
+  expect_equal(nrow(result), 11) # 10 + Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$y)))
   expect_equal(

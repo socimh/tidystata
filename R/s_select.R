@@ -41,19 +41,25 @@ s_select <- function(.data, ...) {
   errors <- list(select = NULL, transmute = NULL)
   for (mode in c("select", "transmute")) {
     warnings <- list()
-    result <- tryCatch(withCallingHandlers({
-      if (mode == "select") {
-        dplyr::select(.data, ...)
-      } else {
-        dplyr::transmute(.data, ...)
+    result <- tryCatch(
+      withCallingHandlers(
+        {
+          if (mode == "select") {
+            dplyr::select(.data, ...)
+          } else {
+            dplyr::transmute(.data, ...)
+          }
+        },
+        warning = function(w) {
+          warnings[[length(warnings) + 1L]] <<- w
+          invokeRestart("muffleWarning")
+        }
+      ),
+      error = function(e) {
+        errors[[mode]] <<- conditionMessage(e)
+        NULL
       }
-    }, warning = function(w) {
-      warnings[[length(warnings) + 1L]] <<- w
-      invokeRestart("muffleWarning")
-    }), error = function(e) {
-      errors[[mode]] <<- conditionMessage(e)
-      NULL
-    })
+    )
     if (is.null(errors[[mode]])) {
       for (w in warnings) {
         warning(w)
@@ -64,8 +70,11 @@ s_select <- function(.data, ...) {
 
   stop(
     "Neither <tidy-select> nor <data-masking> recognised the input.\n",
-    "  select() error: ", errors$select, "\n",
-    "  mutate() error: ", errors$transmute,
+    "  select() error: ",
+    errors$select,
+    "\n",
+    "  mutate() error: ",
+    errors$transmute,
     call. = FALSE
   )
 }

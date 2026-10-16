@@ -89,9 +89,13 @@ warning_vars <- function(vars, suffix) {
     warning(message, call. = FALSE)
   } else if (
     stringr::str_length(vars[1]) +
-      stringr::str_length(vars[2]) > 40) {
+      stringr::str_length(vars[2]) >
+      40
+  ) {
     message <- paste0(
-      vars[1], ", ... are ", suffix
+      vars[1],
+      ", ... are ",
+      suffix
     )
     warning(message, call. = FALSE)
   } else if (length(vars) > 2) {
@@ -108,9 +112,11 @@ warning_vars <- function(vars, suffix) {
 check_numeric <- function(.data, .keep_all) {
   # Check if vars are numeric
   non_num_vars <- .data %>%
-    ds(!tidyselect::where(
-      ~ is_summable(.x)
-    ))
+    ds(
+      !tidyselect::where(
+        ~ is_summable(.x)
+      )
+    )
 
   suffix <- dplyr::if_else(
     .keep_all,
@@ -164,18 +170,45 @@ check_label <- function(.data) {
 }
 
 summ_stat_names <- function(stat) {
-  if (length(stat) == 0L) return(stats::setNames(character(), character()))
+  if (length(stat) == 0L) {
+    return(stats::setNames(character(), character()))
+  }
   if (!is.character(stat) || anyNA(stat) || any(!nzchar(stat))) {
-    stop("`.stat` must be a character vector of non-missing statistic names.", call. = FALSE)
+    stop(
+      "`.stat` must be a character vector of non-missing statistic names.",
+      call. = FALSE
+    )
   }
   aliases <- c(missing = "miss_n", p25 = "q1", p50 = "median", p75 = "q3")
-  supported <- c("type", "n", "unique", "miss_n", "valid_pct", "min", "q1",
-                 "median", "mean", "mad", "sd", "q3", "max", "iqr", "skew",
-                 "kurtosis", "se", "sum", names(aliases))
+  supported <- c(
+    "type",
+    "n",
+    "unique",
+    "miss_n",
+    "valid_pct",
+    "min",
+    "q1",
+    "median",
+    "mean",
+    "mad",
+    "sd",
+    "q3",
+    "max",
+    "iqr",
+    "skew",
+    "kurtosis",
+    "se",
+    "sum",
+    names(aliases)
+  )
   unknown <- setdiff(stat, supported)
   if (length(unknown)) {
-    stop("Unsupported statistic: ", paste(unknown, collapse = ", "),
-         ". See ?summ for supported names.", call. = FALSE)
+    stop(
+      "Unsupported statistic: ",
+      paste(unknown, collapse = ", "),
+      ". See ?summ for supported names.",
+      call. = FALSE
+    )
   }
   stat <- unique(stat)
   mapped <- stat
@@ -188,8 +221,11 @@ select_summ_stats <- function(data, stat) {
   mapped <- summ_stat_names(stat)
   unavailable <- setdiff(unname(mapped), names(data))
   if (length(unavailable)) {
-    stop("Unsupported statistic for this variable type: ",
-         paste(unavailable, collapse = ", "), call. = FALSE)
+    stop(
+      "Unsupported statistic for this variable type: ",
+      paste(unavailable, collapse = ", "),
+      call. = FALSE
+    )
   }
   dplyr::select(data, type, tidyselect::all_of(mapped))
 }
@@ -219,28 +255,59 @@ summ_var <- function(var, stat = character(0), .detail = FALSE) {
   if (.detail || length(stat)) {
     stat_tb$miss_n <- length(var) - n_val
     stat_tb$valid_pct <- if (length(var)) n_val / length(var) else NA_real_
-    stat_tb$q1 <- if (has_values) unname(stats::quantile(observed, .25)) else NA_real_
+    stat_tb$q1 <- if (has_values) {
+      unname(stats::quantile(observed, .25))
+    } else {
+      NA_real_
+    }
     stat_tb$median <- if (has_values) stats::median(observed) else NA_real_
     stat_tb$mad <- if (has_values) stats::mad(observed) else NA_real_
-    stat_tb$q3 <- if (has_values) unname(stats::quantile(observed, .75)) else NA_real_
+    stat_tb$q3 <- if (has_values) {
+      unname(stats::quantile(observed, .75))
+    } else {
+      NA_real_
+    }
     stat_tb$iqr <- if (has_values) stats::IQR(observed) else NA_real_
     stat_tb$skew <- if (has_values) skew(num_var, n_val) else NA_real_
     stat_tb$kurtosis <- if (has_values) kurtosis(num_var, n_val) else NA_real_
     stat_tb$se <- if (n_val) stat_tb$sd / sqrt(n_val) else NA_real_
     stat_tb$sum <- if (has_values) sum(observed) else NA_real_
-    stat_tb <- dplyr::select(stat_tb, tidyselect::all_of(c(
-      "type", "n", "unique", "miss_n", "valid_pct", "min", "q1", "median",
-      "mean", "mad", "sd", "q3", "max", "iqr", "skew", "kurtosis", "se", "sum"
-    )))
+    stat_tb <- dplyr::select(
+      stat_tb,
+      tidyselect::all_of(c(
+        "type",
+        "n",
+        "unique",
+        "miss_n",
+        "valid_pct",
+        "min",
+        "q1",
+        "median",
+        "mean",
+        "mad",
+        "sd",
+        "q3",
+        "max",
+        "iqr",
+        "skew",
+        "kurtosis",
+        "se",
+        "sum"
+      ))
+    )
   }
-  if (length(stat)) stat_tb <- select_summ_stats(stat_tb, stat)
+  if (length(stat)) {
+    stat_tb <- select_summ_stats(stat_tb, stat)
+  }
   stat_tb
 }
 
 fmt_date <- function(x, var) {
   # Format a numeric date/datetime value back to a readable string
   vtype <- s_type(var, .abbr = TRUE)
-  if (is.na(x) || !is.finite(x)) return(NA_character_)
+  if (is.na(x) || !is.finite(x)) {
+    return(NA_character_)
+  }
   if (vtype == "date") {
     format(as.Date(x, origin = "1970-01-01"), "%Y-%m-%d")
   } else {
@@ -250,20 +317,28 @@ fmt_date <- function(x, var) {
 
 fmt_duration <- function(secs, format = "compact") {
   # Format duration in seconds as human-readable string
-  if (is.na(secs) || !is.finite(secs)) return(NA_character_)
-  
+  if (is.na(secs) || !is.finite(secs)) {
+    return(NA_character_)
+  }
+
   if (format == "long") {
     # Long format: "548 days", "2 hours 15 minutes", "30 seconds"
     if (secs >= 86400) {
       days <- round(secs / 86400)
-      if (days == 1) return("1 day")
-      else return(paste(days, "days"))
+      if (days == 1) {
+        return("1 day")
+      } else {
+        return(paste(days, "days"))
+      }
     } else if (secs >= 3600) {
       hours <- floor(secs / 3600)
       mins <- round((secs %% 3600) / 60)
       if (mins == 0) {
-        if (hours == 1) return("1 hour")
-        else return(paste(hours, "hours"))
+        if (hours == 1) {
+          return("1 hour")
+        } else {
+          return(paste(hours, "hours"))
+        }
       } else {
         return(paste(hours, "hours", mins, "minutes"))
       }
@@ -271,35 +346,51 @@ fmt_duration <- function(secs, format = "compact") {
       mins <- floor(secs / 60)
       secs_rem <- round(secs %% 60)
       if (secs_rem == 0) {
-        if (mins == 1) return("1 minute")
-        else return(paste(mins, "minutes"))
+        if (mins == 1) {
+          return("1 minute")
+        } else {
+          return(paste(mins, "minutes"))
+        }
       } else {
         return(paste(mins, "minutes", secs_rem, "seconds"))
       }
     } else {
       secs_round <- round(secs)
-      if (secs_round == 1) return("1 second")
-      else return(paste(secs_round, "seconds"))
+      if (secs_round == 1) {
+        return("1 second")
+      } else {
+        return(paste(secs_round, "seconds"))
+      }
     }
   } else {
     # Compact format: "548d", "2h 15m", "30s"
-    if (secs >= 86400) sprintf("%.1fd", secs / 86400)
-    else if (secs >= 3600) sprintf("%.1fh", secs / 3600)
-    else if (secs >= 60) sprintf("%.1fm", secs / 60)
-    else sprintf("%.0fs", round(secs))
+    if (secs >= 86400) {
+      sprintf("%.1fd", secs / 86400)
+    } else if (secs >= 3600) {
+      sprintf("%.1fh", secs / 3600)
+    } else if (secs >= 60) {
+      sprintf("%.1fm", secs / 60)
+    } else {
+      sprintf("%.0fs", round(secs))
+    }
   }
 }
 
 fmt_date_sd <- function(sd_secs, var, format = "compact") {
   # Format sd (in seconds for datetime, in days for date) as a human-readable span
-  if (is.na(sd_secs) || !is.finite(sd_secs)) return(NA_character_)
+  if (is.na(sd_secs) || !is.finite(sd_secs)) {
+    return(NA_character_)
+  }
   vtype <- s_type(var, .abbr = TRUE)
   if (vtype == "date") {
     # For dates, sd_secs is in days
     days <- round(sd_secs)
     if (format == "long") {
-      if (days == 1) return("1 day")
-      else return(paste(days, "days"))
+      if (days == 1) {
+        return("1 day")
+      } else {
+        return(paste(days, "days"))
+      }
     } else {
       sprintf("%dd", days)
     }
@@ -309,12 +400,19 @@ fmt_date_sd <- function(sd_secs, var, format = "compact") {
   }
 }
 
-summ_date <- function(var, stat = character(0), .detail = FALSE, 
-                        .duration_format = "compact", return_raw = FALSE) {
-  if ("sum" %in% stat) stop("`sum` is not supported for date/datetime variables.", call. = FALSE)
-  n_val    <- sum(!is.na(var), na.rm = TRUE)
+summ_date <- function(
+  var,
+  stat = character(0),
+  .detail = FALSE,
+  .duration_format = "compact",
+  return_raw = FALSE
+) {
+  if ("sum" %in% stat) {
+    stop("`sum` is not supported for date/datetime variables.", call. = FALSE)
+  }
+  n_val <- sum(!is.na(var), na.rm = TRUE)
   miss_val <- sum(is.na(var), na.rm = TRUE)
-  num_var  <- as_numeric(var)
+  num_var <- as_numeric(var)
 
   observed <- num_var[!is.na(num_var)]
   has_values <- length(observed) > 0L
@@ -329,73 +427,76 @@ summ_date <- function(var, stat = character(0), .detail = FALSE,
   mad_raw <- if (has_values) mad(observed) else NA_real_
 
   vtype <- s_type(var, .abbr = TRUE)
-  
+
   if (return_raw) {
     # Return actual Date/POSIXct types for list mode
     if (vtype == "date") {
       stat_tb <- tibble::tibble(
-        type      = dplyr::if_else(
+        type = dplyr::if_else(
           !is.na(s_unit(var)),
           stringr::str_glue("[{s_unit(var)}]"),
           "date"
-        ) %>% as.character(),
-        n         = n_val,
-        unique    = dplyr::n_distinct(var, na.rm = TRUE),
-        miss_n    = miss_val,
+        ) %>%
+          as.character(),
+        n = n_val,
+        unique = dplyr::n_distinct(var, na.rm = TRUE),
+        miss_n = miss_val,
         valid_pct = if (length(var)) n_val / length(var) else NA_real_,
-        min       = as.Date(min_raw, origin = "1970-01-01"),
-        mean      = as.Date(round(mean_raw), origin = "1970-01-01"),
-        max       = as.Date(max_raw, origin = "1970-01-01"),
-        sd        = fmt_date_sd(sd_raw, var, .duration_format),
-        mad       = fmt_date_sd(mad_raw, var, .duration_format),
-        iqr       = fmt_date_sd(iqr_raw, var, .duration_format),
-        se        = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
+        min = as.Date(min_raw, origin = "1970-01-01"),
+        mean = as.Date(round(mean_raw), origin = "1970-01-01"),
+        max = as.Date(max_raw, origin = "1970-01-01"),
+        sd = fmt_date_sd(sd_raw, var, .duration_format),
+        mad = fmt_date_sd(mad_raw, var, .duration_format),
+        iqr = fmt_date_sd(iqr_raw, var, .duration_format),
+        se = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
       )
     } else {
       stat_tb <- tibble::tibble(
-        type      = dplyr::if_else(
+        type = dplyr::if_else(
           !is.na(s_unit(var)),
           stringr::str_glue("[{s_unit(var)}]"),
           "datetime"
-        ) %>% as.character(),
-        n         = n_val,
-        unique    = dplyr::n_distinct(var, na.rm = TRUE),
-        miss_n    = miss_val,
+        ) %>%
+          as.character(),
+        n = n_val,
+        unique = dplyr::n_distinct(var, na.rm = TRUE),
+        miss_n = miss_val,
         valid_pct = if (length(var)) n_val / length(var) else NA_real_,
-        min       = as.POSIXct(min_raw, origin = "1970-01-01", tz = "UTC"),
-        mean      = as.POSIXct(round(mean_raw), origin = "1970-01-01", tz = "UTC"),
-        max       = as.POSIXct(max_raw, origin = "1970-01-01", tz = "UTC"),
-        sd        = fmt_date_sd(sd_raw, var, .duration_format),
-        mad       = fmt_date_sd(mad_raw, var, .duration_format),
-        iqr       = fmt_date_sd(iqr_raw, var, .duration_format),
-        se        = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
+        min = as.POSIXct(min_raw, origin = "1970-01-01", tz = "UTC"),
+        mean = as.POSIXct(round(mean_raw), origin = "1970-01-01", tz = "UTC"),
+        max = as.POSIXct(max_raw, origin = "1970-01-01", tz = "UTC"),
+        sd = fmt_date_sd(sd_raw, var, .duration_format),
+        mad = fmt_date_sd(mad_raw, var, .duration_format),
+        iqr = fmt_date_sd(iqr_raw, var, .duration_format),
+        se = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
       )
     }
   } else {
     # Return formatted strings for table mode
     stat_tb <- tibble::tibble(
-      type      = dplyr::if_else(
+      type = dplyr::if_else(
         !is.na(s_unit(var)),
         stringr::str_glue("[{s_unit(var)}]"),
         s_type(var, .abbr = TRUE)
-      ) %>% as.character(),
-      n         = n_val,
-      unique    = dplyr::n_distinct(var, na.rm = TRUE),
-      miss_n    = miss_val,
+      ) %>%
+        as.character(),
+      n = n_val,
+      unique = dplyr::n_distinct(var, na.rm = TRUE),
+      miss_n = miss_val,
       valid_pct = if (length(var)) n_val / length(var) else NA_real_,
-      min       = fmt_date(min_raw, var),
-      q1        = fmt_date(q1_raw, var),
-      median    = fmt_date(median_raw, var),
-      q3        = fmt_date(q3_raw, var),
-      mean      = fmt_date(mean_raw, var),
-      sd        = fmt_date_sd(sd_raw, var, .duration_format),
-      mad       = fmt_date_sd(mad_raw, var, .duration_format),
-      max       = fmt_date(max_raw, var),
-      iqr       = fmt_date_sd(iqr_raw, var, .duration_format),
-      se        = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
+      min = fmt_date(min_raw, var),
+      q1 = fmt_date(q1_raw, var),
+      median = fmt_date(median_raw, var),
+      q3 = fmt_date(q3_raw, var),
+      mean = fmt_date(mean_raw, var),
+      sd = fmt_date_sd(sd_raw, var, .duration_format),
+      mad = fmt_date_sd(mad_raw, var, .duration_format),
+      max = fmt_date(max_raw, var),
+      iqr = fmt_date_sd(iqr_raw, var, .duration_format),
+      se = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
     )
   }
-  
+
   if (length(stat) > 0) {
     stat_tb <- select_summ_stats(stat_tb, stat)
   } else if (!.detail) {
@@ -405,8 +506,16 @@ summ_date <- function(var, stat = character(0), .detail = FALSE,
   return(stat_tb)
 }
 
-summ_data <- function(.data, .fn, summ_vars, group_vars, .detail, .stat, 
-                       .duration_format = "compact", return_raw = FALSE) {
+summ_data <- function(
+  .data,
+  .fn,
+  summ_vars,
+  group_vars,
+  .detail,
+  .stat,
+  .duration_format = "compact",
+  return_raw = FALSE
+) {
   if (length(summ_vars) > 0) {
     # Create a wrapper function that passes the extra arguments
     fn_wrapper <- function(x) {
@@ -416,7 +525,7 @@ summ_data <- function(.data, .fn, summ_vars, group_vars, .detail, .stat,
         .fn(x, .stat, .detail)
       }
     }
-    
+
     # Explicit column lookup also supports columns named .data or .env;
     # across() may expand those names into the data-mask pronouns.
     summaries <- lapply(summ_vars, function(column) {
@@ -438,12 +547,17 @@ summ_data <- function(.data, .fn, summ_vars, group_vars, .detail, .stat,
   return(out)
 }
 
-summ_list <- function(.data, group_vars, .detail, .stat, 
-                        .mode = c("list", "table"),
-                        .duration_format = c("compact", "long")) {
+summ_list <- function(
+  .data,
+  group_vars,
+  .detail,
+  .stat,
+  .mode = c("list", "table"),
+  .duration_format = c("compact", "long")
+) {
   .mode <- match.arg(.mode)
   .duration_format <- match.arg(.duration_format)
-  
+
   numeric <- .data %>%
     ds(
       !tidyselect::all_of(group_vars) &
@@ -468,9 +582,13 @@ summ_list <- function(.data, group_vars, .detail, .stat,
         )
     )
 
-
   numeric <- summ_data(
-    .data, summ_var, numeric, group_vars, .detail, .stat
+    .data,
+    summ_var,
+    numeric,
+    group_vars,
+    .detail,
+    .stat
   )
 
   if (!is.null(numeric) && nrow(numeric) > 0) {
@@ -484,16 +602,29 @@ summ_list <- function(.data, group_vars, .detail, .stat,
           stringr::str_detect(type, "lbl$") ~
             stringr::str_glue("*{name}"),
           TRUE ~ name
-        ) %>% as.character()
+        ) %>%
+          as.character()
       )
   }
 
   date <- summ_data(
-    .data, summ_date, date, group_vars, .detail, .stat, .duration_format
+    .data,
+    summ_date,
+    date,
+    group_vars,
+    .detail,
+    .stat,
+    .duration_format
   )
 
   datetime <- summ_data(
-    .data, summ_date, datetime, group_vars, .detail, .stat, .duration_format
+    .data,
+    summ_date,
+    datetime,
+    group_vars,
+    .detail,
+    .stat,
+    .duration_format
   )
 
   out <- list(

@@ -36,8 +36,10 @@ test_that("browse: with column selection", {
 
 test_that("browse: with tidyselect helpers", {
   df <- tibble(
-    temp_1 = 1:5, temp_2 = 6:10,
-    pressure_1 = 11:15, pressure_2 = 16:20
+    temp_1 = 1:5,
+    temp_2 = 6:10,
+    pressure_1 = 11:15,
+    pressure_2 = 16:20
   )
   result <- browse(df, starts_with("temp"))
   expect_equal(ncol(result), 2)
@@ -57,7 +59,8 @@ test_that("browse: with column range", {
 
 test_that("browse: with where() selection", {
   df <- tibble(
-    num1 = 1:5, num2 = 6:10,
+    num1 = 1:5,
+    num2 = 6:10,
     char = letters[1:5],
     logi = c(TRUE, FALSE, TRUE, FALSE, TRUE)
   )
@@ -165,9 +168,14 @@ test_that("browse: survey data exploration", {
     q4_satisfaction = sample(1:5, 100, replace = TRUE),
     completion_time = runif(100, 1, 10)
   )
-  
+
   # Browse only demographic questions
-  demo_vars <- browse(survey, respondent_id, starts_with("q1"), starts_with("q2"))
+  demo_vars <- browse(
+    survey,
+    respondent_id,
+    starts_with("q1"),
+    starts_with("q2")
+  )
   expect_equal(ncol(demo_vars), 3)
 })
 
@@ -180,7 +188,7 @@ test_that("browse: time series data inspection", {
     close_price = cumsum(rnorm(30)) + 101,
     volume = sample(1000000:10000000, 30)
   )
-  
+
   # Browse only price columns
   price_data <- browse(ts_data, date, ends_with("_price"))
   expect_equal(ncol(price_data), 5)
@@ -195,9 +203,15 @@ test_that("browse: model diagnostics data", {
     leverage = runif(100),
     cooks_d = runif(100, 0, 1)
   )
-  
+
   # Browse diagnostic measures
-  diagnostics <- browse(model_data, observation, residual, std_residual, cooks_d)
+  diagnostics <- browse(
+    model_data,
+    observation,
+    residual,
+    std_residual,
+    cooks_d
+  )
   expect_equal(ncol(diagnostics), 4)
 })
 
@@ -210,7 +224,7 @@ test_that("browse: works in dplyr pipeline", {
     filter(mpg > 20) %>%
     select(mpg, wt, hp) %>%
     browse(mpg, wt, hp)
-  
+
   expected <- mtcars %>% filter(mpg > 20) %>% select(mpg, wt, hp)
   expect_identical(result, expected)
   expect_true(all(result$mpg > 20))
@@ -221,7 +235,7 @@ test_that("browse: chain with other operations", {
     select(name:mass) %>%
     filter(!is.na(mass)) %>%
     browse(name, mass)
-  
+
   expect_false(any(is.na(result$mass)))
 })
 

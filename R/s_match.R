@@ -59,7 +59,10 @@
 #'
 #' @export
 s_match <- function(
-    string, ignore.case = TRUE, vars = NULL) {
+  string,
+  ignore.case = TRUE,
+  vars = NULL
+) {
   if (is.character(string)) {
     string <- paste0("^(", string, ")$")
     string_vec <- string %>%
@@ -126,8 +129,6 @@ num_range_to_regex <- function(string) {
       return(out)
     }
   } else {
-    stop("The range should be specified as [a-m] or [1-10]",
-      call. = FALSE
-    )
+    stop("The range should be specified as [a-m] or [1-10]", call. = FALSE)
   }
 }

@@ -20,17 +20,17 @@ test_that("row_mean: basic calculation with tibble input", {
   result <- row_mean(tb)
   expect_type(result, "double")
   expect_equal(length(result), 10)
-  expect_equal(result[1], 11)  # mean of 1, 11, 21
+  expect_equal(result[1], 11) # mean of 1, 11, 21
   expect_equal(result[10], 20) # mean of 10, 20, 30
 })
 
 test_that("row_mean: with missing values", {
   tb <- tibble(x = c(1, 2, NA, 4), y = c(NA, 2, 3, 4), z = c(1, NA, 3, 4))
   result <- row_mean(tb)
-  expect_equal(result[1], 1)   # only x and z available
-  expect_equal(result[2], 2)   # only x and y available
-  expect_equal(result[3], 3)   # only y and z available
-  expect_equal(result[4], 4)   # all available
+  expect_equal(result[1], 1) # only x and z available
+  expect_equal(result[2], 2) # only x and y available
+  expect_equal(result[3], 3) # only y and z available
+  expect_equal(result[4], 4) # all available
 })
 
 test_that("row_mean: all NA row returns NA", {
@@ -77,9 +77,9 @@ test_that("row_sum: basic calculation", {
 test_that("row_sum: with missing values", {
   tb <- tibble(x = c(1, NA, 3), y = c(NA, 2, 3), z = c(1, 2, NA))
   result <- row_sum(tb)
-  expect_equal(result[1], 2)  # 1 + 1
-  expect_equal(result[2], 4)  # 2 + 2
-  expect_equal(result[3], 6)  # 3 + 3
+  expect_equal(result[1], 2) # 1 + 1
+  expect_equal(result[2], 4) # 2 + 2
+  expect_equal(result[3], 6) # 3 + 3
 })
 
 test_that("row_sum: within mutate context", {
@@ -189,8 +189,8 @@ test_that("row_median: with even number of columns", {
 test_that("row_median: with missing values", {
   tb <- tibble(x = c(1, NA, 5), y = c(NA, 2, NA), z = c(3, 4, 6))
   result <- row_median(tb)
-  expect_equal(result[1], 2)  # median of 1, 3
-  expect_equal(result[2], 3)  # median of 2, 4
+  expect_equal(result[1], 2) # median of 1, 3
+  expect_equal(result[2], 3) # median of 2, 4
   expect_equal(result[3], 5.5) # median of 5, 6
 })
 
@@ -226,7 +226,7 @@ test_that("row_var: with missing values", {
 test_that("row_var: single non-NA value returns NA", {
   tb <- tibble(x = c(1, NA), y = c(NA, 2), z = c(NA, NA))
   result <- row_var(tb)
-  expect_true(is.na(result[1]))  # only one non-NA
+  expect_true(is.na(result[1])) # only one non-NA
 })
 
 # ============================================================================
@@ -273,9 +273,9 @@ test_that("row_unique: basic calculation", {
 test_that("row_unique: NA values counted as unique", {
   tb <- tibble(x = c(1, NA, 1), y = c(NA, NA, 1), z = c(1, NA, 2))
   result <- row_unique(tb)
-  expect_equal(result[1], 2)  # 1 and NA
-  expect_equal(result[2], 1)  # only NA
-  expect_equal(result[3], 2)  # 1, 1, 2 -> unique: 1, 2
+  expect_equal(result[1], 2) # 1 and NA
+  expect_equal(result[2], 1) # only NA
+  expect_equal(result[3], 2) # 1, 1, 2 -> unique: 1, 2
 })
 
 test_that("row_unique: all identical returns 1", {
@@ -352,7 +352,11 @@ test_that("row_non_miss: complements row_miss", {
 # ============================================================================
 
 test_that("row functions: mixed data types coerce to numeric", {
-  tb <- tibble(x = c(TRUE, FALSE, TRUE), y = c(1L, 2L, 3L), z = c(1.5, 2.5, 3.5))
+  tb <- tibble(
+    x = c(TRUE, FALSE, TRUE),
+    y = c(1L, 2L, 3L),
+    z = c(1.5, 2.5, 3.5)
+  )
   result_mean <- row_mean(tb)
   result_sum <- row_sum(tb)
   expect_type(result_mean, "double")
@@ -368,8 +372,10 @@ test_that("row functions: single row tibble", {
 })
 
 test_that("row functions: many columns", {
-  tb <- as_tibble(replicate(50, rnorm(10)),
-                  .name_repair = ~ paste0("x", seq_along(.x)))
+  tb <- as_tibble(
+    replicate(50, rnorm(10)),
+    .name_repair = ~ paste0("x", seq_along(.x))
+  )
   result <- row_mean(tb)
   expect_equal(length(result), 10)
   expect_type(result, "double")
@@ -397,8 +403,10 @@ test_that("row functions: combining multiple operations in mutate", {
 })
 
 test_that("row functions: extreme values don't cause overflow", {
-  tb <- tibble(x = c(.Machine$double.xmax / 1e10, 1e100), 
-               y = c(1e100, .Machine$double.xmax / 1e10))
+  tb <- tibble(
+    x = c(.Machine$double.xmax / 1e10, 1e100),
+    y = c(1e100, .Machine$double.xmax / 1e10)
+  )
   result_mean <- row_mean(tb)
   result_sum <- row_sum(tb)
   expect_true(all(is.finite(result_mean) | is.infinite(result_mean)))
@@ -408,9 +416,9 @@ test_that("row functions: extreme values don't cause overflow", {
 test_that("row functions: handle NaN correctly", {
   tb <- tibble(x = c(1, NaN, 3), y = c(NaN, 2, 3), z = c(1, 2, NaN))
   result_mean <- row_mean(tb)
-  expect_equal(result_mean[1], 1)  # mean of 1, 1
-  expect_equal(result_mean[2], 2)  # mean of 2, 2
-  expect_equal(result_mean[3], 3)  # mean of 3, 3
+  expect_equal(result_mean[1], 1) # mean of 1, 1
+  expect_equal(result_mean[2], 2) # mean of 2, 2
+  expect_equal(result_mean[3], 3) # mean of 3, 3
 })
 
 # ============================================================================

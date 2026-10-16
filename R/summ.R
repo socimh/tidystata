@@ -111,19 +111,24 @@
 #' mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
 #' summ(mixed, .mode = "list", .duration_format = "compact")
 summ <- function(
-    .data, ...,
-    .by = NULL,
-    .keep_all = FALSE,
-    .detail = FALSE,
-    .stat = character(0),
-    .na.rm = FALSE,
-    .name = TRUE,
-    .mode = c("list", "table"),
-    .duration_format = c("long", "compact")) {
-  
+  .data,
+  ...,
+  .by = NULL,
+  .keep_all = FALSE,
+  .detail = FALSE,
+  .stat = character(0),
+  .na.rm = FALSE,
+  .name = TRUE,
+  .mode = c("list", "table"),
+  .duration_format = c("long", "compact")
+) {
   # Validate controls before data-dependent branching.
-  controls <- list(.keep_all = .keep_all, .detail = .detail,
-                   .na.rm = .na.rm, .name = .name)
+  controls <- list(
+    .keep_all = .keep_all,
+    .detail = .detail,
+    .na.rm = .na.rm,
+    .name = .name
+  )
   for (argument in names(controls)) {
     value <- controls[[argument]]
     if (!is.logical(value) || length(value) != 1L || is.na(value)) {
@@ -133,22 +138,26 @@ summ <- function(
   summ_stat_names(.stat)
   .mode <- match.arg(.mode)
   .duration_format <- match.arg(.duration_format)
-  
+
   # Store original class for later restoration
   original_class <- class(.data)[1]
   # Normalize vectors before grouping and selection.
   if (!is.data.frame(.data)) {
     var_name <- deparse(substitute(.data))
-    if (length(var_name) > 1) var_name <- "value"
+    if (length(var_name) > 1) {
+      var_name <- "value"
+    }
     .data <- tibble::as_tibble_col(.data, column_name = var_name)
     original_class <- "data.frame"
   }
-  
+
   # Convert data.table to tibble for processing (if needed)
   is_dt <- FALSE
   if (inherits(.data, "data.table")) {
     if (!requireNamespace("data.table", quietly = TRUE)) {
-      stop("data.table package required for data.table input. Install with: install.packages('data.table')")
+      stop(
+        "data.table package required for data.table input. Install with: install.packages('data.table')"
+      )
     }
     is_dt <- TRUE
     .data <- tibble::as_tibble(.data)
@@ -157,7 +166,8 @@ summ <- function(
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
-    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data),
+    by
   )
   .data <- dplyr::ungroup(.data)
   input_names <- names(.data)
@@ -175,12 +185,16 @@ summ <- function(
 
   # Prepare data
   .data_summ <- remove_group_vars(
-    .data, ...,
+    .data,
+    ...,
     group_vars = group_vars
   )
 
   if (any(vapply(.data_summ, function(x) !is.null(dim(x)), logical(1)))) {
-    stop("Matrix/data-frame columns are not supported; use atomic or list columns.", call. = FALSE)
+    stop(
+      "Matrix/data-frame columns are not supported; use atomic or list columns.",
+      call. = FALSE
+    )
   }
 
   # Confirm variables
@@ -202,17 +216,47 @@ summ <- function(
   }
 
   # Group keys must remain distinct from summary metadata and pivot fields.
-  reserved <- c("name", "value", "type", "n", "unique", "min", "mean", "sd", "max",
-                "miss_n", "valid_pct", "q1", "median", "mad", "q3", "iqr",
-                "skew", "kurtosis", "se", "sum", "missing", "p25", "p50", "p75")
+  reserved <- c(
+    "name",
+    "value",
+    "type",
+    "n",
+    "unique",
+    "min",
+    "mean",
+    "sd",
+    "max",
+    "miss_n",
+    "valid_pct",
+    "q1",
+    "median",
+    "mad",
+    "q3",
+    "iqr",
+    "skew",
+    "kurtosis",
+    "se",
+    "sum",
+    "missing",
+    "p25",
+    "p50",
+    "p75"
+  )
   for (position in which(group_vars %in% reserved)) {
     old_name <- group_vars[[position]]
     new_name <- paste0(".", old_name)
-    while (new_name %in% c(input_names, names(.data))) new_name <- paste0(".", new_name)
+    while (new_name %in% c(input_names, names(.data))) {
+      new_name <- paste0(".", new_name)
+    }
     names(.data)[names(.data) == old_name] <- new_name
     group_vars[[position]] <- new_name
-    message("Grouping column `", old_name, "` renamed to `", new_name,
-            "` to avoid summary-column collisions.")
+    message(
+      "Grouping column `",
+      old_name,
+      "` renamed to `",
+      new_name,
+      "` to avoid summary-column collisions."
+    )
   }
   measured_count <- ncol(.data) - length(group_vars)
   out <- summ_list(.data, group_vars, .detail, .stat, .mode, .duration_format)
@@ -223,7 +267,7 @@ summ <- function(
       out <- dplyr::select(out, -name)
     }
   }
-  
+
   # Convert output back to original class (for table mode)
   if (.mode == "table" && is.data.frame(out)) {
     if (original_class == "data.frame") {
@@ -239,23 +283,28 @@ summ <- function(
 #' @rdname summ
 #' @export
 tabstat <- function(
-    .data, ...,
-    .by = NULL,
-    .keep_all = FALSE,
-    .detail = FALSE,
-    .stat = "mean",
-    .na.rm = FALSE,
-    .name = TRUE,
-    .mode = c("list", "table"),
-    .duration_format = c("long", "compact")) {
+  .data,
+  ...,
+  .by = NULL,
+  .keep_all = FALSE,
+  .detail = FALSE,
+  .stat = "mean",
+  .na.rm = FALSE,
+  .name = TRUE,
+  .mode = c("list", "table"),
+  .duration_format = c("long", "compact")
+) {
   if (!is.data.frame(.data)) {
     var_name <- deparse(substitute(.data))
-    if (length(var_name) > 1L) var_name <- "value"
+    if (length(var_name) > 1L) {
+      var_name <- "value"
+    }
     .data <- as.data.frame(tibble::as_tibble_col(.data, column_name = var_name))
   }
   return(
     summ(
-      .data, ...,
+      .data,
+      ...,
       .by = {{ .by }},
       .keep_all = .keep_all,
       .detail = .detail,

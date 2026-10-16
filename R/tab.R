@@ -116,13 +116,16 @@ NULL
 #' @export
 #' @rdname tab
 tab <- function(
-    .data, ...,
-    .by = NULL,
-    .desc = FALSE) {
+  .data,
+  ...,
+  .by = NULL,
+  .desc = FALSE
+) {
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
-    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data),
+    by
   )
   .data <- dplyr::ungroup(.data)
 
@@ -139,7 +142,9 @@ tab <- function(
 
   # Tabulate
   out <- tab_data(
-    .data, group_vars, .desc
+    .data,
+    group_vars,
+    .desc
   ) %>%
     dplyr::select(-...any_miss)
 
@@ -150,14 +155,17 @@ tab <- function(
 #' @export
 #' @rdname tab
 tab1 <- function(
-    .data, ...,
-    .by = NULL,
-    .desc = FALSE,
-    .type = c("list", "tibble")) {
+  .data,
+  ...,
+  .by = NULL,
+  .desc = FALSE,
+  .type = c("list", "tibble")
+) {
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
-    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data),
+    by
   )
   .data <- dplyr::ungroup(.data)
 
@@ -177,7 +185,8 @@ tab1 <- function(
 
   if (length(out) == 0L && .type[1] == "tibble") {
     return(dplyr::bind_cols(
-      .data[0L, group_vars, drop = FALSE], append_tab_list(out)
+      .data[0L, group_vars, drop = FALSE],
+      append_tab_list(out)
     ))
   }
 
@@ -193,12 +202,17 @@ tab1 <- function(
 #' @export
 #' @rdname tab
 tab2 <- function(
-    .data, ..., .flip = FALSE) {
+  .data,
+  ...,
+  .flip = FALSE
+) {
   # Prepare data
   .data <- .data %>%
     s_select(...)
   .data <- s_ungroup(.data)
-  if (ncol(.data) == 0L) return(tibble::tibble())
+  if (ncol(.data) == 0L) {
+    return(tibble::tibble())
+  }
 
   # Confirm names
   check_two_vars(.data)
@@ -220,15 +234,18 @@ tab2 <- function(
 #' @export
 #' @rdname tab
 fre <- function(
-    .data, ...,
-    .by = NULL,
-    .desc = FALSE,
-    .type = c("tibble", "flextable")) {
+  .data,
+  ...,
+  .by = NULL,
+  .desc = FALSE,
+  .type = c("tibble", "flextable")
+) {
   .type <- match.arg(.type)
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
-    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data),
+    by
   )
   .data <- dplyr::ungroup(.data)
 
@@ -261,14 +278,17 @@ fre <- function(
 #' @export
 #' @rdname tab
 fre1 <- function(
-    .data, ...,
-    .by = NULL,
-    .desc = FALSE,
-    .type = c("list", "tibble", "flextable")) {
+  .data,
+  ...,
+  .by = NULL,
+  .desc = FALSE,
+  .type = c("list", "tibble", "flextable")
+) {
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
-    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data), by
+    if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data),
+    by
   )
   .data <- dplyr::ungroup(.data)
 
@@ -289,7 +309,8 @@ fre1 <- function(
 
   if (length(out) == 0L && .type[1] == "tibble") {
     return(dplyr::bind_cols(
-      .data[0L, group_vars, drop = FALSE], append_tab_list(out)
+      .data[0L, group_vars, drop = FALSE],
+      append_tab_list(out)
     ))
   }
 
@@ -313,14 +334,19 @@ fre1 <- function(
 #' @export
 #' @rdname tab
 fre2 <- function(
-    .data, ..., .flip = FALSE,
-    .type = c("tibble", "flextable")) {
+  .data,
+  ...,
+  .flip = FALSE,
+  .type = c("tibble", "flextable")
+) {
   .type <- match.arg(.type)
   # Prepare data
   .data <- .data %>%
     s_select(...)
   .data <- s_ungroup(.data)
-  if (ncol(.data) == 0L) return(tibble::tibble())
+  if (ncol(.data) == 0L) {
+    return(tibble::tibble())
+  }
 
   # Confirm names
   check_two_vars(.data)

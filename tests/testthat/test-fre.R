@@ -59,7 +59,7 @@ test_that("fre: Total percent equals 100", {
   df <- tibble(x = c("a", "a", "a", "b", "b", "c"))
   result <- fre(df, x, .type = "tibble")
   total_row <- result[grepl("Total", result$x, ignore.case = TRUE), ]
-  if("percent" %in% names(total_row)) {
+  if ("percent" %in% names(total_row)) {
     expect_equal(total_row$percent, 100)
   }
 })
@@ -88,10 +88,10 @@ test_that("fre: cumulative percent increases", {
   df <- tibble(x = c("a", "a", "a", "b", "b", "c"))
   result <- fre(df, x, .type = "tibble")
   cum_col <- grep("cum", names(result), ignore.case = TRUE, value = TRUE)
-  if(length(cum_col) > 0) {
+  if (length(cum_col) > 0) {
     cum_values <- result[[cum_col[1]]][!grepl("Total", result$x)]
     cum_values <- cum_values[!is.na(cum_values)]
-    if(length(cum_values) > 1) {
+    if (length(cum_values) > 1) {
       expect_true(all(diff(cum_values) >= 0))
     }
   }
@@ -101,9 +101,9 @@ test_that("fre: cumulative percent reaches 100 before Total", {
   df <- tibble(x = c("a", "a", "a", "b", "b", "c"))
   result <- fre(df, x, .type = "tibble")
   cum_col <- grep("cum", names(result), ignore.case = TRUE, value = TRUE)
-  if(length(cum_col) > 0) {
+  if (length(cum_col) > 0) {
     last_non_total <- tail(result[[cum_col[1]]][!grepl("Total", result$x)], 1)
-    if(!is.na(last_non_total)) {
+    if (!is.na(last_non_total)) {
       expect_equal(last_non_total, 100)
     }
   }
@@ -184,7 +184,7 @@ test_that("fre: complex boolean with multiple conditions", {
 test_that("fre: boolean resulting in single category", {
   df <- tibble(x = 1:10, y = rep("a", 10))
   result <- fre(df, y, x > 0, .type = "tibble")
-  expect_equal(nrow(result), 2)  # Only TRUE + Total
+  expect_equal(nrow(result), 2) # Only TRUE + Total
 })
 
 # ============================================================================
@@ -211,9 +211,13 @@ test_that("fre: factor with NA level explicitly included", {
 })
 
 test_that("fre: haven labelled with NA values", {
-  df <- tibble(x = labelled_spss(c(1, 1, 2, -99), 
-                            labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
-                            na_values = -99))
+  df <- tibble(
+    x = labelled_spss(
+      c(1, 1, 2, -99),
+      labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
+      na_values = -99
+    )
+  )
   result <- fre(df, x, .type = "tibble")
   expect_true(any(grepl("Total", result$x, ignore.case = TRUE)))
 })
@@ -230,7 +234,9 @@ test_that("fre: .desc=TRUE with ties", {
 })
 
 test_that("fre: .desc=FALSE preserves order", {
-  df <- tibble(x = factor(c("high", "low", "med"), levels = c("low", "med", "high")))
+  df <- tibble(
+    x = factor(c("high", "low", "med"), levels = c("low", "med", "high"))
+  )
   result <- fre(df, x, .desc = FALSE, .type = "tibble")
   non_total <- result[!grepl("Total", result$x, ignore.case = TRUE), ]
   expect_equal(as.character(non_total$x[1]), "low")
@@ -250,15 +256,22 @@ test_that("fre: sorting with grouped data", {
 # ============================================================================
 
 test_that("fre: Date variables", {
-  df <- tibble(x = as.Date(c("2024-01-01", "2024-01-01", "2024-01-02", "2024-01-02")))
+  df <- tibble(
+    x = as.Date(c("2024-01-01", "2024-01-01", "2024-01-02", "2024-01-02"))
+  )
   result <- fre(df, x, .type = "tibble")
   expect_s3_class(result, "tbl_df")
   expect_true(any(grepl("Total", result$x, ignore.case = TRUE)))
 })
 
 test_that("fre: POSIXct datetime variables", {
-  df <- tibble(x = as.POSIXct(c("2024-01-01 10:00", "2024-01-01 10:00", 
-                                "2024-01-02 12:00")))
+  df <- tibble(
+    x = as.POSIXct(c(
+      "2024-01-01 10:00",
+      "2024-01-01 10:00",
+      "2024-01-02 12:00"
+    ))
+  )
   result <- fre(df, x, .type = "tibble")
   expect_s3_class(result, "tbl_df")
 })
@@ -335,11 +348,14 @@ test_that("fre: 10000 rows with flextable", {
 test_that("fre: 10000 rows with tibble", {
   df <- tibble(x = sample(letters[1:10], 10000, replace = TRUE))
   result <- fre(df, x, .type = "tibble")
-  expect_equal(nrow(result), 11)  # 10 categories + Total
+  expect_equal(nrow(result), 11) # 10 categories + Total
 })
 
 test_that("fre: many variables (20+) with tibble", {
-  df <- as_tibble(replicate(20, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
+  df <- as_tibble(
+    replicate(20, sample(1:3, 100, replace = TRUE)),
+    .name_repair = "minimal"
+  )
   names(df) <- paste0("var", 1:20)
   result <- fre(df, everything(), .type = "tibble")
   expect_s3_class(result, "tbl_df")
@@ -352,7 +368,7 @@ test_that("fre: many variables (20+) with tibble", {
 test_that("fre: single row dataset", {
   df <- tibble(x = "only")
   result <- fre(df, x, .type = "tibble")
-  expect_equal(nrow(result), 2)  # value + Total
+  expect_equal(nrow(result), 2) # value + Total
   total_row <- result[grepl("Total", result$x, ignore.case = TRUE), ]
   expect_equal(total_row$n, 1)
 })
@@ -360,7 +376,7 @@ test_that("fre: single row dataset", {
 test_that("fre: all identical values", {
   df <- tibble(x = rep("same", 1000))
   result <- fre(df, x, .type = "tibble")
-  expect_equal(nrow(result), 2)  # same + Total
+  expect_equal(nrow(result), 2) # same + Total
   total_row <- result[grepl("Total", result$x, ignore.case = TRUE), ]
   expect_equal(total_row$n, 1000)
 })
@@ -374,13 +390,13 @@ test_that("fre: empty data frame", {
 test_that("fre: variable with special characters", {
   df <- tibble(x = c("a@b.com", "a@b.com", "x#y", "$100"))
   result <- fre(df, x, .type = "tibble")
-  expect_equal(nrow(result), 4)  # 3 unique + Total
+  expect_equal(nrow(result), 4) # 3 unique + Total
 })
 
 test_that("fre: unicode characters", {
   df <- tibble(x = c("中文", "中文", "日本語", "🎉", "🎉"))
   result <- fre(df, x, .type = "tibble")
-  expect_equal(nrow(result), 4)  # 3 unique + Total
+  expect_equal(nrow(result), 4) # 3 unique + Total
 })
 
 # ============================================================================
@@ -403,8 +419,12 @@ test_that("fre: non-existent column should error", {
 test_that("fre: survey frequency distribution", {
   set.seed(42)
   df <- tibble(
-    satisfaction = sample(1:5, 1000, replace = TRUE, 
-                         prob = c(0.05, 0.15, 0.3, 0.35, 0.15)),
+    satisfaction = sample(
+      1:5,
+      1000,
+      replace = TRUE,
+      prob = c(0.05, 0.15, 0.3, 0.35, 0.15)
+    ),
     would_recommend = sample(c("Yes", "No", "Maybe"), 1000, replace = TRUE)
   )
   result <- fre(df, satisfaction, would_recommend, .type = "tibble")
@@ -414,7 +434,11 @@ test_that("fre: survey frequency distribution", {
 
 test_that("fre: demographic breakdown with grouping", {
   df <- tibble(
-    age_group = sample(c("18-25", "26-35", "36-50", "50+"), 500, replace = TRUE),
+    age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      500,
+      replace = TRUE
+    ),
     gender = sample(c("Male", "Female"), 500, replace = TRUE)
   )
   result <- fre(df, age_group, .by = gender, .type = "tibble")
@@ -424,8 +448,12 @@ test_that("fre: demographic breakdown with grouping", {
 
 test_that("fre: quality control frequencies", {
   df <- tibble(
-    defect_type = sample(c("None", "Minor", "Major", "Critical"), 1000, 
-                        replace = TRUE, prob = c(0.85, 0.1, 0.04, 0.01)),
+    defect_type = sample(
+      c("None", "Minor", "Major", "Critical"),
+      1000,
+      replace = TRUE,
+      prob = c(0.85, 0.1, 0.04, 0.01)
+    ),
     shift = sample(c("Morning", "Afternoon", "Night"), 1000, replace = TRUE)
   )
   result <- fre(df, defect_type, .by = shift, .type = "tibble")

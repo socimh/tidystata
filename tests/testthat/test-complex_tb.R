@@ -75,13 +75,25 @@ test_that("codebook: extreme missing value patterns", {
 
 test_that("codebook: haven labelled variables with complex labels", {
   df <- tibble(
-    simple_label = labelled(rep(1:3, length.out = 100), labels = c("A" = 1, "B" = 2, "C" = 3)),
-    with_na = labelled_spss(rep(c(1, 1, 2, -99), length.out = 100),
-                       labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
-                       na_values = -99),
-    extended = labelled(rep(1:5, 20), 
-                        labels = c("Very Low" = 1, "Low" = 2, "Medium" = 3, 
-                                  "High" = 4, "Very High" = 5))
+    simple_label = labelled(
+      rep(1:3, length.out = 100),
+      labels = c("A" = 1, "B" = 2, "C" = 3)
+    ),
+    with_na = labelled_spss(
+      rep(c(1, 1, 2, -99), length.out = 100),
+      labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
+      na_values = -99
+    ),
+    extended = labelled(
+      rep(1:5, 20),
+      labels = c(
+        "Very Low" = 1,
+        "Low" = 2,
+        "Medium" = 3,
+        "High" = 4,
+        "Very High" = 5
+      )
+    )
   )
   result <- codebook(df)
   expect_s3_class(result, "tbl_df")
@@ -99,7 +111,10 @@ test_that("codebook: Date and POSIXct datetime variables", {
 
 test_that("codebook: factor with many unused levels", {
   df <- tibble(
-    x = factor(c("a", "b"), levels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j"))
+    x = factor(
+      c("a", "b"),
+      levels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
+    )
   )
   result <- codebook(df)
   expect_equal(result$unique, 2)
@@ -122,7 +137,10 @@ test_that("codebook: matrix column handling", {
 })
 
 test_that("codebook: data frame with 50+ variables", {
-  df <- as_tibble(replicate(50, sample(1:10, 100, replace = TRUE)), .name_repair = "minimal")
+  df <- as_tibble(
+    replicate(50, sample(1:10, 100, replace = TRUE)),
+    .name_repair = "minimal"
+  )
   names(df) <- paste0("var", 1:50)
   result <- codebook(df)
   expect_equal(nrow(result), 50)
@@ -131,8 +149,14 @@ test_that("codebook: data frame with 50+ variables", {
 test_that("codebook: extreme numeric values", {
   df <- tibble(
     normal = 1:10,
-    large = rep(c(.Machine$double.xmax, .Machine$double.xmax / 2), length.out = 10),
-    small = rep(c(.Machine$double.xmin, .Machine$double.xmin * 2), length.out = 10),
+    large = rep(
+      c(.Machine$double.xmax, .Machine$double.xmax / 2),
+      length.out = 10
+    ),
+    small = rep(
+      c(.Machine$double.xmin, .Machine$double.xmin * 2),
+      length.out = 10
+    ),
     inf = rep(c(Inf, -Inf, Inf, -Inf), length.out = 10),
     nan = rep(c(NaN, NaN, 1, 2), length.out = 10)
   )
@@ -168,7 +192,10 @@ test_that("codebook: difftime and hms time variables", {
   skip_if_not_installed("hms")
   df <- tibble(
     duration = as.difftime(c(1, 2, 3, 4, 5), units = "hours"),
-    time_of_day = hms::as_hms(rep(c("08:00:00", "12:00:00", "18:00:00"), length.out = 5))
+    time_of_day = hms::as_hms(rep(
+      c("08:00:00", "12:00:00", "18:00:00"),
+      length.out = 5
+    ))
   )
   result <- codebook(df)
   expect_equal(nrow(result), 2)
@@ -200,8 +227,10 @@ test_that("codebook: data.table input", {
 
 test_that("codebook: starts_with selection", {
   df <- tibble(
-    pref_x_1 = 1:10, pref_x_2 = 1:10,
-    pref_y_1 = 1:10, pref_y_2 = 1:10,
+    pref_x_1 = 1:10,
+    pref_x_2 = 1:10,
+    pref_y_1 = 1:10,
+    pref_y_2 = 1:10,
     other_z = 1:10
   )
   result <- codebook(df, starts_with("pref_"))
@@ -210,8 +239,10 @@ test_that("codebook: starts_with selection", {
 
 test_that("codebook: ends_with selection", {
   df <- tibble(
-    var_a_test = 1:10, var_b_test = 1:10,
-    var_c_prod = 1:10, var_d_prod = 1:10
+    var_a_test = 1:10,
+    var_b_test = 1:10,
+    var_c_prod = 1:10,
+    var_d_prod = 1:10
   )
   result <- codebook(df, ends_with("_test"))
   expect_equal(nrow(result), 2)
@@ -219,8 +250,10 @@ test_that("codebook: ends_with selection", {
 
 test_that("codebook: contains selection", {
   df <- tibble(
-    temp_1 = 1:10, temp_2 = 1:10,
-    pressure_temp = 1:10, humidity = 1:10
+    temp_1 = 1:10,
+    temp_2 = 1:10,
+    pressure_temp = 1:10,
+    humidity = 1:10
   )
   result <- codebook(df, contains("temp"))
   expect_equal(nrow(result), 3)
@@ -228,7 +261,8 @@ test_that("codebook: contains selection", {
 
 test_that("codebook: where() with complex predicate", {
   df <- tibble(
-    num1 = 1:10, num2 = 11:20,
+    num1 = 1:10,
+    num2 = 11:20,
     char = letters[1:10],
     logi = rep(c(TRUE, FALSE), length.out = 10),
     fac = factor(rep(1:2, 5))
@@ -251,14 +285,28 @@ test_that("codebook: survey data simulation", {
   set.seed(42)
   df <- tibble(
     respondent_id = 1:1000,
-    age_group = sample(c("18-25", "26-35", "36-50", "50+"), 1000, replace = TRUE),
-    gender = sample(c("Male", "Female", "Other", "Prefer not to say"), 1000, 
-                   replace = TRUE, prob = c(0.48, 0.48, 0.02, 0.02)),
-    satisfaction = sample(1:5, 1000, replace = TRUE, 
-                         prob = c(0.1, 0.15, 0.3, 0.3, 0.15)),
-    comments = ifelse(sample(c(TRUE, FALSE), 1000, replace = TRUE, prob = c(0.3, 0.7)),
-                     sample(c("Great!", "Needs work", "OK"), 1000, replace = TRUE),
-                     NA),
+    age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      1000,
+      replace = TRUE
+    ),
+    gender = sample(
+      c("Male", "Female", "Other", "Prefer not to say"),
+      1000,
+      replace = TRUE,
+      prob = c(0.48, 0.48, 0.02, 0.02)
+    ),
+    satisfaction = sample(
+      1:5,
+      1000,
+      replace = TRUE,
+      prob = c(0.1, 0.15, 0.3, 0.3, 0.15)
+    ),
+    comments = ifelse(
+      sample(c(TRUE, FALSE), 1000, replace = TRUE, prob = c(0.3, 0.7)),
+      sample(c("Great!", "Needs work", "OK"), 1000, replace = TRUE),
+      NA
+    ),
     completed = sample(c(TRUE, FALSE), 1000, replace = TRUE, prob = c(0.9, 0.1))
   )
   result <- codebook(df)
@@ -274,8 +322,12 @@ test_that("codebook: time series data", {
   df <- tibble(
     timestamp = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 168),
     value = rnorm(168),
-    quality_flag = sample(c("Good", "Suspect", "Bad"), 168, 
-                         replace = TRUE, prob = c(0.85, 0.1, 0.05)),
+    quality_flag = sample(
+      c("Good", "Suspect", "Bad"),
+      168,
+      replace = TRUE,
+      prob = c(0.85, 0.1, 0.05)
+    ),
     sensor_id = rep(c("A1", "A2", "B1", "B2"), each = 42)
   )
   result <- codebook(df)
@@ -290,11 +342,16 @@ test_that("codebook: clinical trial data", {
     treatment = sample(c("Drug", "Placebo"), 200, replace = TRUE),
     age = sample(18:80, 200, replace = TRUE),
     baseline_score = sample(0:100, 200, replace = TRUE),
-    followup_score = ifelse(sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.8, 0.2)),
-                           sample(0:100, 200, replace = TRUE), NA),
-    adverse_event = ifelse(sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.15, 0.85)),
-                          sample(c("Mild", "Moderate", "Severe"), 200, replace = TRUE),
-                          NA)
+    followup_score = ifelse(
+      sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.8, 0.2)),
+      sample(0:100, 200, replace = TRUE),
+      NA
+    ),
+    adverse_event = ifelse(
+      sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.15, 0.85)),
+      sample(c("Mild", "Moderate", "Severe"), 200, replace = TRUE),
+      NA
+    )
   )
   result <- codebook(df)
   expect_equal(nrow(result), ncol(df))

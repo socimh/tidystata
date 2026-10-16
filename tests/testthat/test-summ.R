@@ -43,7 +43,12 @@ test_that("summ: duration format long vs compact", {
     dates = seq(as.Date("2024-01-01"), by = "day", length.out = 100)
   )
   result_long <- summ(df, dates, .mode = "table", .duration_format = "long")
-  result_compact <- summ(df, dates, .mode = "table", .duration_format = "compact")
+  result_compact <- summ(
+    df,
+    dates,
+    .mode = "table",
+    .duration_format = "compact"
+  )
   expect_s3_class(result_long, "data.frame")
   expect_s3_class(result_compact, "data.frame")
 })
@@ -66,7 +71,10 @@ test_that("summ: multiple statistics selection", {
 
 test_that("summ: all available statistics", {
   df <- tibble(x = rnorm(100))
-  result <- summ(df, .stat = c("n", "missing", "mean", "sd", "min", "p25", "p50", "p75", "max"))
+  result <- summ(
+    df,
+    .stat = c("n", "missing", "mean", "sd", "min", "p25", "p50", "p75", "max")
+  )
   expect_true(ncol(result) >= 9)
 })
 
@@ -237,7 +245,7 @@ test_that("summ: very small variance dataset", {
 test_that("summ: dataset with exact zero variance", {
   df <- tibble(x = rep(5, 100))
   result <- summ(df)
-  if("sd" %in% names(result)) {
+  if ("sd" %in% names(result)) {
     expect_equal(result$sd, 0)
   }
 })
@@ -248,8 +256,10 @@ test_that("summ: dataset with exact zero variance", {
 
 test_that("summ: starts_with selection", {
   df <- tibble(
-    temp_1 = rnorm(50), temp_2 = rnorm(50),
-    pressure_1 = rnorm(50), pressure_2 = rnorm(50)
+    temp_1 = rnorm(50),
+    temp_2 = rnorm(50),
+    pressure_1 = rnorm(50),
+    pressure_2 = rnorm(50)
   )
   result <- summ(df, starts_with("temp_"))
   expect_equal(nrow(result), 2)
@@ -257,7 +267,8 @@ test_that("summ: starts_with selection", {
 
 test_that("summ: ends_with selection", {
   df <- tibble(
-    var_a_test = rnorm(50), var_b_test = rnorm(50),
+    var_a_test = rnorm(50),
+    var_b_test = rnorm(50),
     var_c_prod = rnorm(50)
   )
   result <- summ(df, ends_with("_test"))
@@ -266,8 +277,10 @@ test_that("summ: ends_with selection", {
 
 test_that("summ: contains selection", {
   df <- tibble(
-    temp_morning = rnorm(50), temp_evening = rnorm(50),
-    pressure_temp = rnorm(50), humidity = rnorm(50)
+    temp_morning = rnorm(50),
+    temp_evening = rnorm(50),
+    pressure_temp = rnorm(50),
+    humidity = rnorm(50)
   )
   result <- summ(df, contains("temp"))
   expect_equal(nrow(result), 3)
@@ -275,7 +288,8 @@ test_that("summ: contains selection", {
 
 test_that("summ: where() with is.numeric", {
   df <- tibble(
-    num1 = rnorm(50), num2 = rnorm(50),
+    num1 = rnorm(50),
+    num2 = rnorm(50),
     char = sample(letters, 50, replace = TRUE),
     logi = sample(c(TRUE, FALSE), 50, replace = TRUE)
   )
@@ -284,8 +298,13 @@ test_that("summ: where() with is.numeric", {
 })
 
 test_that("summ: numeric column indices", {
-  df <- tibble(a = rnorm(50), b = rnorm(50), c = rnorm(50), 
-               d = rnorm(50), e = rnorm(50))
+  df <- tibble(
+    a = rnorm(50),
+    b = rnorm(50),
+    c = rnorm(50),
+    d = rnorm(50),
+    e = rnorm(50)
+  )
   result <- summ(df, 1, 3, 5)
   expect_equal(nrow(result), 3)
 })

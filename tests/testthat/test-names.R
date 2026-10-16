@@ -62,7 +62,8 @@ test_that("ds: with tidyselect - contains", {
 
 test_that("ds: with tidyselect - where(is.numeric)", {
   df <- tibble(
-    num1 = 1:5, num2 = 6:10,
+    num1 = 1:5,
+    num2 = 6:10,
     char = letters[1:5],
     logi = c(TRUE, FALSE, TRUE, FALSE, TRUE)
   )
@@ -169,8 +170,10 @@ test_that("variables: with labels from haven data", {
 
 test_that("variables: with selection", {
   df <- tibble(
-    temp_1 = 1:5, temp_2 = 6:10,
-    pressure_1 = 11:15, pressure_2 = 16:20
+    temp_1 = 1:5,
+    temp_2 = 6:10,
+    pressure_1 = 11:15,
+    pressure_2 = 16:20
   )
   result <- variables(df, starts_with("temp"))
   expect_equal(nrow(result), 2)
@@ -217,7 +220,9 @@ test_that("variables_search: case insensitive by default", {
 
 test_that("variables_search: wildcard with *", {
   df <- tibble(
-    var_1 = 1:5, var_2 = 6:10, var_10 = 11:15,
+    var_1 = 1:5,
+    var_2 = 6:10,
+    var_10 = 11:15,
     other = 16:20
   )
   result <- variables_search(df, "var*")
@@ -226,7 +231,9 @@ test_that("variables_search: wildcard with *", {
 
 test_that("variables_search: single character with ?", {
   df <- tibble(
-    x1 = 1:5, x2 = 6:10, x10 = 11:15,
+    x1 = 1:5,
+    x2 = 6:10,
+    x10 = 11:15,
     y1 = 16:20
   )
   result <- variables_search(df, "x?")
@@ -237,8 +244,11 @@ test_that("variables_search: single character with ?", {
 
 test_that("variables_search: numeric range", {
   df <- tibble(
-    item_1 = 1:5, item_2 = 6:10, item_3 = 11:15,
-    item_10 = 16:20, other = 21:25
+    item_1 = 1:5,
+    item_2 = 6:10,
+    item_3 = 11:15,
+    item_10 = 16:20,
+    other = 21:25
   )
   result <- variables_search(df, "item_[1-3]")
   expect_setequal(result$name, c("item_1", "item_2", "item_3", "item_10"))
@@ -264,7 +274,9 @@ test_that("variables_search: searches in labels if available", {
 
 test_that("variables_search: combined with additional selection", {
   df <- tibble(
-    temp_1 = 1:5, temp_2 = 6:10, temp_3 = 11:15,
+    temp_1 = 1:5,
+    temp_2 = 6:10,
+    temp_3 = 11:15,
     pressure_1 = 16:20
   )
   result <- variables_search(df, "temp")
@@ -279,14 +291,14 @@ test_that("names functions: work in dplyr pipeline", {
   result <- mtcars %>%
     select(mpg, cyl, disp) %>%
     ds()
-  
+
   expect_equal(result, c("mpg", "cyl", "disp"))
 })
 
 test_that("names functions: chain multiple operations", {
   result <- mtcars %>%
     ds(starts_with("d"))
-  
+
   expect_true("disp" %in% result)
   expect_true("drat" %in% result)
 })
@@ -295,7 +307,7 @@ test_that("variables: work in dplyr pipeline", {
   result <- mtcars %>%
     select(where(is.numeric)) %>%
     variables()
-  
+
   expect_s3_class(result, "tbl_df")
   expect_true(nrow(result) > 0)
 })
@@ -313,11 +325,11 @@ test_that("names functions: survey variable exploration", {
     q4_satisfaction = sample(1:5, 100, replace = TRUE),
     completion_time = runif(100, 1, 10)
   )
-  
+
   # Find all question variables
   questions <- ds(survey_data, starts_with("q"))
   expect_equal(length(questions), 4)
-  
+
   # Search for specific question types
   demo_vars <- variables_search(survey_data, "gender|age")
   expect_true(nrow(demo_vars) >= 2)
@@ -332,11 +344,11 @@ test_that("names functions: time series variable selection", {
     price_close = cumsum(rnorm(30, 0.1, 1)) + 101,
     volume = sample(1000000:10000000, 30)
   )
-  
+
   # Get all price columns
   price_vars <- ds(ts_data, starts_with("price"))
   expect_equal(length(price_vars), 4)
-  
+
   # Get column names as column for documentation
   var_list <- names_as_column(ts_data, starts_with("price"))
   expect_equal(nrow(var_list), 4)
@@ -348,13 +360,13 @@ test_that("names functions: time series variable selection", {
 
 test_that("names functions: work with data.table", {
   skip_if_not_installed("data.table")
-  
+
   dt <- data.table::data.table(x = 1:5, y = 6:10, z = 11:15)
-  
+
   result <- ds(dt)
   expect_type(result, "character")
   expect_equal(result, c("x", "y", "z"))
-  
+
   result_vars <- variables(dt)
   expect_s3_class(result_vars, "tbl_df")
 })
@@ -366,11 +378,11 @@ test_that("names functions: work with data.table", {
 test_that("names functions: handle wide data frames efficiently", {
   df <- as_tibble(replicate(1000, rnorm(10)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:1000)
-  
+
   start_time <- Sys.time()
   result <- ds(df)
   end_time <- Sys.time()
-  
+
   expect_equal(length(result), 1000)
   expect_true(as.numeric(end_time - start_time) < 1)
 })

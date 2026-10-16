@@ -125,10 +125,13 @@ row_non_miss <- function(...) {
 
 # Test the context without evaluating selections or computed arguments twice.
 dots_is_tibble <- function(...) {
-  tryCatch({
-    dplyr::cur_group_id()
-    FALSE
-  }, error = function(e) TRUE)
+  tryCatch(
+    {
+      dplyr::cur_group_id()
+      FALSE
+    },
+    error = function(e) TRUE
+  )
 }
 
 row_input <- function(..., .numeric = TRUE) {
@@ -141,32 +144,46 @@ row_input <- function(..., .numeric = TRUE) {
     candidate <- NULL
     probe_warnings <- list()
     if (length(dots) == 1L) {
-      candidate <- tryCatch(withCallingHandlers(
-        rlang::eval_tidy(dots[[1L]]),
-        warning = function(w) {
-          probe_warnings[[length(probe_warnings) + 1L]] <<- w
-          invokeRestart("muffleWarning")
-        }
-      ), error = function(e) NULL)
+      candidate <- tryCatch(
+        withCallingHandlers(
+          rlang::eval_tidy(dots[[1L]]),
+          warning = function(w) {
+            probe_warnings[[length(probe_warnings) + 1L]] <<- w
+            invokeRestart("muffleWarning")
+          }
+        ),
+        error = function(e) NULL
+      )
     }
     if (is.data.frame(candidate)) {
       data <- candidate
-      for (condition in probe_warnings) warning(condition)
+      for (condition in probe_warnings) {
+        warning(condition)
+      }
     } else {
       data <- dplyr::pick(!!!dots)
     }
   }
   if (ncol(data) == 0L) {
-    stop("Select at least one column; NULL and zero columns are not supported.",
-         call. = FALSE)
+    stop(
+      "Select at least one column; NULL and zero columns are not supported.",
+      call. = FALSE
+    )
   }
   if (.numeric) {
-    valid <- vapply(data, function(x) {
-      (is.numeric(x) || is.logical(x)) && !is.complex(x) && is.null(dim(x))
-    }, logical(1))
+    valid <- vapply(
+      data,
+      function(x) {
+        (is.numeric(x) || is.logical(x)) && !is.complex(x) && is.null(dim(x))
+      },
+      logical(1)
+    )
     if (!all(valid)) {
-      stop("Numeric row calculations require numeric or logical columns: ",
-           paste(names(data)[!valid], collapse = ", "), call. = FALSE)
+      stop(
+        "Numeric row calculations require numeric or logical columns: ",
+        paste(names(data)[!valid], collapse = ", "),
+        call. = FALSE
+      )
     }
     # Rfast's na.rm path needs ordinary NA rather than NaN inputs.
     data <- dplyr::mutate(

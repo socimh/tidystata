@@ -127,8 +127,10 @@ test_that("cut_length: interval ranges are equal", {
   x <- c(0, 1.9, 2, 2.1, 3.9, 4, 4.1, 5.9, 6, 6.1, 8)
   result <- cut_length(x, n = 4, labels = FALSE)
   expect_identical(result, c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L, 4L, 4L))
-  expect_identical(levels(cut_length(x, n = 4)),
-                   c("[0,2]", "(2,4]", "(4,6]", "(6,8]"))
+  expect_identical(
+    levels(cut_length(x, n = 4)),
+    c("[0,2]", "(2,4]", "(4,6]", "(6,8]")
+  )
 })
 
 test_that("cut_length: handles NA values", {
@@ -139,7 +141,11 @@ test_that("cut_length: handles NA values", {
 
 test_that("cut_length: with custom labels", {
   x <- 1:100
-  result <- cut_length(x, n = 4, labels = c("Low", "Med-Low", "Med-High", "High"))
+  result <- cut_length(
+    x,
+    n = 4,
+    labels = c("Low", "Med-Low", "Med-High", "High")
+  )
   expect_equal(levels(result), c("Low", "Med-Low", "Med-High", "High"))
 })
 
@@ -183,15 +189,15 @@ test_that("cut_breaks: right=TRUE (default) - intervals closed on right", {
   x <- c(1, 25, 50, 75, 100)
   result <- cut_breaks(x, breaks = c(25, 50, 75), right = TRUE)
   # With right=TRUE: (min,25], (25,50], (50,75], (75,max]
-  expect_equal(as.character(result[1]), levels(result)[1])  # 1 in first interval
-  expect_equal(as.character(result[2]), levels(result)[1])  # 25 in first interval
+  expect_equal(as.character(result[1]), levels(result)[1]) # 1 in first interval
+  expect_equal(as.character(result[2]), levels(result)[1]) # 25 in first interval
 })
 
 test_that("cut_breaks: right=FALSE - intervals closed on left", {
   x <- c(1, 25, 50, 75, 100)
   result <- cut_breaks(x, breaks = c(25, 50, 75), right = FALSE)
   # With right=FALSE: [min,25), [25,50), [50,75), [75,max)
-  expect_equal(as.character(result[2]), levels(result)[2])  # 25 in second interval
+  expect_equal(as.character(result[2]), levels(result)[2]) # 25 in second interval
 })
 
 test_that("cut_breaks: with custom labels", {
@@ -225,7 +231,7 @@ test_that("cut_breaks: breaks outside range are handled", {
   result <- cut_breaks(x, breaks = c(10, 50, 90))
   # Breaks outside range are included, creating more levels
   expect_true(nlevels(result) >= 2)
-  expect_equal(length(result), 51)  # All values assigned
+  expect_equal(length(result), 51) # All values assigned
 })
 
 test_that("cut_breaks: single unique value errors", {
@@ -242,7 +248,7 @@ test_that("all cut functions: return ordered factors", {
   q_result <- cut_quantile(x, n = 4)
   l_result <- cut_length(x, n = 4)
   b_result <- cut_breaks(x, breaks = c(25, 50, 75))
-  
+
   expect_s3_class(q_result, "ordered")
   expect_s3_class(l_result, "ordered")
   expect_s3_class(b_result, "ordered")
@@ -260,7 +266,7 @@ test_that("all cut functions: handle two elements", {
   result_q <- cut_quantile(x, n = 2)
   result_l <- cut_length(x, n = 2)
   result_b <- cut_breaks(x, breaks = 1.5)
-  
+
   expect_equal(nlevels(result_q), 2)
   expect_equal(nlevels(result_l), 2)
   expect_equal(nlevels(result_b), 2)
@@ -270,11 +276,11 @@ test_that("all cut functions: handle Inf values", {
   x <- c(1, 50, 100, Inf)
   expect_warning(result_q <- cut_quantile(x, n = 4), "collapsed")
   result_b <- cut_breaks(x, breaks = 50)
-  
+
   # Inf should be placed in the highest interval
   expect_false(is.na(result_q[4]))
   expect_false(is.na(result_b[4]))
-  
+
   # cut_length doesn't support Inf values
   expect_error(cut_length(x, n = 4))
 })
@@ -283,11 +289,11 @@ test_that("all cut functions: handle -Inf values", {
   x <- c(-Inf, 1, 50, 100)
   expect_warning(result_q <- cut_quantile(x, n = 4), "collapsed")
   result_b <- cut_breaks(x, breaks = 50)
-  
+
   # -Inf should be placed in the lowest interval
   expect_false(is.na(result_q[1]))
   expect_false(is.na(result_b[1]))
-  
+
   # cut_length doesn't support Inf values
   expect_error(cut_length(x, n = 4))
 })
@@ -299,22 +305,33 @@ test_that("all cut functions: handle -Inf values", {
 test_that("cut_quantile: income distribution analysis", {
   set.seed(42)
   income <- rlnorm(1000, meanlog = 10, sdlog = 1)
-  result <- cut_quantile(income, n = 5, labels = c("Bottom 20%", "20-40%", "40-60%", "60-80%", "Top 20%"))
+  result <- cut_quantile(
+    income,
+    n = 5,
+    labels = c("Bottom 20%", "20-40%", "40-60%", "60-80%", "Top 20%")
+  )
   freq_table <- table(result)
   expect_equal(as.numeric(freq_table), rep(200, 5))
 })
 
 test_that("cut_length: age group creation", {
   ages <- sample(0:100, 500, replace = TRUE)
-  result <- cut_length(ages, n = 5, labels = c("0-20", "21-40", "41-60", "61-80", "81-100"))
+  result <- cut_length(
+    ages,
+    n = 5,
+    labels = c("0-20", "21-40", "41-60", "61-80", "81-100")
+  )
   expect_equal(nlevels(result), 5)
   expect_equal(length(result), 500)
 })
 
 test_that("cut_breaks: exam grade boundaries", {
   scores <- sample(0:100, 200, replace = TRUE)
-  result <- cut_breaks(scores, breaks = c(40, 60, 70, 80), 
-                       labels = c("Fail", "D", "C", "B", "A"))
+  result <- cut_breaks(
+    scores,
+    breaks = c(40, 60, 70, 80),
+    labels = c("Fail", "D", "C", "B", "A")
+  )
   expect_equal(nlevels(result), 5)
   # Verify ordering
   expect_equal(levels(result), c("Fail", "D", "C", "B", "A"))
@@ -323,10 +340,10 @@ test_that("cut_breaks: exam grade boundaries", {
 test_that("cut functions: time series data", {
   dates <- seq(as.Date("2020-01-01"), as.Date("2023-12-31"), by = "day")
   numeric_dates <- as.numeric(dates)
-  
+
   result_q <- cut_quantile(numeric_dates, n = 4)
   result_l <- cut_length(numeric_dates, n = 4)
-  
+
   expect_equal(length(result_q), length(dates))
   expect_equal(length(result_l), length(dates))
 })
@@ -375,8 +392,10 @@ test_that("all cut functions: all NA errors", {
 
 test_that("cut_breaks: non-numeric breaks errors or converts", {
   x <- 1:100
-  expect_warning(result <- cut_breaks(x, breaks = "invalid"),
-                 "NAs introduced by coercion")
+  expect_warning(
+    result <- cut_breaks(x, breaks = "invalid"),
+    "NAs introduced by coercion"
+  )
   expect_identical(as.integer(result), rep(1L, 100))
 })
 
@@ -386,12 +405,12 @@ test_that("cut_breaks: non-numeric breaks errors or converts", {
 
 test_that("cut functions: handle large datasets efficiently", {
   x <- rnorm(100000)
-  
+
   start_time <- Sys.time()
   result_q <- cut_quantile(x, n = 10)
   result_l <- cut_length(x, n = 10)
   end_time <- Sys.time()
-  
+
   expect_equal(length(result_q), 100000)
   expect_equal(length(result_l), 100000)
   # Should complete in reasonable time (less than 5 seconds)

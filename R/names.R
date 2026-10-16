@@ -29,7 +29,6 @@
 #' numeric_names <- ds(lifeexp, where(is.numeric))
 #' dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 
-
 #' @rdname names
 #' @export
 ds <- function(.data, ...) {

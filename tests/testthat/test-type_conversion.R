@@ -92,7 +92,8 @@ test_that("as_character: within mutate context", {
     num = 1:5,
     lbl = labelled(c(1, 2, 1, 2, 1), labels = c(A = 1, B = 2))
   )
-  result <- df %>% mutate(num_chr = as_character(num), lbl_chr = as_character(lbl))
+  result <- df %>%
+    mutate(num_chr = as_character(num), lbl_chr = as_character(lbl))
   expect_type(result$num_chr, "character")
   expect_type(result$lbl_chr, "character")
   expect_equal(result$lbl_chr, c("A", "B", "A", "B", "A"))
@@ -141,12 +142,14 @@ test_that("as_numeric: factor to numeric (level values)", {
   x <- factor(c(10, 20, 30, 20))
   result <- as_numeric(x)
   expect_type(result, "double")
-  expect_equal(result, c(1, 2, 3, 2))  # Factor level indices
+  expect_equal(result, c(1, 2, 3, 2)) # Factor level indices
 })
 
 test_that("as_numeric: ordered factor to numeric", {
-  x <- ordered(c("low", "medium", "high", "medium"),
-               levels = c("low", "medium", "high"))
+  x <- ordered(
+    c("low", "medium", "high", "medium"),
+    levels = c("low", "medium", "high")
+  )
   result <- as_numeric(x)
   expect_type(result, "double")
   expect_equal(result, c(1, 2, 3, 2))
@@ -173,14 +176,14 @@ test_that("as_numeric: Date to numeric (days since epoch)", {
   x <- as.Date(c("2024-01-01", "1970-01-01"))
   result <- as_numeric(x)
   expect_type(result, "double")
-  expect_equal(result[2], 0)  # 1970-01-01 is epoch
+  expect_equal(result[2], 0) # 1970-01-01 is epoch
 })
 
 test_that("as_numeric: POSIXct to numeric", {
   x <- as.POSIXct(c("2024-01-01 00:00:00", "1970-01-01 00:00:00"), tz = "UTC")
   result <- as_numeric(x)
   expect_type(result, "double")
-  expect_equal(result[2], 0)  # The UTC Unix epoch.
+  expect_equal(result[2], 0) # The UTC Unix epoch.
 })
 
 test_that("as_numeric: difftime to numeric", {
@@ -233,7 +236,7 @@ test_that("type conversion: round-trip character -> numeric -> character", {
   original <- c("1", "2.5", "3.14")
   numeric_version <- as_numeric(original)
   character_version <- as_character(numeric_version)
-  
+
   expect_equal(numeric_version, c(1, 2.5, 3.14))
   expect_identical(character_version, original)
 })
@@ -243,10 +246,10 @@ test_that("type conversion: haven labelled preserves labels in character", {
     c(1, 2, 1, 3),
     labels = c(Yes = 1, No = 2, Maybe = 3)
   )
-  
+
   char_result <- as_character(x)
   num_result <- as_numeric(x)
-  
+
   expect_equal(char_result, c("Yes", "No", "Yes", "Maybe"))
   expect_equal(num_result, c(1, 2, 1, 3))
 })
@@ -257,14 +260,14 @@ test_that("type conversion: data frame conversion workflow", {
     score = c("85.5", "92.0", "78.5"),
     passed = factor(c("Yes", "Yes", "No"))
   )
-  
+
   result <- df %>%
     mutate(
       id_chr = as_character(id),
       score_num = as_numeric(score),
       passed_num = as_numeric(passed)
     )
-  
+
   expect_type(result$id_chr, "character")
   expect_type(result$score_num, "double")
   expect_type(result$passed_num, "double")
@@ -296,7 +299,7 @@ test_that("type conversion: handles scientific notation", {
 test_that("type conversion: empty vector handling", {
   empty_num <- numeric(0)
   empty_chr <- character(0)
-  
+
   expect_equal(length(as_character(empty_num)), 0)
   expect_equal(length(as_numeric(empty_chr)), 0)
 })
@@ -316,7 +319,7 @@ test_that("type conversion: NaN handling", {
   x <- c(1, NaN, 3)
   result <- as_character(x)
   expect_identical(result, c("1", "NaN", "3"))
-  
+
   result_num <- as_numeric(c("1", "NaN", "3"))
   expect_true(is.nan(result_num[2]))
 })
@@ -330,10 +333,13 @@ test_that("type conversion: survey data import workflow", {
   survey_data <- tibble(
     respondent_id = 1:5,
     gender = labelled(c(1, 2, 1, 2, 1), labels = c(Male = 1, Female = 2)),
-    age_group = labelled(c(1, 2, 3, 2, 1), labels = c("18-25" = 1, "26-35" = 2, "36+" = 3)),
+    age_group = labelled(
+      c(1, 2, 3, 2, 1),
+      labels = c("18-25" = 1, "26-35" = 2, "36+" = 3)
+    ),
     satisfaction = c("4", "5", "3", "4", "5")
   )
-  
+
   # Convert for analysis
   analysis_data <- survey_data %>%
     mutate(
@@ -341,11 +347,17 @@ test_that("type conversion: survey data import workflow", {
       age_chr = as_character(age_group),
       satisfaction_num = as_numeric(satisfaction)
     )
-  
+
   expect_type(analysis_data$gender_chr, "character")
-  expect_equal(analysis_data$gender_chr, c("Male", "Female", "Male", "Female", "Male"))
+  expect_equal(
+    analysis_data$gender_chr,
+    c("Male", "Female", "Male", "Female", "Male")
+  )
   expect_identical(analysis_data$satisfaction_num, c(4, 5, 3, 4, 5))
-  expect_identical(analysis_data$age_chr, c("18-25", "26-35", "36+", "26-35", "18-25"))
+  expect_identical(
+    analysis_data$age_chr,
+    c("18-25", "26-35", "36+", "26-35", "18-25")
+  )
 })
 
 test_that("type conversion: financial data parsing", {
@@ -354,10 +366,10 @@ test_that("type conversion: financial data parsing", {
     amount_chr = c("$1,234.56", "$500.00", "$2,000.00", "$750.50"),
     currency = c("USD", "USD", "EUR", "GBP")
   )
-  
+
   result <- financial_data %>%
     mutate(amount_num = as_numeric(amount_chr))
-  
+
   expect_type(result$amount_num, "double")
   expect_identical(result$amount_num, c(1234.56, 500, 2000, 750.5))
 })

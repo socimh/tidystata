@@ -11,10 +11,10 @@
 #' random draws continue from the state left by `.fn`.
 #'
 #' @export
-#' @examples 
-#' sample(1:10, 8) %>% 
+#' @examples
+#' sample(1:10, 8) %>%
 #'   set_seed(123)
-#' 
+#'
 #' # When we re-run the code, we will get the same result.
 #' sample(1:10, 8) %>%
 #'  set_seed(123)

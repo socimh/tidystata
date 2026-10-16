@@ -25,8 +25,14 @@ cut_quantile <- function(x, n = 4, labels = NULL) {
   if (!is.numeric(x) || is.complex(x) || !is.null(dim(x))) {
     stop("`x` must be a numeric vector.", call. = FALSE)
   }
-  if (!is.numeric(n) || length(n) != 1L || is.na(n) ||
-      !is.finite(n) || n < 1 || n != floor(n)) {
+  if (
+    !is.numeric(n) ||
+      length(n) != 1L ||
+      is.na(n) ||
+      !is.finite(n) ||
+      n < 1 ||
+      n != floor(n)
+  ) {
     stop("`n` must be a single positive integer.", call. = FALSE)
   }
   observed <- x[!is.na(x)]
@@ -37,28 +43,47 @@ cut_quantile <- function(x, n = 4, labels = NULL) {
     stop("Cannot cut a vector with only one unique value.", call. = FALSE)
   }
   breaks <- unique(stats::quantile(
-    observed, probs = seq(0, 1, length.out = n + 1),
-    na.rm = TRUE, type = 7, names = FALSE
+    observed,
+    probs = seq(0, 1, length.out = n + 1),
+    na.rm = TRUE,
+    type = 7,
+    names = FALSE
   ))
   if (anyNA(breaks)) {
-    stop("Cannot form quantile cutpoints from these observations.", call. = FALSE)
+    stop(
+      "Cannot form quantile cutpoints from these observations.",
+      call. = FALSE
+    )
   }
   intervals <- length(breaks) - 1L
-  if (!is.null(labels) && !identical(labels, FALSE) &&
-      length(labels) != intervals) {
+  if (
+    !is.null(labels) && !identical(labels, FALSE) && length(labels) != intervals
+  ) {
     stop(
-      "`labels` must have length ", intervals,
-      ", the effective number of intervals.", call. = FALSE
+      "`labels` must have length ",
+      intervals,
+      ", the effective number of intervals.",
+      call. = FALSE
     )
   }
   if (intervals < n) {
     warning(
-      "Tied values collapsed quantile cutpoints to ", intervals,
-      " intervals (requested ", n, ").", call. = FALSE
+      "Tied values collapsed quantile cutpoints to ",
+      intervals,
+      " intervals (requested ",
+      n,
+      ").",
+      call. = FALSE
     )
   }
-  cut(x, breaks = breaks, labels = labels, include.lowest = TRUE,
-      right = TRUE, ordered_result = TRUE)
+  cut(
+    x,
+    breaks = breaks,
+    labels = labels,
+    include.lowest = TRUE,
+    right = TRUE,
+    ordered_result = TRUE
+  )
 }
 
 #' @rdname cut
@@ -82,7 +107,8 @@ cut_breaks <- function(x, breaks = NULL, labels = NULL, right = TRUE) {
 
   breaks <- unique(c(x_min, breaks, x_max))
 
-  cut(x,
+  cut(
+    x,
     breaks = breaks,
     include.lowest = TRUE,
     right = right,

@@ -49,7 +49,7 @@ test_that("s_try: non-existent function returns FALSE", {
 
 test_that("s_try: syntax error returns FALSE", {
   # Use quote to delay evaluation and check parsing
-  expr <- quote(mean(1:10))  # Valid expression
+  expr <- quote(mean(1:10)) # Valid expression
   result_valid <- s_try(eval(expr))
   expect_true(result_valid)
 })
@@ -209,7 +209,7 @@ test_that("s_try: list result", {
 test_that("s_try: checking if package is available", {
   is_dplyr_available <- s_try(library(dplyr, quietly = TRUE))
   expect_true(is_dplyr_available)
-  
+
   is_fake_package_available <- s_try(library(fakepackage123))
   expect_false(is_fake_package_available)
 })
@@ -217,7 +217,7 @@ test_that("s_try: checking if package is available", {
 test_that("s_try: checking if function exists", {
   has_tidy <- s_try(exists("tidy", mode = "function"))
   expect_type(has_tidy, "logical")
-  
+
   # A FALSE result is still a successful evaluation.
   expect_false(exists("fake_function_xyz", mode = "function"))
   has_fake_func <- s_try(exists("fake_function_xyz", mode = "function"))
@@ -232,10 +232,10 @@ test_that("s_try: safe model fitting", {
       NULL
     }
   }
-  
+
   result1 <- safe_lm(mtcars, mpg ~ wt)
   expect_s3_class(result1, "lm")
-  
+
   result2 <- safe_lm(mtcars, nonexistent ~ wt)
   expect_null(result2)
 })
@@ -248,7 +248,7 @@ test_that("s_try: conditional workflow", {
       df
     }
   }
-  
+
   good_df <- tibble(x = c("a", "a", "b"), z = 1:3)
   result <- process_data(good_df)
   expect_s3_class(result, "tbl_df")
@@ -258,7 +258,7 @@ test_that("s_try: safe file operations", {
   # This should work
   can_read <- s_try(read.csv(text = "a,b\n1,2\n3,4"))
   expect_true(can_read)
-  
+
   # This should fail
   expect_warning(
     cannot_read <- s_try(read.csv("/nonexistent/path/file.csv")),
@@ -291,7 +291,7 @@ test_that("s_try: used in filter expression", {
     x = 1:10,
     y = letters[1:10]
   )
-  
+
   # Should work
   if (s_try(df %>% filter(x > 5))) {
     filtered <- df %>% filter(x > 5)
@@ -307,7 +307,7 @@ test_that("s_try: fast evaluation for simple cases", {
   start_time <- Sys.time()
   result <- s_try(mean(1:1000000))
   end_time <- Sys.time()
-  
+
   expect_true(result)
   expect_true(as.numeric(end_time - start_time) < 1)
 })
@@ -316,7 +316,7 @@ test_that("s_try: fast failure for errors", {
   start_time <- Sys.time()
   result <- s_try(stop("Immediate error"))
   end_time <- Sys.time()
-  
+
   expect_false(result)
   expect_true(as.numeric(end_time - start_time) < 0.1)
 })

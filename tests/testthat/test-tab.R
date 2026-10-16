@@ -28,13 +28,19 @@ test_that("tab: five variables with complex interactions", {
   )
   result <- tab(df, v1, v2, v3, v4, v5)
   expect_true(nrow(result) > 10)
-  expect_named(result, c(paste0("v", 1:5), "n", "percent", "cum", "valid", "valid_cum"))
+  expect_named(
+    result,
+    c(paste0("v", 1:5), "n", "percent", "cum", "valid", "valid_cum")
+  )
   expect_equal(sum(result$n), 200)
 })
 
 test_that("tab: variables with reserved names (n, percent, cum)", {
-  df <- tibble(n = c(1, 1, 2, 2), percent = c("a", "a", "b", "b"), 
-               cum = c("x", "y", "x", "y"))
+  df <- tibble(
+    n = c(1, 1, 2, 2),
+    percent = c("a", "a", "b", "b"),
+    cum = c("x", "y", "x", "y")
+  )
   expect_message(
     result <- tab(df, n, percent, cum),
     "renamed"
@@ -110,9 +116,13 @@ test_that("tab: factor with NA level explicitly set", {
 })
 
 test_that("tab: haven labelled with NA value labelled", {
-  df <- tibble(x = labelled_spss(c(1, 2, -99, 1), 
-                            labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
-                            na_values = -99))
+  df <- tibble(
+    x = labelled_spss(
+      c(1, 2, -99, 1),
+      labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
+      na_values = -99
+    )
+  )
   result <- tab(df, x)
   expect_equal(nrow(result), 3)
 })
@@ -149,7 +159,19 @@ test_that("tab: many grouping variables with complex hierarchy", {
     category = sample(c("X", "Y", "Z"), 90, replace = TRUE)
   )
   result <- tab(df, category, .by = c(country, region))
-  expect_named(result, c("country", "region", "category", "n", "percent", "cum", "valid", "valid_cum"))
+  expect_named(
+    result,
+    c(
+      "country",
+      "region",
+      "category",
+      "n",
+      "percent",
+      "cum",
+      "valid",
+      "valid_cum"
+    )
+  )
   expect_true(nrow(result) <= 27)
 })
 
@@ -179,7 +201,11 @@ test_that("tab: boolean with OR and AND combined", {
   result <- tab(df, y, selected = (x > 20 & x < 40) | (x > 60 & x < 80))
   expect_equal(sum(result$n), nrow(df))
   expect_equal(sum(result$n[result$selected]), 38L)
-  expected <- count(mutate(df, selected = (x > 20 & x < 40) | (x > 60 & x < 80)), y, selected)
+  expected <- count(
+    mutate(df, selected = (x > 20 & x < 40) | (x > 60 & x < 80)),
+    y,
+    selected
+  )
   expect_equal(select(result, y, selected, n), expected)
 })
 
@@ -192,7 +218,10 @@ test_that("tab: boolean expression creating all FALSE", {
 })
 
 test_that("tab: boolean with is.na() function", {
-  df <- tibble(x = c(1:5, NA, 7:10), y = c("a", "b", NA, "a", "b", "c", "a", "b", "a", "b"))
+  df <- tibble(
+    x = c(1:5, NA, 7:10),
+    y = c("a", "b", NA, "a", "b", "c", "a", "b", "a", "b")
+  )
   result <- tab(df, y, missing_x = is.na(x))
   expect_equal(sum(result$n), nrow(df))
   expect_equal(result$y[result$missing_x], "c")
@@ -281,19 +310,28 @@ test_that("tab: factor levels not in data", {
 })
 
 test_that("tab: Date values spanning multiple years", {
-  df <- tibble(x = as.Date(c("2020-01-01", "2021-06-15", "2022-12-31", 
-                             "2020-01-01", "2021-06-15")))
+  df <- tibble(
+    x = as.Date(c(
+      "2020-01-01",
+      "2021-06-15",
+      "2022-12-31",
+      "2020-01-01",
+      "2021-06-15"
+    ))
+  )
   result <- tab(df, x)
   expect_equal(nrow(result), 3)
   expect_s3_class(result$x, "Date")
 })
 
 test_that("tab: POSIXct with different timezones", {
-  df <- tibble(x = c(
-    as.POSIXct("2024-01-01 12:00", tz = "UTC"),
-    as.POSIXct("2024-01-01 12:00", tz = "EST"),
-    as.POSIXct("2024-01-01 12:00", tz = "UTC")
-  ))
+  df <- tibble(
+    x = c(
+      as.POSIXct("2024-01-01 12:00", tz = "UTC"),
+      as.POSIXct("2024-01-01 12:00", tz = "EST"),
+      as.POSIXct("2024-01-01 12:00", tz = "UTC")
+    )
+  )
   result <- tab(df, x)
   expect_true(nrow(result) >= 2)
 })
@@ -374,8 +412,9 @@ test_that("tab: ordering with mixed case strings", {
 })
 
 test_that("tab: factor ordering preserved even with .desc=TRUE", {
-  df <- tibble(x = factor(c("high", "low", "med"), 
-                          levels = c("low", "med", "high")))
+  df <- tibble(
+    x = factor(c("high", "low", "med"), levels = c("low", "med", "high"))
+  )
   result <- tab(df, x, .desc = FALSE)
   expect_equal(as.character(result$x[1]), "low")
 })
@@ -397,10 +436,16 @@ test_that("tab: 10000 rows with 100 unique combinations", {
 
 test_that("tab: many columns selected", {
   set.seed(42)
-  df <- as_tibble(replicate(15, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
+  df <- as_tibble(
+    replicate(15, sample(1:3, 100, replace = TRUE)),
+    .name_repair = "minimal"
+  )
   names(df) <- paste0("var", 1:15)
   result <- tab(df, var1:var10)
-  expect_named(result, c(paste0("var", 1:10), "n", "percent", "cum", "valid", "valid_cum"))
+  expect_named(
+    result,
+    c(paste0("var", 1:10), "n", "percent", "cum", "valid", "valid_cum")
+  )
 })
 
 # ============================================================================
@@ -430,10 +475,17 @@ test_that("tab: non-existent column reference should error", {
 
 test_that("tab: survey data simulation with skip patterns", {
   df <- tibble(
-    age_group = sample(c("18-25", "26-35", "36-50", "50+"), 200, replace = TRUE),
+    age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      200,
+      replace = TRUE
+    ),
     answered_q2 = sample(c(TRUE, FALSE), 200, replace = TRUE),
-    q2_response = ifelse(sample(c(TRUE, FALSE), 200, replace = TRUE), 
-                         sample(c("Yes", "No"), 200, replace = TRUE), NA)
+    q2_response = ifelse(
+      sample(c(TRUE, FALSE), 200, replace = TRUE),
+      sample(c("Yes", "No"), 200, replace = TRUE),
+      NA
+    )
   )
   result <- tab(df, q2_response, answered_q2)
   expect_true(nrow(result) >= 2)

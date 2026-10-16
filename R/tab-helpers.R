@@ -8,22 +8,33 @@ s_ungroup <- function(.data) {
 }
 
 modify_invalid_names <- function(
-    .data, function_name) {
+  .data,
+  function_name
+) {
   invalid_names <-
     c(
-      "n", "percent", "cum",
-      "valid", "valid_cum",
-      "...any_miss", "...valid_sum", "...tmp"
+      "n",
+      "percent",
+      "cum",
+      "valid",
+      "valid_cum",
+      "...any_miss",
+      "...valid_sum",
+      "...tmp"
     )
   if (function_name %in% c("tab1()", "fre1()")) {
     invalid_names <- c(invalid_names, "value", "variable")
   }
 
-  if (function_name %in%
-    c("tab()", "tab1()")) {
+  if (
+    function_name %in%
+      c("tab()", "tab1()")
+  ) {
     invalid_names <- invalid_names
-  } else if (function_name %in%
-    c("fre()", "fre1()", "tab2()", "fre2()")) {
+  } else if (
+    function_name %in%
+      c("fre()", "fre1()", "tab2()", "fre2()")
+  ) {
     invalid_names <- invalid_names %>%
       c("total")
   } else {
@@ -47,9 +58,16 @@ modify_invalid_names <- function(
         collapse = ", "
       )
     message <- paste0(
-      "To avoid duplicates in `", function_name, "`, ",
-      names1, " are renamed as ", names2, ", respectively.\n",
-      "Better to rename them before `", function_name, "`."
+      "To avoid duplicates in `",
+      function_name,
+      "`, ",
+      names1,
+      " are renamed as ",
+      names2,
+      ", respectively.\n",
+      "Better to rename them before `",
+      function_name,
+      "`."
     )
     message(message)
   } else if (length(detected_names) == 1) {
@@ -58,9 +76,16 @@ modify_invalid_names <- function(
     names2 <- detected_names %>%
       paste0("`.", ., "`")
     message <- paste0(
-      "To avoid duplicates in `", function_name, "`, ",
-      names1, " is renamed as ", names2, ".\n",
-      "Better to rename them before `", function_name, "`."
+      "To avoid duplicates in `",
+      function_name,
+      "`, ",
+      names1,
+      " is renamed as ",
+      names2,
+      ".\n",
+      "Better to rename them before `",
+      function_name,
+      "`."
     )
     message(message)
   } else {
@@ -124,7 +149,10 @@ prepare_tab_data <- function(.data, ..., group_vars = character(0)) {
 }
 
 tab_data <- function(
-    .data, group_vars = character(0), .desc = FALSE) {
+  .data,
+  group_vars = character(0),
+  .desc = FALSE
+) {
   if (any(vapply(.data, function(x) !is.null(dim(x)), logical(1)))) {
     stop("Matrix columns are not supported in tabulation.", call. = FALSE)
   }
@@ -133,8 +161,12 @@ tab_data <- function(
     return(dplyr::bind_cols(
       .data[0L, group_vars, drop = FALSE],
       tibble::tibble(
-        n = integer(), percent = double(), cum = double(),
-        valid = double(), valid_cum = double(), ...any_miss = logical()
+        n = integer(),
+        percent = double(),
+        cum = double(),
+        valid = double(),
+        valid_cum = double(),
+        ...any_miss = logical()
       )
     ))
   }
@@ -161,7 +193,9 @@ tab_data <- function(
       percent = n / sum(n) * 100,
       ...valid_sum = sum(n[!...any_miss]),
       valid = dplyr::if_else(
-        ...any_miss | ...valid_sum == 0, NA_real_, n / ...valid_sum * 100
+        ...any_miss | ...valid_sum == 0,
+        NA_real_,
+        n / ...valid_sum * 100
       )
     )
 
@@ -195,7 +229,10 @@ tab_data <- function(
 
   out <- out %>%
     dplyr::relocate(
-      percent, cum, valid, valid_cum,
+      percent,
+      cum,
+      valid,
+      valid_cum,
       .after = n
     ) %>%
     dplyr::select(-...valid_sum)
@@ -204,17 +241,22 @@ tab_data <- function(
 }
 
 add_total <- function(data, group_vars = character(0)) {
-  if (nrow(data) == 0L) return(data)
+  if (nrow(data) == 0L) {
+    return(data)
+  }
   if (length(group_vars) > 0L) {
     groups <- data %>%
       dplyr::group_by(dplyr::across(tidyselect::all_of(group_vars))) %>%
       dplyr::group_split(.keep = TRUE)
-    return(purrr::map(groups, function(group) {
-      key <- group[1L, group_vars, drop = FALSE]
-      values <- dplyr::select(group, -tidyselect::all_of(group_vars))
-      values <- add_total(values)
-      dplyr::bind_cols(key[rep(1L, nrow(values)), , drop = FALSE], values)
-    }) %>% purrr::list_rbind())
+    return(
+      purrr::map(groups, function(group) {
+        key <- group[1L, group_vars, drop = FALSE]
+        values <- dplyr::select(group, -tidyselect::all_of(group_vars))
+        values <- add_total(values)
+        dplyr::bind_cols(key[rep(1L, nrow(values)), , drop = FALSE], values)
+      }) %>%
+        purrr::list_rbind()
+    )
   }
   narrow_data <- ncol(data) <= 11
 
@@ -232,22 +274,24 @@ add_total <- function(data, group_vars = character(0)) {
   }
 
   # Performance: pre-compute totals once instead of multiple filter/pull passes
-  total_n       <- sum(data$n)
-  valid_rows    <- !data$...any_miss
-  has_valid     <- any(valid_rows)
-  has_missing   <- any(!valid_rows)
-  n_valid_rows  <- sum(valid_rows)
-  n_miss_rows   <- sum(!valid_rows)
-  valid_n       <- if (has_valid) sum(data$n[valid_rows]) else 0L
-  miss_n        <- if (has_missing) sum(data$n[!valid_rows]) else 0L
+  total_n <- sum(data$n)
+  valid_rows <- !data$...any_miss
+  has_valid <- any(valid_rows)
+  has_missing <- any(!valid_rows)
+  n_valid_rows <- sum(valid_rows)
+  n_miss_rows <- sum(!valid_rows)
+  valid_n <- if (has_valid) sum(data$n[valid_rows]) else 0L
+  miss_n <- if (has_missing) sum(data$n[!valid_rows]) else 0L
 
   out <- data
   extra_rows <- list()
 
   if (n_valid_rows > 1 && has_missing) {
     extra_rows[["valid_total"]] <- tibble::tibble(
-      ...tmp = "Valid Total", n = valid_n,
-      percent = valid_n / total_n * 100, valid = 100
+      ...tmp = "Valid Total",
+      n = valid_n,
+      percent = valid_n / total_n * 100,
+      valid = 100
     )
   }
 
@@ -262,7 +306,8 @@ add_total <- function(data, group_vars = character(0)) {
 
   if (n_miss_rows > 1) {
     miss_total <- tibble::tibble(
-      ...tmp = "Missing Total", n = miss_n,
+      ...tmp = "Missing Total",
+      n = miss_n,
       percent = miss_n / total_n * 100
     )
     out <- dplyr::bind_rows(out, miss_total)
@@ -285,8 +330,13 @@ add_total <- function(data, group_vars = character(0)) {
 append_tab_list <- function(.data, blank_row = FALSE) {
   if (length(.data) == 0L) {
     return(tibble::tibble(
-      variable = character(), value = character(), n = integer(),
-      percent = double(), cum = double(), valid = double(), valid_cum = double()
+      variable = character(),
+      value = character(),
+      n = integer(),
+      percent = double(),
+      cum = double(),
+      valid = double(),
+      valid_cum = double()
     ))
   }
   out <- .data %>%
@@ -302,7 +352,9 @@ append_tab_list <- function(.data, blank_row = FALSE) {
       ~ dplyr::pull(., value) %>%
         s_type(.abbr = TRUE) %>%
         dplyr::if_else(
-          . %in% c("int", "dbl"), "num", .
+          . %in% c("int", "dbl"),
+          "num",
+          .
         )
     ) %>%
     unique() %>%
@@ -362,7 +414,9 @@ tab2_data <- function(.data) {
 }
 
 add_total2 <- function(out, .data) {
-  if (nrow(out) == 0L) return(out)
+  if (nrow(out) == 0L) {
+    return(out)
+  }
   if ("total" %in% names(out)[-1L]) {
     stop(
       "Column category `total` is reserved for totals in `fre2()`. ",
@@ -374,14 +428,17 @@ add_total2 <- function(out, .data) {
   out <- out %>%
     dplyr::mutate(
       dplyr::across(
-        -1, ~ tidyr::replace_na(.x, 0)
+        -1,
+        ~ tidyr::replace_na(.x, 0)
       )
     )
   out[[1L]] <- as_character(out[[1L]])
 
   out_sum <- out[1L, , drop = FALSE]
   out_sum[[1L]] <- "total"
-  for (col in names(out)[-1L]) out_sum[[col]] <- sum(out[[col]])
+  for (col in names(out)[-1L]) {
+    out_sum[[col]] <- sum(out[[col]])
+  }
 
   out <- out %>%
     dplyr::bind_rows(out_sum) %>%
@@ -399,7 +456,8 @@ result_to_flextable <- function(tb, group_vars, fre1 = FALSE, fre2 = FALSE) {
   if (!requireNamespace("flextable", quietly = TRUE)) {
     stop(
       "`.type = \"flextable\"` requires the optional flextable package. ",
-      "Install it with install.packages('flextable').", call. = FALSE
+      "Install it with install.packages('flextable').",
+      call. = FALSE
     )
   }
   if (fre2) {
@@ -418,7 +476,8 @@ result_to_flextable <- function(tb, group_vars, fre1 = FALSE, fre2 = FALSE) {
             c(group_vars, "value")
           ),
           ~ ifelse(
-            is.na(variable), NA,
+            is.na(variable),
+            NA,
             tidyr::replace_na(as_character(.x), "NA")
           )
         )

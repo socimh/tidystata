@@ -82,9 +82,12 @@ test_that("fre1: list output structure with Total", {
     var2 = sample(letters[1:5], 100, replace = TRUE)
   )
   result <- fre1(df, var1, var2, .type = "list")
-  purrr::walk(result, ~ {
-    expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
-  })
+  purrr::walk(
+    result,
+    ~ {
+      expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
+    }
+  )
 })
 
 # ============================================================================
@@ -155,9 +158,12 @@ test_that("fre1: variables with varying NA percentages", {
   )
   result <- fre1(df, no_na:fifty_pct, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(result, ~ {
-    expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
-  })
+  purrr::walk(
+    result,
+    ~ {
+      expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
+    }
+  )
 })
 
 test_that("fre1: all NA variable with Total", {
@@ -246,8 +252,16 @@ test_that("fre1: Date variables with Total", {
 
 test_that("fre1: POSIXct datetime with Total", {
   df <- tibble(
-    t1 = as.POSIXct(c("2024-01-01 10:00", "2024-01-01 10:00", "2024-01-02 12:00")),
-    t2 = as.POSIXct(c("2024-06-01 08:00", "2024-06-01 08:00", "2024-06-02 08:00"))
+    t1 = as.POSIXct(c(
+      "2024-01-01 10:00",
+      "2024-01-01 10:00",
+      "2024-01-02 12:00"
+    )),
+    t2 = as.POSIXct(c(
+      "2024-06-01 08:00",
+      "2024-06-01 08:00",
+      "2024-06-02 08:00"
+    ))
   )
   result <- fre1(df, t1, t2, .type = "list")
   expect_type(result$t1$value, "character")
@@ -303,7 +317,8 @@ test_that("fre1: ends_with selection", {
 
 test_that("fre1: where() selection", {
   df <- tibble(
-    num1 = 1:50, num2 = 51:100,
+    num1 = 1:50,
+    num2 = 51:100,
     char = sample(letters, 50, replace = TRUE),
     logi = sample(c(TRUE, FALSE), 50, replace = TRUE)
   )
@@ -312,7 +327,10 @@ test_that("fre1: where() selection", {
 })
 
 test_that("fre1: many variables (20+) with list output", {
-  df <- as_tibble(replicate(20, sample(1:3, 50, replace = TRUE)), .name_repair = "minimal")
+  df <- as_tibble(
+    replicate(20, sample(1:3, 50, replace = TRUE)),
+    .name_repair = "minimal"
+  )
   names(df) <- paste0("var", 1:20)
   result <- fre1(df, everything(), .type = "list")
   expect_equal(length(result), 20)
@@ -326,9 +344,12 @@ test_that("fre1: single row dataset", {
   df <- tibble(x = "only", y = 1, z = TRUE)
   result <- fre1(df, x:z, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(result, ~ {
-    expect_equal(nrow(.x), 2)  # value + Total
-  })
+  purrr::walk(
+    result,
+    ~ {
+      expect_equal(nrow(.x), 2) # value + Total
+    }
+  )
 })
 
 test_that("fre1: all identical values in each variable", {
@@ -338,11 +359,14 @@ test_that("fre1: all identical values in each variable", {
     z = rep(TRUE, 100)
   )
   result <- fre1(df, x:z, .type = "list")
-  purrr::walk(result, ~ {
-    expect_equal(nrow(.x), 2)  # same + Total
-    total_row <- .x[grepl("Total", .x$value, ignore.case = TRUE), ]
-    expect_equal(total_row$n, 100)
-  })
+  purrr::walk(
+    result,
+    ~ {
+      expect_equal(nrow(.x), 2) # same + Total
+      total_row <- .x[grepl("Total", .x$value, ignore.case = TRUE), ]
+      expect_equal(total_row$n, 100)
+    }
+  )
 })
 
 test_that("fre1: extreme cardinality differences", {
@@ -351,8 +375,8 @@ test_that("fre1: extreme cardinality differences", {
     high_card = 1:500
   )
   result <- fre1(df, low_card, high_card, .type = "list")
-  expect_equal(nrow(result$low_card), 3)  # 1, 2, Total
-  expect_equal(nrow(result$high_card), 501)  # 500 unique + Total
+  expect_equal(nrow(result$low_card), 3) # 1, 2, Total
+  expect_equal(nrow(result$high_card), 501) # 500 unique + Total
 })
 
 test_that("fre1: empty data frame", {
@@ -374,7 +398,7 @@ test_that("fre1: unicode in multiple variables", {
   )
   result <- fre1(df, cjk, arabic, emoji, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(result, ~ expect_equal(nrow(.x), 3))  # 2 unique + Total
+  purrr::walk(result, ~ expect_equal(nrow(.x), 3)) # 2 unique + Total
 })
 
 # ============================================================================
@@ -409,7 +433,10 @@ test_that("fre1: moderate size dataset with list output", {
 })
 
 test_that("fre1: many variables with tibble output", {
-  df <- as_tibble(replicate(15, sample(1:3, 100, replace = TRUE)), .name_repair = "minimal")
+  df <- as_tibble(
+    replicate(15, sample(1:3, 100, replace = TRUE)),
+    .name_repair = "minimal"
+  )
   names(df) <- paste0("var", 1:15)
   result <- fre1(df, everything(), .type = "tibble")
   expect_s3_class(result, "tbl_df")
@@ -438,7 +465,11 @@ test_that("fre1: survey data with multiple questions", {
   df <- tibble(
     q1_satisfaction = sample(1:5, 200, replace = TRUE),
     q2_recommend = sample(c("Yes", "No", "Maybe"), 200, replace = TRUE),
-    q3_age_group = sample(c("18-25", "26-35", "36-50", "50+"), 200, replace = TRUE),
+    q3_age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      200,
+      replace = TRUE
+    ),
     q4_gender = sample(c("M", "F", "Other"), 200, replace = TRUE)
   )
   result <- fre1(df, q1_satisfaction:q4_gender, .type = "list")
@@ -449,7 +480,11 @@ test_that("fre1: survey data with multiple questions", {
 test_that("fre1: demographic frequencies with grouping", {
   df <- tibble(
     country = sample(c("US", "UK", "DE"), 300, replace = TRUE),
-    age_group = sample(c("18-25", "26-35", "36-50", "50+"), 300, replace = TRUE),
+    age_group = sample(
+      c("18-25", "26-35", "36-50", "50+"),
+      300,
+      replace = TRUE
+    ),
     gender = sample(c("Male", "Female"), 300, replace = TRUE)
   )
   result <- fre1(df, age_group, gender, .by = country, .type = "tibble")
@@ -460,10 +495,30 @@ test_that("fre1: demographic frequencies with grouping", {
 test_that("fre1: quality control multiple metrics", {
   df <- tibble(
     batch_id = rep(1:10, each = 20),
-    pass_visual = sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.95, 0.05)),
-    pass_measurement = sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.90, 0.10)),
-    pass_functional = sample(c(TRUE, FALSE), 200, replace = TRUE, prob = c(0.98, 0.02))
+    pass_visual = sample(
+      c(TRUE, FALSE),
+      200,
+      replace = TRUE,
+      prob = c(0.95, 0.05)
+    ),
+    pass_measurement = sample(
+      c(TRUE, FALSE),
+      200,
+      replace = TRUE,
+      prob = c(0.90, 0.10)
+    ),
+    pass_functional = sample(
+      c(TRUE, FALSE),
+      200,
+      replace = TRUE,
+      prob = c(0.98, 0.02)
+    )
   )
-  result <- fre1(df, pass_visual:pass_functional, .by = batch_id, .type = "list")
+  result <- fre1(
+    df,
+    pass_visual:pass_functional,
+    .by = batch_id,
+    .type = "list"
+  )
   expect_equal(length(result), 3)
 })
