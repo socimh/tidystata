@@ -72,3 +72,10 @@ docs
 !.opencode/results/console-showcase/
 .opencode/results/console-showcase/*
 !.opencode/results/console-showcase/statart_console_showcase.pdf
+
+# Function-level names and variable metadata acceptance evidence.
+!.opencode/results/inspection-accepted.csv
+!.opencode/results/inspection-accepted-details.csv
+!.opencode/results/inspection-accepted-check.log
+!.opencode/results/inspection-accepted-scenarios.csv
+!.opencode/results/inspection-accepted-examples.log

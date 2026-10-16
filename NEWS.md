@@ -26,6 +26,12 @@
   required. Preserve the existing C++ and `Rfast` row-calculation backend.
 * Extract variable labels directly from column attributes and search labels in
   `variables_search()`.
+* Require a single non-missing character query in `variables_search()`; an
+  empty query still matches all selected variables. Clarify tidyselect inputs,
+  name-vector versus name-table outputs, conditional variable-label columns,
+  grouping-column retention and the supported search pattern language.
+* Avoid a spurious numeric-conversion warning for valid letter-range searches
+  in `variables_search()` and `s_match()`.
 * Parse character inputs in `as_numeric()` while preserving length and missing
   positions and exposing parsing warnings.
 * Calculate grouped one-way tabulation statistics and totals within each group,

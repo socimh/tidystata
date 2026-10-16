@@ -104,13 +104,15 @@ num_range_to_regex <- function(string) {
   letter_range <- start_end %in%
     c(letters, LETTERS) %>%
     sum(.) == 2
+  if (letter_range) {
+    return(string)
+  }
+
   num_range <- start_end %>%
     as.integer() %>%
     s_try()
 
-  if (letter_range) {
-    return(string)
-  } else if (num_range) {
+  if (num_range) {
     begin <- as.integer(start_end[1])
     end <- as.integer(start_end[2])
     if (begin > end) {

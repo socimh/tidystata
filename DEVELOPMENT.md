@@ -46,12 +46,20 @@ artifact deletion requires a separately reviewed, explicitly approved list.
 
 ## Current verification
 
-Latest tabulation acceptance: **14,255 passing expectations across 2,274 blocks,
-zero failed expectations or error blocks**, with 22 test warnings and one
-pre-existing empty test skipped. Fresh native installation, source build and
-`R CMD check --no-manual` pass with **Status: OK**, no check errors, warnings or
-notes. Earlier required-dependency smoke evidence remains valid; dependencies
-and exports did not change. See [tabulation acceptance and all numbered cases](.opencode/reports/project_status_tabulation_acceptance_2026-10-16.md).
+Latest names/metadata acceptance: **15,366 passing expectations across 2,784
+blocks, zero failed expectations or error blocks**, with 19 test warnings and
+one pre-existing empty test skipped. Fresh native installation, source build
+and `R CMD check --no-manual` pass with **Status: OK**, no check errors,
+warnings or notes. Earlier required-dependency smoke evidence remains valid;
+dependencies and exports did not change. See [inspection acceptance and all numbered cases](.opencode/reports/project_status_inspection_acceptance_2026-10-16.md).
+
+ds, ds_as_column, names_as_column, variables and variables_search are locally
+accepted: 548 blocks/1,169 expectations pass without failures/errors/uncaptured
+warnings/skips, including 100 numbered scenarios each (500 executions/1,084
+expectations). Malformed search queries error clearly; valid letter ranges no
+longer warn. Existing-column selection, grouping-key retention, label metadata
+and substring/anchored search are preserved and documented. The maintainer
+approved the selective console PDF; its presentation remains unchanged.
 
 tab/tab1/tab2 and fre/fre1/fre2 are locally accepted release candidates within
 documented display, naming and locale limits: 897 blocks/8,258 expectations
@@ -63,7 +71,7 @@ warnings under Windows LC_CTYPE=C. See the acceptance report for precise limits.
 
 summ() and tabstat() remain locally accepted: all 342 summary blocks and 1,224
 expectations pass. Their [100-case catalogue](.opencode/reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md)
-remains valid. Variable inspection is the next family; minimum-R/multi-platform
+remains valid. codebook() and browse() are the next inspection functions; minimum-R/multi-platform
 publication checks and remaining warning/empty-test coverage still remain.
 The first-milestone evidence below is historical.
 
@@ -137,7 +145,7 @@ matching build toolchain; the minimum version has not been exercised here.
 
 ## Next validation milestone
 
-Review variable inspection functions next, then continue through conversions,
+Finish variable inspection with codebook() and browse(), then continue through conversions,
 row helpers, binning and utilities using the function-level acceptance approach.
 
 1. Replace the empty cut_length interval-width test with a meaningful assertion.

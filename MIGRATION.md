@@ -120,6 +120,29 @@ Matrix columns are unsupported. Selecting no variables returns an empty result:
 rows. `tab2()` and `fre2()` return an empty tibble for a zero-column selection;
 other selections must contain exactly two variables.
 
+## Variable names and metadata
+
+`ds()` returns a character vector of selected names. `ds_as_column()` and
+`names_as_column()` are equivalent and return a one-column tibble named `name`.
+Use tidyselect in `...` to select or rename existing columns; it does not create
+computed columns. Selection on grouped data retains grouping keys, following
+`dplyr::select()`; ungroup first when these keys should not be included.
+
+`variables()` returns a `name` column and adds `label` only when at least one
+selected variable has a usable `label` attribute. Other labels are then `NA`.
+It reads variable attributes, not value-label mappings. Selection and renaming
+retain these attributes, and the input is not modified.
+
+`variables_search()` searches names and variable labels, not cell values. Pass
+one non-missing character string; vectors, `NA` and non-character queries now
+produce a clear error. An empty query matches all selected variables. Matching
+is case-insensitive and searches substrings by default. Use `^age$` for a
+complete name or label, and `*`, `?` or `~` for zero or more, exactly one, or one
+or more characters. One range such as `[a-h]` or `[1-12]` is supported. Numeric
+ranges expand into alternatives; use unanchored patterns such as `item[1-12]`
+for substring matching. Multiple ranges and arbitrary regular expressions are
+outside the supported pattern language.
+
 ## Column summary statistics
 
 `summ()` and `tabstat()` retain numeric and logical columns with no observed

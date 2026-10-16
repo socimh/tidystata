@@ -36,7 +36,7 @@ test_that("ds: single column data frame", {
 })
 
 test_that("ds: many columns", {
-  df <- as_tibble(replicate(100, 1:5))
+  df <- as_tibble(replicate(100, 1:5), .name_repair = "minimal")
   names(df) <- paste0("var", 1:100)
   result <- ds(df)
   expect_equal(length(result), 100)
@@ -364,7 +364,7 @@ test_that("names functions: work with data.table", {
 # ============================================================================
 
 test_that("names functions: handle wide data frames efficiently", {
-  df <- as_tibble(replicate(1000, rnorm(10)))
+  df <- as_tibble(replicate(1000, rnorm(10)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:1000)
   
   start_time <- Sys.time()

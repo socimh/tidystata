@@ -10,7 +10,7 @@
 ## Function-by-function acceptance
 
 - [x] Build and visually verify a selective four-page PDF showing input scripts, actual console output and a downstream research pipeline.
-- [ ] Review maintainer feedback on the PDF before revising function presentation.
+- [x] Review maintainer feedback: the selective console PDF is approved; preserve its current presentation.
 
 - [x] Provide a numbered 100-scenario catalogue and run every case independently for summ and tabstat; preserve all prior checks. See [cases and results](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md).
 
@@ -18,8 +18,9 @@
 - [x] Verify summary tests have no uncaptured warnings/skips and fresh full package checks remain green.
 - [x] Review tab/tab1/tab2 and fre/fre1/fre2, fix reproduced grouping/conversion defects and verify 100 numbered scenarios per export; see [acceptance](reports/project_status_tabulation_acceptance_2026-10-16.md).
 - [x] Regenerate shared help, verify actual output and pass fresh full-suite/build/check after tabulation changes.
-- [ ] Review variable inspection next: codebook, browse, ds, ds_as_column, names_as_column, variables and variables_search.
-- [ ] Continue through variable inspection, conversions, row helpers, binning and utilities.
+- [x] Review ds, ds_as_column, names_as_column, variables and variables_search with 100 numbered scenarios each; fix query validation/letter-range warnings, regenerate help and pass full checks. See [acceptance](reports/project_status_inspection_acceptance_2026-10-16.md).
+- [ ] Review codebook and browse next, including remaining fixture warnings.
+- [ ] Continue through conversions, row helpers, binning and utilities after codebook/browse.
 - [ ] Complete minimum-R/multi-platform validation before any publication request.
 
 ## Next stabilization milestone
@@ -39,7 +40,7 @@
 - [x] Repair the 11 invalid fixtures and 77 incorrect-expectation identities in focused batches, verifying each against its contract.
 - [x] Resolve the eight behavior contracts and fix the reproduced units, summary and naming defects.
 
-- [ ] Replace the skipped empty cut_length test and capture remaining expected warnings outside the now-clean summary family.
+- [ ] Replace the skipped empty cut_length test and capture remaining expected warnings outside the accepted summary/tabulation/names families.
 - [ ] Review selector side effects and additional naming boundaries beyond the retained scenarios before release.
 
 ## Completed first milestone

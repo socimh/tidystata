@@ -27,6 +27,7 @@ A passing demo is not a passing full package test suite.
 - [project_status_core_stabilization_2026-10-16.md](project_status_core_stabilization_2026-10-16.md)
 - [project_status_failure_triage_2026-10-16.md](project_status_failure_triage_2026-10-16.md)
 - [project_status_git_comparison_2026-10-15.md](project_status_git_comparison_2026-10-15.md)
+- [project_status_inspection_acceptance_2026-10-16.md](project_status_inspection_acceptance_2026-10-16.md)
 - [project_status_summ_tabstat_100_scenarios_2026-10-16.md](project_status_summ_tabstat_100_scenarios_2026-10-16.md)
 - [project_status_summ_tabstat_acceptance_2026-10-16.md](project_status_summ_tabstat_acceptance_2026-10-16.md)
 - [project_status_tabulation_acceptance_2026-10-16.md](project_status_tabulation_acceptance_2026-10-16.md)

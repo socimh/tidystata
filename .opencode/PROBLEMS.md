@@ -2,11 +2,11 @@
 
 ## Current verified state (2026-10-16)
 
-The complete suite passes: 14,255 expectations, zero failures/errors, 22 test
-warnings and one skipped block across 2,274 blocks. Fresh installation/build
+The complete suite passes: 15,366 expectations, zero failures/errors, 19 test
+warnings and one skipped block across 2,784 blocks. Fresh installation/build
 and R CMD check --no-manual pass with Status: OK. Earlier required-dependency
 smoke evidence remains valid; dependencies and exports did not change.
-See [tabulation acceptance and current evidence](reports/project_status_tabulation_acceptance_2026-10-16.md). The previous
+See [inspection acceptance and current evidence](reports/project_status_inspection_acceptance_2026-10-16.md). The previous
 [summary catalogue](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md) remains valid.
 
 summ() and tabstat() are locally accepted release candidates: 342 blocks and
@@ -16,6 +16,14 @@ formatting, empty .name behavior and the approved counts-only nonnumeric policy.
 Large integer64 conversion warnings are now visible. The standalone runner
 passes 286 scenarios and 1,158 expectations, including all 100 numbered cases for each function; independent review found no remaining
 material defects in the reviewed summary scope. This coverage expansion changed no package behavior; finite tests do not prove every possible input/platform.
+
+## Names and metadata acceptance resolved (2026-10-16)
+
+- ds, ds_as_column, names_as_column, variables and variables_search each pass 100 numbered scenarios (500 executions/1084 expectations). All inspection acceptance plus retained names tests pass: 548 blocks/1169 expectations, zero failures/errors/uncaptured warnings/skips.
+- variables_search now requires one non-missing character query; zero-length/vector/NA/noncharacter queries error clearly, and the empty string still matches all selected variables. Substring, case-insensitive label/name matching, wildcards and anchors remain unchanged.
+- Valid letter ranges no longer trigger numeric conversion warnings in the shared translator; independent ds/s_match and variables_search regressions reproduce the old warning and pass after the fix.
+- No behavior fixes were required for the three names helpers or variables. Grouping-key retention, tidyselect-only existing-column inputs and conditional label columns are documented. Two unnamed-matrix fixtures no longer emit incidental warnings.
+- Source help regenerated in isolation; current R/tests/help match the fresh verification copy byte-for-byte. Independent review found no material remaining issue. codebook/browse and later families still need function-level acceptance; minimum-R/other-platform gates remain.
 
 ## Tabulation acceptance resolved (2026-10-16)
 
@@ -34,9 +42,9 @@ material defects in the reviewed summary scope. This coverage expansion changed 
 
 ## Remaining follow-up
 
-- A selective [console showcase](reports/project_status_console_showcase_2026-10-16.md) is prepared for maintainer review. All four illustrated sections execute cleanly; no new package defect or behavior change was introduced. Display revisions await feedback.
+- The maintainer approved the selective [console showcase](reports/project_status_console_showcase_2026-10-16.md). Its appearance is preserved; no output redesign is pending.
 - Replace the empty cut_length interval-width test; its skip is missing coverage.
-- Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The summary and tabulation families now have no uncaptured warnings. Test warnings are separate from package-check warnings (zero).
+- Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The summary, tabulation and names/metadata acceptance families now have no uncaptured warnings. Test warnings are separate from package-check warnings (zero).
 - Verify the declared R 4.1 minimum and other platforms before publishing.
 - Combined-header and literal-NA/missing-category cross-table collisions error explicitly; fre2 column category total must be recoded. An observed row label total remains alongside the final marginal row; callers should distinguish the final row.
 - Four regenerated README console lines retain pillar trailing spaces; no generated output was manually patched.
