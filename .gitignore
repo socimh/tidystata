@@ -67,3 +67,8 @@ docs
 !.opencode/results/tabulation-accepted-check.log
 !.opencode/results/tabulation-accepted-scenarios.csv
 !.opencode/results/tabulation-accepted-examples.log
+
+# Keep the requested visual-review PDF; preserve intermediate capture/render files locally.
+!.opencode/results/console-showcase/
+.opencode/results/console-showcase/*
+!.opencode/results/console-showcase/statart_console_showcase.pdf

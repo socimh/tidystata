@@ -34,6 +34,7 @@ material defects in the reviewed summary scope. This coverage expansion changed 
 
 ## Remaining follow-up
 
+- A selective [console showcase](reports/project_status_console_showcase_2026-10-16.md) is prepared for maintainer review. All four illustrated sections execute cleanly; no new package defect or behavior change was introduced. Display revisions await feedback.
 - Replace the empty cut_length interval-width test; its skip is missing coverage.
 - Capture remaining intentional warning paths explicitly and repair legacy matrix-name fixtures outside summaries. The summary and tabulation families now have no uncaptured warnings. Test warnings are separate from package-check warnings (zero).
 - Verify the declared R 4.1 minimum and other platforms before publishing.

@@ -14,6 +14,7 @@ Updated 2026-10-16. Development version **0.2.0.9000**.
 
 ## Evidence and next steps
 
+- [Selective console PDF and input-script showcase](reports/project_status_console_showcase_2026-10-16.md): four pages for maintainer review; package behavior unchanged.
 - [Tabulation acceptance: 100 scenarios per function](reports/project_status_tabulation_acceptance_2026-10-16.md)
 - [100-scenario catalogue for each summary function](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md)
 - [Earlier summ/tabstat acceptance](reports/project_status_summ_tabstat_acceptance_2026-10-16.md)

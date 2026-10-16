@@ -9,6 +9,9 @@
 
 ## Function-by-function acceptance
 
+- [x] Build and visually verify a selective four-page PDF showing input scripts, actual console output and a downstream research pipeline.
+- [ ] Review maintainer feedback on the PDF before revising function presentation.
+
 - [x] Provide a numbered 100-scenario catalogue and run every case independently for summ and tabstat; preserve all prior checks. See [cases and results](reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md).
 
 - [x] Review summ/tabstat, repair reproduced defects, implement counts-only nonnumeric retention, regenerate help and verify real output; see [acceptance report](reports/project_status_summ_tabstat_acceptance_2026-10-16.md).
