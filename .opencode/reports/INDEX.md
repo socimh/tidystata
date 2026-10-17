@@ -32,6 +32,7 @@ A passing demo is not a passing full package test suite.
 - [project_status_failure_triage_2026-10-16.md](project_status_failure_triage_2026-10-16.md)
 - [project_status_git_comparison_2026-10-15.md](project_status_git_comparison_2026-10-15.md)
 - [project_status_inspection_acceptance_2026-10-16.md](project_status_inspection_acceptance_2026-10-16.md)
+- [project_status_preview_pdf_2026-10-16.md](project_status_preview_pdf_2026-10-16.md)
 - [project_status_previews_2026-10-16.md](project_status_previews_2026-10-16.md)
 - [project_status_r_style_adoption_2026-10-16.md](project_status_r_style_adoption_2026-10-16.md)
 - [project_status_row_types_2026-10-16.md](project_status_row_types_2026-10-16.md)

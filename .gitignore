@@ -132,3 +132,8 @@ docs
 !.opencode/results/preview-minimal-minimal.log
 !.opencode/results/preview-demos-demos.log
 !.opencode/results/preview-style.log
+
+# Selective persistent-preview PDF; keep intermediate captures locally.
+!.opencode/results/preview-showcase/
+.opencode/results/preview-showcase/*
+!.opencode/results/preview-showcase/statart_preview_console.pdf

@@ -18,6 +18,8 @@ Updated 2026-10-16. Development version **0.2.0.9000**.
 
 ## Evidence and next steps
 
+- [Ten-page preview PDF](results/preview-showcase/statart_preview_console.pdf): executed inputs and console output for the new preview helpers and research pipelines; visually reviewed.
+
 - [Persistent previews](reports/project_status_previews_2026-10-16.md): latest full-suite acceptance and supported-operation boundaries. [Scripts and console output](reports/report_special_print_0.2.0.9000.md).
 - [Row type and numerical acceptance](reports/project_status_row_types_2026-10-16.md): earlier full/native/build/check results, type rules and console examples.
 - [Modern R adoption: standards, tooling, family contracts and final verification](reports/project_status_r_style_adoption_2026-10-16.md): 90 files pass style/parse/lint; all 40 public interfaces and 24 output records match baseline.

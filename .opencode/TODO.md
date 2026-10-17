@@ -2,6 +2,9 @@
 
 ## Persistent table previews
 
+- [x] Produce and visually verify a ten-page PDF with actual console outputs and input scripts.
+- [ ] Review maintainer feedback on the preview PDF before changing presentation.
+
 - [x] Add complete-data preview class and explicit removal; restore four one-time print/slice helpers while preserving archived source.
 - [x] Preserve settings through agreed base/dplyr/tidyr pipelines and document conversion boundaries.
 - [x] Verify 27 blocks/318 expectations, installed dispatch, full 3,106 blocks/16,992 expectations, minimal smoke, twelve demos and 96-file style checks.

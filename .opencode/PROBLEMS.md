@@ -2,6 +2,8 @@
 
 ## Current verified state (2026-10-16)
 
+Preview showcase: ten-page PDF generated with successful protected execution and visually checked. No new package issues; existing acceptance below is unchanged.
+
 The complete suite passes: **16,992 expectations across 3,106 blocks**, zero
 failures, errors, uncaptured warnings or skips. Fresh installation/build,
 required-dependency smoke and twelve demos pass; 96 R sources pass style checks.
