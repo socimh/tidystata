@@ -387,14 +387,22 @@ for (.function_name in .milestone_row_functions) {
       } else {
         before <- unserialize(serialize(d, NULL))
         expected <- .milestone_row_reference(d, .function_name)
+        extrema <- .function_name %in% c("row_min", "row_max")
+        storage <- typeof(unlist(d, use.names = FALSE))
+        if (extrema && storage == "logical") {
+          expected <- as.logical(expected)
+        }
+        if (extrema && storage == "integer") {
+          expected <- as.integer(expected)
+        }
         out <- suppressWarnings(row_fn(d))
         expect_true(is.atomic(out))
-        expect_true(is.numeric(out))
+        expect_true(is.numeric(out) || is.logical(out))
         expect_null(dim(out))
         expect_length(out, nrow(d))
         expect_equal(out, expected, tolerance = 1e-12)
         if (!.function_name %in% c("row_unique", "row_miss", "row_non_miss")) {
-          expect_type(out, "double")
+          expect_type(out, if (extrema) storage else "double")
         }
         expect_identical(d, before)
         in_mutate <- suppressWarnings(dplyr::mutate(

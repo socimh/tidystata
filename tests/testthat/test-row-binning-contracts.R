@@ -160,9 +160,9 @@ test_that("row contracts: counts accept nonnumeric columns and return integers",
   expect_identical(row_non_miss(data), c(2L, 1L, 3L))
 })
 
-test_that("row contracts: numeric helpers reject character columns clearly", {
+test_that("row contracts: arithmetic helpers reject character columns clearly", {
   data <- tibble::tibble(a = c("1", "2"))
-  for (name in setdiff(row_contract_functions, c("row_miss", "row_non_miss"))) {
+  for (name in c("row_sum", "row_mean", "row_median", "row_var", "row_sd")) {
     expect_error(get(name, mode = "function")(data), "numeric or logical")
   }
 })

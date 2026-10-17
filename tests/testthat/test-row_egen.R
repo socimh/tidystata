@@ -123,7 +123,7 @@ test_that("row_max: all NA in a row returns NA", {
 test_that("row_max: within mutate returns plain vector", {
   tb <- tibble(x = 1:5, y = 5:1)
   result <- tb %>% mutate(max_val = row_max(x, y))
-  expect_type(result$max_val, "double")
+  expect_type(result$max_val, "integer")
   expect_equal(result$max_val, c(5, 4, 3, 4, 5))
 })
 
@@ -160,7 +160,7 @@ test_that("row_min: handles NA values correctly", {
 test_that("row_min: within mutate returns plain vector", {
   tb <- tibble(x = 1:5, y = 5:1)
   result <- tb %>% mutate(min_val = row_min(x, y))
-  expect_type(result$min_val, "double")
+  expect_type(result$min_val, "integer")
   expect_equal(result$min_val, c(1, 2, 3, 2, 1))
 })
 

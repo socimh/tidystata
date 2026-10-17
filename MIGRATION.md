@@ -245,11 +245,69 @@ Custom labels must match the effective interval count. Empty, all-missing,
 constant, or invalid group-count inputs produce errors. These bins are not
 promised to match Stata's `xtile` exactly.
 
-Numeric row summaries ignore missing values. An all-missing row yields zero for
-`row_sum()` and `NA` for the other numeric summaries. `row_var()` and `row_sd()`
-use sample statistics and need at least two observed values. `row_unique()` counts
-one missing category when a row contains missing values. Row helpers return
-atomic vectors, including zero-length vectors for zero-row inputs.
+Row helpers now use operation-specific output types. `row_min()` and
+`row_max()` preserve the compatible common input type: logical inputs return
+logical values and integer inputs return integers, replacing the earlier
+always-double extrema. Mixed logical/integer/double columns use their common
+numeric type. Supported ordered values also include character vectors (C lexical
+order, without parsing), ordered factors (level order), dates, date-times,
+durations, measured vectors, labelled vectors, and `integer64`. Compatible
+classes and metadata are retained, units are normalized, and labelled values
+are compared by their underlying values. Ordered factors cannot be mixed with
+non-ordered columns for extrema. Unordered factors, lists, complex values, and
+incompatible combinations are rejected for extrema.
 
-R 4.1.0 or later is required. The existing native and `Rfast` backend remains in
-use; this development milestone is not a release-readiness claim.
+Arithmetic on plain logical, integer, double, and numeric labelled columns
+returns doubles. Missingness is checked on the original values before stripping
+labels, including tagged and SPSS user-missing values. Columns from the same
+calendar family (`Date` or `POSIXct`) support class-preserving means and medians;
+convert explicitly before requesting calendar sums or dispersion. Durations
+support mean, median, sum, and standard deviation in a common `difftime` unit.
+Convert duration values explicitly to one numeric unit before variance.
+Compatible measured vectors on linear zero-origin scales normalize units before
+arithmetic; variance has squared units, while mean, median, sum, and standard
+deviation retain the common unit. Offset scales such as Celsius and Fahrenheit
+support means and medians only. Explicitly convert to a zero-origin unit before
+sums or dispersion. Nonlinear scales require explicit conversion to a linear
+unit before any arithmetic. Measured arithmetic requires units >= 1.0.0 and uses
+its public scale-conversion API. `integer64` arithmetic requires explicit
+conversion, making any precision loss deliberate. Other incompatible arithmetic
+combinations produce an error.
+
+For example, logical extrema retain their meaning and dates retain their class:
+
+```r
+flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
+statart::row_max(flags) # TRUE, FALSE, NA, with logical type
+
+dates <- tibble::tibble(
+  start = as.Date(c("2024-01-01", NA)),
+  end = as.Date(c("2024-01-03", "2024-01-05"))
+)
+statart::row_min(dates)
+statart::row_mean(dates)
+```
+
+`row_unique()` returns integer counts using compatible common types, preserving
+value identities rather than converting values to doubles. Compatible factors,
+calendar/measured vectors, labelled vectors, `integer64`, lists, and complex
+vectors are supported. List elements remain whole values. All missing values
+in a row count as one distinct category. `row_miss()` and `row_non_miss()` also
+return integers and use each original column's `is.na()` result: scalar missing
+list elements are missing, while `NULL` and empty elements remain observed.
+For extrema and distinct counts, common-type conversion must preserve the
+original missingness of every value. Conflicting SPSS missing-value definitions
+that would turn an observed value into a missing value now produce an error;
+harmonize those definitions explicitly before combining the columns.
+
+Arithmetic and extrema omit missing values. An all-missing row yields a typed
+`NA`, except `row_sum()` yields zero. `row_var()` and `row_sd()` use sample
+statistics and need at least two observed values. Every helper requires
+one-dimensional columns, rejects zero-column selections, and returns a typed
+empty vector for zero-row inputs. Inputs remain unchanged.
+
+R 4.1.0 or later is required. Extrema, distinct counts, medians, and stable
+sample variance/standard deviation use native C++ kernels registered through
+cpp11. Means and sums retain base R compiled row aggregations. `Rfast` is no
+longer required, reducing current Imports to 12. This development milestone is
+not a release-readiness claim.

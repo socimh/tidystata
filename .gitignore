@@ -108,3 +108,15 @@ docs
 !.opencode/results/style-adoption-python-tests.log
 !.opencode/results/style-adoption-compatibility.log
 !.opencode/results/style-adoption-baseline.rds
+
+# Row type/numerical acceptance; preserve intermediate failing probes locally.
+!.opencode/results/row-types-final.csv
+!.opencode/results/row-types-final-details.csv
+!.opencode/results/row-types-final-install.log
+!.opencode/results/row-types-final-tests.log
+!.opencode/results/row-types-final-build.log
+!.opencode/results/row-types-final-check.log
+!.opencode/results/row-types-examples.log
+!.opencode/results/row-types-minimal-minimal.log
+!.opencode/results/row-types-demos-demos.log
+!.opencode/results/row-types-style.log

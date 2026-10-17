@@ -1,6 +1,6 @@
 # Function: fre()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:56 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 20:06:47 | **Status:** PASS
 
 ## Example 1: Basic frequency with Total
 

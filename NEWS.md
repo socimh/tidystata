@@ -17,6 +17,13 @@
 * `cut_quantile()` keeps equal values together. Duplicate quantile cutpoints
   reduce the number of intervals with a warning; custom labels must match that
   effective number. Exact equivalence to Stata's `xtile` is not promised.
+* `row_min()` and `row_max()` now preserve the compatible common input type:
+  logical inputs return logical values and integer inputs return integers,
+  rather than always returning doubles. They also support character values,
+  ordered factors, calendar, duration, measured, labelled, and `integer64`
+  values without converting them to numeric indicators. Ordered factors cannot
+  be mixed with other types for extrema. Unsupported orderings or incompatible
+  combinations error explicitly.
 * R 4.1.0 or later is now required.
 
 ## Improvements and fixes
@@ -32,9 +39,11 @@
 * Correct `browse()` help: the viewed data are returned invisibly with their
   data-frame class preserved, and the interactive viewer is omitted in batch use.
 
-* Reduce required imports to 13 packages. Rich formatting with `flextable` is
-  optional; import/export and model-formatting dependencies are no longer
-  required. Preserve the existing C++ and `Rfast` row-calculation backend.
+* Reduce required imports from 33 to 12 packages. Rich formatting with
+  `flextable` is optional; import/export and model-formatting dependencies are
+  no longer required. Use cpp11-registered C++ row kernels and base R compiled
+  row means/sums; remove the `Rfast` dependency. Native median and centered
+  sample-variance/SD kernels avoid the reproduced overflow/cancellation defects.
 * Extract variable labels directly from column attributes and search labels in
   `variables_search()`.
 * Require a single non-missing character query in `variables_search()`; an
@@ -52,8 +61,22 @@
   denominators and display-label ambiguity in frequency totals. Handle labelled
   vectors without value labels in `as_character()`, including tagged missing
   values, without attempting factor conversion.
-* Make row summaries return atomic vectors consistently, handle empty and missing
-  rows, and use sample variance and standard deviation.
+* Make row summaries return vectors consistently, handle empty and missing
+  rows, and use sample variance and standard deviation. Plain numeric/logical
+  and numeric labelled arithmetic returns doubles, with tagged and SPSS
+  missingness applied before conversion. Calendar means/medians retain class;
+  duration means/medians/sums/SD retain duration units. Compatible measured
+  arithmetic on linear zero-origin scales normalizes units and variance returns
+  squared units. Offset scales support mean/median only; sums and dispersion
+  require explicit conversion to a zero-origin unit. Nonlinear scales require
+  explicit conversion before arithmetic. Measured arithmetic uses the public
+  units >= 1.0.0 scale API. Calendar sums and dispersion, duration variance, and
+  `integer64` arithmetic require explicit conversion. Distinct and missing-value counts return integers; distinct counts
+  retain compatible value identities, including list/complex values. Missing
+  counts use original `is.na()` rules; `NULL` and empty list elements remain
+  observed. Common-type conversions for extrema/distinct counts reject
+  conflicting SPSS definitions that change observed missingness. All row helpers
+  require one-dimensional columns.
 * Retain numeric and logical columns with no observed values in `summ()` and
   `tabstat()`, including zero-row inputs. `n` and `unique` are zero; summary
   statistics, including `sum`, are `NA`; missing counts reflect the input rows.

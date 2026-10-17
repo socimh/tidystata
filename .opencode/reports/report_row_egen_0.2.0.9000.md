@@ -1,6 +1,6 @@
 # Function: row_egen()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 18:04:56 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 20:06:47 | **Status:** PASS
 
 ## Example 1: row_min
 
@@ -113,5 +113,53 @@ df %>%
 1     1     3     2       1
 2     2     2     3       2
 3     3     1     1       1
+```
+
+## Example 9: Logical extrema retain TRUE/FALSE
+
+```r
+flags <- tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
+row_max(flags)
+row_min(flags)
+typeof(row_max(flags))
+```
+
+**Output:**
+
+```
+[1]  TRUE FALSE    NA
+[1] FALSE FALSE    NA
+[1] "logical"
+```
+
+## Example 10: Calendar summaries preserve dates
+
+```r
+dates <- tibble(a = as.Date(c('2024-01-01', NA)),
+                b = as.Date(c('2024-01-03', '2024-01-05')))
+row_max(dates)
+row_mean(dates)
+```
+
+**Output:**
+
+```
+[1] "2024-01-03" "2024-01-05"
+[1] "2024-01-02" "2024-01-05"
+```
+
+## Example 11: Stable C++ sample dispersion
+
+```r
+large <- tibble(a = c(1e12, 1e200), b = c(1e12 + 1, 1e200))
+row_var(large)
+row_sd(large)
+```
+
+**Output:**
+
+```
+[1] 0.5 0.0
+[1] 0.7071068 0.0000000
 ```
 

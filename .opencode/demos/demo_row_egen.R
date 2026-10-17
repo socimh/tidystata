@@ -11,6 +11,7 @@ cat("```r\n")
 cat("df <- tibble(a = c(1, 2, 3), b = c(3, 2, 1), c = c(2, 3, 1))\n")
 cat("row_min(df)\n")
 cat("```\n\n")
+
 cat("**Output:**\n\n")
 cat("```\n")
 df <- tibble(a = c(1, 2, 3), b = c(3, 2, 1), c = c(2, 3, 1))
@@ -94,4 +95,38 @@ print(
   df %>%
     mutate(above_2 = row_min(a, 2))
 )
+cat("```\n\n")
+
+cat("## Example 9: Logical extrema retain TRUE/FALSE\n\n")
+cat("```r\nflags <- tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))\n")
+cat(
+  "row_max(flags)\nrow_min(flags)\ntypeof(row_max(flags))\n```\n\n**Output:**\n\n```\n"
+)
+flags <- tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
+print(row_max(flags))
+print(row_min(flags))
+print(typeof(row_max(flags)))
+stopifnot(identical(row_max(flags), c(TRUE, FALSE, NA)))
+cat("```\n\n")
+
+cat("## Example 10: Calendar summaries preserve dates\n\n")
+cat("```r\ndates <- tibble(a = as.Date(c('2024-01-01', NA)),\n")
+cat("                b = as.Date(c('2024-01-03', '2024-01-05')))\n")
+cat("row_max(dates)\nrow_mean(dates)\n```\n\n**Output:**\n\n```\n")
+dates <- tibble(
+  a = as.Date(c("2024-01-01", NA)),
+  b = as.Date(c("2024-01-03", "2024-01-05"))
+)
+print(row_max(dates))
+print(row_mean(dates))
+stopifnot(identical(row_max(dates), dates$b))
+cat("```\n\n")
+
+cat("## Example 11: Stable C++ sample dispersion\n\n")
+cat("```r\nlarge <- tibble(a = c(1e12, 1e200), b = c(1e12 + 1, 1e200))\n")
+cat("row_var(large)\nrow_sd(large)\n```\n\n**Output:**\n\n```\n")
+large <- tibble(a = c(1e12, 1e200), b = c(1e12 + 1, 1e200))
+print(row_var(large))
+print(row_sd(large))
+stopifnot(isTRUE(all.equal(row_var(large), c(0.5, 0))))
 cat("```\n\n")

@@ -8,6 +8,8 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <cmath>
+#include <limits>
 
 using namespace cpp11;
 namespace writable = cpp11::writable;
@@ -119,4 +121,107 @@ writable::doubles row_total(data_frame tb, bool average)
         out[i] = static_cast<int>(values.size()) + (missing ? 1 : 0);
     }
     return out;
+}
+
+[[cpp11::register]] writable::doubles row_median_dbl(data_frame tb)
+{
+    if (tb.size() == 0) stop("Select at least one column.");
+    writable::doubles out(tb.nrow());
+    std::vector<double> values;
+    values.reserve(tb.size());
+    for (int i = 0; i < tb.nrow(); ++i) {
+        values.clear();
+        for (int j = 0; j < tb.size(); ++j) {
+            doubles col = tb[j];
+            if (!std::isnan(col[i])) values.push_back(col[i]);
+        }
+        if (values.empty()) {
+            out[i] = NA_REAL;
+            continue;
+        }
+        size_t middle = values.size() / 2;
+        std::nth_element(values.begin(), values.begin() + middle, values.end());
+        double upper = values[middle];
+        if (values.size() % 2) {
+            out[i] = upper;
+        } else {
+            double lower = *std::max_element(values.begin(), values.begin() + middle);
+            // Avoid overflow of two finite endpoints, without underflowing
+            // small endpoints unnecessarily. Opposing infinities remain NaN.
+            double threshold = std::numeric_limits<double>::max() / 2;
+            out[i] = std::isfinite(lower) && std::isfinite(upper) &&
+                (std::abs(lower) > threshold || std::abs(upper) > threshold)
+                ? lower / 2 + upper / 2 : (lower + upper) / 2;
+        }
+    }
+    return out;
+}
+
+writable::doubles row_dispersion(data_frame tb, bool standard_deviation)
+{
+    if (tb.size() == 0) stop("Select at least one column.");
+    writable::doubles out(tb.nrow());
+    std::vector<double> values;
+    values.reserve(tb.size());
+    for (int i = 0; i < tb.nrow(); ++i) {
+        values.clear();
+        bool finite = true;
+        double largest = 0;
+        for (int j = 0; j < tb.size(); ++j) {
+            doubles col = tb[j];
+            double value = col[i];
+            if (std::isnan(value)) continue;
+            values.push_back(value);
+            finite = finite && std::isfinite(value);
+            largest = std::max(largest, std::abs(value));
+        }
+        if (values.size() < 2) {
+            out[i] = NA_REAL;
+            continue;
+        }
+        if (!finite) {
+            out[i] = R_NaN;
+            continue;
+        }
+        // Shift before centering to preserve small differences at large
+        // offsets. Halve extreme values so subtraction is safe even on
+        // platforms where long double has the same range as double.
+        long double factor = largest > std::numeric_limits<double>::max() / 2 ? 2 : 1;
+        long double origin = static_cast<long double>(values[0]) / factor;
+        long double center = 0;
+        for (double value : values) {
+            center += (static_cast<long double>(value) / factor - origin) / values.size();
+        }
+        long double scale = 0;
+        for (double value : values) {
+            long double delta = static_cast<long double>(value) / factor - origin - center;
+            scale = std::max(scale, std::abs(delta));
+        }
+        if (scale == 0) {
+            out[i] = 0;
+            continue;
+        }
+        long double squares = 0;
+        long double correction = 0;
+        for (double value : values) {
+            long double delta = (static_cast<long double>(value) / factor - origin - center) / scale;
+            squares += delta * delta;
+            correction += delta;
+        }
+        long double normalized = std::max(static_cast<long double>(0),
+            (squares - correction * correction / values.size()) / (values.size() - 1));
+        long double sd = scale * std::sqrt(normalized) * factor;
+        out[i] = static_cast<double>(standard_deviation ? sd : sd * sd);
+    }
+    return out;
+}
+
+[[cpp11::register]] writable::doubles row_var_dbl(data_frame tb)
+{
+    return row_dispersion(tb, false);
+}
+
+[[cpp11::register]] writable::doubles row_sd_dbl(data_frame tb)
+{
+    return row_dispersion(tb, true);
 }

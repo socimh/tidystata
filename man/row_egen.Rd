@@ -12,7 +12,7 @@
 \alias{row_unique}
 \alias{row_miss}
 \alias{row_non_miss}
-\title{Generate a variable based on row-wise operations.}
+\title{Calculate summaries across columns within each row}
 \usage{
 row_mean(...)
 
@@ -35,50 +35,111 @@ row_miss(...)
 row_non_miss(...)
 }
 \arguments{
-\item{...}{a data frame or tibble, or <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> within the mutate() function.}
+\item{...}{A data frame or tibble, or
+<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> expressions inside
+\code{\link[dplyr:mutate]{dplyr::mutate()}}. Each selected column must be one-dimensional.}
 }
 \value{
-An atomic numeric or integer vector with one value per input row.
+A vector with one value per input row. Extrema retain the compatible
+common type; arithmetic returns doubles or a supported class as described
+above; unique and missing-value counts return integers.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 \itemize{
-\item \code{row_mean()} - Calculate the row-wise mean of selected variables.
-\item \code{row_sum()} - Calculate the row-wise sum of selected variables.
-\item \code{row_max()} - Calculate the row-wise maximum of selected variables.
-\item \code{row_min()} - Calculate the row-wise minimum of selected variables.
-\item \code{row_median()} - Calculate the row-wise median of selected variables.
-\item \code{row_var()} - Calculate the row-wise variance of selected variables.
-\item \code{row_sd()} - Calculate the row-wise standard deviation of selected variables.
-\item \code{row_unique()} - Calculate the row-wise number of unique values of selected variables.
-\item \code{row_miss()} - Calculate the row-wise number of missing values of selected variables.
-\item \code{row_non_miss()} - Calculate the row-wise number of non-missing values of selected variables.
+\item \code{row_mean()}, \code{row_sum()}, and \code{row_median()} calculate row arithmetic.
+\item \code{row_min()} and \code{row_max()} select the smallest and largest row values.
+\item \code{row_var()} and \code{row_sd()} calculate sample variance and standard deviation.
+\item \code{row_unique()} counts distinct values, including one missing category.
+\item \code{row_miss()} and \code{row_non_miss()} count missing and observed values.
 }
 }
 \details{
-Missing values (including NaN) are ignored in numeric summaries.
-All-missing rows return NA, except row_sum() returns zero. Variance and SD
-use the sample denominator and need two observed values. row_unique() counts
-a missing category once. NULL or zero selected columns are rejected; zero
-rows return an empty vector. Numeric summaries accept numeric and logical
-columns; missing-value counts also accept other column types.
+All helpers preserve the input. Missingness is determined from the original
+columns, including tagged and SPSS user-missing values. Arithmetic and extrema
+omit missing values. All-missing rows return a typed \code{NA}, except \code{row_sum()}
+returns zero. Variance and standard deviation use the sample denominator and
+require at least two observed values. Zero-row inputs return typed empty
+vectors; \code{NULL} and zero selected columns are rejected.
 }
+\section{Extrema}{
+
+\code{row_min()} and \code{row_max()} retain the compatible common type of the selected
+columns. Logical inputs return logical values, integer inputs return integers,
+and mixed logical/integer/double inputs use their common numeric type.
+Supported ordered types also include character vectors, ordered factors,
+\code{Date}, \code{POSIXct}, durations, measured vectors, \code{integer64}, and labelled
+vectors. Character values use C lexical ordering without numeric parsing;
+ordered factors use their level order and cannot be mixed with other types.
+Labelled values are compared by their underlying values. Compatible units
+are normalized before comparison.
+Unordered factors, lists, complex values, and incompatible combinations are
+rejected rather than assigned an arbitrary ordering.
+}
+
+\section{Arithmetic}{
+
+Plain logical, integer, double, and numeric labelled columns return double
+vectors. Labels are dropped after applying the original missingness mask.
+\code{integer64} arithmetic requires explicit conversion so potential precision
+loss is a deliberate choice.
+
+Columns from the same calendar family (\code{Date} or \code{POSIXct}) support mean and
+median while retaining their common class and metadata. Calendar sums,
+variance, and standard deviation require explicit numeric conversion first.
+Durations support mean, median, sum, and standard deviation and return
+\code{difftime} vectors in a common unit. For duration variance, explicitly convert
+to one numeric unit first because variance has squared units.
+
+Compatible measured vectors on linear zero-origin scales are normalized to a
+common unit. Mean, median, sum, and standard deviation retain that unit;
+variance returns squared units. Offset scales such as Celsius and Fahrenheit
+support mean and median only. Convert explicitly to a zero-origin unit before
+requesting sums or dispersion. Nonlinear scales require explicit conversion
+to a linear unit before any arithmetic. Other classes and incompatible type
+combinations are rejected. Measured arithmetic requires units >= 1.0.0.
+}
+
+\section{Counts}{
+
+\code{row_unique()} combines compatible column types and counts distinct values
+without dropping their identities through numeric conversion. This includes
+compatible factors, labelled vectors, calendar/measured vectors, \code{integer64},
+list columns, and complex vectors. Missing values count as one category.
+List elements are compared as whole values rather than flattened.
+For extrema and distinct counts, common-type conversion must preserve each
+original value's missingness. Conflicting SPSS missing-value definitions
+that would turn an observed value into a missing value produce an error;
+harmonize those definitions explicitly before combining the columns.
+
+\code{row_miss()} and \code{row_non_miss()} use each original column's \code{is.na()} result.
+Scalar missing list elements are missing; \code{NULL} and empty list elements are
+observed. Count helpers return integer vectors.
+}
+
+\section{Implementation}{
+
+Means and sums use base R's compiled row aggregations. Extrema, distinct
+counts, medians, and sample variance/standard deviation use native C++ kernels
+registered through cpp11; Rfast is no longer required.
+}
+
 \examples{
-tb <- tibble::tibble(
-  x = 1:10,
-  y = 11:20,
-  z = 21:30
-)
-
+tb <- tibble::tibble(x = c(1, 2, NA), y = c(3, NA, NA))
 row_mean(tb)
-
 row_sum(tb)
-
 row_non_miss(tb)
 
-tb \%>\%
-  dplyr::mutate(
-    mean = row_mean(x, y),
-    sum = row_sum(x, y)
-  )
+tb |>
+  dplyr::mutate(mean = row_mean(x, y), sum = row_sum(x, y))
+
+flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
+row_max(flags) # TRUE, FALSE, NA, with logical type
+
+dates <- tibble::tibble(
+  start = as.Date(c("2024-01-01", NA)),
+  end = as.Date(c("2024-01-03", "2024-01-05"))
+)
+row_min(dates)
+row_mean(dates)
 }

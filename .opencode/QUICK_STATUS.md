@@ -2,18 +2,21 @@
 
 Updated 2026-10-16. Development version **0.2.0.9000**.
 
-- Core scope retained: 13 required Imports, 40 exports, cpp11/Rfast backend; four retired wrappers preserved in extra_functions.
-- Full suite: **16,492 passing expectations across 3,053 blocks**, zero failures/errors/uncaptured warnings/skips.
+- Core scope retained: 12 required Imports, 40 exports, cpp11 row kernels and compiled base aggregates; four retired wrappers preserved in extra_functions.
+- Full suite: **16,674 passing expectations across 3,079 blocks**, zero failures/errors/uncaptured warnings/skips.
 - Fresh native installation, source build, required-dependency smoke and all eleven demos passed.
 - **R CMD check --no-manual: Status: OK** (zero check errors/warnings/notes).
 - Fixed invalid test fixtures/assertions, summary missing-data/statistic contracts, tabulation collisions/empty selections, and units recognition. Substring search is retained with explicit anchors for complete matches.
 - Numeric/logical summaries retain zero-observation rows; aliases and numeric sum are supported. Mixed table statistics format consistently; counts stay numeric.
 - List-column tabulation preserves identities; no measured variables yields empty outputs using the established list/tibble container.
-- Original datasets and native artifacts preserved. No new dependencies or exports.
+- Original datasets and native artifacts preserved. No new required dependencies or exports.
 - Work is on local branch test/stabilize-fixtures; master retains origin/master tracking. No push, merge, publication or release.
+
+- Row types/numerics: 26 new blocks/185 expectations; logical/integer/classed extrema preserve meaning, stable C++ median/dispersion replace Rfast, SPSS masks and unit-scale compatibility are explicit. Required-only graph is 33 packages including statart.
 
 ## Evidence and next steps
 
+- [Row type and numerical acceptance](reports/project_status_row_types_2026-10-16.md): current full/native/build/check results, type rules and console examples.
 - [Modern R adoption: standards, tooling, family contracts and final verification](reports/project_status_r_style_adoption_2026-10-16.md): 90 files pass style/parse/lint; all 40 public interfaces and 24 output records match baseline.
 
 - [Ten-page codebook/browse console PDF](reports/project_status_codebook_browse_pdf_2026-10-16.md): input scripts, real printed outputs and research pipelines for maintainer review.

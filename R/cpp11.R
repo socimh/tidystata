@@ -27,3 +27,15 @@ row_mean_dbl <- function(tb) {
 row_unique_dbl <- function(tb) {
   .Call(`_statart_row_unique_dbl`, tb)
 }
+
+row_median_dbl <- function(tb) {
+  .Call(`_statart_row_median_dbl`, tb)
+}
+
+row_var_dbl <- function(tb) {
+  .Call(`_statart_row_var_dbl`, tb)
+}
+
+row_sd_dbl <- function(tb) {
+  .Call(`_statart_row_sd_dbl`, tb)
+}

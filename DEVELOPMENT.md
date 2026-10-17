@@ -25,9 +25,9 @@ The namespace exports 40 objects: 39 functions and the `%>%` operator.
 | Utilities | timer, set_seed, s_try |
 
 Both bundled datasets, lifeexp and starwars, remain. Required Imports decreased
-from 33 to 13; cpp11 and the existing native/Rfast backend remain. Flextable is
-optional. The local installed dependency graph requires 37 non-base/recommended
-packages, or 38 including statart, compared with 124 dependencies previously.
+from 33 to 12; cpp11 supplies the native row kernels and Rfast is no longer
+required. Flextable is optional. The local installed dependency graph requires 32 non-base/recommended
+packages, or 33 including statart, compared with 124 dependencies previously.
 The counts describe dependency breadth, not download size.
 
 Four wrappers are retired: read_data, write_data, esttab, and codebook_detail.
@@ -51,21 +51,31 @@ artifact deletion requires a separately reviewed, explicitly approved list.
 
 ## Current verification
 
-Modern R adoption is verified locally: **16,492 passing expectations across
-3,053 blocks, zero failures, errors, uncaptured warnings or skips**. Fresh native
+Row type and numerical acceptance is verified locally: **16,674 passing
+expectations across 3,079 blocks, zero failures, errors, uncaptured warnings or skips**. Fresh native
 installation, source build and `R CMD check --no-manual` pass with **Status: OK**.
-All 90 adopted R files pass pinned Air/lintr/parsing checks. Required-dependency
+All 92 adopted R files pass pinned Air/lintr/parsing checks. Required-dependency
 smoke checks and all eleven demos pass; 40 public interfaces and 24 representative
 outputs/visibility/diagnostic records match the pre-adoption installation.
-See [adoption evidence](.opencode/reports/project_status_r_style_adoption_2026-10-16.md).
+See [row type/numerical acceptance](.opencode/reports/project_status_row_types_2026-10-16.md).
+The earlier [style adoption evidence](.opencode/reports/project_status_r_style_adoption_2026-10-16.md) records its own historical baseline.
+
+The row pass adds 26 contract blocks/185 expectations. Extrema preserve logical,
+integer and compatible classed inputs; arithmetic retains meaningful calendar,
+duration and physical units or errors explicitly. C++ median and sample
+dispersion avoid overflow/cancellation. SPSS masks precede conversion; exact
+integer64 extrema/counts use lossless keys. See shared help for incompatible
+classes, ordered-factor combinations and measurement-scale restrictions.
 
 The four conversion helpers, row calculations, binning, selectors/types and
 utilities now have risk-based contract review alongside retained suites.
 Existing numbered catalogues remain intact. Fifteen formerly uncaptured warnings
 are explicitly asserted; the empty interval-width test has real assertions.
-Six API/behavior dependency floors are now declared, retaining 13 Imports,
-40 exports, the R 4.1 minimum and existing public behavior. CI includes an
-explicit R 4.1 job; remote platform/minimum-version execution remains pending.
+The earlier adoption declared six API/behavior dependency floors. The row pass
+removes unused Rfast, retains 12 Imports, and requires optional units >= 1.0.0.
+The 40 exports and R 4.1 minimum are unchanged; intentional row output-type
+changes are documented in NEWS and migration guidance. CI includes an explicit
+R 4.1 job; remote platform/minimum-version execution remains pending.
 
 ## Earlier family milestones
 

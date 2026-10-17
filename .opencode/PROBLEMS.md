@@ -2,10 +2,12 @@
 
 ## Current verified state (2026-10-16)
 
-The complete suite passes: **16,492 expectations across 3,053 blocks**, zero
+The complete suite passes: **16,674 expectations across 3,079 blocks**, zero
 failures, errors, uncaptured warnings or skips. Fresh native installation/build,
 R CMD check --no-manual (Status: OK), required-dependency smoke and eleven demos
-pass. See [modern R adoption and evidence](reports/project_status_r_style_adoption_2026-10-16.md).
+pass. See [row type and numerical acceptance](reports/project_status_row_types_2026-10-16.md).
+
+Resolved in the row pass: blanket double coercion no longer changes logical extrema into indicators or strips supported classes. Added exact integer64 extrema/unique counts, compatible unit/calendar/duration handling, original SPSS missing masks, common missing-definition and ordered-factor guards, and explicit unsupported-class errors. New stable C++ median/variance/SD kernels fix overflow and cancellation. Removed unused Rfast (12 Imports); units >= 1.0.0 remains optional. 26 new blocks/185 expectations pass; no new blocking issue was found in independent review.
 
 Resolved in adoption: fifteen previously uncaptured warning emissions are now
 asserted, the empty interval-width test now checks exact boundaries, conversion

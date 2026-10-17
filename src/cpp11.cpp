@@ -55,6 +55,27 @@ extern "C" SEXP _statart_row_unique_dbl(SEXP tb) {
     return cpp11::as_sexp(row_unique_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
   END_CPP11
 }
+// row_stat.cpp
+writable::doubles row_median_dbl(data_frame tb);
+extern "C" SEXP _statart_row_median_dbl(SEXP tb) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(row_median_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+  END_CPP11
+}
+// row_stat.cpp
+writable::doubles row_var_dbl(data_frame tb);
+extern "C" SEXP _statart_row_var_dbl(SEXP tb) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(row_var_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+  END_CPP11
+}
+// row_stat.cpp
+writable::doubles row_sd_dbl(data_frame tb);
+extern "C" SEXP _statart_row_sd_dbl(SEXP tb) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(row_sd_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+  END_CPP11
+}
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
@@ -62,9 +83,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_statart_fun",            (DL_FUNC) &_statart_fun,            0},
     {"_statart_row_max_dbl",    (DL_FUNC) &_statart_row_max_dbl,    1},
     {"_statart_row_mean_dbl",   (DL_FUNC) &_statart_row_mean_dbl,   1},
+    {"_statart_row_median_dbl", (DL_FUNC) &_statart_row_median_dbl, 1},
     {"_statart_row_min_dbl",    (DL_FUNC) &_statart_row_min_dbl,    1},
+    {"_statart_row_sd_dbl",     (DL_FUNC) &_statart_row_sd_dbl,     1},
     {"_statart_row_sum_dbl",    (DL_FUNC) &_statart_row_sum_dbl,    1},
     {"_statart_row_unique_dbl", (DL_FUNC) &_statart_row_unique_dbl, 1},
+    {"_statart_row_var_dbl",    (DL_FUNC) &_statart_row_var_dbl,    1},
     {NULL, NULL, 0}
 };
 }

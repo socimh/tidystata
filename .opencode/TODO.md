@@ -1,5 +1,14 @@
 # To-do list
 
+## Row type and numerical acceptance
+
+- [x] Preserve compatible logical/integer/classed extrema; retain meaningful operation-specific arithmetic types and reject incompatible inputs.
+- [x] Apply original SPSS missingness, exact integer64/list/complex equality keys, ordered-factor guards and unit-scale validation.
+- [x] Replace unstable Rfast median/dispersion with C++ kernels; remove unused required dependency.
+- [x] Verify 26 new blocks/185 expectations, full 3,079 blocks/16,674 passes, fresh native/build/check, required-only smoke, eleven demos and 92-file style checks.
+- [x] Regenerate row help/examples and record independent review; preserve PDFs and historical evidence.
+- [ ] Execute minimum-R/other-platform/compiler validation before publication.
+
 ## Modern R adoption
 
 - [x] Establish authoritative standards and pinned, read-only style tooling.
