@@ -1,6 +1,6 @@
 # Function: browse()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 20:06:46 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 21:08:32 | **Status:** PASS
 
 
 Attaching package: 'dplyr'
@@ -118,7 +118,7 @@ browse(mtcars, mpg, hp, wt)
 **Output:**
 
 ```
-                     mpg  hp    w
+                     mpg  hp    wt
 Mazda RX4           21.0 110 2.620
 Mazda RX4 Wag       21.0 110 2.875
 Datsun 710          22.8  93 2.320

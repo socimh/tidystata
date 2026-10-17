@@ -10,6 +10,7 @@ reference:
   - variables
   - codebook
   - summ
+  - special-print
   - matches("^(tab|fre)")
   - matches("^row_")
 - title: "Type Conversion"

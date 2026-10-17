@@ -120,3 +120,15 @@ docs
 !.opencode/results/row-types-minimal-minimal.log
 !.opencode/results/row-types-demos-demos.log
 !.opencode/results/row-types-style.log
+
+# Persistent preview acceptance evidence; intermediate runs remain local.
+!.opencode/results/preview-final.csv
+!.opencode/results/preview-final-details.csv
+!.opencode/results/preview-final-install.log
+!.opencode/results/preview-final-tests.log
+!.opencode/results/preview-final-build.log
+!.opencode/results/preview-final-check.log
+!.opencode/results/preview-examples.log
+!.opencode/results/preview-minimal-minimal.log
+!.opencode/results/preview-demos-demos.log
+!.opencode/results/preview-style.log

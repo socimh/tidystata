@@ -36,6 +36,7 @@ func_descriptions <- c(
   conversion = "Conversion and missing-value preparation",
   fre = "Frequencies and totals",
   row_egen = "Row calculations",
+  special_print = "Persistent table previews",
   s_select = "Selection and expressions",
   summ = "Summary statistics",
   tab = "Frequency tables",
@@ -84,7 +85,7 @@ for (file in demo_files) {
   if (sum(grepl("^```", output)) %% 2L) {
     output <- c(output, "```")
   }
-  output <- sub("[ \\t]+$", "", output)
+  output <- sub("[[:blank:]]+$", "", output)
   report_file <- sprintf("report_%s_%s.md", name, version)
   status <- if (is.null(failure)) "PASS" else "FAIL"
   writeLines(

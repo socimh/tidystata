@@ -1,6 +1,6 @@
 # Function: timer()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 20:06:49 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 21:08:35 | **Status:** PASS
 
 ## Example 1: Basic timing
 
@@ -11,7 +11,7 @@ timer(Sys.sleep(0.5))
 **Output:**
 
 ```
-Time spent: 0.513s
+Time spent: 0.516s
 
 ```
 
@@ -19,7 +19,7 @@ Time spent: 0.513s
 
 ```r
 result <- timer(mean(1:1000000))
-resul
+result
 ```
 
 **Output:**

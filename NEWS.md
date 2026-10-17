@@ -8,8 +8,8 @@
   repository's `extra_functions/` archive. See `MIGRATION.md` in the repository
   for direct alternatives.
 * Relative to the GitHub 0.2.0 baseline, `s_time()` becomes `timer()`;
-  regression wrappers, `tidy_coef()`, plotting helpers, and special printing/
-  slicing helpers are also removed from the active namespace and preserved
+  regression wrappers, `tidy_coef()`, and plotting helpers are also removed
+  from the active namespace and preserved
   as archived or reworked source. The local `tidy_coef()` to `esttab()` transition
   preceded the four-wrapper retirement. See the complete mapping in MIGRATION.md.
 * `fre()` and `fre2()` now return tibbles by default. `fre1()` returns a list of
@@ -25,8 +25,22 @@
   be mixed with other types for extrema. Unsupported orderings or incompatible
   combinations error explicitly.
 * R 4.1.0 or later is now required.
+* Persistent preview formatting requires tibble >= 3.1.0 and pillar >= 1.8.0,
+  the versions providing the public table-formatting extension hooks used here.
 
 ## Improvements and fixes
+
+* Add `preview_table()` to retain a full table while displaying head/tail or
+  approximately evenly spaced rows. Its settings persist through supported
+  data manipulation, including grouping, summaries, left-table joins,
+  first-input row binding, and pivots. `unpreview_table()`, `as_tibble()`, and
+  `as.data.frame()` explicitly return ordinary tables.
+* Restore `print_headtail()`, `print_interval()`, `slice_headtail()`, and
+  `slice_interval()` as reviewed implementations. Print helpers return the
+  original input invisibly; slice helpers return actual subsets. `n` is the
+  total row budget, accepts positive integers or `Inf`, and selects each row at
+  most once. Head/tail selection gives the head the extra row for odd budgets;
+  `n = 1` selects the first row. The original implementation remains archived.
 
 * Make `codebook()` return a global inventory of selected columns even for
   grouped input, without reinserting unselected grouping keys. Count SPSS

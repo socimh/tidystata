@@ -1,6 +1,6 @@
 # Function: s_select()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 20:06:47 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 21:08:33 | **Status:** PASS
 
 ## Example 1: Select columns by name
 
@@ -143,7 +143,7 @@ s_select(mtcars, starts_with('d'))
 **Output:**
 
 ```
-                     disp dra
+                     disp drat
 Mazda RX4           160.0 3.90
 Mazda RX4 Wag       160.0 3.90
 Datsun 710          108.0 3.85
@@ -219,7 +219,7 @@ Attaching package: 'data.table'
 
 The following objects are masked from 'package:dplyr':
 
-    between, first, las
+    between, first, last
 
 
 The following object is masked from 'package:base':

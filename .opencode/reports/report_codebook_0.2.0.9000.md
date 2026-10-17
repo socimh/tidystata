@@ -1,6 +1,6 @@
 # Function: codebook()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 20:06:46 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 21:08:32 | **Status:** PASS
 
 ## Example 1: Basic codebook
 
@@ -72,7 +72,7 @@ codebook(mtcars, mpg, hp, wt)
 3 wt       double    32     29
 ```
 
-## Example 4: With tidyselec
+## Example 4: With tidyselect
 
 ```r
 codebook(starwars, ends_with('color'))

@@ -13,9 +13,10 @@ comparison below also records helpers archived before the four-wrapper milestone
 
 ## Changes from the GitHub 0.2.0 baseline
 
-Compared with upstream commit `12709f6`, 54 exported objects become 40:
-15 exports are removed and `timer()` is added. This comparison includes local
-changes made before the four-wrapper milestone described above.
+Compared with upstream commit `12709f6`, 54 exported objects become 46:
+11 exports are removed, while `timer()`, `preview_table()`, and
+`unpreview_table()` are added. This comparison includes local changes made
+before the four-wrapper milestone and the restored printing/slicing helpers.
 
 | Previous upstream exports | Current destination or replacement |
 | --- | --- |
@@ -25,12 +26,13 @@ changes made before the four-wrapper milestone described above.
 | `tidy_coef()` | Reworked locally as `esttab()`, then archived under `extra_functions/R/esttab.R`; use broom/broom.mixed directly. `esttab()` was not an export in this upstream revision. |
 | `regress()`, `regress_data()`, `regress_coef()`, `regress_stat()` | Archived under `extra_functions/R/regress.R`; fit models and extract results directly. |
 | `s_plot()`, `s_ggsave()` | Archived under `extra_functions/R/`; use ggplot2 functions directly. |
-| `print_headtail()`, `print_interval()`, `slice_headtail()`, `slice_interval()` | Archived in `extra_functions/R/sepecial-print.R`; use explicit row selection and printing. |
+| `print_headtail()`, `print_interval()`, `slice_headtail()`, `slice_interval()` | Restored as reviewed active functions. The original implementation remains in `extra_functions/R/sepecial-print.R`. Use `preview_table()` for a persistent display style that retains every row. |
 
-The printing S3 registrations are also removed. Archives are unsupported and
-excluded from package builds. Renamed/reworked files are not byte-identical
-copies; the original upstream implementations remain in Git history.
-No compatibility aliases are introduced by this documentation update.
+The original printing classes and their S3 registrations remain retired. The
+new `statart_preview` class operates on full tables; it does not pretend that a
+row subset contains the full data. Archives are unsupported and excluded from
+package builds. Restored and reworked files are not byte-identical copies; the
+original upstream implementations remain in Git history.
 
 ## Import and export directly
 
@@ -119,6 +121,58 @@ Matrix columns are unsupported. Selecting no variables returns an empty result:
 `tab1()` and `fre1()` return empty lists by default, while tibble output has zero
 rows. `tab2()` and `fre2()` return an empty tibble for a zero-column selection;
 other selections must contain exactly two variables.
+
+## Persistent previews and explicit row subsets
+
+Use `preview_table()` when a long table needs a compact console display while
+all rows remain available to subsequent research steps:
+
+```r
+prepared <- survey |>
+  dplyr::arrange(respondent_id) |>
+  statart::preview_table(style = "headtail", n = 10) |>
+  dplyr::mutate(income_log = log(income))
+
+prepared # Prints selected rows; calculations still use the complete table.
+```
+
+The wrapper returns a full tibble with class `statart_preview`, preserving
+supported grouped and rowwise metadata. Its style persists through supported
+selection, filtering, arrangement, mutation, grouping, summaries/reframing, and
+pivots. Joins inherit the left table's settings; `bind_rows()` inherits the
+first input's settings. Supported ordinary data frames become tibbles. Other
+containers and lazy tables require explicit conversion or collection first.
+When a function returns a list of tables, wrap each member explicitly, for
+example `purrr::map(result, statart::preview_table, n = 10)`.
+
+`style = "headtail"` displays the first `ceiling(n / 2)` and final
+`floor(n / 2)` rows. `style = "interval"` displays approximately evenly spaced
+row positions, including both ends when `n >= 2`. Sort the table first when
+these positions should cover a meaningful order. `n` is a total row budget,
+not a count for each end: it must be a positive integer or `Inf`. A budget of
+one selects the first row. If the table has at most `n` rows, every row appears
+once; larger budgets never duplicate rows. Row positions refer to the entire
+current table, including grouped tables, rather than sampling within each group.
+
+```r
+survey |>
+  dplyr::arrange(income) |>
+  statart::preview_table(style = "interval", n = 6)
+
+ordinary <- statart::unpreview_table(prepared)
+# tibble::as_tibble(prepared) and as.data.frame(prepared) also remove the preview.
+```
+
+`unpreview_table()` removes only the preview behavior, leaving all rows and
+supported grouping intact. Ordinary tibble printing may still truncate its
+console output according to tibble options.
+
+For a single display, use `print_headtail()` or `print_interval()` with the
+legacy argument names. They print selected rows and return the original input
+invisibly, so a pipeline continues with the complete data. To intentionally
+reduce the data, use `slice_headtail()` or `slice_interval()`; these return real
+subsets. All four helpers use the same total-`n` selection rules above. They
+replace the archived implementation's duplicate-row and odd-budget behavior.
 
 ## Variable names and metadata
 

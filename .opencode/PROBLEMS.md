@@ -2,10 +2,20 @@
 
 ## Current verified state (2026-10-16)
 
-The complete suite passes: **16,674 expectations across 3,079 blocks**, zero
-failures, errors, uncaptured warnings or skips. Fresh native installation/build,
-R CMD check --no-manual (Status: OK), required-dependency smoke and eleven demos
-pass. See [row type and numerical acceptance](reports/project_status_row_types_2026-10-16.md).
+The complete suite passes: **16,992 expectations across 3,106 blocks**, zero
+failures, errors, uncaptured warnings or skips. Fresh installation/build,
+required-dependency smoke and twelve demos pass; 96 R sources pass style checks.
+Fresh source build and R CMD check --no-manual pass with Status: OK (zero errors, warnings or notes).
+See [preview acceptance](reports/project_status_previews_2026-10-16.md).
+
+Resolved in the preview pass: temporary truncated objects were replaced with a
+complete tibble carrying a display policy. Grouped renaming, pivot selector
+forwarding, footer width/limits, n=1 wording and duplicate/empty names have
+regression coverage. The four old helpers are active again, with real subset
+semantics distinct from persistent previews. 27 blocks/318 expectations pass.
+Required Imports remain 12; public exports become 46; tibble >= 3.1.0 and pillar
+>= 1.8.0 declare the required public formatting hooks. A report-generator trim
+bug that removed literal trailing t characters was reproduced and corrected.
 
 Resolved in the row pass: blanket double coercion no longer changes logical extrema into indicators or strips supported classes. Added exact integer64 extrema/unique counts, compatible unit/calendar/duration handling, original SPSS missing masks, common missing-definition and ordered-factor guards, and explicit unsupported-class errors. New stable C++ median/variance/SD kernels fix overflow and cancellation. Removed unused Rfast (12 Imports); units >= 1.0.0 remains optional. 26 new blocks/185 expectations pass; no new blocking issue was found in independent review.
 
@@ -19,7 +29,7 @@ output records match baseline; both PDF artifacts remain unchanged.
 
 Remaining: remote R4.1/multi-platform execution, old dependency combinations,
 actual GUI viewing, and existing documented locale/display/legacy-binning limits.
-No new public behavior was introduced; broad API changes remain separate work.
+Preview behavior is opt-in; existing summary/tabulation defaults are unchanged.
 
 Earlier family acceptance summaries below are historical checkpoints, superseded
 by the complete current run above for aggregate totals and adoption status.

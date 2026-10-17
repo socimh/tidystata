@@ -1,6 +1,6 @@
 # Function: tab1()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 20:06:48 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-16 21:08:34 | **Status:** PASS
 
 ## Example 1: Basic one-way table
 
@@ -71,7 +71,7 @@ $tall
 
 ```
 
-## Example 4: With tibble outpu
+## Example 4: With tibble output
 
 ```r
 tab1(starwars, sex, gender, .type = 'tibble')
@@ -93,7 +93,7 @@ tab1(starwars, sex, gender, .type = 'tibble')
 8 gender   <NA>               4    4.60 100   NA         NA
 ```
 
-## Example 5: With tidyselec
+## Example 5: With tidyselect
 
 ```r
 tab1(starwars, ends_with('color'))

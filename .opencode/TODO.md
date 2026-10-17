@@ -1,5 +1,14 @@
 # To-do list
 
+## Persistent table previews
+
+- [x] Add complete-data preview class and explicit removal; restore four one-time print/slice helpers while preserving archived source.
+- [x] Preserve settings through agreed base/dplyr/tidyr pipelines and document conversion boundaries.
+- [x] Verify 27 blocks/318 expectations, installed dispatch, full 3,106 blocks/16,992 expectations, minimal smoke, twelve demos and 96-file style checks.
+- [x] Regenerate namespace/help and script/output report; review duplicate names and dependency API floors.
+- [x] Finish final package check (Status: OK), acceptance report and independent review.
+- [ ] Validate R4.1, oldest dependency versions and other platforms before publication.
+
 ## Row type and numerical acceptance
 
 - [x] Preserve compatible logical/integer/classed extrema; retain meaningful operation-specific arithmetic types and reject incompatible inputs.
