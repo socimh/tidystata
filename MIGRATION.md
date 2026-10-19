@@ -4,12 +4,24 @@ The `0.2.0.9000` development series prepares a breaking `0.3.0` release focused
 on data exploration and preparation. Four wrappers have been retired:
 `read_data()`, `write_data()`, `esttab()`, and `codebook_detail()`.
 
-Their implementations and original help are preserved in `extra_functions/` in
-the source repository. Dedicated tests and demos are archived there too. The
-archive is excluded from package builds and active test/demo discovery; archived
-functions are unsupported and may require packages outside statart's dependencies.
+The retired implementations, original help, dedicated tests and demos were
+removed from the checkout during repository cleanup. They remain in the
+maintainer's verified external backup and, for tracked versions, Git history.
+Retired functions are unsupported and may require dependencies outside statart.
 The retained exploration and preparation helpers remain available. The upstream
-comparison below also records helpers archived before the four-wrapper milestone.
+comparison below also records earlier retirements.
+
+This file is the authoritative migration guide in the source repository. The
+same guide is included with installed packages at
+`system.file("MIGRATION.md", package = "statart")` and published as the website's
+Migration guide article. Code blocks are recipes to run deliberately; examples
+that read or write files require your own paths and any named optional packages.
+
+To try local changes, open the source project and restart R, run
+`devtools::install(".", upgrade = "never", build_vignettes = FALSE)`, then
+restart R again. After `library(statart)`, inspect `packageVersion("statart")`
+and `find.package("statart")`. Opening a repository does not itself replace an
+older installed package.
 
 ## Changes from the GitHub 0.2.0 baseline
 
@@ -21,17 +33,17 @@ before the four-wrapper milestone and the restored printing/slicing helpers.
 | Previous upstream exports | Current destination or replacement |
 | --- | --- |
 | `s_time()` | Renamed to `timer()`; timing messages use compact duration text. |
-| `read_data()`, `write_data()` | Archived under `extra_functions/R/import-export.R`; use format-specific packages directly. |
-| `codebook_detail()` | Preserved in `extra_functions/legacy-codebook.R`; use `codebook()` or `datawizard::data_codebook()`. |
-| `tidy_coef()` | Reworked locally as `esttab()`, then archived under `extra_functions/R/esttab.R`; use broom/broom.mixed directly. `esttab()` was not an export in this upstream revision. |
-| `regress()`, `regress_data()`, `regress_coef()`, `regress_stat()` | Archived under `extra_functions/R/regress.R`; fit models and extract results directly. |
-| `s_plot()`, `s_ggsave()` | Archived under `extra_functions/R/`; use ggplot2 functions directly. |
-| `print_headtail()`, `print_interval()`, `slice_headtail()`, `slice_interval()` | Restored as reviewed active functions. The original implementation remains in `extra_functions/R/sepecial-print.R`. Use `preview_table()` for a persistent display style that retains every row. |
+| `read_data()`, `write_data()` | Retired; use format-specific packages directly. |
+| `codebook_detail()` | Retired; use `codebook()` or `datawizard::data_codebook()`. |
+| `tidy_coef()` | Reworked locally as `esttab()`, then retired; use broom/broom.mixed directly. `esttab()` was not an export in this upstream revision. |
+| `regress()`, `regress_data()`, `regress_coef()`, `regress_stat()` | Retired; fit models and extract results directly. |
+| `s_plot()`, `s_ggsave()` | Retired; use ggplot2 functions directly. |
+| `print_headtail()`, `print_interval()`, `slice_headtail()`, `slice_interval()` | Restored as reviewed active functions; original tracked implementations remain in Git history. Use `preview_table()` for a persistent display style that retains every row. |
 
 The original printing classes and their S3 registrations remain retired. The
 new `statart_preview` class operates on full tables; it does not pretend that a
-row subset contains the full data. Archives are unsupported and excluded from
-package builds. Restored and reworked files are not byte-identical copies; the
+row subset contains the full data. Retired implementations are unsupported and
+are not distributed in the package or checkout. Restored and reworked files are not byte-identical copies; the
 original upstream implementations remain in Git history.
 
 ## Import and export directly
@@ -83,14 +95,34 @@ previous detailed codebook capability, call the underlying package directly:
 datawizard::data_codebook(mtcars)
 ```
 
+## Table return types
+
+Table-producing helpers now preserve the input container by default: base
+data.frame inputs return base data.frames, tibbles return tibbles, and
+data.table inputs return data.tables. This applies to frequency tables,
+`summ()`/`tabstat()`, `codebook()`, variable inventories, and name tables,
+including empty results. Existing list outputs remain lists, with each table
+using the input container. If downstream code requires a tibble regardless of
+input, convert explicitly with `tibble::as_tibble()`.
+
+New summaries and inventories are ungrouped. Grouping columns still appear where
+the function normally reports them; selection and slicing retain valid grouping.
+New data.table summaries do not inherit keys or indexes from the input. Arbitrary
+subclass metadata is not copied onto newly shaped tables. Vector and scalar
+helpers retain their existing return shapes, and statistical conventions are
+unchanged.
+
 ## Frequency-table output
 
-`fre()` and `fre2()` now return tibbles. `fre1()` returns a list of tibbles, like
-`tab1()`. To request rich formatting, install `flextable` and specify the type:
+`fre()` and `fre2()` default to `.type = "auto"`, preserving the input container.
+`fre1()` returns a list of tables in that container, like `tab1()`. Explicit
+`.type = "tibble"` requests a tibble, including in `tab1()` and `fre1()`.
+To request rich formatting, install `flextable` and specify the type:
 
 ```r
 statart::fre(mtcars, cyl)
 statart::fre1(mtcars, cyl, gear)
+statart::fre(mtcars, cyl, .type = "tibble")
 statart::fre(mtcars, cyl, .type = "flextable")
 ```
 
@@ -118,8 +150,8 @@ conversion, including tagged missing values.
 
 One-way tabulation accepts list columns and counts their distinct values.
 Matrix columns are unsupported. Selecting no variables returns an empty result:
-`tab1()` and `fre1()` return empty lists by default, while tibble output has zero
-rows. `tab2()` and `fre2()` return an empty tibble for a zero-column selection;
+`tab1()` and `fre1()` return empty lists by default, while table output has zero
+rows. `tab2()` and `fre2()` return an empty table for a zero-column selection;
 other selections must contain exactly two variables.
 
 ## Persistent previews and explicit row subsets
@@ -136,14 +168,16 @@ prepared <- survey |>
 prepared # Prints selected rows; calculations still use the complete table.
 ```
 
-The wrapper returns a full tibble with class `statart_preview`, preserving
-supported grouped and rowwise metadata. Its style persists through supported
+The wrapper adds class `statart_preview` to the full table, preserving its
+underlying data.frame, tibble, or data.table container and supported grouped and
+rowwise metadata. Printing uses a temporary tibble. Its style persists through supported
 selection, filtering, arrangement, mutation, grouping, summaries/reframing, and
 pivots. Joins inherit the left table's settings; `bind_rows()` inherits the
-first input's settings. Supported ordinary data frames become tibbles. Other
-containers and lazy tables require explicit conversion or collection first.
-When a function returns a list of tables, wrap each member explicitly, for
-example `purrr::map(result, statart::preview_table, n = 10)`.
+first input's settings. External dplyr and tidyr verbs follow their own container
+and grouping rules; for example, `dplyr::group_by()` creates a grouped tibble.
+Other containers and lazy tables require explicit conversion or collection first.
+Statart table-producing helpers carry supported preview settings to their results,
+including tables inside list outputs.
 
 `style = "headtail"` displays the first `ceiling(n / 2)` and final
 `floor(n / 2)` rows. `style = "interval"` displays approximately evenly spaced
@@ -163,21 +197,27 @@ ordinary <- statart::unpreview_table(prepared)
 # tibble::as_tibble(prepared) and as.data.frame(prepared) also remove the preview.
 ```
 
-`unpreview_table()` removes only the preview behavior, leaving all rows and
-supported grouping intact. Ordinary tibble printing may still truncate its
+`unpreview_table()` removes only the preview behavior, leaving all rows, the
+underlying container, and supported grouping intact. Wrapping and unwrapping
+data.tables copy them before modifying preview metadata; later explicit native
+data.table mutations retain normal reference semantics. Explicit `as_tibble()`
+and `as.data.frame()` conversions choose the requested container and remove the
+preview. Ordinary tibble printing may still truncate its
 console output according to tibble options.
 
 For a single display, use `print_headtail()` or `print_interval()` with the
 legacy argument names. They print selected rows and return the original input
 invisibly, so a pipeline continues with the complete data. To intentionally
 reduce the data, use `slice_headtail()` or `slice_interval()`; these return real
-subsets. All four helpers use the same total-`n` selection rules above. They
+subsets in the input container. Previews and row subsets preserve base data-frame
+row names. All four helpers use the same total-`n` selection rules above. They
 replace the archived implementation's duplicate-row and odd-budget behavior.
 
 ## Variable names and metadata
 
 `ds()` returns a character vector of selected names. `ds_as_column()` and
-`names_as_column()` are equivalent and return a one-column tibble named `name`.
+`names_as_column()` are equivalent and return a one-column table named `name`
+in the input container.
 Use tidyselect in `...` to select or rename existing columns; it does not create
 computed columns. Selection on grouped data retains grouping keys, following
 `dplyr::select()`; ungroup first when these keys should not be included.
@@ -236,11 +276,15 @@ statart::summ(mtcars, mpg, .stat = c("missing", "miss_n", "p50", "median", "sum"
 ```
 
 Unknown statistics produce an error. `sum` is supported for numeric summaries;
-calendar dates and datetimes support neither `sum` nor `skew`/`kurtosis`.
+calendar dates, datetimes and `hms` times support neither `sum` nor
+`skew`/`kurtosis`.
 
-When `.mode = "table"` combines numeric and calendar summaries, shared formatted
-statistic columns become character so the rows can coexist. Count columns remain
-numeric, and numeric-only summary tables retain numeric statistic columns.
+When `.mode = "table"` combines numeric and calendar summaries, shared location
+columns (such as `mean`) become character so the rows can coexist, with numeric
+values rounded to seven significant digits. Calendar spreads stay numeric, in
+days for Dates and seconds otherwise, and `type` records the unit
+(`"date [days]"`). Count columns remain numeric, and numeric-only summary
+tables retain numeric statistic columns.
 Default `.mode = "list"` separates variable types and preserves numeric statistic
 types in the numeric summary.
 
@@ -259,10 +303,19 @@ values. `.name = FALSE` drops the variable-name column only for one measured
 variable, including an empty grouped result.
 
 List mode returns a single table for one type family, or named tables for mixed
-`numeric`, `date` and `datetime` families. Calendar statistics are formatted text
-in both modes. Dates display calendar days; datetimes display UTC to minute
-precision, and compact sub-minute spreads round to whole seconds. Use the raw
-input with base R statistics when full calendar precision is needed.
+`numeric`, `date`, `datetime` and `time` (`hms`) families. Calendar locations are
+formatted text: Dates display calendar days, datetimes display their own time
+zone (the session zone when none is set) to minute precision, and times display
+`hh:mm:ss`. Calendar spreads (`sd`, `se`, `mad`, `iqr`) are `difftime` columns
+with one unit per column, days for Dates and otherwise the unit that fits the
+median spread, so they compare across rows and support arithmetic:
+
+```r
+out <- summ(events, stamp, .by = site, .stat = c("mean", "sd"))
+as.numeric(out$sd, units = "hours")
+```
+
+`.duration_format` is kept for compatibility but no longer changes the output.
 
 Numeric calculations use double precision; converting large `integer64` values
 can lose precision and emits a warning.
@@ -291,13 +344,166 @@ including compound units such as `m/s`. `s_unit()` returns the unit string even
 for empty and all-missing measured vectors; ordinary vectors return
 `NA_character_`.
 
+## Historical problem repairs and explicit controls
+
+Original `PROBLEMS2.md` notes are retained under `.opencode/notes/`; active
+regression tests preserve the repaired cases. A follow-up review changed four
+defaults to match the original requests:
+`summ()`/`tabstat()` sort groups like `tab()` (`.sort = TRUE`) and hide the
+`name` column for a single variable (`.name = FALSE`); `timer()` reports time
+on failure (`.on_error = TRUE`); and `cut_quantile()` follows Stata's `xtile`
+rule. Pass `.sort = FALSE`, `.name = TRUE` or `.on_error = FALSE` for the
+previous summary and timer behavior.
+
+```r
+survey <- tibble::tibble(
+  group = factor(c("high", "low", "low", NA), levels = c("low", "high")),
+  x = c(10, 1, NA, NA), y = c(NA, 2, 4, NA)
+)
+
+# Groups are sorted by key; omission of summaries with no observed values is
+# independent of removing rows with missing grouping keys (.na.rm = TRUE).
+summ(survey, x, .by = group, .drop_empty = TRUE)
+tabstat(survey, x, .stat = c("mean", "p2.5", "p97.5"))
+
+# Larger .by blocks first; .desc still controls categories within each block.
+tab(survey, x, .by = group, .group_order = "frequency", .desc = TRUE)
+
+# Missingness controls are arguments, never extra data columns.
+row_sum(survey[c("x", "y")], na.rm = FALSE)
+row_mean(survey[c("x", "y")], na.rm = FALSE)
+# Like pmin(): constants cap values and never fill all-missing rows.
+survey |> dplyr::mutate(capped = row_min(x, 5))
+
+# A named constant is computed; unnamed numbers remain column positions.
+summ(survey, one = 1, .by = group)
+
+tab(c(1, 1, 2)) # tibble with a value column and counts 2, 1
+fre(c(1, 1, 2)) # tab1(), fre() and fre1() accept vectors too
+ds(ds(survey), dplyr::starts_with("x"))
+
+# Preserve the actual error while reporting elapsed time for failed work.
+tryCatch(timer(stop("example failure"), .on_error = TRUE), error = conditionMessage)
+```
+
+Summary percentiles use `p0` through `p100`, including decimal percentages, and
+type-7 interpolation. `q1` and `q3` still mean the 25th and 75th percentiles.
+Requesting a small statistic set avoids unrelated calculations; it does not
+change their numerical definitions. All-missing summary rows remain by default.
+
+Selections and computed expressions are classified before evaluation:
+`tab(d, half = y / x)` computes the ratio rather than selecting column `y`, and
+misspelled or out-of-range selections error with every unmatched name instead
+of evaluating an object of the same name. Use `all_of()` for name vectors.
+
+For `sf` input, summary and frequency aggregation use nongeometry attributes:
+all `sfc` columns are excluded before selection and grouping. Results are ordinary
+tables. Geometry cannot be selected as a grouping or measured column for these
+operations. Selection, metadata inspection and browsing retain their existing
+spatial behavior.
+
+Blank cross-tabulation column categories display as `<empty>`. When that synthetic
+header is already occupied, a numeric suffix distinguishes it without combining
+categories. Existing ambiguity errors described above still apply. Logical axes
+use `FALSE`, `TRUE`, then missing; other column categories follow factor
+levels or ascending values, with missing last. Stacked tables convert
+incompatible ordered factors, and labelled vectors with different labels, to
+character display values; list tables retain each variable's class.
+
+`ds()` can select names from a character inventory, including the result of an
+earlier `ds()` call. Inventory values must be unique, nonblank and nonmissing;
+an empty inventory is valid. Selection and renaming operate on those values,
+ignoring the vector's own names. `where()` predicates require actual column data
+and are not available for a name inventory.
+
+Some old notes describe convenience names rather than missing operations:
+
+```r
+# Complete printing and interval browsing are explicit choices.
+print_interval(survey, n = Inf, width = Inf)
+browse(slice_interval(survey, n = 3))
+preview_table(tab(survey, group)) # full data retained under a display policy
+
+# Replace missing values after choosing the intended representation.
+response <- haven::labelled(c(1, 2, NA), labels = c(Yes = 1, No = 2))
+value_if_na(response, 1) # retains numeric value labels
+value_if_na(haven::as_factor(response), "Yes") # factor replacement uses a level
+haven::zap_missing(haven::labelled_spss(c(1, 99), na_values = 99))
+
+tidyr::drop_na(survey, x)
+unique(survey$group) # observed categories; levels() includes unused factor levels
+list(first = 1, second = 2)[["second"]]
+
+# Extract a fitted model separately so fitting errors retain their true cause.
+fit <- stats::lm(mpg ~ wt, data = mtcars)
+# broom::tidy(fit)
+# broom::glance(fit)
+# Mixed models: broom.mixed::tidy(fit, effects = "fixed"); do not invent p-values.
+
+# A direct lm coefficient display; the star here explicitly means p < .05.
+coefficients <- stats::coef(summary(fit))
+sprintf("%.3f%s (%.3f)", coefficients[, "Estimate"],
+        ifelse(coefficients[, "Pr(>|t|)"] < .05, "*", ""),
+        coefficients[, "Std. Error"])
+
+# Numeric standardization uses sample SD and keeps missing positions missing.
+measure <- c(1, 2, NA, 4)
+stopifnot(stats::sd(measure, na.rm = TRUE) > 0)
+standardized <- as.numeric(scale(measure))
+# Constant/all-missing vectors need an explicit substantive policy before scaling.
+
+# A model batch can share the same predictor specification.
+models <- lapply(c("mpg", "disp"), function(response) {
+  stats::lm(stats::reformulate(c("wt", "hp"), response), data = mtcars)
+})
+
+# Word output uses optional flextable directly.
+# flextable::save_as_docx(flextable::flextable(as.data.frame(survey)),
+#                       path = "survey.docx")
+```
+
+For count-table plots, use an explicit `geom_col()` rather than automatic
+distribution plots. Preserve date classes before selecting continuous date axes.
+For correlations, select the intended numeric columns and choose missingness
+explicitly in `stats::cor(..., use = "pairwise.complete.obs")`. Interval printing
+selects evenly spaced row positions; it does not estimate statistical quantiles.
+
+New PCA, weighted-cut, regression, automatic plotting, profiling and output-preset
+APIs remain separate feature requests. The historical labelled-factor failure
+lacks its original call; representative replacement cases are tested, but do not
+prove that unspecified original case was reproduced.
+
 ## Quantile bins and row summaries
 
-`cut_quantile()` uses type-7 quantiles and keeps equal values in the same group.
-Ties may collapse duplicate cutpoints, producing fewer intervals and a warning.
-Custom labels must match the effective interval count. Empty, all-missing,
-constant, or invalid group-count inputs produce errors. These bins are not
-promised to match Stata's `xtile` exactly.
+`cut_quantile()` follows Stata's `xtile` rule with type-7 cutpoints: a value
+joins the first group whose cutpoint is at least that value. Equal values stay
+together and distinct values are never merged, so a 0/1 dummy gives two groups.
+Ties can leave fewer than `n` groups, numbered consecutively with a warning.
+Custom labels must match the effective group count. Empty, all-missing,
+constant, or invalid group-count inputs produce errors. Cutpoints are not
+promised to match Stata's percentile definition exactly. Logical input is
+treated as 0/1, and `labels = TRUE` means the default interval labels. In a
+grouped data mask (`group_by() |> mutate()`), the default returns integer codes
+within each group, like Stata's `xtile, by()`, because group-specific interval
+labels cannot be combined.
+
+Use `cut_quantile(x, n = 10, method = "rank")` when balanced counts matter more
+than keeping equal values together. Values sort ascending; original positions
+break ties. Equal values may enter different groups, and reordering tied rows can
+change their assignments. With `k = min(n, observed_count)`, group sizes differ
+by at most one, with larger groups first. Missing positions remain missing.
+Requesting more groups than observed values warns and uses `k`; constant vectors
+are allowed in rank mode. Default labels are ordered `"1"` through `"k"`, custom
+labels must have length `k`, and `labels = FALSE` returns integer group codes.
+
+`row_sum(..., na.rm = TRUE)` keeps its existing missing-value omission default.
+Explicit FALSE makes any row containing an original missing value return NA.
+`row_min()` and `row_max()` accept `.values` alongside selected columns: one
+vector or a list of vectors, each of size one or the current row/group count.
+Scalar constants recycle without creating rows in empty inputs; supported types
+and original missingness are preserved. Bare numeric constants in `...` are
+values, as in `pmin()`; select columns by position with `c()` or a helper.
+Constants never make an all-missing row observed.
 
 Row helpers now use operation-specific output types. `row_min()` and
 `row_max()` preserve the compatible common input type: logical inputs return

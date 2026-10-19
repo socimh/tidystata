@@ -55,7 +55,16 @@ joint_check <- function(
   fre = FALSE,
   desc = FALSE
 ) {
-  expect_s3_class(out, "tbl_df")
+  expect_identical(
+    class(out),
+    if (inherits(data, "data.table")) {
+      c("data.table", "data.frame")
+    } else if (inherits(data, "tbl_df")) {
+      c("tbl_df", "tbl", "data.frame")
+    } else {
+      "data.frame"
+    }
+  )
   expect_false(dplyr::is_grouped_df(out))
   expect_false(anyDuplicated(names(out)) > 0L)
   expect_true(all(
@@ -803,7 +812,7 @@ joint_add(
     )
   }
 )
-joint_add("base data.frame input returns tibble", function(fun, is_fre) {
+joint_add("base data.frame input returns data.frame", function(fun, is_fre) {
   data <- data.frame(x = c(1, 1, 2), y = c("a", "b", "a"))
   joint_check(fun(data), data, c("x", "y"), fre = is_fre)
 })

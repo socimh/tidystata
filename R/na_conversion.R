@@ -7,7 +7,13 @@
 #'   [tidyr::replace_na()].
 #'
 #' Both wrappers preserve the underlying function's casting, recycling,
-#' and error behavior.
+#' and error behavior when both required arguments are supplied. Use
+#' `na_if_value(x, value)` or `x |> na_if_value(value)` to replace values,
+#' and `value_if_na(x, replacement)` or `x |> value_if_na(replacement)`
+#' to fill missing values. A call with only one argument is incomplete.
+#' For SPSS labelled vectors ([haven::labelled_spss()]), user-defined missing
+#' codes and ranges also count as missing, matching their `is.na()` method;
+#' labels and missing-value metadata are retained.
 #'
 #'
 #' @name na_conversion
@@ -28,11 +34,40 @@
 #' @rdname na_conversion
 #' @export
 na_if_value <- function(.x, .value) {
+  if (missing(.x) || missing(.value)) {
+    argument <- if (missing(.x)) ".x" else ".value"
+    stop(
+      "Missing `",
+      argument,
+      "`. Use na_if_value(x, value) or ",
+      "x |> na_if_value(value).",
+      call. = FALSE
+    )
+  }
   dplyr::na_if(.x, .value)
 }
 
 #' @rdname na_conversion
 #' @export
 value_if_na <- function(.x, .value) {
+  if (missing(.x) || missing(.value)) {
+    argument <- if (missing(.x)) ".x" else ".value"
+    stop(
+      "Missing `",
+      argument,
+      "`. Use value_if_na(x, replacement) or ",
+      "x |> value_if_na(replacement).",
+      call. = FALSE
+    )
+  }
+  if (inherits(.x, "haven_labelled_spss")) {
+    # User-missing codes are missing under is.na(), but not for vctrs/tidyr.
+    replacement <- vctrs::vec_cast(.value, vctrs::vec_ptype(.x))
+    if (length(replacement) != 1L) {
+      stop("`.value` must be a single replacement value.", call. = FALSE)
+    }
+    .x[is.na(.x)] <- replacement
+    return(.x)
+  }
   tidyr::replace_na(.x, .value)
 }

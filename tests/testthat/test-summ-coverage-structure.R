@@ -1,12 +1,11 @@
-library(testthat)
-library(statart)
-
 # Scenarios 051-100 complement the numeric/grouping scenarios 001-050.
 # Each scenario exercises both exported entry points, with explicit .stat
 # requests where their different defaults are not the behavior under test.
 for (function_name in c("summ", "tabstat")) {
   local({
-    api <- getExportedValue("statart", function_name)
+    api <- summary_legacy_layout(
+      getExportedValue("statart", function_name)
+    )
 
     test_that(
       paste(
@@ -411,17 +410,19 @@ for (function_name in c("summ", "tabstat")) {
         "coverage",
         sprintf("%03d", 69),
         "[calendar]",
-        "long date spreads use day units"
+        "date spreads are difftime columns in days"
       ),
       {
         out <- api(
           tibble::tibble(x = as.Date("2024-01-01") + c(0, 2, 4)),
-          .stat = c("sd", "iqr", "mad"),
-          .duration_format = "long"
+          .stat = c("sd", "iqr", "mad")
         )
-        expect_equal(out$sd, "2 days")
-        expect_equal(out$iqr, "2 days")
-        expect_equal(out$mad, "3 days")
+        expect_equal(out$sd, as.difftime(2, units = "days"))
+        expect_equal(out$iqr, as.difftime(2, units = "days"))
+        expect_equal(
+          out$mad,
+          as.difftime(stats::mad(c(0, 2, 4)), units = "days")
+        )
       }
     )
 
@@ -431,18 +432,22 @@ for (function_name in c("summ", "tabstat")) {
         "coverage",
         sprintf("%03d", 70),
         "[calendar]",
-        "compact date spreads include standard error"
+        "date spreads include an unrounded standard error"
       ),
       {
+        # `.duration_format` is retained for compatibility only.
         out <- api(
           tibble::tibble(x = as.Date("2024-01-01") + c(0, 2, 4)),
           .stat = c("sd", "iqr", "mad", "se"),
           .duration_format = "compact"
         )
-        expect_equal(out$sd, "2d")
-        expect_equal(out$iqr, "2d")
-        expect_equal(out$mad, "3d")
-        expect_equal(out$se, "1d")
+        expect_equal(out$sd, as.difftime(2, units = "days"))
+        expect_equal(out$iqr, as.difftime(2, units = "days"))
+        expect_equal(
+          out$mad,
+          as.difftime(stats::mad(c(0, 2, 4)), units = "days")
+        )
+        expect_equal(out$se, as.difftime(2 / sqrt(3), units = "days"))
       }
     )
 
@@ -452,16 +457,16 @@ for (function_name in c("summ", "tabstat")) {
         "coverage",
         sprintf("%03d", 71),
         "[calendar]",
-        "non UTC datetime inputs are displayed as UTC instants"
+        "non UTC datetime inputs are displayed in their own time zone"
       ),
       {
         x <- as.POSIXct("2024-01-01 00:00:00", tz = "America/New_York") +
           c(0, 7200)
         before <- x
         out <- api(tibble::tibble(x = x), .stat = c("min", "mean", "max"))
-        expect_equal(out$min, "2024-01-01 05:00")
-        expect_equal(out$mean, "2024-01-01 06:00")
-        expect_equal(out$max, "2024-01-01 07:00")
+        expect_equal(out$min, "2024-01-01 00:00")
+        expect_equal(out$mean, "2024-01-01 01:00")
+        expect_equal(out$max, "2024-01-01 02:00")
         expect_identical(x, before)
       }
     )
@@ -489,18 +494,14 @@ for (function_name in c("summ", "tabstat")) {
         "coverage",
         sprintf("%03d", 73),
         "[calendar]",
-        "long datetime spreads format minutes and seconds"
+        "minute-scale datetime spreads use minutes"
       ),
       {
         x <- as.POSIXct("2024-01-01", tz = "UTC") + c(0, 120, 240)
-        out <- api(
-          tibble::tibble(x = x),
-          .stat = c("sd", "iqr", "se"),
-          .duration_format = "long"
-        )
-        expect_equal(out$sd, "2 minutes")
-        expect_equal(out$iqr, "2 minutes")
-        expect_match(out$se, "^1 minutes? 9 seconds$")
+        out <- api(tibble::tibble(x = x), .stat = c("sd", "iqr", "se"))
+        expect_equal(out$sd, as.difftime(2, units = "mins"))
+        expect_equal(out$iqr, as.difftime(2, units = "mins"))
+        expect_equal(out$se, as.difftime(2 / sqrt(3), units = "mins"))
       }
     )
 
@@ -510,18 +511,14 @@ for (function_name in c("summ", "tabstat")) {
         "coverage",
         sprintf("%03d", 74),
         "[calendar]",
-        "compact datetime spreads use scaled hours"
+        "hour-scale datetime spreads use hours"
       ),
       {
         x <- as.POSIXct("2024-01-01", tz = "UTC") + c(0, 3600, 7200)
-        out <- api(
-          tibble::tibble(x = x),
-          .stat = c("mean", "sd", "iqr"),
-          .duration_format = "compact"
-        )
+        out <- api(tibble::tibble(x = x), .stat = c("mean", "sd", "iqr"))
         expect_equal(out$mean, "2024-01-01 01:00")
-        expect_equal(out$sd, "1.0h")
-        expect_equal(out$iqr, "1.0h")
+        expect_equal(out$sd, as.difftime(1, units = "hours"))
+        expect_equal(out$iqr, as.difftime(1, units = "hours"))
       }
     )
 

@@ -59,7 +59,7 @@ test_that("milestone quantile ties stay together after row permutation", {
     logical(1)
   )))
   p <- rev(seq_along(x))
-  other <- suppressWarnings(cut_quantile(x[p], n = 4))
+  expect_warning(other <- cut_quantile(x[p], n = 4), "Tied values collapsed")
   expect_identical(as.integer(other)[order(p)], as.integer(out))
 })
 
@@ -113,13 +113,21 @@ for (.scenario in names(.milestone_parse_cases)) {
   test_that(paste("milestone as_numeric imported character", .scenario), {
     case <- .milestone_parse_cases[[.scenario]]
     before <- case[[1]]
-    out <- suppressWarnings(as_numeric(case[[1]]))
+    parsing_warning <- if (.scenario %in% c("nonnumeric", "mixed_nonnumeric")) {
+      "parsing failure"
+    } else {
+      NA
+    }
+    expect_warning(out <- as_numeric(case[[1]]), parsing_warning)
     expect_type(out, "double")
     expect_length(out, length(case[[1]]))
     expect_equal(as.vector(out), case[[2]], tolerance = 1e-14)
     expect_identical(case[[1]], before)
     d <- tibble::tibble(raw = case[[1]])
-    converted <- suppressWarnings(dplyr::mutate(d, value = as_numeric(raw)))
+    expect_warning(
+      converted <- dplyr::mutate(d, value = as_numeric(raw)),
+      parsing_warning
+    )
     expect_equal(as.vector(converted$value), case[[2]], tolerance = 1e-14)
   })
 }
@@ -182,7 +190,7 @@ for (.scenario in names(.milestone_metadata_cases)) {
     d <- .milestone_metadata_cases[[.scenario]]
     before <- unserialize(serialize(d, NULL))
     out <- variables(d)
-    expect_s3_class(out, "tbl_df")
+    expect_identical(class(out), class(d))
     expect_identical(out$name, names(d))
     labels <- lapply(d, attr, which = "label", exact = TRUE)
     expected <- vapply(
@@ -213,7 +221,7 @@ for (.scenario in names(.milestone_metadata_cases)) {
     d <- .milestone_metadata_cases[[.scenario]]
     before <- unserialize(serialize(d, NULL))
     out <- codebook(d)
-    expect_s3_class(out, "tbl_df")
+    expect_identical(class(out), class(d))
     expect_identical(out$variable, names(d))
     expect_equal(
       out$n,
@@ -386,6 +394,11 @@ for (.function_name in .milestone_row_functions) {
         expect_error(row_fn(d), "[Cc]olumn|[Nn]umeric|[Ee]mpty|NULL")
       } else {
         before <- unserialize(serialize(d, NULL))
+        # Windows' C locale cannot translate Unicode names in base matrix
+        # conversion. Keep this fixture in a UTF-8 locale for both references.
+        if (.scenario == "non_syntactic" && .Platform$OS.type == "windows") {
+          withr::local_locale(c(LC_CTYPE = "English_United States.utf8"))
+        }
         expected <- .milestone_row_reference(d, .function_name)
         extrema <- .function_name %in% c("row_min", "row_max")
         storage <- typeof(unlist(d, use.names = FALSE))
@@ -395,7 +408,7 @@ for (.function_name in .milestone_row_functions) {
         if (extrema && storage == "integer") {
           expected <- as.integer(expected)
         }
-        out <- suppressWarnings(row_fn(d))
+        out <- expect_no_warning(row_fn(d))
         expect_true(is.atomic(out))
         expect_true(is.numeric(out) || is.logical(out))
         expect_null(dim(out))
@@ -405,7 +418,7 @@ for (.function_name in .milestone_row_functions) {
           expect_type(out, if (extrema) storage else "double")
         }
         expect_identical(d, before)
-        in_mutate <- suppressWarnings(dplyr::mutate(
+        in_mutate <- expect_no_warning(dplyr::mutate(
           tibble::as_tibble(d),
           observed = row_fn(tidyselect::everything())
         ))
@@ -476,13 +489,21 @@ for (.scenario in names(.milestone_quantile_cases)) {
     {
       case <- .milestone_quantile_cases[[.scenario]]
       before <- case$x
-      raw_breaks <- stats::quantile(
-        case$x,
-        probs = seq(0, 1, length.out = case$n + 1L),
-        na.rm = TRUE
+      # Stata xtile reference: x joins the first group whose cutpoint >= x;
+      # occupied groups are numbered consecutively.
+      observed <- case$x[!is.na(case$x)]
+      cutpoints <- stats::quantile(
+        observed,
+        probs = seq_len(case$n - 1L) / case$n,
+        type = 7
       )
-      breaks <- unique(raw_breaks)
-      if (length(breaks) < length(raw_breaks)) {
+      cutpoints <- unique(cutpoints[cutpoints < max(observed)])
+      raw <- findInterval(case$x, cutpoints, left.open = TRUE) + 1L
+      raw[is.na(case$x)] <- NA_integer_
+      expected_codes <- match(raw, sort(unique(raw[!is.na(raw)])))
+      groups <- max(expected_codes, na.rm = TRUE)
+      collapsed <- groups < case$n
+      if (collapsed) {
         expect_warning(
           out <- do.call(cut_quantile, case),
           "[Cc]ollaps|[Tt]ie|[Ff]ewer"
@@ -490,14 +511,24 @@ for (.scenario in names(.milestone_quantile_cases)) {
       } else {
         expect_no_warning(out <- do.call(cut_quantile, case))
       }
-      expected <- base::cut(
-        case$x,
-        breaks,
-        include.lowest = TRUE,
-        labels = case$labels,
-        ordered_result = TRUE
-      )
-      expect_equal(out, expected)
+      expect_identical(as.integer(out), expected_codes)
+      if (!collapsed && is.null(case$labels)) {
+        # Without ties or empty intervals, results equal base::cut().
+        breaks <- stats::quantile(
+          case$x,
+          probs = seq(0, 1, length.out = case$n + 1L),
+          na.rm = TRUE
+        )
+        expect_equal(
+          out,
+          base::cut(
+            case$x,
+            breaks,
+            include.lowest = TRUE,
+            ordered_result = TRUE
+          )
+        )
+      }
       expect_identical(is.na(out), is.na(case$x))
       expect_identical(case$x, before)
       codes <- as.integer(out)
@@ -507,13 +538,16 @@ for (.scenario in names(.milestone_quantile_cases)) {
       p <- rev(seq_along(case$x))
       shuffled <- case
       shuffled$x <- case$x[p]
-      other <- suppressWarnings(do.call(cut_quantile, shuffled))
+      expect_warning(
+        other <- do.call(cut_quantile, shuffled),
+        if (collapsed) "Tied values collapsed" else NA
+      )
       expect_identical(as.integer(other)[order(p)], codes)
       if (identical(case$labels, FALSE)) {
         expect_type(out, "integer")
       } else {
         expect_s3_class(out, "ordered")
-        expect_equal(nlevels(out), length(breaks) - 1L)
+        expect_equal(nlevels(out), groups)
       }
     }
   )
@@ -547,7 +581,7 @@ for (.scenario in names(.milestone_quantile_cases)) {
 for (.scenario in names(.milestone_invalid_quantiles)) {
   test_that(paste("milestone cut_quantile validates", .scenario), {
     case <- .milestone_invalid_quantiles[[.scenario]]
-    expect_error(suppressWarnings(do.call(cut_quantile, case)))
+    expect_error(do.call(cut_quantile, case))
   })
 }
 
@@ -794,17 +828,17 @@ for (.function_name in c("fre", "fre1", "fre2")) {
         before <- unserialize(serialize(d, NULL))
         if (.function_name == "fre") {
           out <- fre(d, x)
-          expect_s3_class(out, "tbl_df")
+          expect_identical(class(out), class(d))
           totals <- out[!is.na(out$x) & out$x == "Total", ]
           expect_equal(totals$n, nrow(d))
           expect_equal(totals$percent, 100)
-          expect_equal(out, fre(d, x, .type = "tibble"))
+          expect_equal(tibble::as_tibble(out), fre(d, x, .type = "tibble"))
         } else if (.function_name == "fre1") {
           out <- fre1(d, x, y)
           expect_named(out, c("x", "y"))
           expect_false(inherits(out, "flextable"))
           for (frame in out) {
-            expect_s3_class(frame, "tbl_df")
+            expect_identical(class(frame), class(d))
             totals <- frame[!is.na(frame$value) & frame$value == "Total", ]
             expect_equal(totals$n, nrow(d))
             expect_equal(totals$percent, 100)
@@ -812,7 +846,7 @@ for (.function_name in c("fre", "fre1", "fre2")) {
           expect_equal(out, fre1(d, x, y, .type = "list"))
         } else {
           out <- fre2(d, x, y)
-          expect_s3_class(out, "tbl_df")
+          expect_identical(class(out), class(d))
           expect_equal(tail(out$total, 1), nrow(d))
           expect_equal(sum(head(out$total, -1)), nrow(d))
           numeric_columns <- setdiff(names(out), c(names(out)[1], "total"))
@@ -824,7 +858,7 @@ for (.function_name in c("fre", "fre1", "fre2")) {
               drop = FALSE
             ])))
           )
-          expect_equal(out, fre2(d, x, y, .type = "tibble"))
+          expect_equal(tibble::as_tibble(out), fre2(d, x, y, .type = "tibble"))
         }
         expect_identical(d, before)
       }

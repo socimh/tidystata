@@ -2,7 +2,7 @@
 args <- commandArgs(trailingOnly = TRUE)
 local_library <- Sys.getenv(
   "STATART_STYLE_LIBRARY",
-  ".opencode/results/style-tools/library"
+  ".opencode/tools/style-tools/library"
 )
 if (dir.exists(local_library)) {
   .libPaths(c(normalizePath(local_library), .libPaths()))

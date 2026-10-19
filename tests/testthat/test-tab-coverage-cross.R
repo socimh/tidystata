@@ -1,6 +1,3 @@
-library(testthat)
-library(statart)
-
 # Independent public-contract cases: the oracle counts integer category codes
 # with base R table(), never statart's counting or margin helpers.
 cross_cases <- list()
@@ -8,7 +5,15 @@ cross_add <- function(id, title, check) {
   cross_cases[[length(cross_cases) + 1L]] <<-
     list(id = as.integer(id), title = title, check = check)
 }
-cross_assert <- function(out, x, y, header, totals, row_labels = NULL) {
+cross_assert <- function(
+  out,
+  x,
+  y,
+  header,
+  totals,
+  row_labels = NULL,
+  expected_class = c("tbl_df", "tbl", "data.frame")
+) {
   ux <- unique(x)
   uy <- unique(y)
   x_codes <- match(x, ux)
@@ -17,7 +22,7 @@ cross_assert <- function(out, x, y, header, totals, row_labels = NULL) {
     factor(x_codes, levels = seq_along(ux)),
     factor(y_codes, levels = seq_along(uy))
   ))
-  expect_s3_class(out, "tbl_df")
+  expect_identical(class(out), expected_class)
   expect_false(dplyr::is_grouped_df(out))
   expect_identical(names(out)[1], header)
   if (!length(x)) {
@@ -43,7 +48,7 @@ cross_assert <- function(out, x, y, header, totals, row_labels = NULL) {
   expect_false(anyNA(row_pos))
   expect_setequal(row_pos, seq_along(ux))
   expect_false(anyNA(col_pos))
-  actual <- as.matrix(out[seq_len(nr), cat_cols, drop = FALSE])
+  actual <- as.matrix(as.data.frame(out)[seq_len(nr), cat_cols, drop = FALSE])
   expect_equal(
     unname(actual),
     unname(expected[row_pos, col_pos, drop = FALSE]),
@@ -56,7 +61,10 @@ cross_assert <- function(out, x, y, header, totals, row_labels = NULL) {
     expect_identical(out[[1]][nr + 1L], "total")
     expect_equal(out$total[seq_len(nr)], as.numeric(rowSums(actual)))
     expect_equal(
-      as.numeric(unlist(out[nr + 1L, cat_cols], use.names = FALSE)),
+      as.numeric(unlist(
+        as.data.frame(out)[nr + 1L, cat_cols, drop = FALSE],
+        use.names = FALSE
+      )),
       as.numeric(colSums(actual))
     )
     expect_equal(out$total[nr + 1L], length(x))
@@ -564,7 +572,14 @@ cross_add(90, "computed category wrong size errors", function(fn) {
 cross_add(91, "base data frame input is preserved", function(fn) {
   df <- data.frame(x = c("b", "a", "b"), y = c("X", "Y", "Y"))
   before <- unserialize(serialize(df, NULL))
-  cross_assert(fn(df), df$x, df$y, "x \\ y", identical(fn, statart::fre2))
+  cross_assert(
+    fn(df),
+    df$x,
+    df$y,
+    "x \\ y",
+    identical(fn, statart::fre2),
+    expected_class = "data.frame"
+  )
   expect_identical(df, before)
 })
 cross_add(
@@ -597,7 +612,14 @@ cross_add(95, "data.table input is not changed by reference", function(fn) {
   skip_if_not_installed("data.table")
   df <- data.table::data.table(x = c("a", "b", "a"), y = c("X", "Y", "Y"))
   before <- data.table::copy(df)
-  cross_assert(fn(df), df$x, df$y, "x \\ y", identical(fn, statart::fre2))
+  cross_assert(
+    fn(df),
+    df$x,
+    df$y,
+    "x \\ y",
+    identical(fn, statart::fre2),
+    expected_class = c("data.table", "data.frame")
+  )
   expect_identical(df, before)
 })
 cross_add(

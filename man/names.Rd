@@ -14,7 +14,10 @@ ds_as_column(.data, ...)
 names_as_column(.data, ...)
 }
 \arguments{
-\item{.data}{A data frame or tibble.}
+\item{.data}{A data frame, tibble, or data.table. \code{ds()} also accepts a
+character vector representing a name inventory, such as an earlier
+\code{ds()} result. Inventory entries must be unique, nonempty, and nonmissing;
+the vector's own names are ignored. An empty inventory is allowed.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Existing columns to
 select or rename. Omit to include all columns. Computed columns are not
@@ -22,9 +25,11 @@ created by this argument.}
 }
 \value{
 \code{ds()} returns a character vector. \code{ds_as_column()} and
-\code{names_as_column()} are equivalent and return a tibble with one character
+\code{names_as_column()} are equivalent and return a table with one character
 column, \code{name}. On ungrouped data, an empty selection returns a zero-length
-vector or a zero-row tibble, respectively.
+vector or a zero-row table, respectively. Tables preserve the input's
+data.frame, tibble, or data.table container and supported preview settings,
+but do not recreate grouping or arbitrary subclasses on the new rows.
 }
 \description{
 List column names by tidyselect
@@ -34,6 +39,9 @@ Selection order and renamed column names follow \code{\link[dplyr:select]{dplyr:
 grouped data frame, selection retains grouping columns and can emit a
 message when they were not explicitly selected. Ungroup first to select
 independently of grouping columns. The input data are not modified.
+For character inventories, select by names, positions, or name helpers and
+rename as usual. Data-type predicates such as \code{where(is.numeric)} are not
+available because an inventory contains no column data.
 }
 \examples{
 ds(starwars) # equivalent to names(starwars)
@@ -44,6 +52,7 @@ names_as_column(starwars, where(is.character))
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))
 dplyr::select(lifeexp, dplyr::all_of(numeric_names))
+ds(numeric_names, dplyr::starts_with("pop"))
 }
 \seealso{
 \code{\link[=variables]{variables()}}, \code{\link[=codebook]{codebook()}}, \code{\link[=browse]{browse()}}

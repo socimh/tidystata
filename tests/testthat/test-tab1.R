@@ -7,18 +7,13 @@
 # KEY BEHAVIORS: one-way tables
 # EDGE CASES: single category, all unique values
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - Output Format Variations
 # ============================================================================
 
 test_that("tab1: list output with 10 variables", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     v1 = sample(1:3, 100, replace = TRUE),
     v2 = sample(letters[1:4], 100, replace = TRUE),
     v3 = factor(sample(c("a", "b", "c"), 100, replace = TRUE)),
@@ -37,7 +32,8 @@ test_that("tab1: list output with 10 variables", {
 })
 
 test_that("tab1: tibble output with many variables", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     a = 1:50,
     b = letters[1:50],
     c = factor(rep(1:5, 10)),
@@ -50,7 +46,7 @@ test_that("tab1: tibble output with many variables", {
 })
 
 test_that("tab1: list output preserves variable order", {
-  df <- tibble(z = 1:5, a = 1:5, m = 1:5)
+  df <- tibble::tibble(z = 1:5, a = 1:5, m = 1:5)
   result <- tab1(df, z, a, m, .type = "list")
   expect_equal(names(result), c("z", "a", "m"))
 })
@@ -60,7 +56,7 @@ test_that("tab1: list output preserves variable order", {
 # ============================================================================
 
 test_that("tab1: variables with varying NA percentages", {
-  df <- tibble(
+  df <- tibble::tibble(
     no_na = 1:100,
     ten_pct = c(1:90, rep(NA, 10)),
     fifty_pct = c(1:50, rep(NA, 50)),
@@ -76,7 +72,7 @@ test_that("tab1: variables with varying NA percentages", {
 })
 
 test_that("tab1: NA patterns across list elements", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1, NA, 3, NA, 5),
     y = c(NA, "b", NA, "d", NA),
     z = c(1, 2, NA, NA, 5)
@@ -88,7 +84,7 @@ test_that("tab1: NA patterns across list elements", {
 })
 
 test_that("tab1: factor with NA vs character with NA", {
-  df <- tibble(
+  df <- tibble::tibble(
     fac_na = factor(c("a", "b", NA), exclude = NULL),
     char_na = c("a", "b", NA)
   )
@@ -107,7 +103,8 @@ test_that("tab1: factor with NA vs character with NA", {
 # ============================================================================
 
 test_that("tab1: group by with list output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = rep(c("A", "B"), each = 50),
     x = sample(1:3, 100, replace = TRUE),
     y = sample(letters[1:4], 100, replace = TRUE)
@@ -118,7 +115,8 @@ test_that("tab1: group by with list output", {
 })
 
 test_that("tab1: group by with tibble output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     g1 = rep(c("X", "Y"), 50),
     g2 = rep(c("A", "B", "C", "D"), 25),
     v1 = sample(1:3, 100, replace = TRUE),
@@ -129,7 +127,8 @@ test_that("tab1: group by with tibble output", {
 })
 
 test_that("tab1: group by where group has many NAs", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = c(rep("A", 20), rep(NA, 60), rep("B", 20)),
     x = sample(1:3, 100, replace = TRUE)
   )
@@ -138,7 +137,7 @@ test_that("tab1: group by where group has many NAs", {
 })
 
 test_that("tab1: group by with single observation groups", {
-  df <- tibble(
+  df <- tibble::tibble(
     group = 1:50,
     x = rep(1:2, 25)
   )
@@ -152,7 +151,8 @@ test_that("tab1: group by with single observation groups", {
 # ============================================================================
 
 test_that("tab1: boolean expressions as computed variables", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     x = 1:50,
     y = sample(letters[1:5], 50, replace = TRUE)
   )
@@ -162,7 +162,7 @@ test_that("tab1: boolean expressions as computed variables", {
 })
 
 test_that("tab1: complex boolean creating all TRUE or all FALSE", {
-  df <- tibble(
+  df <- tibble::tibble(
     a = 1:20,
     b = 21:40
   )
@@ -174,7 +174,7 @@ test_that("tab1: complex boolean creating all TRUE or all FALSE", {
 })
 
 test_that("tab1: boolean with NA handling", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1:10, NA, 12:20),
     y = c(NA, letters[2:20])
   )
@@ -188,14 +188,14 @@ test_that("tab1: boolean with NA handling", {
 # ============================================================================
 
 test_that("tab1: single row dataset", {
-  df <- tibble(x = "only", y = 1, z = TRUE)
+  df <- tibble::tibble(x = "only", y = 1, z = TRUE)
   result <- tab1(df, x:z, .type = "list")
   expect_equal(length(result), 3)
   purrr::walk(result, ~ expect_equal(.x$n, 1))
 })
 
 test_that("tab1: all unique values in each variable", {
-  df <- tibble(
+  df <- tibble::tibble(
     a = 1:200,
     b = letters[1:20][(1:200 %% 20) + 1],
     c = as.character(1:200)
@@ -207,7 +207,7 @@ test_that("tab1: all unique values in each variable", {
 })
 
 test_that("tab1: all identical values in each variable", {
-  df <- tibble(
+  df <- tibble::tibble(
     a = rep("same", 1000),
     b = rep(42, 1000),
     c = rep(TRUE, 1000)
@@ -223,7 +223,7 @@ test_that("tab1: all identical values in each variable", {
 })
 
 test_that("tab1: extreme cardinality differences", {
-  df <- tibble(
+  df <- tibble::tibble(
     low_card = rep(1:2, 500),
     med_card = rep(1:50, 20),
     high_card = 1:1000
@@ -239,7 +239,7 @@ test_that("tab1: extreme cardinality differences", {
 # ============================================================================
 
 test_that("tab1: starts_with selection across many vars", {
-  df <- tibble(
+  df <- tibble::tibble(
     pref_a_1 = 1:10,
     pref_a_2 = 1:10,
     pref_b_1 = 1:10,
@@ -247,47 +247,47 @@ test_that("tab1: starts_with selection across many vars", {
     other_x = 1:10,
     other_y = 1:10
   )
-  result <- tab1(df, starts_with("pref_"), .type = "list")
+  result <- tab1(df, dplyr::starts_with("pref_"), .type = "list")
   expect_equal(length(result), 4)
 })
 
 test_that("tab1: ends_with selection", {
-  df <- tibble(
+  df <- tibble::tibble(
     x_test = 1:10,
     y_test = 1:10,
     x_prod = 1:10,
     y_prod = 1:10,
     z_dev = 1:10
   )
-  result <- tab1(df, ends_with("_test"), .type = "list")
+  result <- tab1(df, dplyr::ends_with("_test"), .type = "list")
   expect_equal(length(result), 2)
 })
 
 test_that("tab1: contains selection", {
-  df <- tibble(
+  df <- tibble::tibble(
     var_1_temp = 1:10,
     var_2_temp = 1:10,
     var_1_press = 1:10,
     temp_reading = 1:10
   )
-  result <- tab1(df, contains("temp"), .type = "list")
+  result <- tab1(df, dplyr::contains("temp"), .type = "list")
   expect_equal(length(result), 3)
 })
 
 test_that("tab1: where() selection with complex predicate", {
-  df <- tibble(
+  df <- tibble::tibble(
     num1 = 1:10,
     num2 = 11:20,
     char1 = letters[1:10],
     log1 = rep(c(TRUE, FALSE), length.out = 10),
     num3 = 21:30
   )
-  result <- tab1(df, where(is.numeric), .type = "list")
+  result <- tab1(df, dplyr::where(is.numeric), .type = "list")
   expect_equal(length(result), 3)
 })
 
 test_that("tab1: numeric column indices", {
-  df <- tibble(a = 1:5, b = 1:5, c = 1:5, d = 1:5, e = 1:5)
+  df <- tibble::tibble(a = 1:5, b = 1:5, c = 1:5, d = 1:5, e = 1:5)
   result <- tab1(df, 1, 3, 5, .type = "list")
   expect_equal(names(result), c("a", "c", "e"))
 })
@@ -297,7 +297,7 @@ test_that("tab1: numeric column indices", {
 # ============================================================================
 
 test_that("tab1: .desc=TRUE applied to all variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("z", "z", "a", "a", "m"),
     y = c(1, 1, 2, 2, 3)
   )
@@ -309,7 +309,7 @@ test_that("tab1: .desc=TRUE applied to all variables", {
 })
 
 test_that("tab1: .desc=FALSE preserves factor order", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("high", "low", "med"), levels = c("low", "med", "high"))
   )
   result <- tab1(df, x, .desc = FALSE, .type = "list")
@@ -317,7 +317,7 @@ test_that("tab1: .desc=FALSE preserves factor order", {
 })
 
 test_that("tab1: frequency ties handling in sorting", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("a", "a", "b", "b", "c", "c", "d")
   )
   result <- tab1(df, x, .desc = TRUE, .type = "list")
@@ -331,7 +331,7 @@ test_that("tab1: frequency ties handling in sorting", {
 # ============================================================================
 
 test_that("tab1: Date variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     d1 = as.Date(c("2024-01-01", "2024-06-15", "2024-12-31")),
     d2 = as.Date(c("2023-01-01", "2024-01-01", "2025-01-01"))
   )
@@ -341,7 +341,7 @@ test_that("tab1: Date variables", {
 })
 
 test_that("tab1: POSIXct datetime variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     t1 = as.POSIXct(c(
       "2024-01-01 10:00",
       "2024-01-01 14:00",
@@ -358,16 +358,16 @@ test_that("tab1: POSIXct datetime variables", {
 })
 
 test_that("tab1: haven labelled variables", {
-  df <- tibble(
-    x = labelled(c(1, 1, 2, 2), labels = c("Yes" = 1, "No" = 2)),
-    y = labelled(c(3, 3, 4, 4), labels = c("High" = 3, "Low" = 4))
+  df <- tibble::tibble(
+    x = haven::labelled(c(1, 1, 2, 2), labels = c("Yes" = 1, "No" = 2)),
+    y = haven::labelled(c(3, 3, 4, 4), labels = c("High" = 3, "Low" = 4))
   )
   result <- tab1(df, x, y, .type = "list")
   expect_s3_class(result$x$value, "haven_labelled")
 })
 
 test_that("tab1: difftime objects", {
-  df <- tibble(
+  df <- tibble::tibble(
     d1 = as.difftime(c(1, 2, 2, 3), units = "hours"),
     d2 = as.difftime(c(30, 30, 45, 60), units = "mins")
   )
@@ -380,7 +380,7 @@ test_that("tab1: difftime objects", {
 # ============================================================================
 
 test_that("tab1: unicode in multiple variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     latin = c("hello", "world", "hello"),
     cjk = c("中文", "日本語", "中文"),
     arabic = c("مرحبا", "مرحبا", "سلام"),
@@ -394,7 +394,7 @@ test_that("tab1: unicode in multiple variables", {
 })
 
 test_that("tab1: special whitespace characters", {
-  df <- tibble(
+  df <- tibble::tibble(
     empty = c("", "", "a"),
     space = c(" ", " ", "a"),
     tab = c("a\t", "a\t", "b"),
@@ -412,17 +412,19 @@ test_that("tab1: special whitespace characters", {
 # ============================================================================
 
 test_that("tab1: variables named n, percent, cum", {
-  df <- tibble(
+  df <- tibble::tibble(
     n = c(1, 2, 2, 3),
     percent = c("a", "a", "b", "b"),
     cum = c("x", "y", "x", "y"),
     valid = c("p", "p", "q", "q")
   )
-  expect_message(result <- tab1(df, n:cum, .type = "list"), "renamed")
+  # Measured names are list names, not columns, so they are not renamed.
+  expect_no_message(result <- tab1(df, n:cum, .type = "list"))
+  expect_named(result, c("n", "percent", "cum"))
 })
 
 test_that("tab1: variable named 'variable' in tibble output", {
-  df <- tibble(
+  df <- tibble::tibble(
     variable = c("a", "b", "a"),
     value = c(1, 2, 1)
   )
@@ -435,17 +437,19 @@ test_that("tab1: variable named 'variable' in tibble output", {
 # ============================================================================
 
 test_that("tab1: many variables (30+) with list output", {
-  df <- as_tibble(
+  withr::local_preserve_seed()
+  df <- tibble::as_tibble(
     replicate(30, sample(1:3, 100, replace = TRUE)),
     .name_repair = "minimal"
   )
   names(df) <- paste0("var", 1:30)
-  result <- tab1(df, everything(), .type = "list")
+  result <- tab1(df, dplyr::everything(), .type = "list")
   expect_equal(length(result), 30)
 })
 
 test_that("tab1: moderate size dataset with tibble output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     a = sample(1:5, 5000, replace = TRUE),
     b = sample(letters[1:5], 5000, replace = TRUE),
     c = sample(c(TRUE, FALSE), 5000, replace = TRUE)
@@ -456,7 +460,8 @@ test_that("tab1: moderate size dataset with tibble output", {
 })
 
 test_that("tab1: highly skewed distributions", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     rare = c(rep("common", 990), rep("rare", 10)),
     uniform = sample(letters[1:10], 1000, replace = TRUE)
   )
@@ -470,14 +475,14 @@ test_that("tab1: highly skewed distributions", {
 # ============================================================================
 
 test_that("tab1: empty data frame", {
-  df <- tibble(x = numeric(0))
+  df <- tibble::tibble(x = numeric(0))
   result <- tab1(df, x, .type = "list")
   expect_equal(length(result), 1)
   expect_equal(nrow(result[[1]]), 0)
 })
 
 test_that("tab1: non-existent column selection", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_error(tab1(df, y, .type = "list"))
 })
 
@@ -490,7 +495,8 @@ test_that("tab1: NULL input errors", {
 # ============================================================================
 
 test_that("tab1: survey responses with skip patterns", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     age_group = sample(
       c("18-25", "26-35", "36-50", "50+"),
       100,
@@ -510,7 +516,8 @@ test_that("tab1: survey responses with skip patterns", {
 })
 
 test_that("tab1: multi-country data with mixed formats", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     country = sample(c("USA", "UK", "DE", "FR", "JP"), 200, replace = TRUE),
     region = sample(c("North", "South", "East", "West"), 200, replace = TRUE),
     has_data = sample(c(TRUE, FALSE), 200, replace = TRUE),
@@ -522,7 +529,8 @@ test_that("tab1: multi-country data with mixed formats", {
 })
 
 test_that("tab1: quality control flags", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     valid_id = sample(
       c(TRUE, FALSE),
       500,

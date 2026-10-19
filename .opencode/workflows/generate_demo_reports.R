@@ -1,4 +1,4 @@
-# Generate versioned actual-output reports, preserving historical reports.
+# Generate one stable set of current actual-output reports.
 index_only <- "--index-only" %in% commandArgs(trailingOnly = TRUE)
 if (!index_only && !nzchar(Sys.getenv("STATART_DEMO_SOURCE"))) {
   status <- system2(
@@ -41,13 +41,17 @@ func_descriptions <- c(
   summ = "Summary statistics",
   tab = "Frequency tables",
   tab1 = "Separate frequency tables",
-  timer = "Timing"
+  timer = "Timing",
+  textbook = "Textbook alignment contracts",
+  problems2 = "Historical problem repairs and examples",
+  readiness = "Remaining-issue triage and small repairs",
+  containers = "Table container preservation"
 )
 all_reports <- list()
 for (file in demo_files) {
   name <- sub("[.]R$", "", sub("^demo_", "", basename(file)))
   if (index_only) {
-    report_file <- sprintf("report_%s_%s.md", name, version)
+    report_file <- sprintf("report_%s.md", name)
     text <- readLines(file.path(reports_dir, report_file), encoding = "UTF-8")
     status_line <- grep("Status:.*(PASS|FAIL)", text, value = TRUE)
     if (length(status_line) != 1L) {
@@ -86,11 +90,17 @@ for (file in demo_files) {
     output <- c(output, "```")
   }
   output <- sub("[[:blank:]]+$", "", output)
-  report_file <- sprintf("report_%s_%s.md", name, version)
+  report_file <- sprintf("report_%s.md", name)
   status <- if (is.null(failure)) "PASS" else "FAIL"
   writeLines(
     enc2utf8(c(
-      sprintf("# Function: %s()", name),
+      if (name == "textbook") {
+        "# Function contracts: textbook alignment"
+      } else if (name == "problems2") {
+        "# Historical problems: repaired examples"
+      } else {
+        sprintf("# Function: %s()", name)
+      },
       "",
       sprintf(
         "**Version:** %s | **Generated:** %s | **Status:** %s",
@@ -138,32 +148,13 @@ for (name in names(all_reports)) {
     )
   )
 }
-reviews <- list.files(
-  reports_dir,
-  pattern = "^(project_status|milestone_).*\\.md$"
-)
 index <- c(
   index,
-  "",
-  "## Development reviews",
-  "",
-  sprintf("- [%s](%s)", reviews, reviews),
-  "",
-  "## Historical reports",
-  ""
-)
-history <- setdiff(
-  list.files(reports_dir, pattern = "^report_.*[.]md$"),
-  vapply(all_reports, function(x) x$file, character(1))
-)
-index <- c(
-  index,
-  sprintf("- [%s](%s)", history, history),
   "",
   "## Regeneration",
   "",
   "Run `make demo-reports` from the project root.",
-  "The workflow builds native code in a fresh temporary copy and preserves historical reports."
+  "The workflow builds native code in a fresh temporary copy and refreshes the current reports."
 )
 writeLines(enc2utf8(index), file.path(reports_dir, "INDEX.md"), useBytes = TRUE)
 if (any(vapply(all_reports, function(x) x$status == "FAIL", logical(1)))) {

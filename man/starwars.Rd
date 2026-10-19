@@ -21,6 +21,12 @@ A tibble with 87 rows and 14 variables:
 \item{starships}{List of starships the character has piloted}
 }
 }
+\source{
+The object matches \code{dplyr::starwars} from dplyr 1.1.3.
+Upstream preparation acknowledges additional gender research by Megan Beckett.
+See the installed \code{DATA-PROVENANCE.md} and \code{THIRD-PARTY-NOTICES.md}
+for source versions, reconstruction, attribution and distribution review.
+}
 \usage{
 starwars
 }

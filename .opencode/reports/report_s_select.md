@@ -1,8 +1,6 @@
 # Function: s_select()
 
-**Generated:** 2026-03-03 23:09:16
-
----
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:43 | **Status:** PASS
 
 ## Example 1: Select columns by name
 
@@ -192,12 +190,7 @@ tryCatch(
 **Output:**
 
 ```
-Error: Neither <tidy-select> nor <data-masking> recognised the input.
-  select() error: Can't select columns that don't exist.
-✖ Column `nonexistent_col` doesn't exist.
-  mutate() error: ℹ In argument: `nonexistent_col`.
-Caused by error:
-! object 'nonexistent_col' not found 
+Error: Can't select columns that don't exist: `nonexistent_col` (the data have 11 columns). Check the spelling, or name a computed value, e.g. `new = expression`.
 ```
 
 ## Example 6: With data.table
@@ -218,18 +211,18 @@ if (requireNamespace('data.table', quietly = TRUE)) {
 
 Attaching package: 'data.table'
 
- 
-The following object is masked from 'package:statart':
 
-    :=
-
- 
 The following objects are masked from 'package:dplyr':
 
     between, first, last
 
- 
-Class: data.table, data.frame 
+
+The following object is masked from 'package:base':
+
+    %notin%
+
+
+Class: data.table, data.frame
       mpg    hp
     <num> <num>
  1:  21.0   110
@@ -265,6 +258,6 @@ Class: data.table, data.frame
 31:  15.0   335
 32:  21.4   109
       mpg    hp
+    <num> <num>
 ```
-
 

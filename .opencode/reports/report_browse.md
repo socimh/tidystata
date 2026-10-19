@@ -1,23 +1,26 @@
 # Function: browse()
 
-**Generated:** 2026-03-03 23:09:14
-
----
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:41 | **Status:** PASS
 
 
 Attaching package: 'dplyr'
 
- 
+
+The following object is masked from 'package:statart':
+
+    starwars
+
+
 The following objects are masked from 'package:stats':
 
     filter, lag
 
- 
+
 The following objects are masked from 'package:base':
 
     intersect, setdiff, setequal, union
 
- 
+
 ## Example 1: Browse basic data frame
 
 ```r
@@ -203,7 +206,7 @@ browse(starwars, species == 'Human', name, height, mass)
 **Output:**
 
 ```
-# A tibble: 87 × 4
+# A tibble: 87 x 4
    `species == "Human"` name               height  mass
    <lgl>                <chr>               <int> <dbl>
  1 TRUE                 Luke Skywalker        172    77
@@ -212,11 +215,10 @@ browse(starwars, species == 'Human', name, height, mass)
  4 TRUE                 Darth Vader           202   136
  5 TRUE                 Leia Organa           150    49
  6 TRUE                 Owen Lars             178   120
- 7 TRUE                 Beru Whitesun lars    165    75
+ 7 TRUE                 Beru Whitesun Lars    165    75
  8 FALSE                R5-D4                  97    32
  9 TRUE                 Biggs Darklighter     183    84
 10 TRUE                 Obi-Wan Kenobi        182    77
-# ℹ 77 more rows
+# i 77 more rows
 ```
-
 

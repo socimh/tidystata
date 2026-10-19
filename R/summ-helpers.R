@@ -5,6 +5,7 @@ extract_group_var <- function(.data, by) {
   if (!any_dot_by && any_group_by) {
     group_vars <- dplyr::group_vars(.data)
   } else if (any_dot_by) {
+    check_by_selection(.data, by)
     group_vars <- ds(.data, !!by)
   } else {
     group_vars <- character(0)
@@ -15,6 +16,24 @@ extract_group_var <- function(.data, by) {
   }
 
   return(group_vars)
+}
+
+# `.by` selects columns; a computed expression would otherwise fail with a
+# misleading "object not found" error from tidyselect.
+check_by_selection <- function(.data, by) {
+  expr <- rlang::quo_get_expr(by)
+  if (select_expr_is_selection(expr, names(.data))) {
+    return(invisible())
+  }
+  stop(
+    "`.by` must select existing columns, not compute `",
+    rlang::as_label(expr),
+    "`.\nℹ Create the grouping column first, e.g. ",
+    "`mutate(group = ",
+    rlang::as_label(expr),
+    ")`, then use `.by = group`.",
+    call. = FALSE
+  )
 }
 
 contain_vars <- function(.data, group_vars) {
@@ -29,6 +48,7 @@ contain_vars <- function(.data, group_vars) {
 
 remove_group_vars <- function(.data, ..., group_vars) {
   if (!missing(...)) {
+    check_group_selection(.data, ..., group_vars = group_vars)
     .data <- s_select(.data, ...)
   }
   out <- .data %>%
@@ -39,6 +59,36 @@ remove_group_vars <- function(.data, ..., group_vars) {
     # Suppress "adding missing grouping variables" message
     suppressMessages()
   return(out)
+}
+
+# A grouping key selected under another name would be summarised as data.
+check_group_selection <- function(.data, ..., group_vars) {
+  if (!length(group_vars)) {
+    return(invisible())
+  }
+  data <- dplyr::ungroup(.data)
+  dots <- rlang::enquos(...)
+  dots <- dots[select_is_selection(dots, names(data))]
+  selected <- tryCatch(
+    tidyselect::eval_select(rlang::expr(c(!!!dots)), data),
+    error = function(e) NULL
+  )
+  if (is.null(selected)) {
+    return(invisible())
+  }
+  source <- names(data)[selected]
+  renamed <- source %in% group_vars & names(selected) != source
+  if (any(renamed)) {
+    stop(
+      "Grouping column `",
+      source[renamed][[1L]],
+      "` cannot also be measured (selected as `",
+      names(selected)[renamed][[1L]],
+      "`). Copy it first, e.g. with mutate(), to summarise its values.",
+      call. = FALSE
+    )
+  }
+  invisible()
 }
 
 keep_useful_vars <- function(.data, .data_num, group_vars) {
@@ -201,7 +251,13 @@ summ_stat_names <- function(stat) {
     "sum",
     names(aliases)
   )
-  unknown <- setdiff(stat, supported)
+  percentiles <- grepl("^p[0-9]+([.][0-9]+)?$", stat)
+  percentile_values <- suppressWarnings(as.numeric(sub("^p", "", stat)))
+  percentiles <- percentiles &
+    !is.na(percentile_values) &
+    percentile_values >= 0 &
+    percentile_values <= 100
+  unknown <- setdiff(stat, c(supported, stat[percentiles]))
   if (length(unknown)) {
     stop(
       "Unsupported statistic: ",
@@ -217,65 +273,32 @@ summ_stat_names <- function(stat) {
   stats::setNames(mapped, stat)
 }
 
-select_summ_stats <- function(data, stat) {
-  mapped <- summ_stat_names(stat)
-  unavailable <- setdiff(unname(mapped), names(data))
-  if (length(unavailable)) {
-    stop(
-      "Unsupported statistic for this variable type: ",
-      paste(unavailable, collapse = ", "),
-      call. = FALSE
+summ_requested_stats <- function(stat, detail, calendar = FALSE) {
+  if (length(stat)) {
+    requested <- unique(unname(summ_stat_names(stat)))
+  } else if (detail) {
+    requested <- c(
+      "n",
+      "unique",
+      "miss_n",
+      "valid_pct",
+      "min",
+      "q1",
+      "median",
+      "mean",
+      "mad",
+      "sd",
+      "q3",
+      "max",
+      "iqr",
+      "skew",
+      "kurtosis",
+      "se",
+      "sum"
     )
-  }
-  dplyr::select(data, type, tidyselect::all_of(mapped))
-}
-
-summ_var <- function(var, stat = character(0), .detail = FALSE) {
-  # Preserve class-specific missingness (including SPSS user-missing codes)
-  # before numeric conversion strips those attributes.
-  observed_values <- var[!is.na(var)]
-  n_val <- length(observed_values)
-  observed <- if (is_summable(var)) as_numeric(observed_values) else numeric()
-  num_var <- observed
-  has_values <- length(observed) > 0L
-  type_str <- if (!is.na(s_unit(var))) {
-    paste0(s_type(var, .abbr = TRUE), " [", s_unit(var), "]")
-  } else {
-    s_type(var, .abbr = TRUE)
-  }
-  stat_tb <- tibble::tibble(
-    type = type_str,
-    n = n_val,
-    unique = dplyr::n_distinct(observed_values),
-    min = if (has_values) min(observed) else NA_real_,
-    mean = if (has_values) mean(observed) else NA_real_,
-    sd = if (has_values) stats::sd(observed) else NA_real_,
-    max = if (has_values) max(observed) else NA_real_
-  )
-  if (.detail || length(stat)) {
-    stat_tb$miss_n <- length(var) - n_val
-    stat_tb$valid_pct <- if (length(var)) n_val / length(var) else NA_real_
-    stat_tb$q1 <- if (has_values) {
-      unname(stats::quantile(observed, .25))
-    } else {
-      NA_real_
-    }
-    stat_tb$median <- if (has_values) stats::median(observed) else NA_real_
-    stat_tb$mad <- if (has_values) stats::mad(observed) else NA_real_
-    stat_tb$q3 <- if (has_values) {
-      unname(stats::quantile(observed, .75))
-    } else {
-      NA_real_
-    }
-    stat_tb$iqr <- if (has_values) stats::IQR(observed) else NA_real_
-    stat_tb$skew <- if (has_values) skew(num_var, n_val) else NA_real_
-    stat_tb$kurtosis <- if (has_values) kurtosis(num_var, n_val) else NA_real_
-    stat_tb$se <- if (n_val) stat_tb$sd / sqrt(n_val) else NA_real_
-    stat_tb$sum <- if (has_values) sum(observed) else NA_real_
-    stat_tb <- dplyr::select(
-      stat_tb,
-      tidyselect::all_of(c(
-        "type",
+    if (calendar) {
+      # Retain the established calendar detail column order.
+      requested <- c(
         "n",
         "unique",
         "miss_n",
@@ -283,268 +306,293 @@ summ_var <- function(var, stat = character(0), .detail = FALSE) {
         "min",
         "q1",
         "median",
-        "mean",
-        "mad",
-        "sd",
         "q3",
+        "mean",
+        "sd",
+        "mad",
         "max",
         "iqr",
-        "skew",
-        "kurtosis",
-        "se",
-        "sum"
-      ))
-    )
+        "se"
+      )
+    }
+  } else {
+    requested <- if (calendar) {
+      c("n", "unique", "mean", "sd", "min", "max")
+    } else {
+      c("n", "unique", "min", "mean", "sd", "max")
+    }
   }
-  if (length(stat)) {
-    stat_tb <- select_summ_stats(stat_tb, stat)
-  }
-  stat_tb
+  unique(c("type", requested))
 }
 
+# Summarise one variable for every group. Type metadata, numeric conversion
+# and distinct-value identities are computed once per variable, not per group.
+summ_variable <- function(var, locs, requested, calendar = FALSE) {
+  missing <- is.na(var)
+  unit <- s_unit(var)
+  type <- s_type(var, .abbr = TRUE)
+  # Calendar spreads carry their own difftime units, so the type stays bare.
+  if (!is.na(unit) && !calendar) {
+    type <- paste0(type, " [", unit, "]")
+  }
+  counts <- c("type", "n", "unique", "miss_n", "valid_pct")
+  numeric <- if (any(!requested %in% counts) && is_summable(var)) {
+    as_numeric(var)
+  } else {
+    NULL
+  }
+  ids <- if ("unique" %in% requested) vctrs::vec_group_id(var) else NULL
+
+  quantile_names <- requested[grepl("^p[0-9]", requested)]
+  probabilities <- stats::setNames(
+    as.numeric(sub("^p", "", quantile_names)) / 100,
+    quantile_names
+  )
+  if (any(requested %in% c("q1", "iqr"))) {
+    probabilities["q1"] <- .25
+  }
+  if (any(requested %in% c("q3", "iqr"))) {
+    probabilities["q3"] <- .75
+  }
+  mean_needed <- any(requested %in% c("mean", "skew", "kurtosis"))
+  sd_needed <- any(requested %in% c("sd", "se", "skew", "kurtosis"))
+  statistics <- setdiff(requested, "type")
+
+  one_group <- function(loc) {
+    kept <- loc[!missing[loc]]
+    n_val <- length(kept)
+    observed <- if (is.null(numeric)) numeric() else numeric[kept]
+    has_values <- length(observed) > 0L
+    center <- if (mean_needed && has_values) mean(observed) else NA_real_
+    spread <- if (sd_needed && has_values) stats::sd(observed) else NA_real_
+    quantiles <- stats::setNames(
+      rep(NA_real_, length(probabilities)),
+      names(probabilities)
+    )
+    if (has_values && length(probabilities)) {
+      quantiles[] <- stats::quantile(
+        observed,
+        probabilities,
+        type = 7,
+        names = FALSE
+      )
+    }
+    vapply(
+      statistics,
+      function(statistic) {
+        if (statistic %in% names(quantiles)) {
+          return(unname(quantiles[[statistic]]))
+        }
+        switch(
+          statistic,
+          n = n_val,
+          unique = length(unique(ids[kept])),
+          miss_n = length(loc) - n_val,
+          valid_pct = if (length(loc)) n_val / length(loc) else NA_real_,
+          min = if (has_values) min(observed) else NA_real_,
+          median = if (has_values) stats::median(observed) else NA_real_,
+          mean = center,
+          mad = if (has_values) stats::mad(observed) else NA_real_,
+          sd = spread,
+          max = if (has_values) max(observed) else NA_real_,
+          iqr = if (has_values) {
+            unname(quantiles[["q3"]] - quantiles[["q1"]])
+          } else {
+            NA_real_
+          },
+          skew = if (has_values) {
+            sum((observed - center)^3) / (n_val * spread^3)
+          } else {
+            NA_real_
+          },
+          kurtosis = if (has_values) {
+            sum((observed - center)^4) / (n_val * spread^4) - 3
+          } else {
+            NA_real_
+          },
+          se = if (n_val) spread / sqrt(n_val) else NA_real_,
+          sum = if (has_values) sum(observed) else NA_real_
+        )
+      },
+      numeric(1)
+    )
+  }
+
+  values <- matrix(
+    as.numeric(unlist(lapply(locs, one_group), use.names = FALSE)),
+    ncol = length(statistics),
+    byrow = TRUE
+  )
+  out <- list(type = rep(type, length(locs)))
+  for (j in seq_along(statistics)) {
+    column <- values[, j]
+    if (statistics[[j]] %in% c("n", "unique", "miss_n")) {
+      column <- as.integer(column)
+    }
+    out[[statistics[[j]]]] <- column
+  }
+  tibble::as_tibble(out[requested])
+}
+
+# Format calendar locations: Dates as days, datetimes in their own time zone
+# and hms times of day as clock times.
 fmt_date <- function(x, var) {
-  # Format a numeric date/datetime value back to a readable string
-  vtype <- s_type(var, .abbr = TRUE)
-  if (is.na(x) || !is.finite(x)) {
-    return(NA_character_)
-  }
-  if (vtype == "date") {
-    format(as.Date(x, origin = "1970-01-01"), "%Y-%m-%d")
+  out <- rep(NA_character_, length(x))
+  infinite <- is.infinite(x)
+  out[infinite] <- as.character(x[infinite])
+  finite <- is.finite(x)
+  type <- s_type(var, .abbr = TRUE)
+  if (type == "date") {
+    out[finite] <- format(
+      as.Date(x[finite], origin = "1970-01-01"),
+      "%Y-%m-%d"
+    )
+  } else if (type == "time") {
+    out[finite] <- fmt_clock(x[finite])
   } else {
-    format(as.POSIXct(x, origin = "1970-01-01", tz = "UTC"), "%Y-%m-%d %H:%M")
-  }
-}
-
-fmt_duration <- function(secs, format = "compact") {
-  # Format duration in seconds as human-readable string
-  if (is.na(secs) || !is.finite(secs)) {
-    return(NA_character_)
-  }
-
-  if (format == "long") {
-    # Long format: "548 days", "2 hours 15 minutes", "30 seconds"
-    if (secs >= 86400) {
-      days <- round(secs / 86400)
-      if (days == 1) {
-        return("1 day")
-      } else {
-        return(paste(days, "days"))
-      }
-    } else if (secs >= 3600) {
-      hours <- floor(secs / 3600)
-      mins <- round((secs %% 3600) / 60)
-      if (mins == 0) {
-        if (hours == 1) {
-          return("1 hour")
-        } else {
-          return(paste(hours, "hours"))
-        }
-      } else {
-        return(paste(hours, "hours", mins, "minutes"))
-      }
-    } else if (secs >= 60) {
-      mins <- floor(secs / 60)
-      secs_rem <- round(secs %% 60)
-      if (secs_rem == 0) {
-        if (mins == 1) {
-          return("1 minute")
-        } else {
-          return(paste(mins, "minutes"))
-        }
-      } else {
-        return(paste(mins, "minutes", secs_rem, "seconds"))
-      }
-    } else {
-      secs_round <- round(secs)
-      if (secs_round == 1) {
-        return("1 second")
-      } else {
-        return(paste(secs_round, "seconds"))
-      }
-    }
-  } else {
-    # Compact format: "548d", "2h 15m", "30s"
-    if (secs >= 86400) {
-      sprintf("%.1fd", secs / 86400)
-    } else if (secs >= 3600) {
-      sprintf("%.1fh", secs / 3600)
-    } else if (secs >= 60) {
-      sprintf("%.1fm", secs / 60)
-    } else {
-      sprintf("%.0fs", round(secs))
-    }
-  }
-}
-
-fmt_date_sd <- function(sd_secs, var, format = "compact") {
-  # Format sd (in seconds for datetime, in days for date) as a human-readable span
-  if (is.na(sd_secs) || !is.finite(sd_secs)) {
-    return(NA_character_)
-  }
-  vtype <- s_type(var, .abbr = TRUE)
-  if (vtype == "date") {
-    # For dates, sd_secs is in days
-    days <- round(sd_secs)
-    if (format == "long") {
-      if (days == 1) {
-        return("1 day")
-      } else {
-        return(paste(days, "days"))
-      }
-    } else {
-      sprintf("%dd", days)
-    }
-  } else {
-    # For datetime, sd_secs is in seconds
-    fmt_duration(sd_secs, format)
-  }
-}
-
-summ_date <- function(
-  var,
-  stat = character(0),
-  .detail = FALSE,
-  .duration_format = "compact",
-  return_raw = FALSE
-) {
-  if ("sum" %in% stat) {
-    stop("`sum` is not supported for date/datetime variables.", call. = FALSE)
-  }
-  n_val <- sum(!is.na(var), na.rm = TRUE)
-  miss_val <- sum(is.na(var), na.rm = TRUE)
-  num_var <- as_numeric(var)
-
-  observed <- num_var[!is.na(num_var)]
-  has_values <- length(observed) > 0L
-  min_raw <- if (has_values) min(observed) else NA_real_
-  median_raw <- if (has_values) median(observed) else NA_real_
-  q1_raw <- if (has_values) unname(quantile(observed, .25)) else NA_real_
-  q3_raw <- if (has_values) unname(quantile(observed, .75)) else NA_real_
-  mean_raw <- if (has_values) mean(observed) else NA_real_
-  sd_raw <- if (has_values) sd(observed) else NA_real_
-  max_raw <- if (has_values) max(observed) else NA_real_
-  iqr_raw <- if (has_values) IQR(observed) else NA_real_
-  mad_raw <- if (has_values) mad(observed) else NA_real_
-
-  vtype <- s_type(var, .abbr = TRUE)
-
-  if (return_raw) {
-    # Return actual Date/POSIXct types for list mode
-    if (vtype == "date") {
-      stat_tb <- tibble::tibble(
-        type = dplyr::if_else(
-          !is.na(s_unit(var)),
-          stringr::str_glue("[{s_unit(var)}]"),
-          "date"
-        ) %>%
-          as.character(),
-        n = n_val,
-        unique = dplyr::n_distinct(var, na.rm = TRUE),
-        miss_n = miss_val,
-        valid_pct = if (length(var)) n_val / length(var) else NA_real_,
-        min = as.Date(min_raw, origin = "1970-01-01"),
-        mean = as.Date(round(mean_raw), origin = "1970-01-01"),
-        max = as.Date(max_raw, origin = "1970-01-01"),
-        sd = fmt_date_sd(sd_raw, var, .duration_format),
-        mad = fmt_date_sd(mad_raw, var, .duration_format),
-        iqr = fmt_date_sd(iqr_raw, var, .duration_format),
-        se = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
-      )
-    } else {
-      stat_tb <- tibble::tibble(
-        type = dplyr::if_else(
-          !is.na(s_unit(var)),
-          stringr::str_glue("[{s_unit(var)}]"),
-          "datetime"
-        ) %>%
-          as.character(),
-        n = n_val,
-        unique = dplyr::n_distinct(var, na.rm = TRUE),
-        miss_n = miss_val,
-        valid_pct = if (length(var)) n_val / length(var) else NA_real_,
-        min = as.POSIXct(min_raw, origin = "1970-01-01", tz = "UTC"),
-        mean = as.POSIXct(round(mean_raw), origin = "1970-01-01", tz = "UTC"),
-        max = as.POSIXct(max_raw, origin = "1970-01-01", tz = "UTC"),
-        sd = fmt_date_sd(sd_raw, var, .duration_format),
-        mad = fmt_date_sd(mad_raw, var, .duration_format),
-        iqr = fmt_date_sd(iqr_raw, var, .duration_format),
-        se = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
-      )
-    }
-  } else {
-    # Return formatted strings for table mode
-    stat_tb <- tibble::tibble(
-      type = dplyr::if_else(
-        !is.na(s_unit(var)),
-        stringr::str_glue("[{s_unit(var)}]"),
-        s_type(var, .abbr = TRUE)
-      ) %>%
-        as.character(),
-      n = n_val,
-      unique = dplyr::n_distinct(var, na.rm = TRUE),
-      miss_n = miss_val,
-      valid_pct = if (length(var)) n_val / length(var) else NA_real_,
-      min = fmt_date(min_raw, var),
-      q1 = fmt_date(q1_raw, var),
-      median = fmt_date(median_raw, var),
-      q3 = fmt_date(q3_raw, var),
-      mean = fmt_date(mean_raw, var),
-      sd = fmt_date_sd(sd_raw, var, .duration_format),
-      mad = fmt_date_sd(mad_raw, var, .duration_format),
-      max = fmt_date(max_raw, var),
-      iqr = fmt_date_sd(iqr_raw, var, .duration_format),
-      se = fmt_date_sd(sd_raw / sqrt(n_val), var, .duration_format)
+    out[finite] <- format(
+      as.POSIXct(x[finite], origin = "1970-01-01", tz = "UTC"),
+      "%Y-%m-%d %H:%M",
+      tz = summ_time_zone(var)
     )
   }
+  out
+}
 
-  if (length(stat) > 0) {
-    stat_tb <- select_summ_stats(stat_tb, stat)
-  } else if (!.detail) {
-    stat_tb <- stat_tb %>%
-      dplyr::select(type, n, unique, mean, sd, min, max)
+# Seconds as hh:mm:ss, matching how hms prints whole-second times.
+fmt_clock <- function(seconds) {
+  whole <- round(abs(seconds))
+  sprintf(
+    "%s%02d:%02d:%02d",
+    ifelse(seconds < 0 & whole > 0, "-", ""),
+    as.integer(whole %/% 3600),
+    as.integer(whole %% 3600 %/% 60),
+    as.integer(whole %% 60)
+  )
+}
+
+summ_time_zone <- function(var) {
+  zone <- attr(var, "tzone", exact = TRUE)
+  if (is.null(zone) || !nzchar(zone[[1L]])) "" else zone[[1L]]
+}
+
+calendar_unsupported <- c("sum", "skew", "kurtosis")
+calendar_spreads <- c("sd", "mad", "iqr", "se")
+
+# One unit per column keeps spreads comparable and usable in arithmetic:
+# Dates always use days; other calendar spreads use the unit that fits the
+# typical (median) nonzero spread.
+summ_spread_units <- function(column, date) {
+  if (date) {
+    return("days")
   }
-  return(stat_tb)
+  seconds <- abs(as.numeric(column, units = "secs"))
+  seconds <- seconds[is.finite(seconds) & seconds > 0]
+  if (!length(seconds)) {
+    return("secs")
+  }
+  typical <- stats::median(seconds)
+  if (typical < 60) {
+    "secs"
+  } else if (typical < 3600) {
+    "mins"
+  } else if (typical < 86400) {
+    "hours"
+  } else {
+    "days"
+  }
+}
+
+# Locations become display strings; spreads become difftime seconds, and
+# summ_data() then gives each spread column a single unit.
+summ_format_calendar <- function(out, var, requested) {
+  locations <- setdiff(
+    requested,
+    c("type", "n", "unique", "miss_n", "valid_pct", calendar_spreads)
+  )
+  for (statistic in locations) {
+    out[[statistic]] <- fmt_date(out[[statistic]], var)
+  }
+  scale <- if (s_type(var, .abbr = TRUE) == "date") 86400 else 1
+  for (statistic in intersect(requested, calendar_spreads)) {
+    out[[statistic]] <- as.difftime(out[[statistic]] * scale, units = "secs")
+  }
+  out
 }
 
 summ_data <- function(
   .data,
-  .fn,
   summ_vars,
   group_vars,
   .detail,
   .stat,
-  .duration_format = "compact",
-  return_raw = FALSE
+  calendar = FALSE
 ) {
-  if (length(summ_vars) > 0) {
-    # Create a wrapper function that passes the extra arguments
-    fn_wrapper <- function(x) {
-      if (identical(.fn, summ_date)) {
-        .fn(x, .stat, .detail, .duration_format, return_raw)
-      } else {
-        .fn(x, .stat, .detail)
-      }
-    }
-
-    # Explicit column lookup also supports columns named .data or .env;
-    # across() may expand those names into the data-mask pronouns.
-    summaries <- lapply(summ_vars, function(column) {
-      rlang::expr(fn_wrapper(.data[[!!column]]))
-    })
-    names(summaries) <- summ_vars
-    out <- .data %>%
-      dplyr::summarise(
-        !!!summaries,
-        .by = tidyselect::all_of(group_vars)
-      ) %>%
-      tidyr::pivot_longer(
-        !tidyselect::all_of(group_vars)
-      ) %>%
-      tidyr::unnest(value)
-  } else {
-    out <- NULL
+  if (length(summ_vars) == 0L) {
+    return(NULL)
   }
-  return(out)
+  requested <- summ_requested_stats(.stat, .detail, calendar)
+  if (calendar) {
+    unavailable <- intersect(requested, calendar_unsupported)
+    if (length(unavailable)) {
+      stop(
+        "Unsupported statistic ",
+        paste0("`", unavailable, "`", collapse = ", "),
+        ": not supported for date/datetime/time variables.",
+        call. = FALSE
+      )
+    }
+  }
+  if (length(group_vars)) {
+    groups <- vctrs::vec_group_loc(.data[group_vars])
+    keys <- groups$key
+    locs <- groups$loc
+  } else {
+    keys <- NULL
+    locs <- list(seq_len(nrow(.data)))
+  }
+  blocks <- lapply(summ_vars, function(column) {
+    var <- .data[[column]]
+    out <- summ_variable(var, locs, requested, calendar)
+    if (calendar) {
+      out <- summ_format_calendar(out, var, requested)
+    }
+    out
+  })
+  group_count <- length(locs)
+  variable_count <- length(summ_vars)
+  # Stack variable blocks, then interleave as group-major, variable-minor rows.
+  rows <- c(outer(
+    (seq_len(variable_count) - 1L) * group_count,
+    seq_len(group_count),
+    "+"
+  ))
+  stats <- vctrs::vec_slice(vctrs::vec_rbind(!!!blocks), rows)
+  if (calendar) {
+    date <- s_type(.data[[summ_vars[[1L]]]], .abbr = TRUE) == "date"
+    for (statistic in intersect(names(stats), calendar_spreads)) {
+      units(stats[[statistic]]) <- summ_spread_units(stats[[statistic]], date)
+    }
+  }
+  out <- tibble::tibble(name = rep(summ_vars, group_count))
+  if (!is.null(keys)) {
+    out <- dplyr::bind_cols(
+      vctrs::vec_slice(keys, rep(seq_len(group_count), each = variable_count)),
+      out
+    )
+  }
+  out <- dplyr::bind_cols(out, stats)
+  if (length(.stat)) {
+    mapped <- summ_stat_names(.stat)
+    out <- dplyr::select(
+      out,
+      tidyselect::all_of(group_vars),
+      name,
+      type,
+      tidyselect::all_of(mapped)
+    )
+  }
+  out
 }
 
 summ_list <- function(
@@ -552,17 +600,15 @@ summ_list <- function(
   group_vars,
   .detail,
   .stat,
-  .mode = c("list", "table"),
-  .duration_format = c("compact", "long")
+  .mode = c("list", "table")
 ) {
   .mode <- match.arg(.mode)
-  .duration_format <- match.arg(.duration_format)
 
   numeric <- .data %>%
     ds(
       !tidyselect::all_of(group_vars) &
         !tidyselect::where(
-          ~ s_type(.x) %in% c("date", "datetime")
+          ~ s_type(.x) %in% c("date", "datetime", "time")
         )
     )
 
@@ -582,9 +628,41 @@ summ_list <- function(
         )
     )
 
+  time <- .data %>%
+    ds(
+      !tidyselect::all_of(group_vars) &
+        tidyselect::where(
+          ~ s_type(.x) %in% c("time")
+        )
+    )
+
+  requested <- unique(unname(summ_stat_names(.stat)))
+  skipped <- intersect(requested, calendar_unsupported)
+  calendar <- c(date, datetime, time)
+  if (length(skipped) && length(calendar)) {
+    if (length(numeric) == 0L) {
+      stop(
+        "Unsupported statistic ",
+        paste0("`", skipped, "`", collapse = ", "),
+        ": not supported for date/datetime/time variables.",
+        call. = FALSE
+      )
+    }
+    warning(
+      "`",
+      paste(skipped, collapse = "`, `"),
+      "` is not available for date/datetime/time variables; skipped: ",
+      paste(calendar, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+    date <- character()
+    datetime <- character()
+    time <- character()
+  }
+
   numeric <- summ_data(
     .data,
-    summ_var,
     numeric,
     group_vars,
     .detail,
@@ -607,44 +685,37 @@ summ_list <- function(
       )
   }
 
-  date <- summ_data(
-    .data,
-    summ_date,
-    date,
-    group_vars,
-    .detail,
-    .stat,
-    .duration_format
-  )
-
+  date <- summ_data(.data, date, group_vars, .detail, .stat, calendar = TRUE)
   datetime <- summ_data(
     .data,
-    summ_date,
     datetime,
     group_vars,
     .detail,
     .stat,
-    .duration_format
+    calendar = TRUE
   )
+  time <- summ_data(.data, time, group_vars, .detail, .stat, calendar = TRUE)
 
   out <- list(
     numeric = numeric,
     date = date,
-    datetime = datetime
+    datetime = datetime,
+    time = time
   ) %>%
     purrr::discard(~ is.null(.))
 
   if (.mode == "table") {
     if (length(out) > 0) {
-      # Calendar summaries format locations and spreads as text. Use the same
-      # representation for shared statistic columns when stacking numeric rows.
+      out <- lapply(out, summ_table_spreads)
+      # Calendar locations are text. Shared statistic columns use text too,
+      # with numeric values rounded to seven significant digits.
       text_stats <- unique(unlist(lapply(out, function(data) {
         names(data)[vapply(data, is.character, logical(1))]
       })))
       text_stats <- setdiff(text_stats, c(group_vars, "name", "type"))
       out <- lapply(out, function(data) {
         for (stat in intersect(text_stats, names(data))) {
-          data[[stat]] <- as.character(data[[stat]])
+          data[[stat]] <- summ_table_text(data[[stat]])
         }
         data
       })
@@ -657,4 +728,29 @@ summ_list <- function(
   }
 
   return(out)
+}
+
+# In one stacked table, calendar spreads become plain numbers (days for Dates,
+# seconds otherwise) so they share numeric columns; `type` records the unit.
+summ_table_spreads <- function(data) {
+  spreads <- names(data)[vapply(data, inherits, logical(1), "difftime")]
+  if (!length(spreads)) {
+    return(data)
+  }
+  unit <- if (all(data$type == "date")) "days" else "secs"
+  for (statistic in spreads) {
+    data[[statistic]] <- as.numeric(data[[statistic]], units = unit)
+  }
+  data$type <- paste0(data$type, " [", unit, "]")
+  data
+}
+
+summ_table_text <- function(x) {
+  if (is.character(x)) {
+    return(x)
+  }
+  if (is.double(x)) {
+    x <- signif(x, 7)
+  }
+  as.character(x)
 }

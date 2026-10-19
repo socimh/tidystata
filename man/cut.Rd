@@ -7,14 +7,15 @@
 \alias{cut_breaks}
 \title{Cut a numeric vector into intervals.}
 \usage{
-cut_quantile(x, n = 4, labels = NULL)
+cut_quantile(x, n = 4, labels = NULL, method = c("quantile", "rank"))
 
 cut_length(x, n = 4, labels = NULL)
 
 cut_breaks(x, breaks = NULL, labels = NULL, right = TRUE)
 }
 \arguments{
-\item{x}{A numeric vector.}
+\item{x}{A numeric vector. \code{cut_quantile()} also accepts a logical vector,
+treated as 0/1.}
 
 \item{n}{A positive integer. The number of intervals.}
 
@@ -23,24 +24,48 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = TRUE)
     \code{labels = FALSE}, simple integer codes are returned instead of
     a factor.}
 
-\item{breaks}{either a numeric vector of two or more unique cut points or a
-    single number (greater than or equal to 2) giving the number of
-    intervals into which \code{x} is to be cut.}
+\item{method}{Quantile boundaries (\code{"quantile"}, the default), or balanced
+rank groups (\code{"rank"}). Rank groups may split ties, breaking them by original
+position. They differ in size by at most one; earlier groups get extra rows.}
+
+\item{breaks}{Numeric cutpoints for \code{cut_breaks()}. The observed minimum and
+maximum are included automatically. \code{NULL} uses the observed median as an
+interior cutpoint. A single number supplies one interior cutpoint, rather
+than the number of intervals.}
 
 \item{right}{logical, indicating if the intervals should be closed on
     the right (and open on the left) or vice versa.}
 }
 \value{
-An ordered factor, or integer interval codes when \code{labels = FALSE}.
+An ordered factor, or integer interval codes when \code{labels = FALSE}
+or when \code{cut_quantile()} runs in a grouped data mask with default labels.
 }
 \description{
 Cut a numeric vector into intervals.
 }
 \details{
-\code{cut_quantile()} uses type-7 quantiles and collapses duplicate
-cutpoints with a warning. Equal values stay in the same group, so ties may
-produce fewer intervals than \code{n}. Custom labels must match the effective
-number of intervals. Empty, all-missing, and constant vectors are rejected.
+\code{cut_quantile()} follows Stata's \code{xtile} rule with type-7
+quantile cutpoints at \verb{1/n, 2/n, ...}: each value joins the first group
+whose cutpoint is at least that value. Equal values stay in the same group
+and distinct values are never merged, so a 0/1 dummy always gives two
+groups. Ties can leave fewer than \code{n} groups; occupied groups are then
+numbered consecutively and a warning is given. Default labels are the
+contiguous intervals covered by each group, for example \code{"[0,0]"} and
+\code{"(0,1]"}. Custom labels must match the effective number of groups.
+Empty and all-missing vectors are rejected. Constant vectors are rejected
+only by the default quantile method. Cutpoints are not promised to match
+Stata's percentile definition exactly.
+
+\code{labels = NULL} (the default) or \code{TRUE} gives interval labels; \code{FALSE}
+gives integer codes. Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its
+own cutpoints and interval labels, which cannot be combined, so the default
+returns integer codes within each group (like Stata's \verb{xtile, by()}).
+Supply \code{labels = TRUE} to request labels there anyway.
+
+Rank groups omit missing observations when ranking, then restore missing
+output positions. If \code{n} exceeds the observed count, use one group per
+observation and warn. Default rank labels are \code{"1"} through the effective
+group count; custom labels must match that count.
 }
 \examples{
 cut_quantile(1:20)
@@ -48,4 +73,5 @@ cut_quantile(1:20)
 cut_length(1:20)
 
 cut_breaks(1:20, breaks = c(5, 15))
+cut_breaks(1:20, breaks = 10)
 }

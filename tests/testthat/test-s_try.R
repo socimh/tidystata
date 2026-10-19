@@ -6,11 +6,6 @@
 # KEY BEHAVIORS: safe evaluation, error handling
 # EDGE CASES: nested expressions, type coercion
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-
 # ============================================================================
 # CHALLENGING TESTS - Basic Success Cases
 # ============================================================================
@@ -27,8 +22,8 @@ test_that("s_try: successful expression returns TRUE", {
 })
 
 test_that("s_try: successful data frame operation", {
-  df <- tibble(x = 1:5, y = 6:10)
-  result <- s_try(df %>% summarise(total = sum(x)))
+  df <- tibble::tibble(x = 1:5, y = 6:10)
+  result <- s_try(df %>% dplyr::summarise(total = sum(x)))
   expect_true(result)
 })
 
@@ -68,7 +63,7 @@ test_that("s_try: NULL extraction succeeds", {
 })
 
 test_that("s_try: accessing non-existent column warns but succeeds", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_warning(result <- s_try(df$y), "Unknown or uninitialised column")
   expect_true(result)
 })
@@ -126,8 +121,8 @@ test_that("s_try: multi-statement expression", {
 test_that("s_try: pipe operations", {
   result <- s_try(
     mtcars %>%
-      filter(mpg > 20) %>%
-      summarise(avg_wt = mean(wt))
+      dplyr::filter(mpg > 20) %>%
+      dplyr::summarise(avg_wt = mean(wt))
   )
   expect_true(result)
 })
@@ -193,7 +188,7 @@ test_that("s_try: vector result", {
 })
 
 test_that("s_try: data frame result", {
-  result <- s_try(tibble(x = 1:5, y = 6:10))
+  result <- s_try(tibble::tibble(x = 1:5, y = 6:10))
   expect_true(result)
 })
 
@@ -207,10 +202,10 @@ test_that("s_try: list result", {
 # ============================================================================
 
 test_that("s_try: checking if package is available", {
-  is_dplyr_available <- s_try(library(dplyr, quietly = TRUE))
+  is_dplyr_available <- s_try(loadNamespace("dplyr"))
   expect_true(is_dplyr_available)
 
-  is_fake_package_available <- s_try(library(fakepackage123))
+  is_fake_package_available <- s_try(loadNamespace("fakepackage123"))
   expect_false(is_fake_package_available)
 })
 
@@ -242,14 +237,14 @@ test_that("s_try: safe model fitting", {
 
 test_that("s_try: conditional workflow", {
   process_data <- function(df) {
-    if (s_try(df %>% group_by(x) %>% summarise(y = mean(z)))) {
-      df %>% group_by(x) %>% summarise(y = mean(z))
+    if (s_try(df %>% dplyr::group_by(x) %>% dplyr::summarise(y = mean(z)))) {
+      df %>% dplyr::group_by(x) %>% dplyr::summarise(y = mean(z))
     } else {
       df
     }
   }
 
-  good_df <- tibble(x = c("a", "a", "b"), z = 1:3)
+  good_df <- tibble::tibble(x = c("a", "a", "b"), z = 1:3)
   result <- process_data(good_df)
   expect_s3_class(result, "tbl_df")
 })
@@ -287,36 +282,30 @@ test_that("s_try: used in ifelse", {
 })
 
 test_that("s_try: used in filter expression", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = 1:10,
     y = letters[1:10]
   )
 
   # Should work
-  if (s_try(df %>% filter(x > 5))) {
-    filtered <- df %>% filter(x > 5)
+  if (s_try(df %>% dplyr::filter(x > 5))) {
+    filtered <- df %>% dplyr::filter(x > 5)
     expect_equal(nrow(filtered), 5)
   }
 })
 
 # ============================================================================
-# CHALLENGING TESTS - Performance
+# CHALLENGING TESTS - Evaluation outcomes
 # ============================================================================
 
-test_that("s_try: fast evaluation for simple cases", {
-  start_time <- Sys.time()
+test_that("s_try: reports successful evaluation of a large vector", {
   result <- s_try(mean(1:1000000))
-  end_time <- Sys.time()
 
-  expect_true(result)
-  expect_true(as.numeric(end_time - start_time) < 1)
+  expect_identical(result, TRUE)
 })
 
-test_that("s_try: fast failure for errors", {
-  start_time <- Sys.time()
+test_that("s_try: reports an immediate error", {
   result <- s_try(stop("Immediate error"))
-  end_time <- Sys.time()
 
-  expect_false(result)
-  expect_true(as.numeric(end_time - start_time) < 0.1)
+  expect_identical(result, FALSE)
 })

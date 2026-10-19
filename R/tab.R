@@ -34,22 +34,38 @@
 #' flattening their contents. Selecting no measured variables returns no rows:
 #' `tab()` and `fre()` retain their count and percentage columns and any grouping
 #' keys; `tab1()` and `fre1()` return an empty list by default or an empty table
-#' with `.type = "tibble"`. `tab2()` and `fre2()` return an empty tibble when no
+#' with `.type = "tibble"`. `tab2()` and `fre2()` return an empty table when no
 #' variables are selected; otherwise exactly two variables are required.
+#' With no selected variables, `fre2(..., .type = "flextable")` errors because
+#' rich cross-tabulation requires two selected variables.
 #'
 #' Cross-tabulation keeps category names unchanged. Categories may match the
-#' original variable names. A category matching the combined row-header name,
+#' original variable names. Column categories follow their values: factor
+#' levels in order, other types ascending, with missing values last.
+#' A category matching the combined row-header name,
 #' or literal `"NA"` alongside a missing column category, causes a name-collision
 #' error. In `fre2()`, the column category `"total"` is reserved for marginal
 #' totals; recode it first or use `tab2()`.
 #' The final row in `fre2()` is the marginal total, labelled `"total"`; an
 #' observed row category with the same label remains a separate row.
+#' Blank column categories use `"<empty>"`, with the smallest unused numeric
+#' suffix when that header is already taken. Logical cross-tabulation axes
+#' follow `FALSE`, `TRUE`, then missing values.
+#'
+#' Combined `tab1()` output uses character values when factor types cannot be
+#' combined; each variable's category order is retained. List output preserves
+#' the original category classes.
 #'
 #' If the output tibble has many rows, consider using
 #' `print()` to display the output.
 #'
-#' @param .data A data frame, data frame extension
-#' (e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).
+#' @param .data An in-memory data frame, tibble, or data.table.
+#' Collect lazy tables before tabulating. `tab()`, `tab1()`, `fre()` and
+#' `fre1()` also accept an atomic vector, tabulated as a tibble column named
+#' `value`; omit selectors and `.by` in this form. `tab2()` and `fre2()` need
+#' a data frame.
+#' All spatial `sfc` geometry columns are excluded before attribute tabulation;
+#' geometry columns cannot be selected as measured variables or grouping keys.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> or
 #' <[`data-masking`][args_data_masking]> Variables to tabulate.
 #'
@@ -59,15 +75,28 @@
 #' @param .by Optional grouping columns, selected with tidyselect. For `tab()`,
 #' `tab1()`, `fre()` and `fre1()`, `NULL` inherits existing `group_by()` groups;
 #' an explicit selection replaces them. Grouping columns are not measured
-#' variables. `tab2()` and `fre2()` do not accept `.by`.
-#' @param .desc If TRUE, will show the largest groups at the top.
+#' variables. `tab2()` and `fre2()` do not accept `.by`, `.desc` or
+#' `.group_order`; supplying them is an error.
+#' @param .desc If `TRUE`, sort categories by descending count within each
+#' group (missing categories stay last). To order the `.by` group blocks by
+#' size, use `.group_order = "frequency"`.
 #' @param .type Output type. `tab1()` and `fre1()` default to a list of
-#' tibbles; `fre()` and `fre2()` default to a tibble. Explicit flextable
-#' output requires the optional flextable package.
+#' tables; `fre()` and `fre2()` default to `"auto"`, preserving the input
+#' container. Explicit `"tibble"` always returns a plain tibble. Explicit
+#' `"flextable"` output requires the optional flextable package.
 #' @param .flip If TRUE, will transpose the output tibble.
+#' @param .group_order Group block order for one-way and joint tables. `"keys"`
+#' retains key order; `"frequency"` orders by descending observation count,
+#' including missing measured values. Missing grouping keys appear last and ties
+#' follow key order. `.desc` controls categories within each group independently.
 #'
 #' @return
-#' A tibble, a list of tibbles, or a flextable.
+#' A table, a list of tables, or an explicitly requested flextable. Default
+#' tables preserve the input's data.frame, tibble, or data.table container,
+#' including each table in a list. Results are ungrouped, with grouping keys
+#' retained as columns where applicable. Supported preview settings persist
+#' unless an explicit output type is requested. Other subclasses are not
+#' reconstructed on these newly shaped tables. Input data are not modified.
 #'
 #' @name tab
 #'
@@ -96,6 +125,12 @@
 #'
 #' tab(starwars)
 #'
+#' tab(c(1, 1, 2, NA))
+#'
+#' fre(c(1, 1, 2, NA))
+#'
+#' tab(starwars, sex, .by = species, .group_order = "frequency")
+#'
 #' tab1(starwars, 1:3)
 #'
 #' tab1(starwars, ends_with("color"))
@@ -119,8 +154,18 @@ tab <- function(
   .data,
   ...,
   .by = NULL,
-  .desc = FALSE
+  .desc = FALSE,
+  .group_order = c("keys", "frequency")
 ) {
+  .group_order <- match.arg(.group_order)
+  if (!is.data.frame(.data)) {
+    .data <- tab_vector_data(.data, ..., .by = {{ .by }})
+  }
+  template <- .data
+  .data <- aggregation_working_data(
+    .data,
+    override_groups = !rlang::quo_is_null(rlang::enquo(.by))
+  )
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
@@ -147,9 +192,10 @@ tab <- function(
     .desc
   ) %>%
     dplyr::select(-...any_miss)
+  out <- order_tab_groups(out, .data, group_vars, .group_order)
 
   # Output
-  return(out)
+  table_restore(out, template)
 }
 
 #' @export
@@ -159,8 +205,18 @@ tab1 <- function(
   ...,
   .by = NULL,
   .desc = FALSE,
-  .type = c("list", "tibble")
+  .type = c("list", "tibble"),
+  .group_order = c("keys", "frequency")
 ) {
+  .group_order <- match.arg(.group_order)
+  if (!is.data.frame(.data)) {
+    .data <- tab_vector_data(.data, ..., .by = {{ .by }})
+  }
+  template <- .data
+  .data <- aggregation_working_data(
+    .data,
+    override_groups = !rlang::quo_is_null(rlang::enquo(.by))
+  )
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
@@ -174,19 +230,25 @@ tab1 <- function(
   values <- prepare_tab_data(.data, ..., group_vars = group_vars)
   .data <- dplyr::bind_cols(keys, values)
   old_names <- names(.data)
-  .data <- modify_invalid_names(.data, "tab1()")
+  # Measured names become list names or `variable` values, never columns.
+  .data <- modify_invalid_names(.data, "tab1()", group_vars)
   group_vars <- names(.data)[match(group_vars, old_names)]
 
   out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
     dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
       tab_data(group_vars, .desc) %>%
-      dplyr::select(-...any_miss)
+      dplyr::select(-...any_miss) %>%
+      order_tab_groups(.data, group_vars, .group_order)
   })
 
   if (length(out) == 0L && .type[1] == "tibble") {
-    return(dplyr::bind_cols(
-      .data[0L, group_vars, drop = FALSE],
-      append_tab_list(out)
+    return(table_restore(
+      dplyr::bind_cols(
+        .data[0L, group_vars, drop = FALSE],
+        append_tab_list(out)
+      ),
+      template,
+      "tibble"
     ))
   }
 
@@ -196,7 +258,7 @@ tab1 <- function(
   }
 
   # Output
-  return(out)
+  table_restore(out, template, if (.type == "list") "auto" else .type)
 }
 
 #' @export
@@ -206,12 +268,15 @@ tab2 <- function(
   ...,
   .flip = FALSE
 ) {
+  reject_cross_controls(..., function_name = "tab2()")
+  template <- .data
+  .data <- aggregation_working_data(.data)
   # Prepare data
   .data <- .data %>%
     s_select(...)
   .data <- s_ungroup(.data)
   if (ncol(.data) == 0L) {
-    return(tibble::tibble())
+    return(table_restore(tibble::tibble(), template))
   }
 
   # Confirm names
@@ -228,7 +293,7 @@ tab2 <- function(
   out <- tab2_data(.data)
 
   # Output
-  return(out)
+  table_restore(out, template)
 }
 
 #' @export
@@ -238,8 +303,18 @@ fre <- function(
   ...,
   .by = NULL,
   .desc = FALSE,
-  .type = c("tibble", "flextable")
+  .type = c("auto", "tibble", "flextable"),
+  .group_order = c("keys", "frequency")
 ) {
+  .group_order <- match.arg(.group_order)
+  if (!is.data.frame(.data)) {
+    .data <- tab_vector_data(.data, ..., .by = {{ .by }})
+  }
+  template <- .data
+  .data <- aggregation_working_data(
+    .data,
+    override_groups = !rlang::quo_is_null(rlang::enquo(.by))
+  )
   .type <- match.arg(.type)
   # Identify group variables
   by <- rlang::enquo(.by)
@@ -265,6 +340,7 @@ fre <- function(
     tab_data(group_vars, .desc) %>%
     add_total(group_vars) %>%
     dplyr::select(-...any_miss)
+  out <- order_tab_groups(out, .data, group_vars, .group_order)
 
   if (.type[1] == "flextable") {
     out <- out %>%
@@ -272,7 +348,7 @@ fre <- function(
   }
 
   # Output
-  return(out)
+  if (.type == "flextable") out else table_restore(out, template, .type)
 }
 
 #' @export
@@ -282,8 +358,18 @@ fre1 <- function(
   ...,
   .by = NULL,
   .desc = FALSE,
-  .type = c("list", "tibble", "flextable")
+  .type = c("list", "tibble", "flextable"),
+  .group_order = c("keys", "frequency")
 ) {
+  .group_order <- match.arg(.group_order)
+  if (!is.data.frame(.data)) {
+    .data <- tab_vector_data(.data, ..., .by = {{ .by }})
+  }
+  template <- .data
+  .data <- aggregation_working_data(
+    .data,
+    override_groups = !rlang::quo_is_null(rlang::enquo(.by))
+  )
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
@@ -297,20 +383,25 @@ fre1 <- function(
   values <- prepare_tab_data(.data, ..., group_vars = group_vars)
   .data <- dplyr::bind_cols(keys, values)
   old_names <- names(.data)
-  .data <- modify_invalid_names(.data, "fre1()")
+  .data <- modify_invalid_names(.data, "fre1()", group_vars)
   group_vars <- names(.data)[match(group_vars, old_names)]
 
   out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
     dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
       tab_data(group_vars, .desc) %>%
       add_total(group_vars) %>%
-      dplyr::select(-...any_miss)
+      dplyr::select(-...any_miss) %>%
+      order_tab_groups(.data, group_vars, .group_order)
   })
 
   if (length(out) == 0L && .type[1] == "tibble") {
-    return(dplyr::bind_cols(
-      .data[0L, group_vars, drop = FALSE],
-      append_tab_list(out)
+    return(table_restore(
+      dplyr::bind_cols(
+        .data[0L, group_vars, drop = FALSE],
+        append_tab_list(out)
+      ),
+      template,
+      "tibble"
     ))
   }
 
@@ -327,7 +418,11 @@ fre1 <- function(
   }
 
   # Output
-  return(out)
+  if (.type == "flextable") {
+    out
+  } else {
+    table_restore(out, template, if (.type == "list") "auto" else .type)
+  }
 }
 
 
@@ -337,15 +432,24 @@ fre2 <- function(
   .data,
   ...,
   .flip = FALSE,
-  .type = c("tibble", "flextable")
+  .type = c("auto", "tibble", "flextable")
 ) {
+  reject_cross_controls(..., function_name = "fre2()")
+  template <- .data
+  .data <- aggregation_working_data(.data)
   .type <- match.arg(.type)
   # Prepare data
   .data <- .data %>%
     s_select(...)
   .data <- s_ungroup(.data)
   if (ncol(.data) == 0L) {
-    return(tibble::tibble())
+    if (.type == "flextable") {
+      stop(
+        "Flextable cross-tabulation requires two selected variables.",
+        call. = FALSE
+      )
+    }
+    return(table_restore(tibble::tibble(), template, .type))
   }
 
   # Confirm names
@@ -369,5 +473,37 @@ fre2 <- function(
   }
 
   # Output
-  return(out)
+  if (.type == "flextable") out else table_restore(out, template, .type)
+}
+
+# One-way and grouping controls would otherwise be read as data expressions.
+reject_cross_controls <- function(..., function_name) {
+  supplied <- intersect(c(".by", ".desc", ".group_order"), ...names())
+  if (length(supplied)) {
+    stop(
+      "`",
+      supplied[[1L]],
+      "` is not supported by `",
+      function_name,
+      "`; cross-tabulations have no groups or category sorting. ",
+      "Use `tab()` or `fre()` with `.by`, or filter the data first.",
+      call. = FALSE
+    )
+  }
+}
+
+# Atomic vectors become a one-column tibble named `value`.
+tab_vector_data <- function(.data, ..., .by = NULL) {
+  if (!is.atomic(.data) || is.null(.data) || !is.null(dim(.data))) {
+    stop("`.data` must be a data frame or an atomic vector.", call. = FALSE)
+  }
+  if (!missing(...)) {
+    stop("For vector input, omit selectors in `...`.", call. = FALSE)
+  }
+  if (!rlang::quo_is_null(rlang::enquo(.by))) {
+    stop("For vector input, omit `.by`.", call. = FALSE)
+  }
+  # tibble() reads `.data` as its data pronoun, so bind the vector first.
+  value <- .data
+  tibble::tibble(value = value)
 }

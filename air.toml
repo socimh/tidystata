@@ -2,4 +2,4 @@
 line-width = 80
 indent-width = 2
 line-ending = "auto"
-exclude = ["R/cpp11.R", "extra_functions/", "docs/", ".opencode/results/"]
+exclude = ["R/cpp11.R", "docs/", ".opencode/results/", ".opencode/tools/", ".opencode/notes/"]

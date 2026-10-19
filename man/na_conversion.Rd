@@ -30,7 +30,13 @@ replaced or missing values filled.
 }
 
 Both wrappers preserve the underlying function's casting, recycling,
-and error behavior.
+and error behavior when both required arguments are supplied. Use
+\code{na_if_value(x, value)} or \code{x |> na_if_value(value)} to replace values,
+and \code{value_if_na(x, replacement)} or \code{x |> value_if_na(replacement)}
+to fill missing values. A call with only one argument is incomplete.
+For SPSS labelled vectors (\code{\link[haven:labelled_spss]{haven::labelled_spss()}}), user-defined missing
+codes and ranges also count as missing, matching their \code{is.na()} method;
+labels and missing-value metadata are retained.
 }
 \examples{
 x <- c(1, 2, NA, 4)

@@ -5,10 +5,9 @@
 #' in <[`tidy-select`][dplyr_tidy_select]>.
 #' It is designed to select columns in a Stata-like style.
 #'
-#' As `matches()`, `s_match()` must be used
-#' within a *selecting* function, such as
-#' `ds()` or
-#' `dplyr::across()`.
+#' Use `s_match()` within a *selecting* function, such as `ds()` or
+#' `dplyr::across()`. Alternatively, provide `vars` explicitly to return
+#' matching positions in a standalone call.
 #'
 #' @param string A single character string containing patterns, separated by
 #' spaces, like selecting a varlist in Stata's `keep` command.
@@ -25,7 +24,14 @@
 #' * `var1-var5` is NOT used to select a range of variables.
 #' Use `var1:var5` out of `s_match()` instead.
 #'
+#' Space-separated patterns are alternatives, each matched against complete
+#' column names. Numeric ranges expand within each pattern before matching.
+#' Each pattern can contain one bracketed range; separate patterns may each
+#' contain their own range.
+#'
 #' @examples
+#' s_match("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
+#'
 #' tb <- paste0("x", 1:15) %>%
 #'   tibble::as_tibble() %>%
 #'   tidyr::pivot_wider(names_from = value)
@@ -49,10 +55,9 @@
 #' tb %>%
 #'   ds(s_match("x[9-15]"))
 #'
-#' \dontrun{
+#' # A literal hyphen pattern selects no columns here; it is not a range.
 #' tb %>%
 #'   ds(s_match("x1-x5"))
-#' }
 #'
 #' tb %>%
 #'   ds(x1:x5)
@@ -63,20 +68,19 @@ s_match <- function(
   ignore.case = TRUE,
   vars = NULL
 ) {
-  if (is.character(string)) {
-    string <- paste0("^(", string, ")$")
-    string_vec <- string %>%
-      stringr::str_split_1("\\s+")
-    if (length(string_vec) == 1) {
-      string_vec <- paste0("^", string, "$")
-    }
-    out <- string_vec %>%
-      stringr::str_replace_all("\\*", ".*") %>%
-      stringr::str_replace_all("~", ".+") %>%
-      stringr::str_replace_all("\\?", ".") %>%
-      purrr::map_chr(num_range_to_regex) %>%
-      stringr::str_flatten("|")
+  if (!is.character(string)) {
+    stop("`string` must be a character string.", call. = FALSE)
   }
+  # Expand complete raw patterns before attaching their boundary anchors.
+  # paste0 also retains the existing literal-NA pattern behavior.
+  patterns <- paste0(string, "") %>%
+    stringr::str_split_1("\\s+") %>%
+    stringr::str_replace_all("\\*", ".*") %>%
+    stringr::str_replace_all("~", ".+") %>%
+    stringr::str_replace_all("\\?", ".") %>%
+    purrr::map_chr(num_range_to_regex)
+  out <- paste0("^(", patterns, ")$") %>%
+    stringr::str_flatten("|")
 
   tidyselect::matches(
     out,

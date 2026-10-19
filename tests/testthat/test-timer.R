@@ -6,11 +6,6 @@
 # KEY BEHAVIORS: execution timing, performance measurement
 # EDGE CASES: very fast/slow operations, nested timing
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-
 # ============================================================================
 # CHALLENGING TESTS - Basic Timing
 # ============================================================================
@@ -34,6 +29,7 @@ test_that("timer: works with pipe operations", {
 })
 
 test_that("timer: handles complex expressions", {
+  withr::local_preserve_seed()
   result <- timer({
     x <- rnorm(1000)
     y <- summary(x)
@@ -46,6 +42,35 @@ test_that("timer: handles complex expressions", {
 # ============================================================================
 # CHALLENGING TESTS - Duration Format
 # ============================================================================
+
+test_that("timer: duration formatting covers unit boundaries without waiting", {
+  seconds <- c(0, 0.012, 0.999, 1, 1.25, 59.99, 60, 65.9, 3599, 3600, 3780)
+  expected <- c(
+    "0.000s",
+    "0.012s",
+    "0.999s",
+    "1.00s",
+    "1.25s",
+    "59.99s",
+    "1m0s",
+    "1m5s",
+    "59m59s",
+    "1h0m",
+    "1h3m"
+  )
+  actual <- vapply(
+    seconds,
+    function(x) {
+      statart:::duration_to_chr(as.difftime(x, units = "secs"))
+    },
+    character(1)
+  )
+  expect_identical(actual, expected)
+  expect_identical(
+    statart:::duration_to_chr(as.difftime(1.5, units = "hours")),
+    "1h30m"
+  )
+})
 
 test_that("timer: displays sub-second timing", {
   result <- capture_messages(
@@ -60,22 +85,17 @@ test_that("timer: displays sub-second timing", {
 })
 
 test_that("timer: displays seconds format", {
-  result <- capture_messages(
-    timer(Sys.sleep(0.1))
+  expect_identical(
+    statart:::duration_to_chr(as.difftime(5.23, units = "secs")),
+    "5.23s"
   )
-  expect_true(any(grepl("Time spent", result)))
 })
 
 test_that("timer: displays minutes format for longer operations", {
-  # We can't actually sleep for a minute, but we can verify the format function
-  # by testing the helper directly through the message pattern
-  result <- capture_messages(
-    timer({
-      Sys.sleep(0.05)
-      "done"
-    })
+  expect_identical(
+    statart:::duration_to_chr(as.difftime(2 + 5 / 60, units = "mins")),
+    "2m5s"
   )
-  expect_true(any(grepl("Time spent", result)))
 })
 
 # ============================================================================
@@ -83,8 +103,9 @@ test_that("timer: displays minutes format for longer operations", {
 # ============================================================================
 
 test_that("timer: works with data frame operations", {
-  df <- tibble(x = 1:1000, y = rnorm(1000))
-  result <- timer(df %>% summarise(mean_x = mean(x), sd_y = sd(y)))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = 1:1000, y = rnorm(1000))
+  result <- timer(df %>% dplyr::summarise(mean_x = mean(x), sd_y = sd(y)))
   expect_s3_class(result, "tbl_df")
   expect_equal(result$mean_x, 500.5)
 })
@@ -161,13 +182,13 @@ test_that("timer: handles warnings in expression", {
 
 test_that("timer: works with multiple pipes", {
   result <- mtcars %>%
-    filter(mpg > 20) %>%
-    summarise(avg_wt = mean(wt)) %>%
+    dplyr::filter(mpg > 20) %>%
+    dplyr::summarise(avg_wt = mean(wt)) %>%
     timer()
 
   expected <- mtcars %>%
-    filter(mpg > 20) %>%
-    summarise(avg_wt = mean(wt))
+    dplyr::filter(mpg > 20) %>%
+    dplyr::summarise(avg_wt = mean(wt))
   expect_identical(result, expected)
   expect_equal(nrow(result), 1)
 })
@@ -187,8 +208,9 @@ test_that("timer: works with nested function calls", {
 # ============================================================================
 
 test_that("timer: handles large data creation", {
+  withr::local_preserve_seed()
   result <- timer({
-    large_df <- tibble(
+    large_df <- tibble::tibble(
       x = rnorm(100000),
       y = sample(letters, 100000, replace = TRUE),
       z = Sys.time() + 1:100000
@@ -199,6 +221,7 @@ test_that("timer: handles large data creation", {
 })
 
 test_that("timer: handles matrix operations", {
+  withr::local_preserve_seed()
   result <- timer({
     mat <- matrix(rnorm(10000), nrow = 100)
     eigen_vals <- eigen(crossprod(mat))$values
@@ -220,16 +243,16 @@ test_that("timer: data analysis workflow", {
 
       # Data cleaning
       clean_data <- data %>%
-        filter(!is.na(mpg)) %>%
-        mutate(hp_per_cyl = hp / cyl)
+        dplyr::filter(!is.na(mpg)) %>%
+        dplyr::mutate(hp_per_cyl = hp / cyl)
 
       # Summary statistics
       stats <- clean_data %>%
-        group_by(cyl) %>%
-        summarise(
+        dplyr::group_by(cyl) %>%
+        dplyr::summarise(
           avg_mpg = mean(mpg),
           avg_hp = mean(hp),
-          count = n()
+          count = dplyr::n()
         )
 
       # Model fitting
@@ -244,6 +267,7 @@ test_that("timer: data analysis workflow", {
 })
 
 test_that("timer: simulation workflow", {
+  withr::local_preserve_seed()
   set.seed(42)
   result <- timer({
     # Monte Carlo simulation

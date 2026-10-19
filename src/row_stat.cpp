@@ -4,43 +4,12 @@
 #include <vector>
 #include <set>
 #include <algorithm>
-#include <unordered_set>
-#include <iostream>
-#include <numeric>
-#include <random>
 #include <cmath>
 #include <limits>
 
 using namespace cpp11;
 namespace writable = cpp11::writable;
 using namespace std;
-
-[[cpp11::register]] cpp11::doubles_matrix<> df_to_mat(data_frame tb, double na)
-{
-    int nrow = tb.nrow();
-    int ncol = tb.size();
-    writable::doubles col;
-    writable::doubles_matrix<> mat(nrow, ncol);
-
-    for (int i = 0; i < ncol; i++)
-    {
-        col = tb[i];
-        for (int j = 0; j < nrow; j++)
-        {
-            double val = col[j];
-            if (std::isnan(val))
-            {
-                mat(j, i) = na;
-            }
-            else
-            {
-                mat(j, i) = val;
-            }
-        }
-    }
-
-    return mat;
-}
 
 // Allocate results independently of the input columns and skip missing values.
 writable::doubles row_extreme(data_frame tb, bool maximum)

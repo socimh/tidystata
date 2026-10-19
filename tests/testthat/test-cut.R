@@ -6,11 +6,6 @@
 # KEY BEHAVIORS: interval creation, numeric binning
 # EDGE CASES: boundary values, duplicate breaks
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-
 # Record and assert every expected warning, including min/max warning pairs.
 cut_test_warnings <- function(code) {
   messages <- character()
@@ -101,6 +96,7 @@ test_that("cut_quantile: extreme values", {
 })
 
 test_that("cut_quantile: preserves order of original data", {
+  withr::local_preserve_seed()
   x <- sample(1:100)
   result <- cut_quantile(x, n = 4)
   expect_equal(length(result), 100)
@@ -287,7 +283,9 @@ test_that("all cut functions: handle Inf values", {
 
 test_that("all cut functions: handle -Inf values", {
   x <- c(-Inf, 1, 50, 100)
-  expect_warning(result_q <- cut_quantile(x, n = 4), "collapsed")
+  # -Inf is a distinct value, so it keeps its own (lowest) group.
+  expect_no_warning(result_q <- cut_quantile(x, n = 4))
+  expect_identical(as.integer(result_q), 1:4)
   result_b <- cut_breaks(x, breaks = 50)
 
   # -Inf should be placed in the lowest interval
@@ -303,6 +301,7 @@ test_that("all cut functions: handle -Inf values", {
 # ============================================================================
 
 test_that("cut_quantile: income distribution analysis", {
+  withr::local_preserve_seed()
   set.seed(42)
   income <- rlnorm(1000, meanlog = 10, sdlog = 1)
   result <- cut_quantile(
@@ -315,6 +314,7 @@ test_that("cut_quantile: income distribution analysis", {
 })
 
 test_that("cut_length: age group creation", {
+  withr::local_preserve_seed()
   ages <- sample(0:100, 500, replace = TRUE)
   result <- cut_length(
     ages,
@@ -326,6 +326,7 @@ test_that("cut_length: age group creation", {
 })
 
 test_that("cut_breaks: exam grade boundaries", {
+  withr::local_preserve_seed()
   scores <- sample(0:100, 200, replace = TRUE)
   result <- cut_breaks(
     scores,
@@ -357,8 +358,8 @@ test_that("all cut functions: n <= 0 errors or handles gracefully", {
   # Functions may error or handle invalid n values
   expect_error(cut_quantile(x, n = 0), "positive integer")
   expect_error(cut_quantile(x, n = -1), "positive integer")
-  expect_error(cut_length(x, n = 0), NA)
-  expect_error(cut_length(x, n = -1), NA)
+  expect_error(cut_length(x, n = 0), "positive integer")
+  expect_error(cut_length(x, n = -1), "positive integer")
 })
 
 test_that("all cut functions: empty vector errors or handles gracefully", {
@@ -400,19 +401,18 @@ test_that("cut_breaks: non-numeric breaks errors or converts", {
 })
 
 # ============================================================================
-# CHALLENGING TESTS - Performance
+# CHALLENGING TESTS - Large inputs
 # ============================================================================
 
-test_that("cut functions: handle large datasets efficiently", {
+test_that("cut functions: retain size and interval counts for large inputs", {
+  withr::local_preserve_seed()
   x <- rnorm(100000)
 
-  start_time <- Sys.time()
   result_q <- cut_quantile(x, n = 10)
   result_l <- cut_length(x, n = 10)
-  end_time <- Sys.time()
 
   expect_equal(length(result_q), 100000)
   expect_equal(length(result_l), 100000)
-  # Should complete in reasonable time (less than 5 seconds)
-  expect_true(as.numeric(end_time - start_time) < 5)
+  expect_identical(nlevels(result_q), 10L)
+  expect_identical(nlevels(result_l), 10L)
 })

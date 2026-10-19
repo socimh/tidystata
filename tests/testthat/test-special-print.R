@@ -128,7 +128,7 @@ test_that("preview arguments reject invalid budgets and styles", {
 
 test_that("preview accepts base data frames and rejects unsupported containers", {
   data <- data.frame(a = 1:3, b = letters[1:3])
-  expect_preview_matches(preview_table(data), tibble::as_tibble(data))
+  expect_preview_matches(preview_table(data), data)
   expect_error(preview_table(1:3))
   expect_error(preview_table(list(a = 1:3)))
   expect_error(preview_table(matrix(1:4, ncol = 2)))

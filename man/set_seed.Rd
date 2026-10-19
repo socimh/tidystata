@@ -23,7 +23,7 @@ state is changed and is not restored, including when \code{.fn} fails. Subsequen
 random draws continue from the state left by \code{.fn}.
 }
 \examples{
-sample(1:10, 8) \%>\% 
+sample(1:10, 8) \%>\%
   set_seed(123)
 
 # When we re-run the code, we will get the same result.

@@ -5,17 +5,19 @@
 #' Inspect the types, observed counts, distinct observed values, and variable
 #' labels of a dataset or selected columns.
 #'
-#' @param .data The input data (data frame or tibble).
+#' @param .data The input data (data frame, tibble, or data.table).
 #' @param ...  <[`tidy-select`][dplyr_tidy_select]> or
 #' <[`data-masking`][args_data_masking]> Variables to include in the codebook.
 #' Omit to include all columns. Selection is attempted first; expressions that
 #' are not valid selections are evaluated as computed columns by [s_select()].
 #'
-#' @return An ungrouped tibble with one row per selected variable, in selection
+#' @return An ungrouped table with one row per selected variable, in selection
 #' order. Columns are `variable`, optional `label`, `type`, `n`, and `unique`.
 #' `n` counts observed values and `unique` counts distinct observed values.
 #' Empty and all-missing columns have zero counts. A zero-column selection
 #' returns zero rows with `variable`, `type`, `n`, and `unique` columns.
+#' The input's data.frame, tibble, or data.table container and supported preview
+#' settings are preserved. Other subclasses are not reconstructed.
 #'
 #' @details
 #' Counts describe the complete input, irrespective of existing grouping. Data
@@ -61,17 +63,22 @@
 #' @rdname codebook
 #' @export
 codebook <- function(.data, ...) {
+  template <- .data
+  .data <- table_working_data(.data)
   .data <- dplyr::ungroup(.data)
   if (!missing(...)) {
     .data <- s_select(.data, ...)
   }
   vctrs::vec_as_names(names(.data), repair = "check_unique")
   if (ncol(.data) == 0L) {
-    return(tibble::tibble(
-      variable = character(),
-      type = character(),
-      n = integer(),
-      unique = integer()
+    return(table_restore(
+      tibble::tibble(
+        variable = character(),
+        type = character(),
+        n = integer(),
+        unique = integer()
+      ),
+      template
     ))
   }
 
@@ -94,7 +101,7 @@ codebook <- function(.data, ...) {
     out <- dplyr::relocate(out, label, .after = variable)
   }
 
-  out
+  table_restore(out, template)
 }
 
 codebook_var <- function(var) {

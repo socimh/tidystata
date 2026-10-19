@@ -2,6 +2,14 @@ url: https://socimh.github.io/statart/
 template:
   bootstrap: 5
 
+articles:
+- title: "Learn statart"
+  navbar: ~
+  contents:
+  - getting-started
+  - containers-and-missing-values
+  - articles/migration
+
 reference:
 - title: "Explore Data"
   contents:
@@ -23,7 +31,7 @@ reference:
   - starts_with("s_")
   - set_seed
   - timer
-  - pipe
+  - "%>%"
 - title: "Sample Data"
   contents:
   - lifeexp

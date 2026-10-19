@@ -4,19 +4,46 @@
 #' `timer()` works like the `timer` command in Stata.
 #'
 #' @param .x An expression to evaluate and time.
+#' @param .on_error A single logical value. If `TRUE` (the default), also
+#'   report elapsed time when the expression fails, then let the original error
+#'   propagate. Use `FALSE` to report elapsed time only on success.
 #' @return The evaluated result, invisibly.
 #' @details
 #' The expression is evaluated once. On success, elapsed time is emitted as a
-#' message. Warnings and errors propagate normally; a failed expression emits
-#' no completion-time message.
+#' message. Warnings and errors propagate normally. When the expression fails
+#' (or is interrupted) and `.on_error = TRUE`, a message marked as failed
+#' execution reports the elapsed time while the error unwinds; the original
+#' condition object, including its call, is not modified.
+#'
+#' Nested or repeated timers each measure everything evaluated inside them,
+#' so a later timer in a pipeline reports cumulative time from its own start.
 #' @export
 #'
 #' @examples
 #' x <- seq_len(1e6)
 #' mean(x) %>% timer()
-timer <- function(.x) {
+#' try(timer(stop("failure")))
+timer <- function(.x, .on_error = TRUE) {
+  if (!is.logical(.on_error) || length(.on_error) != 1L || is.na(.on_error)) {
+    stop(
+      "`.on_error` must be a single nonmissing logical value.",
+      call. = FALSE
+    )
+  }
   begin_time <- Sys.time()
+  completed <- FALSE
+  # Report failures while unwinding, without wrapping the evaluation frame.
+  on.exit(
+    if (!completed && .on_error) {
+      message(
+        "Failed execution. Time spent: ",
+        duration_to_chr(Sys.time() - begin_time)
+      )
+    },
+    add = TRUE
+  )
   out <- .x
+  completed <- TRUE
   end_time <- Sys.time()
   time <- end_time - begin_time
   message("Time spent: ", duration_to_chr(time))

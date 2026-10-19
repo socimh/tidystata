@@ -3,14 +3,21 @@
 #' variable inspection, column selection, row calculations, and binning.
 #' Use [tab()], [summ()], and [codebook()] to start exploring a dataset.
 #'
+#' @section Tutorials and migration:
+#' Read `vignette("getting-started", package = "statart")` for a short workflow
+#' and `vignette("containers-and-missing-values", package = "statart")` for
+#' output containers, grouping and missing-value conventions.
+#' The full migration guide is installed at
+#' `system.file("MIGRATION.md", package = "statart")`.
+#' Plain scripts are installed in `system.file("examples", package = "statart")`.
+#'
 #' @keywords internal
 "_PACKAGE"
 
 ## usethis namespace: start
 #' @importFrom magrittr %>%
 #' @importFrom rlang :=
-#' @importFrom utils apropos
-#' @importFrom stats IQR mad median quantile sd Gamma as.formula binomial coef df.residual glm lm poisson pt setNames
+#' @importFrom stats IQR mad median quantile sd
 #' @useDynLib statart, .registration = TRUE
 ## usethis namespace: end
 NULL

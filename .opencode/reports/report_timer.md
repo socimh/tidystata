@@ -1,8 +1,6 @@
 # Function: timer()
 
-**Generated:** 2026-03-03 23:09:19
-
----
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:45 | **Status:** PASS
 
 ## Example 1: Basic timing
 
@@ -13,8 +11,8 @@ timer(Sys.sleep(0.5))
 **Output:**
 
 ```
-Time spent: 0.510s
- 
+Time spent: 0.512s
+
 ```
 
 ## Example 2: Timing with return value
@@ -27,8 +25,8 @@ result
 **Output:**
 
 ```
-Time spent: 0.003s
- 
+Time spent: 0.004s
+
 ```
 
 **Return value:**
@@ -47,7 +45,7 @@ timer(1 + 1)
 
 ```
 Time spent: 0.000s
- 
+
 ```
 
 ## Example 4: With pipe operations
@@ -61,7 +59,7 @@ nrow(result)
 
 ```
 Time spent: 0.001s
- 
+
 ```
 
 **Return value (nrow):**
@@ -83,17 +81,17 @@ timer({
 **Output:**
 
 ```
-Time spent: 0.000s
- 
+Time spent: 0.001s
+
 ```
 
-## Example 6: Duration formatting helper
+## Example 6: Internal duration formatting helper
 
 ```r
-duration_to_chr(0.05)   # Sub-second
-duration_to_chr(5.23)   # Seconds
-duration_to_chr(75)     # Minutes
-duration_to_chr(3700)   # Hours
+statart:::duration_to_chr(0.05)   # Sub-second
+statart:::duration_to_chr(5.23)   # Seconds
+statart:::duration_to_chr(75)     # Minutes
+statart:::duration_to_chr(3700)   # Hours
 ```
 
 **Output:**
@@ -104,5 +102,4 @@ duration_to_chr(3700)   # Hours
 [1] "1m15s"
 [1] "1h1m"
 ```
-
 

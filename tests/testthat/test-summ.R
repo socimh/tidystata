@@ -7,18 +7,13 @@
 # KEY BEHAVIORS: summary statistics, group analysis
 # EDGE CASES: empty groups, all-NA columns
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - Output Mode Variations
 # ============================================================================
 
 test_that("summ: list mode with multiple variable types", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     numeric_var = rnorm(100),
     date_var = seq(as.Date("2024-01-01"), by = "day", length.out = 100),
     datetime_var = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 100),
@@ -29,7 +24,7 @@ test_that("summ: list mode with multiple variable types", {
 })
 
 test_that("summ: table mode with date variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = 1:50,
     start_date = seq(as.Date("2024-01-01"), by = "day", length.out = 50),
     end_date = seq(as.Date("2024-03-01"), by = "day", length.out = 50)
@@ -39,7 +34,7 @@ test_that("summ: table mode with date variables", {
 })
 
 test_that("summ: duration format long vs compact", {
-  df <- tibble(
+  df <- tibble::tibble(
     dates = seq(as.Date("2024-01-01"), by = "day", length.out = 100)
   )
   result_long <- summ(df, dates, .mode = "table", .duration_format = "long")
@@ -58,19 +53,22 @@ test_that("summ: duration format long vs compact", {
 # ============================================================================
 
 test_that("summ: single statistic selection", {
-  df <- tibble(x = rnorm(100), y = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100), y = rnorm(100))
   result <- summ(df, .stat = "mean")
   expect_true(all(c("mean") %in% names(result)))
 })
 
 test_that("summ: multiple statistics selection", {
-  df <- tibble(x = rnorm(100), y = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100), y = rnorm(100))
   result <- summ(df, .stat = c("mean", "sd", "min", "max"))
   expect_true(all(c("mean", "sd", "min", "max") %in% names(result)))
 })
 
 test_that("summ: all available statistics", {
-  df <- tibble(x = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100))
   result <- summ(
     df,
     .stat = c("n", "missing", "mean", "sd", "min", "p25", "p50", "p75", "max")
@@ -79,13 +77,14 @@ test_that("summ: all available statistics", {
 })
 
 test_that("tabstat: default mean statistic", {
-  df <- tibble(x = rnorm(100), y = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100), y = rnorm(100))
   result <- tabstat(df, x, y)
   expect_true("mean" %in% names(result))
 })
 
 test_that("tabstat: custom statistics", {
-  df <- tibble(x = 1:100, y = 101:200)
+  df <- tibble::tibble(x = 1:100, y = 101:200)
   result <- tabstat(df, x, y, .stat = c("sum", "mean", "sd"))
   expect_true(all(c("sum", "mean", "sd") %in% names(result)))
 })
@@ -95,7 +94,8 @@ test_that("tabstat: custom statistics", {
 # ============================================================================
 
 test_that("summ: group by single variable", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = rep(c("A", "B", "C"), each = 33)[1:99],
     x = rnorm(99),
     y = rnorm(99)
@@ -106,7 +106,8 @@ test_that("summ: group by single variable", {
 })
 
 test_that("summ: group by multiple variables", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     g1 = rep(c("X", "Y"), 50),
     g2 = rep(c("A", "B", "C", "D"), 25),
     value = rnorm(100)
@@ -116,7 +117,8 @@ test_that("summ: group by multiple variables", {
 })
 
 test_that("summ: group with many groups", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = rep(1:50, each = 2),
     x = rnorm(100)
   )
@@ -125,7 +127,8 @@ test_that("summ: group with many groups", {
 })
 
 test_that("summ: group with NA in grouping variable", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = c(rep("A", 30), rep(NA, 40), rep("B", 30)),
     x = rnorm(100)
   )
@@ -134,7 +137,8 @@ test_that("summ: group with NA in grouping variable", {
 })
 
 test_that("summ: .na.rm=TRUE removes NA groups", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = c(rep("A", 50), rep(NA, 50)),
     x = rnorm(100)
   )
@@ -144,7 +148,8 @@ test_that("summ: .na.rm=TRUE removes NA groups", {
 })
 
 test_that("summ: group where some groups have 1 observation", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = 1:100,
     x = rnorm(100)
   )
@@ -158,13 +163,14 @@ test_that("summ: group where some groups have 1 observation", {
 # ============================================================================
 
 test_that("summ: detail mode with numeric variables", {
-  df <- tibble(x = rnorm(100), y = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100), y = rnorm(100))
   result <- summ(df, .detail = TRUE)
   expect_true("detail" %in% names(result) || ncol(result) > 5)
 })
 
 test_that("summ: detail mode with dates", {
-  df <- tibble(
+  df <- tibble::tibble(
     dates = seq(as.Date("2024-01-01"), by = "day", length.out = 365)
   )
   result <- summ(df, dates, .detail = TRUE)
@@ -172,7 +178,8 @@ test_that("summ: detail mode with dates", {
 })
 
 test_that("summ: detail mode with grouped data", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = rep(c("A", "B"), each = 50),
     x = rnorm(100)
   )
@@ -185,7 +192,7 @@ test_that("summ: detail mode with grouped data", {
 # ============================================================================
 
 test_that("summ: variables with varying missing percentages", {
-  df <- tibble(
+  df <- tibble::tibble(
     complete = 1:100,
     ten_pct = c(1:90, rep(NA, 10)),
     fifty_pct = c(1:50, rep(NA, 50)),
@@ -197,19 +204,19 @@ test_that("summ: variables with varying missing percentages", {
 })
 
 test_that("summ: all NA variable handling", {
-  df <- tibble(x = rep(NA, 100))
+  df <- tibble::tibble(x = rep(NA, 100))
   expect_warning(result <- summ(df), "x.*entirely missing")
   expect_equal(nrow(result), 1)
 })
 
 test_that("summ: NaN vs NA handling", {
-  df <- tibble(x = c(1, 2, NaN, NaN, NA, NA, 3, 4))
+  df <- tibble::tibble(x = c(1, 2, NaN, NaN, NA, NA, 3, 4))
   result <- summ(df)
   expect_true("missing" %in% names(result) || "n" %in% names(result))
 })
 
 test_that("summ: Inf values in calculations", {
-  df <- tibble(x = c(1, 2, 3, Inf, -Inf))
+  df <- tibble::tibble(x = c(1, 2, 3, Inf, -Inf))
   result <- summ(df)
   expect_true("mean" %in% names(result) || "min" %in% names(result))
 })
@@ -219,7 +226,8 @@ test_that("summ: Inf values in calculations", {
 # ============================================================================
 
 test_that("summ: extreme numeric values", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     normal = rnorm(100),
     large = c(.Machine$double.xmax / 1e10, rep(1e100, 99)),
     small = c(.Machine$double.xmin * 1e10, rep(1e-100, 99))
@@ -229,7 +237,7 @@ test_that("summ: extreme numeric values", {
 })
 
 test_that("summ: integer overflow edge case", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(.Machine$integer.max, .Machine$integer.max - 1, 1, 2)
   )
   result <- summ(df)
@@ -237,13 +245,13 @@ test_that("summ: integer overflow edge case", {
 })
 
 test_that("summ: very small variance dataset", {
-  df <- tibble(x = c(1, 1.0000001, 0.9999999, 1.0000002, 0.9999998))
+  df <- tibble::tibble(x = c(1, 1.0000001, 0.9999999, 1.0000002, 0.9999998))
   result <- summ(df)
   expect_true("sd" %in% names(result))
 })
 
 test_that("summ: dataset with exact zero variance", {
-  df <- tibble(x = rep(5, 100))
+  df <- tibble::tibble(x = rep(5, 100))
   result <- summ(df)
   if ("sd" %in% names(result)) {
     expect_equal(result$sd, 0)
@@ -255,50 +263,55 @@ test_that("summ: dataset with exact zero variance", {
 # ============================================================================
 
 test_that("summ: starts_with selection", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     temp_1 = rnorm(50),
     temp_2 = rnorm(50),
     pressure_1 = rnorm(50),
     pressure_2 = rnorm(50)
   )
-  result <- summ(df, starts_with("temp_"))
+  result <- summ(df, dplyr::starts_with("temp_"))
   expect_equal(nrow(result), 2)
 })
 
 test_that("summ: ends_with selection", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     var_a_test = rnorm(50),
     var_b_test = rnorm(50),
     var_c_prod = rnorm(50)
   )
-  result <- summ(df, ends_with("_test"))
+  result <- summ(df, dplyr::ends_with("_test"))
   expect_equal(nrow(result), 2)
 })
 
 test_that("summ: contains selection", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     temp_morning = rnorm(50),
     temp_evening = rnorm(50),
     pressure_temp = rnorm(50),
     humidity = rnorm(50)
   )
-  result <- summ(df, contains("temp"))
+  result <- summ(df, dplyr::contains("temp"))
   expect_equal(nrow(result), 3)
 })
 
 test_that("summ: where() with is.numeric", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     num1 = rnorm(50),
     num2 = rnorm(50),
     char = sample(letters, 50, replace = TRUE),
     logi = sample(c(TRUE, FALSE), 50, replace = TRUE)
   )
-  result <- summ(df, where(is.numeric))
+  result <- summ(df, dplyr::where(is.numeric))
   expect_equal(nrow(result), 2)
 })
 
 test_that("summ: numeric column indices", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     a = rnorm(50),
     b = rnorm(50),
     c = rnorm(50),
@@ -314,7 +327,7 @@ test_that("summ: numeric column indices", {
 # ============================================================================
 
 test_that("summ: Date variables spanning years", {
-  df <- tibble(
+  df <- tibble::tibble(
     dates = seq(as.Date("2020-01-01"), as.Date("2024-12-31"), by = "day")
   )
   result <- summ(df, dates)
@@ -322,7 +335,7 @@ test_that("summ: Date variables spanning years", {
 })
 
 test_that("summ: POSIXct with different timezones", {
-  df <- tibble(
+  df <- tibble::tibble(
     utc_time = as.POSIXct("2024-01-01 12:00", tz = "UTC"),
     est_time = as.POSIXct("2024-01-01 07:00", tz = "EST")
   )
@@ -331,7 +344,7 @@ test_that("summ: POSIXct with different timezones", {
 })
 
 test_that("summ: datetime variables in list mode", {
-  df <- tibble(
+  df <- tibble::tibble(
     timestamps = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 100)
   )
   result <- summ(df, .mode = "list")
@@ -339,7 +352,8 @@ test_that("summ: datetime variables in list mode", {
 })
 
 test_that("summ: difftime objects", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     duration = as.difftime(rnorm(100, mean = 24, sd = 5), units = "hours")
   )
   result <- summ(df)
@@ -351,15 +365,16 @@ test_that("summ: difftime objects", {
 # ============================================================================
 
 test_that("summ: haven labelled numeric", {
-  df <- tibble(
-    x = labelled(rnorm(100), labels = c("Low" = -1, "High" = 1))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
+    x = haven::labelled(rnorm(100), labels = c("Low" = -1, "High" = 1))
   )
   expect_warning(result <- summ(df, x), "x.*labelled variable")
   expect_s3_class(result, "data.frame")
 })
 
 test_that("summ: integer vs double distinction", {
-  df <- tibble(
+  df <- tibble::tibble(
     int_col = as.integer(1:100),
     dbl_col = as.double(1:100) + 0.5
   )
@@ -368,7 +383,8 @@ test_that("summ: integer vs double distinction", {
 })
 
 test_that("summ: logical variables converted to numeric", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     bool = sample(c(TRUE, FALSE), 100, replace = TRUE)
   )
   result <- summ(df)
@@ -380,6 +396,7 @@ test_that("summ: logical variables converted to numeric", {
 # ============================================================================
 
 test_that("summ: numeric vector input", {
+  withr::local_preserve_seed()
   x <- rnorm(100)
   result <- summ(x)
   expect_s3_class(result, "data.frame")
@@ -402,7 +419,8 @@ test_that("summ: Date vector input", {
 # ============================================================================
 
 test_that("summ: 10000 rows with multiple variables", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     x = rnorm(10000),
     y = rnorm(10000),
     z = rnorm(10000)
@@ -412,14 +430,16 @@ test_that("summ: 10000 rows with multiple variables", {
 })
 
 test_that("summ: many variables (50+)", {
-  df <- as_tibble(replicate(50, rnorm(100)), .name_repair = "minimal")
+  withr::local_preserve_seed()
+  df <- tibble::as_tibble(replicate(50, rnorm(100)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:50)
   result <- summ(df)
   expect_equal(nrow(result), 50)
 })
 
 test_that("summ: grouped data with many groups", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = rep(1:100, each = 10),
     x = rnorm(1000)
   )
@@ -432,7 +452,7 @@ test_that("summ: grouped data with many groups", {
 # ============================================================================
 
 test_that("summ: empty data frame with columns", {
-  df <- tibble(x = numeric(0), y = numeric(0))
+  df <- tibble::tibble(x = numeric(0), y = numeric(0))
   result <- summ(df)
   expect_s3_class(result, "data.frame")
 })
@@ -442,12 +462,13 @@ test_that("summ: NULL input should error", {
 })
 
 test_that("summ: character only data frame should error or skip", {
-  df <- tibble(x = letters[1:10], y = letters[11:20])
+  df <- tibble::tibble(x = letters[1:10], y = letters[11:20])
   expect_warning(expect_error(summ(df)), "non-numeric")
 })
 
 test_that("summ: non-existent column should error", {
-  df <- tibble(x = rnorm(10))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(10))
   expect_error(summ(df, y))
 })
 
@@ -456,19 +477,22 @@ test_that("summ: non-existent column should error", {
 # ============================================================================
 
 test_that("summ: .name=FALSE with single variable", {
-  df <- tibble(x = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100))
   result <- summ(df, .name = FALSE)
   expect_false("name" %in% names(result))
 })
 
 test_that("summ: .name=TRUE with single variable", {
-  df <- tibble(x = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100))
   result <- summ(df, .name = TRUE)
   expect_true("name" %in% names(result))
 })
 
 test_that("summ: .name=FALSE with multiple variables", {
-  df <- tibble(x = rnorm(100), y = rnorm(100))
+  withr::local_preserve_seed()
+  df <- tibble::tibble(x = rnorm(100), y = rnorm(100))
   result <- summ(df, .name = FALSE)
   expect_true("name" %in% names(result))
 })
@@ -478,8 +502,9 @@ test_that("summ: .name=FALSE with multiple variables", {
 # ============================================================================
 
 test_that("summ: clinical measurements", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     patient_id = 1:200,
     age = sample(18:90, 200, replace = TRUE),
     systolic_bp = rnorm(200, mean = 120, sd = 15),
@@ -494,8 +519,9 @@ test_that("summ: clinical measurements", {
 })
 
 test_that("summ: financial time series", {
+  withr::local_preserve_seed()
   set.seed(123)
-  df <- tibble(
+  df <- tibble::tibble(
     date = seq(as.Date("2024-01-01"), by = "day", length.out = 252),
     open_price = cumsum(rnorm(252, mean = 0.1, sd = 2)) + 100,
     high_price = cumsum(rnorm(252, mean = 0.1, sd = 2)) + 102,
@@ -508,8 +534,9 @@ test_that("summ: financial time series", {
 })
 
 test_that("summ: survey data with grouping", {
+  withr::local_preserve_seed()
   set.seed(456)
-  df <- tibble(
+  df <- tibble::tibble(
     region = sample(c("North", "South", "East", "West"), 1000, replace = TRUE),
     age = sample(18:80, 1000, replace = TRUE),
     income = rnorm(1000, mean = 50000, sd = 20000),
@@ -521,8 +548,9 @@ test_that("summ: survey data with grouping", {
 })
 
 test_that("summ: quality control data", {
+  withr::local_preserve_seed()
   set.seed(789)
-  df <- tibble(
+  df <- tibble::tibble(
     batch_id = rep(1:20, each = 50),
     measurement_1 = rnorm(1000, mean = 100, sd = 5),
     measurement_2 = rnorm(1000, mean = 50, sd = 3),
@@ -537,6 +565,7 @@ test_that("summ: quality control data", {
 # ============================================================================
 
 test_that("summ: data.table input conversion", {
+  withr::local_preserve_seed()
   skip_if_not_installed("data.table")
   df <- data.table::data.table(
     x = rnorm(100),
@@ -548,6 +577,7 @@ test_that("summ: data.table input conversion", {
 })
 
 test_that("summ: data.table input with table mode", {
+  withr::local_preserve_seed()
   skip_if_not_installed("data.table")
   df <- data.table::data.table(
     x = rnorm(100),

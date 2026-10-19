@@ -1,8 +1,6 @@
 # Function: row_egen()
 
-**Generated:** 2026-03-03 23:09:16
-
----
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:43 | **Status:** PASS
 
 ## Example 1: row_min
 
@@ -26,7 +24,7 @@ row_max(df)
 **Output:**
 
 ```
-[1] 3 3 1
+[1] 3 3 3
 ```
 
 ## Example 3: row_mean
@@ -38,7 +36,7 @@ row_mean(df)
 **Output:**
 
 ```
-[1] 2.666667 2.666667 1.000000
+[1] 2.000000 2.333333 1.666667
 ```
 
 ## Example 4: row_sum
@@ -50,7 +48,7 @@ row_sum(df)
 **Output:**
 
 ```
-[1] 8 8 3
+[1] 6 7 5
 ```
 
 ## Example 5: row_miss (count NA per row)
@@ -91,12 +89,12 @@ df %>%
 **Output:**
 
 ```
-# A tibble: 3 × 5
+# A tibble: 3 x 5
       a     b     c min_val max_val
   <dbl> <dbl> <dbl>   <dbl>   <dbl>
-1     3     3     2       3       3
-2     3     2     3       3       3
-3     1     1     1       1       1
+1     1     3     2       1       3
+2     2     2     3       2       3
+3     3     1     1       1       3
 ```
 
 ## Example 8: With scalar values
@@ -109,12 +107,59 @@ df %>%
 **Output:**
 
 ```
-# A tibble: 3 × 4
+# A tibble: 3 x 4
       a     b     c above_2
   <dbl> <dbl> <dbl>   <dbl>
-1     3     3     2       3
+1     1     3     2       1
 2     2     2     3       2
-3     1     1     1       1
+3     3     1     1       2
 ```
 
+## Example 9: Logical extrema retain TRUE/FALSE
+
+```r
+flags <- tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
+row_max(flags)
+row_min(flags)
+typeof(row_max(flags))
+```
+
+**Output:**
+
+```
+[1]  TRUE FALSE    NA
+[1] FALSE FALSE    NA
+[1] "logical"
+```
+
+## Example 10: Calendar summaries preserve dates
+
+```r
+dates <- tibble(a = as.Date(c('2024-01-01', NA)),
+                b = as.Date(c('2024-01-03', '2024-01-05')))
+row_max(dates)
+row_mean(dates)
+```
+
+**Output:**
+
+```
+[1] "2024-01-03" "2024-01-05"
+[1] "2024-01-02" "2024-01-05"
+```
+
+## Example 11: Stable C++ sample dispersion
+
+```r
+large <- tibble(a = c(1e12, 1e200), b = c(1e12 + 1, 1e200))
+row_var(large)
+row_sd(large)
+```
+
+**Output:**
+
+```
+[1] 0.5 0.0
+[1] 0.7071068 0.0000000
+```
 

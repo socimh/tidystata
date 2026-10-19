@@ -9,4 +9,4 @@
 library(testthat)
 library(statart)
 
-test_check("statart")
+test_check("statart", stop_on_warning = TRUE)

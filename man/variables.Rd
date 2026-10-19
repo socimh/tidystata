@@ -10,7 +10,7 @@ variables(.data, ...)
 variables_search(.data, string, ...)
 }
 \arguments{
-\item{.data}{The input data frame or tibble.}
+\item{.data}{The input data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Existing columns to
 select or rename before listing or searching. Omit to include all columns.
@@ -23,10 +23,13 @@ represent zero or more, exactly one, and one or more characters, respectively.
 Use \code{^} and \code{$} anchors to require a complete name or label match.}
 }
 \value{
-A tibble with a character \code{name} column. A character \code{label} column
+A table with a character \code{name} column. A character \code{label} column
 is added only when at least one selected variable has a usable label;
 unlabelled variables then have \code{NA} labels. Search returns only matching
 rows, in selection order, with the same columns as the selected variable list.
+Tables preserve the input's data.frame, tibble, or data.table container and
+supported preview settings. Results are ungrouped; arbitrary subclasses are
+not reconstructed on the inventory rows.
 }
 \description{
 \itemize{

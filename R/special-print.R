@@ -9,8 +9,9 @@
 #' the unchanged input. `slice_headtail()` and `slice_interval()` actually
 #' select rows, so use them only when a smaller data set is wanted.
 #'
-#' @param .data An in-memory data frame, ordinary tibble, grouped tibble, or
-#' rowwise tibble. Convert other table subclasses explicitly before wrapping;
+#' @param .data An in-memory data frame, data.table, ordinary tibble, grouped
+#' tibble, rowwise tibble, or `sf` data frame (geometry is kept when slicing and
+#' printed as a column). Convert other subclasses explicitly before wrapping;
 #' collect lazy tables first. Apply the wrapper separately to lists of tables.
 #' @param style Either `"headtail"` or `"interval"`.
 #' @param n Total number of rows to display or select: a positive whole number
@@ -39,12 +40,20 @@
 #' do not change stored settings. Explicit `tibble::as_tibble()` or
 #' `as.data.frame()` conversions remove the preview, as does extracting a column.
 #' This feature controls console printing, not HTML widgets or GUI viewers.
+#' Only the temporary display is converted to a tibble. Wrapping and unwrapping
+#' a data.table creates an independent copy; native operations such as `:=`
+#' on a wrapped data.table retain ordinary reference semantics. External
+#' dplyr/tidyr verbs determine their own result container and grouping, while
+#' preview settings follow the result.
 #'
-#' @return `preview_table()` returns a complete tibble with an additional
+#' @return `preview_table()` returns the complete input container with an additional
 #' `statart_preview` class. `unpreview_table()` returns the table without that
 #' class or its settings, preserving grouping. The print helpers invisibly
-#' return their original input. The slice helpers return the selected rows as
-#' a tibble, retaining supported grouping and existing preview settings.
+#' return their original input. The slice helpers return the selected rows in
+#' the input container, retaining valid grouping and existing preview settings.
+#' Explicit base data.frame row names are preserved. Slice helpers regenerate
+#' automatic row names following dplyr's row-slicing behavior. Other subclasses
+#' are unsupported.
 #' @examples
 #' x <- preview_table(tibble::tibble(id = 1:30, value = (1:30)^2))
 #' x
@@ -66,11 +75,13 @@ preview_table <- function(.data, style = c("headtail", "interval"), n = 10) {
   style <- match.arg(style)
   preview_check_n(n)
   out <- unpreview_table(.data)
-  if (!inherits(out, "tbl_df")) {
-    out <- tibble::as_tibble(out, .name_repair = "minimal")
+  if (inherits(out, "data.table")) {
+    data.table::setattr(out, "statart_preview", list(style = style, n = n))
+    data.table::setattr(out, "class", c("statart_preview", class(out)))
+  } else {
+    attr(out, "statart_preview") <- list(style = style, n = n)
+    class(out) <- c("statart_preview", class(out))
   }
-  attr(out, "statart_preview") <- list(style = style, n = n)
-  class(out) <- c("statart_preview", class(out))
   out
 }
 
@@ -78,8 +89,18 @@ preview_table <- function(.data, style = c("headtail", "interval"), n = 10) {
 #' @export
 unpreview_table <- function(.data) {
   preview_check_data(.data)
-  attr(.data, "statart_preview") <- NULL
-  class(.data) <- setdiff(class(.data), "statart_preview")
+  if (inherits(.data, "data.table")) {
+    .data <- data.table::copy(.data)
+    data.table::setattr(.data, "statart_preview", NULL)
+    data.table::setattr(
+      .data,
+      "class",
+      setdiff(class(.data), "statart_preview")
+    )
+  } else {
+    attr(.data, "statart_preview") <- NULL
+    class(.data) <- setdiff(class(.data), "statart_preview")
+  }
   .data
 }
 
@@ -88,16 +109,21 @@ preview_check_data <- function(x) {
     "statart_preview",
     "grouped_df",
     "rowwise_df",
+    "sf",
     "tbl_df",
     "tbl",
+    "data.table",
     "data.frame"
   )
   if (!is.data.frame(x) || !all(class(x) %in% supported)) {
     rlang::abort(paste0(
-      "`.data` must be an in-memory data frame or ordinary/grouped/rowwise ",
+      "`.data` must be an in-memory data frame, data.table, sf data frame, or ordinary/grouped/rowwise ",
       "tibble. Collect lazy tables and convert other subclasses explicitly ",
       "with tibble::as_tibble(); apply the wrapper to each table in a list."
     ))
+  }
+  if (inherits(x, "data.table")) {
+    table_check_data_table()
   }
 }
 
@@ -129,12 +155,24 @@ preview_rows <- function(size, n, style) {
 
 preview_restore <- function(out, template) {
   if (is.data.frame(out)) {
-    class(out) <- c("statart_preview", setdiff(class(out), "statart_preview"))
-    attr(out, "statart_preview") <- attr(
-      template,
-      "statart_preview",
-      exact = TRUE
-    )
+    classes <- c("statart_preview", setdiff(class(out), "statart_preview"))
+    settings <- attr(template, "statart_preview", exact = TRUE)
+    if (inherits(out, "data.table")) {
+      table_check_data_table()
+      # Native := returns the original reference, which must remain an alias.
+      if (
+        identical(class(out), classes) &&
+          identical(attr(out, "statart_preview", exact = TRUE), settings)
+      ) {
+        return(out)
+      }
+      out <- data.table::copy(out)
+      data.table::setattr(out, "class", classes)
+      data.table::setattr(out, "statart_preview", settings)
+    } else {
+      class(out) <- classes
+      attr(out, "statart_preview") <- settings
+    }
   }
   out
 }
@@ -318,8 +356,12 @@ slice_interval <- function(.data, n = 10) {
 preview_slice <- function(.data, n, style) {
   preview_check_data(.data)
   rows <- preview_rows(nrow(.data), n, style)
-  if (!inherits(.data, "tbl_df")) {
-    .data <- tibble::as_tibble(.data, .name_repair = "minimal")
+  if (inherits(.data, "data.table")) {
+    out <- unpreview_table(.data)[rows]
+    if (inherits(.data, "statart_preview")) {
+      out <- preview_restore(out, .data)
+    }
+    return(out)
   }
   dplyr::dplyr_row_slice(.data, rows)
 }

@@ -1,19 +1,17 @@
-library(testthat)
-library(statart)
-library(tibble)
-
 # These contracts apply to both public entry points. Calculated references use
 # ordinary R arithmetic rather than statart's implementation helpers.
 for (function_name in c("summ", "tabstat")) {
   local({
-    api <- getExportedValue("statart", function_name)
+    api <- summary_legacy_layout(
+      getExportedValue("statart", function_name)
+    )
     for (key in c("name", "value", "type", "n", "mean", "p50")) {
       local({
         group_key <- key
         test_that(
           paste(function_name, "preserves reserved grouping key", group_key),
           {
-            df <- tibble(x = c(1, 3, 8), g = c("a", "a", "b"))
+            df <- tibble::tibble(x = c(1, 3, 8), g = c("a", "a", "b"))
             names(df)[2] <- group_key
             before <- df
             expect_message(
@@ -42,7 +40,7 @@ for (function_name in c("summ", "tabstat")) {
         "reserved grouping repair avoids existing dotted names"
       ),
       {
-        df <- tibble(
+        df <- tibble::tibble(
           name = c("a", "a", "b"),
           .name = c("A", "A", "B"),
           ..name = 1:3,
@@ -65,7 +63,11 @@ for (function_name in c("summ", "tabstat")) {
       paste(function_name, "explicit by overrides pre-existing groups"),
       {
         df <- dplyr::group_by(
-          tibble(g = c("a", "b", "b"), h = c("z", "z", "y"), x = c(1, 3, 8)),
+          tibble::tibble(
+            g = c("a", "b", "b"),
+            h = c("z", "z", "y"),
+            x = c(1, 3, 8)
+          ),
           g
         )
         out <- api(df, x, .by = h, .stat = "mean")
@@ -79,7 +81,10 @@ for (function_name in c("summ", "tabstat")) {
     test_that(
       paste(function_name, "uses pre-existing groups when by is omitted"),
       {
-        df <- dplyr::group_by(tibble(g = c("a", "a", "b"), x = c(1, 3, 8)), g)
+        df <- dplyr::group_by(
+          tibble::tibble(g = c("a", "a", "b"), x = c(1, 3, 8)),
+          g
+        )
         out <- api(df, x, .stat = "mean")
         expect_equal(out$g, c("a", "b"))
         expect_equal(out$mean, c(2, 8))
@@ -93,7 +98,7 @@ for (function_name in c("summ", "tabstat")) {
       ),
       {
         out <- api(
-          tibble(g = character(), x = numeric()),
+          tibble::tibble(g = character(), x = numeric()),
           x,
           .by = g,
           .name = FALSE,
@@ -111,7 +116,7 @@ for (function_name in c("summ", "tabstat")) {
       ),
       {
         out <- api(
-          tibble(g = character(), x = numeric(), y = integer()),
+          tibble::tibble(g = character(), x = numeric(), y = integer()),
           .by = g,
           .name = FALSE,
           .stat = "mean"
@@ -126,17 +131,18 @@ for (function_name in c("summ", "tabstat")) {
         "accepts fractional-second datetime spread in compact mode"
       ),
       {
-        df <- tibble(t = as.POSIXct("2024-01-01", tz = "UTC") + c(0, 1))
+        df <- tibble::tibble(t = as.POSIXct("2024-01-01", tz = "UTC") + c(0, 1))
         out <- api(
           df,
           .stat = c("mean", "sd", "mad", "iqr", "se"),
           .duration_format = "compact"
         )
         expect_equal(out$mean, "2024-01-01 00:00")
-        expect_equal(out$sd, "1s")
-        expect_equal(out$mad, "1s")
-        expect_equal(out$iqr, "0s")
-        expect_equal(out$se, "0s")
+        # Sub-second spreads keep their exact values in seconds.
+        expect_equal(out$sd, as.difftime(sd(0:1), units = "secs"))
+        expect_equal(out$mad, as.difftime(stats::mad(0:1), units = "secs"))
+        expect_equal(out$iqr, as.difftime(0.5, units = "secs"))
+        expect_equal(out$se, as.difftime(sd(0:1) / sqrt(2), units = "secs"))
       }
     )
 
@@ -147,7 +153,7 @@ for (function_name in c("summ", "tabstat")) {
       ),
       {
         out <- api(
-          tibble(t = as.POSIXct("2024-01-01", tz = "UTC") + 0:2),
+          tibble::tibble(t = as.POSIXct("2024-01-01", tz = "UTC") + 0:2),
           .stat = "mean",
           .duration_format = "compact"
         )
@@ -158,7 +164,7 @@ for (function_name in c("summ", "tabstat")) {
     test_that(
       paste(function_name, "preserves measured columns named data pronouns"),
       {
-        df <- tibble(.data = c(1, 3, 8), .env = c(2, 4, 6))
+        df <- tibble::tibble(.data = c(1, 3, 8), .env = c(2, 4, 6))
         out <- api(df, .stat = c("n", "mean"))
         expect_equal(out$name, c(".data", ".env"))
         expect_equal(out$mean, c(4, 4))
@@ -187,7 +193,7 @@ for (function_name in c("summ", "tabstat")) {
         for (argument in c(".keep_all", ".detail", ".na.rm", ".name")) {
           for (value in list(NA, logical(), c(TRUE, FALSE), "yes", 1)) {
             args <- c(
-              list(tibble(x = 1:3)),
+              list(tibble::tibble(x = 1:3)),
               stats::setNames(list(value), argument)
             )
             expect_error(do.call(api, args), "single.*TRUE.*FALSE")
@@ -202,7 +208,7 @@ for (function_name in c("summ", "tabstat")) {
         "multi-key missing groups follow the explicit removal flag"
       ),
       {
-        df <- tibble(
+        df <- tibble::tibble(
           a = c("x", NA, "x", "x"),
           b = c(1, 1, NA, 1),
           x = c(1, 2, 3, NA_real_)
@@ -227,7 +233,7 @@ for (function_name in c("summ", "tabstat")) {
         "mixed calendars have the documented list and table shapes"
       ),
       {
-        df <- tibble(
+        df <- tibble::tibble(
           x = c(1, 3),
           d = as.Date("2024-01-01") + 0:1,
           t = as.POSIXct("2024-01-01", tz = "UTC") + c(0, 3600)
@@ -247,14 +253,16 @@ for (function_name in c("summ", "tabstat")) {
 
 for (function_name in c("summ", "tabstat")) {
   local({
-    api <- getExportedValue("statart", function_name)
+    api <- summary_legacy_layout(
+      getExportedValue("statart", function_name)
+    )
     test_that(
       paste(
         function_name,
         "keeps character counts without parsing numeric-looking text"
       ),
       {
-        df <- tibble(x = c("1", "3", "3", NA_character_))
+        df <- tibble::tibble(x = c("1", "3", "3", NA_character_))
         expect_warning(
           out <- api(
             df,
@@ -273,7 +281,7 @@ for (function_name in c("summ", "tabstat")) {
       }
     )
     test_that(paste(function_name, "keeps list-column counts and identities"), {
-      df <- tibble(x = list(c(1, 2), c(1, 2), c(3, 4), NA))
+      df <- tibble::tibble(x = list(c(1, 2), c(1, 2), c(3, 4), NA))
       expect_warning(
         out <- api(
           df,
@@ -293,7 +301,7 @@ for (function_name in c("summ", "tabstat")) {
     test_that(
       paste(function_name, "mixed nonnumeric columns keep missing statistics"),
       {
-        df <- tibble(x = c(1, 3, 5), text = c("10", "20", "30"))
+        df <- tibble::tibble(x = c(1, 3, 5), text = c("10", "20", "30"))
         expect_warning(
           out <- api(df, .keep_all = TRUE, .stat = "mean"),
           "non-numeric"
@@ -305,7 +313,7 @@ for (function_name in c("summ", "tabstat")) {
     test_that(
       paste(function_name, "matrix columns fail with an actionable message"),
       {
-        df <- tibble(x = matrix(1:6, nrow = 3))
+        df <- tibble::tibble(x = matrix(1:6, nrow = 3))
         expect_error(api(df), "Matrix.*columns.*not supported")
       }
     )
@@ -314,12 +322,14 @@ for (function_name in c("summ", "tabstat")) {
 
 for (function_name in c("summ", "tabstat")) {
   local({
-    api <- getExportedValue("statart", function_name)
+    api <- summary_legacy_layout(
+      getExportedValue("statart", function_name)
+    )
     test_that(
       paste(function_name, "warns when integer64 conversion loses precision"),
       {
         skip_if_not_installed("bit64")
-        df <- tibble(
+        df <- tibble::tibble(
           x = bit64::as.integer64(c("9007199254740992", "9007199254740993"))
         )
         expect_warning(
@@ -336,13 +346,15 @@ for (function_name in c("summ", "tabstat")) {
 
 for (function_name in c("summ", "tabstat")) {
   local({
-    api <- getExportedValue("statart", function_name)
+    api <- summary_legacy_layout(
+      getExportedValue("statart", function_name)
+    )
     test_that(
       paste(function_name, "mixed-type notice has no spurious suffix"),
       {
         expect_message(
           api(
-            tibble(x = c(1, 3), d = as.Date("2024-01-01") + 0:1),
+            tibble::tibble(x = c(1, 3), d = as.Date("2024-01-01") + 0:1),
             .stat = "mean"
           ),
           "heterogeneous[.][[:space:]]*$"

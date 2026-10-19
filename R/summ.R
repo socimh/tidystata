@@ -2,13 +2,16 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' Compute one row of summary statistics per selected variable and group.
-#' `tabstat()` delegates to `summ()` with `.stat = "mean"` by default.
+#' `tabstat()` delegates to `summ()` with `.stat = "mean"` by default; with
+#' `.detail = TRUE` and no explicit `.stat`, it returns all detail statistics.
 #'
 #' @param ... Variables to summarise, using tidyselect or data-masking
 #' expressions (for example, `dplyr::where(is.numeric)` or `x_sq = x^2`).
 #' If omitted, select all columns except grouping keys.
 #' @param .data A data frame, data frame extension (e.g. a tibble), or a vector.
 #' Matrix and data-frame columns are unsupported; use atomic or list columns.
+#' For `sf` input, summarise attribute data only: all geometry columns are
+#' removed before selection. Geometry columns cannot be selected or grouped.
 #' @param .by Optional grouping columns, selected with tidyselect. An explicit
 #' selection overrides existing `group_by()` groups; when omitted, existing
 #' groups are used. Grouping columns are excluded from the measured variables.
@@ -27,23 +30,38 @@
 #' `miss_n`, `q1`, `median`, and `q3`; requested names and order are retained.
 #' Identical requested names are deduplicated; aliases and canonical names
 #' may coexist. `sum` applies to numeric summaries, not calendar dates or
-#' datetimes. Calendar summaries do not support `skew` or `kurtosis` either.
+#' datetimes. Calendar summaries do not support `skew` or `kurtosis` either;
+#' when such a statistic is requested alongside numeric variables, calendar
+#' variables are skipped with a warning.
+#' Percentiles `p0` through `p100`, including decimals such as `p2.5`, use
+#' type-7 quantiles. Only requested statistics and their prerequisites are
+#' calculated when `.stat` is nonempty.
 #' @param .na.rm A single `TRUE` or `FALSE`. If `TRUE`, remove rows missing
 #' any grouping key before summarising. Default is `FALSE`. Missing measured
 #' values are always omitted from numeric statistics, regardless of this flag.
-#' @param .name A single `TRUE` or `FALSE`. If `TRUE` (default), retain the
-#' `name` column. If `FALSE`, drop it only when one measured variable is
-#' summarised, including zero-row grouped output.
+#' @param .name A single `TRUE` or `FALSE`. If `FALSE` (default), drop the
+#' `name` column when exactly one measured variable is summarised, including
+#' zero-row grouped output; with several variables it is always kept. If
+#' `TRUE`, always retain it.
 #' @param .mode A character string. Either `"list"` (default) or `"table"`.
 #' List mode returns a single table when one variable-type family is present,
-#' otherwise a list named `numeric`, `date`, and/or `datetime`. The `numeric`
-#' family also contains nonnumeric columns retained by `.keep_all`.
-#' Table mode combines all families. Shared formatted statistic columns become
-#' character when numeric and calendar summaries are combined; counts remain
-#' numeric. Calendar locations and spreads are strings in both modes.
-#' @param .duration_format A character string, `"long"` (default) or `"compact"`.
-#' Controls calendar spread statistics such as SD: `"548 days"` versus `"548d"`.
-#' Sub-minute datetime spreads are rounded to whole seconds for display.
+#' otherwise a list named `numeric`, `date`, `datetime`, and/or `time` (for
+#' `hms` times of day). The `numeric` family also contains nonnumeric columns
+#' retained by `.keep_all`.
+#' Table mode combines all families. Calendar location columns are text, so a
+#' shared location column (such as `mean`) becomes character, with numeric
+#' values rounded to seven significant digits; counts remain numeric. Calendar
+#' spreads become plain numbers in days (Dates) or seconds (datetimes and
+#' times), and the unit is appended to `type`, for example `"date [days]"`.
+#' @param .duration_format Retained for compatibility and no longer affects the
+#' output: calendar spreads are always `difftime` columns (see Details).
+#' @param .sort A single `TRUE` or `FALSE`. If `TRUE` (default), sort grouping
+#' keys ascending like [tab()] (factor levels in their defined order, character
+#' keys in C-locale order), with missing keys last. Within each group, preserve
+#' the selected variable order. If `FALSE`, groups follow first appearance.
+#' @param .drop_empty A single `TRUE` or `FALSE`. If `TRUE`, remove individual
+#' summary rows with no observed measured values (`n == 0`), even when `n` is
+#' not requested. This is independent of `.na.rm`. Default is `FALSE`.
 #' @details
 #' Counts and missing values:
 #'
@@ -79,17 +97,31 @@
 #' Calendar output and grouping names:
 #'
 #' Date locations are displayed as `YYYY-MM-DD`; fractional days are not shown.
-#' Datetime locations are displayed in UTC as `YYYY-MM-DD HH:MM`, without
-#' seconds. Calendar spread statistics are formatted durations, not raw numbers.
+#' Infinite Date locations are displayed as `-Inf` or `Inf`; missing locations
+#' remain `NA`.
+#' Datetime locations are displayed as `YYYY-MM-DD HH:MM`, without seconds, in
+#' the variable's own time zone (the session time zone when none is set).
+#' `hms` time-of-day locations are displayed as `hh:mm:ss`.
+#'
+#' Calendar spread statistics (`sd`, `se`, `mad`, `iqr`) are `difftime`
+#' columns, so they can be compared across rows and used in arithmetic. Each
+#' column has one unit: days for Dates; for datetimes and times, the unit
+#' (seconds, minutes, hours or days) that fits the column's median nonzero
+#' spread. Convert with, for example, `as.numeric(out$sd, units = "hours")`.
 #' Grouping keys that collide with summary metadata or internal pivot names
 #' are renamed by prepending dots until unique among the input names, with
 #' a message. The input data are not modified.
 #' @name summ
 #'
-#' @return A tibble, or a list of tibbles in list mode when multiple
-#' variable-type families are present. Table mode restores a base data.frame
-#' or data.table for those input classes. Vector input uses its expression
-#' as the variable name (or `value` for a multiline expression).
+#' @return A table, or a list of tables in list mode when multiple
+#' variable-type families are present. Each table preserves the input's
+#' data.frame, tibble, or data.table container in both modes. Results are
+#' ungrouped, retaining grouping keys as columns and supported preview settings.
+#' Other subclasses are not reconstructed. Vector input returns a tibble in
+#' list mode or a data.frame in table mode, using its expression as the variable
+#' name, or `value` for a multiline expression or a magrittr pipe (`.`). Wrap
+#' the vector in a named tibble to choose a stable variable name. Input data are
+#' not modified.
 #' @export
 #'
 #' @examples
@@ -109,7 +141,11 @@
 #'
 #' # Keep numeric and calendar summaries in separate tables
 #' mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
-#' summ(mixed, .mode = "list", .duration_format = "compact")
+#' summ(mixed, .mode = "list")
+#'
+#' # Choose a stable variable name when starting from a vector
+#' scores <- c(4, 6, NA, 8)
+#' tibble::tibble(score = scores) |> summ(.name = TRUE)
 summ <- function(
   .data,
   ...,
@@ -118,16 +154,20 @@ summ <- function(
   .detail = FALSE,
   .stat = character(0),
   .na.rm = FALSE,
-  .name = TRUE,
+  .name = FALSE,
   .mode = c("list", "table"),
-  .duration_format = c("long", "compact")
+  .duration_format = c("long", "compact"),
+  .sort = TRUE,
+  .drop_empty = FALSE
 ) {
   # Validate controls before data-dependent branching.
   controls <- list(
     .keep_all = .keep_all,
     .detail = .detail,
     .na.rm = .na.rm,
-    .name = .name
+    .name = .name,
+    .sort = .sort,
+    .drop_empty = .drop_empty
   )
   for (argument in names(controls)) {
     value <- controls[[argument]]
@@ -139,28 +179,17 @@ summ <- function(
   .mode <- match.arg(.mode)
   .duration_format <- match.arg(.duration_format)
 
-  # Store original class for later restoration
-  original_class <- class(.data)[1]
+  input_expr <- substitute(.data)
+  template <- .data
+  .data <- aggregation_working_data(
+    .data,
+    override_groups = !rlang::quo_is_null(rlang::enquo(.by))
+  )
   # Normalize vectors before grouping and selection.
   if (!is.data.frame(.data)) {
-    var_name <- deparse(substitute(.data))
-    if (length(var_name) > 1) {
-      var_name <- "value"
-    }
+    var_name <- summ_vector_name(input_expr)
     .data <- tibble::as_tibble_col(.data, column_name = var_name)
-    original_class <- "data.frame"
-  }
-
-  # Convert data.table to tibble for processing (if needed)
-  is_dt <- FALSE
-  if (inherits(.data, "data.table")) {
-    if (!requireNamespace("data.table", quietly = TRUE)) {
-      stop(
-        "data.table package required for data.table input. Install with: install.packages('data.table')"
-      )
-    }
-    is_dt <- TRUE
-    .data <- tibble::as_tibble(.data)
+    template <- if (.mode == "table") as.data.frame(.data) else .data
   }
 
   # Identify group variables
@@ -242,6 +271,7 @@ summ <- function(
     "p50",
     "p75"
   )
+  reserved <- unique(c(reserved, .stat))
   for (position in which(group_vars %in% reserved)) {
     old_name <- group_vars[[position]]
     new_name <- paste0(".", old_name)
@@ -250,16 +280,58 @@ summ <- function(
     }
     names(.data)[names(.data) == old_name] <- new_name
     group_vars[[position]] <- new_name
-    message(
-      "Grouping column `",
+    message(reserved_name_message(
       old_name,
-      "` renamed to `",
       new_name,
-      "` to avoid summary-column collisions."
-    )
+      "summ()",
+      what = "Grouping column"
+    ))
   }
   measured_count <- ncol(.data) - length(group_vars)
-  out <- summ_list(.data, group_vars, .detail, .stat, .mode, .duration_format)
+  # Keep observed counts internally when filtering a selected-statistic result.
+  working_stats <- if (.drop_empty && length(.stat)) {
+    unique(c(.stat, "n"))
+  } else {
+    .stat
+  }
+  out <- summ_list(
+    .data,
+    group_vars,
+    .detail,
+    working_stats,
+    .mode
+  )
+  finalize <- function(data) {
+    if (.drop_empty) {
+      data <- data[data$n > 0L, , drop = FALSE]
+      if (length(.stat) && !"n" %in% .stat) {
+        data$n <- NULL
+      }
+    }
+    if (.sort) {
+      # Strip only the marker added for this type; actual leading stars remain.
+      prefix_length <- ifelse(
+        !is_summable_chr(data$type),
+        3L,
+        ifelse(
+          data$type %in% c("fct", "ord"),
+          2L,
+          ifelse(stringr::str_detect(data$type, "lbl$"), 1L, 0L)
+        )
+      )
+      variable_positions <- match(
+        substring(data$name, prefix_length + 1L),
+        setdiff(names(.data), group_vars)
+      )
+      data <- dplyr::arrange(
+        data,
+        !!!rlang::syms(group_vars),
+        !!variable_positions
+      )
+    }
+    data
+  }
+  out <- if (is.data.frame(out)) finalize(out) else lapply(out, finalize)
 
   # A single measured variable can omit its otherwise redundant name column.
   if (!.name && is.data.frame(out) && "name" %in% names(out)) {
@@ -268,16 +340,7 @@ summ <- function(
     }
   }
 
-  # Convert output back to original class (for table mode)
-  if (.mode == "table" && is.data.frame(out)) {
-    if (original_class == "data.frame") {
-      out <- as.data.frame(out)
-    } else if (is_dt) {
-      out <- data.table::as.data.table(out)
-    }
-  }
-
-  return(out)
+  table_restore(out, template)
 }
 
 #' @rdname summ
@@ -290,16 +353,22 @@ tabstat <- function(
   .detail = FALSE,
   .stat = "mean",
   .na.rm = FALSE,
-  .name = TRUE,
+  .name = FALSE,
   .mode = c("list", "table"),
-  .duration_format = c("long", "compact")
+  .duration_format = c("long", "compact"),
+  .sort = TRUE,
+  .drop_empty = FALSE
 ) {
+  # Detailed output replaces the default mean-only request.
+  if (isTRUE(.detail) && missing(.stat)) {
+    .stat <- character(0)
+  }
   if (!is.data.frame(.data)) {
-    var_name <- deparse(substitute(.data))
-    if (length(var_name) > 1L) {
-      var_name <- "value"
+    var_name <- summ_vector_name(substitute(.data))
+    .data <- tibble::as_tibble_col(.data, column_name = var_name)
+    if (match.arg(.mode) == "table") {
+      .data <- as.data.frame(.data)
     }
-    .data <- as.data.frame(tibble::as_tibble_col(.data, column_name = var_name))
   }
   return(
     summ(
@@ -312,7 +381,15 @@ tabstat <- function(
       .na.rm = .na.rm,
       .name = .name,
       .mode = .mode,
-      .duration_format = .duration_format
+      .duration_format = .duration_format,
+      .sort = .sort,
+      .drop_empty = .drop_empty
     )
   )
+}
+
+# A multiline expression or a magrittr placeholder has no useful name.
+summ_vector_name <- function(expr) {
+  name <- deparse(expr)
+  if (length(name) > 1L || identical(name, ".")) "value" else name
 }

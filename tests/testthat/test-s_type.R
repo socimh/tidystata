@@ -6,12 +6,6 @@
 # KEY BEHAVIORS: type detection, unit extraction
 # EDGE CASES: ambiguous types, compound units
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - s_type() Basic Types
 # ============================================================================
@@ -95,7 +89,7 @@ test_that("s_type: hms time", {
 # ============================================================================
 
 test_that("s_type: haven labelled", {
-  x <- labelled(c(1, 2, 1), labels = c(Yes = 1, No = 2))
+  x <- haven::labelled(c(1, 2, 1), labels = c(Yes = 1, No = 2))
   result <- s_type(x)
   expect_type(result, "character")
   expect_true(grepl("label|lbl", result))
@@ -108,7 +102,7 @@ test_that("s_type: list", {
 })
 
 test_that("s_type: data frame", {
-  x <- tibble(a = 1:5, b = 6:10)
+  x <- tibble::tibble(a = 1:5, b = 6:10)
   result <- s_type(x)
   expect_type(result, "character")
 })
@@ -164,7 +158,7 @@ test_that("s_type: NaN values", {
 # ============================================================================
 
 test_that("s_type: applied to each column with summarise", {
-  df <- tibble(
+  df <- tibble::tibble(
     int_col = 1:5,
     dbl_col = c(1.5, 2.5, 3.5, 4.5, 5.5),
     chr_col = letters[1:5],
@@ -173,7 +167,7 @@ test_that("s_type: applied to each column with summarise", {
   )
 
   result <- df %>%
-    summarise(across(everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
 
   expect_s3_class(result, "tbl_df")
   expect_equal(result$int_col, "integer")
@@ -184,13 +178,13 @@ test_that("s_type: applied to each column with summarise", {
 })
 
 test_that("s_type: within mutate for type checking", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = 1:5,
     y = letters[1:5]
   )
 
   result <- df %>%
-    mutate(x_type = s_type(x), y_type = s_type(y))
+    dplyr::mutate(x_type = s_type(x), y_type = s_type(y))
 
   expect_equal(result$x_type[1], "integer")
   expect_equal(result$y_type[1], "character")
@@ -257,7 +251,7 @@ test_that("s_type and s_unit: all-missing measured vector metadata", {
 
 test_that("s_type and s_unit: codebook retains measurement metadata", {
   skip_if_not_installed("units")
-  df <- tibble(distance = units::set_units(c(1, NA, 3), "m"))
+  df <- tibble::tibble(distance = units::set_units(c(1, NA, 3), "m"))
   original <- df
 
   result <- codebook(df)
@@ -306,7 +300,8 @@ test_that("s_unit: factor returns NA", {
 # ============================================================================
 
 test_that("s_type: used in codebook workflow", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     id = 1:100,
     income = rnorm(100, 50000, 10000),
     gender = sample(c("M", "F"), 100, replace = TRUE),
@@ -315,8 +310,8 @@ test_that("s_type: used in codebook workflow", {
 
   # Simulate codebook variable summary
   var_summary <- df %>%
-    summarise(across(
-      everything(),
+    dplyr::summarise(dplyr::across(
+      dplyr::everything(),
       list(
         type = s_type,
         n = ~ sum(!is.na(.))
@@ -343,7 +338,8 @@ test_that("s_type: type validation function", {
 # ============================================================================
 
 test_that("s_type: data audit workflow", {
-  audit_data <- tibble(
+  withr::local_preserve_seed()
+  audit_data <- tibble::tibble(
     transaction_id = 1:1000,
     amount = rnorm(1000, 100, 20),
     currency = sample(c("USD", "EUR", "GBP"), 1000, replace = TRUE),
@@ -353,7 +349,7 @@ test_that("s_type: data audit workflow", {
 
   # Get type summary for all columns
   type_summary <- audit_data %>%
-    summarise(across(everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
 
   expect_equal(type_summary$transaction_id, "integer")
   expect_equal(type_summary$amount, "double")
@@ -362,7 +358,7 @@ test_that("s_type: data audit workflow", {
 })
 
 test_that("s_type: ETL pipeline type checking", {
-  raw_data <- tibble(
+  raw_data <- tibble::tibble(
     id = as.character(1:100), # IDs stored as character
     value = rep(c("100.5", "200.3", "150.0"), length.out = 100), # Values as character
     date = rep(c("2024-01-01", "2024-01-02", "2024-01-03"), length.out = 100) # Dates as character
@@ -370,20 +366,20 @@ test_that("s_type: ETL pipeline type checking", {
 
   # Check types before conversion
   original_types <- raw_data %>%
-    summarise(across(everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
 
   expect_equal(unique(unlist(original_types)), "character")
 
   # After conversion
   clean_data <- raw_data %>%
-    mutate(
+    dplyr::mutate(
       id = as.integer(id),
       value = as.numeric(value),
       date = as.Date(date)
     )
 
   clean_types <- clean_data %>%
-    summarise(across(everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
 
   expect_equal(clean_types$id, "integer")
   expect_equal(clean_types$value, "double")

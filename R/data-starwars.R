@@ -3,6 +3,11 @@
 #' The original data, from SWAPI, the Star Wars API, <https://swapi.py4e.com/>, has been revised
 #' to reflect additional research into gender and sex determinations of characters.
 #'
+#' @source The object matches `dplyr::starwars` from dplyr 1.1.3.
+#' Upstream preparation acknowledges additional gender research by Megan Beckett.
+#' See the installed `DATA-PROVENANCE.md` and `THIRD-PARTY-NOTICES.md`
+#' for source versions, reconstruction, attribution and distribution review.
+#'
 #' @format A tibble with 87 rows and 14 variables:
 #' \describe{
 #' \item{name}{Name of the character}

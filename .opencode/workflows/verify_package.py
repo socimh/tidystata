@@ -1,5 +1,6 @@
 """Build and test a fresh temporary source copy without replacing local artifacts."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -7,16 +8,48 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tarfile
+
+from r_process import r_command, r_environment
+
+
+def source_copy_ignore(root):
+    """Keep local tools and derived outputs out of fresh verification copies."""
+    def ignore(directory, names):
+        directory = Path(directory)
+        return [name for name in names if
+                name in {".git", ".Rproj.user", "__pycache__", ".Rhistory"} or
+                (directory == root and name in {"docs", "extra_functions"}) or
+                (directory == root / ".opencode" and
+                 name in {"results", "tools", "notes"}) or
+                (directory.name == "src" and
+                 Path(name).suffix.lower() in {".o", ".dll", ".so", ".a"})]
+    return ignore
+
+
+def parse_options(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--filter", default="")
+    parser.add_argument("--shuffle-seed", type=int)
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--check", action="store_true")
+    modes.add_argument("--release", action="store_true",
+                        help="Build vignettes and run full --as-cran/manual checks")
+    modes.add_argument("--demos", action="store_true")
+    modes.add_argument("--minimal", action="store_true")
+    parser.add_argument("--prefix", default=".opencode/results/current")
+    options = parser.parse_args(argv)
+    if any((options.check, options.release, options.demos, options.minimal)) and (
+        options.filter or options.shuffle_seed is not None
+    ):
+        parser.error("--filter and --shuffle-seed require ordinary test mode")
+    if options.shuffle_seed is not None and not 0 <= options.shuffle_seed <= 2147483647:
+        parser.error("--shuffle-seed must be an integer from 0 to 2147483647")
+    return options
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--filter", default="")
-    parser.add_argument("--check", action="store_true")
-    parser.add_argument("--demos", action="store_true")
-    parser.add_argument("--minimal", action="store_true")
-    parser.add_argument("--prefix", default=".opencode/results/current")
-    options = parser.parse_args()
+    options = parse_options()
     root = Path(__file__).resolve().parents[2]
     prefix = (root / options.prefix).resolve()
     prefix.parent.mkdir(parents=True, exist_ok=True)
@@ -24,30 +57,22 @@ def main():
     source = workspace / "statart"
     library = workspace / "library"
     library.mkdir()
-    launcher = Path("C:/Users/socimh/.codex/scripts/run_r_safe.py")
     logs = workspace / "logs"
 
-    def ignore(directory, names):
-        return [name for name in names if name in
-                (".git", ".Rproj.user", "__pycache__", ".Rhistory") or
-                (Path(directory).name == "src" and
-                 Path(name).suffix.lower() in (".o", ".dll", ".so", ".a"))]
-
-    shutil.copytree(root, source, ignore=ignore)
+    shutil.copytree(root, source, ignore=source_copy_ignore(root))
     paths = dict(workspace=str(workspace), source=str(source), library=str(library))
     Path(str(prefix) + "-paths.json").write_text(
         json.dumps(paths, indent=2), encoding="utf-8")
     print("Fresh source:", source, flush=True)
 
     def run(name, command, cwd=root, extra_env=None):
-        env = os.environ.copy()
-        # The inherited C.UTF-8 locale is unsupported by Windows R. Scope the
-        # correction to child processes; never change machine/R startup files.
-        env.update({"LC_ALL": "C", "LANG": "C"})
-        env.update(extra_env or {})
+        development_library = root / ".opencode/tools/library"
+        library_paths = [str(library)]
+        if development_library.is_dir():
+            library_paths.append(str(development_library))
+        env = r_environment(extra_env, libraries=library_paths)
         log = prefix.parent / (prefix.name + "-" + name + ".log")
-        full_command = [sys.executable, str(launcher), "--log-directory",
-                        str(logs), "--timeout", "900", "--", *map(str, command)]
+        full_command = r_command(command, log_directory=logs)
         with log.open("w", encoding="utf-8") as stream:
             result = subprocess.run(full_command, cwd=cwd, env=env,
                                     stdout=stream, stderr=subprocess.STDOUT)
@@ -64,16 +89,18 @@ def main():
         return run("demos", ["Rscript", root / ".opencode/workflows/generate_demo_reports.R"],
                    cwd=source, extra_env={"STATART_DEMO_SOURCE": str(source),
                                          "STATART_DEMO_LIBRARY": str(library),
-                                         "R_LIBS_USER": str(library),
                                          "STATART_REPORT_DIR": str(root / ".opencode/reports")})
     if options.minimal:
         return run("minimal", ["Rscript", root / ".opencode/tests/minimal_dependencies.R",
                                library, workspace / "minimal-library"])
-    status = run("tests", ["Rscript", root / ".opencode/workflows/run_suite.R",
-                           source, prefix, options.filter])
-    if options.check:
-        build = run("build", ["R", "CMD", "build", "--no-build-vignettes",
-                               "--no-manual", source], cwd=workspace)
+    test_command = ["Rscript", root / ".opencode/workflows/run_suite.R",
+                    source, prefix, options.filter]
+    if options.shuffle_seed is not None:
+        test_command.append(str(options.shuffle_seed))
+    status = run("tests", test_command)
+    if options.check or options.release:
+        build_options = [] if options.release else ["--no-build-vignettes", "--no-manual"]
+        build = run("build", ["R", "CMD", "build", *build_options, source], cwd=workspace)
         if build:
             return build
         tarballs = list(workspace.glob("statart_*.tar.gz"))
@@ -82,12 +109,66 @@ def main():
         paths["tarball"] = str(tarballs[0])
         Path(str(prefix) + "-paths.json").write_text(
             json.dumps(paths, indent=2), encoding="utf-8")
-        check = run("check", ["R", "CMD", "check", "--no-manual",
-                               tarballs[0]], cwd=workspace, extra_env={
-                                   "_R_CHECK_FORCE_SUGGESTS_": "false",
-                                   "_R_CHECK_CRAN_INCOMING_REMOTE_": "false"
-                               })
-        status = status or check
+        check_options = ["--as-cran"] if options.release else ["--no-manual"]
+        check_env = {
+            "_R_CHECK_FORCE_SUGGESTS_": "true",
+            "_R_CHECK_CRAN_INCOMING_REMOTE_": "true"
+        } if options.release else {
+            "_R_CHECK_FORCE_SUGGESTS_": "false",
+            "_R_CHECK_CRAN_INCOMING_REMOTE_": "false"
+        }
+        paths["release_check"] = options.release
+        paths["check_options"] = check_options
+        Path(str(prefix) + "-paths.json").write_text(
+            json.dumps(paths, indent=2), encoding="utf-8")
+        check = run("check", ["R", "CMD", "check", *check_options, tarballs[0]],
+                    cwd=workspace, extra_env=check_env)
+        check_result = Path(str(prefix) + "-check-result.json")
+        parsed = run("check-result", [
+            "Rscript", root / ".opencode/workflows/parse_check_result.R",
+            workspace / "statart.Rcheck/00check.log", str(check), check_result
+        ])
+        status = status or check or parsed
+        paths["check_result"] = str(check_result)
+        if check_result.is_file():
+            summary = json.loads(check_result.read_text(encoding="utf-8"))
+            paths["check_summary"] = summary
+            print("Check counts:", summary["counts"], flush=True)
+            if summary["notes"]:
+                print("Check notes require review before publication.", flush=True)
+        if options.release and status == 0:
+            archive = tarballs[0]
+            before = archive.read_bytes()
+            bundle_library = workspace / "bundle-library"
+            bundle_library.mkdir()
+            installed = run("bundle-install", [
+                "R", "CMD", "INSTALL", "--library=" + str(bundle_library), archive
+            ])
+            if archive.read_bytes() != before:
+                raise RuntimeError("Candidate archive changed during installation")
+            status = status or installed
+            if installed == 0:
+                with tarfile.open(archive) as bundle:
+                    description = bundle.extractfile("statart/DESCRIPTION").read().decode("utf-8")
+                fields = dict(line.split(":", 1) for line in description.splitlines()
+                              if line and not line[0].isspace() and ":" in line)
+                receipt = dict(
+                    tarball=str(archive),
+                    tarball_sha256=hashlib.sha256(before).hexdigest(),
+                    tarball_md5=hashlib.md5(before).hexdigest(),
+                    bundle_library=str(bundle_library),
+                    package=fields["Package"].strip(), version=fields["Version"].strip()
+                )
+                receipt_path = Path(str(prefix) + "-installation.json")
+                receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+                resources = run("resources", [
+                    "Rscript", root / ".opencode/tests/verify_release_resources.R",
+                    bundle_library, archive, receipt_path
+                ])
+                status = status or resources
+                paths.update(receipt, installation_receipt=str(receipt_path))
+        Path(str(prefix) + "-paths.json").write_text(
+            json.dumps(paths, indent=2), encoding="utf-8")
     return status
 
 

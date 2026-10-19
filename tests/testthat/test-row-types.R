@@ -295,6 +295,7 @@ test_that("affine units cannot disguise sums or dispersion as absolute scales", 
 })
 
 test_that("compiled row statistics agree with independent base references", {
+  withr::local_preserve_seed()
   set.seed(8102)
   for (offset in c(0, 1e12)) {
     data <- as.data.frame(matrix(rnorm(350) + offset, nrow = 50))

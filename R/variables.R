@@ -5,7 +5,7 @@
 #' * `variables_search()` searches for variables by name or variable label,
 #'   rather than by the values stored in the columns.
 #'
-#' @param .data The input data frame or tibble.
+#' @param .data The input data frame, tibble, or data.table.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to
 #' select or rename before listing or searching. Omit to include all columns.
 #' Computed columns are not created by this argument.
@@ -15,10 +15,13 @@
 #' represent zero or more, exactly one, and one or more characters, respectively.
 #' Use `^` and `$` anchors to require a complete name or label match.
 #'
-#' @return A tibble with a character `name` column. A character `label` column
+#' @return A table with a character `name` column. A character `label` column
 #' is added only when at least one selected variable has a usable label;
 #' unlabelled variables then have `NA` labels. Search returns only matching
 #' rows, in selection order, with the same columns as the selected variable list.
+#' Tables preserve the input's data.frame, tibble, or data.table container and
+#' supported preview settings. Results are ungrouped; arbitrary subclasses are
+#' not reconstructed on the inventory rows.
 #'
 #' @details
 #' Variable labels are read from each column's `label` attribute, including

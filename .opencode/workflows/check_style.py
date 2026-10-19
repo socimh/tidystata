@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import sys
 
+from r_process import r_command, r_environment
+
 
 def checked_files(root, manifest):
     paths = manifest["files"]
@@ -22,7 +24,8 @@ def checked_files(root, manifest):
         if not target.is_relative_to(root.resolve()) or not target.is_file():
             raise ValueError("Missing or external R source: " + name)
         if name.casefold() == "r/cpp11.r" or name.casefold().startswith(
-            ("extra_functions/", "docs/", ".opencode/results/")
+            ("extra_functions/", "docs/", ".opencode/results/",
+             ".opencode/tools/", ".opencode/notes/")
         ):
             raise ValueError("Generated or archived source in style scope: " + name)
     return paths
@@ -49,7 +52,7 @@ def main():
         missing = new_sources(root, args.base) - set(paths) - {"R/cpp11.R"}
         if missing:
             raise ValueError("New R sources absent from style scope: " + ", ".join(sorted(missing)))
-    local_air = root / ".opencode/results/style-tools/air.exe"
+    local_air = root / ".opencode/tools/style-tools/air.exe"
     air = args.air or os.environ.get("STATART_AIR") or shutil.which("air")
     if not air and local_air.is_file():
         air = str(local_air)
@@ -62,14 +65,8 @@ def main():
     if result.returncode:
         return result.returncode
     script = root / ".opencode/workflows/check_style.R"
-    command = ["Rscript", str(script), str(manifest_path)]
-    if os.name == "nt":
-        launcher = Path("C:/Users/socimh/.codex/scripts/run_r_safe.py")
-        command = [sys.executable, str(launcher), "--", *command]
-    env = os.environ.copy()
-    if os.name == "nt":
-        env.update(LC_ALL="C", LANG="C")
-    return subprocess.run(command, cwd=root, env=env).returncode
+    command = r_command(["Rscript", str(script), str(manifest_path)])
+    return subprocess.run(command, cwd=root, env=r_environment()).returncode
 
 
 if __name__ == "__main__":

@@ -5,21 +5,35 @@
 #' <[`data-masking`][args_data_masking]> expressions. Omit to return the input
 #' unchanged.
 #'
-#' @return The result of [dplyr::select()] when selection succeeds, otherwise
-#' the result of [dplyr::transmute()]. Data-frame classes and grouping follow
-#' the successful operation; a tibble input returns a tibble.
+#' @return The selected (and computed) columns. Data-frame classes and
+#' grouping follow [dplyr::select()]; a tibble input returns a tibble.
 #'
 #' @details
-#' Selection is attempted first. Its successful result is returned directly,
-#' without trying data masking or repeating the operation. If selection fails,
-#' expressions are evaluated with [dplyr::transmute()]. Warnings from the
-#' successful operation are emitted; warnings from a failed attempt are not.
-#' If both operations fail, the error includes both underlying messages.
+#' Each argument is classified before evaluation. Column names, strings,
+#' numeric positions, selection syntax (`c()`, `:`, `!`, `&`, `|`, unary `-`)
+#' and tidyselect helpers such as `starts_with()`, `where()`, `all_of()` or
+#' [s_match()] select existing columns, as do calls that use no column names
+#' (for example `all_of(vars)` or `seq_len(2)`). Any other expression that
+#' uses columns, such as `height > 50` or `bmi = mass / height^2`, is computed
+#' with [dplyr::mutate()] and then selected, so arithmetic on columns is never
+#' misread as column positions. Selections and computed values can be mixed;
+#' output follows argument order. Unnamed computed columns are named by their
+#' expression.
 #'
-#' A failed selection can evaluate user code before the data-masking fallback.
-#' For random draws or other expressions with side effects, compute the columns
-#' with [dplyr::mutate()] first, then select their names. Grouping columns are
-#' retained according to dplyr's selection and transformation rules.
+#' A named constant such as `one = 1`, `label = "x"` or `y = c(1, 2)` creates
+#' a constant column; it never selects or renames columns by position. Unnamed
+#' names, strings and positions must identify existing columns. If they do
+#' not, an error lists every unmatched name instead of evaluating them as
+#' expressions, so a misspelled column is never replaced by an object of the
+#' same name in the calling environment. (A symbol naming a character vector in
+#' the calling environment is still passed to tidyselect, which deprecates that
+#' form in favour of `all_of()`.)
+#'
+#' If selection itself fails for another reason (for example, duplicate output
+#' names), the arguments are evaluated sequentially with [dplyr::transmute()];
+#' if that also fails, the error reports both attempts. Computed expressions
+#' are evaluated once when selection succeeds. Grouping columns are retained
+#' according to dplyr's selection rules.
 #' @export
 #'
 #' @examples
@@ -27,10 +41,8 @@
 #'   s_select()
 #' starwars %>%
 #'   s_select(name, height)
-#' \dontrun{
-#' starwars %>%
-#'   dplyr::select(height > 50)
-#' }
+#' # Ordinary select() rejects this computed expression.
+#' try(dplyr::select(starwars, height > 50))
 #' starwars %>%
 #'   s_select(height > 50)
 s_select <- function(.data, ...) {
@@ -38,43 +50,188 @@ s_select <- function(.data, ...) {
     return(.data)
   }
 
-  errors <- list(select = NULL, transmute = NULL)
-  for (mode in c("select", "transmute")) {
-    warnings <- list()
-    result <- tryCatch(
-      withCallingHandlers(
-        {
-          if (mode == "select") {
-            dplyr::select(.data, ...)
-          } else {
-            dplyr::transmute(.data, ...)
-          }
-        },
-        warning = function(w) {
-          warnings[[length(warnings) + 1L]] <<- w
-          invokeRestart("muffleWarning")
-        }
-      ),
+  original <- .data
+  dots <- rlang::enquos(...)
+  select_check_unmatched(.data, dots)
+  labels <- names(dots)
+  selection <- select_is_selection(dots, names(.data))
+  if (any(!selection)) {
+    unnamed <- !nzchar(labels)
+    labels[unnamed] <- vapply(dots[unnamed], rlang::as_label, character(1))
+    computed <- dots[!selection]
+    names(computed) <- labels[!selection]
+    .data <- tryCatch(
+      dplyr::mutate(.data, !!!computed),
       error = function(e) {
-        errors[[mode]] <<- conditionMessage(e)
-        NULL
+        stop(
+          "Neither <tidy-select> nor <data-masking> recognised the input.\n",
+          "  select() error: the expression is not a column selection.\n",
+          "  mutate() error: ",
+          conditionMessage(e),
+          call. = FALSE
+        )
       }
     )
-    if (is.null(errors[[mode]])) {
-      for (w in warnings) {
-        warning(w)
-      }
-      return(result)
-    }
+    dots[!selection] <- lapply(labels[!selection], function(label) {
+      rlang::quo(!!rlang::sym(label))
+    })
+    names(dots)[!selection] <- ""
   }
-
+  selected <- select_attempt(dplyr::select(.data, !!!dots))
+  if (is.null(selected$error)) {
+    return(selected$value)
+  }
+  fallback <- select_attempt(dplyr::transmute(original, ...))
+  if (is.null(fallback$error)) {
+    return(fallback$value)
+  }
   stop(
     "Neither <tidy-select> nor <data-masking> recognised the input.\n",
     "  select() error: ",
-    errors$select,
+    selected$error,
     "\n",
     "  mutate() error: ",
-    errors$transmute,
+    fallback$error,
     call. = FALSE
   )
+}
+
+# Replay warnings only from the attempt that succeeds.
+select_attempt <- function(expr) {
+  warnings <- list()
+  error <- NULL
+  value <- tryCatch(
+    withCallingHandlers(
+      expr,
+      warning = function(w) {
+        warnings[[length(warnings) + 1L]] <<- w
+        invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(e) {
+      error <<- conditionMessage(e)
+      NULL
+    }
+  )
+  if (is.null(error)) {
+    for (w in warnings) {
+      warning(w)
+    }
+  }
+  list(value = value, error = error)
+}
+
+selection_operators <- c("c", ":", "!", "&", "|", "(", "-")
+
+selection_helpers <- c(
+  "starts_with",
+  "ends_with",
+  "contains",
+  "matches",
+  "num_range",
+  "all_of",
+  "any_of",
+  "everything",
+  "last_col",
+  "where",
+  "one_of",
+  "s_match"
+)
+
+# Selection syntax goes to select(). Named constants and expressions that use
+# columns are computed, so arithmetic on columns is never read as positions.
+select_is_selection <- function(dots, columns) {
+  named <- nzchar(names(dots))
+  vapply(
+    seq_along(dots),
+    function(i) {
+      expr <- rlang::quo_get_expr(dots[[i]])
+      if (named[[i]] && select_is_constant(expr)) {
+        return(FALSE)
+      }
+      select_expr_is_selection(expr, columns)
+    },
+    logical(1)
+  )
+}
+
+select_is_constant <- function(expr) {
+  if (rlang::is_syntactic_literal(expr)) {
+    return(!is.null(expr))
+  }
+  rlang::is_call(expr, "c") &&
+    length(expr) > 1L &&
+    all(vapply(as.list(expr)[-1L], select_is_constant, logical(1)))
+}
+
+select_expr_is_selection <- function(expr, columns) {
+  if (rlang::is_symbol(expr)) {
+    return(TRUE)
+  }
+  if (rlang::is_syntactic_literal(expr)) {
+    return(!is.logical(expr))
+  }
+  if (!rlang::is_call(expr)) {
+    return(FALSE)
+  }
+  head <- rlang::call_name(expr)
+  if (!is.null(head) && head %in% selection_helpers) {
+    return(TRUE)
+  }
+  operator <- !is.null(head) &&
+    head %in% selection_operators &&
+    (head != "-" || length(expr) == 2L)
+  if (operator) {
+    return(all(vapply(
+      as.list(expr)[-1L],
+      select_expr_is_selection,
+      logical(1),
+      columns = columns
+    )))
+  }
+  # Other calls select only when they do not use columns, e.g. seq_len(2).
+  !any(all.vars(expr) %in% columns)
+}
+
+# Unnamed names, strings and positions that match no column are typos, not
+# data-masking expressions; report all of them together before selecting.
+select_check_unmatched <- function(.data, dots) {
+  columns <- names(.data)
+  unmatched <- character()
+  for (i in seq_along(dots)) {
+    if (nzchar(names(dots)[[i]])) {
+      next
+    }
+    expr <- rlang::quo_get_expr(dots[[i]])
+    if (rlang::is_symbol(expr) || rlang::is_string(expr)) {
+      name <- rlang::as_string(expr)
+      if (name %in% columns) {
+        next
+      }
+      if (rlang::is_symbol(expr)) {
+        # Deprecated tidyselect external character vectors remain possible.
+        value <- tryCatch(rlang::eval_tidy(dots[[i]]), error = function(e) NULL)
+        if (is.character(value)) {
+          next
+        }
+      }
+      unmatched <- c(unmatched, paste0("`", name, "`"))
+    } else if (is.numeric(expr) && length(expr) == 1L) {
+      if (expr != round(expr) || abs(expr) > length(columns) || expr == 0) {
+        unmatched <- c(unmatched, paste0("position ", expr))
+      }
+    }
+  }
+  if (length(unmatched)) {
+    stop(
+      "Can't select columns that don't exist: ",
+      paste(unmatched, collapse = ", "),
+      " (the data have ",
+      length(columns),
+      if (length(columns) == 1L) " column" else " columns",
+      "). Check the spelling, or name a computed value, e.g. ",
+      "`new = expression`.",
+      call. = FALSE
+    )
+  }
 }

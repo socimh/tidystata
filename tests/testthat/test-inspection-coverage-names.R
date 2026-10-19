@@ -1,6 +1,3 @@
-library(testthat)
-library(statart)
-
 # One hundred independent selection scenarios are run through each public name
 # listing entry point. Expected names come from explicit fixtures, not ds(),
 # select(), or another statart function used as a reference implementation.
@@ -58,7 +55,7 @@ inspect_names_case(
       first = 3:4,
       row.names = c("person-2", "person-1")
     )
-    check(api(input), c("second", "first"))
+    check(api(input), c("second", "first"), container = "frame")
   }
 )
 inspect_names_case(
@@ -96,7 +93,7 @@ inspect_names_case(
   function(api, check) {
     expected <- paste0("measurement_", seq_len(1000))
     input <- as.data.frame(setNames(rep(list(1:2), 1000), expected))
-    check(api(input), expected)
+    check(api(input), expected, container = "frame")
   }
 )
 inspect_names_case(
@@ -867,7 +864,7 @@ inspect_names_case(
   "[names] default listing reports duplicate raw names without repairing them",
   function(api, check) {
     input <- setNames(data.frame(a = 1:2, b = 3:4), c("same", "same"))
-    check(api(input), c("same", "same"))
+    check(api(input), c("same", "same"), container = "frame")
   }
 )
 inspect_names_case(
@@ -942,7 +939,11 @@ inspect_names_case(
     )
     data.table::setkeyv(input, "id")
     before <- data.table::copy(input)
-    check(api(input, response = value, id), c("response", "id"))
+    check(
+      api(input, response = value, id),
+      c("response", "id"),
+      container = "table"
+    )
     expect_identical(input, before)
     expect_identical(data.table::key(input), "id")
   }
@@ -956,7 +957,7 @@ inspect_names_case(
       class = c("inspection_example", "data.frame")
     )
     before <- input
-    check(api(input, y, x), c("y", "x"))
+    check(api(input, y, x), c("y", "x"), container = "frame")
     expect_identical(input, before)
   }
 )
@@ -1077,11 +1078,17 @@ stopifnot(
 for (function_name in c("ds", "ds_as_column", "names_as_column")) {
   local({
     api <- getExportedValue("statart", function_name)
-    check <- function(out, expected) {
+    check <- function(out, expected, container = "tibble") {
       if (identical(function_name, "ds")) {
         expect_identical(out, expected)
       } else {
-        expect_identical(out, tibble::tibble(name = expected))
+        expected_table <- switch(
+          container,
+          tibble = tibble::tibble(name = expected),
+          frame = data.frame(name = expected),
+          table = data.table::data.table(name = expected)
+        )
+        expect_identical(out, expected_table)
       }
     }
     for (case in inspect_names_cases) {

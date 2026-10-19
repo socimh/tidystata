@@ -9,27 +9,53 @@
 \alias{fre2}
 \title{Tabulate columns}
 \usage{
-tab(.data, ..., .by = NULL, .desc = FALSE)
+tab(
+  .data,
+  ...,
+  .by = NULL,
+  .desc = FALSE,
+  .group_order = c("keys", "frequency")
+)
 
-tab1(.data, ..., .by = NULL, .desc = FALSE, .type = c("list", "tibble"))
+tab1(
+  .data,
+  ...,
+  .by = NULL,
+  .desc = FALSE,
+  .type = c("list", "tibble"),
+  .group_order = c("keys", "frequency")
+)
 
 tab2(.data, ..., .flip = FALSE)
 
-fre(.data, ..., .by = NULL, .desc = FALSE, .type = c("tibble", "flextable"))
+fre(
+  .data,
+  ...,
+  .by = NULL,
+  .desc = FALSE,
+  .type = c("auto", "tibble", "flextable"),
+  .group_order = c("keys", "frequency")
+)
 
 fre1(
   .data,
   ...,
   .by = NULL,
   .desc = FALSE,
-  .type = c("list", "tibble", "flextable")
+  .type = c("list", "tibble", "flextable"),
+  .group_order = c("keys", "frequency")
 )
 
-fre2(.data, ..., .flip = FALSE, .type = c("tibble", "flextable"))
+fre2(.data, ..., .flip = FALSE, .type = c("auto", "tibble", "flextable"))
 }
 \arguments{
-\item{.data}{A data frame, data frame extension
-(e.g. a tibble), or a lazy data frame (e.g. from dbplyr or dtplyr).}
+\item{.data}{An in-memory data frame, tibble, or data.table.
+Collect lazy tables before tabulating. \code{tab()}, \code{tab1()}, \code{fre()} and
+\code{fre1()} also accept an atomic vector, tabulated as a tibble column named
+\code{value}; omit selectors and \code{.by} in this form. \code{tab2()} and \code{fre2()} need
+a data frame.
+All spatial \code{sfc} geometry columns are excluded before attribute tabulation;
+geometry columns cannot be selected as measured variables or grouping keys.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to tabulate.
@@ -41,18 +67,32 @@ See examples below.}
 \item{.by}{Optional grouping columns, selected with tidyselect. For \code{tab()},
 \code{tab1()}, \code{fre()} and \code{fre1()}, \code{NULL} inherits existing \code{group_by()} groups;
 an explicit selection replaces them. Grouping columns are not measured
-variables. \code{tab2()} and \code{fre2()} do not accept \code{.by}.}
+variables. \code{tab2()} and \code{fre2()} do not accept \code{.by}, \code{.desc} or
+\code{.group_order}; supplying them is an error.}
 
-\item{.desc}{If TRUE, will show the largest groups at the top.}
+\item{.desc}{If \code{TRUE}, sort categories by descending count within each
+group (missing categories stay last). To order the \code{.by} group blocks by
+size, use \code{.group_order = "frequency"}.}
+
+\item{.group_order}{Group block order for one-way and joint tables. \code{"keys"}
+retains key order; \code{"frequency"} orders by descending observation count,
+including missing measured values. Missing grouping keys appear last and ties
+follow key order. \code{.desc} controls categories within each group independently.}
 
 \item{.type}{Output type. \code{tab1()} and \code{fre1()} default to a list of
-tibbles; \code{fre()} and \code{fre2()} default to a tibble. Explicit flextable
-output requires the optional flextable package.}
+tables; \code{fre()} and \code{fre2()} default to \code{"auto"}, preserving the input
+container. Explicit \code{"tibble"} always returns a plain tibble. Explicit
+\code{"flextable"} output requires the optional flextable package.}
 
 \item{.flip}{If TRUE, will transpose the output tibble.}
 }
 \value{
-A tibble, a list of tibbles, or a flextable.
+A table, a list of tables, or an explicitly requested flextable. Default
+tables preserve the input's data.frame, tibble, or data.table container,
+including each table in a list. Results are ungrouped, with grouping keys
+retained as columns where applicable. Supported preview settings persist
+unless an explicit output type is requested. Other subclasses are not
+reconstructed on these newly shaped tables. Input data are not modified.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -89,16 +129,27 @@ an observed \code{"Total"} category. Counts remain separate; use \code{tab()} or
 flattening their contents. Selecting no measured variables returns no rows:
 \code{tab()} and \code{fre()} retain their count and percentage columns and any grouping
 keys; \code{tab1()} and \code{fre1()} return an empty list by default or an empty table
-with \code{.type = "tibble"}. \code{tab2()} and \code{fre2()} return an empty tibble when no
+with \code{.type = "tibble"}. \code{tab2()} and \code{fre2()} return an empty table when no
 variables are selected; otherwise exactly two variables are required.
+With no selected variables, \code{fre2(..., .type = "flextable")} errors because
+rich cross-tabulation requires two selected variables.
 
 Cross-tabulation keeps category names unchanged. Categories may match the
-original variable names. A category matching the combined row-header name,
+original variable names. Column categories follow their values: factor
+levels in order, other types ascending, with missing values last.
+A category matching the combined row-header name,
 or literal \code{"NA"} alongside a missing column category, causes a name-collision
 error. In \code{fre2()}, the column category \code{"total"} is reserved for marginal
 totals; recode it first or use \code{tab2()}.
 The final row in \code{fre2()} is the marginal total, labelled \code{"total"}; an
 observed row category with the same label remains a separate row.
+Blank column categories use \code{"<empty>"}, with the smallest unused numeric
+suffix when that header is already taken. Logical cross-tabulation axes
+follow \code{FALSE}, \code{TRUE}, then missing values.
+
+Combined \code{tab1()} output uses character values when factor types cannot be
+combined; each variable's category order is retained. List output preserves
+the original category classes.
 
 If the output tibble has many rows, consider using
 \code{print()} to display the output.
@@ -127,6 +178,12 @@ tab(starwars, ends_with("color"))
 tab(starwars, s_match("s*e"))
 
 tab(starwars)
+
+tab(c(1, 1, 2, NA))
+
+fre(c(1, 1, 2, NA))
+
+tab(starwars, sex, .by = species, .group_order = "frequency")
 
 tab1(starwars, 1:3)
 

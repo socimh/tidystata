@@ -1,6 +1,3 @@
-library(testthat)
-library(statart)
-
 # Independent references for the documented R statistic conventions. Skewness
 # and excess kurtosis use central moments standardized by the sample SD.
 summary_reference <- function(x) {
@@ -31,7 +28,7 @@ summary_reference <- function(x) {
 for (function_name in c("summ", "tabstat")) {
   local({
     fn_name <- function_name
-    fn <- get(fn_name, envir = asNamespace("statart"))
+    fn <- summary_legacy_layout(get(fn_name, envir = asNamespace("statart")))
 
     test_that(paste(fn_name, "matches independent numerical references"), {
       cases <- list(
@@ -59,7 +56,7 @@ for (function_name in c("summ", "tabstat")) {
       input <- tibble::tibble(x = x)
       before <- input
       expected <- summary_reference(c(1, 2, NA_real_, NA_real_))
-      out <- suppressWarnings(fn(input, .stat = names(expected)))
+      expect_warning(out <- fn(input, .stat = names(expected)), "labelled")
       expect_equal(
         unlist(out[names(expected)], use.names = FALSE),
         unname(expected),
@@ -73,10 +70,13 @@ for (function_name in c("summ", "tabstat")) {
         c(1, 2, 97, 98, 99, NA_real_),
         na_range = c(97, 99)
       )
-      out <- suppressWarnings(fn(
-        tibble::tibble(x = x),
-        .stat = c("n", "unique", "missing", "valid_pct", "mean", "sum")
-      ))
+      expect_warning(
+        out <- fn(
+          tibble::tibble(x = x),
+          .stat = c("n", "unique", "missing", "valid_pct", "mean", "sum")
+        ),
+        "labelled"
+      )
       expect_equal(out$n, 2)
       expect_equal(out$unique, 2)
       expect_equal(out$missing, 4)
@@ -87,11 +87,13 @@ for (function_name in c("summ", "tabstat")) {
 
     test_that(paste(fn_name, "retains all-user-missing SPSS rows as missing"), {
       x <- haven::labelled_spss(c(99, 99, NA_real_), na_values = 99)
-      out <- suppressWarnings(fn(
-        tibble::tibble(x = x),
-        .detail = TRUE,
-        .stat = character()
-      ))
+      expect_warning(
+        expect_warning(
+          out <- fn(tibble::tibble(x = x), .detail = TRUE, .stat = character()),
+          "labelled"
+        ),
+        "entirely missing"
+      )
       expect_equal(out$n, 0)
       expect_equal(out$unique, 0)
       expect_equal(out$miss_n, 3)
@@ -112,12 +114,15 @@ for (function_name in c("summ", "tabstat")) {
           g = c("observed", "observed", "missing", "missing"),
           x = haven::labelled_spss(c(1, 99, 99, NA_real_), na_values = 99)
         )
-        out <- suppressWarnings(fn(
-          input,
-          x,
-          .by = g,
-          .stat = c("n", "unique", "missing", "mean", "sum")
-        ))
+        expect_warning(
+          out <- fn(
+            input,
+            x,
+            .by = g,
+            .stat = c("n", "unique", "missing", "mean", "sum")
+          ),
+          "labelled"
+        )
         expect_equal(out$g, c("observed", "missing"))
         expect_equal(out$n, c(1, 0))
         expect_equal(out$unique, c(1, 0))

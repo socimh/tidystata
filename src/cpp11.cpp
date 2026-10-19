@@ -5,21 +5,6 @@
 #include "cpp11/declarations.hpp"
 #include <R_ext/Visibility.h>
 
-// code.cpp
-void fun();
-extern "C" SEXP _statart_fun() {
-  BEGIN_CPP11
-    fun();
-    return R_NilValue;
-  END_CPP11
-}
-// row_stat.cpp
-cpp11::doubles_matrix<> df_to_mat(data_frame tb, double na);
-extern "C" SEXP _statart_df_to_mat(SEXP tb, SEXP na) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(df_to_mat(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb), cpp11::as_cpp<cpp11::decay_t<double>>(na)));
-  END_CPP11
-}
 // row_stat.cpp
 writable::doubles row_max_dbl(data_frame tb);
 extern "C" SEXP _statart_row_max_dbl(SEXP tb) {
@@ -79,8 +64,6 @@ extern "C" SEXP _statart_row_sd_dbl(SEXP tb) {
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_statart_df_to_mat",      (DL_FUNC) &_statart_df_to_mat,      2},
-    {"_statart_fun",            (DL_FUNC) &_statart_fun,            0},
     {"_statart_row_max_dbl",    (DL_FUNC) &_statart_row_max_dbl,    1},
     {"_statart_row_mean_dbl",   (DL_FUNC) &_statart_row_mean_dbl,   1},
     {"_statart_row_median_dbl", (DL_FUNC) &_statart_row_median_dbl, 1},

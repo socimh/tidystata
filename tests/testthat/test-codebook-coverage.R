@@ -12,7 +12,16 @@ cb_expect <- function(
   labels = NULL
 ) {
   out <- codebook(data)
-  expect_s3_class(out, "tbl_df")
+  expect_identical(
+    class(out),
+    if (inherits(data, "data.table")) {
+      c("data.table", "data.frame")
+    } else if (inherits(data, "tbl_df")) {
+      c("tbl_df", "tbl", "data.frame")
+    } else {
+      "data.frame"
+    }
+  )
   expect_false(inherits(out, "grouped_df"))
   expect_false(inherits(out, "rowwise_df"))
   expect_identical(out$variable, variables)
@@ -582,13 +591,13 @@ test_that("codebook coverage 088: all incomplete nested rows have zero counts", 
   x <- data.frame(a = c(1, NA_real_), b = c(NA_real_, 2))
   cb_expect(tibble::tibble(x = x), 0, 0, "dataframe")
 })
-test_that("codebook coverage 089: base data frame returns tibble and preserves row names", {
+test_that("codebook coverage 089: base data frame returns data frame and preserves row names", {
   x <- data.frame(a = c(1, 1, NA), row.names = c("one", "two", "three"))
   before <- serialize(x, NULL)
   cb_expect(x, 2, 1, "double")
   expect_identical(serialize(x, NULL), before)
 })
-test_that("codebook coverage 090: data.table input returns tibble without mutation", {
+test_that("codebook coverage 090: data.table input returns data.table without mutation", {
   skip_if_not_installed("data.table")
   x <- data.table::data.table(a = c(1, 1, NA), b = c("x", "y", "x"))
   before <- data.table::copy(x)

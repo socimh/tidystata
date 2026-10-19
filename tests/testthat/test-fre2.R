@@ -7,18 +7,12 @@
 # KEY BEHAVIORS: bivariate frequency tables
 # EDGE CASES: sparse tables, zero cells
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - Output Type Variations
 # ============================================================================
 
 test_that("fre2: tibble output (default)", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(c("A", "B"), each = 3),
     y = rep(c("X", "Y", "Z"), 2)
   )
@@ -27,7 +21,7 @@ test_that("fre2: tibble output (default)", {
 })
 
 test_that("fre2: tibble output", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(c("A", "B"), each = 3),
     y = rep(c("X", "Y", "Z"), 2)
   )
@@ -36,7 +30,7 @@ test_that("fre2: tibble output", {
 })
 
 test_that("fre2: numeric row and character column", {
-  df <- tibble(
+  df <- tibble::tibble(
     row = rep(1:3, each = 4),
     col = rep(c("a", "b", "c", "d"), 3)
   )
@@ -49,7 +43,7 @@ test_that("fre2: numeric row and character column", {
 # ============================================================================
 
 test_that("fre2: Total row sum equals grand total", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("A", "A", "B", "B"),
     y = c("X", "Y", "X", "Y")
   )
@@ -59,7 +53,7 @@ test_that("fre2: Total row sum equals grand total", {
 })
 
 test_that("fre2: Total column sum equals row totals", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(c("A", "B"), each = 3),
     y = rep(c("X", "Y", "Z"), 2)
   )
@@ -72,7 +66,7 @@ test_that("fre2: Total column sum equals row totals", {
 })
 
 test_that("fre2: all cell values plus totals", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("A", "A", "A", "B", "B", "C"),
     y = c("X", "X", "Y", "X", "Y", "Y")
   )
@@ -87,7 +81,7 @@ test_that("fre2: all cell values plus totals", {
 # ============================================================================
 
 test_that("fre2: .flip=TRUE swaps dimensions", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(c("A", "B"), each = 3),
     y = rep(c("X", "Y", "Z"), 2)
   )
@@ -110,7 +104,7 @@ test_that("fre2: .flip=TRUE swaps dimensions", {
 })
 
 test_that("fre2: flip with many levels", {
-  df <- tibble(
+  df <- tibble::tibble(
     rows = rep(letters[1:10], each = 5),
     cols = rep(LETTERS[1:5], 10)
   )
@@ -123,7 +117,7 @@ test_that("fre2: flip with many levels", {
 # ============================================================================
 
 test_that("fre2: NAs in row variable", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(NA, NA, "A", "A", "B"),
     y = c("X", "Y", "X", "Y", "X")
   )
@@ -132,7 +126,7 @@ test_that("fre2: NAs in row variable", {
 })
 
 test_that("fre2: NAs in column variable", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("A", "A", "B", "B"),
     y = c("X", NA, "Y", NA)
   )
@@ -142,7 +136,7 @@ test_that("fre2: NAs in column variable", {
 })
 
 test_that("fre2: NAs in both variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(NA, "A", NA, "B"),
     y = c("X", NA, NA, "Y")
   )
@@ -151,7 +145,7 @@ test_that("fre2: NAs in both variables", {
 })
 
 test_that("fre2: factor with NA level", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("a", "b", NA), exclude = NULL),
     y = c("x", "y", "x")
   )
@@ -164,7 +158,7 @@ test_that("fre2: factor with NA level", {
 # ============================================================================
 
 test_that("fre2: single row dataset", {
-  df <- tibble(x = "A", y = "X")
+  df <- tibble::tibble(x = "A", y = "X")
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(result[[1]], c("A", "total"))
   category_cols <- names(result)[2:(ncol(result) - 1)]
@@ -181,7 +175,7 @@ test_that("fre2: single row dataset", {
 })
 
 test_that("fre2: all identical values", {
-  df <- tibble(x = rep("same", 100), y = rep("value", 100))
+  df <- tibble::tibble(x = rep("same", 100), y = rep("value", 100))
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(nrow(result), 2) # same, Total
   category_cols <- names(result)[2:(ncol(result) - 1)]
@@ -198,7 +192,7 @@ test_that("fre2: all identical values", {
 })
 
 test_that("fre2: row var all unique, column var few levels", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = 1:100,
     y = rep(c("A", "B"), 50)
   )
@@ -207,7 +201,7 @@ test_that("fre2: row var all unique, column var few levels", {
 })
 
 test_that("fre2: row var few levels, column var all unique", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(c("A", "B"), 50),
     y = 1:100
   )
@@ -226,7 +220,7 @@ test_that("fre2: row var few levels, column var all unique", {
 })
 
 test_that("fre2: empty data frame", {
-  df <- tibble(x = character(0), y = character(0))
+  df <- tibble::tibble(x = character(0), y = character(0))
   result <- fre2(df, x, y, .type = "tibble")
   expect_equal(nrow(result), 0)
 })
@@ -236,8 +230,9 @@ test_that("fre2: empty data frame", {
 # ============================================================================
 
 test_that("fre2: 10x10 cross-tabulation with totals", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     x = sample(1:10, 1000, replace = TRUE),
     y = sample(letters[1:10], 1000, replace = TRUE)
   )
@@ -257,8 +252,9 @@ test_that("fre2: 10x10 cross-tabulation with totals", {
 })
 
 test_that("fre2: sparse matrix with totals", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     x = sample(1:20, 100, replace = TRUE),
     y = sample(1:20, 100, replace = TRUE)
   )
@@ -273,7 +269,7 @@ test_that("fre2: sparse matrix with totals", {
 # ============================================================================
 
 test_that("fre2: unicode in both dimensions", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("中文", "中文", "日本語", "日本語"),
     y = c("مرحبا", "مرحبا", "שלום", "שלום")
   )
@@ -293,7 +289,7 @@ test_that("fre2: unicode in both dimensions", {
 })
 
 test_that("fre2: emoji as values", {
-  df <- tibble(
+  df <- tibble::tibble(
     emotion = c("🎉", "🎉", "😢", "😢", "🎉"),
     category = c("A", "B", "A", "B", "A")
   )
@@ -317,7 +313,7 @@ test_that("fre2: emoji as values", {
 # ============================================================================
 
 test_that("fre2: Date vs character", {
-  df <- tibble(
+  df <- tibble::tibble(
     date = as.Date(c("2024-01-01", "2024-01-01", "2024-01-02", "2024-01-02")),
     status = c("Active", "Inactive", "Active", "Inactive")
   )
@@ -330,7 +326,7 @@ test_that("fre2: Date vs character", {
 })
 
 test_that("fre2: logical vs numeric", {
-  df <- tibble(
+  df <- tibble::tibble(
     flag = c(TRUE, TRUE, FALSE, FALSE, TRUE),
     value = c(1, 2, 1, 2, 1)
   )
@@ -350,7 +346,7 @@ test_that("fre2: logical vs numeric", {
 })
 
 test_that("fre2: ordered factor vs regular factor", {
-  df <- tibble(
+  df <- tibble::tibble(
     size = ordered(c("S", "M", "L", "S", "M"), levels = c("S", "M", "L")),
     color = factor(c("Red", "Blue", "Red", "Blue", "Red"))
   )
@@ -367,7 +363,7 @@ test_that("fre2: ordered factor vs regular factor", {
 # ============================================================================
 
 test_that("fre2: variables named n, total in data", {
-  df <- tibble(
+  df <- tibble::tibble(
     n = c("A", "A", "B"),
     total = c("X", "Y", "X")
   )
@@ -382,12 +378,12 @@ test_that("fre2: variables named n, total in data", {
 # ============================================================================
 
 test_that("fre2: single variable should error", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_error(fre2(df, x))
 })
 
 test_that("fre2: three variables should error", {
-  df <- tibble(x = 1:5, y = 1:5, z = 1:5)
+  df <- tibble::tibble(x = 1:5, y = 1:5, z = 1:5)
   expect_error(fre2(df, x, y, z))
 })
 
@@ -396,7 +392,7 @@ test_that("fre2: NULL input should error", {
 })
 
 test_that("fre2: non-existent column should error", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_error(fre2(df, x, y))
 })
 
@@ -405,8 +401,9 @@ test_that("fre2: non-existent column should error", {
 # ============================================================================
 
 test_that("fre2: clinical trial contingency table", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     treatment = sample(c("Drug", "Placebo"), 200, replace = TRUE),
     response = sample(c("Complete", "Partial", "None"), 200, replace = TRUE)
   )
@@ -426,7 +423,8 @@ test_that("fre2: clinical trial contingency table", {
 })
 
 test_that("fre2: demographic breakdown with totals", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     age_group = sample(
       c("18-25", "26-35", "36-50", "50+"),
       500,
@@ -450,7 +448,8 @@ test_that("fre2: demographic breakdown with totals", {
 })
 
 test_that("fre2: time series cross-tab with totals", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     quarter = rep(c("Q1", "Q2", "Q3", "Q4"), each = 25),
     region = sample(c("North", "South", "East", "West"), 100, replace = TRUE)
   )
@@ -470,7 +469,8 @@ test_that("fre2: time series cross-tab with totals", {
 })
 
 test_that("fre2: survey cross-tab with totals", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     question_1 = sample(c("Yes", "No", "Maybe"), 300, replace = TRUE),
     question_2 = sample(c("Agree", "Disagree", "Neutral"), 300, replace = TRUE)
   )
@@ -494,7 +494,7 @@ test_that("fre2: survey cross-tab with totals", {
 # ============================================================================
 
 test_that("fre2: factor with unused levels", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("a", "b"), levels = c("a", "b", "c", "d")),
     y = factor(c("x", "y"), levels = c("x", "y", "z"))
   )
@@ -506,7 +506,7 @@ test_that("fre2: factor with unused levels", {
 })
 
 test_that("fre2: factor levels not alphabetically ordered", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("High", "Med", "Low"), levels = c("Low", "Med", "High")),
     y = c("A", "B", "A")
   )
@@ -519,7 +519,7 @@ test_that("fre2: factor levels not alphabetically ordered", {
 # ============================================================================
 
 test_that("fre2: using numeric column positions", {
-  df <- tibble(
+  df <- tibble::tibble(
     a = 1:4,
     x = c("A", "B", "A", "B"),
     b = 1:4,
@@ -530,8 +530,8 @@ test_that("fre2: using numeric column positions", {
 })
 
 test_that("fre2: everything() with two columns", {
-  df <- tibble(x = c("A", "B", "A", "B"), y = c("X", "Y", "X", "Y"))
-  result <- fre2(df, everything(), .type = "tibble")
+  df <- tibble::tibble(x = c("A", "B", "A", "B"), y = c("X", "Y", "X", "Y"))
+  result <- fre2(df, dplyr::everything(), .type = "tibble")
   expect_equal(nrow(result), 3)
   category_cols <- names(result)[2:(ncol(result) - 1)]
   expect_setequal(category_cols, as.character(unique(df$y)))
@@ -551,7 +551,7 @@ test_that("fre2: everything() with two columns", {
 # ============================================================================
 
 test_that("fre2: Inf and -Inf values", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(Inf, Inf, -Inf, -Inf, 0),
     y = c("A", "B", "A", "B", "A")
   )
@@ -560,7 +560,7 @@ test_that("fre2: Inf and -Inf values", {
 })
 
 test_that("fre2: very large numbers", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1e200, 1e200, 2e200, 2e200),
     y = c("A", "B", "A", "B")
   )
@@ -569,7 +569,7 @@ test_that("fre2: very large numbers", {
 })
 
 test_that("fre2: very small numbers near zero", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1e-300, 1e-300, 2e-300, 2e-300),
     y = c("A", "B", "A", "B")
   )
@@ -582,7 +582,8 @@ test_that("fre2: very small numbers near zero", {
 # ============================================================================
 
 test_that("fre2: defect analysis by shift", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     shift = sample(c("Morning", "Afternoon", "Night"), 500, replace = TRUE),
     defect_type = sample(
       c("None", "Minor", "Major", "Critical"),
@@ -611,7 +612,8 @@ test_that("fre2: defect analysis by shift", {
 })
 
 test_that("fre2: product sales by region", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     product = sample(c("Widget", "Gadget", "Tool"), 1000, replace = TRUE),
     region = sample(c("North", "South", "East", "West"), 1000, replace = TRUE)
   )
@@ -635,7 +637,7 @@ test_that("fre2: product sales by region", {
 # ============================================================================
 
 test_that("fre2: highly concentrated data", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(rep("A", 950), rep("B", 50)),
     y = c(rep("X", 950), rep("Y", 50))
   )
@@ -656,8 +658,9 @@ test_that("fre2: highly concentrated data", {
 })
 
 test_that("fre2: uniformly distributed data", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     x = sample(letters[1:10], 1000, replace = TRUE),
     y = sample(LETTERS[1:10], 1000, replace = TRUE)
   )

@@ -1,23 +1,54 @@
 # Developing statart
 
-Current development version: **0.2.0.9000**. The package focuses on Stata-inspired
-exploration and data preparation. This is the first stabilization milestone for
-a future 0.3.0 release.
+statart **0.2.0.9000** provides Stata-inspired data exploration and preparation
+and is stabilizing toward a future 0.3.0 release. This is the single current
+package map, verification status and backlog. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
-The [coding standard](CONTRIBUTING.md#r-coding-standard) defines modern R style,
-compatibility boundaries and risk-based verification. Run `make style-check`
-for the adopted source list; formatting is explicit and local. See the
-[adoption ledger](.opencode/plans/r-style-adoption.md) for execution status.
+## Current verification
 
-## Active package
+Verified **2026-10-19** on Windows / R 4.6.0 after repository cleanup:
 
-The namespace exports 46 objects: 45 functions and the `%>%` operator.
+- Fresh baseline, post-cleanup and reordered suites each pass **18,382
+  expectations across 3,184 blocks**, with identical source fingerprints and
+  outcomes, different reordered execution, and no failures, errors, unexpected
+  warnings or skips.
+- All **39 Python workflow tests**, **121-source** pinned style/parsing/lint,
+  **16 demos**, six plain manual scripts, required-only smoke and generated
+  migration freshness pass. Fresh installations preserve all **46 public
+  interfaces** and **24** captured value/visibility/diagnostic records.
+- Fresh source build and complete `--as-cran` archive checking finish, including
+  tests, examples, vignettes and PDF/HTML manuals. The strict verification gate
+  remains **not passing**: **0 errors, 1 WARNING, 1 NOTE**. The warning is an
+  existing Unicode information symbol in `R/summ-helpers.R:31`, unchanged from
+  the pre-cleanup source; use an equivalent Unicode escape in a separate
+  portability fix. The incoming NOTE covers development/new-submission metadata
+  and four unpublished URLs. Separate archive installation and installed-resource
+  checks pass. No condition was suppressed.
+- Fresh website build passes: **72 pages, 1,143 local references, zero broken
+  targets**. Maintained Markdown links also resolve. Network-dependent checks
+  were rerun with network access after sandboxed attempts were blocked.
+
+The complete pre-cleanup checkout, including ignored/untracked files and Git
+metadata, is preserved in a hash-verified external backup. The cleanup removes
+superseded artifacts, scripts and documentation while preserving package sources,
+active tests, datasets and generated help byte-for-byte. Current demo reports
+are regenerated from maintained sources. Disposable logs/receipts are retained
+outside the checkout; normal future runs use ignored `.opencode/results/`.
+Local Git checkpoint requested 2026-10-19. No push, publication or remote
+compatibility run was performed.
+
+## Package map
+
+The namespace contains **46 exports**: 45 functions and `%>%`. The package has
+12 required Imports, two bundled datasets (`lifeexp`, `starwars`), and cpp11
+native row kernels. R >= 4.1 is required.
 
 | Area | Public functions |
 | --- | --- |
 | Tabulation | tab, tab1, tab2, fre, fre1, fre2 |
 | Summaries | summ, tabstat |
-| Variable inspection | codebook, browse, ds, ds_as_column, names_as_column, variables, variables_search |
+| Inspection | codebook, browse, ds, ds_as_column, names_as_column, variables, variables_search |
 | Row calculations | row_mean, row_sum, row_min, row_max, row_median, row_var, row_sd, row_unique, row_miss, row_non_miss |
 | Conversion | as_character, as_numeric, na_if_value, value_if_na |
 | Selection and types | s_select, s_match, s_type, s_unit |
@@ -25,235 +56,110 @@ The namespace exports 46 objects: 45 functions and the `%>%` operator.
 | Utilities | timer, set_seed, s_try |
 | Table previews | preview_table, unpreview_table, print_headtail, print_interval, slice_headtail, slice_interval |
 
-Both bundled datasets, lifeexp and starwars, remain. Required Imports decreased
-from 33 to 12; cpp11 supplies the native row kernels and Rfast is no longer
-required. Flextable is optional. The local installed dependency graph requires 32 non-base/recommended
-packages, or 33 including statart, compared with 124 dependencies previously.
-The counts describe dependency breadth, not download size.
+| Location | Maintained content |
+| --- | --- |
+| `R/`, `src/`, `tests/testthat/` | Package source, native code and active regression coverage |
+| `man/`, `NAMESPACE` | Generated help and namespace; edit roxygen sources |
+| `data/`, `data-raw/`, `inst/DATA-PROVENANCE.md` | Preserved datasets, exact reconstruction and provenance |
+| `inst/examples/`, `vignettes/` | Plain manual examples, viewer checklist and tutorials |
+| `.opencode/demos/`, `.opencode/reports/` | Current actual-output demos and generated reports/index |
+| `.opencode/workflows/`, `.opencode/tests/` | Current verification tools and specialized checks/benchmarks |
+| `.opencode/notes/` | Unchanged original issue notes, screenshots and follow-up handover |
+| `.opencode/tools/`, `.opencode/results/` | Ignored local tool installations and disposable verification results |
 
-Four wrappers are retired: read_data, write_data, esttab, and codebook_detail.
-Their implementations, original help, dedicated tests, and demos are preserved
-under extra_functions and excluded from builds and active discovery. See
-[MIGRATION.md](MIGRATION.md) for direct alternatives and breaking changes.
-Retained exploration/preparation helpers remain exported; MIGRATION.md also maps earlier upstream helper removals.
+README content lives in `README.Rmd`; website organization lives in
+`_pkgdown.yml`. `MIGRATION.md` generates the installed guide and website article.
+Website output is derived and is built independently from deployment. Retired
+wrappers and historical development archives are no longer shipped in the
+checkout; consult migration alternatives, Git history for tracked versions or
+the maintainer's external backup. The root `run_tests.R` remains a compatibility
+entry point. `make clean` removes nothing.
 
-## Repository layout and historical files
+## Established choices
 
-Current entry points are this guide, CONTRIBUTING.md, and
-.opencode/QUICK_STATUS.md. Retired implementations remain in extra_functions;
-[historical development files](extra_functions/development-history/README.md)
-now hold the old build scratchpad, exploratory test/dependency scripts and
-0.2.0 release notes. The archive is excluded from package builds.
+The user-approved follow-up decisions remain binding:
 
-Keep run_tests.R, README source/output, generated help, bundled datasets and
-native sources. Local docs, IDE state, compiled objects and intermediate
-results remain preserved and ignored by Git. make clean removes no files;
-artifact deletion requires a separately reviewed, explicitly approved list.
+- Summaries sort groups by default (`.sort = TRUE`) and hide the single-variable
+  `name` column (`.name = FALSE`); `.drop_empty` remains opt-in.
+- `timer()` reports on failure (`.on_error = TRUE`) and rethrows the untouched
+  error. Nested timers measure their entire enclosed expressions cumulatively.
+- Row numeric constants are values, as in `pmin()`; they never fill an all-missing
+  row. Named tabulation/summary constants are computed; unnamed numbers select
+  column positions. Column expressions are computed once and selection typos
+  must not silently evaluate unrelated globals.
+- Quantile cuts use the documented xtile rule with type-7 cutpoints, occupied
+  groups renumbered consecutively and warnings for collapsed groups. Rank mode
+  remains explicit. Grouped default cuts return group-relative integer codes.
+- The latest low-severity follow-up supports vectors in `fre()`/`tab1()`/`fre1()`,
+  names piped summary vectors `value`, rounds mixed-table numeric text to seven
+  significant digits, returns calendar spreads as `difftime` columns in list
+  mode and numeric unit-labelled spreads in table mode, and handles `hms` clocks.
+  It also adds actionable `.by` errors, grouping-column row inputs and supported
+  sf previews/slices. These have active regressions in `test-problems2-low.R`;
+  older readiness triage dispositions deferring them are superseded.
 
-## Current verification
-
-Persistent previews are verified locally: **16,992 passing expectations across
-3,106 blocks**, zero failures, errors, uncaptured warnings or skips. The new
-preview family has 27 blocks/318 expectations, also verified against a fresh
-installed package. All 96 maintained R files pass pinned Air/parsing/lintr
-checks; required-dependency smoke and all twelve demos pass.
-
-Fresh source build and R CMD check --no-manual pass with Status: OK (zero errors, warnings or notes).
-See [preview acceptance](.opencode/reports/project_status_previews_2026-10-16.md)
-and the [script/output examples](.opencode/reports/report_special_print_0.2.0.9000.md).
-
-Use `preview_table(result)` to retain the complete table while showing the first
-five and last five rows. Interval mode is explicit. Preview settings persist
-through supported edits, grouping, summaries, joins, row binding and pivots;
-`unpreview_table()` or explicit tibble/data.frame conversion removes them.
-The restored one-time print helpers return the original input invisibly;
-the slice helpers actually select rows. Original archived source is preserved.
-No tabulation or summary default changes. Six added/restored public functions
-bring the namespace to 46 exports; required Imports remain 12. Public printing
-hooks require tibble >= 3.1.0 and pillar >= 1.8.0; R >= 4.1 remains unchanged.
-
-The earlier [row type/numerical acceptance](.opencode/reports/project_status_row_types_2026-10-16.md)
-records 3,079 blocks/16,674 expectations, stable native calculations and
-compatible class preservation. The [style adoption evidence](.opencode/reports/project_status_r_style_adoption_2026-10-16.md)
-records its own historical baseline. These earlier results remain historical
-rather than current aggregate counts.
-
-Execution remains Windows R 4.6.0 with installed dependencies. R 4.1, minimum
-dependency versions, other platforms, and actual GUI rendering remain pending.
-Preview printing concerns console output, not HTML widgets or viewers.
-
-## Earlier family milestones
-
-The following figures retain earlier acceptance evidence; the full-suite totals
-above are current.
-
-Latest codebook/browse acceptance: **16,213 passing expectations across 2,996
-blocks, zero failed expectations or error blocks**, with 15 test warnings and
-one pre-existing empty test skipped. Fresh native installation, source build
-and `R CMD check --no-manual` pass with **Status: OK**, no check errors,
-warnings or notes. Earlier required-dependency smoke evidence remains valid;
-dependencies and exports did not change. See [codebook/browse acceptance and all numbered cases](.opencode/reports/project_status_codebook_browse_acceptance_2026-10-16.md).
-
-codebook() and browse() are locally accepted in the documented/headless scope:
-297 blocks/985 expectations pass with zero failures/errors/uncaptured warnings
-or skips, including 100 numbered scenarios each (200 cases/817 expectations).
-Fixed global grouped inventories, SPSS/list missingness, structured-row counts,
-Unicode names and repeated successful selector execution. Failed selection can
-still execute callbacks before data-masking fallback; precompute random or
-side-effecting expressions with mutate. Actual GUI viewing remains unverified.
-
-ds, ds_as_column, names_as_column, variables and variables_search are locally
-accepted: 548 blocks/1,169 expectations pass without failures/errors/uncaptured
-warnings/skips, including 100 numbered scenarios each (500 executions/1,084
-expectations). Malformed search queries error clearly; valid letter ranges no
-longer warn. Existing-column selection, grouping-key retention, label metadata
-and substring/anchored search are preserved and documented. The maintainer
-approved the selective console PDF; its presentation remains unchanged.
-
-tab/tab1/tab2 and fre/fre1/fre2 are locally accepted release candidates within
-documented display, naming and locale limits: 897 blocks/8,258 expectations
-pass with zero failures/errors/uncaptured warnings/skips, including 100 numbered
-cases per export (600 executions/7,547 expectations). Explicit grouping overrides
-and label-free tagged-missing conversion are fixed. Frequency display labels can
-coincide without merging counts; some non-ASCII column names emit native-encoding
-warnings under Windows LC_CTYPE=C. See the acceptance report for precise limits.
-
-summ() and tabstat() remain locally accepted: all 342 summary blocks and 1,224
-expectations pass. Their [100-case catalogue](.opencode/reports/project_status_summ_tabstat_100_scenarios_2026-10-16.md)
-remains valid. Conversion helpers are next; minimum-R/multi-platform
-publication checks and remaining warning/empty-test coverage still remain.
-The first-milestone evidence below is historical.
-
-- [Milestone contract report](.opencode/reports/milestone_contracts_0.2.0.9000.md):
-  622 passing scenarios and 4,098 passing expectations, with no failures,
-  errors, warnings, or skips. Coverage includes the independent review fixes.
-- A fresh native installation succeeds. A separate smoke check loads the core
-  with required dependencies only and verifies the error for absent formatting.
-- All ten active demos execute successfully and have versioned output reports.
-- Historically, first-milestone package checking passed non-test stages but
-  failed at tests. The current passing full-suite check above supersedes that
-  result; the milestone status report retains its original totals.
-- [Original baseline](.opencode/reports/project_status_2026-10-15.md) is historical:
-  134 failed expectations and 38 error blocks before this milestone.
-
-No coverage percentage or release-readiness claim is implied. Test blocks,
-expectations, warnings, and error blocks are different counting units.
-
-## Behavior established in this milestone
-
-fre/fre2 return tibbles; fre1 returns a list. Rich formatting is explicit and
-optional. Grouped tabulation retains missing keys and calculates totals within
-each group. Reserved names are renamed consistently, including metadata names.
-Character conversion preserves positions and parsing diagnostics. Variable
-labels are read from attributes, and searches inspect those labels.
-
-All row helpers return atomic vectors and preserve inputs. Missing values are
-ignored in numeric summaries; all-missing rows yield NA except sums yield zero.
-Variance/SD use sample statistics, and unique counts missing once. Explicit
-pick(), dataframe arguments, and dataframe expressions work inside mutate().
-Quantile binning keeps ties together, collapses duplicate cutpoints with a
-warning, and does not claim exact equivalence to Stata xtile.
+Mixed calendar/numeric location columns in table mode remain character; choose
+list mode to retain separate numeric tables. `starwars` attachment masking is
+normal namespace lookup; use qualified dataset names. Existing container,
+missingness, grouping, class and locale boundaries are documented in migration
+and help. The old long-duration summary formatter was replaced by duration
+columns; its historical wording checks are not current formatter coverage.
 
 ## Working commands
 
-Run from the project root. The Python workflow calls the protected Windows R
-launcher for every R command, builds native code in a temporary source copy,
-collects real test results, and returns a failure status when tests fail.
-Original compiled artifacts and datasets are preserved.
+Run from the project root. Repository automation uses a fresh temporary source
+copy and installation; Windows R commands pass through the protected launcher.
+Inspect exit status and complete logs before claiming success.
 
 ```powershell
-# Entire retained suite.
-python .opencode/workflows/verify_package.py
-
-# Focused milestone regressions, fresh native build, and scenario report.
-python C:/Users/socimh/.codex/scripts/run_r_safe.py -- Rscript .opencode/tests/verify_milestone.R
-
-# A single existing family.
-python .opencode/workflows/verify_package.py --filter type_conversion
-
-# Required-dependencies-only smoke check, including absent optional formatting.
-python .opencode/workflows/verify_package.py --minimal
-
-# Fresh source build, full suite, and R CMD check.
-python .opencode/workflows/verify_package.py --check
-
-# Versioned actual-output reports; retains historical reports.
-make demo-reports
+python .opencode/workflows/check_style.py
+python .opencode/workflows/verify_package.py --prefix .opencode/results/current
+python .opencode/workflows/verify_package.py --filter type_conversion --prefix .opencode/results/current-focused
+python .opencode/workflows/verify_package.py --shuffle-seed 20261019 --prefix .opencode/results/current-reordered
+python .opencode/workflows/verify_package.py --minimal --prefix .opencode/results/current-minimal
+python .opencode/workflows/verify_package.py --demos --prefix .opencode/results/current-demos
+python .opencode/workflows/verify_package.py --release --prefix .opencode/results/current-release
+python .opencode/workflows/generate_migration.py --check
 ```
 
-make test, make test-results, and make test-<family> use the same protected,
-isolated workflow. Results are saved under .opencode/results. Paths/logs identify
-temporary build copies and check output. The workflow scopes LC_ALL=C to child
-processes because this Windows R rejects the inherited C.UTF-8 locale.
+`make test`, `make test-<family>`, `make demo-reports` and `make style-check`
+provide shortcuts. `--release` includes vignettes, PDF manual and `--as-cran`;
+`--check` is a faster development check. Check, release, minimal and demos are
+mutually exclusive modes. Compare reordered tests by source/test identity and
+outcome, excluding timings. The [workflow guide](.opencode/workflows/README.md)
+describes the maintained tools. [Plain examples](inst/examples/README.md) cover
+installation and direct calls; [current reports](.opencode/reports/INDEX.md)
+show generated console output.
 
-Edit logic and roxygen comments in R, native logic in src/*.cpp, tests under
-tests/testthat, README.Rmd for README content, and _pkgdown.yml for website
-organization. Regenerate help, namespace, README, and report indexes from their
-sources. Do not hand-edit generated outputs. Source requires R >= 4.1 and a
-matching build toolchain; the minimum version has not been exercised here.
+## Open backlog and release gates
 
-## Next validation milestone
-
-1. Execute the declared R 4.1 minimum and Windows/macOS/Linux CI matrix after an
-   authorized remote update; current local execution is Windows R 4.6.0 only.
-2. Validate actual interactive viewer rendering manually.
-3. Review release metadata, migration guidance and preserved locale/display/binning
-   limitations before requesting publication.
-
-Function-family adoption is complete in the tested local scope; use
-`make style-check` and the documented protected verification workflows for future
-changes. Website building is separate from explicitly requested deployment.
-
-The approved summary policies, search matching, empty selections and list counts
-are implemented. Original-variable/category collisions and units recognition
-are fixed. No push, merge, publication or release has been performed.
-
-Git history was restored on 2026-10-15 from https://github.com/socimh/statart.git.
-Local master tracks origin/master. The 2026-10-16 development checkpoint preserves the newer local work with known test failures documented.
-No push, publication, or release is included in this milestone.
-
-## Stabilization preparation checkpoint (historical)
-
-Prepared 2026-10-16: the local development checkpoint preserves source, tests,
-archives, documentation and selected verification evidence. Other generated
-results remain on disk and are ignored; see .opencode/results/README.md.
-MIGRATION.md now covers all 15 removed upstream exports and the timer rename.
-
-The [saved-failure triage](.opencode/reports/project_status_failure_triage_2026-10-16.md)
-accounts for 104 identities: 11 invalid fixtures, 77 incorrect expectations,
-seven likely defects, eight contract decisions, and one environmental flake.
-These are classifications of earlier results, not a new passing suite.
-Start with fixture/assertion repairs, then summaries, tabulation, and utilities.
-No function behavior or test expectations were changed in this preparation pass.
-A fresh isolated installation and required-dependency smoke check passed on
-2026-10-16. Full-suite and release-check failures remain outstanding.
-
-## GitHub maintenance
-
-Verified 2026-10-15: origin uses authenticated HTTPS for socimh/statart, master
-tracks origin/master, and GitHub CLI authenticates as socimh with admin access.
-Commit identity, the repository-local credential helper, and the exact Git trust
-entry are configured. No additional setup is needed. After a successful fetch,
-local and remote master both point to 12709f6ab8398ddeedab40def10adfc3c7ebefd4;
-there are no incoming commits to reconcile.
-
-Use `git status --short --branch`, `git fetch origin`, and
-`git diff origin/master` to inspect tracked work. Also inspect
-`git ls-files --others --exclude-standard`, to catch new source, tests, archives, reports, and workflows before committing. Preserve that work before
-switching branches or integrating changes. See the
-[verified comparison](.opencode/reports/project_status_git_comparison_2026-10-15.md).
-
-The upstream migration mapping and result-artifact versioning policy are now documented.
-Before publishing, address the remaining test-warning/empty-test coverage,
-exercise supported R versions/platforms, and review generated whitespace. The Git
-connection is ready for maintenance; passing local checks do not replace
-cross-platform and minimum-version release validation. Push,
-merge, and release require an explicit maintainer request.
-
-## Entry points
-
-- [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
-- [Current issues](.opencode/PROBLEMS.md), [tasks](.opencode/TODO.md), and
-  [progress](.opencode/PROGRESS.md).
-- [Report index](.opencode/reports/INDEX.md), with current and historical output.
-- [Approved scope and execution ledger](.opencode/plans/lean-core-milestone.md).
+- **Dataset distribution:** keep both datasets and notices unchanged and hold
+  public distribution pending dataset-specific evidence. For `lifeexp`, establish
+  terms for the historical World Bank Learning Modules selection and Stata-derived
+  file. For `starwars`, establish the compiled-data permission/notice chain across
+  pinned dplyr 1.1.3, SWAPI and additional research; dplyr's MIT software notice
+  alone does not resolve it. Supply evidence or separately authorize clarification
+  requests; replacement or relicensing requires another decision.
+- **Remote compatibility:** six OS/R jobs and eleven exact dependency-floor cases
+  are configured but actual hosted execution remains pending. Run only after
+  distribution evidence and separate upload/dispatch authorization, recording
+  candidate identity, exact versions, logs, skips and native exits. Local Windows
+  R 4.6 checks do not establish R 4.1, dependency floors or other platforms.
+- **Interactive viewers:** obtain actual selected/all/grouped observations in
+  both RStudio and VS Code using the candidate-bound
+  [viewer checklist](inst/examples/VIEWER_CHECKLIST.md). Verify a protected
+  interactive launch first; the batch launcher cannot drive an interactive
+  terminal. Record editor/extension versions and any watcher failure.
+- **Publication:** review release version/metadata and four unpublished URLs.
+  Existing incoming-check notes require a recorded publication decision. Local
+  verification does not authorize push, deployment, release or submission.
+- **Remaining follow-up:** duration display rounding at unit boundaries still
+  needs review: compact timer formatting can round a value just below one minute
+  to `60.00s`. Preserve the agreed cumulative timing contract while addressing
+  display separately. No formatter behavior is changed by repository cleanup.
+- **Optional work:** consider suite-runtime optimization without removing coverage;
+  obtain the original labelled-factor failing call and actual `fre()` dataset for
+  exact historical reproduction if desired. Existing representative tests do not
+  prove those unavailable originals. Review preview styling only on maintainer
+  feedback. New weighted cuts, PCA, regression wrappers, plotting, profiling and
+  output presets require separate feature design.

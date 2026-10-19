@@ -46,9 +46,9 @@ stopifnot(
 )
 d <- data.frame(g = c("A", "A", NA), x = c(1, NA, 2), y = c(3, NA, 4))
 stopifnot(
-  inherits(fre(d, x), "tbl_df"),
+  identical(class(fre(d, x)), "data.frame"),
   is.list(fre1(d, x)),
-  inherits(fre2(d, x, y), "tbl_df"),
+  identical(class(fre2(d, x, y)), "data.frame"),
   identical(row_max(d[c("x", "y")]), c(3, NA_real_, 4)),
   identical(as_numeric(c("1", "2")), c(1, 2)),
   nrow(tab1(d, x, .by = g)$x) == 3L,
@@ -60,6 +60,16 @@ error <- tryCatch(fre(d, x, .type = "flextable"), error = function(e) {
   conditionMessage(e)
 })
 stopifnot(is.character(error), grepl("optional flextable", error))
+stopifnot(!requireNamespace("data.table", quietly = TRUE))
+serialized_table <- structure(d, class = c("data.table", "data.frame"))
+for (operation in list(
+  function() tab(serialized_table, x),
+  function() preview_table(serialized_table),
+  function() unpreview_table(serialized_table)
+)) {
+  diagnostic <- tryCatch(operation(), error = conditionMessage)
+  stopifnot(is.character(diagnostic), grepl("Install.*data.table", diagnostic))
+}
 cat(
   "PASS: core load, exports, grouping, conversion, rows, summaries, bins,\n",
   "and actionable optional-formatting error with required dependencies only.\n"

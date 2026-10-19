@@ -1,0 +1,196 @@
+---
+title: "Containers, grouping and missing values"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Containers, grouping and missing values}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+statart separates tabular results from display choices. This tutorial shows how
+to preserve data containers and interpret missing values before passing results
+to another calculation.
+
+## Container types and lists
+
+```{r containers}
+library(statart)
+library(dplyr)
+
+df <- data.frame(
+  group = c("A", "A", "B", NA),
+  answer = c("yes", NA, "no", "yes"),
+  score = c(2, NA, 6, 8)
+)
+tbl <- tibble::as_tibble(df)
+
+class(tab(df, answer))
+class(tab(tbl, answer))
+class(summ(df, score))
+class(summ(tbl, score))
+```
+
+New tables preserve a base data frame, tibble or data.table input. A list result
+remains a list, and each table inside follows the same rule. An explicit output
+option takes precedence:
+
+```{r list-and-override}
+base_tables <- tab1(df, answer, group)
+class(base_tables)
+class(base_tables$answer)
+class(fre(df, answer, .type = "tibble"))
+```
+
+Other data-frame subclasses are not reconstructed on newly shaped tables.
+Vectors, such as the result of `ds()` or `row_mean()`, keep their intentional
+vector output. New data.table summaries do not retain input keys or indexes.
+
+The optional data.table integration is exercised only when it is installed:
+
+```{r data-table}
+if (requireNamespace("data.table", quietly = TRUE)) {
+  dt <- data.table::as.data.table(df)
+  class(tab(dt, answer))
+  class(summ(dt, score))
+}
+```
+
+Rich output is also optional. It is a display object rather than a data table:
+
+```{r rich-output}
+if (requireNamespace("flextable", quietly = TRUE)) {
+  rich <- fre(tbl, answer, .type = "flextable")
+  class(rich)
+}
+```
+
+## Grouping and denominators
+
+```{r grouping}
+grouped <- group_by(tbl, group)
+tab(grouped, answer)
+summary <- summ(grouped, score, .stat = c("n", "mean", "missing"))
+summary
+group_vars(summary)
+```
+
+Summary and inventory results are ungrouped. Grouping keys remain ordinary
+columns where reported. For `tab()`, `tab1()`, `fre()`, `fre1()`, `summ()` and
+`tabstat()`, `.by = NULL` inherits existing groups; an explicit `.by` replaces
+them. Cross-tabulation with `tab2()` or `fre2()` has no `.by` argument.
+
+```{r group-override}
+summ(grouped, score, .by = answer, .stat = c("n", "mean"))
+```
+
+One-way tabulations use all observations within a group for `percent` and `cum`,
+on a zero-to-100 scale. `valid` and `valid_cum` exclude missing measured values.
+Missing grouping keys are ordinary groups. In summaries, `valid_pct` is instead
+a fraction from zero to one. The `.na.rm` argument to `summ()` removes missing
+grouping keys; numeric calculations always omit missing measured values.
+
+```{r denominators}
+tab(tbl, answer)
+summ(tbl, score, .stat = c("n", "miss_n", "valid_pct", "mean"))
+summ(tbl, score, .by = group, .na.rm = TRUE, .stat = c("n", "mean"))
+```
+
+## Empty and all-missing measurements
+
+```{r empty}
+empty <- tbl[0, ]
+summ(empty, score, .stat = c("n", "sum", "mean"))
+tab1(tbl, starts_with("absent"))
+
+missing <- tibble(a = c(NA_real_, NA_real_), b = c(NA_real_, 4))
+summ(missing, a, .stat = c("n", "sum", "mean"))
+row_sum(missing)
+row_mean(missing)
+```
+
+An ungrouped numeric column with no observations remains in a summary with
+`n = 0` and `NA` statistics, including `sum`. An all-missing row instead has a
+row sum of zero and a row mean of `NA`. Empty selections give empty results for
+tabulation; row helpers require at least one column. Matrix columns are not
+supported by the tabulation and column-summary interfaces.
+
+## Labels and special missing values
+
+Variable labels describe columns; value labels describe particular values.
+SPSS user-missing codes and Stata tagged missing values follow the original
+vector's missingness rules.
+
+```{r labels}
+labelled <- tibble(
+  response = haven::labelled_spss(
+    c(1, 2, 99, NA),
+    labels = c(Yes = 1, No = 2, Refused = 99),
+    na_values = 99,
+    label = "Interview response"
+  )
+)
+variables(labelled)
+codebook(labelled)
+tab(labelled, response)
+as_character(labelled$response)
+```
+
+Summary statistics for labelled numeric measurements use their underlying
+values and exclude SPSS user-missing codes. Factors use level codes and warn;
+choose measurements deliberately instead of averaging category codes.
+`as_character()` displays value labels when present, but does not itself recode
+every labelled refusal into an ordinary `NA`.
+
+## Numeric and calendar summary tables
+
+```{r calendar}
+mixed <- tibble(score = c(2, 4), day = as.Date("2024-01-01") + c(0, 2))
+separate <- summ(mixed, .stat = c("n", "min", "mean", "max"))
+names(separate)
+separate$numeric
+separate$date
+summ(mixed, .mode = "table", .stat = c("n", "min", "mean", "max"))
+```
+
+Default list mode keeps numeric statistics numeric in their own table. Table
+mode combines families, using character statistic columns when numeric and
+calendar output share them. Calendar statistics are formatted text in both
+modes. Use raw inputs and base R statistics when full calendar precision is
+needed. SD uses the sample denominator, quantiles use type 7, and these
+conventions are not promises of exact Stata equivalence.
+
+## A preview retains every row
+
+```{r previews}
+long <- tibble(id = 1:12, value = (1:12)^2)
+preview <- preview_table(long, n = 4)
+preview
+nrow(preview)
+sum(preview$value)
+
+subset <- slice_headtail(long, n = 4)
+subset
+nrow(subset)
+sum(subset$value)
+```
+
+The preview still contains 12 rows; the slice contains four. `n` is the total
+display or selection budget, split between the beginning and end. Interval
+mode samples approximately evenly spaced positions; sort first when position
+should represent a meaningful order.
+
+```{r remove-preview}
+preview_table(long, style = "interval", n = 4)
+ordinary <- unpreview_table(preview)
+identical(ordinary, long)
+```
+
+`print_headtail()` and `print_interval()` print once and invisibly return the
+complete input. `unpreview_table()` removes the persistent display setting.
+Supported dplyr/tidyr operations carry preview settings forward while following
+their own container and grouping rules. Wrapping and unwrapping a data.table
+copies it; later native data.table mutations retain ordinary reference semantics.

@@ -6,6 +6,7 @@
 #'
 #' @return A numeric value
 #' @name stat
+#' @keywords internal
 
 #' @rdname stat
 skew <- function(x, n) {

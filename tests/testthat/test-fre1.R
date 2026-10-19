@@ -7,24 +7,18 @@
 # KEY BEHAVIORS: single variable frequency
 # EDGE CASES: edge cases in univariate analysis
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - Output Type Variations
 # ============================================================================
 
 test_that("fre1: list output (default)", {
-  df <- tibble(x = c("a", "a", "b", "b", "c"), y = c(1, 1, 2, 2, 3))
+  df <- tibble::tibble(x = c("a", "a", "b", "b", "c"), y = c(1, 1, 2, 2, 3))
   result <- fre1(df, x, y)
   expect_type(result, "list")
 })
 
 test_that("fre1: tibble output", {
-  df <- tibble(x = c("a", "a", "b", "b", "c"), y = c(1, 1, 2, 2, 3))
+  df <- tibble::tibble(x = c("a", "a", "b", "b", "c"), y = c(1, 1, 2, 2, 3))
   result <- fre1(df, x, y, .type = "tibble")
   expect_s3_class(result, "tbl_df")
   expect_true("variable" %in% names(result))
@@ -32,14 +26,15 @@ test_that("fre1: tibble output", {
 })
 
 test_that("fre1: list output", {
-  df <- tibble(x = c("a", "a", "b"), y = c(1, 1, 2))
+  df <- tibble::tibble(x = c("a", "a", "b"), y = c(1, 1, 2))
   result <- fre1(df, x, y, .type = "list")
   expect_type(result, "list")
   expect_equal(length(result), 2)
 })
 
 test_that("fre1: many variables with tibble output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     v1 = sample(1:3, 50, replace = TRUE),
     v2 = sample(letters[1:4], 50, replace = TRUE),
     v3 = factor(sample(c("x", "y"), 50, replace = TRUE))
@@ -54,14 +49,14 @@ test_that("fre1: many variables with tibble output", {
 # ============================================================================
 
 test_that("fre1: each variable has its own Total row", {
-  df <- tibble(x = c("a", "a", "b"), y = c(1, 1, 2))
+  df <- tibble::tibble(x = c("a", "a", "b"), y = c(1, 1, 2))
   result <- fre1(df, x, y, .type = "list")
   expect_true(any(grepl("Total", result$x$value)))
   expect_true(any(grepl("Total", result$y$value)))
 })
 
 test_that("fre1: Total counts are correct per variable", {
-  df <- tibble(x = c("a", "a", "b", "c"), y = c(1, 1, 2, 3))
+  df <- tibble::tibble(x = c("a", "a", "b", "c"), y = c(1, 1, 2, 3))
   result <- fre1(df, x, y, .type = "list")
   x_total <- result$x[grepl("Total", result$x$value, ignore.case = TRUE), ]
   y_total <- result$y[grepl("Total", result$y$value, ignore.case = TRUE), ]
@@ -70,14 +65,15 @@ test_that("fre1: Total counts are correct per variable", {
 })
 
 test_that("fre1: tibble output with multiple Total rows", {
-  df <- tibble(x = c("a", "a", "b"), y = c(1, 1, 2))
+  df <- tibble::tibble(x = c("a", "a", "b"), y = c(1, 1, 2))
   result <- fre1(df, x, y, .type = "tibble")
   total_count <- sum(grepl("Total", result$value, ignore.case = TRUE))
   expect_equal(total_count, 2)
 })
 
 test_that("fre1: list output structure with Total", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     var1 = sample(1:3, 100, replace = TRUE),
     var2 = sample(letters[1:5], 100, replace = TRUE)
   )
@@ -95,7 +91,8 @@ test_that("fre1: list output structure with Total", {
 # ============================================================================
 
 test_that("fre1: group by with list output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = rep(c("A", "B"), each = 10),
     x = sample(1:3, 20, replace = TRUE),
     y = sample(letters[1:3], 20, replace = TRUE)
@@ -106,7 +103,8 @@ test_that("fre1: group by with list output", {
 })
 
 test_that("fre1: group by with tibble output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = rep(c("A", "B"), each = 10),
     x = sample(1:3, 20, replace = TRUE),
     y = sample(letters[1:3], 20, replace = TRUE)
@@ -117,8 +115,9 @@ test_that("fre1: group by with tibble output", {
 })
 
 test_that("fre1: group by with flextable output", {
+  withr::local_preserve_seed()
   skip_if_not_installed("flextable")
-  df <- tibble(
+  df <- tibble::tibble(
     group = rep(c("A", "B"), each = 10),
     x = sample(1:3, 20, replace = TRUE)
   )
@@ -127,7 +126,8 @@ test_that("fre1: group by with flextable output", {
 })
 
 test_that("fre1: group with NA in grouping variable", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     group = c(rep("A", 10), rep(NA, 10), rep("B", 10)),
     x = sample(1:3, 30, replace = TRUE)
   )
@@ -136,7 +136,8 @@ test_that("fre1: group with NA in grouping variable", {
 })
 
 test_that("fre1: complex multi-level grouping", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     g1 = rep(c("X", "Y"), 20),
     g2 = rep(c("A", "B", "C", "D"), 10),
     x = sample(1:3, 40, replace = TRUE),
@@ -151,7 +152,7 @@ test_that("fre1: complex multi-level grouping", {
 # ============================================================================
 
 test_that("fre1: variables with varying NA percentages", {
-  df <- tibble(
+  df <- tibble::tibble(
     no_na = 1:50,
     ten_pct = c(1:45, rep(NA, 5)),
     fifty_pct = c(1:25, rep(NA, 25))
@@ -167,7 +168,7 @@ test_that("fre1: variables with varying NA percentages", {
 })
 
 test_that("fre1: all NA variable with Total", {
-  df <- tibble(
+  df <- tibble::tibble(
     normal = c("a", "b", "a"),
     all_na = rep(NA, 3)
   )
@@ -177,7 +178,7 @@ test_that("fre1: all NA variable with Total", {
 })
 
 test_that("fre1: factor with NA level in list output", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("a", "b", NA), exclude = NULL),
     y = c(1, 2, 3)
   )
@@ -191,7 +192,8 @@ test_that("fre1: factor with NA level in list output", {
 # ============================================================================
 
 test_that("fre1: boolean expressions as computed variables", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     x = 1:30,
     y = sample(letters[1:3], 30, replace = TRUE)
   )
@@ -201,7 +203,8 @@ test_that("fre1: boolean expressions as computed variables", {
 })
 
 test_that("fre1: complex boolean in tibble output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     a = 1:50,
     b = sample(letters[1:3], 50, replace = TRUE),
     c = sample(c(TRUE, FALSE), 50, replace = TRUE)
@@ -216,7 +219,7 @@ test_that("fre1: complex boolean in tibble output", {
 # ============================================================================
 
 test_that("fre1: .desc applied to all variables in list", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("z", "z", "a", "a", "m"),
     y = c(3, 3, 1, 1, 2)
   )
@@ -227,7 +230,7 @@ test_that("fre1: .desc applied to all variables in list", {
 })
 
 test_that("fre1: .desc=FALSE preserves factor order", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("high", "low", "med"), levels = c("low", "med", "high"))
   )
   result <- fre1(df, x, .desc = FALSE, .type = "list")
@@ -240,7 +243,7 @@ test_that("fre1: .desc=FALSE preserves factor order", {
 # ============================================================================
 
 test_that("fre1: Date variables with Total", {
-  df <- tibble(
+  df <- tibble::tibble(
     d1 = as.Date(c("2024-01-01", "2024-01-01", "2024-01-02")),
     d2 = as.Date(c("2024-06-01", "2024-06-01", "2024-06-02"))
   )
@@ -251,7 +254,7 @@ test_that("fre1: Date variables with Total", {
 })
 
 test_that("fre1: POSIXct datetime with Total", {
-  df <- tibble(
+  df <- tibble::tibble(
     t1 = as.POSIXct(c(
       "2024-01-01 10:00",
       "2024-01-01 10:00",
@@ -270,7 +273,7 @@ test_that("fre1: POSIXct datetime with Total", {
 })
 
 test_that("fre1: logical variables with Total", {
-  df <- tibble(
+  df <- tibble::tibble(
     flag1 = c(TRUE, TRUE, FALSE),
     flag2 = c(FALSE, FALSE, TRUE)
   )
@@ -280,9 +283,9 @@ test_that("fre1: logical variables with Total", {
 })
 
 test_that("fre1: haven labelled variables", {
-  df <- tibble(
-    x = labelled(c(1, 1, 2), labels = c("A" = 1, "B" = 2)),
-    y = labelled(c(3, 3, 4), labels = c("X" = 3, "Y" = 4))
+  df <- tibble::tibble(
+    x = haven::labelled(c(1, 1, 2), labels = c("A" = 1, "B" = 2)),
+    y = haven::labelled(c(3, 3, 4), labels = c("X" = 3, "Y" = 4))
   )
   result <- fre1(df, x, y, .type = "list")
   expect_type(result, "list")
@@ -296,43 +299,47 @@ test_that("fre1: haven labelled variables", {
 # ============================================================================
 
 test_that("fre1: starts_with selection", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     temp_1 = sample(1:3, 50, replace = TRUE),
     temp_2 = sample(1:3, 50, replace = TRUE),
     pressure_1 = sample(1:3, 50, replace = TRUE)
   )
-  result <- fre1(df, starts_with("temp_"), .type = "list")
+  result <- fre1(df, dplyr::starts_with("temp_"), .type = "list")
   expect_equal(length(result), 2)
 })
 
 test_that("fre1: ends_with selection", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     var_a_test = sample(letters[1:3], 50, replace = TRUE),
     var_b_test = sample(letters[1:3], 50, replace = TRUE),
     var_c_prod = sample(letters[1:3], 50, replace = TRUE)
   )
-  result <- fre1(df, ends_with("_test"), .type = "list")
+  result <- fre1(df, dplyr::ends_with("_test"), .type = "list")
   expect_equal(length(result), 2)
 })
 
 test_that("fre1: where() selection", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     num1 = 1:50,
     num2 = 51:100,
     char = sample(letters, 50, replace = TRUE),
     logi = sample(c(TRUE, FALSE), 50, replace = TRUE)
   )
-  result <- fre1(df, where(is.numeric), .type = "list")
+  result <- fre1(df, dplyr::where(is.numeric), .type = "list")
   expect_equal(length(result), 2)
 })
 
 test_that("fre1: many variables (20+) with list output", {
-  df <- as_tibble(
+  withr::local_preserve_seed()
+  df <- tibble::as_tibble(
     replicate(20, sample(1:3, 50, replace = TRUE)),
     .name_repair = "minimal"
   )
   names(df) <- paste0("var", 1:20)
-  result <- fre1(df, everything(), .type = "list")
+  result <- fre1(df, dplyr::everything(), .type = "list")
   expect_equal(length(result), 20)
 })
 
@@ -341,7 +348,7 @@ test_that("fre1: many variables (20+) with list output", {
 # ============================================================================
 
 test_that("fre1: single row dataset", {
-  df <- tibble(x = "only", y = 1, z = TRUE)
+  df <- tibble::tibble(x = "only", y = 1, z = TRUE)
   result <- fre1(df, x:z, .type = "list")
   expect_equal(length(result), 3)
   purrr::walk(
@@ -353,7 +360,7 @@ test_that("fre1: single row dataset", {
 })
 
 test_that("fre1: all identical values in each variable", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep("same", 100),
     y = rep(42, 100),
     z = rep(TRUE, 100)
@@ -370,7 +377,7 @@ test_that("fre1: all identical values in each variable", {
 })
 
 test_that("fre1: extreme cardinality differences", {
-  df <- tibble(
+  df <- tibble::tibble(
     low_card = rep(1:2, 250),
     high_card = 1:500
   )
@@ -380,7 +387,7 @@ test_that("fre1: extreme cardinality differences", {
 })
 
 test_that("fre1: empty data frame", {
-  df <- tibble(x = numeric(0), y = character(0))
+  df <- tibble::tibble(x = numeric(0), y = character(0))
   result <- fre1(df, x, y, .type = "list")
   expect_equal(length(result), 2)
   purrr::walk(result, ~ expect_equal(nrow(.x), 0))
@@ -391,7 +398,7 @@ test_that("fre1: empty data frame", {
 # ============================================================================
 
 test_that("fre1: unicode in multiple variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     cjk = c("中文", "日本語", "中文"),
     arabic = c("مرحبا", "مرحبا", "سلام"),
     emoji = c("🎉", "🎊", "🎉")
@@ -406,15 +413,14 @@ test_that("fre1: unicode in multiple variables", {
 # ============================================================================
 
 test_that("fre1: variables named n, percent, cum, total", {
-  df <- tibble(
+  df <- tibble::tibble(
     n = c(1, 1, 2),
     percent = c("a", "a", "b"),
     total = c("x", "y", "x")
   )
-  expect_message(
-    result <- fre1(df, n, percent, total, .type = "list"),
-    "renamed"
-  )
+  # Measured names are list names, not columns, so they are not renamed.
+  expect_no_message(result <- fre1(df, n, percent, total, .type = "list"))
+  expect_named(result, c("n", "percent", "total"))
 })
 
 # ============================================================================
@@ -422,7 +428,8 @@ test_that("fre1: variables named n, percent, cum, total", {
 # ============================================================================
 
 test_that("fre1: moderate size dataset with list output", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     a = sample(1:5, 5000, replace = TRUE),
     b = sample(letters[1:5], 5000, replace = TRUE),
     c = sample(c(TRUE, FALSE), 5000, replace = TRUE)
@@ -433,12 +440,13 @@ test_that("fre1: moderate size dataset with list output", {
 })
 
 test_that("fre1: many variables with tibble output", {
-  df <- as_tibble(
+  withr::local_preserve_seed()
+  df <- tibble::as_tibble(
     replicate(15, sample(1:3, 100, replace = TRUE)),
     .name_repair = "minimal"
   )
   names(df) <- paste0("var", 1:15)
-  result <- fre1(df, everything(), .type = "tibble")
+  result <- fre1(df, dplyr::everything(), .type = "tibble")
   expect_s3_class(result, "tbl_df")
   expect_true("variable" %in% names(result))
 })
@@ -452,7 +460,7 @@ test_that("fre1: NULL input should error", {
 })
 
 test_that("fre1: non-existent column should error", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_error(fre1(df, y))
 })
 
@@ -461,8 +469,9 @@ test_that("fre1: non-existent column should error", {
 # ============================================================================
 
 test_that("fre1: survey data with multiple questions", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     q1_satisfaction = sample(1:5, 200, replace = TRUE),
     q2_recommend = sample(c("Yes", "No", "Maybe"), 200, replace = TRUE),
     q3_age_group = sample(
@@ -478,7 +487,8 @@ test_that("fre1: survey data with multiple questions", {
 })
 
 test_that("fre1: demographic frequencies with grouping", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     country = sample(c("US", "UK", "DE"), 300, replace = TRUE),
     age_group = sample(
       c("18-25", "26-35", "36-50", "50+"),
@@ -493,7 +503,8 @@ test_that("fre1: demographic frequencies with grouping", {
 })
 
 test_that("fre1: quality control multiple metrics", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     batch_id = rep(1:10, each = 20),
     pass_visual = sample(
       c(TRUE, FALSE),

@@ -105,7 +105,7 @@ test_that("s_select discards failed-probe warnings and retains successful fallba
   expect_match(warnings, "branch-warning", fixed = TRUE)
   expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
 })
-test_that("s_select retains documented select-first side-effect boundary", {
+test_that("s_select evaluates computed expressions once", {
   d <- tibble::tibble(x = 1:3)
   state <- new.env()
   state$n <- 0L
@@ -115,7 +115,7 @@ test_that("s_select retains documented select-first side-effect boundary", {
     x * 2
   }
   out <- s_select(d, z = compute(x))
-  # The failing selection attempt can run code; the fallback runs only once.
-  expect_identical(state$n, 2L)
+  # Computed expressions are classified before evaluation and run once.
+  expect_identical(state$n, 1L)
   expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
 })

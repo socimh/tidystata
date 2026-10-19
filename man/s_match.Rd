@@ -25,10 +25,9 @@ An integer vector of positions in the available column names.
 in <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}>.
 It is designed to select columns in a Stata-like style.
 
-As \code{matches()}, \code{s_match()} must be used
-within a \emph{selecting} function, such as
-\code{ds()} or
-\code{dplyr::across()}.
+Use \code{s_match()} within a \emph{selecting} function, such as \code{ds()} or
+\code{dplyr::across()}. Alternatively, provide \code{vars} explicitly to return
+matching positions in a standalone call.
 }
 \details{
 \itemize{
@@ -40,8 +39,15 @@ within a \emph{selecting} function, such as
 \item \code{var1-var5} is NOT used to select a range of variables.
 Use \code{var1:var5} out of \code{s_match()} instead.
 }
+
+Space-separated patterns are alternatives, each matched against complete
+column names. Numeric ranges expand within each pattern before matching.
+Each pattern can contain one bracketed range; separate patterns may each
+contain their own range.
 }
 \examples{
+s_match("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
+
 tb <- paste0("x", 1:15) \%>\%
   tibble::as_tibble() \%>\%
   tidyr::pivot_wider(names_from = value)
@@ -65,10 +71,9 @@ tb \%>\%
 tb \%>\%
   ds(s_match("x[9-15]"))
 
-\dontrun{
+# A literal hyphen pattern selects no columns here; it is not a range.
 tb \%>\%
   ds(s_match("x1-x5"))
-}
 
 tb \%>\%
   ds(x1:x5)

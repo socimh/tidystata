@@ -1,139 +1,19 @@
-.Rproj.user
+# Local session and authentication state.
+.Rproj.user/
 .Rhistory
 .Rdata
 .httr-oauth
 .DS_Store
-.quarto
+.quarto/
 **/__pycache__/
-docs
 
-# Keep selected milestone evidence; retain other generated results locally.
-.opencode/results/*
-!.opencode/results/README.md
-!.opencode/results/baseline-0.2.0.json
-!.opencode/results/milestone-contracts.csv
-!.opencode/results/milestone-contracts-details.csv
-!.opencode/results/milestone-contracts-tests.log
-!.opencode/results/milestone-contracts-install.log
-!.opencode/results/milestone-retained-final.csv
-!.opencode/results/milestone-retained-final-details.csv
-!.opencode/results/milestone-retained-final-tests.log
-!.opencode/results/milestone-verification-check.log
-!.opencode/results/milestone-minimal-final-minimal.log
-!.opencode/results/milestone-timer-recheck.csv
-!.opencode/results/milestone-timing-probe.txt
+# Reproducible development outputs and local tool installations.
+/docs/
+/.opencode/results/
+/.opencode/tools/
 
-# Historical scratch/debug files remain local.
-.opencode/tests/debug_issue_a1.R
-.opencode/tests/debug_issue_a1_step.R
-.opencode/tests/test_esttab_output.txt
-.opencode/tests/test_esttab_comprehensive_output.txt
-
-# Complete post-repair regression evidence.
-!.opencode/results/stabilization-tests-full.csv
-!.opencode/results/stabilization-tests-full-details.csv
-!.opencode/results/stabilization-tests-full-tests.log
-
-# Verified core stabilization evidence.
-!.opencode/results/stabilization-core-clean.csv
-!.opencode/results/stabilization-core-clean-details.csv
-!.opencode/results/stabilization-core-clean-tests.log
-!.opencode/results/stabilization-core-clean-build.log
-!.opencode/results/stabilization-core-clean-check.log
-!.opencode/results/stabilization-core-minimal-minimal.log
-!.opencode/results/stabilization-core-examples.txt
-
-# Post-cleanup package-content and verification evidence.
-!.opencode/results/cleanup-final.csv
-!.opencode/results/cleanup-final-build.log
-!.opencode/results/cleanup-final-check.log
-
-# Function-level summary acceptance evidence.
-!.opencode/results/summ-acceptance-clean.csv
-!.opencode/results/summ-acceptance-clean-details.csv
-!.opencode/results/summ-acceptance-clean-check.log
-!.opencode/results/summ-acceptance-clean-scenarios.csv
-!.opencode/results/summ-acceptance-examples-clean.log
-
-# Reviewed 100-scenario matrix for each summary function.
-!.opencode/results/summ-100-reviewed.csv
-!.opencode/results/summ-100-reviewed-details.csv
-!.opencode/results/summ-100-reviewed-check.log
-!.opencode/results/summ-100-reviewed-scenarios.csv
-!.opencode/results/summ-100-reviewed-examples.log
-
-# Function-level tabulation acceptance evidence.
-!.opencode/results/tabulation-accepted.csv
-!.opencode/results/tabulation-accepted-details.csv
-!.opencode/results/tabulation-accepted-check.log
-!.opencode/results/tabulation-accepted-scenarios.csv
-!.opencode/results/tabulation-accepted-examples.log
-
-# Keep the requested visual-review PDF; preserve intermediate capture/render files locally.
-!.opencode/results/console-showcase/
-.opencode/results/console-showcase/*
-!.opencode/results/console-showcase/statart_console_showcase.pdf
-
-# Function-level names and variable metadata acceptance evidence.
-!.opencode/results/inspection-accepted.csv
-!.opencode/results/inspection-accepted-details.csv
-!.opencode/results/inspection-accepted-check.log
-!.opencode/results/inspection-accepted-scenarios.csv
-!.opencode/results/inspection-accepted-examples.log
-
-# Codebook/browse acceptance and shared-selector regression evidence.
-!.opencode/results/codebook-browse-accepted.csv
-!.opencode/results/codebook-browse-accepted-details.csv
-!.opencode/results/codebook-browse-accepted-check.log
-!.opencode/results/codebook-browse-accepted-scenarios.csv
-!.opencode/results/codebook-browse-accepted-examples.log
-
-# Keep the requested codebook/browse PDF; preserve captures and render files locally.
-!.opencode/results/codebook-browse-showcase/
-.opencode/results/codebook-browse-showcase/*
-!.opencode/results/codebook-browse-showcase/statart_codebook_browse_console.pdf
-.opencode/workflows/__pycache__/
-
-# Reproducible modern-R adoption evidence; preserve larger intermediates locally.
-!.opencode/results/style-adoption-final.csv
-!.opencode/results/style-adoption-final-details.csv
-!.opencode/results/style-adoption-final-install.log
-!.opencode/results/style-adoption-final-tests.log
-!.opencode/results/style-adoption-final-build.log
-!.opencode/results/style-adoption-final-check.log
-!.opencode/results/style-adoption-demos-demos.log
-!.opencode/results/style-adoption-minimal-minimal.log
-!.opencode/results/style-adoption-tooling.json
-!.opencode/results/style-adoption-style.log
-!.opencode/results/style-adoption-python-tests.log
-!.opencode/results/style-adoption-compatibility.log
-!.opencode/results/style-adoption-baseline.rds
-
-# Row type/numerical acceptance; preserve intermediate failing probes locally.
-!.opencode/results/row-types-final.csv
-!.opencode/results/row-types-final-details.csv
-!.opencode/results/row-types-final-install.log
-!.opencode/results/row-types-final-tests.log
-!.opencode/results/row-types-final-build.log
-!.opencode/results/row-types-final-check.log
-!.opencode/results/row-types-examples.log
-!.opencode/results/row-types-minimal-minimal.log
-!.opencode/results/row-types-demos-demos.log
-!.opencode/results/row-types-style.log
-
-# Persistent preview acceptance evidence; intermediate runs remain local.
-!.opencode/results/preview-final.csv
-!.opencode/results/preview-final-details.csv
-!.opencode/results/preview-final-install.log
-!.opencode/results/preview-final-tests.log
-!.opencode/results/preview-final-build.log
-!.opencode/results/preview-final-check.log
-!.opencode/results/preview-examples.log
-!.opencode/results/preview-minimal-minimal.log
-!.opencode/results/preview-demos-demos.log
-!.opencode/results/preview-style.log
-
-# Selective persistent-preview PDF; keep intermediate captures locally.
-!.opencode/results/preview-showcase/
-.opencode/results/preview-showcase/*
-!.opencode/results/preview-showcase/statart_preview_console.pdf
+# Native build products; keep source and registration wrappers.
+/src/*.o
+/src/*.dll
+/src/*.so
+/src/*.a

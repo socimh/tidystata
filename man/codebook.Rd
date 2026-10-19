@@ -7,7 +7,7 @@
 codebook(.data, ...)
 }
 \arguments{
-\item{.data}{The input data (data frame or tibble).}
+\item{.data}{The input data (data frame, tibble, or data.table).}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to include in the codebook.
@@ -15,11 +15,13 @@ Omit to include all columns. Selection is attempted first; expressions that
 are not valid selections are evaluated as computed columns by \code{\link[=s_select]{s_select()}}.}
 }
 \value{
-An ungrouped tibble with one row per selected variable, in selection
+An ungrouped table with one row per selected variable, in selection
 order. Columns are \code{variable}, optional \code{label}, \code{type}, \code{n}, and \code{unique}.
 \code{n} counts observed values and \code{unique} counts distinct observed values.
 Empty and all-missing columns have zero counts. A zero-column selection
 returns zero rows with \code{variable}, \code{type}, \code{n}, and \code{unique} columns.
+The input's data.frame, tibble, or data.table container and supported preview
+settings are preserved. Other subclasses are not reconstructed.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

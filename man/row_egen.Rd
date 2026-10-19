@@ -14,19 +14,19 @@
 \alias{row_non_miss}
 \title{Calculate summaries across columns within each row}
 \usage{
-row_mean(...)
+row_mean(..., na.rm = TRUE)
 
-row_sum(...)
+row_sum(..., na.rm = TRUE)
 
-row_max(...)
+row_max(..., .values = NULL, na.rm = TRUE)
 
-row_min(...)
+row_min(..., .values = NULL, na.rm = TRUE)
 
-row_median(...)
+row_median(..., na.rm = TRUE)
 
-row_var(...)
+row_var(..., na.rm = TRUE)
 
-row_sd(...)
+row_sd(..., na.rm = TRUE)
 
 row_unique(...)
 
@@ -38,6 +38,16 @@ row_non_miss(...)
 \item{...}{A data frame or tibble, or
 <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> expressions inside
 \code{\link[dplyr:mutate]{dplyr::mutate()}}. Each selected column must be one-dimensional.}
+
+\item{na.rm}{For arithmetic and extrema helpers, a single logical value. If
+\code{TRUE} (the default), omit missing values; if \code{FALSE}, any missing input
+makes that row's result missing. Count helpers (\code{row_unique()},
+\code{row_miss()}, \code{row_non_miss()}) reject \code{na.rm}.}
+
+\item{.values}{For \code{row_min()} and \code{row_max()}, additional values to compare
+with selected columns: a vector, or a list of vectors. Each must have
+length one or the number of input rows (the current group size inside
+grouped \code{mutate()}). Values must have compatible supported types.}
 }
 \value{
 A vector with one value per input row. Extrema retain the compatible
@@ -57,10 +67,10 @@ above; unique and missing-value counts return integers.
 \details{
 All helpers preserve the input. Missingness is determined from the original
 columns, including tagged and SPSS user-missing values. Arithmetic and extrema
-omit missing values. All-missing rows return a typed \code{NA}, except \code{row_sum()}
-returns zero. Variance and standard deviation use the sample denominator and
-require at least two observed values. Zero-row inputs return typed empty
-vectors; \code{NULL} and zero selected columns are rejected.
+omit missing values by default. All-missing rows return a typed \code{NA}, except
+\code{row_sum(na.rm = TRUE)} returns zero. Variance and standard deviation use the
+sample denominator and require at least two observed values. Zero-row inputs
+return typed empty vectors; \code{NULL} and zero selected columns are rejected.
 }
 \section{Extrema}{
 
@@ -75,6 +85,13 @@ Labelled values are compared by their underlying values. Compatible units
 are normalized before comparison.
 Unordered factors, lists, complex values, and incompatible combinations are
 rejected rather than assigned an arbitrary ordering.
+Like \code{\link[=pmin]{pmin()}} and \code{\link[=pmax]{pmax()}}, bare numeric constants in \code{row_min()} and
+\code{row_max()} are values, not column positions: \code{row_min(x, 0.5)} caps \code{x} at
+0.5. Inside \code{mutate()}, a symbol that is not a column but names a numeric
+vector in the calling environment is also used as values. Select columns by
+position with \code{c()} or a tidyselect helper, for example \code{row_min(c(1, 2))}.
+Length-one constants (including those in \code{.values}) never fill a row whose
+other inputs are all missing; such rows stay \code{NA}, as with \code{pmin()}.
 }
 
 \section{Arithmetic}{
@@ -132,6 +149,9 @@ row_non_miss(tb)
 
 tb |>
   dplyr::mutate(mean = row_mean(x, y), sum = row_sum(x, y))
+tb |>
+  dplyr::mutate(capped = row_min(x, .values = 0.5))
+row_sum(tb, na.rm = FALSE)
 
 flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
 row_max(flags) # TRUE, FALSE, NA, with logical type

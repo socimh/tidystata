@@ -5,8 +5,10 @@ from pathlib import Path
 import tempfile
 import subprocess
 import unittest
+import sys
 
 SCRIPT = Path(__file__).resolve().parents[1] / "workflows/check_style.py"
+sys.path.insert(0, str(SCRIPT.parent))
 SPEC = importlib.util.spec_from_file_location("check_style", SCRIPT)
 CHECK = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(CHECK)
@@ -39,14 +41,17 @@ class StyleScopeTests(unittest.TestCase):
     def test_rejects_missing_external_duplicate_generated_and_archive_paths(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ("R/cpp11.R", "extra_functions/old.R", "source.R"):
+            for name in ("R/cpp11.R", "extra_functions/old.R", "source.R",
+                         ".opencode/tools/library/fixture.R", ".opencode/notes/request.R"):
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("x <- 1\n", encoding="utf-8")
             for paths in ([], ["missing.R"], ["../outside.R"], ["source.R"] * 2,
                           ["R/cpp11.R"], ["extra_functions/old.R"],
                           ["R\\cpp11.R"], ["extra_functions\\old.R"],
-                          ["./R/cpp11.R"], ["R/CPP11.R"]):
+                          ["./R/cpp11.R"], ["R/CPP11.R"],
+                          [".opencode/tools/library/fixture.R"],
+                          [".opencode/notes/request.R"]):
                 with self.subTest(paths=paths), self.assertRaises(ValueError):
                     CHECK.checked_files(root, {"files": paths})
 

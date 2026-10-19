@@ -4,10 +4,14 @@
 \alias{timer}
 \title{Time spent on a function}
 \usage{
-timer(.x)
+timer(.x, .on_error = TRUE)
 }
 \arguments{
 \item{.x}{An expression to evaluate and time.}
+
+\item{.on_error}{A single logical value. If \code{TRUE} (the default), also
+report elapsed time when the expression fails, then let the original error
+propagate. Use \code{FALSE} to report elapsed time only on success.}
 }
 \value{
 The evaluated result, invisibly.
@@ -17,10 +21,16 @@ The evaluated result, invisibly.
 }
 \details{
 The expression is evaluated once. On success, elapsed time is emitted as a
-message. Warnings and errors propagate normally; a failed expression emits
-no completion-time message.
+message. Warnings and errors propagate normally. When the expression fails
+(or is interrupted) and \code{.on_error = TRUE}, a message marked as failed
+execution reports the elapsed time while the error unwinds; the original
+condition object, including its call, is not modified.
+
+Nested or repeated timers each measure everything evaluated inside them,
+so a later timer in a pipeline reports cumulative time from its own start.
 }
 \examples{
 x <- seq_len(1e6)
 mean(x) \%>\% timer()
+try(timer(stop("failure")))
 }

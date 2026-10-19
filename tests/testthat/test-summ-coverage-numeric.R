@@ -1,6 +1,3 @@
-library(testthat)
-library(statart)
-
 # Cases 001-050 are shared public contracts, independently run for each export.
 # The oracle uses the documented R conventions, never statart internals.
 summ_cov_reference <- function(x) {
@@ -525,7 +522,9 @@ for (function_name in c("summ", "tabstat")) {
         case$title
       ),
       {
-        case$check(getExportedValue("statart", function_name))
+        case$check(
+          summary_legacy_layout(getExportedValue("statart", function_name))
+        )
       }
     )
   }

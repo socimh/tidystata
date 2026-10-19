@@ -7,18 +7,12 @@
 # KEY BEHAVIORS: variable metadata, type detection
 # EDGE CASES: complex data types, nested structures
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - codebook() Complex Scenarios
 # ============================================================================
 
 test_that("codebook: empty data frame with columns", {
-  df <- tibble(x = numeric(0), y = character(0), z = logical(0))
+  df <- tibble::tibble(x = numeric(0), y = character(0), z = logical(0))
   result <- codebook(df)
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 3)
@@ -26,7 +20,7 @@ test_that("codebook: empty data frame with columns", {
 })
 
 test_that("codebook: single row dataset", {
-  df <- tibble(
+  df <- tibble::tibble(
     num = 1,
     char = "only",
     logi = TRUE,
@@ -39,7 +33,7 @@ test_that("codebook: single row dataset", {
 })
 
 test_that("codebook: all identical values across types", {
-  df <- tibble(
+  df <- tibble::tibble(
     num = rep(42, 100),
     char = rep("same", 100),
     logi = rep(TRUE, 100),
@@ -50,7 +44,7 @@ test_that("codebook: all identical values across types", {
 })
 
 test_that("codebook: all unique values (100% unique)", {
-  df <- tibble(
+  df <- tibble::tibble(
     id = 1:500,
     uuid = paste0("ID", 1:500),
     timestamp = as.POSIXct(Sys.time() + 1:500)
@@ -61,7 +55,7 @@ test_that("codebook: all unique values (100% unique)", {
 })
 
 test_that("codebook: extreme missing value patterns", {
-  df <- tibble(
+  df <- tibble::tibble(
     no_na = 1:100,
     ten_pct = c(1:90, rep(NA, 10)),
     fifty_pct = c(1:50, rep(NA, 50)),
@@ -74,17 +68,17 @@ test_that("codebook: extreme missing value patterns", {
 })
 
 test_that("codebook: haven labelled variables with complex labels", {
-  df <- tibble(
-    simple_label = labelled(
+  df <- tibble::tibble(
+    simple_label = haven::labelled(
       rep(1:3, length.out = 100),
       labels = c("A" = 1, "B" = 2, "C" = 3)
     ),
-    with_na = labelled_spss(
+    with_na = haven::labelled_spss(
       rep(c(1, 1, 2, -99), length.out = 100),
       labels = c("Yes" = 1, "No" = 2, "Missing" = -99),
       na_values = -99
     ),
-    extended = labelled(
+    extended = haven::labelled(
       rep(1:5, 20),
       labels = c(
         "Very Low" = 1,
@@ -100,7 +94,7 @@ test_that("codebook: haven labelled variables with complex labels", {
 })
 
 test_that("codebook: Date and POSIXct datetime variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     date_only = seq(as.Date("2020-01-01"), as.Date("2024-12-31"), by = "month"),
     datetime = seq(as.POSIXct("2020-01-01"), by = "hour", length.out = 60),
     datetime_tz = as.POSIXct(c("2024-01-01 10:00"), tz = "UTC")
@@ -110,7 +104,7 @@ test_that("codebook: Date and POSIXct datetime variables", {
 })
 
 test_that("codebook: factor with many unused levels", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(
       c("a", "b"),
       levels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
@@ -121,7 +115,7 @@ test_that("codebook: factor with many unused levels", {
 })
 
 test_that("codebook: list column handling", {
-  df <- tibble(
+  df <- tibble::tibble(
     normal = 1:5,
     list_col = I(list(1:3, 2:4, 3:5, 4:6, 5:7))
   )
@@ -130,14 +124,15 @@ test_that("codebook: list column handling", {
 })
 
 test_that("codebook: matrix column handling", {
-  df <- tibble(x = 1:4)
+  df <- tibble::tibble(x = 1:4)
   df$y <- matrix(1:8, nrow = 4)
   result <- codebook(df)
   expect_equal(nrow(result), 2)
 })
 
 test_that("codebook: data frame with 50+ variables", {
-  df <- as_tibble(
+  withr::local_preserve_seed()
+  df <- tibble::as_tibble(
     replicate(50, sample(1:10, 100, replace = TRUE)),
     .name_repair = "minimal"
   )
@@ -147,7 +142,7 @@ test_that("codebook: data frame with 50+ variables", {
 })
 
 test_that("codebook: extreme numeric values", {
-  df <- tibble(
+  df <- tibble::tibble(
     normal = 1:10,
     large = rep(
       c(.Machine$double.xmax, .Machine$double.xmax / 2),
@@ -165,7 +160,7 @@ test_that("codebook: extreme numeric values", {
 })
 
 test_that("codebook: unicode and special characters in column names", {
-  df <- tibble(
+  df <- tibble::tibble(
     `中文变量` = 1:10,
     `العربية` = 1:10,
     `with spaces` = 1:10,
@@ -177,7 +172,8 @@ test_that("codebook: unicode and special characters in column names", {
 })
 
 test_that("codebook: logical variables with NA", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     all_true = rep(TRUE, 100),
     all_false = rep(FALSE, 100),
     mixed = sample(c(TRUE, FALSE), 100, replace = TRUE),
@@ -190,7 +186,7 @@ test_that("codebook: logical variables with NA", {
 
 test_that("codebook: difftime and hms time variables", {
   skip_if_not_installed("hms")
-  df <- tibble(
+  df <- tibble::tibble(
     duration = as.difftime(c(1, 2, 3, 4, 5), units = "hours"),
     time_of_day = hms::as_hms(rep(
       c("08:00:00", "12:00:00", "18:00:00"),
@@ -203,7 +199,7 @@ test_that("codebook: difftime and hms time variables", {
 
 test_that("codebook: integer64 from bit64 package", {
   skip_if_not_installed("bit64")
-  df <- tibble(
+  df <- tibble::tibble(
     big_int = bit64::as.integer64(c(1e15, 1e15, 2e15))
   )
   result <- codebook(df)
@@ -217,7 +213,7 @@ test_that("codebook: data.table input", {
     y = letters[1:10]
   )
   result <- codebook(df)
-  expect_s3_class(result, "tbl_df")
+  expect_identical(class(result), c("data.table", "data.frame"))
   expect_equal(nrow(result), 2)
 })
 
@@ -226,53 +222,53 @@ test_that("codebook: data.table input", {
 # ============================================================================
 
 test_that("codebook: starts_with selection", {
-  df <- tibble(
+  df <- tibble::tibble(
     pref_x_1 = 1:10,
     pref_x_2 = 1:10,
     pref_y_1 = 1:10,
     pref_y_2 = 1:10,
     other_z = 1:10
   )
-  result <- codebook(df, starts_with("pref_"))
+  result <- codebook(df, dplyr::starts_with("pref_"))
   expect_equal(nrow(result), 4)
 })
 
 test_that("codebook: ends_with selection", {
-  df <- tibble(
+  df <- tibble::tibble(
     var_a_test = 1:10,
     var_b_test = 1:10,
     var_c_prod = 1:10,
     var_d_prod = 1:10
   )
-  result <- codebook(df, ends_with("_test"))
+  result <- codebook(df, dplyr::ends_with("_test"))
   expect_equal(nrow(result), 2)
 })
 
 test_that("codebook: contains selection", {
-  df <- tibble(
+  df <- tibble::tibble(
     temp_1 = 1:10,
     temp_2 = 1:10,
     pressure_temp = 1:10,
     humidity = 1:10
   )
-  result <- codebook(df, contains("temp"))
+  result <- codebook(df, dplyr::contains("temp"))
   expect_equal(nrow(result), 3)
 })
 
 test_that("codebook: where() with complex predicate", {
-  df <- tibble(
+  df <- tibble::tibble(
     num1 = 1:10,
     num2 = 11:20,
     char = letters[1:10],
     logi = rep(c(TRUE, FALSE), length.out = 10),
     fac = factor(rep(1:2, 5))
   )
-  result <- codebook(df, where(is.numeric))
+  result <- codebook(df, dplyr::where(is.numeric))
   expect_equal(nrow(result), 2)
 })
 
 test_that("codebook: numeric column indices", {
-  df <- tibble(a = 1:5, b = 1:5, c = 1:5, d = 1:5, e = 1:5)
+  df <- tibble::tibble(a = 1:5, b = 1:5, c = 1:5, d = 1:5, e = 1:5)
   result <- codebook(df, 1, 3, 5)
   expect_equal(result$variable, c("a", "c", "e"))
 })
@@ -282,8 +278,9 @@ test_that("codebook: numeric column indices", {
 # ============================================================================
 
 test_that("codebook: survey data simulation", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     respondent_id = 1:1000,
     age_group = sample(
       c("18-25", "26-35", "36-50", "50+"),
@@ -319,7 +316,8 @@ test_that("codebook: survey data simulation", {
 })
 
 test_that("codebook: time series data", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     timestamp = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 168),
     value = rnorm(168),
     quality_flag = sample(
@@ -335,8 +333,9 @@ test_that("codebook: time series data", {
 })
 
 test_that("codebook: clinical trial data", {
+  withr::local_preserve_seed()
   set.seed(123)
-  df <- tibble(
+  df <- tibble::tibble(
     subject_id = paste0("SUB", 1:200),
     site = sample(c("Site A", "Site B", "Site C"), 200, replace = TRUE),
     treatment = sample(c("Drug", "Placebo"), 200, replace = TRUE),
@@ -367,12 +366,12 @@ test_that("codebook: NULL input should error", {
 })
 
 test_that("codebook: non-existent column selection should error", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_error(codebook(df, y))
 })
 
 test_that("codebook: empty selection should error or return empty", {
-  df <- tibble(x = 1:5, y = 1:5)
-  result <- codebook(df, starts_with("zzz"))
+  df <- tibble::tibble(x = 1:5, y = 1:5)
+  result <- codebook(df, dplyr::starts_with("zzz"))
   expect_equal(nrow(result), 0)
 })

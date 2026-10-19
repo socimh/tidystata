@@ -179,12 +179,12 @@ test_that("binning contracts: collapsed quantile boundaries preserve all ties", 
   x <- c(rep(1, 4), rep(2, 4), NA)
   expect_warning(
     out <- cut_quantile(x, n = 4, labels = FALSE),
-    "collapsed quantile cutpoints to 2 intervals"
+    "collapsed quantile cutpoints to 2 groups"
   )
   expect_identical(out, c(rep(1L, 4), rep(2L, 4), NA_integer_))
   expect_warning(
     labelled <- cut_quantile(x, n = 4, labels = c("Low", "High")),
-    "collapsed quantile cutpoints to 2 intervals"
+    "collapsed quantile cutpoints to 2 groups"
   )
   expect_identical(levels(labelled), c("Low", "High"))
 })

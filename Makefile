@@ -45,12 +45,12 @@ test:
 style-check:
 	python .opencode/workflows/check_style.py
 
-# Collect test results (both .Rds and .txt)
+# Collect current test results in the ignored results directory
 test-results:
 	@echo "$(BLUE)Collecting test results...$(RESET)"
 	python .opencode/workflows/verify_package.py --prefix .opencode/results/current
 
-# Generate demo reports showing actual function output
+# Refresh the single checked-in set of current demo reports
 demo-reports:
 	@echo "$(BLUE)Generating demo reports with actual function output...$(RESET)"
 	python .opencode/workflows/verify_package.py --demos --prefix .opencode/results/demos
@@ -69,8 +69,8 @@ test-%:
 
 # Preserve reports, results and local artifacts; deletion needs a reviewed list.
 clean:
-	@echo "No files removed. Reports, results, datasets and native artifacts are preserved."
-	@echo "Review an exact artifact list and obtain maintainer approval before deleting files."
+	@echo "No files removed. Generated outputs are ignored; current demo reports are maintained."
+	@echo "Review generated artifacts before deleting them; preserve source, data and active work."
 
 # List available test files
 list-tests:

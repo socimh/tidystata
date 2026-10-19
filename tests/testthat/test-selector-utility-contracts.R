@@ -126,14 +126,14 @@ test_that("timer evaluates its promise once and returns the exact object invisib
   expect_identical(out, list(value = value, visible = FALSE))
 })
 
-test_that("timer propagates the original error and emits no completion message", {
+test_that("timer propagates the original error without a message when disabled", {
   condition <- structure(
     list(message = "timed failure", call = NULL),
     class = c("timed_error", "error", "condition")
   )
   messages <- character()
   err <- withCallingHandlers(
-    tryCatch(timer(stop(condition)), error = identity),
+    tryCatch(timer(stop(condition), .on_error = FALSE), error = identity),
     message = function(m) {
       messages <<- c(messages, conditionMessage(m))
       invokeRestart("muffleMessage")
@@ -254,7 +254,7 @@ test_that("s_try preserves the existing try-error classification and visible res
 })
 
 
-test_that("s_select preserves RNG consumption across a failed selection and fallback", {
+test_that("s_select evaluates computed expressions exactly once", {
   local({
     old <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     on.exit(
@@ -265,7 +265,7 @@ test_that("s_select preserves RNG consumption across a failed selection and fall
       }
     )
     set.seed(731)
-    stats::runif(2)
+    stats::runif(1)
     expected_state <- .Random.seed
     set.seed(731)
     calls <- 0L
@@ -277,7 +277,7 @@ test_that("s_select preserves RNG consumption across a failed selection and fall
     }
     out <- s_select(tibble::tibble(x = 1:3), z = compute(x))
     expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
-    expect_identical(calls, 2L)
+    expect_identical(calls, 1L)
     expect_identical(.Random.seed, expected_state)
   })
 })

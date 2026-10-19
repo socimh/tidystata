@@ -9,7 +9,8 @@ s_ungroup <- function(.data) {
 
 modify_invalid_names <- function(
   .data,
-  function_name
+  function_name,
+  candidates = names(.data)
 ) {
   invalid_names <-
     c(
@@ -41,56 +42,15 @@ modify_invalid_names <- function(
     stop("Invalid function name.", call. = FALSE)
   }
 
-  detected_names <- intersect(
-    names(.data),
-    invalid_names
-  )
-
-  if (length(detected_names) > 1) {
-    names1 <- detected_names %>%
-      paste0("`", ., "`") %>%
-      stringr::str_flatten(
-        collapse <- ", "
-      )
-    names2 <- detected_names %>%
-      paste0("`.", ., "`") %>%
-      stringr::str_flatten(
-        collapse = ", "
-      )
-    message <- paste0(
-      "To avoid duplicates in `",
-      function_name,
-      "`, ",
-      names1,
-      " are renamed as ",
-      names2,
-      ", respectively.\n",
-      "Better to rename them before `",
-      function_name,
-      "`."
-    )
-    message(message)
-  } else if (length(detected_names) == 1) {
-    names1 <- detected_names %>%
-      paste0("`", ., "`")
-    names2 <- detected_names %>%
-      paste0("`.", ., "`")
-    message <- paste0(
-      "To avoid duplicates in `",
-      function_name,
-      "`, ",
-      names1,
-      " is renamed as ",
-      names2,
-      ".\n",
-      "Better to rename them before `",
-      function_name,
-      "`."
-    )
-    message(message)
-  } else {
+  detected_names <- intersect(candidates, invalid_names)
+  if (length(detected_names) == 0L) {
     return(.data)
   }
+  message(reserved_name_message(
+    detected_names,
+    paste0(".", detected_names),
+    function_name
+  ))
 
   can_rename <- .data %>%
     dplyr::rename_with(
@@ -99,18 +59,36 @@ modify_invalid_names <- function(
     ) %>%
     s_try()
 
-  if (length(detected_names) > 0) {
-    if (can_rename) {
-      .data %>%
-        dplyr::rename_with(
-          ~ paste0(".", .x),
-          tidyselect::all_of(detected_names)
-        ) %>%
-        return()
-    } else {
-      stop("The new name is also taken. Rename fails.", call. = FALSE)
-    }
+  if (can_rename) {
+    dplyr::rename_with(
+      .data,
+      ~ paste0(".", .x),
+      tidyselect::all_of(detected_names)
+    )
+  } else {
+    stop("The new name is also taken. Rename fails.", call. = FALSE)
   }
+}
+
+# Shared wording for input columns renamed to avoid output-column collisions.
+reserved_name_message <- function(old, new, function_name, what = NULL) {
+  quote <- function(x) paste0("`", x, "`", collapse = ", ")
+  paste0(
+    if (is.null(what)) "" else paste0(what, " "),
+    quote(old),
+    " renamed to ",
+    quote(new),
+    " because `",
+    function_name,
+    "` output uses ",
+    if (length(old) == 1L) quote(old) else "these names",
+    ".\n",
+    "\u2139 Rename the input column",
+    if (length(old) == 1L) "" else "s",
+    " before calling `",
+    function_name,
+    "` to choose another name."
+  )
 }
 
 check_two_vars <- function(.data) {
@@ -244,87 +222,96 @@ add_total <- function(data, group_vars = character(0)) {
   if (nrow(data) == 0L) {
     return(data)
   }
-  if (length(group_vars) > 0L) {
-    groups <- data %>%
-      dplyr::group_by(dplyr::across(tidyselect::all_of(group_vars))) %>%
-      dplyr::group_split(.keep = TRUE)
-    return(
-      purrr::map(groups, function(group) {
-        key <- group[1L, group_vars, drop = FALSE]
-        values <- dplyr::select(group, -tidyselect::all_of(group_vars))
-        values <- add_total(values)
-        dplyr::bind_cols(key[rep(1L, nrow(values)), , drop = FALSE], values)
-      }) %>%
-        purrr::list_rbind()
-    )
-  }
-  narrow_data <- ncol(data) <= 11
-
+  values <- setdiff(names(data), group_vars)
+  narrow_data <- length(values) <= 11
   if (narrow_data) {
-    col_name <- data %>%
-      dplyr::select(-c(n:dplyr::last_col())) %>%
-      ds(dplyr::last_col())
-    data <- data %>%
-      dplyr::rename(...tmp = {{ col_name }}) %>%
-      dplyr::mutate(...tmp = as_character(...tmp))
+    label <- values[[match("n", values) - 1L]]
+    data[[label]] <- as_character(data[[label]])
   } else {
-    data <- data %>%
-      dplyr::mutate(...tmp = "") %>%
-      dplyr::relocate(...tmp, tidyselect::last_col(6):tidyselect::last_col(2))
+    label <- "...tmp"
+    data[[label]] <- ""
   }
 
-  # Performance: pre-compute totals once instead of multiple filter/pull passes
-  total_n <- sum(data$n)
+  if (length(group_vars) > 0L) {
+    groups <- vctrs::vec_group_loc(data[group_vars])
+    group_id <- integer(nrow(data))
+    group_id[unlist(groups$loc)] <- rep(
+      seq_along(groups$loc),
+      lengths(groups$loc)
+    )
+    first <- vapply(groups$loc, `[[`, integer(1), 1L)
+  } else {
+    group_id <- rep(1L, nrow(data))
+    first <- 1L
+  }
+  group_count <- length(first)
+  sum_by <- function(x) {
+    as.vector(rowsum(x, factor(group_id, levels = seq_len(group_count))))
+  }
   valid_rows <- !data$...any_miss
-  has_valid <- any(valid_rows)
-  has_missing <- any(!valid_rows)
-  n_valid_rows <- sum(valid_rows)
-  n_miss_rows <- sum(!valid_rows)
-  valid_n <- if (has_valid) sum(data$n[valid_rows]) else 0L
-  miss_n <- if (has_missing) sum(data$n[!valid_rows]) else 0L
+  total_n <- sum_by(data$n)
+  valid_n <- sum_by(data$n * valid_rows)
+  miss_n <- total_n - valid_n
+  n_valid_rows <- sum_by(as.integer(valid_rows))
+  n_miss_rows <- sum_by(as.integer(!valid_rows))
 
-  out <- data
-  extra_rows <- list()
-
-  if (n_valid_rows > 1 && has_missing) {
-    extra_rows[["valid_total"]] <- tibble::tibble(
-      ...tmp = "Valid Total",
-      n = valid_n,
-      percent = valid_n / total_n * 100,
-      valid = 100
-    )
+  extra_row <- function(groups, text, n, percent, valid = NULL) {
+    row <- vctrs::vec_slice(data[group_vars], first[groups])
+    row[[label]] <- rep(text, length(groups))
+    row$n <- n[groups]
+    row$percent <- percent[groups]
+    if (!is.null(valid)) {
+      row$valid <- rep(valid, length(groups))
+    }
+    row
   }
-
-  # Insert valid-total row after valid rows
-  if (length(extra_rows) > 0) {
-    out <- dplyr::bind_rows(
-      out[valid_rows, ],
-      extra_rows[["valid_total"]],
-      out[!valid_rows, ]
+  with_valid <- which(n_valid_rows > 1L & n_miss_rows > 0L)
+  with_missing <- which(n_miss_rows > 1L)
+  extras <- list(
+    extra_row(
+      with_valid,
+      "Valid Total",
+      valid_n,
+      valid_n / total_n * 100,
+      100
+    ),
+    extra_row(with_missing, "Missing Total", miss_n, miss_n / total_n * 100),
+    extra_row(
+      seq_len(group_count),
+      "Total",
+      total_n,
+      rep(100, group_count)
     )
-  }
-
-  if (n_miss_rows > 1) {
-    miss_total <- tibble::tibble(
-      ...tmp = "Missing Total",
-      n = miss_n,
-      percent = miss_n / total_n * 100
-    )
-    out <- dplyr::bind_rows(out, miss_total)
-  }
-
-  out <- dplyr::bind_rows(
-    out,
-    tibble::tibble(...tmp = "Total", n = total_n, percent = 100)
   )
+  # Within each group: valid rows, valid total, missing rows, missing total,
+  # then the overall total.
+  out <- vctrs::vec_rbind(data, !!!extras)
+  rank <- c(
+    ifelse(valid_rows, 1L, 3L),
+    rep(2L, length(with_valid)),
+    rep(4L, length(with_missing)),
+    rep(5L, group_count)
+  )
+  owner <- c(group_id, with_valid, with_missing, seq_len(group_count))
+  out <- vctrs::vec_slice(out, order(owner, rank, seq_along(owner)))
 
   if (narrow_data) {
-    out <- dplyr::rename(out, {{ col_name }} := ...tmp)
+    out
   } else {
     out <- dplyr::rename(out, total = ...tmp)
+    dplyr::relocate(
+      out,
+      tidyselect::all_of(c(
+        "total",
+        "n",
+        "percent",
+        "cum",
+        "valid",
+        "valid_cum"
+      )),
+      .before = tidyselect::all_of(values[[1L]])
+    )
   }
-
-  return(out)
 }
 
 append_tab_list <- function(.data, blank_row = FALSE) {
@@ -360,7 +347,21 @@ append_tab_list <- function(.data, blank_row = FALSE) {
     unique() %>%
     length()
 
-  if (vec_types > 1) {
+  value_types <- lapply(out, function(table) table$value)
+  # Combining labelled vectors would relabel later values with earlier labels.
+  labels <- lapply(value_types, function(x) {
+    if (inherits(x, "haven_labelled")) attr(x, "labels", exact = TRUE)
+  })
+  compatible_types <- length(unique(labels)) <= 1L &&
+    tryCatch(
+      {
+        do.call(vctrs::vec_ptype_common, unname(value_types))
+        TRUE
+      },
+      vctrs_error_incompatible_type = function(error) FALSE
+    )
+
+  if (vec_types > 1 || !compatible_types) {
     out <- out %>%
       purrr::map(
         ~ .x %>%
@@ -393,7 +394,7 @@ tab2_data <- function(.data) {
     names() %>%
     stringr::str_flatten(" \\ ")
 
-  out <- .data %>%
+  counts <- .data %>%
     dplyr::rename(
       {{ join_name }} := 1
     ) %>%
@@ -401,7 +402,28 @@ tab2_data <- function(.data) {
       dplyr::across(
         dplyr::everything()
       )
-    ) %>%
+    )
+
+  column_values <- counts[[2L]]
+  # Count raw values before assigning display headers, so identities stay apart.
+  blank <- !is.na(column_values) & as.character(column_values) == ""
+  if (any(blank)) {
+    used_names <- c(join_name, as.character(column_values[!blank]))
+    empty_name <- "<empty>"
+    suffix <- 0L
+    while (empty_name %in% used_names) {
+      suffix <- suffix + 1L
+      empty_name <- paste0("<empty>", suffix)
+    }
+    column_values <- as.character(column_values)
+    column_values[blank] <- empty_name
+    counts[[2L]] <- column_values
+  }
+  # Order headers by raw values (factor levels, ascending, missing last).
+  raw_order <- vctrs::vec_order(counts[[2L]])
+  headers <- as.character(column_values)[raw_order]
+  headers[is.na(headers)] <- "NA"
+  out <- counts %>%
     tidyr::pivot_wider(
       names_from = 2,
       values_from = n
@@ -409,8 +431,26 @@ tab2_data <- function(.data) {
     dplyr::mutate(
       dplyr::across(-1, ~ tidyr::replace_na(.x, 0))
     )
+  out <- out[c(names(out)[1L], unique(headers))]
 
   return(out)
+}
+
+order_tab_groups <- function(out, data, group_vars, group_order) {
+  if (group_order == "keys" || length(group_vars) == 0L || nrow(out) == 0L) {
+    return(out)
+  }
+  groups <- vctrs::vec_group_loc(data[group_vars])
+  keys <- dplyr::arrange(groups$key, dplyr::across(dplyr::everything()))
+  sizes <- lengths(groups$loc)[vctrs::vec_match(keys, groups$key)]
+  missing_keys <- rowSums(is.na(as.data.frame(keys))) > 0L
+  ranked_keys <- keys[
+    order(missing_keys, -sizes, seq_len(nrow(keys))),
+    ,
+    drop = FALSE
+  ]
+  group_id <- vctrs::vec_match(out[group_vars], ranked_keys)
+  out[order(group_id, seq_len(nrow(out))), , drop = FALSE]
 }
 
 add_total2 <- function(out, .data) {

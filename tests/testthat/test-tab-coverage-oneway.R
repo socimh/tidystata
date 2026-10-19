@@ -161,14 +161,19 @@ oneway_group_check <- function(out, frequency, d, group = "g") {
     if (frequency) expect_equal(tail(o$n, 1), sum(idx))
   }
 }
-oneway_add("base data frame returns list of tibbles", function(fn, frequency) {
-  d <- data.frame(x = c(1, 1, 2), y = c("a", "b", "a"))
-  before <- d
-  out <- fn(d)
-  expect_named(out, c("x", "y"))
-  expect_true(all(vapply(out, inherits, logical(1), "tbl_df")))
-  expect_identical(d, before)
-})
+oneway_add(
+  "base data frame returns list of data frames",
+  function(fn, frequency) {
+    d <- data.frame(x = c(1, 1, 2), y = c("a", "b", "a"))
+    before <- d
+    out <- fn(d)
+    expect_named(out, c("x", "y"))
+    for (frame in out) {
+      expect_identical(class(frame), "data.frame")
+    }
+    expect_identical(d, before)
+  }
+)
 oneway_add("tibble output variable ordering", function(fn, frequency) {
   out <- fn(tibble::tibble(z = 1:2, a = 3:4), z, a, .type = "tibble")
   expect_identical(unique(out$variable), c("z", "a"))
@@ -320,10 +325,11 @@ oneway_add("Unicode column names", function(fn, frequency) {
   out <- fn(d, tidyselect::everything())
   expect_named(out, names(d))
 })
-oneway_add("reserved measured name is renamed", function(fn, frequency) {
+oneway_add("reserved measured name keeps its name", function(fn, frequency) {
+  # Measured names become list names, never output columns, so cannot collide.
   d <- tibble::tibble(n = c("a", "b", "a"))
-  expect_message(out <- fn(d, n), "renamed")
-  expect_named(out, ".n")
+  expect_no_message(out <- fn(d, n))
+  expect_named(out, "n")
   expect_equal(out[[1]]$n[1:2], c(2, 1))
 })
 oneway_add("reserved value group is renamed", function(fn, frequency) {
@@ -333,10 +339,14 @@ oneway_add("reserved value group is renamed", function(fn, frequency) {
   expect_true(".value" %in% names(out$x))
 })
 oneway_add(
-  "reserved name with occupied dotted destination errors",
+  "reserved group name with occupied dotted destination errors",
   function(fn, frequency) {
-    d <- tibble::tibble(n = 1:2, .n = 3:4)
-    expect_message(expect_error(fn(d), "new name is also taken"), "renamed")
+    d <- tibble::tibble(n = 1:2, .n = 3:4, x = 1:2)
+    expect_message(
+      expect_error(fn(d, x, .by = c(n, .n)), "new name is also taken"),
+      "renamed"
+    )
+    expect_named(fn(tibble::tibble(n = 1:2, .n = 3:4)), c("n", ".n"))
   }
 )
 oneway_add("matrix column rejected", function(fn, frequency) {
@@ -448,7 +458,7 @@ oneway_add("data table input unchanged", function(fn, frequency) {
   out <- fn(d, x)
   expect_named(out, "x")
   expect_identical(d, before)
-  expect_s3_class(out$x, "tbl_df")
+  expect_identical(class(out$x), c("data.table", "data.frame"))
 })
 oneway_add(
   "grouped descending order within each group",

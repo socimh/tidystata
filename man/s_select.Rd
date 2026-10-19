@@ -14,34 +14,46 @@ s_select(.data, ...)
 unchanged.}
 }
 \value{
-The result of \code{\link[dplyr:select]{dplyr::select()}} when selection succeeds, otherwise
-the result of \code{\link[dplyr:transmute]{dplyr::transmute()}}. Data-frame classes and grouping follow
-the successful operation; a tibble input returns a tibble.
+The selected (and computed) columns. Data-frame classes and
+grouping follow \code{\link[dplyr:select]{dplyr::select()}}; a tibble input returns a tibble.
 }
 \description{
 Enhanced select() with data-masking
 }
 \details{
-Selection is attempted first. Its successful result is returned directly,
-without trying data masking or repeating the operation. If selection fails,
-expressions are evaluated with \code{\link[dplyr:transmute]{dplyr::transmute()}}. Warnings from the
-successful operation are emitted; warnings from a failed attempt are not.
-If both operations fail, the error includes both underlying messages.
+Each argument is classified before evaluation. Column names, strings,
+numeric positions, selection syntax (\code{c()}, \code{:}, \code{!}, \code{&}, \code{|}, unary \code{-})
+and tidyselect helpers such as \code{starts_with()}, \code{where()}, \code{all_of()} or
+\code{\link[=s_match]{s_match()}} select existing columns, as do calls that use no column names
+(for example \code{all_of(vars)} or \code{seq_len(2)}). Any other expression that
+uses columns, such as \code{height > 50} or \code{bmi = mass / height^2}, is computed
+with \code{\link[dplyr:mutate]{dplyr::mutate()}} and then selected, so arithmetic on columns is never
+misread as column positions. Selections and computed values can be mixed;
+output follows argument order. Unnamed computed columns are named by their
+expression.
 
-A failed selection can evaluate user code before the data-masking fallback.
-For random draws or other expressions with side effects, compute the columns
-with \code{\link[dplyr:mutate]{dplyr::mutate()}} first, then select their names. Grouping columns are
-retained according to dplyr's selection and transformation rules.
+A named constant such as \code{one = 1}, \code{label = "x"} or \code{y = c(1, 2)} creates
+a constant column; it never selects or renames columns by position. Unnamed
+names, strings and positions must identify existing columns. If they do
+not, an error lists every unmatched name instead of evaluating them as
+expressions, so a misspelled column is never replaced by an object of the
+same name in the calling environment. (A symbol naming a character vector in
+the calling environment is still passed to tidyselect, which deprecates that
+form in favour of \code{all_of()}.)
+
+If selection itself fails for another reason (for example, duplicate output
+names), the arguments are evaluated sequentially with \code{\link[dplyr:transmute]{dplyr::transmute()}};
+if that also fails, the error reports both attempts. Computed expressions
+are evaluated once when selection succeeds. Grouping columns are retained
+according to dplyr's selection rules.
 }
 \examples{
 starwars \%>\%
   s_select()
 starwars \%>\%
   s_select(name, height)
-\dontrun{
-starwars \%>\%
-  dplyr::select(height > 50)
-}
+# Ordinary select() rejects this computed expression.
+try(dplyr::select(starwars, height > 50))
 starwars \%>\%
   s_select(height > 50)
 }

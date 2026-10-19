@@ -37,8 +37,9 @@ slice_headtail(.data, n = 10)
 slice_interval(.data, n = 10)
 }
 \arguments{
-\item{.data}{An in-memory data frame, ordinary tibble, grouped tibble, or
-rowwise tibble. Convert other table subclasses explicitly before wrapping;
+\item{.data}{An in-memory data frame, data.table, ordinary tibble, grouped
+tibble, rowwise tibble, or \code{sf} data frame (geometry is kept when slicing and
+printed as a column). Convert other subclasses explicitly before wrapping;
 collect lazy tables first. Apply the wrapper separately to lists of tables.}
 
 \item{style}{Either \code{"headtail"} or \code{"interval"}.}
@@ -55,11 +56,14 @@ current console width; \code{Inf} shows all columns.}
 \item{max_extra_cols, max_footer_lines}{Tibble formatting controls.}
 }
 \value{
-\code{preview_table()} returns a complete tibble with an additional
+\code{preview_table()} returns the complete input container with an additional
 \code{statart_preview} class. \code{unpreview_table()} returns the table without that
 class or its settings, preserving grouping. The print helpers invisibly
-return their original input. The slice helpers return the selected rows as
-a tibble, retaining supported grouping and existing preview settings.
+return their original input. The slice helpers return the selected rows in
+the input container, retaining valid grouping and existing preview settings.
+Explicit base data.frame row names are preserved. Slice helpers regenerate
+automatic row names following dplyr's row-slicing behavior. Other subclasses
+are unsupported.
 }
 \description{
 \code{preview_table()} keeps the complete data and remembers how to print it.
@@ -88,6 +92,11 @@ use a global row budget, not a separate budget per group.
 do not change stored settings. Explicit \code{tibble::as_tibble()} or
 \code{as.data.frame()} conversions remove the preview, as does extracting a column.
 This feature controls console printing, not HTML widgets or GUI viewers.
+Only the temporary display is converted to a tibble. Wrapping and unwrapping
+a data.table creates an independent copy; native operations such as \verb{:=}
+on a wrapped data.table retain ordinary reference semantics. External
+dplyr/tidyr verbs determine their own result container and grouping, while
+preview settings follow the result.
 }
 \examples{
 x <- preview_table(tibble::tibble(id = 1:30, value = (1:30)^2))

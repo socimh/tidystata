@@ -15,7 +15,16 @@ inspect_metadata_expect <- function(
 ) {
   before <- unserialize(serialize(data, NULL))
   result <- if (is.null(select)) variables(data) else select(data)
-  expect_s3_class(result, "tbl_df")
+  expect_identical(
+    class(result),
+    if (inherits(data, "data.table")) {
+      c("data.table", "data.frame")
+    } else if (inherits(data, "tbl_df")) {
+      c("tbl_df", "tbl", "data.frame")
+    } else {
+      "data.frame"
+    }
+  )
   expect_identical(result$name, expected_names)
   expect_identical(
     names(result),
@@ -223,7 +232,7 @@ for (key in names(inspect_metadata_selections)) {
   })
 }
 # 061-075: containers, names and zero dimensions.
-inspect_metadata_add("base data frame returns tibble metadata", function() {
+inspect_metadata_add("base data frame returns data frame metadata", function() {
   d <- as.data.frame(inspect_metadata_select_data())
   inspect_metadata_expect(
     d,
@@ -544,7 +553,16 @@ inspect_search_frame <- function(nm, labels = NULL) {
 inspect_search_expect <- function(d, query, expected, select = NULL) {
   before <- unserialize(serialize(d, NULL))
   out <- if (is.null(select)) variables_search(d, query) else select(d, query)
-  expect_s3_class(out, "tbl_df")
+  expect_identical(
+    class(out),
+    if (inherits(d, "data.table")) {
+      c("data.table", "data.frame")
+    } else if (inherits(d, "tbl_df")) {
+      c("tbl_df", "tbl", "data.frame")
+    } else {
+      "data.frame"
+    }
+  )
   expect_identical(out$name, expected)
   expect_identical(d, before)
   invisible(out)
@@ -883,7 +901,7 @@ inspect_search_add("computed variable selection is unsupported", function() {
     new = income + 1
   ))
 })
-inspect_search_add("empty base dataset returns empty tibble", function() {
+inspect_search_add("empty base dataset returns empty data frame", function() {
   inspect_search_expect(data.frame(), "*", character())
 })
 inspect_search_add("zero-row dataset still searches metadata", function() {
@@ -919,7 +937,7 @@ inspect_search_add("blank-only labels leave name matching usable", function() {
   )
 })
 inspect_search_add(
-  "data.table search returns tibble without mutation",
+  "data.table search returns data.table without mutation",
   function() {
     skip_if_not_installed("data.table")
     d <- data.table::as.data.table(inspect_metadata_select_data())

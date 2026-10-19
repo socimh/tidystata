@@ -1,8 +1,6 @@
 # Function: summ()
 
-**Generated:** 2026-03-03 23:09:17
-
----
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:44 | **Status:** PASS
 
 ## Example 1: Basic numeric summary
 
@@ -13,10 +11,8 @@ summ(mtcars, mpg)
 **Output:**
 
 ```
-# A tibble: 1 × 8
-  name  type      n unique   min  mean    sd   max
-  <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
-1 mpg   dbl      32     25  10.4  20.1  6.03  33.9
+  type  n unique  min     mean       sd  max
+1  dbl 32     25 10.4 20.09062 6.026948 33.9
 ```
 
 ## Example 2: Multiple variables
@@ -28,12 +24,10 @@ summ(mtcars, mpg, hp, wt)
 **Output:**
 
 ```
-# A tibble: 3 × 8
-  name  type      n unique   min   mean     sd    max
-  <chr> <chr> <int>  <int> <dbl>  <dbl>  <dbl>  <dbl>
-1 mpg   dbl      32     25 10.4   20.1   6.03   33.9 
-2 hp    dbl      32     22 52    147.   68.6   335   
-3 wt    dbl      32     29  1.51   3.22  0.978   5.42
+  name type  n unique    min      mean         sd     max
+1  mpg  dbl 32     25 10.400  20.09062  6.0269481  33.900
+2   hp  dbl 32     22 52.000 146.68750 68.5628685 335.000
+3   wt  dbl 32     29  1.513   3.21725  0.9784574   5.424
 ```
 
 ## Example 3: Grouped summary
@@ -45,12 +39,10 @@ summ(mtcars, mpg, .by = cyl)
 **Output:**
 
 ```
-# A tibble: 3 × 9
-    cyl name  type      n unique   min  mean    sd   max
-  <dbl> <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
-1     6 mpg   dbl       7      6  17.8  19.7  1.45  21.4
-2     4 mpg   dbl      11      9  21.4  26.7  4.51  33.9
-3     8 mpg   dbl      14     12  10.4  15.1  2.56  19.2
+  cyl type  n unique  min     mean       sd  max
+1   4  dbl 11      9 21.4 26.66364 4.509828 33.9
+2   6  dbl  7      6 17.8 19.74286 1.453567 21.4
+3   8  dbl 14     12 10.4 15.10000 2.560048 19.2
 ```
 
 ## Example 4: Custom statistics
@@ -62,10 +54,8 @@ summ(mtcars, mpg, .stat = c('mean', 'sd'))
 **Output:**
 
 ```
-# A tibble: 1 × 4
-  name  type   mean    sd
-  <chr> <chr> <dbl> <dbl>
-1 mpg   dbl    20.1  6.03
+  type     mean       sd
+1  dbl 20.09062 6.026948
 ```
 
 ## Example 5: Detailed statistics
@@ -77,12 +67,10 @@ summ(mtcars, mpg, .detail = TRUE)
 **Output:**
 
 ```
-# A tibble: 1 × 18
-  name  type      n unique miss_n valid_pct   min    q1 median  mean   mad    sd
-  <chr> <chr> <int>  <int>  <int>     <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>
-1 mpg   dbl      32     25      0         1  10.4  15.4   19.2  20.1  5.41  6.03
-# ℹ 6 more variables: q3 <dbl>, max <dbl>, iqr <dbl>, skew <dbl>,
-#   kurtosis <dbl>, se <dbl>
+  type  n unique miss_n valid_pct  min     q1 median     mean     mad       sd
+1  dbl 32     25      0         1 10.4 15.425   19.2 20.09062 5.41149 6.026948
+    q3  max   iqr     skew  kurtosis       se   sum
+1 22.8 33.9 7.375 0.610655 -0.372766 1.065424 642.9
 ```
 
 ## Example 6: Inf/-Inf handling
@@ -94,10 +82,8 @@ summ(data.frame(x = c(1, 2, Inf, -Inf, 3)))
 **Output:**
 
 ```
-# A tibble: 1 × 8
-  name  type      n unique   min  mean    sd   max
-  <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
-1 x     dbl       5      5  -Inf   NaN   NaN   Inf
+  type n unique  min mean  sd max
+1  dbl 5      5 -Inf  NaN NaN Inf
 ```
 
 ## Example 7: With grouping and NA handling
@@ -110,11 +96,9 @@ summ(df, .by = g, .na.rm = TRUE)
 **Output:**
 
 ```
-# A tibble: 2 × 9
-  g     name  type      n unique   min  mean     sd   max
-  <chr> <chr> <chr> <int>  <int> <dbl> <dbl>  <dbl> <dbl>
-1 a     x     dbl       2      2     1   1.5  0.707     2
-2 b     x     dbl       1      1     4   4   NA         4
+  g type n unique min mean        sd max
+1 a  dbl 2      2   1  1.5 0.7071068   2
+2 b  dbl 1      1   4  4.0        NA   4
 ```
 
 ## Example 8: All numeric variables
@@ -126,13 +110,11 @@ summ(mtcars[, 1:4])
 **Output:**
 
 ```
-# A tibble: 4 × 8
-  name  type      n unique   min   mean     sd   max
-  <chr> <chr> <int>  <int> <dbl>  <dbl>  <dbl> <dbl>
-1 mpg   dbl      32     25  10.4  20.1    6.03  33.9
-2 cyl   dbl      32      3   4     6.19   1.79   8  
-3 disp  dbl      32     27  71.1 231.   124.   472  
-4 hp    dbl      32     22  52   147.    68.6  335  
+  name type  n unique  min      mean         sd   max
+1  mpg  dbl 32     25 10.4  20.09062   6.026948  33.9
+2  cyl  dbl 32      3  4.0   6.18750   1.785922   8.0
+3 disp  dbl 32     27 71.1 230.72188 123.938694 472.0
+4   hp  dbl 32     22 52.0 146.68750  68.562868 335.0
 ```
 
 ## Example 9: tabstat() wrapper
@@ -144,20 +126,37 @@ tabstat(mtcars, .by = cyl)
 **Output:**
 
 ```
-# A tibble: 30 × 4
-     cyl name  type     mean
-   <dbl> <chr> <chr>   <dbl>
- 1     6 mpg   dbl    19.7  
- 2     6 disp  dbl   183.   
- 3     6 hp    dbl   122.   
- 4     6 drat  dbl     3.59 
- 5     6 wt    dbl     3.12 
- 6     6 qsec  dbl    18.0  
- 7     6 vs    dbl     0.571
- 8     6 am    dbl     0.429
- 9     6 gear  dbl     3.86 
-10     6 carb  dbl     3.43 
-# ℹ 20 more rows
+   cyl name type        mean
+1    4  mpg  dbl  26.6636364
+2    4 disp  dbl 105.1363636
+3    4   hp  dbl  82.6363636
+4    4 drat  dbl   4.0709091
+5    4   wt  dbl   2.2857273
+6    4 qsec  dbl  19.1372727
+7    4   vs  dbl   0.9090909
+8    4   am  dbl   0.7272727
+9    4 gear  dbl   4.0909091
+10   4 carb  dbl   1.5454545
+11   6  mpg  dbl  19.7428571
+12   6 disp  dbl 183.3142857
+13   6   hp  dbl 122.2857143
+14   6 drat  dbl   3.5857143
+15   6   wt  dbl   3.1171429
+16   6 qsec  dbl  17.9771429
+17   6   vs  dbl   0.5714286
+18   6   am  dbl   0.4285714
+19   6 gear  dbl   3.8571429
+20   6 carb  dbl   3.4285714
+21   8  mpg  dbl  15.1000000
+22   8 disp  dbl 353.1000000
+23   8   hp  dbl 209.2142857
+24   8 drat  dbl   3.2292857
+25   8   wt  dbl   3.9992143
+26   8 qsec  dbl  16.7721429
+27   8   vs  dbl   0.0000000
+28   8   am  dbl   0.1428571
+29   8 gear  dbl   3.2857143
+30   8 carb  dbl   3.5000000
 ```
 
 ## Example 10: Zero-variance column
@@ -169,10 +168,7 @@ summ(data.frame(x = rep(5, 10)))
 **Output:**
 
 ```
-# A tibble: 1 × 8
-  name  type      n unique   min  mean    sd   max
-  <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
-1 x     dbl      10      1     5     5     0     5
+  type  n unique min mean sd max
+1  dbl 10      1   5    5  0   5
 ```
-
 

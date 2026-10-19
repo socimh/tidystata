@@ -12,14 +12,22 @@
 #' @param ... A data frame or tibble, or
 #'   <[`tidy-select`][dplyr::dplyr_tidy_select]> expressions inside
 #'   [dplyr::mutate()]. Each selected column must be one-dimensional.
+#' @param na.rm For arithmetic and extrema helpers, a single logical value. If
+#'   `TRUE` (the default), omit missing values; if `FALSE`, any missing input
+#'   makes that row's result missing. Count helpers (`row_unique()`,
+#'   `row_miss()`, `row_non_miss()`) reject `na.rm`.
+#' @param .values For `row_min()` and `row_max()`, additional values to compare
+#'   with selected columns: a vector, or a list of vectors. Each must have
+#'   length one or the number of input rows (the current group size inside
+#'   grouped `mutate()`). Values must have compatible supported types.
 #'
 #' @details
 #' All helpers preserve the input. Missingness is determined from the original
 #' columns, including tagged and SPSS user-missing values. Arithmetic and extrema
-#' omit missing values. All-missing rows return a typed `NA`, except `row_sum()`
-#' returns zero. Variance and standard deviation use the sample denominator and
-#' require at least two observed values. Zero-row inputs return typed empty
-#' vectors; `NULL` and zero selected columns are rejected.
+#' omit missing values by default. All-missing rows return a typed `NA`, except
+#' `row_sum(na.rm = TRUE)` returns zero. Variance and standard deviation use the
+#' sample denominator and require at least two observed values. Zero-row inputs
+#' return typed empty vectors; `NULL` and zero selected columns are rejected.
 #'
 #' @section Extrema:
 #' `row_min()` and `row_max()` retain the compatible common type of the selected
@@ -33,6 +41,13 @@
 #' are normalized before comparison.
 #' Unordered factors, lists, complex values, and incompatible combinations are
 #' rejected rather than assigned an arbitrary ordering.
+#' Like [pmin()] and [pmax()], bare numeric constants in `row_min()` and
+#' `row_max()` are values, not column positions: `row_min(x, 0.5)` caps `x` at
+#' 0.5. Inside `mutate()`, a symbol that is not a column but names a numeric
+#' vector in the calling environment is also used as values. Select columns by
+#' position with `c()` or a tidyselect helper, for example `row_min(c(1, 2))`.
+#' Length-one constants (including those in `.values`) never fill a row whose
+#' other inputs are all missing; such rows stay `NA`, as with `pmin()`.
 #'
 #' @section Arithmetic:
 #' Plain logical, integer, double, and numeric labelled columns return double
@@ -88,6 +103,9 @@
 #'
 #' tb |>
 #'   dplyr::mutate(mean = row_mean(x, y), sum = row_sum(x, y))
+#' tb |>
+#'   dplyr::mutate(capped = row_min(x, .values = 0.5))
+#' row_sum(tb, na.rm = FALSE)
 #'
 #' flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
 #' row_max(flags) # TRUE, FALSE, NA, with logical type
@@ -101,49 +119,57 @@
 
 #' @rdname row_egen
 #' @export
-row_mean <- function(...) {
-  row_numeric_summary(row_input(...), "mean")
+row_mean <- function(..., na.rm = TRUE) {
+  row_check_na_rm(na.rm)
+  row_numeric_summary(row_input(...), "mean", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
-row_sum <- function(...) {
-  row_numeric_summary(row_input(...), "sum")
+row_sum <- function(..., na.rm = TRUE) {
+  row_check_na_rm(na.rm)
+  row_numeric_summary(row_input(...), "sum", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
-row_max <- function(...) {
-  row_extreme_typed(row_input(...), TRUE)
+row_max <- function(..., .values = NULL, na.rm = TRUE) {
+  row_check_na_rm(na.rm)
+  row_extreme_constants(row_extreme_input(..., .values = .values), TRUE, na.rm)
 }
 
 #' @rdname row_egen
 #' @export
-row_min <- function(...) {
-  row_extreme_typed(row_input(...), FALSE)
+row_min <- function(..., .values = NULL, na.rm = TRUE) {
+  row_check_na_rm(na.rm)
+  row_extreme_constants(row_extreme_input(..., .values = .values), FALSE, na.rm)
 }
 
 #' @rdname row_egen
 #' @export
-row_median <- function(...) {
-  row_numeric_summary(row_input(...), "median")
+row_median <- function(..., na.rm = TRUE) {
+  row_check_na_rm(na.rm)
+  row_numeric_summary(row_input(...), "median", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
-row_var <- function(...) {
-  row_numeric_summary(row_input(...), "var")
+row_var <- function(..., na.rm = TRUE) {
+  row_check_na_rm(na.rm)
+  row_numeric_summary(row_input(...), "var", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
-row_sd <- function(...) {
-  row_numeric_summary(row_input(...), "sd")
+row_sd <- function(..., na.rm = TRUE) {
+  row_check_na_rm(na.rm)
+  row_numeric_summary(row_input(...), "sd", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_unique <- function(...) {
+  row_reject_na_rm(..., fn = "row_unique()")
   data <- row_input(...)
   if (all(vapply(data, row_plain_numeric, logical(1)))) {
     return(row_unique_dbl(row_double_columns(data)))
@@ -157,13 +183,119 @@ row_unique <- function(...) {
 #' @rdname row_egen
 #' @export
 row_miss <- function(...) {
+  row_reject_na_rm(..., fn = "row_miss()")
   as.integer(rowSums(is.na(row_input(...))))
 }
 
 #' @rdname row_egen
 #' @export
 row_non_miss <- function(...) {
+  row_reject_na_rm(..., fn = "row_non_miss()")
   as.integer(rowSums(!is.na(row_input(...))))
+}
+
+row_check_na_rm <- function(na.rm) {
+  if (!is.logical(na.rm) || length(na.rm) != 1L || is.na(na.rm)) {
+    stop("`na.rm` must be a single nonmissing logical value.", call. = FALSE)
+  }
+}
+
+row_reject_na_rm <- function(..., fn) {
+  if ("na.rm" %in% ...names()) {
+    stop(
+      "`na.rm` is not an argument of ",
+      fn,
+      "; it counts values across all selected columns.",
+      call. = FALSE
+    )
+  }
+}
+
+row_is_number_literal <- function(expr) {
+  if (
+    is.call(expr) && length(expr) == 2L && identical(expr[[1L]], quote(`-`))
+  ) {
+    expr <- expr[[2L]]
+  }
+  is.numeric(expr) && length(expr) == 1L
+}
+
+# Split extrema inputs into selected columns, full-length vectors and scalar
+# constants. Constants never make an otherwise all-missing row observed.
+row_extreme_input <- function(..., .values = NULL) {
+  dots <- rlang::enquos(...)
+  in_mutate <- !dots_is_tibble()
+  constant <- vapply(
+    dots,
+    function(q) row_is_number_literal(rlang::quo_get_expr(q)),
+    logical(1)
+  )
+  extra <- lapply(dots[constant], rlang::eval_tidy)
+  rest <- dots[!constant]
+  if (in_mutate && length(rest)) {
+    columns <- c(
+      names(dplyr::pick(dplyr::everything())),
+      names(dplyr::cur_group())
+    )
+    external <- vapply(
+      rest,
+      function(q) {
+        expr <- rlang::quo_get_expr(q)
+        if (!rlang::is_symbol(expr) || rlang::as_string(expr) %in% columns) {
+          return(FALSE)
+        }
+        value <- tryCatch(rlang::eval_tidy(q), error = function(e) NULL)
+        is.numeric(value) && is.null(dim(value)) && !is.object(value)
+      },
+      logical(1)
+    )
+    extra <- c(extra, lapply(rest[external], rlang::eval_tidy))
+    rest <- rest[!external]
+  }
+  if (!is.null(.values)) {
+    extra <- c(
+      extra,
+      if (is.list(.values) && !is.object(.values)) .values else list(.values)
+    )
+  }
+  data <- if (length(rest)) {
+    rlang::inject(row_input(!!!unname(rest)))
+  } else {
+    rows <- if (in_mutate) dplyr::n() else max(c(1L, lengths(extra)))
+    tibble::new_tibble(list(), nrow = rows)
+  }
+  rows <- nrow(data)
+  scalar <- lengths(extra) == 1L
+  if (any(!scalar)) {
+    data <- row_add_values(data, unname(extra[!scalar]))
+  }
+  scalars <- extra[scalar]
+  if (ncol(data) == 0L && !length(scalars)) {
+    stop(
+      "Select at least one column; NULL and zero columns are not supported.",
+      call. = FALSE
+    )
+  }
+  list(data = data, scalars = scalars)
+}
+
+row_extreme_constants <- function(input, maximum, na.rm) {
+  data <- input$data
+  missing <- matrix(
+    unlist(lapply(data, is.na), use.names = FALSE),
+    nrow = nrow(data)
+  )
+  observed <- if (ncol(data)) rowSums(!missing) > 0L else rep(TRUE, nrow(data))
+  complete <- if (ncol(data)) rowSums(missing) == 0L else rep(TRUE, nrow(data))
+  if (length(input$scalars)) {
+    data <- row_add_values(data, unname(input$scalars))
+  }
+  out <- row_extreme_typed(data, maximum)
+  drop <- !observed | (!na.rm & !complete)
+  if (any(drop)) {
+    out <- vctrs::vec_assign(out, drop, vctrs::vec_init(out, 1L))
+  }
+  out
 }
 
 row_plain_numeric <- function(x) {
@@ -219,6 +351,34 @@ row_key_columns <- function(keys, rows, columns) {
   ))
 }
 
+row_add_values <- function(data, values) {
+  if (is.null(values)) {
+    return(data)
+  }
+  extra <- if (is.list(values) && !is.object(values)) values else list(values)
+  rows <- nrow(data)
+  for (i in seq_along(extra)) {
+    value <- extra[[i]]
+    if (is.list(value) || !is.null(dim(value))) {
+      stop("`.values` must contain one-dimensional vectors.", call. = FALSE)
+    }
+    if (is.null(value) || !length(value) %in% c(1L, rows)) {
+      stop(
+        "Each vector in `.values` must have length one or the input row count (",
+        rows,
+        ").",
+        call. = FALSE
+      )
+    }
+    extra[[i]] <- vctrs::vec_recycle(value, rows)
+  }
+  names(extra) <- utils::tail(
+    make.unique(c(names(data), rep(".values", length(extra)))),
+    length(extra)
+  )
+  tibble::as_tibble(c(as.list(data), extra))
+}
+
 row_extreme_typed <- function(data, maximum) {
   kernel <- if (maximum) row_max_dbl else row_min_dbl
   ordered <- vapply(data, is.ordered, logical(1))
@@ -270,7 +430,7 @@ row_extreme_typed <- function(data, maximum) {
   vctrs::vec_set_names(vctrs::vec_slice(values, match(best, ranks)), NULL)
 }
 
-row_numeric_summary <- function(data, operation) {
+row_numeric_summary <- function(data, operation, na.rm = TRUE) {
   plain <- vapply(
     data,
     function(x) {
@@ -333,6 +493,9 @@ row_numeric_summary <- function(data, operation) {
   if (operation != "sum") {
     out[observed < if (operation %in% c("var", "sd")) 2L else 1L] <- NA_real_
   }
+  if (!na.rm) {
+    out[observed < ncol(data)] <- NA_real_
+  }
   out <- as.double(out)
   if (is.null(prototype)) out else vctrs::vec_restore(out, prototype)
 }
@@ -384,6 +547,33 @@ dots_is_tibble <- function(...) {
   )
 }
 
+# pick() omits grouping columns. When a selection fails, retry with the group
+# keys included, so row helpers can use a grouping column as pmin() can.
+row_pick <- function(dots) {
+  tryCatch(
+    dplyr::pick(!!!dots),
+    error = function(e) {
+      keys <- dplyr::cur_group()
+      if (ncol(keys) == 0L) {
+        stop(e)
+      }
+      full <- dplyr::bind_cols(
+        dplyr::pick(dplyr::everything()),
+        vctrs::vec_slice(keys, rep(1L, dplyr::n()))
+      )
+      selected <- tryCatch(
+        tidyselect::eval_select(
+          rlang::expr(c(!!!dots)),
+          full,
+          allow_rename = FALSE
+        ),
+        error = function(e2) stop(e)
+      )
+      full[selected]
+    }
+  )
+}
+
 row_input <- function(...) {
   if (dots_is_tibble(...)) {
     data <- tibble::tibble(...)
@@ -411,7 +601,7 @@ row_input <- function(...) {
         warning(condition)
       }
     } else {
-      data <- dplyr::pick(!!!dots)
+      data <- row_pick(dots)
     }
   }
   if (ncol(data) == 0L) {

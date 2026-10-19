@@ -21,3 +21,4 @@ A numeric value
 \description{
 Calculate skewness and kurtosis
 }
+\keyword{internal}

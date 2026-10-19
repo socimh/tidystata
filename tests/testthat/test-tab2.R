@@ -7,18 +7,12 @@
 # KEY BEHAVIORS: two-way tables
 # EDGE CASES: empty cells, marginal totals
 
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - Basic Cross-tabulation Complexity
 # ============================================================================
 
 test_that("tab2: two numeric variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(1:5, each = 4),
     y = rep(1:4, 5)
   )
@@ -33,7 +27,7 @@ test_that("tab2: two numeric variables", {
 })
 
 test_that("tab2: two character variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     row_var = rep(c("A", "B", "C", "D"), each = 3),
     col_var = rep(c("X", "Y", "Z"), 4)
   )
@@ -47,7 +41,8 @@ test_that("tab2: two character variables", {
 })
 
 test_that("tab2: numeric row, character column", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     age_group = rep(1:5, each = 20),
     gender = sample(c("M", "F"), 100, replace = TRUE)
   )
@@ -61,7 +56,8 @@ test_that("tab2: numeric row, character column", {
 })
 
 test_that("tab2: factor row, numeric column", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     treatment = factor(rep(c("Control", "Drug A", "Drug B"), each = 30)),
     response_score = sample(1:10, 90, replace = TRUE)
   )
@@ -74,7 +70,7 @@ test_that("tab2: factor row, numeric column", {
 # ============================================================================
 
 test_that("tab2: .flip=TRUE swaps row and column variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(c("A", "B"), 10),
     y = rep(c("X", "Y", "Z"), length.out = 20)
   )
@@ -85,7 +81,7 @@ test_that("tab2: .flip=TRUE swaps row and column variables", {
 })
 
 test_that("tab2: flip with many levels", {
-  df <- tibble(
+  df <- tibble::tibble(
     rows = rep(letters[1:10], each = 5),
     cols = rep(LETTERS[1:5], 10)
   )
@@ -99,7 +95,7 @@ test_that("tab2: flip with many levels", {
 })
 
 test_that("tab2: flip preserves cell values", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("A", "A", "B", "B"),
     y = c("X", "Y", "X", "Y")
   )
@@ -117,7 +113,7 @@ test_that("tab2: flip preserves cell values", {
 # ============================================================================
 
 test_that("tab2: NAs in row variable only", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(NA, NA, 1, 1, 2, 2, NA),
     y = c("a", "b", "a", "b", "a", "b", "a")
   )
@@ -126,7 +122,7 @@ test_that("tab2: NAs in row variable only", {
 })
 
 test_that("tab2: NAs in column variable only", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1, 1, 2, 2, 3, 3),
     y = c("a", NA, "b", NA, "a", "b")
   )
@@ -135,7 +131,7 @@ test_that("tab2: NAs in column variable only", {
 })
 
 test_that("tab2: NAs in both variables", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1, NA, 2, NA, 1),
     y = c("a", "b", NA, NA, "a")
   )
@@ -145,7 +141,7 @@ test_that("tab2: NAs in both variables", {
 })
 
 test_that("tab2: all rows have at least one NA", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1, NA, 2, NA),
     y = c(NA, "a", NA, "b")
   )
@@ -158,7 +154,7 @@ test_that("tab2: all rows have at least one NA", {
 })
 
 test_that("tab2: factor with NA level", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("a", "b", NA), exclude = NULL),
     y = c("x", "y", "x")
   )
@@ -174,7 +170,7 @@ test_that("tab2: factor with NA level", {
 # ============================================================================
 
 test_that("tab2: single row dataset", {
-  df <- tibble(x = "A", y = "X")
+  df <- tibble::tibble(x = "A", y = "X")
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 1)
   expect_setequal(names(result)[-1], as.character(unique(df$y)))
@@ -186,7 +182,7 @@ test_that("tab2: single row dataset", {
 })
 
 test_that("tab2: all identical values", {
-  df <- tibble(x = rep("same", 100), y = rep("value", 100))
+  df <- tibble::tibble(x = rep("same", 100), y = rep("value", 100))
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 1)
   expect_setequal(names(result)[-1], as.character(unique(df$y)))
@@ -198,7 +194,7 @@ test_that("tab2: all identical values", {
 })
 
 test_that("tab2: row var all unique, column var few levels", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = 1:100,
     y = rep(c("A", "B"), 50)
   )
@@ -212,7 +208,7 @@ test_that("tab2: row var all unique, column var few levels", {
 })
 
 test_that("tab2: row var few levels, column var all unique", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = rep(c("A", "B"), 50),
     y = 1:100
   )
@@ -226,7 +222,7 @@ test_that("tab2: row var few levels, column var all unique", {
 })
 
 test_that("tab2: both variables all unique", {
-  df <- tibble(x = 1:50, y = 51:100)
+  df <- tibble::tibble(x = 1:50, y = 51:100)
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 50)
   expect_setequal(names(result)[-1], as.character(unique(df$y)))
@@ -239,7 +235,7 @@ test_that("tab2: both variables all unique", {
 })
 
 test_that("tab2: empty data frame", {
-  df <- tibble(x = character(0), y = character(0))
+  df <- tibble::tibble(x = character(0), y = character(0))
   result <- tab2(df, x, y)
   expect_equal(nrow(result), 0)
 })
@@ -249,8 +245,9 @@ test_that("tab2: empty data frame", {
 # ============================================================================
 
 test_that("tab2: 10x10 cross-tabulation", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     x = sample(1:10, 1000, replace = TRUE),
     y = sample(letters[1:10], 1000, replace = TRUE)
   )
@@ -265,8 +262,9 @@ test_that("tab2: 10x10 cross-tabulation", {
 })
 
 test_that("tab2: 50x5 cross-tabulation", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     x = sample(1:50, 500, replace = TRUE),
     y = sample(LETTERS[1:5], 500, replace = TRUE)
   )
@@ -280,8 +278,9 @@ test_that("tab2: 50x5 cross-tabulation", {
 })
 
 test_that("tab2: 5x50 cross-tabulation", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     x = sample(LETTERS[1:5], 500, replace = TRUE),
     y = sample(1:50, 500, replace = TRUE)
   )
@@ -295,8 +294,9 @@ test_that("tab2: 5x50 cross-tabulation", {
 })
 
 test_that("tab2: sparse cross-tabulation with many empty cells", {
+  withr::local_preserve_seed()
   set.seed(42)
-  df <- tibble(
+  df <- tibble::tibble(
     x = sample(1:20, 100, replace = TRUE),
     y = sample(1:20, 100, replace = TRUE)
   )
@@ -310,7 +310,7 @@ test_that("tab2: sparse cross-tabulation with many empty cells", {
 # ============================================================================
 
 test_that("tab2: unicode characters in both dimensions", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("中文", "中文", "日本語", "日本語"),
     y = c("مرحبا", "مرحبا", "שלום", "שלום")
   )
@@ -324,7 +324,7 @@ test_that("tab2: unicode characters in both dimensions", {
 })
 
 test_that("tab2: emoji as values", {
-  df <- tibble(
+  df <- tibble::tibble(
     emotion = c("🎉", "🎉", "😢", "😢", "🎉"),
     category = c("A", "B", "A", "B", "A")
   )
@@ -338,7 +338,7 @@ test_that("tab2: emoji as values", {
 })
 
 test_that("tab2: special whitespace characters", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c("a", "a", "b", " ", " "),
     y = c("x", "x", "y", "z", "z")
   )
@@ -347,7 +347,7 @@ test_that("tab2: special whitespace characters", {
 })
 
 test_that("tab2: mixed scripts in same variable", {
-  df <- tibble(
+  df <- tibble::tibble(
     lang = c("English", "中文", "English", "日本語"),
     region = c("US", "Asia", "UK", "Asia")
   )
@@ -361,7 +361,7 @@ test_that("tab2: mixed scripts in same variable", {
 # ============================================================================
 
 test_that("tab2: Date vs character", {
-  df <- tibble(
+  df <- tibble::tibble(
     date = as.Date(c("2024-01-01", "2024-01-01", "2024-01-02", "2024-01-02")),
     status = c("Active", "Inactive", "Active", "Inactive")
   )
@@ -375,7 +375,7 @@ test_that("tab2: Date vs character", {
 })
 
 test_that("tab2: logical vs numeric", {
-  df <- tibble(
+  df <- tibble::tibble(
     flag = c(TRUE, TRUE, FALSE, FALSE, TRUE),
     value = c(1, 2, 1, 2, 1)
   )
@@ -389,7 +389,7 @@ test_that("tab2: logical vs numeric", {
 })
 
 test_that("tab2: ordered factor vs regular factor", {
-  df <- tibble(
+  df <- tibble::tibble(
     size = ordered(c("S", "M", "L", "S", "M"), levels = c("S", "M", "L")),
     color = factor(c("Red", "Blue", "Red", "Blue", "Red"))
   )
@@ -402,12 +402,12 @@ test_that("tab2: ordered factor vs regular factor", {
 # ============================================================================
 
 test_that("tab2: single variable should error", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_error(tab2(df, x))
 })
 
 test_that("tab2: three variables should error", {
-  df <- tibble(x = 1:5, y = 1:5, z = 1:5)
+  df <- tibble::tibble(x = 1:5, y = 1:5, z = 1:5)
   expect_error(tab2(df, x, y, z))
 })
 
@@ -416,12 +416,12 @@ test_that("tab2: NULL input should error", {
 })
 
 test_that("tab2: non-existent column should error", {
-  df <- tibble(x = 1:5)
+  df <- tibble::tibble(x = 1:5)
   expect_error(tab2(df, x, y))
 })
 
 test_that("tab2: matrix column should error", {
-  df <- tibble(x = 1:4)
+  df <- tibble::tibble(x = 1:4)
   df$y <- matrix(1:8, nrow = 4)
   expect_error(tab2(df, x, y))
 })
@@ -431,7 +431,7 @@ test_that("tab2: matrix column should error", {
 # ============================================================================
 
 test_that("tab2: Inf and -Inf values", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(Inf, Inf, -Inf, -Inf, 0),
     y = c("A", "B", "A", "B", "A")
   )
@@ -440,7 +440,7 @@ test_that("tab2: Inf and -Inf values", {
 })
 
 test_that("tab2: very large numbers", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1e200, 1e200, 2e200, 2e200),
     y = c("A", "B", "A", "B")
   )
@@ -449,7 +449,7 @@ test_that("tab2: very large numbers", {
 })
 
 test_that("tab2: very small numbers near zero", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = c(1e-300, 1e-300, 2e-300, 2e-300),
     y = c("A", "B", "A", "B")
   )
@@ -458,7 +458,7 @@ test_that("tab2: very small numbers near zero", {
 })
 
 test_that("tab2: mixed numeric classes (integer vs double)", {
-  df <- tibble(
+  df <- tibble::tibble(
     int_col = c(1L, 1L, 2L, 2L),
     dbl_col = c(1.0, 1.0, 2.0, 2.0)
   )
@@ -476,7 +476,8 @@ test_that("tab2: mixed numeric classes (integer vs double)", {
 # ============================================================================
 
 test_that("tab2: clinical trial data", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     treatment = sample(c("Drug", "Placebo"), 200, replace = TRUE),
     response = sample(c("Complete", "Partial", "None"), 200, replace = TRUE)
   )
@@ -491,7 +492,8 @@ test_that("tab2: clinical trial data", {
 })
 
 test_that("tab2: demographic breakdown", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     age_group = sample(
       c("18-25", "26-35", "36-50", "50+"),
       500,
@@ -509,7 +511,8 @@ test_that("tab2: demographic breakdown", {
 })
 
 test_that("tab2: time series cross-tab", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     quarter = rep(c("Q1", "Q2", "Q3", "Q4"), each = 25),
     region = sample(c("North", "South", "East", "West"), 100, replace = TRUE)
   )
@@ -523,7 +526,8 @@ test_that("tab2: time series cross-tab", {
 })
 
 test_that("tab2: survey cross-tabulation", {
-  df <- tibble(
+  withr::local_preserve_seed()
+  df <- tibble::tibble(
     question_1 = sample(c("Yes", "No", "Maybe"), 300, replace = TRUE),
     question_2 = sample(c("Agree", "Disagree", "Neutral"), 300, replace = TRUE)
   )
@@ -541,7 +545,7 @@ test_that("tab2: survey cross-tabulation", {
 # ============================================================================
 
 test_that("tab2: factor with unused levels", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("a", "b"), levels = c("a", "b", "c", "d")),
     y = factor(c("x", "y"), levels = c("x", "y", "z"))
   )
@@ -553,7 +557,7 @@ test_that("tab2: factor with unused levels", {
 })
 
 test_that("tab2: factor levels not alphabetically ordered", {
-  df <- tibble(
+  df <- tibble::tibble(
     x = factor(c("High", "Med", "Low"), levels = c("Low", "Med", "High")),
     y = c("A", "B", "A")
   )
@@ -562,7 +566,7 @@ test_that("tab2: factor levels not alphabetically ordered", {
 })
 
 test_that("tab2: numeric factor vs character", {
-  df <- tibble(
+  df <- tibble::tibble(
     score = factor(c(1, 2, 1, 2), levels = c(3, 2, 1)),
     pass = c("Yes", "No", "Yes", "No")
   )
@@ -575,20 +579,20 @@ test_that("tab2: numeric factor vs character", {
 # ============================================================================
 
 test_that("tab2: using numeric column positions", {
-  df <- tibble(a = 1:4, x = 1:4, b = 1:4, y = c("A", "B", "A", "B"))
+  df <- tibble::tibble(a = 1:4, x = 1:4, b = 1:4, y = c("A", "B", "A", "B"))
   result <- tab2(df, 2, 4)
   expect_equal(nrow(result), 4)
 })
 
 test_that("tab2: last_col() selection", {
-  df <- tibble(x = 1:4, y = c("A", "B", "A", "B"), z = 1:4)
-  result <- tab2(df, 1, last_col())
+  df <- tibble::tibble(x = 1:4, y = c("A", "B", "A", "B"), z = 1:4)
+  result <- tab2(df, 1, dplyr::last_col())
   expect_equal(ncol(result), 5)
 })
 
 test_that("tab2: everything() with two columns", {
-  df <- tibble(x = c("A", "B", "A", "B"), y = c(1, 2, 1, 2))
-  result <- tab2(df, everything())
+  df <- tibble::tibble(x = c("A", "B", "A", "B"), y = c(1, 2, 1, 2))
+  result <- tab2(df, dplyr::everything())
   expect_equal(nrow(result), 2)
   expect_setequal(names(result)[-1], as.character(unique(df$y)))
   expect_equal(

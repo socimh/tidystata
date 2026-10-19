@@ -1,0 +1,46 @@
+name: Documentation freshness
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::devtools, roxygen2@8.0.0
+          needs: website
+      - name: Check generated migration copies
+        run: python .opencode/workflows/generate_migration.py --check
+      - name: Install current source and regenerate documentation
+        shell: Rscript {0}
+        run: |
+          lib <- tempfile("statart-doc-library-")
+          dir.create(lib)
+          remotes::install_local(".", lib = lib, upgrade = "never", build_vignettes = FALSE)
+          .libPaths(c(lib, .libPaths()))
+          roxygen2::roxygenise()
+          devtools::build_readme()
+      - name: Fail on stale help or namespace
+        run: |
+          git status --porcelain --untracked-files=all -- man NAMESPACE
+          test -z "$(git status --porcelain --untracked-files=all -- man NAMESPACE)"
+      - name: Record README rendering differences
+        if: always()
+        run: git diff -- README.md > readme-render.diff
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: readme-render-diff
+          path: readme-render.diff

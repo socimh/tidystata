@@ -1,0 +1,146 @@
+---
+title: "Getting started with statart"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with statart}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+statart provides short commands for exploring and preparing data. Its tables
+can be saved, filtered and joined in ordinary R workflows. This tutorial uses a
+small survey so that you can check the counts and calculations yourself.
+
+## Load data and inspect variables
+
+```{r data}
+library(statart)
+library(dplyr)
+
+survey <- tibble(
+  id = 1:6,
+  group = c("A", "A", "A", "B", "B", NA),
+  response = c("yes", "no", NA, "yes", "yes", "no"),
+  score1 = c(2, 4, NA, 6, 8, 10),
+  score2 = c(4, NA, NA, 8, 10, 12)
+)
+attr(survey$score1, "label") <- "First assessment score"
+
+codebook(survey)
+variables(survey)
+ds(survey, starts_with("score"))
+```
+
+`codebook()` gives one row per variable. `variables()` reports names and variable
+labels, while `ds()` returns a character vector of names. `variables_search()`
+searches names and labels, so it can find a variable from its description:
+
+```{r select}
+variables_search(survey, "assessment")
+s_select(survey, id, starts_with("score"))
+```
+
+## Count categories
+
+```{r count}
+counts <- tab(survey, response)
+counts
+sum(counts$n)
+
+fre(survey, response)
+tab2(survey, group, response)
+```
+
+The counts sum to six, including the missing response. `tab()` returns observed
+categories with counts and percentages. `fre()` adds total rows; `tab2()` puts
+the categories of its second variable into columns. Use `tab1()` when you want
+separate one-way tables instead of a joint table:
+
+```{r count-list}
+tables <- tab1(survey, group, response)
+tables$response
+```
+
+The returned objects contain data. For example, select categories occurring
+more than once with an ordinary pipeline:
+
+```{r count-pipeline}
+tab(survey, response) |>
+  filter(n > 1)
+```
+
+## Summarise measurements
+
+Select numeric measurements deliberately. Codes attached to categories are not
+automatically meaningful measurements.
+
+```{r summary}
+summ(survey, score1, score2, .stat = c("n", "mean", "sd", "missing"))
+tabstat(survey, score1, score2, .by = group)
+mean(survey$score1, na.rm = TRUE)
+```
+
+`summ()` can return several statistics. `tabstat()` selects means by default.
+Both omit missing measured values from numeric calculations. Missing grouping
+keys remain as a group unless you request `.na.rm = TRUE`:
+
+```{r groups}
+summ(survey, score1, .by = group, .na.rm = TRUE, .stat = c("n", "mean"))
+```
+
+Numeric-only summaries return a table. When numeric and calendar measurements
+are combined, the default can be a list of tables. The companion
+`vignette("containers-and-missing-values", package = "statart")` explains those
+types and their missing-value conventions.
+
+## Prepare new variables
+
+Row helpers return vectors, making them convenient in `mutate()`. `pick()` makes
+the columns being combined explicit.
+
+```{r rows}
+prepared <- survey |>
+  mutate(
+    average = row_mean(pick(score1, score2)),
+    observed = row_non_miss(pick(score1, score2))
+  )
+prepared
+```
+
+The third row has no observed score, so its average is `NA` and its observed
+count is zero. Row sums use zero for an all-missing row, while column summaries
+use `NA` for a sum with no observations.
+
+Character measurements can be parsed explicitly, and sentinel values can be
+replaced before calculations:
+
+```{r conversion}
+as_numeric(c("1,200", "2,500", NA))
+na_if_value(c(1, -99, 3), -99)
+cut_quantile(1:8, 4)
+```
+
+`as_numeric()` uses a flexible number parser; check parsing warnings when the
+input is messy. Quantile bins keep tied values together and may contain fewer
+intervals when cutpoints coincide. These conventions do not promise exact
+equivalence with every Stata command.
+
+## Continue with plain scripts
+
+The installed package includes scripts for inspection, tabulation, summaries,
+preparation and edge cases. Locate a script with:
+
+```{r script-path}
+system.file("examples", "03_summary_statistics.R", package = "statart")
+```
+
+Open it in your editor and run its lines individually. If results appear to use
+an older package, inspect `packageVersion("statart")` and `find.package("statart")`.
+For local source changes, install from the project and restart R before testing.
+
+The full migration guide is installed at
+`system.file("MIGRATION.md", package = "statart")`.

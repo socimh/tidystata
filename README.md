@@ -27,10 +27,12 @@ The package focuses on exploring and preparing data:
 
 The `0.2.0.9000` development series retires the import/export,
 regression-table, and detailed-codebook wrappers in preparation for
-`0.3.0`. See the [migration guide](MIGRATION.md) for direct package
-alternatives and breaking changes. This experimental package is
-undergoing stabilization; see [DEVELOPMENT.md](DEVELOPMENT.md) for the
-verified status and remaining work.
+`0.3.0`. See the [migration
+guide](https://socimh.github.io/statart/articles/migration.html) for
+direct package alternatives and breaking changes. This experimental
+package is undergoing stabilization; see
+[DEVELOPMENT.md](https://github.com/socimh/statart/blob/master/DEVELOPMENT.md)
+for the verified status and remaining work.
 
 ## Installation
 
@@ -42,6 +44,68 @@ devtools::install_github("socimh/statart")
 
 R 4.1.0 or later and a suitable build toolchain are required to install
 from source. Rich table formatting is optional and requires `flextable`.
+
+If you already have this source repository on your computer, open
+`statart.Rproj` and restart R before installing the local changes:
+
+``` r
+devtools::install(".", upgrade = "never", build_vignettes = FALSE)
+```
+
+Restart R again, then check the version and installed location:
+
+``` r
+library(statart)
+packageVersion("statart")
+find.package("statart")
+```
+
+Opening the source folder alone does not change what `library(statart)`
+loads. Repeat the installation after editing source code. During package
+development, `devtools::load_all(".")` loads the working source into the
+current session; installation followed by a fresh R session tests the
+installed package.
+
+## Learn the workflow
+
+Read [Getting
+started](https://socimh.github.io/statart/articles/getting-started.html)
+for a small exploration and preparation workflow, and [Containers and
+missing
+values](https://socimh.github.io/statart/articles/containers-and-missing-values.html)
+for return types, grouping, labels and previews. In an installation that
+includes vignettes, use
+`vignette("getting-started", package = "statart")`.
+
+Plain manual scripts are included in the installed package. Open a
+script in your editor and run its lines individually, or run this
+complete example:
+
+``` r
+source(system.file("examples", "02_frequency_tables.R", package = "statart"),
+       echo = TRUE)
+```
+
+Use `system.file("examples", "README.md", package = "statart")` for the
+script index and `system.file("MIGRATION.md", package = "statart")` for
+the full installed migration guide. The source repository also contains
+both guides.
+
+## Table return types
+
+Table-producing helpers preserve the input container by default: a
+tibble returns a tibble, a base data frame returns a base data frame,
+and a data.table returns a data.table. List outputs remain lists, with
+each table following the same rule. Explicit output options override
+this default. Summaries and variable inventories are ungrouped; grouping
+columns are retained where the function normally reports them. Arbitrary
+data-frame subclass metadata is not guaranteed on newly constructed
+tables. Vector and scalar helpers retain their usual outputs.
+
+`preview_table()` preserves the underlying container while changing its
+console display. `unpreview_table()` removes that display setting.
+External dplyr and tidyr verbs retain their own container and grouping
+behavior, with preview settings preserved for supported operations.
 
 ## Example
 
@@ -77,11 +141,9 @@ Summarise selected numeric variables in `mtcars`.
 
 ``` r
 summ(mtcars, mpg, wt)
-#> # A tibble: 2 x 8
-#>   name  type      n unique   min  mean    sd   max
-#>   <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
-#> 1 mpg   dbl      32     25 10.4  20.1  6.03  33.9 
-#> 2 wt    dbl      32     29  1.51  3.22 0.978  5.42
+#>   name type  n unique    min     mean        sd    max
+#> 1  mpg  dbl 32     25 10.400 20.09062 6.0269481 33.900
+#> 2   wt  dbl 32     29  1.513  3.21725 0.9784574  5.424
 ```
 
 Choose numeric variables deliberately: means and standard deviations of
@@ -92,15 +154,14 @@ and summary statistics are `NA`, including `sum`.
 Select statistics with `.stat`. Aliases `missing`, `p25`, `p50`, and
 `p75` retain their requested names and order; `sum` is available for
 numeric summaries. Unsupported statistics produce an error. See the
-[migration guide](MIGRATION.md) for the date/datetime restrictions and
-cross-tabulation naming rules.
+[migration
+guide](https://socimh.github.io/statart/articles/migration.html) for the
+date/datetime restrictions and cross-tabulation naming rules.
 
 ``` r
 summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
-#> # A tibble: 1 x 5
-#>   name  type  missing   p50   sum
-#>   <chr> <chr>   <int> <dbl> <dbl>
-#> 1 mpg   dbl         0  19.2  643.
+#>   name type missing  p50   sum
+#> 1  mpg  dbl       0 19.2 642.9
 ```
 
 With `.mode = "table"`, numeric and calendar summaries share character
@@ -206,8 +267,9 @@ tab2(statart::starwars, sex, gender)
 `fre()` family functions simply add total rows (and total columns in
 `fre2()`) to their `tab()` counterparts.
 
-`fre()` and `fre2()` return tibbles by default. `fre1()` returns a list
-of tibbles.
+`fre()` and `fre2()` default to `.type = "auto"`, preserving the input
+container. `fre1()` returns a list whose tables preserve that container.
+Request `.type = "tibble"` explicitly when a tibble is required.
 
 ``` r
 fre(statart::starwars, sex)

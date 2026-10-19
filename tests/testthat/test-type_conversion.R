@@ -1,9 +1,3 @@
-library(testthat)
-library(statart)
-library(dplyr)
-library(tibble)
-library(haven)
-
 # ============================================================================
 # CHALLENGING TESTS - as_character
 # ============================================================================
@@ -36,7 +30,7 @@ test_that("as_character: ordered factor to character", {
 })
 
 test_that("as_character: haven labelled to character", {
-  x <- labelled(
+  x <- haven::labelled(
     c(1, 2, 1, 3),
     labels = c(Yes = 1, No = 2, Maybe = 3)
   )
@@ -46,7 +40,7 @@ test_that("as_character: haven labelled to character", {
 })
 
 test_that("as_character: haven labelled with partial labels", {
-  x <- labelled(
+  x <- haven::labelled(
     c(1, 2, 99, 1),
     labels = c(Yes = 1, No = 2)
   )
@@ -88,12 +82,12 @@ test_that("as_character: empty vector", {
 })
 
 test_that("as_character: within mutate context", {
-  df <- tibble(
+  df <- tibble::tibble(
     num = 1:5,
-    lbl = labelled(c(1, 2, 1, 2, 1), labels = c(A = 1, B = 2))
+    lbl = haven::labelled(c(1, 2, 1, 2, 1), labels = c(A = 1, B = 2))
   )
   result <- df %>%
-    mutate(num_chr = as_character(num), lbl_chr = as_character(lbl))
+    dplyr::mutate(num_chr = as_character(num), lbl_chr = as_character(lbl))
   expect_type(result$num_chr, "character")
   expect_type(result$lbl_chr, "character")
   expect_equal(result$lbl_chr, c("A", "B", "A", "B", "A"))
@@ -156,7 +150,7 @@ test_that("as_numeric: ordered factor to numeric", {
 })
 
 test_that("as_numeric: haven labelled to numeric", {
-  x <- labelled(
+  x <- haven::labelled(
     c(10, 20, 10, 30),
     labels = c(Ten = 10, Twenty = 20, Thirty = 30)
   )
@@ -211,13 +205,13 @@ test_that("as_numeric: character with currency symbols", {
 })
 
 test_that("as_numeric: within mutate context", {
-  df <- tibble(
+  df <- tibble::tibble(
     chr = c("1", "2", "3"),
     fct = factor(c(10, 20, 30)),
-    lbl = labelled(c(100, 200, 100), labels = c(A = 100, B = 200))
+    lbl = haven::labelled(c(100, 200, 100), labels = c(A = 100, B = 200))
   )
   result <- df %>%
-    mutate(
+    dplyr::mutate(
       chr_num = as_numeric(chr),
       fct_num = as_numeric(fct),
       lbl_num = as_numeric(lbl)
@@ -242,7 +236,7 @@ test_that("type conversion: round-trip character -> numeric -> character", {
 })
 
 test_that("type conversion: haven labelled preserves labels in character", {
-  x <- labelled(
+  x <- haven::labelled(
     c(1, 2, 1, 3),
     labels = c(Yes = 1, No = 2, Maybe = 3)
   )
@@ -255,14 +249,14 @@ test_that("type conversion: haven labelled preserves labels in character", {
 })
 
 test_that("type conversion: data frame conversion workflow", {
-  df <- tibble(
-    id = labelled(c(1, 2, 3), labels = c(A = 1, B = 2, C = 3)),
+  df <- tibble::tibble(
+    id = haven::labelled(c(1, 2, 3), labels = c(A = 1, B = 2, C = 3)),
     score = c("85.5", "92.0", "78.5"),
     passed = factor(c("Yes", "Yes", "No"))
   )
 
   result <- df %>%
-    mutate(
+    dplyr::mutate(
       id_chr = as_character(id),
       score_num = as_numeric(score),
       passed_num = as_numeric(passed)
@@ -330,10 +324,13 @@ test_that("type conversion: NaN handling", {
 
 test_that("type conversion: survey data import workflow", {
   # Simulating data from SPSS/Stata import
-  survey_data <- tibble(
+  survey_data <- tibble::tibble(
     respondent_id = 1:5,
-    gender = labelled(c(1, 2, 1, 2, 1), labels = c(Male = 1, Female = 2)),
-    age_group = labelled(
+    gender = haven::labelled(
+      c(1, 2, 1, 2, 1),
+      labels = c(Male = 1, Female = 2)
+    ),
+    age_group = haven::labelled(
       c(1, 2, 3, 2, 1),
       labels = c("18-25" = 1, "26-35" = 2, "36+" = 3)
     ),
@@ -342,7 +339,7 @@ test_that("type conversion: survey data import workflow", {
 
   # Convert for analysis
   analysis_data <- survey_data %>%
-    mutate(
+    dplyr::mutate(
       gender_chr = as_character(gender),
       age_chr = as_character(age_group),
       satisfaction_num = as_numeric(satisfaction)
@@ -361,14 +358,14 @@ test_that("type conversion: survey data import workflow", {
 })
 
 test_that("type conversion: financial data parsing", {
-  financial_data <- tibble(
+  financial_data <- tibble::tibble(
     transaction_id = 1:4,
     amount_chr = c("$1,234.56", "$500.00", "$2,000.00", "$750.50"),
     currency = c("USD", "USD", "EUR", "GBP")
   )
 
   result <- financial_data %>%
-    mutate(amount_num = as_numeric(amount_chr))
+    dplyr::mutate(amount_num = as_numeric(amount_chr))
 
   expect_type(result$amount_num, "double")
   expect_identical(result$amount_num, c(1234.56, 500, 2000, 750.5))

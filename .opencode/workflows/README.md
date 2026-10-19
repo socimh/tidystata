@@ -1,77 +1,68 @@
 # Package verification workflows
 
-Run from the repository root. The current supported workflow is
-[verify_package.py](verify_package.py). It builds native code in a temporary
-source copy, preserves local artifacts, and returns a failure status when
-installation, tests, build or package checks fail.
+Run from the repository root. [verify_package.py](verify_package.py) is the
+maintained entry point for fresh native installation, tests, package checking,
+required-dependency smoke checks and demos. It stages source in a temporary copy,
+uses a private installation and returns failure for failed or incomplete checks.
+Local tools, results and generated website output are excluded from staging.
 
 ```powershell
-# Full retained test suite.
-python .opencode/workflows/verify_package.py
-
-# One test family.
-python .opencode/workflows/verify_package.py --filter summ
-
-# Fresh native install, suite, source build and R CMD check.
-python .opencode/workflows/verify_package.py --check
-
-# Required-dependency smoke check.
-python .opencode/workflows/verify_package.py --minimal
-
-# Current versioned demo reports; preserves historical reports.
-make demo-reports
+python .opencode/workflows/verify_package.py --prefix .opencode/results/current
+python .opencode/workflows/verify_package.py --filter summ --prefix .opencode/results/current-focused
+python .opencode/workflows/verify_package.py --shuffle-seed 20261019 --prefix .opencode/results/current-reordered
+python .opencode/workflows/verify_package.py --minimal --prefix .opencode/results/current-minimal
+python .opencode/workflows/verify_package.py --demos --prefix .opencode/results/current-demos
+python .opencode/workflows/verify_package.py --release --prefix .opencode/results/current-release
 ```
 
-The Python workflow invokes the protected Windows R launcher for every R
-command. Any direct Rscript invocation, including the root run_tests.R wrapper,
-must also use that launcher:
+`--release` includes vignettes, PDF manual and `--as-cran`; `--check` is a faster
+development check. Check, release, minimal and demos are mutually exclusive.
+Filters and shuffle seeds apply only to ordinary tests. The seeded run records
+actual test file/block order and maps temporary names to original test identities;
+compare outcomes by identity rather than timings.
+
+Windows automation calls the protected launcher through `r_process.py`. Direct
+R invocations, including the compatibility wrapper, require it too:
 
 ```powershell
 python C:/Users/socimh/.codex/scripts/run_r_safe.py -- Rscript run_tests.R summ
 ```
 
-Results are written to .opencode/results. Use --prefix to retain a distinct
-run. Only selected reviewed evidence is versioned; other outputs remain local.
-See [the evidence policy](../results/README.md). The
-[report index](../reports/INDEX.md) distinguishes versioned examples and
-historical reports; [.opencode/QUICK_STATUS.md](../QUICK_STATUS.md) is the
-current status entry point.
+The default protected launcher is machine-specific; `STATART_R_LAUNCHER` may
+select another verified protected launcher. An absent launcher is an error.
+Inspect native exit status and full logs. The release workflow parses the check
+result, fails for errors/warnings/incomplete checks, installs the actual built
+archive into an empty private library and records its checksum/install receipt.
+Notes remain visible and require a publication decision. Website checks install
+their staged candidate separately; a dependency library never substitutes for
+that candidate. Building a site does not authorize deployment.
 
-make clean is a non-destructive notice. It does not delete reports, results,
-data, compiled files or session state. Review an exact list and obtain
-maintainer approval before any artifact deletion.
+## Maintained tools and outputs
 
-## Historical tooling
+- `run_suite.R` collects active `tests/testthat` outcomes. Specialized checks and
+  benchmarks remain under `.opencode/tests/`; do not source the whole directory.
+- `generate_demo_reports.R` executes `.opencode/demos/demo_<family>.R` against the
+  explicit fresh library, generating current `report_<family>.md` files and
+  `INDEX.md` in `.opencode/reports/`. Use `make demo-reports`. `--index-only`
+  rebuilds the index from existing reports through the protected launcher.
+  Malformed/missing demo status records fail clearly.
+- `check_style.py` performs read-only Air 0.12.0, R parsing and lintr 3.4.0 checks
+  for `.opencode/style-scope.json`; use `make style-check`. Local pinned tools
+  live in `.opencode/tools/style-tools/`, and the development R library in
+  `.opencode/tools/library/`. See CONTRIBUTING.md for environment overrides.
+- `generate_migration.py` owns the installed migration guide and website article;
+  run it after editing root `MIGRATION.md`, then use `--check` for freshness.
+- Python `test_*.py` files under `.opencode/tests/` exercise failure propagation,
+  staging, launcher policy, dependency constraints and receipts. Run them with
+  `python -m unittest discover -s .opencode/tests -p "test_*.py"`.
 
-esttab_automation.R, watch_esttab.R and related older tests remain for historical
-reference. They target retired functionality and are not the active package
-verification workflow. Do not source all scripts in .opencode/tests as a test
-runner: that folder also contains historical and specialized scripts.
+`.opencode/results/` and `.opencode/tools/` are ignored local directories. Reuse
+consistent `current` prefixes for normal runs; execution logs may remain in the
+protected launcher's temporary directory. Do not accumulate versioned histories.
+Current verification and unresolved gates belong in
+[DEVELOPMENT.md](../../DEVELOPMENT.md). Original issue notes are retained read-only
+under `.opencode/notes/`; removed historical tooling and reports are recoverable
+from the maintainer's verified external backup or tracked Git versions.
 
-Old root setup/test/release files and the interactive build scratchpad are
-preserved in [development-history](../../extra_functions/development-history/README.md),
-excluded from package builds. See [DEVELOPMENT.md](../../DEVELOPMENT.md) for
-source locations and the protected execution requirements.
-# Current maintained workflow
-
-Start with `verify_package.py` for fresh native installation, tests, checking,
-minimal-dependency smoke checks and demos. It calls the protected Windows R
-launcher. `run_suite.R` collects results; `generate_demo_reports.R` owns demo
-reports and their index. The family `verify_*.R` acceptance runners listed in
-`../style-scope.json` retain their established numbered catalogues.
-The demo workflow passes its fresh installed library explicitly. Individual
-demos attach statart normally; they no longer repeatedly load development
-namespaces or depend on an old DLL in the working folder.
-After adding a development report, run the report generator with `--index-only`
-through the protected launcher to rebuild the index from existing demo reports
-without rerunning demos. Missing or malformed demo status records fail clearly.
-
-`check_style.py` is the read-only entry point for pinned Air 0.12.0 and lintr
-3.4.0 checks. Use `make style-check`; see CONTRIBUTING.md for installation,
-scope and the documented namespace exception. The manifest lists maintained
-handwritten R sources. Generated showcase scripts are rebuilt by their Python
-authoring sources and are deliberately outside manual formatting.
-
-Older esttab automation, scratch runners, challenge-header utilities and saved
-reports are preserved historical material. They are not alternative current
-entry points. No historical files or generated results are deleted by adoption.
+`make clean` is a non-destructive notice. Deleting artifacts requires explicit
+authorization and a reviewed list; it is not an alternative verification mode.

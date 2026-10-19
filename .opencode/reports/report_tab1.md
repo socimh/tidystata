@@ -1,8 +1,6 @@
 # Function: tab1()
 
-**Generated:** 2026-03-03 23:09:18
-
----
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:44 | **Status:** PASS
 
 ## Example 1: Basic one-way table
 
@@ -14,14 +12,14 @@ tab1(starwars, sex)
 
 ```
 $sex
-# A tibble: 5 × 6
+# A tibble: 5 x 6
   value              n percent   cum valid valid_cum
   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
 1 female            16   18.4   18.4 19.3       19.3
 2 hermaphroditic     1    1.15  19.5  1.20      20.5
 3 male              60   69.0   88.5 72.3       92.8
-4 none               6    6.90  95.4  7.23     100  
-5 <NA>               4    4.60 100   NA         NA  
+4 none               6    6.90  95.4  7.23     100
+5 <NA>               4    4.60 100   NA         NA
 
 ```
 
@@ -35,22 +33,22 @@ tab1(starwars, sex, gender)
 
 ```
 $sex
-# A tibble: 5 × 6
+# A tibble: 5 x 6
   value              n percent   cum valid valid_cum
   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
 1 female            16   18.4   18.4 19.3       19.3
 2 hermaphroditic     1    1.15  19.5  1.20      20.5
 3 male              60   69.0   88.5 72.3       92.8
-4 none               6    6.90  95.4  7.23     100  
-5 <NA>               4    4.60 100   NA         NA  
+4 none               6    6.90  95.4  7.23     100
+5 <NA>               4    4.60 100   NA         NA
 
 $gender
-# A tibble: 3 × 6
+# A tibble: 3 x 6
   value         n percent   cum valid valid_cum
   <chr>     <int>   <dbl> <dbl> <dbl>     <dbl>
 1 feminine     17   19.5   19.5  20.5      20.5
-2 masculine    66   75.9   95.4  79.5     100  
-3 <NA>          4    4.60 100    NA        NA  
+2 masculine    66   75.9   95.4  79.5     100
+3 <NA>          4    4.60 100    NA        NA
 
 ```
 
@@ -64,12 +62,12 @@ tab1(starwars, tall = height > 180)
 
 ```
 $tall
-# A tibble: 3 × 6
+# A tibble: 3 x 6
   value     n percent   cum valid valid_cum
   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
-1 FALSE    43   49.4   49.4  53.1      53.1
-2 TRUE     38   43.7   93.1  46.9     100  
-3 NA        6    6.90 100    NA        NA  
+1 FALSE    42   48.3   48.3  51.9      51.9
+2 TRUE     39   44.8   93.1  48.1     100
+3 NA        6    6.90 100    NA        NA
 
 ```
 
@@ -82,17 +80,17 @@ tab1(starwars, sex, gender, .type = 'tibble')
 **Output:**
 
 ```
-# A tibble: 8 × 7
+# A tibble: 8 x 7
   variable value              n percent   cum valid valid_cum
   <chr>    <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
 1 sex      female            16   18.4   18.4 19.3       19.3
 2 sex      hermaphroditic     1    1.15  19.5  1.20      20.5
 3 sex      male              60   69.0   88.5 72.3       92.8
-4 sex      none               6    6.90  95.4  7.23     100  
-5 sex      <NA>               4    4.60 100   NA         NA  
+4 sex      none               6    6.90  95.4  7.23     100
+5 sex      <NA>               4    4.60 100   NA         NA
 6 gender   feminine          17   19.5   19.5 20.5       20.5
-7 gender   masculine         66   75.9   95.4 79.5      100  
-8 gender   <NA>               4    4.60 100   NA         NA  
+7 gender   masculine         66   75.9   95.4 79.5      100
+8 gender   <NA>               4    4.60 100   NA         NA
 ```
 
 ## Example 5: With tidyselect
@@ -105,41 +103,40 @@ tab1(starwars, ends_with('color'))
 
 ```
 $hair_color
-# A tibble: 13 × 6
+# A tibble: 12 x 6
    value             n percent    cum valid valid_cum
    <chr>         <int>   <dbl>  <dbl> <dbl>     <dbl>
  1 auburn            1    1.15   1.15  1.22      1.22
  2 auburn, grey      1    1.15   2.30  1.22      2.44
  3 auburn, white     1    1.15   3.45  1.22      3.66
- 4 black            13   14.9   18.4  15.9      19.5 
- 5 blond             3    3.45  21.8   3.66     23.2 
- 6 blonde            1    1.15  23.0   1.22     24.4 
- 7 brown            18   20.7   43.7  22.0      46.3 
- 8 brown, grey       1    1.15  44.8   1.22     47.6 
- 9 grey              1    1.15  46.0   1.22     48.8 
-10 none             37   42.5   88.5  45.1      93.9 
-11 unknown           1    1.15  89.7   1.22     95.1 
-12 white             4    4.60  94.3   4.88    100   
-13 <NA>              5    5.75 100    NA        NA   
+ 4 black            13   14.9   18.4  15.9      19.5
+ 5 blond             3    3.45  21.8   3.66     23.2
+ 6 blonde            1    1.15  23.0   1.22     24.4
+ 7 brown            18   20.7   43.7  22.0      46.3
+ 8 brown, grey       1    1.15  44.8   1.22     47.6
+ 9 grey              1    1.15  46.0   1.22     48.8
+10 none             38   43.7   89.7  46.3      95.1
+11 white             4    4.60  94.3   4.88    100
+12 <NA>              5    5.75 100    NA        NA
 
 $skin_color
-# A tibble: 31 × 6
+# A tibble: 31 x 6
    value                   n percent   cum valid valid_cum
    <chr>               <int>   <dbl> <dbl> <dbl>     <dbl>
  1 blue                    2    2.30  2.30  2.30      2.30
  2 blue, grey              2    2.30  4.60  2.30      4.60
  3 brown                   4    4.60  9.20  4.60      9.20
- 4 brown mottle            1    1.15 10.3   1.15     10.3 
- 5 brown, white            1    1.15 11.5   1.15     11.5 
- 6 dark                    6    6.90 18.4   6.90     18.4 
- 7 fair                   17   19.5  37.9  19.5      37.9 
- 8 fair, green, yellow     1    1.15 39.1   1.15     39.1 
- 9 gold                    1    1.15 40.2   1.15     40.2 
-10 green                   6    6.90 47.1   6.90     47.1 
-# ℹ 21 more rows
+ 4 brown mottle            1    1.15 10.3   1.15     10.3
+ 5 brown, white            1    1.15 11.5   1.15     11.5
+ 6 dark                    6    6.90 18.4   6.90     18.4
+ 7 fair                   17   19.5  37.9  19.5      37.9
+ 8 fair, green, yellow     1    1.15 39.1   1.15     39.1
+ 9 gold                    1    1.15 40.2   1.15     40.2
+10 green                   6    6.90 47.1   6.90     47.1
+# i 21 more rows
 
 $eye_color
-# A tibble: 15 × 6
+# A tibble: 15 x 6
    value             n percent   cum valid valid_cum
    <chr>         <int>   <dbl> <dbl> <dbl>     <dbl>
  1 black            10   11.5   11.5 11.5       11.5
@@ -156,7 +153,7 @@ $eye_color
 12 red, blue         1    1.15  82.8  1.15      82.8
 13 unknown           3    3.45  86.2  3.45      86.2
 14 white             1    1.15  87.4  1.15      87.4
-15 yellow           11   12.6  100   12.6      100  
+15 yellow           11   12.6  100   12.6      100
 
 ```
 
@@ -170,13 +167,12 @@ tab1(starwars, human = species == 'Human')
 
 ```
 $human
-# A tibble: 3 × 6
+# A tibble: 3 x 6
   value     n percent   cum valid valid_cum
   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
 1 FALSE    48   55.2   55.2  57.8      57.8
-2 TRUE     35   40.2   95.4  42.2     100  
-3 NA        4    4.60 100    NA        NA  
+2 TRUE     35   40.2   95.4  42.2     100
+3 NA        4    4.60 100    NA        NA
 
 ```
-
 

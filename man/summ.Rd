@@ -13,9 +13,11 @@ summ(
   .detail = FALSE,
   .stat = character(0),
   .na.rm = FALSE,
-  .name = TRUE,
+  .name = FALSE,
   .mode = c("list", "table"),
-  .duration_format = c("long", "compact")
+  .duration_format = c("long", "compact"),
+  .sort = TRUE,
+  .drop_empty = FALSE
 )
 
 tabstat(
@@ -26,14 +28,18 @@ tabstat(
   .detail = FALSE,
   .stat = "mean",
   .na.rm = FALSE,
-  .name = TRUE,
+  .name = FALSE,
   .mode = c("list", "table"),
-  .duration_format = c("long", "compact")
+  .duration_format = c("long", "compact"),
+  .sort = TRUE,
+  .drop_empty = FALSE
 )
 }
 \arguments{
 \item{.data}{A data frame, data frame extension (e.g. a tibble), or a vector.
-Matrix and data-frame columns are unsupported; use atomic or list columns.}
+Matrix and data-frame columns are unsupported; use atomic or list columns.
+For \code{sf} input, summarise attribute data only: all geometry columns are
+removed before selection. Geometry columns cannot be selected or grouped.}
 
 \item{...}{Variables to summarise, using tidyselect or data-masking
 expressions (for example, \code{dplyr::where(is.numeric)} or \code{x_sq = x^2}).
@@ -60,38 +66,61 @@ Supported names are \code{type}, \code{n}, \code{unique}, \code{miss_n}, \code{v
 \code{miss_n}, \code{q1}, \code{median}, and \code{q3}; requested names and order are retained.
 Identical requested names are deduplicated; aliases and canonical names
 may coexist. \code{sum} applies to numeric summaries, not calendar dates or
-datetimes. Calendar summaries do not support \code{skew} or \code{kurtosis} either.}
+datetimes. Calendar summaries do not support \code{skew} or \code{kurtosis} either;
+when such a statistic is requested alongside numeric variables, calendar
+variables are skipped with a warning.
+Percentiles \code{p0} through \code{p100}, including decimals such as \code{p2.5}, use
+type-7 quantiles. Only requested statistics and their prerequisites are
+calculated when \code{.stat} is nonempty.}
 
 \item{.na.rm}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, remove rows missing
 any grouping key before summarising. Default is \code{FALSE}. Missing measured
 values are always omitted from numeric statistics, regardless of this flag.}
 
-\item{.name}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), retain the
-\code{name} column. If \code{FALSE}, drop it only when one measured variable is
-summarised, including zero-row grouped output.}
+\item{.name}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), drop the
+\code{name} column when exactly one measured variable is summarised, including
+zero-row grouped output; with several variables it is always kept. If
+\code{TRUE}, always retain it.}
 
 \item{.mode}{A character string. Either \code{"list"} (default) or \code{"table"}.
 List mode returns a single table when one variable-type family is present,
-otherwise a list named \code{numeric}, \code{date}, and/or \code{datetime}. The \code{numeric}
-family also contains nonnumeric columns retained by \code{.keep_all}.
-Table mode combines all families. Shared formatted statistic columns become
-character when numeric and calendar summaries are combined; counts remain
-numeric. Calendar locations and spreads are strings in both modes.}
+otherwise a list named \code{numeric}, \code{date}, \code{datetime}, and/or \code{time} (for
+\code{hms} times of day). The \code{numeric} family also contains nonnumeric columns
+retained by \code{.keep_all}.
+Table mode combines all families. Calendar location columns are text, so a
+shared location column (such as \code{mean}) becomes character, with numeric
+values rounded to seven significant digits; counts remain numeric. Calendar
+spreads become plain numbers in days (Dates) or seconds (datetimes and
+times), and the unit is appended to \code{type}, for example \code{"date [days]"}.}
 
-\item{.duration_format}{A character string, \code{"long"} (default) or \code{"compact"}.
-Controls calendar spread statistics such as SD: \code{"548 days"} versus \code{"548d"}.
-Sub-minute datetime spreads are rounded to whole seconds for display.}
+\item{.duration_format}{Retained for compatibility and no longer affects the
+output: calendar spreads are always \code{difftime} columns (see Details).}
+
+\item{.sort}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), sort grouping
+keys ascending like \code{\link[=tab]{tab()}} (factor levels in their defined order, character
+keys in C-locale order), with missing keys last. Within each group, preserve
+the selected variable order. If \code{FALSE}, groups follow first appearance.}
+
+\item{.drop_empty}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, remove individual
+summary rows with no observed measured values (\code{n == 0}), even when \code{n} is
+not requested. This is independent of \code{.na.rm}. Default is \code{FALSE}.}
 }
 \value{
-A tibble, or a list of tibbles in list mode when multiple
-variable-type families are present. Table mode restores a base data.frame
-or data.table for those input classes. Vector input uses its expression
-as the variable name (or \code{value} for a multiline expression).
+A table, or a list of tables in list mode when multiple
+variable-type families are present. Each table preserves the input's
+data.frame, tibble, or data.table container in both modes. Results are
+ungrouped, retaining grouping keys as columns and supported preview settings.
+Other subclasses are not reconstructed. Vector input returns a tibble in
+list mode or a data.frame in table mode, using its expression as the variable
+name, or \code{value} for a multiline expression or a magrittr pipe (\code{.}). Wrap
+the vector in a named tibble to choose a stable variable name. Input data are
+not modified.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Compute one row of summary statistics per selected variable and group.
-\code{tabstat()} delegates to \code{summ()} with \code{.stat = "mean"} by default.
+\code{tabstat()} delegates to \code{summ()} with \code{.stat = "mean"} by default; with
+\code{.detail = TRUE} and no explicit \code{.stat}, it returns all detail statistics.
 }
 \details{
 Counts and missing values:
@@ -128,8 +157,17 @@ inputs, undefined spread or moment statistics may be \code{NA} or \code{NaN}.
 Calendar output and grouping names:
 
 Date locations are displayed as \code{YYYY-MM-DD}; fractional days are not shown.
-Datetime locations are displayed in UTC as \verb{YYYY-MM-DD HH:MM}, without
-seconds. Calendar spread statistics are formatted durations, not raw numbers.
+Infinite Date locations are displayed as \code{-Inf} or \code{Inf}; missing locations
+remain \code{NA}.
+Datetime locations are displayed as \verb{YYYY-MM-DD HH:MM}, without seconds, in
+the variable's own time zone (the session time zone when none is set).
+\code{hms} time-of-day locations are displayed as \code{hh:mm:ss}.
+
+Calendar spread statistics (\code{sd}, \code{se}, \code{mad}, \code{iqr}) are \code{difftime}
+columns, so they can be compared across rows and used in arithmetic. Each
+column has one unit: days for Dates; for datetimes and times, the unit
+(seconds, minutes, hours or days) that fits the column's median nonzero
+spread. Convert with, for example, \code{as.numeric(out$sd, units = "hours")}.
 Grouping keys that collide with summary metadata or internal pivot names
 are renamed by prepending dots until unique among the input names, with
 a message. The input data are not modified.
@@ -151,5 +189,9 @@ summ(lifeexp, .by = region, .na.rm = TRUE)
 
 # Keep numeric and calendar summaries in separate tables
 mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
-summ(mixed, .mode = "list", .duration_format = "compact")
+summ(mixed, .mode = "list")
+
+# Choose a stable variable name when starting from a vector
+scores <- c(4, 6, NA, 8)
+tibble::tibble(score = scores) |> summ(.name = TRUE)
 }
