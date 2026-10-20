@@ -263,7 +263,7 @@ summ <- function(
     summ_metadata(.data_summ, .keep_all),
     .keep_all
   )
-  .data <- keep_useful_vars(.data, .data_summ[names(metadata)], group_vars)
+  .data <- summ_keep_measured(.data, .data_summ[names(metadata)], group_vars)
 
   # Group keys must remain distinct from summary metadata and pivot fields.
   reserved <- c(

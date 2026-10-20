@@ -606,13 +606,16 @@ test_that("tab2: everything() with two columns", {
 
 test_that("cross totals preserve integer storage and promote overflow safely", {
   small <- tibble::tibble(category = "a", x = 2L, y = 3L)
-  expect_identical(statart:::add_total2(small, data.frame())$total, c(5L, 5L))
+  expect_identical(
+    tab2_add_total(small, data.frame())$total,
+    c(5L, 5L)
+  )
   large <- tibble::tibble(category = "a", x = .Machine$integer.max, y = 1L)
-  expect_no_warning(out <- statart:::add_total2(large, data.frame()))
+  expect_no_warning(out <- tab2_add_total(large, data.frame()))
   expect_identical(out$total, rep(as.double(.Machine$integer.max) + 1, 2L))
   decimals <- tibble::tibble(category = "a", x = 0.5, y = 1.25)
   expect_identical(
-    statart:::add_total2(decimals, data.frame())$total,
+    tab2_add_total(decimals, data.frame())$total,
     c(1.75, 1.75)
   )
 })

@@ -253,14 +253,14 @@ tab <- function(
   )
 
   # Prepare data
-  .data_nogroup <- prepare_tab_data(.data, ..., group_vars = group_vars)
+  .data_nogroup <- tab_prepare_data(.data, ..., group_vars = group_vars)
   .data <- .data %>%
     dplyr::select(dplyr::any_of(group_vars)) %>%
     dplyr::bind_cols(.data_nogroup)
 
   # Confirm names
   old_names <- names(.data)
-  .data <- modify_invalid_names(.data, "tab()")
+  .data <- tab_rename_reserved(.data, "tab()")
   group_vars <- names(.data)[match(group_vars, old_names)]
   if (length(group_vars) && !is.null(groups)) {
     names(groups$key) <- group_vars
@@ -341,11 +341,11 @@ tab1 <- function(
 
   .type <- match.arg(.type)
   keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))
-  values <- prepare_tab_data(.data, ..., group_vars = group_vars)
+  values <- tab_prepare_data(.data, ..., group_vars = group_vars)
   .data <- dplyr::bind_cols(keys, values)
   old_names <- names(.data)
   # Measured names become list names or `variable` values, never columns.
-  .data <- modify_invalid_names(.data, "tab1()", group_vars)
+  .data <- tab_rename_reserved(.data, "tab1()", group_vars)
   group_vars <- names(.data)[match(group_vars, old_names)]
   if (length(group_vars) && !is.null(groups)) {
     names(groups$key) <- group_vars
@@ -424,7 +424,7 @@ tab2 <- function(
   # Prepare data
   .data <- .data %>%
     s_select(...)
-  .data <- s_ungroup(.data)
+  .data <- tab_ungroup(.data)
   if (ncol(.data) == 0L) {
     if (.type == "flextable") {
       cli::cli_abort(
@@ -435,8 +435,8 @@ tab2 <- function(
   }
 
   # Confirm names
-  check_two_vars(.data)
-  .data <- modify_invalid_names(.data, "tab2()")
+  tab2_check_vars(.data)
+  .data <- tab_rename_reserved(.data, "tab2()")
   # Three or more variables: every pairwise table, like Stata's tab2.
   if (ncol(.data) > 2L) {
     pairs <- utils::combn(names(.data), 2L, simplify = FALSE)
@@ -493,7 +493,7 @@ tab2_pair <- function(.data, weights, template, .flip, .total, .type, .chi2) {
   out <- tab2_data(.data, weights)
   test <- if (.chi2) xtab_chi2(out) else NULL
   if (.total) {
-    out <- add_total2(out, .data)
+    out <- tab2_add_total(out, .data)
     if (.type == "flextable") {
       out <- result_to_flextable(out, character(0), fre2 = TRUE)
       if (!is.null(test)) {
@@ -558,14 +558,14 @@ fre <- function(
   )
 
   # Prepare data
-  .data_nogroup <- prepare_tab_data(.data, ..., group_vars = group_vars)
+  .data_nogroup <- tab_prepare_data(.data, ..., group_vars = group_vars)
   .data <- .data %>%
     dplyr::select(dplyr::any_of(group_vars)) %>%
     dplyr::bind_cols(.data_nogroup)
 
   # Confirm names
   old_names <- names(.data)
-  .data <- modify_invalid_names(.data, "fre()")
+  .data <- tab_rename_reserved(.data, "fre()")
   group_vars <- names(.data)[match(group_vars, old_names)]
   if (length(group_vars) && !is.null(groups)) {
     names(groups$key) <- group_vars
@@ -640,10 +640,10 @@ fre1 <- function(
 
   .type <- match.arg(.type)
   keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))
-  values <- prepare_tab_data(.data, ..., group_vars = group_vars)
+  values <- tab_prepare_data(.data, ..., group_vars = group_vars)
   .data <- dplyr::bind_cols(keys, values)
   old_names <- names(.data)
-  .data <- modify_invalid_names(.data, "fre1()", group_vars)
+  .data <- tab_rename_reserved(.data, "fre1()", group_vars)
   group_vars <- names(.data)[match(group_vars, old_names)]
   if (length(group_vars) && !is.null(groups)) {
     names(groups$key) <- group_vars

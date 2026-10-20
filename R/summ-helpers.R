@@ -11,7 +11,7 @@ extract_group_var <- function(.data, by, call = rlang::caller_env()) {
     group_vars <- character(0)
   }
 
-  if (!contain_vars(.data, group_vars)) {
+  if (!has_group_vars(.data, group_vars)) {
     cli::cli_abort(
       "The data do not include all grouping variable(s).",
       call = call
@@ -39,7 +39,7 @@ check_by_selection <- function(.data, by, call = rlang::caller_env()) {
   )
 }
 
-contain_vars <- function(.data, group_vars) {
+has_group_vars <- function(.data, group_vars) {
   contain <- .data %>%
     dplyr::ungroup() %>%
     dplyr::select(
@@ -94,7 +94,7 @@ check_group_selection <- function(.data, ..., group_vars) {
   invisible()
 }
 
-keep_useful_vars <- function(.data, .data_num, group_vars) {
+summ_keep_measured <- function(.data, .data_num, group_vars) {
   out <- .data %>%
     dplyr::ungroup() %>%
     dplyr::select(
@@ -112,7 +112,7 @@ is_summable_chr <- function(chr) {
     )
 }
 
-warning_vars <- function(vars, suffix) {
+summ_warn_vars <- function(vars, suffix) {
   if (length(vars) == 0) {
     return()
   } else if (length(vars) == 1) {
@@ -161,7 +161,7 @@ summ_check_metadata <- function(
 ) {
   types <- vapply(metadata, `[[`, character(1), "type")
   summable <- vapply(metadata, `[[`, logical(1), "summable")
-  warning_vars(
+  summ_warn_vars(
     names(metadata)[!summable],
     if (keep_all) {
       "non-numeric (***)."
@@ -176,7 +176,7 @@ summ_check_metadata <- function(
     },
     logical(1)
   )
-  warning_vars(
+  summ_warn_vars(
     names(metadata)[entirely_missing],
     if (keep_all) {
       "entirely missing."
@@ -191,7 +191,7 @@ summ_check_metadata <- function(
     )
   }
   factors <- names(metadata)[summable & types %in% c("fct", "ord")]
-  warning_vars(
+  summ_warn_vars(
     factors,
     if (length(factors) == 1L) {
       "a factor (**)."
@@ -200,7 +200,7 @@ summ_check_metadata <- function(
     }
   )
   labelled <- names(metadata)[summable & grepl("lbl$", types)]
-  warning_vars(
+  summ_warn_vars(
     labelled,
     if (length(labelled) == 1L) {
       "a labelled variable (*)."
@@ -590,7 +590,7 @@ summ_group_unique <- function(ids, kept, n) {
 
 # Format calendar locations: Dates as days, datetimes in their own time zone
 # and hms times of day as clock times.
-fmt_date <- function(x, var, type) {
+summ_format_date <- function(x, var, type) {
   out <- rep(NA_character_, length(x))
   infinite <- is.infinite(x)
   out[infinite] <- as.character(x[infinite])
@@ -664,7 +664,7 @@ summ_format_calendar <- function(out, var, requested, type) {
     c("type", "n", "unique", "miss_n", "valid_pct", calendar_spreads)
   )
   for (statistic in locations) {
-    out[[statistic]] <- fmt_date(out[[statistic]], var, type)
+    out[[statistic]] <- summ_format_date(out[[statistic]], var, type)
   }
   scale <- if (type == "date") 86400 else 1
   for (statistic in intersect(requested, calendar_spreads)) {

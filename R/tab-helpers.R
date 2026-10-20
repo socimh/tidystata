@@ -1,5 +1,5 @@
 # Helper functions for tab() and fre() families
-s_ungroup <- function(.data) {
+tab_ungroup <- function(.data) {
   if (dplyr::is_grouped_df(.data)) {
     cli::cli_inform("Ungrouping the data.")
     .data <- dplyr::ungroup(.data)
@@ -7,7 +7,7 @@ s_ungroup <- function(.data) {
   return(.data)
 }
 
-modify_invalid_names <- function(
+tab_rename_reserved <- function(
   .data,
   function_name,
   candidates = names(.data),
@@ -86,7 +86,7 @@ reserved_name_inform <- function(old, new, function_name, what = NULL) {
   ))
 }
 
-check_two_vars <- function(.data, call = rlang::caller_env()) {
+tab2_check_vars <- function(.data, call = rlang::caller_env()) {
   if (ncol(.data) < 2) {
     cli::cli_abort(
       c(
@@ -99,7 +99,7 @@ check_two_vars <- function(.data, call = rlang::caller_env()) {
   }
 }
 
-prepare_tab_data <- function(.data, ..., group_vars = character(0)) {
+tab_prepare_data <- function(.data, ..., group_vars = character(0)) {
   .data <- dplyr::ungroup(.data)
   if (group_vars %>% length() > 0) {
     out <- .data %>%
@@ -191,12 +191,12 @@ tab_data <- function(
   out <- out[c(group_vars, measured, "n", names(columns), "...any_miss")]
 
   if (total) {
-    out <- add_total(out, group_vars, groups)
+    out <- tab_add_total(out, group_vars, groups)
   }
   order_tab_groups(out, .data, group_vars, group_order, weights, input_groups)
 }
 
-add_total <- function(data, group_vars = character(0), groups) {
+tab_add_total <- function(data, group_vars = character(0), groups) {
   if (nrow(data) == 0L) {
     return(data)
   }
@@ -458,7 +458,7 @@ order_tab_groups <- function(
   out[order(group_id, seq_len(nrow(out))), , drop = FALSE]
 }
 
-add_total2 <- function(out, .data, call = rlang::caller_env()) {
+tab2_add_total <- function(out, .data, call = rlang::caller_env()) {
   if (nrow(out) == 0L) {
     return(out)
   }
