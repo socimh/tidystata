@@ -533,9 +533,17 @@ cross_add(80, "zero-column data frame returns empty table", function(fn) {
 cross_add(81, "one selected variable errors", function(fn) {
   expect_error(fn(cross_fixture(), x), "provide two variables")
 })
-cross_add(82, "three selected variables error", function(fn) {
-  expect_error(fn(cross_fixture()), "provide only two variables")
-})
+cross_add(
+  82,
+  "three selected variables give every pairwise table",
+  function(fn) {
+    df <- cross_fixture()
+    out <- fn(df)
+    expect_named(out, c("x x y", "x x z", "y x z"))
+    expect_identical(out[["x x y"]], fn(df, x, y))
+    expect_identical(out[["y x z"]], fn(df, y, z))
+  }
+)
 cross_add(83, "unknown variable selection errors", function(fn) {
   expect_error(fn(cross_fixture(), x, unknown_column))
 })

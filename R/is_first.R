@@ -7,7 +7,8 @@
 #' for example to count or summarise each group once.
 #'
 #' Unlike [duplicates_tag()], which counts the other rows sharing the same
-#' values, `is_first()` marks one row per group.
+#' values, `is_first()` marks one row per group. `s_tag()` is an alias of
+#' `is_first()`.
 #'
 #' @param ... Vectors of equal length that define the groups. Omit them in
 #' grouped [dplyr::mutate()] (or with `.by`) to flag the first row of each
@@ -32,6 +33,10 @@
 #'
 #' # First row within each group
 #' dplyr::mutate(panel, first = is_first(), .by = id)
+#' @name is_first
+NULL
+
+#' @rdname is_first
 #' @export
 is_first <- function(..., .missing = FALSE) {
   check_flag(.missing, ".missing")
@@ -67,3 +72,7 @@ is_first <- function(..., .missing = FALSE) {
   }
   first
 }
+
+#' @rdname is_first
+#' @export
+s_tag <- is_first

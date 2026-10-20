@@ -1,4 +1,4 @@
-# Shared weight handling for tab(), xtab(), summ() and xtile().
+# Shared weight handling for tab(), tab2(), summ() and xtile().
 #
 # Frequency weights (Stata [fw], dplyr's `wt`) count each row `w` times.
 # Analytic weights (Stata [aw]) are rescaled within each group to sum to the

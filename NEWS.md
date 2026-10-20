@@ -1,5 +1,35 @@
 # statart 0.2.0.9000
 
+## Stata names and aliases (2026-10-20)
+
+- Functions now carry their Stata names, with the earlier names kept as quiet
+  aliases on the same help pages: `mvdecode()`/`mvencode()` (aliases
+  `na_if_value()`/`value_if_na()`), `destring()`/`decode()` (aliases
+  `as_numeric()`/`as_character()`), `pc()` (alias `pct()`, which clashes
+  with `gt::pct()`), and `tab2()`/`fre2()` (alias `xtab()`). Further
+  aliases: `s_tag()` for `is_first()`, `tab_gen()` for `as_dummy()`,
+  `var_type()`/`var_unit()` for `s_type()`/`s_unit()`, and
+  `cut_quantile()`, `s_try()` and `names_as_column()` without a notice.
+- `tab2()` and `fre2()` with three or more variables return every pairwise
+  table as a named list, as Stata's `tab2` does; with `.chi2 = TRUE`, each
+  test is headed "-> tabulation of x by y".
+- `mvdecode()` treats several codes as a set, like `mv(-98 -99)`. This also
+  applies to `na_if_value()`, which used to compare a vector of codes
+  elementwise, as `dplyr::na_if()` does; a single code works as before.
+- New `tostring()`, like Stata's `tostring`: values as text, keeping codes
+  rather than value labels (`decode()` gives the labels).
+- New `row_nvals()`, like egenmore's `egen rownvals()`: distinct values in
+  each row, ignoring missing values unless `.missing = TRUE`, when it equals
+  `row_unique()`.
+- New `s_print()` prints the first and last rows, evenly spaced rows or every
+  row through one `style` argument.
+- `ds()` gains `.type = "table"`, which returns the names as a one-column
+  table; `ds_as_column()` and `names_as_column()` are aliases for it.
+- `set_seed(123)` also works alone, like `set seed 123`; the pipe form
+  `x %>% set_seed(123)` is unchanged.
+- `findit()` entries use these names, and the R-function table describes
+  each alias.
+
 ## Assertions, first-row flags and full listings (2026-10-19)
 
 - New `assert()`, like Stata's `assert`: checks conditions on every row (with
@@ -31,9 +61,9 @@
 
 ## Standardising, percentages and dummies (2026-10-19)
 
-- New `std()` and `pct()` for `mutate()`, like Stata's `egen std()` and
+- New `std()` and `pc()` for `mutate()`, like Stata's `egen std()` and
   `egen pc()`: `std()` returns a plain standardised vector (with optional
-  `mean` and `sd`), and `pct()` a percentage of the total (or a proportion
+  `mean` and `sd`), and `pc()` a percentage of the total (or a proportion
   with `prop = TRUE`). In grouped `mutate()` or with `.by`, each group uses
   its own statistics, like `by g: egen`.
 - New `as_dummy()`: one 0/1 column per observed category, placed after its
@@ -62,14 +92,14 @@
 - New `misstable()`: missing values by variable, like `misstable summarize`,
   or missing patterns with `.patterns = TRUE`, like `misstable patterns`.
   Supports `.by`; `.all = TRUE` also lists complete variables.
-- `xtab()` gains `.chi2 = TRUE`, like `tab x y, chi2 V`: Pearson's chi-square,
+- `tab2()` gains `.chi2 = TRUE`, like `tab x y, chi2 V`: Pearson's chi-square,
   its p-value and Cramer's V are printed and stored in `attr(x, "chi2")`
   (and added as a flextable footer). It matches
   `chisq.test(correct = FALSE)`.
 
 ## Weights (2026-10-19)
 
-- `tab()`, `tab1()`, `fre()`, `fre1()`, `xtab()`, `summ()` and `tabstat()`
+- `tab()`, `tab1()`, `fre()`, `fre1()`, `tab2()`, `summ()` and `tabstat()`
   gain `.wt` and `.wt_type`, like Stata's `[fweight]` and `[aweight]`.
   Frequency weights (default) count each row `w` times, as in
   `dplyr::count(wt =)`, and allow non-integer weights. Analytic weights,
@@ -124,11 +154,8 @@
 
 ## Cross-tabulation and merging (2026-10-19)
 
-- New `xtab()` cross-tabulates two variables, like Stata's `tab x y`, and
-  replaces `tab2()` and `fre2()`: `xtab(.total = TRUE)` adds the total row and
-  column. `tab2()` and `fre2()` remain as deprecated aliases with identical
-  results. Stata's own `tab2` produces every pairwise table, so the old name
-  misled Stata users.
+- `tab2()` cross-tabulates two variables, like Stata's `tab x y`, and
+  `fre2()` (`tab2(.total = TRUE)`) adds the total row and column.
 - `tab()` and `tab1()` gain `.total`; `tab(.total = TRUE)` equals `fre()` and
   `tab1(.total = TRUE)` equals `fre1()`. `fre()` and `fre1()` stay as
   shortcuts.
@@ -148,10 +175,10 @@
   `duplicates_drop()` follow Stata's `duplicates` subcommands. Dropping on a
   subset of columns errors when the removed rows differ elsewhere, unless
   `.force = TRUE`.
-- Renamed, with the old names kept as deprecated aliases that give identical
-  results and a once-per-session notice: `cut_quantile()` is now `xtile()`,
-  `s_match()` is now `varlist()`, `s_try()` is now `capture()`, and
-  `names_as_column()` is folded into the identical `ds_as_column()`.
+- New Stata names: `cut_quantile()` is now `xtile()` and `s_try()` is now
+  `capture()`, with the old names kept as aliases. `s_match()` is now
+  `varlist()`; `s_match()` remains as a deprecated alias with a
+  once-per-session notice.
 
 ## Metadata and distinct-counting performance (2026-10-19)
 

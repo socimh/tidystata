@@ -1,6 +1,6 @@
 # Function: findit()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:26:34 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 00:14:01 | **Status:** PASS
 
 ## Example 1: a bare Stata word, with Stata's abbreviations
 
@@ -39,14 +39,14 @@ merge 1:1 id using data2                                        # Merge with a m
   Related Stata: merge
 
 # ... and 7 more. Use `print(n = Inf)` to see all, or `View()`.
-# Stata to R: 28 entries
+# Stata to R: 29 entries
 
 bysort group: egen x_avg = mean(x)  # Group statistic as a new variable [dplyr]
   mutate(data, x_avg = mean(x, na.rm = TRUE), .by = group)
 egen x_avg = mean(x)                # Sample statistic as a new variable [dplyr]
   mutate(data, x_avg = mean(x, na.rm = TRUE))
 
-# ... and 26 more. Use `print(n = Inf)` to see all, or `View()`.
+# ... and 27 more. Use `print(n = Inf)` to see all, or `View()`.
 ```
 
 ## Example 3: packages beyond statart
@@ -115,6 +115,6 @@ Use `findit()` for the whole list.
 ```
 
 statart   dplyr   tidyr  fixest
-     76      78       6      11
-Entries: 414
+     77      78       6      11
+Entries: 415
 ```

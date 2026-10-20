@@ -2,10 +2,13 @@
 % Please edit documentation in R/std.R
 \name{std}
 \alias{std}
+\alias{pc}
 \alias{pct}
 \title{Standardise a variable or scale it to a percentage}
 \usage{
 std(x, mean = 0, sd = 1)
+
+pc(x, prop = FALSE)
 
 pct(x, prop = FALSE)
 }
@@ -16,13 +19,13 @@ through their codes.}
 \item{mean, sd}{The mean and standard deviation of the result, like Stata's
 \verb{egen std(x), mean() std()} options.}
 
-\item{prop}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, \code{pct()} returns
+\item{prop}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, \code{pc()} returns
 proportions (summing to 1) instead of percentages (summing to 100).}
 }
 \value{
 A double vector the same length as \code{x}. Missing values stay
 missing. \code{std()} returns all \code{NA} when the standard deviation is zero or
-undefined (fewer than two observed values), and \code{pct()} when the total is
+undefined (fewer than two observed values), and \code{pc()} when the total is
 zero, as Stata gives missing values there.
 }
 \description{
@@ -30,22 +33,24 @@ Vector helpers for \code{\link[dplyr:mutate]{dplyr::mutate()}}, following Stata'
 \itemize{
 \item \code{std()} standardises to mean 0 and standard deviation 1, like
 \verb{egen z = std(x)}. Unlike \code{\link[=scale]{scale()}}, it returns a plain vector.
-\item \code{pct()} gives each value as a percentage of the total, like
+\item \code{pc()} gives each value as a percentage of the total, like
 \verb{egen p = pc(x)}, or as a proportion with \code{prop = TRUE}.
 }
 
+\code{pct()} is an alias of \code{pc()}. The gt package also exports a \code{pct()} (for
+column widths), so prefer \code{pc()} when gt is attached.
 In grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}), the mean, standard deviation
 and total come from each group, like Stata's \verb{by g: egen}.
 }
 \examples{
 std(c(1, 2, 3, NA))
-pct(c(2, 3, 5))
-pct(c(2, 3, 5), prop = TRUE)
+pc(c(2, 3, 5))
+pc(c(2, 3, 5), prop = TRUE)
 
 lifeexp \%>\%
   dplyr::mutate(
     z = std(lexp),
-    share = pct(popgrowth),
+    share = pc(popgrowth),
     .by = region
   )
 }

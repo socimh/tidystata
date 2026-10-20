@@ -10,10 +10,10 @@ if (requireNamespace("data.table", quietly = TRUE)) {
 calls <- list(
   tab = function(x) tab(x, g),
   tab1 = function(x) tab1(x, g)[[1]],
-  tab2 = function(x) xtab(x, g, x),
+  tab2 = function(x) tab2(x, g, x),
   fre = function(x) fre(x, g),
   fre1 = function(x) fre1(x, g)[[1]],
-  fre2 = function(x) xtab(x, g, x, .total = TRUE),
+  fre2 = function(x) fre2(x, g, x),
   summ = function(x) summ(x, x),
   tabstat = function(x) tabstat(x, x),
   codebook = function(x) codebook(x),

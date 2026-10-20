@@ -3,11 +3,17 @@
 \name{s_type}
 \alias{s_type}
 \alias{s_unit}
-\title{Know the type of an object.}
+\alias{var_type}
+\alias{var_unit}
+\title{Report an object's type or unit}
 \usage{
 s_type(.x, .abbr = FALSE)
 
 s_unit(.x)
+
+var_type(.x, .abbr = FALSE)
+
+var_unit(.x)
 }
 \arguments{
 \item{.x}{An object.}
@@ -22,7 +28,7 @@ or duration vectors, including empty or all-missing measured vectors, and
 \code{NA_character_} for vectors without units.
 }
 \description{
-Know the type of an object.
+\code{var_type()} and \code{var_unit()} are aliases of \code{s_type()} and \code{s_unit()}.
 }
 \details{
 Types describe storage and class metadata, not the observed values: empty and

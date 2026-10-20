@@ -236,13 +236,27 @@ test_that("statart entries call functions that statart exports", {
     all(uses_export),
     info = paste(data$stata[ours][!uses_export], collapse = "; ")
   )
-  deprecated <- c(
-    "tab2",
-    "fre2",
+  # Entries use primary names, not aliases or deprecated names.
+  aliases <- c(
+    "xtab",
     "cut_quantile",
     "s_match",
     "s_try",
-    "names_as_column"
+    "names_as_column",
+    "ds_as_column",
+    "na_if_value",
+    "value_if_na",
+    "pct",
+    "s_tag",
+    "tab_gen",
+    "as_numeric",
+    "as_character",
+    "var_type",
+    "var_unit"
   )
-  expect_false(any(unlist(calls) %in% deprecated))
+  used <- unlist(calls)
+  expect_false(
+    any(used %in% aliases),
+    info = toString(intersect(used, aliases))
+  )
 })

@@ -1,4 +1,4 @@
-# Demo: std(), pct() and as_dummy(), like Stata's egen std(), egen pc() and
+# Demo: std(), pc() and as_dummy(), like Stata's egen std(), egen pc() and
 # tabulate, generate(). Runs against the fresh installation selected by the
 # demo workflow.
 library(statart)
@@ -7,7 +7,7 @@ cat("## Example 1: standardise and scale within groups\n\n```\n")
 scaled <- dplyr::mutate(
   lifeexp,
   z = std(lexp),
-  share = pct(popgrowth),
+  share = pc(popgrowth),
   .by = region
 )
 print(dplyr::select(scaled, region, country, lexp, z, popgrowth, share))

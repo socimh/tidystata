@@ -3,7 +3,7 @@
 #' @description
 #' Adds one 0/1 column per observed category of each selected variable, like
 #' Stata's `tabulate x, generate(x_)`. The new columns are placed right after
-#' their source variable.
+#' their source variable. `tab_gen()` is an alias of `as_dummy()`.
 #'
 #' @param .data A data frame, tibble, or data.table.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables
@@ -33,6 +33,10 @@
 #' as_dummy(starwars, sex)
 #' as_dummy(starwars, sex, .names = "index", .remove = TRUE)
 #' as_dummy(lifeexp, region)
+#' @name as_dummy
+NULL
+
+#' @rdname as_dummy
 #' @export
 as_dummy <- function(
   .data,
@@ -147,3 +151,7 @@ dummy_columns <- function(x, var, names) {
   names(out) <- paste0(var, "_", suffix)
   out
 }
+
+#' @rdname as_dummy
+#' @export
+tab_gen <- as_dummy

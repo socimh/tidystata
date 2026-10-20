@@ -15,10 +15,10 @@ print(survey)
 
 prepared <- survey |>
   dplyr::mutate(
-    response = as_character(response),
-    income = as_numeric(income),
-    quality = na_if_value(quality, 99L),
-    response = value_if_na(response, "Unknown")
+    response = decode(response),
+    income = destring(income),
+    quality = mvdecode(quality, 99L),
+    response = mvencode(response, "Unknown")
   )
 
 cat("\n## Example 2: Prepared research data\n\n")
@@ -33,8 +33,8 @@ cat("\n## Example 3: Factor labels and numeric codes\n\n")
 response <- factor(c("Yes", "No", NA), levels = c("No", "Yes"))
 print(tibble::tibble(
   response,
-  text = as_character(response),
-  code = as_numeric(response)
+  text = decode(response),
+  code = destring(response)
 ))
 
 cat("\n## Example 4: SPSS missing codes remain explicit values\n\n")
@@ -44,7 +44,7 @@ imported <- haven::labelled_spss(
   na_values = 99
 )
 print(tibble::tibble(
-  text = as_character(imported),
-  raw_value = as_numeric(imported)
+  text = decode(imported),
+  raw_value = destring(imported)
 ))
-stopifnot(identical(as_numeric(imported), c(1, 99, NA_real_)))
+stopifnot(identical(destring(imported), c(1, 99, NA_real_)))

@@ -5,6 +5,7 @@
 \alias{preview_table}
 \alias{unpreview_table}
 \alias{print_headtail}
+\alias{s_print}
 \alias{print_all}
 \alias{print_interval}
 \alias{slice_headtail}
@@ -22,6 +23,14 @@ print_headtail(
   ...,
   max_extra_cols = NULL,
   max_footer_lines = NULL
+)
+
+s_print(
+  .data,
+  style = c("headtail", "interval", "all"),
+  n = 10,
+  width = NULL,
+  ...
 )
 
 print_all(.data, ...)
@@ -45,7 +54,8 @@ tibble, rowwise tibble, or \code{sf} data frame (geometry is kept when slicing a
 printed as a column). Convert other subclasses explicitly before wrapping;
 collect lazy tables first. Apply the wrapper separately to lists of tables.}
 
-\item{style}{Either \code{"headtail"} or \code{"interval"}.}
+\item{style}{Either \code{"headtail"} or \code{"interval"}. \code{s_print()} also accepts
+\code{"all"}, which prints every row and column like \code{print_all()}.}
 
 \item{n}{Total number of rows to display or select: a positive whole number
 or \code{Inf} for all rows. An odd head/tail budget gives the head the extra row.
@@ -75,8 +85,10 @@ evenly spaced rows. \code{unpreview_table()} removes the preference.
 
 \code{print_headtail()} and \code{print_interval()} print once and invisibly return
 the unchanged input. \code{print_all()} prints every row and every column, like
-Stata's \code{list}, and also returns the input invisibly. \code{slice_headtail()} and \code{slice_interval()} actually
-select rows, so use them only when a smaller data set is wanted.
+Stata's \code{list}, and also returns the input invisibly. \code{s_print()} does all
+three through one \code{style} argument. \code{slice_headtail()} and
+\code{slice_interval()} actually select rows, so use them only when a smaller
+data set is wanted.
 }
 \details{
 Preview settings survive table subsetting/replacement, dplyr mutation,
@@ -112,6 +124,7 @@ unpreview_table(x)
 print_headtail(mtcars, n = 6)
 print_interval(mtcars, n = 6)
 print_all(head(mtcars, 12))
+s_print(mtcars, "interval", n = 6)
 slice_headtail(mtcars, n = 6)
 slice_interval(mtcars, n = 6)
 }

@@ -62,7 +62,7 @@ variables <- function(.data, ...) {
     .data <- dplyr::select(.data, ...)
   }
 
-  out <- ds_as_column(.data)
+  out <- ds(.data, .type = "table")
 
   labels <- variable_labels(.data)
   if (any(!is.na(labels))) {

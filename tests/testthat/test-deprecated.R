@@ -3,24 +3,9 @@ reset_deprecation_notices <- function() {
   rm(list = ls(shown), envir = shown)
 }
 
-test_that("renamed functions give identical results with a single notice", {
+test_that("s_match() gives identical results with a single notice", {
   reset_deprecation_notices()
   withr::defer(reset_deprecation_notices())
-  expect_message(
-    old <- cut_quantile(1:8, 2),
-    "renamed to `xtile()`",
-    fixed = TRUE
-  )
-  expect_identical(old, xtile(1:8, 2))
-  expect_silent(cut_quantile(1:8, 2))
-
-  expect_message(
-    old <- s_try(stop("x")),
-    "renamed to `capture()`",
-    fixed = TRUE
-  )
-  expect_identical(old, capture(stop("x")))
-
   data <- tibble::tibble(x1 = 1, x2 = 2, y = 3)
   expect_message(
     old <- ds(data, s_match("x*")),
@@ -32,23 +17,22 @@ test_that("renamed functions give identical results with a single notice", {
     s_match("x?", vars = names(data)),
     varlist("x?", vars = names(data))
   )
+})
 
-  expect_message(
-    old <- names_as_column(data),
-    "renamed to `ds_as_column()`",
-    fixed = TRUE
-  )
-  expect_identical(old, ds_as_column(data))
-
+test_that("earlier names are quiet aliases or current names", {
+  reset_deprecation_notices()
+  withr::defer(reset_deprecation_notices())
+  data <- tibble::tibble(x1 = 1, x2 = 2, y = 3)
   cross <- tibble::tibble(a = c("p", "q"), b = c("u", "u"))
-  expect_message(old <- tab2(cross, a, b), "renamed to `xtab()`", fixed = TRUE)
-  expect_identical(old, xtab(cross, a, b))
-  expect_message(
-    old <- fre2(cross, a, b, .flip = TRUE),
-    "renamed to `xtab(.total = TRUE)`",
-    fixed = TRUE
+  expect_silent(cut_quantile(1:8, 2))
+  expect_silent(s_try(stop("x")))
+  expect_silent(names_as_column(data))
+  expect_silent(tab2(cross, a, b))
+  expect_silent(fre2(cross, a, b))
+  expect_identical(
+    fre2(cross, a, b, .flip = TRUE),
+    tab2(cross, a, b, .flip = TRUE, .total = TRUE)
   )
-  expect_identical(old, xtab(cross, a, b, .flip = TRUE, .total = TRUE))
 })
 
 test_that("varlist() is recognised as a selection inside computed selections", {

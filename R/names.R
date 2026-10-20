@@ -7,11 +7,13 @@
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to
 #' select or rename. Omit to include all columns. Computed columns are not
 #' created by this argument.
+#' @param .type `"vector"` (the default) returns the names as a character
+#'   vector, like Stata's `ds`; `"table"` returns them as a one-column table.
 #'
-#' @return `ds()` returns a character vector. `ds_as_column()` returns a table
-#' with one character column, `name` (`names_as_column()` is a deprecated
-#' alias). On ungrouped data, an empty selection returns a zero-length
-#' vector or a zero-row table, respectively. Tables preserve the input's
+#' @return `ds()` returns a character vector. `ds(.type = "table")` returns a
+#' table with one character column, `name`; `ds_as_column()` and
+#' `names_as_column()` are aliases for it. On ungrouped data, an empty
+#' selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
 #' data.frame, tibble, or data.table container and supported preview settings,
 #' but do not recreate grouping or arbitrary subclasses on the new rows.
 #'
@@ -30,7 +32,7 @@
 #' @examples
 #' ds(starwars) # equivalent to names(starwars)
 #' ds(starwars, homeworld:starships)
-#' ds_as_column(starwars, ends_with("color"))
+#' ds(starwars, ends_with("color"), .type = "table")
 #' ds_as_column(starwars, where(is.character))
 #'
 #' # Save a programmatic selection for later stages of a pipeline.
@@ -40,7 +42,12 @@
 
 #' @rdname names
 #' @export
-ds <- function(.data, ...) {
+ds <- function(.data, ..., .type = c("vector", "table")) {
+  .type <- match.arg(.type)
+  if (.type == "table") {
+    out <- tibble::as_tibble_col(ds(table_working_data(.data), ...), "name")
+    return(table_restore(out, .data))
+  }
   if (is.character(.data) && is.null(dim(.data))) {
     if (anyNA(.data) || any(!nzchar(trimws(.data))) || anyDuplicated(.data)) {
       stop(
@@ -68,6 +75,9 @@ ds <- function(.data, ...) {
 #' @rdname names
 #' @export
 ds_as_column <- function(.data, ...) {
-  out <- tibble::as_tibble_col(ds(table_working_data(.data), ...), "name")
-  table_restore(out, .data)
+  ds(.data, ..., .type = "table")
 }
+
+#' @rdname names
+#' @export
+names_as_column <- ds_as_column

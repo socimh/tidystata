@@ -2,45 +2,56 @@
 % Please edit documentation in R/na_conversion.R
 \name{na_conversion}
 \alias{na_conversion}
+\alias{mvdecode}
+\alias{mvencode}
 \alias{na_if_value}
 \alias{value_if_na}
 \title{Replace values with missing values or fill missing values}
 \usage{
+mvdecode(x, mv)
+
+mvencode(x, mv)
+
 na_if_value(.x, .value)
 
 value_if_na(.x, .value)
 }
 \arguments{
-\item{.x}{A vector.}
+\item{x, .x}{A vector.}
 
-\item{.value}{For \code{na_if_value()}, values to replace with \code{NA}; these are cast
-to the type of \code{.x} and recycled to its size. For \code{value_if_na()}, a single
-replacement value for missing elements, cast to the type of \code{.x}.}
+\item{mv, .value}{For \code{mvdecode()} and \code{na_if_value()}, the codes to replace
+with \code{NA}; any value equal to one of them becomes missing. For
+\code{mvencode()} and \code{value_if_na()}, a single replacement value for missing
+elements, cast to the type of \code{x}.}
 }
 \value{
-A vector with the same type and size as \code{.x}, with matching values
+A vector with the same type and size as \code{x}, with matching values
 replaced or missing values filled.
 }
 \description{
+Vector helpers named after Stata's missing-value commands:
 \itemize{
-\item \code{na_if_value()} replaces values equal to \code{.value} with \code{NA}, using
-\code{\link[dplyr:na_if]{dplyr::na_if()}}.
-\item \code{value_if_na()} replaces missing values with \code{.value}, using
-\code{\link[tidyr:replace_na]{tidyr::replace_na()}}.
+\item \code{mvdecode()} replaces every value in \code{mv} with \code{NA}, like
+\verb{mvdecode x, mv(-98 -99)}. Each code is matched with \code{\link[dplyr:na_if]{dplyr::na_if()}}.
+\item \code{mvencode()} replaces missing values with \code{mv}, like \verb{mvencode x, mv(0)},
+using \code{\link[tidyr:replace_na]{tidyr::replace_na()}}.
 }
 
-Both wrappers preserve the underlying function's casting, recycling,
-and error behavior when both required arguments are supplied. Use
-\code{na_if_value(x, value)} or \code{x |> na_if_value(value)} to replace values,
-and \code{value_if_na(x, replacement)} or \code{x |> value_if_na(replacement)}
-to fill missing values. A call with only one argument is incomplete.
+\code{na_if_value()} and \code{value_if_na()} are aliases of \code{mvdecode()} and
+\code{mvencode()}. Use \code{mutate(x = mvdecode(x, -99))} for one variable, or
+\verb{mutate(across(c(x, y), \\(v) mvdecode(v, -99)))} for a varlist.
+
+Casting and error behavior follow the underlying functions: codes are cast
+to the type of \code{x}, so a lossy cast such as \code{1.5} for an integer vector is
+an error. A call with only one argument is incomplete.
 For SPSS labelled vectors (\code{\link[haven:labelled_spss]{haven::labelled_spss()}}), user-defined missing
 codes and ranges also count as missing, matching their \code{is.na()} method;
 labels and missing-value metadata are retained.
 }
 \examples{
-x <- c(1, 2, NA, 4)
-na_if_value(x, 2)
+x <- c(1, -99, NA, 4, -98)
+mvdecode(x, -99)
+mvdecode(x, c(-98, -99))
 
-value_if_na(x, 3)
+mvencode(c(1, NA, 4), 0)
 }

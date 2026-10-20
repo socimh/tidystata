@@ -142,11 +142,11 @@ test_that("cross-tab columns follow value and level order with missing last", {
 
 test_that("cross-tabs reject one-way and grouping controls", {
   d <- tibble::tibble(g = c("a", "b", "b"), x = c("p", "q", "q"))
-  expect_error(xtab(d, x, g, .desc = TRUE), "`.desc`.*xtab")
-  expect_error(xtab(d, x, .by = g), "`.by`.*xtab")
+  expect_error(xtab(d, x, g, .desc = TRUE), "`.desc`.*tab2")
+  expect_error(xtab(d, x, .by = g), "`.by`.*tab2")
   expect_error(
     xtab(d, x, g, .group_order = "frequency", .total = TRUE),
-    "`.group_order`.*xtab"
+    "`.group_order`.*tab2"
   )
 })
 

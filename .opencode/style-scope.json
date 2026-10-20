@@ -102,6 +102,7 @@
     "tests/testthat/test-container-edge-cases.R",
     "tests/testthat/test-conversion-contracts.R",
     "tests/testthat/test-cut.R",
+    "tests/testthat/test-aliases.R",
     "tests/testthat/test-deprecated.R",
     "tests/testthat/test-findit.R",
     "tests/testthat/test-fre.R",

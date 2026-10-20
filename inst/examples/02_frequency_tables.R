@@ -28,13 +28,13 @@ tab1(survey, group, sex)
 tab1(survey, group, sex, .type = "tibble")
 
 # Cross-tabulations, with either variable in the rows.
-xtab(survey, group, sex)
-xtab(survey, group, sex, .flip = TRUE)
+tab2(survey, group, sex)
+tab2(survey, group, sex, .flip = TRUE)
 
 # Add totals explicitly.
 fre(survey, sex)
 fre1(survey, group, sex)
-xtab(survey, group, sex, .total = TRUE)
+tab2(survey, group, sex, .total = TRUE)
 
 # Percentages are calculated within each group, including the missing group.
 tab(survey, sex, .by = group)

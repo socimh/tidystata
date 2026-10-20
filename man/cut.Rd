@@ -3,11 +3,20 @@
 \name{cut}
 \alias{cut}
 \alias{xtile}
+\alias{cut_quantile}
 \alias{cut_length}
 \alias{cut_breaks}
-\title{Cut a numeric vector into intervals.}
+\title{Cut a numeric vector into groups}
 \usage{
 xtile(x, n = 4, labels = NULL, method = c("quantile", "rank"), wt = NULL)
+
+cut_quantile(
+  x,
+  n = 4,
+  labels = NULL,
+  method = c("quantile", "rank"),
+  wt = NULL
+)
 
 cut_length(x, n = 4, labels = NULL)
 
@@ -52,8 +61,7 @@ or when \code{xtile()} runs in a grouped data mask with default labels.
 \item \code{cut_breaks()} cuts at given cutpoints.
 }
 
-\code{xtile()} was called \code{cut_quantile()} before statart 0.2.0.9000; the old
-name still works with a once-per-session notice.
+\code{cut_quantile()} is an alias of \code{xtile()}.
 }
 \details{
 \code{xtile()} follows Stata's \code{xtile} rule with type-7

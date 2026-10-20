@@ -1,6 +1,6 @@
 # Function: tab()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:22 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 00:14:02 | **Status:** PASS
 
 ## Example 1: Basic frequency table
 
@@ -125,7 +125,7 @@ tab(starwars, tall = height > 180)
 ## Example 8: Cross-tabulation (tab2)
 
 ```r
-xtab(starwars, sex, gender)
+tab2(starwars, sex, gender)
 ```
 
 **Output:**

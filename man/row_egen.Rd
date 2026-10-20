@@ -10,6 +10,7 @@
 \alias{row_var}
 \alias{row_sd}
 \alias{row_unique}
+\alias{row_nvals}
 \alias{row_miss}
 \alias{row_non_miss}
 \title{Calculate summaries across columns within each row}
@@ -30,6 +31,8 @@ row_sd(..., na.rm = TRUE)
 
 row_unique(...)
 
+row_nvals(..., .missing = FALSE)
+
 row_miss(...)
 
 row_non_miss(...)
@@ -48,6 +51,10 @@ makes that row's result missing. Count helpers (\code{row_unique()},
 with selected columns: a vector, or a list of vectors. Each must have
 length one or the number of input rows (the current group size inside
 grouped \code{mutate()}). Values must have compatible supported types.}
+
+\item{.missing}{For \code{row_nvals()}, a single \code{TRUE} or \code{FALSE}. If \code{FALSE}
+(the default), missing values are not counted, as in egenmore's
+\code{rownvals()}; if \code{TRUE}, they count as one value, as in \code{row_unique()}.}
 }
 \value{
 A vector with one value per input row. Extrema retain the compatible
@@ -61,6 +68,8 @@ above; unique and missing-value counts return integers.
 \item \code{row_min()} and \code{row_max()} select the smallest and largest row values.
 \item \code{row_var()} and \code{row_sd()} calculate sample variance and standard deviation.
 \item \code{row_unique()} counts distinct values, including one missing category.
+\code{row_nvals()} follows egenmore's \verb{egen rownvals()} and ignores missing
+values unless \code{.missing = TRUE}, when it equals \code{row_unique()}.
 \item \code{row_miss()} and \code{row_non_miss()} count missing and observed values.
 }
 }

@@ -10,20 +10,20 @@ survey <- tibble(
 survey
 mutate(
   survey,
-  response = value_if_na(as_character(response), "Unknown"),
-  amount = as_numeric(amount),
-  quality = na_if_value(quality, 99L)
+  response = mvencode(decode(response), "Unknown"),
+  amount = destring(amount),
+  quality = mvdecode(quality, 99L)
 )
 
 # Parsing keeps the position of an invalid value and issues a warning.
-parsed <- as_numeric(c("10", "bad", "30"))
+parsed <- destring(c("10", "bad", "30"))
 parsed # 10, NA, 30
 readr::problems(parsed)
 
 # Factors: compare labels with numeric LEVEL CODES.
 response <- factor(c("yes", "no", NA), levels = c("no", "yes"))
-as_character(response)
-as_numeric(response) # 2, 1, NA
+decode(response)
+destring(response) # 2, 1, NA
 
 # Row calculations omit missing values. All-missing row sums are zero.
 scores <- tibble(

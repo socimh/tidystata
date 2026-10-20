@@ -57,7 +57,7 @@ imported <- tibble(
 codebook(imported)
 tab(imported, answer)
 summ(imported) # A labelled-variable warning is expected.
-as_numeric(imported$answer) # Raw 99 is preserved by conversion.
+destring(imported$answer) # Raw 99 is preserved by conversion.
 is.na(imported$answer) # FALSE, FALSE, TRUE, TRUE
 
 # A preview changes printing, not the rows available for analysis.
@@ -86,7 +86,7 @@ mean(checks$x, na.rm = TRUE) # 4
 sd(checks$x, na.rm = TRUE)
 
 # Deliberately invalid calls: uncomment and run ONE at a time to see each error.
-# xtab(tbl, group)                     # Needs two variables.
+# tab2(tbl, group)                     # Needs two variables.
 # summ(tbl, x, .stat = "not_a_stat")   # Unknown statistic.
 # xtile(rep(1, 5))              # Cannot split a constant vector.
 # preview_table(tbl, n = 0)            # n must be positive.

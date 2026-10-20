@@ -2,7 +2,7 @@
 % Please edit documentation in R/s_select.R
 \name{s_select}
 \alias{s_select}
-\title{Enhanced select() with data-masking}
+\title{Select and compute columns}
 \usage{
 s_select(.data, ...)
 }
@@ -18,7 +18,7 @@ The selected (and computed) columns. Data-frame classes and
 grouping follow \code{\link[dplyr:select]{dplyr::select()}}; a tibble input returns a tibble.
 }
 \description{
-Enhanced select() with data-masking
+An enhanced \code{\link[dplyr:select]{dplyr::select()}} that also accepts data-masking expressions.
 }
 \details{
 Each argument is classified before evaluation. Column names, strings,

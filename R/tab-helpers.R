@@ -34,7 +34,7 @@ modify_invalid_names <- function(
     invalid_names <- invalid_names
   } else if (
     function_name %in%
-      c("fre()", "fre1()", "xtab()")
+      c("fre()", "fre1()", "tab2()")
   ) {
     invalid_names <- invalid_names %>%
       c("total")
@@ -92,22 +92,13 @@ reserved_name_message <- function(old, new, function_name, what = NULL) {
 }
 
 check_two_vars <- function(.data) {
-  var_n <- ncol(.data)
-  message1 <- paste0(
-    "Only ",
-    var_n,
-    " variable is input.
-      Please provide two variables for cross-tabulation."
-  )
-  message2 <- paste0(
-    var_n,
-    " variables are input.
-      Please provide only two variables for cross-tabulation."
-  )
-  if (var_n < 2) {
-    stop(message1, call. = FALSE)
-  } else if (var_n > 2) {
-    stop(message2, call. = FALSE)
+  if (ncol(.data) < 2) {
+    stop(
+      "Only 1 variable is input.\n",
+      "Please provide two variables for cross-tabulation, or more for ",
+      "every pairwise table.",
+      call. = FALSE
+    )
   }
 }
 
@@ -473,7 +464,7 @@ add_total2 <- function(out, .data) {
   if ("total" %in% names(out)[-1L]) {
     stop(
       "Column category `total` is reserved for totals in ",
-      "`xtab(.total = TRUE)`. Recode this category first, or omit `.total`.",
+      "`tab2(.total = TRUE)`. Recode this category first, or omit `.total`.",
       call. = FALSE
     )
   }

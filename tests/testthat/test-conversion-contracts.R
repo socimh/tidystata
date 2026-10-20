@@ -233,7 +233,8 @@ test_that("missing replacement returns typed empty inputs", {
 })
 
 test_that("missing replacement reports incompatible sizes and lossy casts", {
-  expect_error(na_if_value(1:3, 1:2), class = "vctrs_error_incompatible_size")
+  # Several codes are a set, as in Stata's mvdecode, not an elementwise match.
+  expect_identical(na_if_value(1:3, 1:2), c(NA, NA, 3L))
   expect_error(na_if_value(1:3, 1.5), class = "vctrs_error_cast_lossy")
   expect_error(
     value_if_na(c(1L, NA_integer_), 1.5),

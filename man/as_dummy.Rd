@@ -2,9 +2,12 @@
 % Please edit documentation in R/as_dummy.R
 \name{as_dummy}
 \alias{as_dummy}
+\alias{tab_gen}
 \title{Create indicator (dummy) variables}
 \usage{
 as_dummy(.data, ..., .names = c("value", "index"), .remove = FALSE)
+
+tab_gen(.data, ..., .names = c("value", "index"), .remove = FALSE)
 }
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
@@ -30,7 +33,7 @@ label uses the value label.
 \description{
 Adds one 0/1 column per observed category of each selected variable, like
 Stata's \verb{tabulate x, generate(x_)}. The new columns are placed right after
-their source variable.
+their source variable. \code{tab_gen()} is an alias of \code{as_dummy()}.
 }
 \details{
 Categories are the observed, non-missing values: factor levels in level

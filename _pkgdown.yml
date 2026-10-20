@@ -29,7 +29,6 @@ reference:
   - summ
   - special-print
   - matches("^(tab|fre)")
-  - xtab
   - pwcorr
   - misstable
   - matches("^row_")

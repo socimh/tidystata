@@ -2,9 +2,12 @@
 % Please edit documentation in R/s_try.R
 \name{capture}
 \alias{capture}
+\alias{s_try}
 \title{Capture an error and report success}
 \usage{
 capture(.fn)
+
+s_try(.fn)
 }
 \arguments{
 \item{.fn}{An expression to evaluate once.}
@@ -15,8 +18,7 @@ A single logical value.
 \description{
 \code{capture()} works like Stata's \code{capture}: it evaluates an expression,
 suppresses any error, and returns \code{TRUE} if the expression succeeded and
-\code{FALSE} if it failed. \code{capture()} was called \code{s_try()} before statart
-0.2.0.9000; the old name still works with a once-per-session notice.
+\code{FALSE} if it failed. \code{s_try()} is an alias of \code{capture()}.
 }
 \details{
 Errors are caught without printing their messages; warnings and messages

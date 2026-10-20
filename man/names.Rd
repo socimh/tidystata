@@ -4,11 +4,14 @@
 \alias{names}
 \alias{ds}
 \alias{ds_as_column}
+\alias{names_as_column}
 \title{List column names by tidyselect}
 \usage{
-ds(.data, ...)
+ds(.data, ..., .type = c("vector", "table"))
 
 ds_as_column(.data, ...)
+
+names_as_column(.data, ...)
 }
 \arguments{
 \item{.data}{A data frame, tibble, or data.table. \code{ds()} also accepts a
@@ -19,12 +22,15 @@ the vector's own names are ignored. An empty inventory is allowed.}
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Existing columns to
 select or rename. Omit to include all columns. Computed columns are not
 created by this argument.}
+
+\item{.type}{\code{"vector"} (the default) returns the names as a character
+vector, like Stata's \code{ds}; \code{"table"} returns them as a one-column table.}
 }
 \value{
-\code{ds()} returns a character vector. \code{ds_as_column()} returns a table
-with one character column, \code{name} (\code{names_as_column()} is a deprecated
-alias). On ungrouped data, an empty selection returns a zero-length
-vector or a zero-row table, respectively. Tables preserve the input's
+\code{ds()} returns a character vector. \code{ds(.type = "table")} returns a
+table with one character column, \code{name}; \code{ds_as_column()} and
+\code{names_as_column()} are aliases for it. On ungrouped data, an empty
+selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
 data.frame, tibble, or data.table container and supported preview settings,
 but do not recreate grouping or arbitrary subclasses on the new rows.
 }
@@ -43,7 +49,7 @@ available because an inventory contains no column data.
 \examples{
 ds(starwars) # equivalent to names(starwars)
 ds(starwars, homeworld:starships)
-ds_as_column(starwars, ends_with("color"))
+ds(starwars, ends_with("color"), .type = "table")
 ds_as_column(starwars, where(is.character))
 
 # Save a programmatic selection for later stages of a pipeline.

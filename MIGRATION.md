@@ -33,12 +33,11 @@ before the four-wrapper milestone and the restored printing/slicing helpers.
 | Previous upstream exports | Current destination or replacement |
 | --- | --- |
 | `s_time()` | Renamed to `timer()`; timing messages use compact duration text. |
-| `cut_quantile()` | Renamed to `xtile()`, the Stata command it follows; the old name works with a once-per-session notice. |
-| `s_match()` | Renamed to `varlist()`, since it parses a Stata varlist string; the old name works with a notice. |
-| `s_try()` | Renamed to `capture()`, after Stata's `capture`; the old name works with a notice. |
-| `names_as_column()` | Use the identical `ds_as_column()`; the old name works with a notice. |
-| `tab2()` | Renamed to `xtab()`; the old name works with a notice. |
-| `fre2()` | Use `xtab(.total = TRUE)`; the old name works with a notice. |
+| `cut_quantile()` | Now `xtile()`, the Stata command it follows; `cut_quantile()` stays as a quiet alias. |
+| `s_match()` | Renamed to `varlist()`, since it parses a Stata varlist string; the old name works with a once-per-session notice. |
+| `s_try()` | Now `capture()`, after Stata's `capture`; `s_try()` stays as a quiet alias. |
+| `names_as_column()` | Now `ds(.type = "table")`; `names_as_column()` and `ds_as_column()` stay as quiet aliases. |
+| `tab2()`, `fre2()` | Kept as the cross-tabulation functions; `tab2()` with three or more variables now returns every pairwise table, as Stata's `tab2` does. |
 | `read_data()`, `write_data()` | Retired; use format-specific packages directly. |
 | `codebook_detail()` | Retired; use `codebook()` or `datawizard::data_codebook()`. |
 | `tidy_coef()` | Reworked locally as `esttab()`, then retired; use broom/broom.mixed directly. `esttab()` was not an export in this upstream revision. |
@@ -52,6 +51,40 @@ row subset contains the full data. Retired implementations are unsupported and
 are not distributed in the package or checkout. Restored and reworked files are not byte-identical copies; the
 original upstream implementations remain in Git history.
 
+## Stata names and aliases
+
+Several functions now carry their Stata names. The earlier names still work as
+quiet aliases, with no notice, and are documented on the same help pages.
+
+| Stata | Function | Aliases |
+| --- | --- | --- |
+| `tab2 x y` | `tab2()`; `fre2()` adds totals | `xtab()` |
+| `mvdecode x, mv(-98 -99)` | `mvdecode(x, c(-98, -99))` | `na_if_value()` |
+| `mvencode x, mv(0)` | `mvencode(x, 0)` | `value_if_na()` |
+| `destring` | `destring()` | `as_numeric()` |
+| `decode` | `decode()` | `as_character()` |
+| `tostring` | `tostring()` (new: codes as text, ignoring value labels) | |
+| `egen pc()` | `pc()` | `pct()` |
+| `egen tag()` | `is_first()` | `s_tag()` |
+| `egen rownvals()` (egenmore) | `row_nvals()` (new: ignores missing values unless `.missing = TRUE`) | |
+| `tab x, gen(x_)` | `as_dummy()` | `tab_gen()` |
+| `xtile` | `xtile()` | `cut_quantile()` |
+| `capture` | `capture()` | `s_try()` |
+| `ds` | `ds()`; `ds(.type = "table")` for a table | `ds_as_column()`, `names_as_column()` |
+| `list` | `s_print()` (new: `style = "headtail"`, `"interval"` or `"all"`) | |
+| `set seed 123` | `set_seed(123)`, now also alone; the pipe form `x %>% set_seed(123)` is unchanged | |
+
+`s_type()` and `s_unit()` also have the aliases `var_type()` and `var_unit()`.
+`pct()` shares its name with `gt::pct()`, so prefer `pc()` when gt is attached.
+
+One behaviour changed: several codes in `na_if_value(x, c(-98, -99))` now
+mean "any of these", as in Stata, instead of an elementwise comparison as in
+`dplyr::na_if()`. A single code works as before.
+
+statart does not define `search()`, `describe()` or `lookfor()`, which would
+mask base R, Hmisc/psych and labelled. Use `findit()`, `variables()` and
+`variables_search()`.
+
 ## Weights
 
 Stata's weight clauses map to `.wt` and `.wt_type`:
@@ -60,7 +93,7 @@ Stata's weight clauses map to `.wt` and `.wt_type`:
 | --- | --- |
 | `tab x [fw = w]` | `tab(d, x, .wt = w)` |
 | `tab x [aw = w]` | `tab(d, x, .wt = w, .wt_type = "analytic")` |
-| `tab x y [fw = w]` | `xtab(d, x, y, .wt = w)` |
+| `tab x y [fw = w]` | `tab2(d, x, y, .wt = w)` |
 | `summarize x [aw = w]` | `summ(d, x, .wt = w, .wt_type = "analytic")` |
 | `xtile q = x [aw = w], n(5)` | `mutate(d, q = xtile(x, 5, wt = w))` |
 
@@ -78,11 +111,11 @@ weights as frequency or analytic weights only.
 | `spearman x y` | `pwcorr(d, x, y, .method = "spearman")` |
 | `misstable summarize` | `misstable(d)` |
 | `misstable patterns` | `misstable(d, .patterns = TRUE)` |
-| `tab x y, chi2 V` | `xtab(d, x, y, .chi2 = TRUE)` |
+| `tab x y, chi2 V` | `tab2(d, x, y, .chi2 = TRUE)` |
 
 `pwcorr()` uses pairwise deletion as Stata does; drop incomplete rows first
 for `correlate`'s listwise deletion. `misstable()` treats empty strings as
-observed, unlike Stata; convert them with `na_if_value()` first.
+observed, unlike Stata; convert them with `mvdecode()` first.
 
 ## Standardising, percentages and dummies
 
@@ -90,7 +123,7 @@ observed, unlike Stata; convert them with `na_if_value()` first.
 | --- | --- |
 | `egen z = std(x)` | `mutate(d, z = std(x))` |
 | `by g: egen z = std(x)` | `mutate(d, z = std(x), .by = g)` |
-| `egen p = pc(x)` | `mutate(d, p = pct(x))` |
+| `egen p = pc(x)` | `mutate(d, p = pc(x))` |
 | `tab x, gen(x_)` | `as_dummy(d, x, .names = "index")` |
 
 `as_dummy()` names columns by category (`x_male`) unless `.names = "index"`.
@@ -250,7 +283,7 @@ identical, and observed categories can match total labels. Use `tab()` or
 `fre2()` is the marginal total even if an observed row category is also
 `"total"`.
 
-`as_character()` uses value labels only when the labelled vector has a nonempty
+`decode()` uses value labels only when the labelled vector has a nonempty
 `labels` attribute. Vectors without value labels use ordinary character
 conversion, including tagged missing values.
 
@@ -457,7 +490,7 @@ regression tests preserve the repaired cases. A follow-up review changed four
 defaults to match the original requests:
 `summ()`/`tabstat()` sort groups like `tab()` (`.sort = TRUE`) and hide the
 `name` column for a single variable (`.name = FALSE`); `timer()` reports time
-on failure (`.on_error = TRUE`); and `cut_quantile()` follows Stata's `xtile`
+on failure (`.on_error = TRUE`); and `xtile()` follows Stata's `xtile`
 rule. Pass `.sort = FALSE`, `.name = TRUE` or `.on_error = FALSE` for the
 previous summary and timer behavior.
 
@@ -532,8 +565,8 @@ preview_table(tab(survey, group)) # full data retained under a display policy
 
 # Replace missing values after choosing the intended representation.
 response <- haven::labelled(c(1, 2, NA), labels = c(Yes = 1, No = 2))
-value_if_na(response, 1) # retains numeric value labels
-value_if_na(haven::as_factor(response), "Yes") # factor replacement uses a level
+mvencode(response, 1) # retains numeric value labels
+mvencode(haven::as_factor(response), "Yes") # factor replacement uses a level
 haven::zap_missing(haven::labelled_spss(c(1, 99), na_values = 99))
 
 tidyr::drop_na(survey, x)
@@ -581,7 +614,7 @@ prove that unspecified original case was reproduced.
 
 ## Quantile bins and row summaries
 
-`cut_quantile()` follows Stata's `xtile` rule with type-7 cutpoints: a value
+`xtile()` follows Stata's `xtile` rule with type-7 cutpoints: a value
 joins the first group whose cutpoint is at least that value. Equal values stay
 together and distinct values are never merged, so a 0/1 dummy gives two groups.
 Ties can leave fewer than `n` groups, numbered consecutively with a warning.
@@ -593,7 +626,7 @@ grouped data mask (`group_by() |> mutate()`), the default returns integer codes
 within each group, like Stata's `xtile, by()`, because group-specific interval
 labels cannot be combined.
 
-Use `cut_quantile(x, n = 10, method = "rank")` when balanced counts matter more
+Use `xtile(x, n = 10, method = "rank")` when balanced counts matter more
 than keeping equal values together. Values sort ascending; original positions
 break ties. Equal values may enter different groups, and reordering tied rows can
 change their assignments. With `k = min(n, observed_count)`, group sizes differ

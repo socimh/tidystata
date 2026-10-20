@@ -7,6 +7,8 @@
 #' * `row_min()` and `row_max()` select the smallest and largest row values.
 #' * `row_var()` and `row_sd()` calculate sample variance and standard deviation.
 #' * `row_unique()` counts distinct values, including one missing category.
+#'   `row_nvals()` follows egenmore's `egen rownvals()` and ignores missing
+#'   values unless `.missing = TRUE`, when it equals `row_unique()`.
 #' * `row_miss()` and `row_non_miss()` count missing and observed values.
 #'
 #' @param ... A data frame or tibble, or
@@ -20,6 +22,9 @@
 #'   with selected columns: a vector, or a list of vectors. Each must have
 #'   length one or the number of input rows (the current group size inside
 #'   grouped `mutate()`). Values must have compatible supported types.
+#' @param .missing For `row_nvals()`, a single `TRUE` or `FALSE`. If `FALSE`
+#'   (the default), missing values are not counted, as in egenmore's
+#'   `rownvals()`; if `TRUE`, they count as one value, as in `row_unique()`.
 #'
 #' @details
 #' All helpers preserve the input. Missingness is determined from the original
@@ -178,6 +183,17 @@ row_unique <- function(...) {
   keys <- as.double(vctrs::vec_match(values, values))
   keys[unlist(lapply(data, is.na), use.names = FALSE)] <- NA_real_
   row_unique_dbl(row_key_columns(keys, nrow(data), ncol(data)))
+}
+
+#' @rdname row_egen
+#' @export
+row_nvals <- function(..., .missing = FALSE) {
+  check_flag(.missing, ".missing")
+  out <- row_unique(...)
+  if (.missing) {
+    return(out)
+  }
+  out - (row_miss(...) > 0L)
 }
 
 #' @rdname row_egen

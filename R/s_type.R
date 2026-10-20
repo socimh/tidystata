@@ -1,4 +1,6 @@
-#' Know the type of an object.
+#' Report an object's type or unit
+#'
+#' `var_type()` and `var_unit()` are aliases of `s_type()` and `s_unit()`.
 #'
 #' @name s_type
 #' @param .x An object.
@@ -120,3 +122,11 @@ s_unit <- function(.x) {
   }
   NA_character_
 }
+
+#' @export
+#' @rdname s_type
+var_type <- s_type
+
+#' @export
+#' @rdname s_type
+var_unit <- s_unit

@@ -2,19 +2,30 @@
 % Please edit documentation in R/type_conversion.R
 \name{type_conversion}
 \alias{type_conversion}
+\alias{destring}
+\alias{decode}
+\alias{tostring}
 \alias{as_character}
 \alias{as_numeric}
 \title{Convert vectors for data preparation}
 \usage{
+destring(.x)
+
+decode(.x)
+
+tostring(x)
+
 as_character(.x)
 
 as_numeric(.x)
 }
 \arguments{
 \item{.x}{A vector or matrix.}
+
+\item{x}{A vector, for \code{tostring()}.}
 }
 \value{
-\code{as_character()} returns a character vector. \code{as_numeric()} returns
+\code{as_character()} and \code{tostring()} return a character vector. \code{as_numeric()} returns
 a double vector; unsupported types such as lists, raw vectors, and complex
 vectors return missing values of the same length. Empty inputs return
 typed empty vectors. Names, dimensions, labels, and units are dropped.
@@ -23,14 +34,27 @@ Conversion of large \code{integer64} values to double may lose precision and
 emits the underlying conversion warning.
 }
 \description{
+Vector helpers named after Stata's conversion commands:
+}
+\details{
+\itemize{
+\item \code{destring()} (alias \code{as_numeric()}) converts text to numbers, like
+Stata's \code{destring}. Use \code{mutate(x = destring(x))}.
+\item \code{decode()} (alias \code{as_character()}) converts a labelled vector to its
+value labels, like Stata's \code{decode}.
+\item \code{tostring()} converts values to text and ignores value labels, like
+Stata's \code{tostring}: a labelled vector or factor gives its codes, and
+character input is returned unchanged. Missing values stay \code{NA}. Dates use
+\code{\link[=as.character]{as.character()}}, so they become \code{"2024-01-31"} rather than day numbers.
+}
+
 Character input to \code{as_numeric()} is parsed with \code{\link[readr:parse_number]{readr::parse_number()}},
 preserving its length. Invalid numbers generate parsing warnings. Factors
 return their level codes; labelled numeric variables return their values.
 \code{as_character()} uses value labels when a labelled vector has a nonempty
 \code{labels} attribute. Without value labels, it uses ordinary character
 conversion, including for tagged missing values.
-}
-\details{
+
 SPSS user-missing codes remain values in both conversions. Numeric conversion
 preserves tagged missing values. Dates become days since 1970-01-01;
 date-times become seconds since the Unix epoch. Durations and measured
@@ -39,8 +63,9 @@ vectors retain their numeric values in their existing units.
 \examples{
 lifeexp |>
   dplyr::mutate(
-    region_chr = as_character(region),
-    region_num = as_numeric(region),
+    region_chr = decode(region),
+    region_code = tostring(region),
+    region_num = destring(region),
     region_fct = haven::as_factor(region),
     .keep = "used"
   )

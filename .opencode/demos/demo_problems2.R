@@ -1,8 +1,8 @@
 # Actual outputs for repaired historical problems and supported alternatives.
 cat("## Example 1: Blank cross-tab categories remain distinct\n\n```\n")
 d <- tibble::tibble(x = c("a", "a", "b"), y = c("", "<empty>", "z"))
-print(xtab(d, x, y))
-stopifnot(sum(as.matrix(xtab(d, x, y)[-1])) == 3)
+print(tab2(d, x, y))
+stopifnot(sum(as.matrix(tab2(d, x, y)[-1])) == 3)
 cat("```\n\n## Example 2: Different ordered factors combine\n\n```\n")
 factors <- tibble::tibble(
   a = ordered(c("a", "b")),
@@ -46,8 +46,8 @@ cat(
   "```\n\n## Example 8: Labelled replacements have explicit representations\n\n```\n"
 )
 response <- haven::labelled(c(1, 2, NA), labels = c(Yes = 1, No = 2))
-print(value_if_na(response, 1))
-print(value_if_na(haven::as_factor(response), "Yes"))
+print(mvencode(response, 1))
+print(mvencode(haven::as_factor(response), "Yes"))
 cat("```\n\n## Example 9: Spatial aggregation ignores geometries\n\n```\n")
 if (requireNamespace("sf", quietly = TRUE)) {
   points <- sf::st_as_sf(
@@ -64,8 +64,8 @@ cat(
   "```\n\n## Example 10: Logical axes have consistent category order\n\n```\n"
 )
 flags <- tibble::tibble(a = c(FALSE, TRUE, NA), b = c(TRUE, FALSE, NA))
-print(xtab(flags, a, b))
-stopifnot(identical(names(xtab(flags, a, b))[-1], c("FALSE", "TRUE", "NA")))
+print(tab2(flags, a, b))
+stopifnot(identical(names(tab2(flags, a, b))[-1], c("FALSE", "TRUE", "NA")))
 cat(
   "```\n\n## Example 11: Missing replacement arguments explain the call\n\n```\n"
 )

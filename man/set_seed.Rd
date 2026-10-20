@@ -2,25 +2,33 @@
 % Please edit documentation in R/set_seed.R
 \name{set_seed}
 \alias{set_seed}
-\title{Set seeds with pipeline.}
+\title{Set the random seed, in a pipeline or alone}
 \usage{
 set_seed(.fn, seed)
 }
 \arguments{
-\item{.fn}{An expression evaluated after setting the seed.}
+\item{.fn}{An expression evaluated after setting the seed. When \code{seed} is
+omitted, \code{.fn} is the seed itself, as in \code{set_seed(123)}.}
 
 \item{seed}{An integer for reproducibility.}
 }
 \value{
-The expression's result, preserving its visibility.
+The expression's result, preserving its visibility. Used alone,
+\code{set_seed()} returns \code{NULL} invisibly.
 }
 \description{
-Attach a seed to a specific function.
+Attach a seed to one expression at the end of a pipeline, as in
+\code{sample(x, 5) \%>\% set_seed(123)}, or set it alone like Stata's
+\verb{set seed 123} with \code{set_seed(123)}.
 }
 \details{
 Calls \code{\link[=set.seed]{set.seed()}} before evaluating \code{.fn} once. The global random-number
 state is changed and is not restored, including when \code{.fn} fails. Subsequent
 random draws continue from the state left by \code{.fn}.
+
+With only one argument, that argument is the seed and must be a single
+finite number. A pipeline that forgets the seed therefore errors, unless
+its result happens to be a single number, which is then used as the seed.
 }
 \examples{
 sample(1:10, 8) \%>\%
@@ -29,4 +37,8 @@ sample(1:10, 8) \%>\%
 # When we re-run the code, we will get the same result.
 sample(1:10, 8) \%>\%
  set_seed(123)
+
+# Alone, like Stata's set seed 123
+set_seed(123)
+sample(1:10, 8)
 }

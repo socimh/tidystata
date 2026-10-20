@@ -1,12 +1,11 @@
-#' Cut a numeric vector into intervals.
+#' Cut a numeric vector into groups
 #'
 #' @description
 #' * `xtile()` creates `n` quantile groups, following Stata's `xtile`.
 #' * `cut_length()` creates `n` intervals of equal length.
 #' * `cut_breaks()` cuts at given cutpoints.
 #'
-#' `xtile()` was called `cut_quantile()` before statart 0.2.0.9000; the old
-#' name still works with a once-per-session notice.
+#' `cut_quantile()` is an alias of `xtile()`.
 #'
 #' @param x A numeric vector. `xtile()` also accepts a logical vector,
 #' treated as 0/1.
@@ -206,6 +205,10 @@ xtile <- function(
 }
 
 # TRUE inside a grouped dplyr verb such as group_by() |> mutate().
+#' @rdname cut
+#' @export
+cut_quantile <- xtile
+
 cut_in_grouped_mask <- function() {
   keys <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
   !is.null(keys) && ncol(keys) > 0L

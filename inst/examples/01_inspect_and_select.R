@@ -28,8 +28,8 @@ variables_search(survey, "absent") # An empty table is expected.
 ds(survey)
 ds(survey, age:income)
 ds(survey, varlist("score?"))
-ds_as_column(survey, starts_with("score"))
-ds_as_column(survey, age, income)
+ds(survey, starts_with("score"), .type = "table")
+ds(survey, age, income, .type = "table")
 
 # Select, rename, or calculate columns.
 s_select(survey, id, age, income)

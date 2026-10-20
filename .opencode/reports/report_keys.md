@@ -1,6 +1,6 @@
 # Function: keys()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:21 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 00:14:01 | **Status:** PASS
 
 ## Example 1: isid() asserts a key inside a pipeline
 
@@ -85,7 +85,7 @@ Matched                              2  (.merge == "matched")
 [1] "Merge assertion failed: found 1 master only row(s) and 1 using only row(s); `.assert` allows only matched."
 ```
 
-## Example 6: xtab() cross-tabulates, optionally with totals
+## Example 6: tab2() cross-tabulates, optionally with totals
 
 ```
 # A tibble: 5 x 4

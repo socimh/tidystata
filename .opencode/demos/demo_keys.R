@@ -48,8 +48,8 @@ print(tryCatch(
 ))
 
 cat(
-  "```\n\n## Example 6: xtab() cross-tabulates, optionally with totals\n\n```\n"
+  "```\n\n## Example 6: tab2() cross-tabulates, optionally with totals\n\n```\n"
 )
-print(xtab(starwars, sex, gender))
-print(xtab(starwars, sex, gender, .total = TRUE))
+print(tab2(starwars, sex, gender))
+print(tab2(starwars, sex, gender, .total = TRUE))
 cat("```\n")

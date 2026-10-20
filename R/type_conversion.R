@@ -1,5 +1,16 @@
 #' Convert vectors for data preparation
 #'
+#' Vector helpers named after Stata's conversion commands:
+#'
+#' * `destring()` (alias `as_numeric()`) converts text to numbers, like
+#'   Stata's `destring`. Use `mutate(x = destring(x))`.
+#' * `decode()` (alias `as_character()`) converts a labelled vector to its
+#'   value labels, like Stata's `decode`.
+#' * `tostring()` converts values to text and ignores value labels, like
+#'   Stata's `tostring`: a labelled vector or factor gives its codes, and
+#'   character input is returned unchanged. Missing values stay `NA`. Dates use
+#'   [as.character()], so they become `"2024-01-31"` rather than day numbers.
+#'
 #' Character input to `as_numeric()` is parsed with [readr::parse_number()],
 #' preserving its length. Invalid numbers generate parsing warnings. Factors
 #' return their level codes; labelled numeric variables return their values.
@@ -14,7 +25,8 @@
 #'
 #' @name type_conversion
 #' @param .x A vector or matrix.
-#' @return `as_character()` returns a character vector. `as_numeric()` returns
+#' @param x A vector, for `tostring()`.
+#' @return `as_character()` and `tostring()` return a character vector. `as_numeric()` returns
 #'   a double vector; unsupported types such as lists, raw vectors, and complex
 #'   vectors return missing values of the same length. Empty inputs return
 #'   typed empty vectors. Names, dimensions, labels, and units are dropped.
@@ -25,11 +37,37 @@
 #' @examples
 #' lifeexp |>
 #'   dplyr::mutate(
-#'     region_chr = as_character(region),
-#'     region_num = as_numeric(region),
+#'     region_chr = decode(region),
+#'     region_code = tostring(region),
+#'     region_num = destring(region),
 #'     region_fct = haven::as_factor(region),
 #'     .keep = "used"
 #'   )
+
+#' @export
+#' @rdname type_conversion
+destring <- function(.x) as_numeric(.x)
+
+#' @export
+#' @rdname type_conversion
+decode <- function(.x) as_character(.x)
+
+#' @export
+#' @rdname type_conversion
+tostring <- function(x) {
+  if (is.character(x)) {
+    return(x)
+  }
+  missing_value <- is.na(x)
+  if (is.factor(x)) {
+    x <- as.integer(x)
+  } else if (inherits(x, "haven_labelled")) {
+    x <- vctrs::vec_data(x)
+  }
+  out <- as.character(x)
+  out[missing_value] <- NA_character_
+  out
+}
 
 #' @export
 #' @rdname type_conversion

@@ -7,6 +7,18 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**Round 8 Stata names and aliases, 2026-10-20 (live checkout):**
+`--release` suite **19,379 passing expectations across 3,357 blocks**, zero
+failures, errors, warnings or skips; `R CMD check --as-cran` gives 0 errors,
+0 warnings and 1 NOTE (CRAN incoming feasibility), and the installed-resource
+check passes with the export guards in `.opencode/tests/` raised from 68 to 80.
+The minimal-dependency and style checks (157 sources) pass, demos pass
+(24 families; only the `findit`, `keys` and `tab` reports changed), and a fresh
+site build renders both `findit()` articles and the alias help pages. A first
+release attempt failed on two literal information glyphs (now `ℹ`
+escapes) and on a `test-problems2-tab.R` message pattern that still named
+`xtab()`.
+
 **Round 7 `assert()`, `is_first()`, `print_all()`, 2026-10-19 (live
 checkout):** `--release` suite **19,298 passing expectations across 3,347
 blocks** (includes the concurrent agent's updated `findit()` tests), zero
@@ -218,28 +230,31 @@ rerun performance gates. Original notes under `.opencode/notes/` are preserved.
 
 ## Package map
 
-The namespace contains **68 exports**: 67 functions and `%>%`, including six
-deprecated aliases (`cut_quantile`, `s_match`, `s_try`, `names_as_column`,
-`tab2`, `fre2`). The package has
+The namespace contains **80 exports**: 79 functions and `%>%`. Fourteen
+are quiet aliases (`xtab`, `na_if_value`, `value_if_na`, `as_numeric`,
+`as_character`, `pct`, `s_tag`, `tab_gen`, `var_type`, `var_unit`,
+`cut_quantile`, `s_try`, `ds_as_column`, `names_as_column`) documented on their
+primary's help page, and one is deprecated (`s_match`). The package has
 12 required Imports, two bundled datasets (`lifeexp`, `starwars`), and cpp11
 native row kernels. R >= 4.1 is required.
 
 | Area | Public functions |
 | --- | --- |
 | Stata lookup | findit |
-| Tabulation | tab, tab1, xtab, fre, fre1 |
+| Tabulation | tab, tab1, tab2, fre, fre1, fre2 |
 | Summaries | summ, tabstat, pwcorr, misstable |
-| Inspection | codebook, browse, ds, ds_as_column, variables, variables_search |
+| Inspection | codebook, browse, ds, variables, variables_search |
 | Keys, duplicates and merging | isid, duplicates_report, duplicates_tag, duplicates_list, duplicates_drop, is_first, assert, s_merge |
-| Row calculations | row_mean, row_sum, row_min, row_max, row_median, row_var, row_sd, row_unique, row_miss, row_non_miss |
-| Conversion | as_character, as_numeric, na_if_value, value_if_na |
+| Row calculations | row_mean, row_sum, row_min, row_max, row_median, row_var, row_sd, row_unique, row_nvals, row_miss, row_non_miss |
+| Conversion | destring, decode, tostring, mvdecode, mvencode |
 | Selection and types | s_select, varlist, s_type, s_unit |
 | Binning | xtile, cut_length, cut_breaks |
-| Variable transforms | std, pct, as_dummy |
+| Variable transforms | std, pc, as_dummy |
 | Panel operators | s_lag, s_lead, s_diff |
 | Utilities | timer, set_seed, capture |
-| Deprecated aliases | cut_quantile, s_match, s_try, names_as_column, tab2, fre2 |
-| Table previews | preview_table, unpreview_table, print_headtail, print_interval, print_all, slice_headtail, slice_interval |
+| Aliases | xtab, na_if_value, value_if_na, as_numeric, as_character, pct, s_tag, tab_gen, var_type, var_unit, cut_quantile, s_try, ds_as_column, names_as_column |
+| Deprecated | s_match |
+| Table previews | preview_table, unpreview_table, s_print, print_headtail, print_interval, print_all, slice_headtail, slice_interval |
 
 | Location | Maintained content |
 | --- | --- |

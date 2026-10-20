@@ -2,30 +2,13 @@
 % Please edit documentation in R/deprecated.R
 \name{statart-deprecated}
 \alias{statart-deprecated}
-\alias{cut_quantile}
 \alias{s_match}
-\alias{s_try}
-\alias{names_as_column}
-\alias{tab2}
-\alias{fre2}
 \title{Renamed functions}
 \usage{
-cut_quantile(...)
-
 s_match(...)
-
-s_try(...)
-
-names_as_column(...)
-
-tab2(.data, ..., .flip = FALSE)
-
-fre2(.data, ..., .flip = FALSE, .type = c("auto", "tibble", "flextable"))
 }
 \arguments{
 \item{...}{Arguments passed to the new function.}
-
-\item{.data, .flip, .type}{Passed to \code{\link[=xtab]{xtab()}}.}
 }
 \value{
 The result of the new function.
@@ -35,12 +18,12 @@ These functions were renamed in statart 0.2.0.9000. The old names still
 work and give identical results; each shows a notice once per session.
 They will be removed in a future release.\tabular{ll}{
    Old name \tab New name \cr
-   \code{cut_quantile()} \tab \code{\link[=xtile]{xtile()}} \cr
    \code{s_match()} \tab \code{\link[=varlist]{varlist()}} \cr
-   \code{s_try()} \tab \code{\link[=capture]{capture()}} \cr
-   \code{names_as_column()} \tab \code{\link[=ds_as_column]{ds_as_column()}} \cr
-   \code{tab2()} \tab \code{\link[=xtab]{xtab()}} \cr
-   \code{fre2()} \tab \code{\link[=xtab]{xtab(.total = TRUE)}} \cr
 }
+
+
+Other earlier names, such as \code{cut_quantile()}, \code{s_try()},
+\code{names_as_column()}, \code{tab2()} and \code{fre2()}, are current names or aliases
+and give no notice.
 }
 \keyword{internal}

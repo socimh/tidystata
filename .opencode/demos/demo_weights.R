@@ -21,7 +21,7 @@ print(analytic)
 stopifnot(all.equal(sum(analytic$n), nrow(survey)))
 
 cat("```\n\n## Example 3: weighted cross-tabulation with totals\n\n```\n")
-print(xtab(survey, region, edu, .wt = w, .total = TRUE))
+print(tab2(survey, region, edu, .wt = w, .total = TRUE))
 
 cat("```\n\n## Example 4: weighted summaries\n\n```\n")
 stats <- c("n", "mean", "sd", "p50")

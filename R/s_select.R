@@ -1,4 +1,6 @@
-#' Enhanced select() with data-masking
+#' Select and compute columns
+#'
+#' An enhanced [dplyr::select()] that also accepts data-masking expressions.
 #'
 #' @param .data A data frame or tibble.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> selections or

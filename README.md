@@ -18,17 +18,16 @@ combines Stata-inspired features with tidyverse-style operations.
 
 The package focuses on exploring and preparing data:
 
-- `tab()`, `tab1()`, and `xtab()` for frequency tables.
-- `fre()`, `fre1()`, and `xtab(.total = TRUE)` for frequency tables with
-  totals.
+- `tab()`, `tab1()`, and `tab2()` for frequency tables.
+- `fre()`, `fre1()`, and `fre2()` for frequency tables with totals.
 - `summ()` and `tabstat()` for summary statistics.
-- `pwcorr()`, `misstable()`, and `xtab(.chi2 = TRUE)` for correlations,
+- `pwcorr()`, `misstable()`, and `tab2(.chi2 = TRUE)` for correlations,
   missing values, and tests of independence.
 - `codebook()` and `variables()` for variable inspection.
 - `isid()`, `duplicates_report()`, `assert()`, `is_first()`, and
   `s_merge()` for checking keys and merging, and `print_all()` for
   listing every row.
-- `s_select()`, row calculations, conversion helpers, `std()`, `pct()`,
+- `s_select()`, row calculations, conversion helpers, `std()`, `pc()`,
   `as_dummy()`, panel lags (`s_lag()`, `s_lead()`, `s_diff()`), and
   binning for data preparation.
 
@@ -271,10 +270,10 @@ One-way tabulation also counts list-column values. Selecting no
 variables returns an empty result; `tab1()` and `fre1()` return empty
 lists by default. Matrix columns are unsupported.
 
-`xtab()` cross-tabulates two variables.
+`tab2()` cross-tabulates two variables.
 
 ``` r
-xtab(statart::starwars, sex, gender)
+tab2(statart::starwars, sex, gender)
 #> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
@@ -288,12 +287,11 @@ xtab(statart::starwars, sex, gender)
 ### fre()
 
 `fre()` family functions simply add total rows (and total columns in
-`xtab(.total = TRUE)`) to their `tab()` counterparts.
+`fre2()`) to their `tab()` counterparts.
 
-`fre()` and `xtab(.total = TRUE)` default to `.type = "auto"`,
-preserving the input container. `fre1()` returns a list whose tables
-preserve that container. Request `.type = "tibble"` explicitly when a
-tibble is required.
+`fre()` and `fre2()` default to `.type = "auto"`, preserving the input
+container. `fre1()` returns a list whose tables preserve that container.
+Request `.type = "tibble"` explicitly when a tibble is required.
 
 ``` r
 fre(statart::starwars, sex)

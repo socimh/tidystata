@@ -104,7 +104,7 @@ cat("Verified archive MD5:", receipt$tarball_md5, "\n")
 cat("Version:", as.character(packageVersion("statart")), "\n")
 cat("Installation:", find.package("statart"), "\n")
 stopifnot(
-  length(getNamespaceExports("statart")) == 68L,
+  length(getNamespaceExports("statart")) == 80L,
   !any(grepl(
     "(_fun|_df_to_mat)$",
     names(getDLLRegisteredRoutines("statart")$.Call)

@@ -52,11 +52,11 @@ counts
 sum(counts$n)
 
 fre(survey, response)
-xtab(survey, group, response)
+tab2(survey, group, response)
 ```
 
 The counts sum to six, including the missing response. `tab()` returns observed
-categories with counts and percentages. `fre()` adds total rows; `xtab()` puts
+categories with counts and percentages. `fre()` adds total rows; `tab2()` puts
 the categories of its second variable into columns. Use `tab1()` when you want
 separate one-way tables instead of a joint table:
 
@@ -119,12 +119,12 @@ Character measurements can be parsed explicitly, and sentinel values can be
 replaced before calculations:
 
 ```{r conversion}
-as_numeric(c("1,200", "2,500", NA))
-na_if_value(c(1, -99, 3), -99)
+destring(c("1,200", "2,500", NA))
+mvdecode(c(1, -99, 3), -99)
 xtile(1:8, 4)
 ```
 
-`as_numeric()` uses a flexible number parser; check parsing warnings when the
+`destring()` uses a flexible number parser; check parsing warnings when the
 input is messy. Quantile bins keep tied values together and may contain fewer
 intervals when cutpoints coincide. These conventions do not promise exact
 equivalence with every Stata command.

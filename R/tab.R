@@ -6,15 +6,17 @@
 #'
 #' * `tab()` - Tabulates variable(s) simultaneously, similar to `count()`.
 #' * `tab1()` - Tabulates variable(s) one by one.
-#' * `xtab()` - Cross-tabulates two variables, like Stata's `tab x y`.
+#' * `tab2()` - Cross-tabulates two variables, like Stata's `tab x y`. With
+#'   three or more variables it returns every pairwise table, like Stata's
+#'   `tab2 x y z`.
 #'
-#' Each takes `.total = TRUE` to add "Total" rows (and, for `xtab()`, a
-#' "total" column). `fre()` and `fre1()` are shortcuts for `tab(.total = TRUE)`
-#' and `tab1(.total = TRUE)`, named after Stata's `fre`. `tab2()` and `fre2()`
-#' are deprecated names for `xtab()` and `xtab(.total = TRUE)`.
+#' Each takes `.total = TRUE` to add "Total" rows (and, for `tab2()`, a
+#' "total" column). `fre()`, `fre1()` and `fre2()` are shortcuts for
+#' `tab(.total = TRUE)`, `tab1(.total = TRUE)` and `tab2(.total = TRUE)`,
+#' named after Stata's `fre`. `xtab()` is an alias of `tab2()`.
 #'
 #' The functions return data by default. With totals, rich output is
-#' available from `fre()`, `fre1()` and `xtab(.total = TRUE)` with
+#' available from `fre()`, `fre1()` and `fre2()` with
 #' `.type = "flextable"` when the optional flextable package is installed.
 #'
 #' For `tab()`, `tab1()`, `fre()` and `fre1()`, `n` counts observations.
@@ -36,25 +38,26 @@
 #' flattening their contents. Selecting no measured variables returns no rows:
 #' `tab()` and `fre()` retain their count and percentage columns and any grouping
 #' keys; `tab1()` and `fre1()` return an empty list by default or an empty table
-#' with `.type = "tibble"`. `xtab()` returns an empty table when no
-#' variables are selected; otherwise exactly two variables are required.
-#' With no selected variables, `xtab(..., .type = "flextable")` errors because
-#' rich cross-tabulation requires two selected variables.
+#' with `.type = "tibble"`. `tab2()` returns an empty table when no
+#' variables are selected and errors when only one is. With three or more, it
+#' returns a list of every pairwise table, named like `"x x y"`, each with the
+#' same options. With no selected variables, `tab2(..., .type = "flextable")`
+#' errors because rich cross-tabulation requires two selected variables.
 #'
 #' Cross-tabulation keeps category names unchanged. Categories may match the
 #' original variable names. Column categories follow their values: factor
 #' levels in order, other types ascending, with missing values last.
 #' A category matching the combined row-header name,
 #' or literal `"NA"` alongside a missing column category, causes a name-collision
-#' error. With `xtab(.total = TRUE)`, the column category `"total"` is reserved
+#' error. With `tab2(.total = TRUE)`, the column category `"total"` is reserved
 #' for marginal totals; recode it first or omit the totals.
-#' The final row of `xtab(.total = TRUE)` is the marginal total, labelled `"total"`; an
+#' The final row of `tab2(.total = TRUE)` is the marginal total, labelled `"total"`; an
 #' observed row category with the same label remains a separate row.
 #' Blank column categories use `"<empty>"`, with the smallest unused numeric
 #' suffix when that header is already taken. Logical cross-tabulation axes
 #' follow `FALSE`, `TRUE`, then missing values.
 #'
-#' With `.chi2 = TRUE`, `xtab()` tests the categories shown in the table,
+#' With `.chi2 = TRUE`, `tab2()` tests the categories shown in the table,
 #' including missing ones (filter them out first to exclude them), and drops
 #' rows or columns with no observations. It prints Pearson's chi-square, its
 #' degrees of freedom, the p-value and Cramer's V as a message, and stores
@@ -75,7 +78,7 @@
 #' @param .data An in-memory data frame, tibble, or data.table.
 #' Collect lazy tables before tabulating. `tab()`, `tab1()`, `fre()` and
 #' `fre1()` also accept an atomic vector, tabulated as a tibble column named
-#' `value`; omit selectors and `.by` in this form. `xtab()` needs a data
+#' `value`; omit selectors and `.by` in this form. `tab2()` needs a data
 #' frame.
 #' All spatial `sfc` geometry columns are excluded before attribute tabulation;
 #' geometry columns cannot be selected as measured variables or grouping keys.
@@ -88,13 +91,13 @@
 #' @param .by Optional grouping columns, selected with tidyselect. For `tab()`,
 #' `tab1()`, `fre()` and `fre1()`, `NULL` inherits existing `group_by()` groups;
 #' an explicit selection replaces them. Grouping columns are not measured
-#' variables. `xtab()` does not accept `.by`, `.desc` or `.group_order`;
+#' variables. `tab2()` does not accept `.by`, `.desc` or `.group_order`;
 #' supplying them is an error.
 #' @param .desc If `TRUE`, sort categories by descending count within each
 #' group (missing categories stay last). To order the `.by` group blocks by
 #' size, use `.group_order = "frequency"`.
 #' @param .type Output type. `tab1()` and `fre1()` default to a list of
-#' tables; `fre()` and `xtab()` default to `"auto"`, preserving the input
+#' tables; `fre()`, `tab2()` and `fre2()` default to `"auto"`, preserving the input
 #' container. Explicit `"tibble"` always returns a plain tibble. Explicit
 #' `"flextable"` output requires the optional flextable package.
 #' @param .flip If TRUE, will transpose the output tibble.
@@ -110,9 +113,9 @@
 #' scale. Percentages are the same under both types.
 #' @param .total A single `TRUE` or `FALSE`. If `TRUE`, add "Total" rows:
 #' `tab(.total = TRUE)` is `fre()` and `tab1(.total = TRUE)` is `fre1()`.
-#' `xtab(.total = TRUE)` adds a total row and a total column. Flextable output
-#' from `xtab()` requires totals.
-#' @param .chi2 A single `TRUE` or `FALSE`. If `TRUE`, `xtab()` reports
+#' `tab2(.total = TRUE)` is `fre2()` and adds a total row and a total column.
+#' Flextable output from `tab2()` requires totals.
+#' @param .chi2 A single `TRUE` or `FALSE`. If `TRUE`, `tab2()` reports
 #' Pearson's chi-square test of independence and Cramer's V, like Stata's
 #' `tab x y, chi2 V`. See Details.
 #' @param .group_order Group block order for one-way and joint tables. `"keys"`
@@ -178,14 +181,17 @@
 #'
 #' tab(starwars, sex, .total = TRUE)
 #'
-#' xtab(starwars, sex, gender)
+#' tab2(starwars, sex, gender)
 #'
-#' xtab(starwars, height, gender)
+#' tab2(starwars, height, gender)
 #'
-#' xtab(starwars, height, gender, .total = TRUE)
+#' fre2(starwars, height, gender)
+#'
+#' # Every pairwise table, like Stata's tab2 sex gender eye_color
+#' tab2(starwars, sex, gender, eye_color)
 #'
 #' # Chi-square test of independence, like Stata's tab x y, chi2 V
-#' chi2 <- xtab(starwars, sex, gender, .chi2 = TRUE)
+#' chi2 <- tab2(starwars, sex, gender, .chi2 = TRUE)
 #' attr(chi2, "chi2")
 NULL
 
@@ -378,7 +384,7 @@ tab1 <- function(
 
 #' @export
 #' @rdname tab
-xtab <- function(
+tab2 <- function(
   .data,
   ...,
   .flip = FALSE,
@@ -388,7 +394,7 @@ xtab <- function(
   .wt_type = c("frequency", "analytic"),
   .chi2 = FALSE
 ) {
-  reject_cross_controls(..., function_name = "xtab()")
+  reject_cross_controls(..., function_name = "tab2()")
   check_flag(.flip, ".flip")
   check_flag(.total, ".total")
   check_flag(.chi2, ".chi2")
@@ -429,8 +435,52 @@ xtab <- function(
 
   # Confirm names
   check_two_vars(.data)
-  .data <- modify_invalid_names(.data, "xtab()")
+  .data <- modify_invalid_names(.data, "tab2()")
+  # Three or more variables: every pairwise table, like Stata's tab2.
+  if (ncol(.data) > 2L) {
+    pairs <- utils::combn(names(.data), 2L, simplify = FALSE)
+    out <- lapply(pairs, function(pair) {
+      if (.chi2) {
+        message("-> tabulation of ", pair[[1L]], " by ", pair[[2L]])
+      }
+      pair_data <- dplyr::select(.data, dplyr::all_of(pair))
+      tab2_pair(pair_data, weights, template, .flip, .total, .type, .chi2)
+    })
+    names(out) <- vapply(pairs, paste, character(1), collapse = " x ")
+    return(out)
+  }
+  tab2_pair(.data, weights, template, .flip, .total, .type, .chi2)
+}
 
+#' @export
+#' @rdname tab
+xtab <- tab2
+
+#' @export
+#' @rdname tab
+fre2 <- function(
+  .data,
+  ...,
+  .flip = FALSE,
+  .type = c("auto", "tibble", "flextable"),
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic"),
+  .chi2 = FALSE
+) {
+  tab2(
+    .data,
+    ...,
+    .flip = .flip,
+    .total = TRUE,
+    .type = match.arg(.type),
+    .wt = {{ .wt }},
+    .wt_type = match.arg(.wt_type),
+    .chi2 = .chi2
+  )
+}
+
+# One two-way table from exactly two selected columns.
+tab2_pair <- function(.data, weights, template, .flip, .total, .type, .chi2) {
   # Flip variables
   if (.flip) {
     .data <- .data %>%

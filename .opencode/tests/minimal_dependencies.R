@@ -33,7 +33,7 @@ assign(
 )
 stopifnot(!requireNamespace("flextable", quietly = TRUE))
 library(statart)
-stopifnot(length(getNamespaceExports("statart")) == 68L)
+stopifnot(length(getNamespaceExports("statart")) == 80L)
 preview <- preview_table(tibble::tibble(id = 1:30), n = 4)
 stopifnot(nrow(preview) == 30L, identical(preview$id, 1:30))
 stopifnot(inherits(dplyr::mutate(preview, twice = id * 2), "statart_preview"))

@@ -104,7 +104,7 @@ for (.function_name in c("tab2", "fre2")) {
         expect_identical(fn(d[, FALSE], .flip = flip), tibble::tibble())
       }
       expect_error(fn(d, x), "Please provide two variables")
-      expect_error(fn(d, x, y, z), "Please provide only two variables")
+      expect_named(fn(d, x, y, z), c("x x y", "x x z", "y x z"))
       expect_identical(d, before)
     }
   )

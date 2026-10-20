@@ -5,9 +5,11 @@
 #'
 #' * `std()` standardises to mean 0 and standard deviation 1, like
 #'   `egen z = std(x)`. Unlike [scale()], it returns a plain vector.
-#' * `pct()` gives each value as a percentage of the total, like
+#' * `pc()` gives each value as a percentage of the total, like
 #'   `egen p = pc(x)`, or as a proportion with `prop = TRUE`.
 #'
+#' `pct()` is an alias of `pc()`. The gt package also exports a `pct()` (for
+#' column widths), so prefer `pc()` when gt is attached.
 #' In grouped [dplyr::mutate()] (or with `.by`), the mean, standard deviation
 #' and total come from each group, like Stata's `by g: egen`.
 #'
@@ -15,23 +17,23 @@
 #' through their codes.
 #' @param mean,sd The mean and standard deviation of the result, like Stata's
 #' `egen std(x), mean() std()` options.
-#' @param prop A single `TRUE` or `FALSE`. If `TRUE`, `pct()` returns
+#' @param prop A single `TRUE` or `FALSE`. If `TRUE`, `pc()` returns
 #' proportions (summing to 1) instead of percentages (summing to 100).
 #'
 #' @return A double vector the same length as `x`. Missing values stay
 #' missing. `std()` returns all `NA` when the standard deviation is zero or
-#' undefined (fewer than two observed values), and `pct()` when the total is
+#' undefined (fewer than two observed values), and `pc()` when the total is
 #' zero, as Stata gives missing values there.
 #'
 #' @examples
 #' std(c(1, 2, 3, NA))
-#' pct(c(2, 3, 5))
-#' pct(c(2, 3, 5), prop = TRUE)
+#' pc(c(2, 3, 5))
+#' pc(c(2, 3, 5), prop = TRUE)
 #'
 #' lifeexp %>%
 #'   dplyr::mutate(
 #'     z = std(lexp),
-#'     share = pct(popgrowth),
+#'     share = pc(popgrowth),
 #'     .by = region
 #'   )
 #' @export
@@ -49,7 +51,7 @@ std <- function(x, mean = 0, sd = 1) {
 
 #' @rdname std
 #' @export
-pct <- function(x, prop = FALSE) {
+pc <- function(x, prop = FALSE) {
   x <- egen_numeric(x)
   check_flag(prop, "prop")
   total <- sum(x, na.rm = TRUE)
@@ -59,6 +61,10 @@ pct <- function(x, prop = FALSE) {
   out <- x / total
   if (prop) out else out * 100
 }
+
+#' @rdname std
+#' @export
+pct <- pc
 
 egen_numeric <- function(x) {
   if (inherits(x, "haven_labelled") && is.numeric(vctrs::vec_data(x))) {
