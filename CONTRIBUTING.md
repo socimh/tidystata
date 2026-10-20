@@ -44,6 +44,48 @@ sources, tests and maintained examples. The reviewed file list is
   quota. Assert intentional warnings explicitly. Snapshots are selective tools
   for diagnostics/presentation, not substitutes for numerical assertions.
 
+### Package conventions
+
+statart follows the [tidyverse style guide](https://style.tidyverse.org/) and
+the layout used by dplyr, tidyr, stringr and purrr. The points below are the
+statart-specific decisions; consult the guide for everything else.
+
+- **Files.** A file holding one function is named after it (`is_first.R`); a
+  family file gets a short hyphenated name (`row-stats.R`, `type-conversion.R`).
+  Exported functions and their documentation come first, private helpers after.
+  Small helpers shared across families live in `R/utils.R`; argument checks in
+  `R/utils-check.R`; deprecated wrappers in `R/deprec.R`. Vendored
+  `R/import-standalone-*.R` files are updated with `usethis::use_standalone()`,
+  never edited by hand.
+- **Internal names.** Helpers take their family prefix (`summ_`, `tab_`,
+  `row_`, `merge_`); the `s_` prefix is reserved for exported functions.
+- **Errors.** Signal conditions with `cli::cli_abort()`, `cli::cli_warn()` and
+  `cli::cli_inform()`. Start with a sentence-case problem statement ending in a
+  full stop: use "must" when the expectation is known (``{.arg n} must be a
+  whole number, not {.obj_type_friendly {n}}.``) and "can't" otherwise. Add
+  `x`/`i` bullets for details and a final `i` hint ending in `?` only when the
+  fix is clear. Refer to arguments with `{.arg}`, to data columns as
+  "column", and let cli wrap long lines.
+- **Checks.** Validate public inputs with the vendored rlang checkers
+  (`check_bool()`, `check_string()`, `check_number_whole()`,
+  `check_data_frame()`, ...) or a `check_*()` helper in `R/utils-check.R`.
+  Every checker takes `arg = caller_arg(x)` and `call = caller_env()`, and
+  public functions forward `call` so errors name the user's call. Validate
+  enumerated options with `rlang::arg_match()`. Re-signalled errors keep their
+  cause with `parent = cnd`.
+- **Documentation.** Titles are sentence case without a full stop; `@param`
+  entries are sentences ending in a full stop. Shared arguments (`.data`,
+  `...`, `.by`, `.wt`) inherit from `@inheritParams statart_args` in
+  `R/doc-params.R`. Use `@returns`, `@family` (plural, matching the pkgdown
+  section) and `[fn()]` cross-links.
+- **Tests.** `tests/testthat/test-<file>.R` mirrors `R/<file>.R`; numbered
+  acceptance catalogues live beside it as `test-<file>-acceptance.R`. Test the
+  wording of error and warning messages with `expect_snapshot(error = TRUE)`;
+  test values with ordinary expectations.
+- **NEWS.** One bullet per user-facing change, present tense, the function name
+  in backticks near the start, newest bullets at the top of the development
+  section. Group bullets under headings only when preparing a release.
+
 Air **0.12.0** is the sole formatter; lintr **3.4.0** checks namespace use and
 prohibited package-code calls. These are development tools, not runtime Imports.
 Install Air from its official release or `air-formatter==0.12.0`, and install
