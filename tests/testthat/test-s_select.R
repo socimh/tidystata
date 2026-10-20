@@ -579,3 +579,12 @@ test_that("s_select evaluates computed expressions once", {
   expect_identical(state$n, 1L)
   expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
 })
+
+test_that("s_select() reports unmatched and unrecognised input", {
+  d <- tibble::tibble(height = c(1, 2), mass = c(3, 4))
+  expect_snapshot(error = TRUE, {
+    s_select(d, heigth, mas)
+    s_select(d, 4)
+    s_select(d, ratio = mass / missing_column)
+  })
+})

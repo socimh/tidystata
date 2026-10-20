@@ -1,18 +1,21 @@
-extract_group_var <- function(.data, by) {
+extract_group_var <- function(.data, by, call = rlang::caller_env()) {
   any_dot_by <- !rlang::quo_is_null(by)
   any_group_by <- dplyr::is_grouped_df(.data)
 
   if (!any_dot_by && any_group_by) {
     group_vars <- dplyr::group_vars(.data)
   } else if (any_dot_by) {
-    check_by_selection(.data, by)
+    check_by_selection(.data, by, call)
     group_vars <- ds(.data, !!by)
   } else {
     group_vars <- character(0)
   }
 
   if (!contain_vars(.data, group_vars)) {
-    stop("The data do not include all grouping variable(s).")
+    cli::cli_abort(
+      "The data do not include all grouping variable(s).",
+      call = call
+    )
   }
 
   return(group_vars)
@@ -20,19 +23,19 @@ extract_group_var <- function(.data, by) {
 
 # `.by` selects columns; a computed expression would otherwise fail with a
 # misleading "object not found" error from tidyselect.
-check_by_selection <- function(.data, by) {
+check_by_selection <- function(.data, by, call = rlang::caller_env()) {
   expr <- rlang::quo_get_expr(by)
   if (select_expr_is_selection(expr, names(.data))) {
     return(invisible())
   }
-  stop(
-    "`.by` must select existing columns, not compute `",
-    rlang::as_label(expr),
-    "`.\n\u2139 Create the grouping column first, e.g. ",
-    "`mutate(group = ",
-    rlang::as_label(expr),
-    ")`, then use `.by = group`.",
-    call. = FALSE
+  label <- rlang::as_label(expr)
+  cli::cli_abort(
+    c(
+      "{.arg .by} must select existing columns, not compute {.code {label}}.",
+      i = "Create the grouping column first, e.g.
+           {.code mutate(group = {label})}, then use {.code .by = group}."
+    ),
+    call = call
   )
 }
 
@@ -47,6 +50,8 @@ contain_vars <- function(.data, group_vars) {
 }
 
 remove_group_vars <- function(.data, ..., group_vars) {
+  # Dots hold user selections, so report errors through the caller's frame.
+  rlang::local_error_call(rlang::caller_env())
   if (!missing(...)) {
     check_group_selection(.data, ..., group_vars = group_vars)
     .data <- s_select(.data, ...)
@@ -79,13 +84,11 @@ check_group_selection <- function(.data, ..., group_vars) {
   source <- names(data)[selected]
   renamed <- source %in% group_vars & names(selected) != source
   if (any(renamed)) {
-    stop(
-      "Grouping column `",
-      source[renamed][[1L]],
-      "` cannot also be measured (selected as `",
-      names(selected)[renamed][[1L]],
-      "`). Copy it first, e.g. with mutate(), to summarise its values.",
-      call. = FALSE
+    cli::cli_abort(
+      "Grouping column {.var {source[renamed][[1L]]}} cannot also be measured
+       (selected as {.var {names(selected)[renamed][[1L]]}}). Copy it first,
+       e.g. with {.fn mutate}, to summarise its values.",
+      call = rlang::caller_env()
     )
   }
   invisible()
@@ -114,7 +117,7 @@ warning_vars <- function(vars, suffix) {
     return()
   } else if (length(vars) == 1) {
     message <- paste0(vars, " is ", suffix)
-    warning(message, call. = FALSE)
+    cli::cli_warn("{message}")
   } else if (
     stringr::str_length(vars[1]) +
       stringr::str_length(vars[2]) >
@@ -125,15 +128,15 @@ warning_vars <- function(vars, suffix) {
       ", ... are ",
       suffix
     )
-    warning(message, call. = FALSE)
+    cli::cli_warn("{message}")
   } else if (length(vars) > 2) {
     message <- paste(vars[1:2], collapse = ", ") %>%
       paste0(", ... are ", suffix)
-    warning(message, call. = FALSE)
+    cli::cli_warn("{message}")
   } else {
     message <- paste(vars, collapse = " and ") %>%
       paste0(" are ", suffix)
-    warning(message, call. = FALSE)
+    cli::cli_warn("{message}")
   }
 }
 
@@ -151,7 +154,11 @@ summ_metadata <- function(data, keep_all) {
   })
 }
 
-summ_check_metadata <- function(metadata, keep_all) {
+summ_check_metadata <- function(
+  metadata,
+  keep_all,
+  call = rlang::caller_env()
+) {
   types <- vapply(metadata, `[[`, character(1), "type")
   summable <- vapply(metadata, `[[`, logical(1), "summable")
   warning_vars(
@@ -178,9 +185,9 @@ summ_check_metadata <- function(metadata, keep_all) {
     }
   )
   if (!any(summable) && !(keep_all && length(metadata))) {
-    stop(
-      "None of the provided variable(s) is suitable for `summ()`.",
-      call. = FALSE
+    cli::cli_abort(
+      "None of the provided variable(s) is suitable for {.fn summ}.",
+      call = call
     )
   }
   factors <- names(metadata)[summable & types %in% c("fct", "ord")]
@@ -204,14 +211,15 @@ summ_check_metadata <- function(metadata, keep_all) {
   if (keep_all) metadata else metadata[summable]
 }
 
-summ_stat_names <- function(stat) {
+summ_stat_names <- function(stat, call = rlang::caller_env()) {
   if (length(stat) == 0L) {
     return(stats::setNames(character(), character()))
   }
   if (!is.character(stat) || anyNA(stat) || any(!nzchar(stat))) {
-    stop(
-      "`.stat` must be a character vector of non-missing statistic names.",
-      call. = FALSE
+    cli::cli_abort(
+      "{.arg .stat} must be a character vector of non-missing statistic
+       names.",
+      call = call
     )
   }
   aliases <- c(missing = "miss_n", p25 = "q1", p50 = "median", p75 = "q3")
@@ -244,11 +252,11 @@ summ_stat_names <- function(stat) {
     percentile_values <= 100
   unknown <- setdiff(stat, c(supported, stat[percentiles]))
   if (length(unknown)) {
-    stop(
-      "Unsupported statistic: ",
-      paste(unknown, collapse = ", "),
-      ". See ?summ for supported names.",
-      call. = FALSE
+    unknown <- paste(unknown, collapse = ", ")
+    cli::cli_abort(
+      "Unsupported statistic: {unknown}. See {.code ?summ} for supported
+       names.",
+      call = call
     )
   }
   stat <- unique(stat)
@@ -675,7 +683,8 @@ summ_data <- function(
   weights = NULL,
   weight_type = "frequency",
   groups,
-  metadata
+  metadata,
+  call = rlang::caller_env()
 ) {
   if (length(summ_vars) == 0L) {
     return(NULL)
@@ -684,11 +693,10 @@ summ_data <- function(
   if (calendar) {
     unavailable <- intersect(requested, calendar_unsupported)
     if (length(unavailable)) {
-      stop(
-        "Unsupported statistic ",
-        paste0("`", unavailable, "`", collapse = ", "),
-        ": not supported for date/datetime/time variables.",
-        call. = FALSE
+      cli::cli_abort(
+        "Unsupported statistic {.code {unavailable}}: not supported for
+         date/datetime/time variables.",
+        call = call
       )
     }
   }
@@ -774,7 +782,8 @@ summ_list <- function(
   .mode = c("list", "table"),
   weights = NULL,
   weight_type = "frequency",
-  metadata
+  metadata,
+  call = rlang::caller_env()
 ) {
   .mode <- match.arg(.mode)
 
@@ -785,25 +794,21 @@ summ_list <- function(
   time <- names(types)[types == "time"]
   groups <- aggregation_groups(.data, group_vars)
 
-  requested <- unique(unname(summ_stat_names(.stat)))
+  requested <- unique(unname(summ_stat_names(.stat, call = call)))
   skipped <- intersect(requested, calendar_unsupported)
   calendar <- c(date, datetime, time)
   if (length(skipped) && length(calendar)) {
     if (length(numeric) == 0L) {
-      stop(
-        "Unsupported statistic ",
-        paste0("`", skipped, "`", collapse = ", "),
-        ": not supported for date/datetime/time variables.",
-        call. = FALSE
+      cli::cli_abort(
+        "Unsupported statistic {.code {skipped}}: not supported for
+         date/datetime/time variables.",
+        call = call
       )
     }
-    warning(
-      "`",
-      paste(skipped, collapse = "`, `"),
-      "` is not available for date/datetime/time variables; skipped: ",
-      paste(calendar, collapse = ", "),
-      ".",
-      call. = FALSE
+    skipped_variables <- paste(calendar, collapse = ", ")
+    cli::cli_warn(
+      "{.code {skipped}} {?is/are} not available for date/datetime/time
+       variables; skipped: {skipped_variables}."
     )
     date <- character()
     datetime <- character()
@@ -811,6 +816,7 @@ summ_list <- function(
   }
 
   numeric <- summ_data(
+    call = call,
     .data,
     numeric,
     group_vars,
@@ -839,6 +845,7 @@ summ_list <- function(
   }
 
   date <- summ_data(
+    call = call,
     .data,
     date,
     group_vars,
@@ -851,6 +858,7 @@ summ_list <- function(
     metadata = metadata
   )
   datetime <- summ_data(
+    call = call,
     .data,
     datetime,
     group_vars,
@@ -863,6 +871,7 @@ summ_list <- function(
     metadata = metadata
   )
   time <- summ_data(
+    call = call,
     .data,
     time,
     group_vars,
@@ -903,7 +912,7 @@ summ_list <- function(
   } else if (length(out) == 1) {
     out <- out[[1]]
   } else {
-    message("A list is returned as statistics are heterogeneous.")
+    cli::cli_inform("A list is returned as statistics are heterogeneous.")
   }
 
   return(out)

@@ -75,12 +75,7 @@ variables <- function(.data, ...) {
 #' @rdname variables
 #' @export
 variables_search <- function(.data, string, ...) {
-  if (!is.character(string) || length(string) != 1L || is.na(string)) {
-    stop(
-      "`string` must be a single non-missing character string.",
-      call. = FALSE
-    )
-  }
+  check_string(string)
   if (is.character(string)) {
     string <- string %>%
       stringr::str_replace_all("\\*", ".*") %>%

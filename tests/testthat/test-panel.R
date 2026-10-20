@@ -265,16 +265,25 @@ test_that("panel operators validate their input", {
     s_lag(1:2, time = factor(c("W1", "W2"))),
     "levels need not be in time order"
   )
-  expect_error(s_lag(1:2, time = list(1, 2)), "not list")
+  expect_error(s_lag(1:2, time = list(1, 2)), "not a list")
   expect_error(s_lag(1:2, time = 1:2, unit = "month"), "dates and date-times")
   expect_error(
     s_lag(1:2, time = as.Date(c("2024-01-01", "2024-02-01")), unit = "decade"),
     "should be one of"
   )
-  expect_error(s_lag(1:2, -1, time = 1:2), "non-negative whole number")
-  expect_error(s_lead(1:2, 1.5, time = 1:2), "non-negative whole number")
+  expect_error(
+    s_lag(1:2, -1, time = 1:2),
+    "whole number larger than or equal to 0"
+  )
+  expect_error(
+    s_lead(1:2, 1.5, time = 1:2),
+    "whole number larger than or equal to 0"
+  )
   expect_error(s_lag(1:2, time = 1:2, delta = 0), "must be positive")
-  expect_error(s_diff(letters[1:2], time = 1:2), "must be numeric or logical")
+  expect_error(
+    s_diff(letters[1:2], time = 1:2),
+    "must be a numeric or logical vector"
+  )
 })
 
 test_that("lags of distinct times match the earlier time exactly", {
@@ -301,4 +310,18 @@ test_that("lags of distinct times match the earlier time exactly", {
   expect_error(s_lag(1:3, time = c(-0, 0, 1)), "such as 0")
   expect_error(s_lag(1:4, time = c(3, 1, 2, 1)), "such as 1")
   expect_error(s_diff(1:3, 0, time = c(1, 1, 2)), "Repeated time values")
+})
+
+test_that("panel operators report invalid input", {
+  expect_snapshot(error = TRUE, {
+    s_lag(1:3)
+    s_lag(1:3, n = -1, time = 1:3)
+    s_lag(1:3, time = 1:2)
+    s_lag(1:3, time = 1:3, delta = 0)
+    s_lag(1:3, time = c(1, 1, 2))
+    s_lag(1:3, time = c("a", "b", "c"))
+    s_lag(1:3, time = factor(c("a", "b", "c")))
+    s_lag(1:3, time = 1:3, unit = "day")
+    s_diff(letters[1:3], time = 1:3)
+  })
 })

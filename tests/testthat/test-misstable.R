@@ -81,5 +81,16 @@ test_that("misstable() handles special missing values and empty data", {
     0L
   )
   expect_error(misstable(1:3), "must be a data frame")
-  expect_error(misstable(missing_data, .all = "yes"), "single TRUE or FALSE")
+  expect_error(
+    misstable(missing_data, .all = "yes"),
+    "must be `TRUE` or `FALSE`"
+  )
+})
+
+test_that("misstable() reports invalid input", {
+  expect_snapshot(error = TRUE, {
+    misstable(1:3)
+    misstable(tibble::tibble(x = NA), .all = "yes")
+    misstable(tibble::tibble(n = c(1, NA)), .patterns = TRUE)
+  })
 })

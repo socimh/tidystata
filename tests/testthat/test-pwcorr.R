@@ -59,7 +59,7 @@ test_that("pwcorr() selects numeric columns and validates input", {
   expect_identical(pwcorr(data)$var2, c("y", "flag", "flag"))
   expect_error(pwcorr(data, x, id), "must be numeric or logical")
   expect_error(pwcorr(data, x), "at least two numeric variables")
-  expect_error(pwcorr(data, x, y, .wide = NA), "single TRUE or FALSE")
+  expect_error(pwcorr(data, x, y, .wide = NA), "must be `TRUE` or `FALSE`")
   expect_error(pwcorr(1:3), "must be a data frame")
 
   constant <- tibble::tibble(x = c(1, 2, 3), y = c(5, 5, 5))
@@ -95,4 +95,14 @@ test_that("weighted pwcorr() equals replicated data", {
     pwcorr(data, x, y, .wt = w, .method = "spearman"),
     "Pearson correlations only"
   )
+})
+
+test_that("pwcorr() reports invalid input", {
+  d <- tibble::tibble(x = c(1, 2, 3), y = c(2, 1, 3), s = c("a", "b", "c"))
+  expect_snapshot(error = TRUE, {
+    pwcorr(d, x, y, .wide = NA)
+    pwcorr(d, x, s)
+    pwcorr(d, x)
+    pwcorr(d, x, y, .wt = x, .method = "spearman")
+  })
 })

@@ -151,3 +151,22 @@ test_that("missing keys match each other and containers are kept", {
     "data.table"
   )
 })
+
+test_that("s_merge() reports invalid input and failed assertions", {
+  expect_snapshot(error = TRUE, {
+    s_merge(people, 1:3, "1:1", by = "id")
+    s_merge(people, income)
+    s_merge(people, income, "1:1", by = 1)
+    s_merge(people, income, "1:1", by = "id", .keep = "both")
+    s_merge(people, income, "1:1", by = "missing_key")
+    s_merge(people, income, "1:1", by = "id", .generate = "age")
+    s_merge(
+      tibble::tibble(id = c(1, 1)),
+      income,
+      "1:1",
+      by = "id",
+      .report = FALSE
+    )
+    s_merge(people, income, "1:1", by = "id", .assert = "match")
+  })
+})

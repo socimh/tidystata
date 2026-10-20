@@ -39,8 +39,8 @@
 #' @export
 std <- function(x, mean = 0, sd = 1) {
   x <- egen_numeric(x)
-  check_number(mean, "mean")
-  check_number(sd, "sd")
+  check_number_decimal(mean, allow_infinite = FALSE)
+  check_number_decimal(sd, allow_infinite = FALSE)
   center <- base::mean(x, na.rm = TRUE)
   spread <- stats::sd(x, na.rm = TRUE)
   if (is.na(spread) || spread == 0) {
@@ -53,7 +53,7 @@ std <- function(x, mean = 0, sd = 1) {
 #' @export
 pc <- function(x, prop = FALSE) {
   x <- egen_numeric(x)
-  check_flag(prop, "prop")
+  check_bool(prop)
   total <- sum(x, na.rm = TRUE)
   if (total == 0) {
     return(rep(NA_real_, length(x)))
@@ -66,23 +66,16 @@ pc <- function(x, prop = FALSE) {
 #' @export
 pct <- pc
 
-egen_numeric <- function(x) {
+egen_numeric <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   if (inherits(x, "haven_labelled") && is.numeric(vctrs::vec_data(x))) {
     return(as.numeric(vctrs::vec_data(x)))
   }
   if ((is.numeric(x) || is.logical(x)) && !is.object(x)) {
     return(as.numeric(x))
   }
-  stop(
-    "`x` must be numeric or logical, not ",
-    class(x)[[1L]],
-    ".",
-    call. = FALSE
-  )
-}
-
-check_number <- function(value, name) {
-  if (!is.numeric(value) || length(value) != 1L || !is.finite(value)) {
-    stop("`", name, "` must be a single finite number.", call. = FALSE)
-  }
+  stop_input_type(x, "a numeric or logical vector", arg = arg, call = call)
 }

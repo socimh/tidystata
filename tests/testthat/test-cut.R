@@ -356,10 +356,10 @@ test_that("cut functions: time series data", {
 test_that("all cut functions: n <= 0 errors or handles gracefully", {
   x <- 1:100
   # Functions may error or handle invalid n values
-  expect_error(xtile(x, n = 0), "positive integer")
-  expect_error(xtile(x, n = -1), "positive integer")
-  expect_error(cut_length(x, n = 0), "positive integer")
-  expect_error(cut_length(x, n = -1), "positive integer")
+  expect_error(xtile(x, n = 0), "whole number larger than or equal to 1")
+  expect_error(xtile(x, n = -1), "whole number larger than or equal to 1")
+  expect_error(cut_length(x, n = 0), "whole number larger than or equal to 1")
+  expect_error(cut_length(x, n = -1), "whole number larger than or equal to 1")
 })
 
 test_that("all cut functions: empty vector errors or handles gracefully", {
@@ -652,7 +652,7 @@ test_that("rank cuts balance ties deterministically and restore missing position
   expect_error(xtile(1:5, method = "wrong"), "arg")
   expect_error(
     xtile(1:5, n = 1 + 1i, method = "rank"),
-    "positive integer"
+    "whole number larger than or equal to 1"
   )
 })
 
@@ -708,7 +708,7 @@ test_that("cut_length rejects interval counts outside its integer contract", {
   for (n in invalid) {
     expect_error(
       cut_length(1:10, n = n),
-      "`n` must be a single positive integer"
+      "`n` must be a whole number larger than or equal to 1"
     )
   }
 })
@@ -810,4 +810,18 @@ test_that("binning contracts: binning does not mutate source values or labels", 
   cut_length(x, n = 2)
   cut_breaks(x, breaks = 3)
   expect_identical(serialize(x, NULL), before)
+})
+
+test_that("binning reports invalid input", {
+  expect_snapshot(error = TRUE, {
+    xtile(letters)
+    xtile(1:10, n = 0)
+    xtile(1:10, n = 2.5)
+    xtile(c(NA, NA))
+    xtile(rep(1, 4))
+    xtile(1:4, wt = 1:4, method = "rank")
+    xtile(1:4, wt = c(1, -1, 1, 1))
+    cut_length(1:10, n = "2")
+  })
+  expect_snapshot(xtile(1:2, n = 4, method = "rank"))
 })

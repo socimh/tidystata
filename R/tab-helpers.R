@@ -1,7 +1,7 @@
 # Helper functions for tab() and fre() families
 s_ungroup <- function(.data) {
   if (dplyr::is_grouped_df(.data)) {
-    message("Ungrouping the data.")
+    cli::cli_inform("Ungrouping the data.")
     .data <- dplyr::ungroup(.data)
   }
   return(.data)
@@ -10,7 +10,8 @@ s_ungroup <- function(.data) {
 modify_invalid_names <- function(
   .data,
   function_name,
-  candidates = names(.data)
+  candidates = names(.data),
+  call = rlang::caller_env()
 ) {
   invalid_names <-
     c(
@@ -39,18 +40,18 @@ modify_invalid_names <- function(
     invalid_names <- invalid_names %>%
       c("total")
   } else {
-    stop("Invalid function name.", call. = FALSE)
+    cli::cli_abort("Invalid function name.", .internal = TRUE)
   }
 
   detected_names <- intersect(candidates, invalid_names)
   if (length(detected_names) == 0L) {
     return(.data)
   }
-  message(reserved_name_message(
+  reserved_name_inform(
     detected_names,
     paste0(".", detected_names),
     function_name
-  ))
+  )
 
   can_rename <- .data %>%
     dplyr::rename_with(
@@ -66,38 +67,34 @@ modify_invalid_names <- function(
       tidyselect::all_of(detected_names)
     )
   } else {
-    stop("The new name is also taken. Rename fails.", call. = FALSE)
+    cli::cli_abort("The new name is also taken. Rename fails.", call = call)
   }
 }
 
 # Shared wording for input columns renamed to avoid output-column collisions.
-reserved_name_message <- function(old, new, function_name, what = NULL) {
+reserved_name_inform <- function(old, new, function_name, what = NULL) {
   quote <- function(x) paste0("`", x, "`", collapse = ", ")
-  paste0(
-    if (is.null(what)) "" else paste0(what, " "),
-    quote(old),
-    " renamed to ",
-    quote(new),
-    " because `",
-    function_name,
-    "` output uses ",
-    if (length(old) == 1L) quote(old) else "these names",
-    ".\n",
-    "\u2139 Rename the input column",
-    if (length(old) == 1L) "" else "s",
-    " before calling `",
-    function_name,
-    "` to choose another name."
-  )
+  renamed <- paste0(if (is.null(what)) "" else paste0(what, " "), quote(old))
+  replacement <- quote(new)
+  uses <- if (length(old) == 1L) quote(old) else "these names"
+  columns <- if (length(old) == 1L) "column" else "columns"
+  cli::cli_inform(c(
+    "{renamed} renamed to {replacement} because {.code {function_name}} output
+     uses {uses}.",
+    i = "Rename the input {columns} before calling {.code {function_name}} to
+         choose another name."
+  ))
 }
 
-check_two_vars <- function(.data) {
+check_two_vars <- function(.data, call = rlang::caller_env()) {
   if (ncol(.data) < 2) {
-    stop(
-      "Only 1 variable is input.\n",
-      "Please provide two variables for cross-tabulation, or more for ",
-      "every pairwise table.",
-      call. = FALSE
+    cli::cli_abort(
+      c(
+        "Only 1 variable is input.",
+        i = "Provide two variables for cross-tabulation, or more for every
+             pairwise table."
+      ),
+      call = call
     )
   }
 }
@@ -143,10 +140,14 @@ tab_data <- function(
   weights = NULL,
   total = FALSE,
   group_order = "keys",
-  input_groups = NULL
+  input_groups = NULL,
+  call = rlang::caller_env()
 ) {
   if (any(vapply(.data, function(x) !is.null(dim(x)), logical(1)))) {
-    stop("Matrix columns are not supported in tabulation.", call. = FALSE)
+    cli::cli_abort(
+      "Matrix columns are not supported in tabulation.",
+      call = call
+    )
   }
   .data <- tibble::as_tibble(.data)
   if (length(setdiff(names(.data), group_vars)) == 0L) {
@@ -457,15 +458,16 @@ order_tab_groups <- function(
   out[order(group_id, seq_len(nrow(out))), , drop = FALSE]
 }
 
-add_total2 <- function(out, .data) {
+add_total2 <- function(out, .data, call = rlang::caller_env()) {
   if (nrow(out) == 0L) {
     return(out)
   }
   if ("total" %in% names(out)[-1L]) {
-    stop(
-      "Column category `total` is reserved for totals in ",
-      "`tab2(.total = TRUE)`. Recode this category first, or omit `.total`.",
-      call. = FALSE
+    cli::cli_abort(
+      "Column category {.val total} is reserved for totals in
+       {.code tab2(.total = TRUE)}. Recode this category first, or omit
+       {.arg .total}.",
+      call = call
     )
   }
 
@@ -499,12 +501,21 @@ add_total2 <- function(out, .data) {
   return(out)
 }
 
-result_to_flextable <- function(tb, group_vars, fre1 = FALSE, fre2 = FALSE) {
+result_to_flextable <- function(
+  tb,
+  group_vars,
+  fre1 = FALSE,
+  fre2 = FALSE,
+  call = rlang::caller_env()
+) {
   if (!requireNamespace("flextable", quietly = TRUE)) {
-    stop(
-      "`.type = \"flextable\"` requires the optional flextable package. ",
-      "Install it with install.packages('flextable').",
-      call. = FALSE
+    cli::cli_abort(
+      c(
+        "{.code .type = \"flextable\"} requires the optional {.pkg flextable}
+         package.",
+        i = "Install it with {.code install.packages(\"flextable\")}."
+      ),
+      call = call
     )
   }
   if (fre2) {
@@ -582,7 +593,8 @@ xtab_chi2 <- function(out) {
       "two columns with observations."
     )
   }
-  message(paste(text, collapse = "\n"))
+  # Fixed-width statistics output, so keep its spacing as written.
+  rlang::inform(paste(text, collapse = "\n"))
   test <- tibble::tibble(
     statistic = statistic,
     df = df,

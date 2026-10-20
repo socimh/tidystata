@@ -95,6 +95,19 @@ if (shuffle) {
     file.path(test_path, ordered_files),
     file.path(test_path, renamed)
   )))
+  # Snapshots are keyed by file name; give each staged file its snapshots.
+  snapshot_name <- function(file) {
+    file.path(
+      test_path,
+      "_snaps",
+      sub("[.][rR]$", ".md", sub("^test-", "", file))
+    )
+  }
+  has_snapshot <- file.exists(snapshot_name(ordered_files))
+  stopifnot(all(file.copy(
+    snapshot_name(ordered_files)[has_snapshot],
+    snapshot_name(renamed)[has_snapshot]
+  )))
   unselected <- files[!selected]
   if (length(unselected)) {
     stopifnot(all(file.rename(

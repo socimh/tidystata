@@ -62,24 +62,24 @@ s_merge <- function(
   .report = TRUE
 ) {
   if (!is.data.frame(.data) || !is.data.frame(using)) {
-    stop("`.data` and `using` must be data frames.", call. = FALSE)
+    cli::cli_abort("{.arg .data} and {.arg using} must be data frames.")
   }
   if (missing(relationship)) {
-    stop(
-      "Specify the key `relationship`: \"1:1\", \"m:1\" or \"1:m\".",
-      call. = FALSE
+    cli::cli_abort(
+      "Specify the key {.arg relationship}: {.val 1:1}, {.val m:1} or
+       {.val 1:m}."
     )
   }
   relationship <- match.arg(relationship, c("1:1", "m:1", "1:m"))
   if (missing(by) || !is.character(by) || !length(by) || anyNA(by)) {
-    stop("`by` must be a character vector of key columns.", call. = FALSE)
+    cli::cli_abort("{.arg by} must be a character vector of key columns.")
   }
   groups <- c("master", "using", "match")
   .keep <- merge_groups(.keep, ".keep")
   if (!is.null(.assert)) {
     .assert <- merge_groups(.assert, ".assert")
   }
-  check_flag(.report, ".report")
+  check_bool(.report)
 
   master <- dplyr::ungroup(table_working_data(.data))
   other <- dplyr::ungroup(table_working_data(using))
@@ -89,10 +89,14 @@ s_merge <- function(
     ifelse(nzchar(names(by)), names(by), by)
   }
   using_keys <- unname(by)
-  merge_check_keys(master, master_keys, "`.data`")
-  merge_check_keys(other, using_keys, "`using`")
+  merge_check_keys(master, master_keys, "{.arg .data}")
+  merge_check_keys(other, using_keys, "{.arg using}")
   if (relationship %in% c("1:1", "1:m")) {
-    merge_check_unique(master, master_keys, "the master data (`.data`)")
+    merge_check_unique(
+      master,
+      master_keys,
+      "the master data ({.arg .data})"
+    )
   }
   if (relationship %in% c("1:1", "m:1")) {
     merge_check_unique(other, using_keys, "the using data")
@@ -104,26 +108,19 @@ s_merge <- function(
     setdiff(names(other), using_keys)
   )
   if (length(shared)) {
-    message(
-      "Kept the values from `.data` for column(s) also in `using`: ",
-      paste0("`", shared, "`", collapse = ", "),
-      ".\n\u2139 Rename them in `using` first to keep both."
-    )
+    cli::cli_inform(c(
+      "Kept the values from {.arg .data} for column{?s} also in {.arg using}:
+       {.var {shared}}.",
+      i = "Rename them in {.arg using} first to keep both."
+    ))
     other <- other[setdiff(names(other), shared)]
   }
   if (!is.null(.generate)) {
-    if (!rlang::is_string(.generate) || !nzchar(.generate)) {
-      stop(
-        "`.generate` must be a single nonempty string or NULL.",
-        call. = FALSE
-      )
-    }
+    check_string(.generate, allow_empty = FALSE, allow_null = TRUE)
     if (.generate %in% c(names(master), names(other))) {
-      stop(
-        "Column `",
-        .generate,
-        "` already exists; choose another `.generate` name.",
-        call. = FALSE
+      cli::cli_abort(
+        "Column {.var {(.generate)}} already exists; choose another
+         {.arg .generate} name."
       )
     }
   }
@@ -150,23 +147,22 @@ s_merge <- function(
   joined[[in_using]] <- NULL
 
   if (.report) {
-    message(merge_report(counts, .generate))
+    # The report is a fixed-width table, so keep its spacing as written.
+    rlang::inform(merge_report(counts, .generate))
   }
   if (!is.null(.assert) && !all(counts[setdiff(groups, .assert)] == 0L)) {
     found <- setdiff(groups[unique(status)], .assert)
-    stop(
-      "Merge assertion failed: found ",
-      paste0(
-        counts[found],
-        " ",
-        merge_group_label(found),
-        " row(s)",
-        collapse = " and "
-      ),
-      "; `.assert` allows only ",
-      paste(merge_group_label(.assert), collapse = ", "),
-      ".",
-      call. = FALSE
+    found <- paste0(
+      counts[found],
+      " ",
+      merge_group_label(found),
+      " row(s)",
+      collapse = " and "
+    )
+    allowed <- paste(merge_group_label(.assert), collapse = ", ")
+    cli::cli_abort(
+      "Merge assertion failed: found {found}; {.arg .assert} allows only
+       {allowed}."
     )
   }
   if (!is.null(.generate)) {
@@ -183,14 +179,13 @@ s_merge <- function(
   table_restore(joined, .data)
 }
 
-merge_groups <- function(value, argument) {
+merge_groups <- function(value, argument, call = rlang::caller_env()) {
   groups <- c("master", "using", "match")
   if (!is.character(value) || !length(value) || !all(value %in% groups)) {
-    stop(
-      "`",
-      argument,
-      "` must contain \"master\", \"using\" and/or \"match\".",
-      call. = FALSE
+    cli::cli_abort(
+      "{.arg {argument}} must contain {.val master}, {.val using} and/or
+       {.val match}.",
+      call = call
     )
   }
   unique(value)
@@ -202,33 +197,33 @@ merge_group_label <- function(group) {
   ])
 }
 
-merge_check_keys <- function(data, keys, label) {
+merge_check_keys <- function(data, keys, label, call = rlang::caller_env()) {
   missing <- setdiff(keys, names(data))
   if (length(missing)) {
-    stop(
-      "Key column(s) not found in ",
-      label,
-      ": ",
-      paste0("`", missing, "`", collapse = ", "),
-      ".",
-      call. = FALSE
+    cli::cli_abort(
+      paste0("Key column(s) not found in ", label, ": {.var {missing}}."),
+      call = call
     )
   }
 }
 
-merge_check_unique <- function(data, keys, label) {
+merge_check_unique <- function(data, keys, label, call = rlang::caller_env()) {
   copies <- key_copies(tibble::as_tibble(data[keys]))
   if (any(copies > 1L)) {
-    stop(
-      key_label(keys),
-      if (length(keys) == 1L) " does" else " do",
-      " not uniquely identify rows in ",
-      label,
-      " (",
-      sum(copies > 1L),
-      " rows share a key).\n",
-      "\u2139 Check the relationship, or see the rows with `duplicates_list()`.",
-      call. = FALSE
+    verb <- if (length(keys) == 1L) "does" else "do"
+    keys <- key_label(keys)
+    shared <- sum(copies > 1L)
+    cli::cli_abort(
+      c(
+        paste0(
+          "{keys} {verb} not uniquely identify rows in ",
+          label,
+          " ({shared} rows share a key)."
+        ),
+        i = "Check the relationship, or see the rows with
+             {.fn duplicates_list}."
+      ),
+      call = call
     )
   }
 }

@@ -11,7 +11,7 @@ test_that(".total gives the fre() results from tab() and tab1()", {
     tab1(data, x, .type = "tibble", .total = TRUE),
     fre1(data, x, .type = "tibble")
   )
-  expect_error(tab(data, x, .total = NA), "single TRUE or FALSE")
+  expect_error(tab(data, x, .total = NA), "must be `TRUE` or `FALSE`")
 })
 
 test_that("xtab() cross-tabulates with optional totals", {
@@ -27,7 +27,7 @@ test_that("xtab() cross-tabulates with optional totals", {
     xtab(data, a, b, .type = "flextable"),
     "requires `.total = TRUE`"
   )
-  expect_error(xtab(data, a, b, .total = "yes"), "single TRUE or FALSE")
+  expect_error(xtab(data, a, b, .total = "yes"), "must be `TRUE` or `FALSE`")
 })
 
 test_that("xtab(.chi2 = TRUE) matches chisq.test() and Stata's signed V", {
@@ -90,7 +90,7 @@ test_that("xtab(.chi2 = TRUE) handles weights, totals and degenerate tables", {
     "not computed"
   )
   expect_true(is.na(attr(out, "chi2")$statistic))
-  expect_error(xtab(data, a, b, .chi2 = NA), "single TRUE or FALSE")
+  expect_error(xtab(data, a, b, .chi2 = NA), "must be `TRUE` or `FALSE`")
   skip_if_not_installed("flextable")
   table <- suppressMessages(
     xtab(data, a, b, .total = TRUE, .type = "flextable", .chi2 = TRUE)

@@ -110,7 +110,7 @@ unpreview_table <- function(.data) {
   .data
 }
 
-preview_check_data <- function(x) {
+preview_check_data <- function(x, call = rlang::caller_env()) {
   supported <- c(
     "statart_preview",
     "grouped_df",
@@ -122,18 +122,23 @@ preview_check_data <- function(x) {
     "data.frame"
   )
   if (!is.data.frame(x) || !all(class(x) %in% supported)) {
-    rlang::abort(paste0(
-      "`.data` must be an in-memory data frame, data.table, sf data frame, or ordinary/grouped/rowwise ",
-      "tibble. Collect lazy tables and convert other subclasses explicitly ",
-      "with tibble::as_tibble(); apply the wrapper to each table in a list."
-    ))
+    cli::cli_abort(
+      c(
+        "{.arg .data} must be an in-memory data frame, data.table, sf data
+         frame, or ordinary/grouped/rowwise tibble.",
+        i = "Collect lazy tables and convert other subclasses explicitly with
+             {.fn tibble::as_tibble}; apply the wrapper to each table in a
+             list."
+      ),
+      call = call
+    )
   }
   if (inherits(x, "data.table")) {
-    table_check_data_table()
+    table_check_data_table(call)
   }
 }
 
-preview_check_n <- function(n) {
+preview_check_n <- function(n, call = rlang::caller_env()) {
   if (
     !is.numeric(n) ||
       length(n) != 1L ||
@@ -141,12 +146,15 @@ preview_check_n <- function(n) {
       n <= 0 ||
       (is.finite(n) && n != floor(n))
   ) {
-    rlang::abort("`n` must be a single positive whole number or Inf.")
+    cli::cli_abort(
+      "{.arg n} must be a single positive whole number or {.code Inf}.",
+      call = call
+    )
   }
 }
 
-preview_rows <- function(size, n, style) {
-  preview_check_n(n)
+preview_rows <- function(size, n, style, call = rlang::caller_env()) {
+  preview_check_n(n, call)
   if (size <= n) {
     return(seq_len(size))
   }
@@ -384,9 +392,9 @@ slice_interval <- function(.data, n = 10) {
   preview_slice(.data, n, "interval")
 }
 
-preview_slice <- function(.data, n, style) {
-  preview_check_data(.data)
-  rows <- preview_rows(nrow(.data), n, style)
+preview_slice <- function(.data, n, style, call = rlang::caller_env()) {
+  preview_check_data(.data, call)
+  rows <- preview_rows(nrow(.data), n, style, call)
   if (inherits(.data, "data.table")) {
     out <- unpreview_table(.data)[rows]
     if (inherits(.data, "statart_preview")) {

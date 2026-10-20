@@ -67,37 +67,29 @@ NULL
 #' @rdname keys
 #' @export
 isid <- function(.data, ..., .missok = FALSE) {
-  check_flag(.missok, ".missok")
+  check_bool(.missok)
   keys <- key_columns(.data, ...)
   labels <- key_label(names(keys))
   if (!.missok) {
     missing <- vapply(keys, function(x) any(is.na(x)), logical(1))
     if (any(missing)) {
-      stop(
-        "`",
-        paste(names(keys)[missing], collapse = "`, `"),
-        "` should never be missing to identify rows.\n",
-        "\u2139 Use `.missok = TRUE` to allow missing key values.",
-        call. = FALSE
-      )
+      cli::cli_abort(c(
+        "{.var {names(keys)[missing]}} should never be missing to identify
+         rows.",
+        i = "Use {.code .missok = TRUE} to allow missing key values."
+      ))
     }
   }
   copies <- key_copies(keys)
   if (any(copies > 1L)) {
     repeated <- sum(copies > 1L)
     sets <- length(unique(vctrs::vec_group_id(keys)[copies > 1L]))
-    stop(
-      labels,
-      if (ncol(keys) == 1L) " does" else " do",
-      " not uniquely identify the rows: ",
-      sets,
-      if (sets == 1L) " value appears" else " values appear",
-      " more than once (",
-      repeated,
-      " rows).\n",
-      "\u2139 See them with `duplicates_list()`.",
-      call. = FALSE
-    )
+    verb <- if (ncol(keys) == 1L) "does" else "do"
+    cli::cli_abort(c(
+      "{labels} {verb} not uniquely identify the rows: {sets} value{?s}
+       appear{?s/} more than once ({repeated} rows).",
+      i = "See them with {.fn duplicates_list}."
+    ))
   }
   invisible(.data)
 }
@@ -118,15 +110,10 @@ duplicates_report <- function(.data, ...) {
 #' @rdname keys
 #' @export
 duplicates_tag <- function(.data, ..., .name = "dup") {
-  if (!rlang::is_string(.name) || !nzchar(.name)) {
-    stop("`.name` must be a single nonempty string.", call. = FALSE)
-  }
+  check_string(.name, allow_empty = FALSE)
   if (.name %in% names(.data)) {
-    stop(
-      "Column `",
-      .name,
-      "` already exists; choose another `.name`.",
-      call. = FALSE
+    cli::cli_abort(
+      "Column {.var {(.name)}} already exists; choose another {.arg .name}."
     )
   }
   tags <- key_copies(key_columns(.data, ...)) - 1L
@@ -160,7 +147,7 @@ duplicates_list <- function(.data, ...) {
 #' @rdname keys
 #' @export
 duplicates_drop <- function(.data, ..., .force = FALSE) {
-  check_flag(.force, ".force")
+  check_bool(.force)
   keys <- key_columns(.data, ...)
   all_columns <- ncol(keys) == ncol(.data)
   surplus <- duplicated(vctrs::vec_group_id(keys))
@@ -172,28 +159,20 @@ duplicates_drop <- function(.data, ..., .force = FALSE) {
     )
     kept <- vctrs::vec_slice(full, which(!surplus))
     if (vctrs::vec_unique_count(kept) < vctrs::vec_unique_count(full)) {
-      stop(
-        "Rows sharing ",
-        key_label(names(keys)),
-        " differ in other columns, so dropping them loses data.\n",
-        "\u2139 Use `.force = TRUE` to keep the first row of each set anyway.",
-        call. = FALSE
-      )
+      cli::cli_abort(c(
+        "Rows sharing {sub('^V', 'v', key_label(names(keys)))} differ in
+         other columns, so dropping them loses data.",
+        i = "Use {.code .force = TRUE} to keep the first row of each set
+             anyway."
+      ))
     }
   }
-  message(
-    "(",
-    sum(surplus),
-    if (sum(surplus) == 1L) " row" else " rows",
-    " removed)"
-  )
+  cli::cli_inform("({sum(surplus)} row{?s} removed)")
   key_row_slice(.data, which(!surplus))
 }
 
-key_columns <- function(.data, ...) {
-  if (!is.data.frame(.data)) {
-    stop("`.data` must be a data frame.", call. = FALSE)
-  }
+key_columns <- function(.data, ..., call = rlang::caller_env()) {
+  check_data_frame(.data, call = call)
   data <- dplyr::ungroup(table_working_data(.data))
   if (missing(...)) {
     return(tibble::as_tibble(data, .name_repair = "minimal"))
@@ -204,7 +183,7 @@ key_columns <- function(.data, ...) {
     allow_rename = FALSE
   )
   if (!length(selected)) {
-    stop("Select at least one identifying column.", call. = FALSE)
+    cli::cli_abort("Select at least one identifying column.", call = call)
   }
   tibble::as_tibble(data[selected], .name_repair = "minimal")
 }
@@ -229,10 +208,4 @@ key_row_slice <- function(.data, rows) {
     return(.data[rows])
   }
   dplyr::dplyr_row_slice(.data, rows)
-}
-
-check_flag <- function(value, name) {
-  if (!is.logical(value) || length(value) != 1L || is.na(value)) {
-    stop("`", name, "` must be a single TRUE or FALSE.", call. = FALSE)
-  }
 }

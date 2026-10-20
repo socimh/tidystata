@@ -260,3 +260,9 @@ test_that("statart entries call functions that statart exports", {
     info = toString(intersect(used, aliases))
   )
 })
+
+test_that("findit() reports an invalid query", {
+  expect_snapshot(error = TRUE, {
+    findit(1 + 1)
+  })
+})

@@ -815,7 +815,7 @@ test_that("summary sorting uses key values and preserves measured-variable order
       fn(input, x, .by = g, .stat = "n")$g,
       factor(c("high", "low", NA), levels = c("high", "low"))
     )
-    expect_error(fn(input, .sort = NA), "single TRUE or FALSE")
+    expect_error(fn(input, .sort = NA), "must be `TRUE` or `FALSE`")
   }
 })
 
@@ -841,7 +841,7 @@ test_that("summary empty-row removal is independent of missing-key removal", {
     )
     expect_equal(combined$g, c("a", "b"))
     expect_equal(combined$name, c("x", "day"))
-    expect_error(fn(input, .drop_empty = 1), "single TRUE or FALSE")
+    expect_error(fn(input, .drop_empty = 1), "must be `TRUE` or `FALSE`")
   }
   expect_warning(
     empty <- summ(c(NA_real_, NA_real_), .drop_empty = TRUE, .stat = "mean"),
@@ -916,4 +916,22 @@ test_that("mixed calendar tables retain documented shared-column types", {
   # Magrittr placeholders are named `value` (see test-problems2-low.R).
   expect_identical(piped$name, "value")
   expect_identical(piped$mean, 2)
+})
+
+test_that("summ() and tabstat() report invalid input", {
+  d <- tibble::tibble(
+    g = c("a", "b"),
+    x = c(1, 2),
+    when = as.Date("2020-01-01") + 0:1
+  )
+  expect_snapshot(error = TRUE, {
+    summ(d, x, .sort = NA)
+    tabstat(d, x, .keep_all = 1)
+    summ(d, x, .stat = NA)
+    summ(d, x, .stat = c("mean", "middle"))
+    summ(d, when, .stat = "sum")
+    summ(d, x, .by = toupper(g))
+    summ(d, g)
+  })
+  expect_snapshot(out <- summ(d, x, when, .stat = c("mean", "skew")))
 })

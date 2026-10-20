@@ -39,24 +39,22 @@ NULL
 #' @rdname is_first
 #' @export
 is_first <- function(..., .missing = FALSE) {
-  check_flag(.missing, ".missing")
+  check_bool(.missing)
   keys <- list(...)
   if (!length(keys)) {
+    error_call <- rlang::current_env()
     size <- tryCatch(dplyr::n(), error = function(e) {
-      stop(
-        "Supply the variables that define the groups, or call `is_first()` ",
-        "inside a grouped `mutate()`.",
-        call. = FALSE
+      cli::cli_abort(
+        "Supply the variables that define the groups, or call {.fn is_first}
+         inside a grouped {.fn dplyr::mutate}.",
+        call = error_call
       )
     })
     return(seq_len(size) == 1L)
   }
   sizes <- lengths(keys)
   if (any(sizes != sizes[[1L]])) {
-    stop(
-      "All arguments to `is_first()` must have the same length.",
-      call. = FALSE
-    )
+    cli::cli_abort("All arguments to {.fn is_first} must have the same length.")
   }
   names(keys) <- paste0("key", seq_along(keys))
   keys <- vctrs::new_data_frame(keys, n = sizes[[1L]])

@@ -187,6 +187,7 @@ summ <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
+  local_wrapper_error_call()
   # Validate controls before data-dependent branching.
   controls <- list(
     .keep_all = .keep_all,
@@ -197,10 +198,7 @@ summ <- function(
     .drop_empty = .drop_empty
   )
   for (argument in names(controls)) {
-    value <- controls[[argument]]
-    if (!is.logical(value) || length(value) != 1L || is.na(value)) {
-      stop("`", argument, "` must be a single TRUE or FALSE.", call. = FALSE)
-    }
+    check_bool(controls[[argument]], arg = argument)
   }
   summ_stat_names(.stat)
   .mode <- match.arg(.mode)
@@ -253,9 +251,9 @@ summ <- function(
   )
 
   if (any(vapply(.data_summ, function(x) !is.null(dim(x)), logical(1)))) {
-    stop(
-      "Matrix/data-frame columns are not supported; use atomic or list columns.",
-      call. = FALSE
+    cli::cli_abort(
+      "Matrix/data-frame columns are not supported; use atomic or list
+       columns."
     )
   }
 
@@ -302,12 +300,12 @@ summ <- function(
     }
     names(.data)[names(.data) == old_name] <- new_name
     group_vars[[position]] <- new_name
-    message(reserved_name_message(
+    reserved_name_inform(
       old_name,
       new_name,
       "summ()",
       what = "Grouping column"
-    ))
+    )
   }
   measured_count <- ncol(.data) - length(group_vars)
   # Keep observed counts internally when filtering a selected-statistic result.

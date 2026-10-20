@@ -33,5 +33,13 @@ test_that("is_first() without arguments flags the first row of each group", {
 test_that("is_first() validates its input", {
   expect_error(is_first(), "Supply the variables")
   expect_error(is_first(1:2, 1:3), "same length")
-  expect_error(is_first(1:2, .missing = NA), "single TRUE or FALSE")
+  expect_error(is_first(1:2, .missing = NA), "must be `TRUE` or `FALSE`")
+})
+
+test_that("is_first() reports invalid input", {
+  expect_snapshot(error = TRUE, {
+    is_first(1:2, .missing = NA)
+    is_first()
+    is_first(1:2, 1:3)
+  })
 })

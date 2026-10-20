@@ -196,7 +196,7 @@ for (function_name in c("summ", "tabstat")) {
               list(tibble::tibble(x = 1:3)),
               stats::setNames(list(value), argument)
             )
-            expect_error(do.call(api, args), "single.*TRUE.*FALSE")
+            expect_error(do.call(api, args), "must be `TRUE` or `FALSE`")
           }
         }
       }

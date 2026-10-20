@@ -207,7 +207,7 @@ tab <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
-  check_flag(.total, ".total")
+  check_bool(.total)
   if (.total) {
     return(fre(
       .data,
@@ -293,7 +293,7 @@ tab1 <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
-  check_flag(.total, ".total")
+  check_bool(.total)
   if (.total) {
     return(fre1(
       .data,
@@ -350,6 +350,7 @@ tab1 <- function(
     names(groups$key) <- group_vars
   }
 
+  error_call <- rlang::current_env()
   out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
     dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
       tab_data(
@@ -357,7 +358,8 @@ tab1 <- function(
         .desc,
         weights = weights,
         group_order = .group_order,
-        input_groups = groups
+        input_groups = groups,
+        call = error_call
       ) %>%
       dplyr::select(-...any_miss)
   })
@@ -394,15 +396,15 @@ tab2 <- function(
   .wt_type = c("frequency", "analytic"),
   .chi2 = FALSE
 ) {
+  local_wrapper_error_call()
   reject_cross_controls(..., function_name = "tab2()")
-  check_flag(.flip, ".flip")
-  check_flag(.total, ".total")
-  check_flag(.chi2, ".chi2")
+  check_bool(.flip)
+  check_bool(.total)
+  check_bool(.chi2)
   .type <- match.arg(.type)
   if (.type == "flextable" && !.total) {
-    stop(
-      "Flextable cross-tabulation requires `.total = TRUE`.",
-      call. = FALSE
+    cli::cli_abort(
+      "Flextable cross-tabulation requires {.code .total = TRUE}."
     )
   }
   template <- .data
@@ -411,12 +413,11 @@ tab2 <- function(
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
   .data <- weighted$data
   if (.chi2 && !is.null(weighted$weights) && .wt_type == "analytic") {
-    stop(
-      "`.chi2` is not available with analytic weights, whose counts are ",
-      "not observation counts.\n",
-      "\u2139 For sampling weights, use `survey::svychisq()`.",
-      call. = FALSE
-    )
+    cli::cli_abort(c(
+      "{.arg .chi2} is not available with analytic weights, whose counts are
+       not observation counts.",
+      i = "For sampling weights, use {.fn survey::svychisq}."
+    ))
   }
   weights <- weights_scale(weighted$weights, .data, character(), .wt_type)
   # Prepare data
@@ -425,9 +426,8 @@ tab2 <- function(
   .data <- s_ungroup(.data)
   if (ncol(.data) == 0L) {
     if (.type == "flextable") {
-      stop(
-        "Flextable cross-tabulation requires two selected variables.",
-        call. = FALSE
+      cli::cli_abort(
+        "Flextable cross-tabulation requires two selected variables."
       )
     }
     return(table_restore(tibble::tibble(), template, .type))
@@ -441,7 +441,7 @@ tab2 <- function(
     pairs <- utils::combn(names(.data), 2L, simplify = FALSE)
     out <- lapply(pairs, function(pair) {
       if (.chi2) {
-        message("-> tabulation of ", pair[[1L]], " by ", pair[[2L]])
+        cli::cli_inform("-> tabulation of {pair[[1L]]} by {pair[[2L]]}")
       }
       pair_data <- dplyr::select(.data, dplyr::all_of(pair))
       tab2_pair(pair_data, weights, template, .flip, .total, .type, .chi2)
@@ -481,6 +481,7 @@ fre2 <- function(
 
 # One two-way table from exactly two selected columns.
 tab2_pair <- function(.data, weights, template, .flip, .total, .type, .chi2) {
+  rlang::local_error_call(rlang::caller_env())
   # Flip variables
   if (.flip) {
     .data <- .data %>%
@@ -569,6 +570,7 @@ fre <- function(
     names(groups$key) <- group_vars
   }
 
+  error_call <- rlang::current_env()
   # Tabulate
   out <- .data %>%
     tab_data(
@@ -577,13 +579,14 @@ fre <- function(
       weights = weights,
       total = TRUE,
       group_order = .group_order,
-      input_groups = groups
+      input_groups = groups,
+      call = error_call
     ) %>%
     dplyr::select(-...any_miss)
 
   if (.type[1] == "flextable") {
     out <- out %>%
-      result_to_flextable(group_vars)
+      result_to_flextable(group_vars, call = error_call)
   }
 
   # Output
@@ -645,6 +648,7 @@ fre1 <- function(
     names(groups$key) <- group_vars
   }
 
+  error_call <- rlang::current_env()
   out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
     dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
       tab_data(
@@ -653,7 +657,8 @@ fre1 <- function(
         weights = weights,
         total = TRUE,
         group_order = .group_order,
-        input_groups = groups
+        input_groups = groups,
+        call = error_call
       ) %>%
       dplyr::select(-...any_miss)
   })
@@ -673,7 +678,7 @@ fre1 <- function(
     out <- out %>%
       append_tab_list(blank_row = TRUE) %>%
       dplyr::slice(-dplyr::n()) %>%
-      result_to_flextable(group_vars, fre1 = TRUE)
+      result_to_flextable(group_vars, fre1 = TRUE, call = error_call)
   } else if (.type[1] == "tibble") {
     out <- append_tab_list(
       out,
@@ -691,31 +696,37 @@ fre1 <- function(
 
 
 # One-way and grouping controls would otherwise be read as data expressions.
-reject_cross_controls <- function(..., function_name) {
+reject_cross_controls <- function(
+  ...,
+  function_name,
+  call = rlang::caller_env()
+) {
   supplied <- intersect(c(".by", ".desc", ".group_order"), ...names())
   if (length(supplied)) {
-    stop(
-      "`",
-      supplied[[1L]],
-      "` is not supported by `",
-      function_name,
-      "`; cross-tabulations have no groups or category sorting. ",
-      "Use `tab()` or `fre()` with `.by`, or filter the data first.",
-      call. = FALSE
+    cli::cli_abort(
+      c(
+        "{.arg {supplied[[1L]]}} is not supported by {.code {function_name}};
+         cross-tabulations have no groups or category sorting.",
+        i = "Use {.fn tab} or {.fn fre} with {.arg .by}, or filter the data
+             first."
+      ),
+      call = call
     )
   }
 }
 
 # Atomic vectors become a one-column tibble named `value`.
 tab_vector_data <- function(.data, ..., .by = NULL) {
+  # Dots hold user selections, so report errors through the caller's frame.
+  rlang::local_error_call(rlang::caller_env())
   if (!is.atomic(.data) || is.null(.data) || !is.null(dim(.data))) {
-    stop("`.data` must be a data frame or an atomic vector.", call. = FALSE)
+    stop_input_type(.data, "a data frame or an atomic vector")
   }
   if (!missing(...)) {
-    stop("For vector input, omit selectors in `...`.", call. = FALSE)
+    cli::cli_abort("For vector input, omit selectors in {.arg ...}.")
   }
   if (!rlang::quo_is_null(rlang::enquo(.by))) {
-    stop("For vector input, omit `.by`.", call. = FALSE)
+    cli::cli_abort("For vector input, omit {.arg .by}.")
   }
   # tibble() reads `.data` as its data pronoun, so bind the vector first.
   value <- .data

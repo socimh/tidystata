@@ -531,7 +531,7 @@ cross_add(80, "zero-column data frame returns empty table", function(fn) {
   expect_equal(dim(out), c(0L, 0L))
 })
 cross_add(81, "one selected variable errors", function(fn) {
-  expect_error(fn(cross_fixture(), x), "provide two variables")
+  expect_error(fn(cross_fixture(), x), "rovide two variables")
 })
 cross_add(
   82,

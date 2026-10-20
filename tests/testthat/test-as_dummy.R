@@ -77,7 +77,10 @@ test_that("as_dummy() keeps containers and validates input", {
     as_dummy(tibble::tibble(x = list(1, 2)), x),
     "cannot be expanded"
   )
-  expect_error(as_dummy(dummy_data, sex, .remove = NA), "single TRUE or FALSE")
+  expect_error(
+    as_dummy(dummy_data, sex, .remove = NA),
+    "must be `TRUE` or `FALSE`"
+  )
 })
 
 test_that("as_dummy() keeps sf geometry", {
@@ -89,4 +92,15 @@ test_that("as_dummy() keeps sf geometry", {
   out <- as_dummy(points, k, .remove = TRUE)
   expect_s3_class(out, "sf")
   expect_identical(names(out), c("k_a", "k_b", "geometry"))
+})
+
+test_that("as_dummy() reports invalid input", {
+  d <- tibble::tibble(sex = c("m", "f"), sex_f = 1:2)
+  expect_snapshot(error = TRUE, {
+    as_dummy(1:3)
+    as_dummy(d, sex, .remove = NA)
+    as_dummy(d, tidyselect::starts_with("none"))
+    as_dummy(d, sex)
+    as_dummy(dplyr::group_by(d, sex), sex, .remove = TRUE)
+  })
 })

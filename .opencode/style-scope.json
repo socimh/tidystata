@@ -72,6 +72,7 @@
     "R/table-container.R",
     "R/timer.R",
     "R/type-conversion.R",
+    "R/utils-check.R",
     "R/utils-pipe.R",
     "R/var-type.R",
     "R/variables.R",

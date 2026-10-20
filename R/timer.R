@@ -24,20 +24,14 @@
 #' mean(x) %>% timer()
 #' try(timer(stop("failure")))
 timer <- function(.x, .on_error = TRUE) {
-  if (!is.logical(.on_error) || length(.on_error) != 1L || is.na(.on_error)) {
-    stop(
-      "`.on_error` must be a single nonmissing logical value.",
-      call. = FALSE
-    )
-  }
+  check_bool(.on_error)
   begin_time <- Sys.time()
   completed <- FALSE
   # Report failures while unwinding, without wrapping the evaluation frame.
   on.exit(
     if (!completed && .on_error) {
-      message(
-        "Failed execution. Time spent: ",
-        duration_to_chr(Sys.time() - begin_time)
+      cli::cli_inform(
+        "Failed execution. Time spent: {duration_to_chr(Sys.time() - begin_time)}"
       )
     },
     add = TRUE
@@ -46,7 +40,7 @@ timer <- function(.x, .on_error = TRUE) {
   completed <- TRUE
   end_time <- Sys.time()
   time <- end_time - begin_time
-  message("Time spent: ", duration_to_chr(time))
+  cli::cli_inform("Time spent: {duration_to_chr(time)}")
   invisible(out)
 }
 

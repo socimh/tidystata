@@ -1157,3 +1157,17 @@ test_that("row contracts: arithmetic helpers reject character columns clearly", 
     expect_error(get(name, mode = "function")(data), "numeric or logical")
   }
 })
+
+test_that("row helpers report invalid input", {
+  d <- tibble::tibble(a = 1:2, b = c("x", "y"), d = as.Date("2020-01-01") + 0:1)
+  expect_snapshot(error = TRUE, {
+    row_mean(d$a, na.rm = NA)
+    row_unique(d$a, na.rm = TRUE)
+    row_nvals(d$a, na.rm = TRUE)
+    row_mean(d$a, d$b)
+    row_sum(d$d, d$d + 1)
+    row_max(d$a, .values = list(1:3))
+    row_max(d$a, factor(c("u", "v")))
+    dplyr::mutate(d, m = row_mean(tidyselect::where(is.list)))
+  })
+})

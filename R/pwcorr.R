@@ -54,12 +54,10 @@ pwcorr <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
-  if (!is.data.frame(.data)) {
-    stop("`.data` must be a data frame.", call. = FALSE)
-  }
+  check_data_frame(.data)
   .method <- match.arg(.method)
   .wt_type <- match.arg(.wt_type)
-  check_flag(.wide, ".wide")
+  check_bool(.wide)
   by <- rlang::enquo(.by)
   .data <- aggregation_working_data(
     .data,
@@ -70,30 +68,28 @@ pwcorr <- function(
     by
   )
   .data <- dplyr::ungroup(.data)
+  error_call <- rlang::current_env()
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
   if (!is.null(weighted$weights) && .method != "pearson") {
-    stop("`.wt` is supported for Pearson correlations only.", call. = FALSE)
+    cli::cli_abort("{.arg .wt} is supported for Pearson correlations only.")
   }
   .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
   weights <- weighted$weights
 
   values <- remove_group_vars(.data, ..., group_vars = group_vars)
-  values <- pwcorr_values(values, selected = !missing(...))
+  values <- pwcorr_values(values, selected = !missing(...), call = error_call)
   if (.wide && "variable" %in% names(values)) {
-    stop(
-      "Column `variable` holds the row names of the wide table; ",
-      "rename the variable `variable` first.",
-      call. = FALSE
+    cli::cli_abort(
+      "Column {.var variable} holds the row names of the wide table; rename
+       the variable {.var variable} first."
     )
   }
   reserved <- if (.wide) "variable" else c("var1", "var2", "r", "n", "p")
   clash <- intersect(group_vars, c(reserved, if (.wide) names(values)))
   if (length(clash)) {
-    stop(
-      "Grouping variable `",
-      clash[[1L]],
-      "` clashes with an output column name; rename it first.",
-      call. = FALSE
+    cli::cli_abort(
+      "Grouping variable {.var {clash[[1L]]}} clashes with an output column
+       name; rename it first."
     )
   }
 
@@ -123,7 +119,7 @@ pwcorr <- function(
 
 # Numeric versions of the correlated columns. Unselected non-numeric columns
 # are skipped; explicitly selected ones are an error.
-pwcorr_values <- function(data, selected) {
+pwcorr_values <- function(data, selected, call = rlang::caller_env()) {
   numeric <- lapply(data, function(x) {
     if (is.logical(x) && !is.object(x)) {
       return(as.numeric(x))
@@ -138,16 +134,18 @@ pwcorr_values <- function(data, selected) {
   })
   invalid <- vapply(numeric, is.null, logical(1))
   if (selected && any(invalid)) {
-    stop(
-      "`",
-      paste(names(data)[invalid], collapse = "`, `"),
-      "` must be numeric or logical to be correlated.",
-      call. = FALSE
+    cli::cli_abort(
+      "{.var {names(data)[invalid]}} must be numeric or logical to be
+       correlated.",
+      call = call
     )
   }
   numeric <- numeric[!invalid]
   if (length(numeric) < 2L) {
-    stop("Select at least two numeric variables to correlate.", call. = FALSE)
+    cli::cli_abort(
+      "Select at least two numeric variables to correlate.",
+      call = call
+    )
   }
   numeric
 }

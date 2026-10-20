@@ -633,13 +633,13 @@ test_that("tab2() returns every pairwise table for three or more variables", {
   messages <- capture_messages(tested <- tab2(d, a, b, c, .chi2 = TRUE))
   expect_identical(
     grep("^-> ", messages, value = TRUE),
-    paste0("-> tabulation of ", c("a by b", "a by c", "b by c"), "\n")
+    paste0("-> tabulation of ", c("a by b", "a by c", "b by c"))
   )
   expect_identical(
     attr(tested[["b x c"]], "chi2"),
     attr(suppressMessages(tab2(d, b, c, .chi2 = TRUE)), "chi2")
   )
-  expect_error(tab2(d, a), "Please provide two variables")
+  expect_error(tab2(d, a), "Provide two variables")
   dt <- data.table::as.data.table(d)
   expect_s3_class(tab2(dt, a, b, c)[[1]], "data.table")
 })

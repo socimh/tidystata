@@ -446,3 +446,10 @@ test_that("set_seed rejects an invalid seed before forcing the expression", {
   )
   expect_identical(calls, 0L)
 })
+
+test_that("set_seed() reports a missing or invalid seed", {
+  expect_snapshot(error = TRUE, {
+    set_seed()
+    set_seed("a")
+  })
+})

@@ -321,7 +321,7 @@ test_that("varlist diagnoses noncharacter patterns without changing selections",
   for (pattern in list(1, TRUE, NULL, list("x*"), factor("x*"))) {
     expect_error(
       varlist(pattern, vars = c("x1", "x2", "y")),
-      "`string` must be a character string"
+      "`string` must be a character vector"
     )
   }
   expect_identical(varlist("x*", vars = c("x1", "x2", "y")), c(1L, 2L))
@@ -381,4 +381,12 @@ test_that("letter range translation remains compatible with ds and varlist", {
   d <- tibble::tibble(xA = 1:2, xB = 3:4, xC = 5:6, xZ = 7:8)
   expect_no_warning(out <- ds(d, varlist("x[A-C]")))
   expect_identical(out, c("xA", "xB", "xC"))
+})
+
+test_that("varlist() reports invalid patterns", {
+  expect_snapshot(error = TRUE, {
+    varlist(1, vars = "x1")
+    varlist("x[1-2][3-4]", vars = "x1")
+    varlist("x[3-1]", vars = "x1")
+  })
 })

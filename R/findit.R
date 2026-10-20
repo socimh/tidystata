@@ -127,7 +127,7 @@ findit <- function(command = NULL) {
   }
 
   candidates <- unique(c(entries$command, findit_functions()$`function`))
-  message(findit_no_match(query, first, candidates))
+  rlang::inform(findit_no_match(query, first, candidates))
   invisible(findit_result(entries[0L, ], "keyword"))
 }
 
@@ -160,7 +160,7 @@ findit_rank <- function(found, terms, match) {
   found
 }
 
-findit_query <- function(expr) {
+findit_query <- function(expr, call = rlang::caller_env()) {
   if (is.null(expr)) {
     return(NULL)
   }
@@ -176,10 +176,11 @@ findit_query <- function(expr) {
   ) {
     return(paste(deparse(expr), collapse = ""))
   }
-  stop(
-    "`command` must be one Stata word, an R function name or a quoted string, ",
-    "as in `findit(reg)`, `findit(left_join)` or `findit(\"merge 1:1 id\")`.",
-    call. = FALSE
+  cli::cli_abort(
+    "{.arg command} must be one Stata word, an R function name or a quoted
+     string, as in {.code findit(reg)}, {.code findit(left_join)} or
+     {.code findit(\"merge 1:1 id\")}.",
+    call = call
   )
 }
 

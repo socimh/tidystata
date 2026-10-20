@@ -12,10 +12,6 @@ test_that("std() standardises like egen std() and scale()", {
   expect_identical(std(c(5, 5, NA)), rep(NA_real_, 3))
   expect_identical(std(c(5, NA)), c(NA_real_, NA_real_))
   expect_identical(std(numeric()), numeric())
-  expect_error(std(letters), "must be numeric or logical, not character")
-  expect_error(std(factor("a")), "not factor")
-  expect_error(std(1:3, mean = "a"), "single finite number")
-  expect_error(std(1:3, sd = c(1, 2)), "single finite number")
 })
 
 test_that("pct() scales to a percentage of the total like egen pc()", {
@@ -24,8 +20,6 @@ test_that("pct() scales to a percentage of the total like egen pc()", {
   expect_equal(pct(c(TRUE, FALSE, TRUE)), c(50, 0, 50))
   expect_identical(pct(c(0, 0)), c(NA_real_, NA_real_))
   expect_identical(pct(c(NA_real_, NA_real_)), c(NA_real_, NA_real_))
-  expect_error(pct(1:3, prop = NA), "single TRUE or FALSE")
-  expect_error(pct(as.Date("2020-01-01")), "not Date")
 })
 
 test_that("std() and pct() use each group in grouped mutate()", {
@@ -38,4 +32,15 @@ test_that("std() and pct() use each group in grouped mutate()", {
   expect_equal(out$share, c(25, 75, 10, 20, 70))
   grouped <- dplyr::mutate(dplyr::group_by(data, g), z = std(x))
   expect_equal(grouped$z, out$z)
+})
+
+test_that("std() and pct() report invalid inputs", {
+  expect_snapshot(error = TRUE, {
+    std(letters)
+    std(factor("a"))
+    std(1:3, mean = "a")
+    std(1:3, sd = c(1, 2))
+    pct(1:3, prop = NA)
+    pct(as.Date("2020-01-01"))
+  })
 })

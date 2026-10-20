@@ -51,6 +51,19 @@ test_that("assert() evaluates group functions within groups", {
 
 test_that("assert() validates its input", {
   expect_error(assert(lifeexp), "at least one condition")
-  expect_error(assert(lifeexp, lexp), "must give TRUE or FALSE, not numeric")
+  expect_error(
+    assert(lifeexp, lexp),
+    "must give `TRUE` or `FALSE`, not a double vector"
+  )
   expect_error(assert(1:3, TRUE), "must be a data frame")
+})
+
+test_that("assert() reports invalid input and failed conditions", {
+  d <- tibble::tibble(x = c(1, -1, NA))
+  expect_snapshot(error = TRUE, {
+    assert(1:3, TRUE)
+    assert(d)
+    assert(d, x)
+    assert(d, x > 0, !is.na(x))
+  })
 })

@@ -50,9 +50,8 @@ ds <- function(.data, ..., .type = c("vector", "table")) {
   }
   if (is.character(.data) && is.null(dim(.data))) {
     if (anyNA(.data) || any(!nzchar(trimws(.data))) || anyDuplicated(.data)) {
-      stop(
-        "A name inventory must contain unique, nonempty, nonmissing names.",
-        call. = FALSE
+      cli::cli_abort(
+        "A name inventory must contain unique, nonempty, nonmissing names."
       )
     }
     inventory <- unname(.data)

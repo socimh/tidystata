@@ -856,11 +856,11 @@ for (function_name in c("summ", "tabstat")) {
       {
         expect_error(
           api(tibble::tibble(x = 1:3), .keep_all = 1),
-          "keep_all.*single TRUE or FALSE"
+          "keep_all.*must be `TRUE` or `FALSE`"
         )
         expect_error(
           api(tibble::tibble(x = 1:3), .name = c(TRUE, FALSE)),
-          "name.*single TRUE or FALSE"
+          "name.*must be `TRUE` or `FALSE`"
         )
       }
     )

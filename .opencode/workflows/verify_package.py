@@ -97,7 +97,8 @@ def main():
                     source, prefix, options.filter]
     if options.shuffle_seed is not None:
         test_command.append(str(options.shuffle_seed))
-    status = run("tests", test_command)
+    # Like devtools::test(): snapshot expectations run outside CRAN checks.
+    status = run("tests", test_command, extra_env={"NOT_CRAN": "true"})
     if options.check or options.release:
         build_options = [] if options.release else ["--no-build-vignettes", "--no-manual"]
         build = run("build", ["R", "CMD", "build", *build_options, source], cwd=workspace)

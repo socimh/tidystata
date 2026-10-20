@@ -464,3 +464,9 @@ test_that("timer propagates the original error without a message when disabled",
   expect_identical(err, condition)
   expect_length(messages, 0L)
 })
+
+test_that("timer() reports invalid input", {
+  expect_snapshot(error = TRUE, {
+    timer(1, .on_error = NA)
+  })
+})

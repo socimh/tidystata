@@ -127,64 +127,64 @@
 #' @rdname row_egen
 #' @export
 row_mean <- function(..., na.rm = TRUE) {
-  row_check_na_rm(na.rm)
+  check_bool(na.rm)
   row_numeric_summary(row_input(...), "mean", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_sum <- function(..., na.rm = TRUE) {
-  row_check_na_rm(na.rm)
+  check_bool(na.rm)
   row_numeric_summary(row_input(...), "sum", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_max <- function(..., .values = NULL, na.rm = TRUE) {
-  row_check_na_rm(na.rm)
+  check_bool(na.rm)
   row_extreme_constants(row_extreme_input(..., .values = .values), TRUE, na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_min <- function(..., .values = NULL, na.rm = TRUE) {
-  row_check_na_rm(na.rm)
+  check_bool(na.rm)
   row_extreme_constants(row_extreme_input(..., .values = .values), FALSE, na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_median <- function(..., na.rm = TRUE) {
-  row_check_na_rm(na.rm)
+  check_bool(na.rm)
   row_numeric_summary(row_input(...), "median", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_var <- function(..., na.rm = TRUE) {
-  row_check_na_rm(na.rm)
+  check_bool(na.rm)
   row_numeric_summary(row_input(...), "var", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_sd <- function(..., na.rm = TRUE) {
-  row_check_na_rm(na.rm)
+  check_bool(na.rm)
   row_numeric_summary(row_input(...), "sd", na.rm = na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_unique <- function(...) {
-  row_reject_na_rm(..., fn = "row_unique()")
+  row_reject_na_rm(..., fn = "row_unique")
   row_unique_count(row_input(...))
 }
 
 #' @rdname row_egen
 #' @export
 row_nvals <- function(..., .missing = FALSE) {
-  check_flag(.missing, ".missing")
-  row_reject_na_rm(..., fn = "row_unique()")
+  check_bool(.missing)
+  row_reject_na_rm(..., fn = "row_nvals")
   # Select the columns once for both counts.
   data <- row_input(...)
   out <- row_unique_count(data)
@@ -197,23 +197,23 @@ row_nvals <- function(..., .missing = FALSE) {
 #' @rdname row_egen
 #' @export
 row_miss <- function(...) {
-  row_reject_na_rm(..., fn = "row_miss()")
+  row_reject_na_rm(..., fn = "row_miss")
   row_missing_count(row_input(...))
 }
 
 #' @rdname row_egen
 #' @export
 row_non_miss <- function(...) {
-  row_reject_na_rm(..., fn = "row_non_miss()")
+  row_reject_na_rm(..., fn = "row_non_miss")
   data <- row_input(...)
   ncol(data) - row_missing_count(data)
 }
 
-row_unique_count <- function(data) {
+row_unique_count <- function(data, call = rlang::caller_env()) {
   if (all(vapply(data, row_plain_numeric, logical(1)))) {
     return(row_unique_dbl(unname(as.list(data))))
   }
-  values <- row_common_values(data)
+  values <- row_common_values(data, call)
   keys <- as.double(vctrs::vec_match(values, values))
   keys[unlist(lapply(data, is.na), use.names = FALSE)] <- NA_real_
   row_unique_dbl(row_key_columns(keys, nrow(data), ncol(data)))
@@ -241,19 +241,12 @@ row_missing_count <- function(data) {
   row_na_count(columns, !plain)
 }
 
-row_check_na_rm <- function(na.rm) {
-  if (!is.logical(na.rm) || length(na.rm) != 1L || is.na(na.rm)) {
-    stop("`na.rm` must be a single nonmissing logical value.", call. = FALSE)
-  }
-}
-
-row_reject_na_rm <- function(..., fn) {
+row_reject_na_rm <- function(..., fn, call = rlang::caller_env()) {
   if ("na.rm" %in% ...names()) {
-    stop(
-      "`na.rm` is not an argument of ",
-      fn,
-      "; it counts values across all selected columns.",
-      call. = FALSE
+    cli::cli_abort(
+      "{.arg na.rm} is not an argument of {.fn {fn}}; it counts values across
+       all selected columns.",
+      call = call
     )
   }
 }
@@ -270,6 +263,8 @@ row_is_number_literal <- function(expr) {
 # Split extrema inputs into selected columns, full-length vectors and scalar
 # constants. Constants never make an otherwise all-missing row observed.
 row_extreme_input <- function(..., .values = NULL) {
+  # Dots hold user columns, so report errors through the caller's frame.
+  rlang::local_error_call(rlang::caller_env())
   dots <- rlang::enquos(...)
   in_mutate <- !dots_is_tibble()
   constant <- vapply(
@@ -318,23 +313,28 @@ row_extreme_input <- function(..., .values = NULL) {
   }
   scalars <- extra[scalar]
   if (ncol(data) == 0L && !length(scalars)) {
-    stop(
-      "Select at least one column; NULL and zero columns are not supported.",
-      call. = FALSE
+    cli::cli_abort(
+      "Select at least one column; {.code NULL} and zero columns are not
+       supported."
     )
   }
   list(data = data, scalars = scalars)
 }
 
-row_extreme_constants <- function(input, maximum, na.rm) {
+row_extreme_constants <- function(
+  input,
+  maximum,
+  na.rm,
+  call = rlang::caller_env()
+) {
   data <- input$data
   missing <- if (ncol(data)) row_missing_count(data) else integer(nrow(data))
   observed <- if (ncol(data)) missing < ncol(data) else rep(TRUE, nrow(data))
   complete <- missing == 0L
   if (length(input$scalars)) {
-    data <- row_add_values(data, unname(input$scalars))
+    data <- row_add_values(data, unname(input$scalars), call)
   }
-  out <- row_extreme_typed(data, maximum)
+  out <- row_extreme_typed(data, maximum, call)
   drop <- !observed | (!na.rm & !complete)
   if (any(drop)) {
     out <- vctrs::vec_assign(out, drop, vctrs::vec_init(out, 1L))
@@ -361,7 +361,7 @@ row_kernel_columns <- function(data) {
   }))
 }
 
-row_common_values <- function(data) {
+row_common_values <- function(data, call = rlang::caller_env()) {
   normalized <- lapply(data, function(x) {
     missing <- is.na(x)
     if (any(missing) && !is.list(x)) {
@@ -373,19 +373,19 @@ row_common_values <- function(data) {
   values <- tryCatch(
     vctrs::vec_c(!!!unname(normalized)),
     error = function(e) {
-      stop(
-        "Selected columns have incompatible types: ",
-        conditionMessage(e),
-        call. = FALSE
+      cli::cli_abort(
+        "Selected columns have incompatible types.",
+        parent = e,
+        call = call
       )
     }
   )
   original_missing <- unlist(lapply(data, is.na), use.names = FALSE)
   if (any(is.na(values) != original_missing)) {
-    stop(
-      "Selected columns have incompatible missing-value definitions; ",
-      "convert labelled missing values explicitly before combining them.",
-      call. = FALSE
+    cli::cli_abort(
+      "Selected columns have incompatible missing-value definitions; convert
+       labelled missing values explicitly before combining them.",
+      call = call
     )
   }
   values
@@ -397,7 +397,7 @@ row_key_columns <- function(keys, rows, columns) {
   })
 }
 
-row_add_values <- function(data, values) {
+row_add_values <- function(data, values, call = rlang::caller_env()) {
   if (is.null(values)) {
     return(data)
   }
@@ -406,14 +406,16 @@ row_add_values <- function(data, values) {
   for (i in seq_along(extra)) {
     value <- extra[[i]]
     if (is.list(value) || !is.null(dim(value))) {
-      stop("`.values` must contain one-dimensional vectors.", call. = FALSE)
+      cli::cli_abort(
+        "{.arg .values} must contain one-dimensional vectors.",
+        call = call
+      )
     }
     if (is.null(value) || !length(value) %in% c(1L, rows)) {
-      stop(
-        "Each vector in `.values` must have length one or the input row count (",
-        rows,
-        ").",
-        call. = FALSE
+      cli::cli_abort(
+        "Each vector in {.arg .values} must have length one or the input row
+         count ({rows}).",
+        call = call
       )
     }
     extra[[i]] <- vctrs::vec_recycle(value, rows)
@@ -425,14 +427,14 @@ row_add_values <- function(data, values) {
   tibble::as_tibble(c(as.list(data), extra))
 }
 
-row_extreme_typed <- function(data, maximum) {
+row_extreme_typed <- function(data, maximum, call = rlang::caller_env()) {
   kernel <- if (maximum) row_max_dbl else row_min_dbl
   ordered <- vapply(data, is.ordered, logical(1))
   if (any(ordered) && !all(ordered)) {
-    stop(
-      "Ordered factor extrema require compatible ordered columns; ",
-      "convert explicitly before combining them with other types.",
-      call. = FALSE
+    cli::cli_abort(
+      "Ordered factor extrema require compatible ordered columns; convert
+       explicitly before combining them with other types.",
+      call = call
     )
   }
   if (all(vapply(data, row_plain_numeric, logical(1)))) {
@@ -460,14 +462,14 @@ row_extreme_typed <- function(data, maximum) {
     logical(1)
   )
   if (!all(supported)) {
-    stop(
-      "Row extrema require supported ordered columns; unordered factors, lists ",
-      "and complex columns have no supported ordering: ",
-      paste(names(data)[!supported], collapse = ", "),
-      call. = FALSE
+    unsupported <- paste(names(data)[!supported], collapse = ", ")
+    cli::cli_abort(
+      "Row extrema require supported ordered columns; unordered factors, lists
+       and complex columns have no supported ordering: {unsupported}",
+      call = call
     )
   }
-  values <- row_common_values(data)
+  values <- row_common_values(data, call)
   # Rank original values without converting integer64 payloads or class units
   # to doubles. The C++ kernel compares exact integer ranks, then R slices the
   # original common vector to retain its type and metadata.
@@ -476,7 +478,12 @@ row_extreme_typed <- function(data, maximum) {
   vctrs::vec_set_names(vctrs::vec_slice(values, match(best, ranks)), NULL)
 }
 
-row_numeric_summary <- function(data, operation, na.rm = TRUE) {
+row_numeric_summary <- function(
+  data,
+  operation,
+  na.rm = TRUE,
+  call = rlang::caller_env()
+) {
   plain <- vapply(
     data,
     function(x) {
@@ -492,26 +499,30 @@ row_numeric_summary <- function(data, operation, na.rm = TRUE) {
     duration <- all(vapply(data, inherits, logical(1), "difftime"))
     measured <- all(vapply(data, inherits, logical(1), "units"))
     if (calendar && !operation %in% c("mean", "median")) {
-      stop(
-        "Calendar Date/POSIXct columns support mean and median, not sums or dispersion; convert explicitly first.",
-        call. = FALSE
+      cli::cli_abort(
+        "Calendar Date/POSIXct columns support mean and median, not sums or
+         dispersion; convert explicitly first.",
+        call = call
       )
     }
     if (duration && operation == "var") {
-      stop(
-        "Duration variance has squared units; convert durations explicitly to one numeric unit first.",
-        call. = FALSE
+      cli::cli_abort(
+        "Duration variance has squared units; convert durations explicitly to
+         one numeric unit first.",
+        call = call
       )
     }
     if (!calendar && !duration && !measured) {
-      stop(
-        "Numeric row calculations require compatible supported numeric or logical columns; integer64 and other classes require explicit conversion.",
-        call. = FALSE
+      cli::cli_abort(
+        "Numeric row calculations require compatible supported numeric or
+         logical columns; integer64 and other classes require explicit
+         conversion.",
+        call = call
       )
     }
     values <- vctrs::vec_cast_common(!!!data)
     if (measured) {
-      row_check_unit_scale(data, operation)
+      row_check_unit_scale(data, operation, call)
     }
     prototype <- vctrs::vec_ptype_common(!!!values)
     if (duration) {
@@ -540,7 +551,7 @@ row_numeric_summary <- function(data, operation, na.rm = TRUE) {
   if (is.null(prototype)) out else vctrs::vec_restore(out, prototype)
 }
 
-row_check_unit_scale <- function(data, operation) {
+row_check_unit_scale <- function(data, operation, call = rlang::caller_env()) {
   for (x in data) {
     base <- tryCatch(
       as.double(units::convert_to_base(units::set_units(
@@ -549,10 +560,11 @@ row_check_unit_scale <- function(data, operation) {
         mode = "standard"
       ))),
       error = function(e) {
-        stop(
-          "Unsupported measurement scale; convert to an explicit linear unit first: ",
-          conditionMessage(e),
-          call. = FALSE
+        cli::cli_abort(
+          "Unsupported measurement scale; convert to an explicit linear unit
+           first.",
+          parent = e,
+          call = call
         )
       }
     )
@@ -562,15 +574,17 @@ row_check_unit_scale <- function(data, operation) {
         increments[1L] <= 0 ||
         !isTRUE(all.equal(increments[1L], increments[2L], tolerance = 1e-10))
     ) {
-      stop(
-        "Nonlinear measurement scales require explicit conversion to a linear unit first.",
-        call. = FALSE
+      cli::cli_abort(
+        "Nonlinear measurement scales require explicit conversion to a linear
+         unit first.",
+        call = call
       )
     }
     if (operation %in% c("sum", "var", "sd") && base[1L] != 0) {
-      stop(
-        "Sums and dispersion of offset units require explicit conversion to a zero-origin unit first.",
-        call. = FALSE
+      cli::cli_abort(
+        "Sums and dispersion of offset units require explicit conversion to a
+         zero-origin unit first.",
+        call = call
       )
     }
   }
@@ -632,6 +646,8 @@ row_pick <- function(dots) {
 }
 
 row_input <- function(...) {
+  # Dots hold user columns, so report errors through the caller's frame.
+  rlang::local_error_call(rlang::caller_env())
   if (dots_is_tibble(...)) {
     data <- tibble::tibble(...)
   } else {
@@ -662,17 +678,16 @@ row_input <- function(...) {
     }
   }
   if (ncol(data) == 0L) {
-    stop(
-      "Select at least one column; NULL and zero columns are not supported.",
-      call. = FALSE
+    cli::cli_abort(
+      "Select at least one column; {.code NULL} and zero columns are not
+       supported."
     )
   }
   valid <- vapply(data, function(x) is.null(dim(x)), logical(1))
   if (!all(valid)) {
-    stop(
-      "Row calculations require one-dimensional columns: ",
-      paste(names(data)[!valid], collapse = ", "),
-      call. = FALSE
+    invalid <- paste(names(data)[!valid], collapse = ", ")
+    cli::cli_abort(
+      "Row calculations require one-dimensional columns: {invalid}"
     )
   }
   data

@@ -54,6 +54,7 @@ s_select <- function(.data, ...) {
 
   original <- .data
   dots <- rlang::enquos(...)
+  error_call <- rlang::current_env()
   select_check_unmatched(.data, dots)
   labels <- names(dots)
   selection <- select_is_selection(dots, names(.data))
@@ -65,12 +66,10 @@ s_select <- function(.data, ...) {
     .data <- tryCatch(
       dplyr::mutate(.data, !!!computed),
       error = function(e) {
-        stop(
-          "Neither <tidy-select> nor <data-masking> recognised the input.\n",
-          "  select() error: the expression is not a column selection.\n",
-          "  mutate() error: ",
+        select_abort_unrecognised(
+          "the expression is not a column selection.",
           conditionMessage(e),
-          call. = FALSE
+          call = error_call
         )
       }
     )
@@ -87,14 +86,23 @@ s_select <- function(.data, ...) {
   if (is.null(fallback$error)) {
     return(fallback$value)
   }
-  stop(
-    "Neither <tidy-select> nor <data-masking> recognised the input.\n",
-    "  select() error: ",
-    selected$error,
-    "\n",
-    "  mutate() error: ",
-    fallback$error,
-    call. = FALSE
+  select_abort_unrecognised(selected$error, fallback$error)
+}
+
+# Both interpretations failed; report each attempt's own message.
+select_abort_unrecognised <- function(
+  select_error,
+  mutate_error,
+  call = rlang::caller_env()
+) {
+  cli::cli_abort(
+    c(
+      "Neither {.code <tidy-select>} nor {.code <data-masking>} recognised the
+       input.",
+      " " = "select() error: {select_error}",
+      " " = "mutate() error: {mutate_error}"
+    ),
+    call = call
   )
 }
 
@@ -198,7 +206,7 @@ select_expr_is_selection <- function(expr, columns) {
 
 # Unnamed names, strings and positions that match no column are typos, not
 # data-masking expressions; report all of them together before selecting.
-select_check_unmatched <- function(.data, dots) {
+select_check_unmatched <- function(.data, dots, call = rlang::caller_env()) {
   columns <- names(.data)
   unmatched <- character()
   for (i in seq_along(dots)) {
@@ -226,15 +234,15 @@ select_check_unmatched <- function(.data, dots) {
     }
   }
   if (length(unmatched)) {
-    stop(
-      "Can't select columns that don't exist: ",
-      paste(unmatched, collapse = ", "),
-      " (the data have ",
-      length(columns),
-      if (length(columns) == 1L) " column" else " columns",
-      "). Check the spelling, or name a computed value, e.g. ",
-      "`new = expression`.",
-      call. = FALSE
+    unmatched <- paste(unmatched, collapse = ", ")
+    cli::cli_abort(
+      c(
+        "Can't select columns that don't exist: {unmatched} (the data have
+         {length(columns)} column{?s}).",
+        i = "Check the spelling, or name a computed value, e.g.
+             {.code new = expression}."
+      ),
+      call = call
     )
   }
 }

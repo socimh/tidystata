@@ -200,12 +200,12 @@ for (.bad_query in list(
         before <- d
         expect_error(
           variables_search(d, bad),
-          "single non-missing character string",
+          "`string` must be a single string",
           fixed = TRUE
         )
         expect_error(
           variables_search(d[, FALSE], bad),
-          "single non-missing character string",
+          "`string` must be a single string",
           fixed = TRUE
         )
         expect_identical(d, before)
@@ -225,4 +225,12 @@ test_that("variables_search accepts letter ranges without numeric-coercion warni
   expect_no_warning(out <- variables_search(d, "^item_[a-c]$"))
   expect_identical(out$name, c("item_a", "item_b", "item_c"))
   expect_identical(d, before)
+})
+
+test_that("variables_search() reports an invalid query", {
+  d <- tibble::tibble(a = 1)
+  expect_snapshot(error = TRUE, {
+    variables_search(d, c("a", "b"))
+    variables_search(d, NA_character_)
+  })
 })

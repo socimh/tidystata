@@ -33,17 +33,15 @@
 set_seed <- function(.fn, seed) {
   if (missing(seed)) {
     if (missing(.fn)) {
-      stop("Supply a seed, as in `set_seed(123)`.", call. = FALSE)
+      cli::cli_abort("Supply a seed, as in {.code set_seed(123)}.")
     }
     seed <- .fn
     if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed)) {
-      stop(
-        "Used alone, `set_seed()` needs one number as the seed, as in ",
-        "`set_seed(123)`.
-",
-        "\u2139 In a pipeline, give the seed: `x %>% set_seed(123)`.",
-        call. = FALSE
-      )
+      cli::cli_abort(c(
+        "Used alone, {.fn set_seed} needs one number as the seed, as in
+         {.code set_seed(123)}.",
+        i = "In a pipeline, give the seed: {.code x %>% set_seed(123)}."
+      ))
     }
     set.seed(seed)
     return(invisible(NULL))

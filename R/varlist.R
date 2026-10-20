@@ -71,8 +71,9 @@ varlist <- function(
   vars = NULL
 ) {
   if (!is.character(string)) {
-    stop("`string` must be a character string.", call. = FALSE)
+    stop_input_type(string, "a character vector")
   }
+  error_call <- rlang::current_env()
   # Expand complete raw patterns before attaching their boundary anchors.
   # paste0 also retains the existing literal-NA pattern behavior.
   patterns <- paste0(string, "") %>%
@@ -80,7 +81,12 @@ varlist <- function(
     stringr::str_replace_all("\\*", ".*") %>%
     stringr::str_replace_all("~", ".+") %>%
     stringr::str_replace_all("\\?", ".") %>%
-    purrr::map_chr(num_range_to_regex)
+    vapply(
+      num_range_to_regex,
+      character(1),
+      call = error_call,
+      USE.NAMES = FALSE
+    )
   out <- paste0("^(", patterns, ")$") %>%
     stringr::str_flatten("|")
 
@@ -92,7 +98,7 @@ varlist <- function(
 }
 
 # Helper function
-num_range_to_regex <- function(string) {
+num_range_to_regex <- function(string, call = rlang::caller_env()) {
   any_range <- stringr::str_detect(string, "\\[.*\\]")
 
   if (!any_range) {
@@ -106,7 +112,7 @@ num_range_to_regex <- function(string) {
 
   multiple_ranges <- length(start_end) > 2
   if (multiple_ranges) {
-    stop("Only one range is allowed.", call. = FALSE)
+    cli::cli_abort("Only one range is allowed.", call = call)
   }
 
   letter_range <- sum(start_end %in% c(letters, LETTERS)) == 2
@@ -122,9 +128,9 @@ num_range_to_regex <- function(string) {
     begin <- as.integer(start_end[1])
     end <- as.integer(start_end[2])
     if (begin > end) {
-      stop(
+      cli::cli_abort(
         "The number range should start with a smaller number.",
-        call. = FALSE
+        call = call
       )
     } else {
       string_parts <- string %>%
@@ -135,6 +141,9 @@ num_range_to_regex <- function(string) {
       return(out)
     }
   } else {
-    stop("The range should be specified as [a-m] or [1-10]", call. = FALSE)
+    cli::cli_abort(
+      "The range should be specified as {.code [a-m]} or {.code [1-10]}.",
+      call = call
+    )
   }
 }

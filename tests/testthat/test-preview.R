@@ -643,3 +643,11 @@ test_that("s_print() matches the print helpers for each style", {
   expect_identical(withVisible(s_print(data))$value, data)
   expect_error(s_print(data, "middle"))
 })
+
+test_that("previews report invalid input", {
+  expect_snapshot(error = TRUE, {
+    preview_table(1:3)
+    preview_table(tibble::tibble(x = 1), n = 0)
+    slice_headtail(tibble::tibble(x = 1), n = 2.5)
+  })
+})

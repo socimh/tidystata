@@ -1321,3 +1321,19 @@ for (.fn_name in c("tab", "fre", "tab1", "fre1")) {
     )
   })
 }
+
+test_that("tabulation reports invalid input", {
+  d <- tibble::tibble(a = c("x", "y"), b = c("u", "v"), w = c(1, 2))
+  expect_snapshot(error = TRUE, {
+    tab(d, a, .total = NA)
+    tab(list(1, 2))
+    tab(1:3, a)
+    tab2(d, a)
+    fre2(d, a)
+    tab2(d, a, b, .by = a)
+    tab2(d, a, b, .wt = w, .wt_type = "analytic", .chi2 = TRUE)
+    tab(d, a, .wt = c(1, 2, 3))
+    tab(d, a, .wt = c(-1, 2))
+  })
+  expect_snapshot(out <- tab(tibble::tibble(n = 1:2), n))
+})

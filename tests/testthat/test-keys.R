@@ -31,7 +31,7 @@ test_that("isid() reports repeated keys and missing values", {
   )
   expect_true(capture(isid(panel[-4, ], id, wave)))
   expect_false(capture(isid(panel, id)))
-  expect_error(isid(panel, id, .missok = NA), "single TRUE or FALSE")
+  expect_error(isid(panel, id, .missok = NA), "must be `TRUE` or `FALSE`")
   expect_error(isid(1:3), "must be a data frame")
 })
 
@@ -105,4 +105,17 @@ test_that("key functions keep data.frame and data.table containers", {
   expect_s3_class(duplicates_tag(table, id), "data.table")
   expect_false("dup" %in% names(table))
   expect_s3_class(duplicates_list(table, id), "data.table")
+})
+
+test_that("key checks report invalid input and repeated keys", {
+  d <- tibble::tibble(id = c(1, 1, NA), x = 1:3)
+  expect_snapshot(error = TRUE, {
+    isid(d, id, .missok = NA)
+    isid(d, id)
+    isid(d, id, .missok = TRUE)
+    duplicates_tag(d, id, .name = "")
+    duplicates_tag(d, id, .name = "x")
+    duplicates_drop(d, id)
+    isid(1:3)
+  })
 })

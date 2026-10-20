@@ -90,7 +90,7 @@ NULL
 #' @rdname panel
 #' @export
 s_lag <- function(x, n = 1L, time, delta = 1, unit = NULL) {
-  check_periods(n)
+  check_number_whole(n, min = 0)
   period <- panel_period(time, x, delta, unit)
   vctrs::vec_slice(x, panel_rows(period, n * delta, time))
 }
@@ -98,7 +98,7 @@ s_lag <- function(x, n = 1L, time, delta = 1, unit = NULL) {
 #' @rdname panel
 #' @export
 s_lead <- function(x, n = 1L, time, delta = 1, unit = NULL) {
-  check_periods(n)
+  check_number_whole(n, min = 0)
   period <- panel_period(time, x, delta, unit)
   vctrs::vec_slice(x, panel_rows(period, -n * delta, time))
 }
@@ -106,7 +106,7 @@ s_lead <- function(x, n = 1L, time, delta = 1, unit = NULL) {
 #' @rdname panel
 #' @export
 s_diff <- function(x, n = 1L, time, delta = 1, unit = NULL) {
-  check_periods(n)
+  check_number_whole(n, min = 0)
   calendar <- inherits(x, c("Date", "POSIXt"))
   out <- if (calendar || inherits(x, "difftime")) x else egen_numeric(x)
   if (inherits(out, "POSIXlt")) {
@@ -133,7 +133,7 @@ s_diff <- function(x, n = 1L, time, delta = 1, unit = NULL) {
 # The row whose time is `shift` units earlier, after checking that times are
 # unique. Distinct, nonmissing periods are matched natively in one sorted walk;
 # otherwise duplicated() reports repeats and match() finds the rows.
-panel_rows <- function(period, shift, time) {
+panel_rows <- function(period, shift, time, call = rlang::caller_env()) {
   if (is.double(period) && !anyNA(period)) {
     # The kernel sorts short vectors itself; long ones use the radix sort.
     order <- if (
@@ -146,30 +146,33 @@ panel_rows <- function(period, shift, time) {
       return(rows)
     }
   }
-  panel_check_unique(period, time)
+  panel_check_unique(period, time, call)
   match(period - shift, period, incomparables = NA)
 }
 
 # Time as a whole-period index.
-panel_period <- function(time, x, delta, unit) {
+panel_period <- function(time, x, delta, unit, call = rlang::caller_env()) {
   if (missing(time)) {
-    stop(
-      "`time` must be supplied, such as `time = year`; it plays the role of ",
-      "the time variable in Stata's `xtset`.",
-      call. = FALSE
+    cli::cli_abort(
+      "{.arg time} must be supplied, such as {.code time = year}; it plays the
+       role of the time variable in Stata's {.code xtset}.",
+      call = call
     )
   }
   if (length(time) != length(x)) {
-    stop("`time` must have the same length as `x`.", call. = FALSE)
+    cli::cli_abort(
+      "{.arg time} must have the same length as {.arg x}.",
+      call = call
+    )
   }
-  check_number(delta, "delta")
+  check_number_decimal(delta, allow_infinite = FALSE, call = call)
   if (delta <= 0) {
-    stop("`delta` must be positive.", call. = FALSE)
+    cli::cli_abort("{.arg delta} must be positive.", call = call)
   }
-  time_period(time, unit)
+  time_period(time, unit, call = call)
 }
 
-panel_check_unique <- function(period, time) {
+panel_check_unique <- function(period, time, call = rlang::caller_env()) {
   repeated <- duplicated(period, incomparables = NA)
   if (any(repeated)) {
     # Inside grouped mutate(), the panel is already supplied.
@@ -177,31 +180,29 @@ panel_check_unique <- function(period, time) {
       ncol(dplyr::cur_group()) > 0L,
       error = function(e) FALSE
     )
-    stop(
-      "Repeated time values within panel, such as ",
-      format(vctrs::vec_slice(time, which(repeated)[[1L]])),
-      ".\n",
-      if (grouped) {
-        "\u2139 Each time should appear once per panel; find the repeats with "
-      } else {
-        "\u2139 Supply the panel identifier, such as `.by = id`, and check it with "
-      },
-      "`isid(data, id, time)`.",
-      call. = FALSE
+    example <- format(vctrs::vec_slice(time, which(repeated)[[1L]]))
+    hint <- if (grouped) {
+      "Each time should appear once per panel; find the repeats with
+       {.code isid(data, id, time)}."
+    } else {
+      "Supply the panel identifier, such as {.code .by = id}, and check it
+       with {.code isid(data, id, time)}."
+    }
+    cli::cli_abort(
+      c("Repeated time values within panel, such as {example}.", i = hint),
+      call = call
     )
   }
 }
 
 # Whole-period index for each supported time type.
-time_period <- function(time, unit) {
+time_period <- function(time, unit, call = rlang::caller_env()) {
   natural <- period_class_unit(time)
   if (!is.null(natural)) {
     if (!is.null(unit) && !identical(unit, natural)) {
-      stop(
-        "`time` is already a ",
-        natural,
-        " period; omit `unit`.",
-        call. = FALSE
+      cli::cli_abort(
+        "{.arg time} is already a {natural} period; omit {.arg unit}.",
+        call = call
       )
     }
     if (inherits(time, c("yearmon", "yearqtr"))) {
@@ -227,31 +228,33 @@ time_period <- function(time, unit) {
       (inherits(time, "haven_labelled") && is.numeric(vctrs::vec_data(time)))
   ) {
     if (!is.null(unit)) {
-      stop(
-        "`unit` applies to dates and date-times only.",
-        call. = FALSE
+      cli::cli_abort(
+        "{.arg unit} applies to dates and date-times only.",
+        call = call
       )
     }
     return(as.numeric(vctrs::vec_data(time)))
   }
   hint <- if (is.factor(time)) {
-    paste0(
-      "\n\u2139 Its levels need not be in time order. Use ",
-      "`factor(wave, levels = ..., ordered = TRUE)`, or ",
-      "`as.numeric(as.character(year))` for numeric labels."
+    c(
+      i = "Its levels need not be in time order. Use
+           {.code factor(wave, levels = ..., ordered = TRUE)}, or
+           {.code as.numeric(as.character(year))} for numeric labels."
     )
   } else if (is.character(time)) {
-    paste0(
-      "\n\u2139 Convert it first, such as `as.numeric(year)`, `as.Date(date)` ",
-      "or `factor(wave, levels = ..., ordered = TRUE)`."
+    c(
+      i = "Convert it first, such as {.code as.numeric(year)},
+           {.code as.Date(date)} or
+           {.code factor(wave, levels = ..., ordered = TRUE)}."
     )
   }
-  stop(
-    "`time` must be numeric, a date, a date-time or a period, not ",
-    class(time)[[1L]],
-    ".",
-    hint,
-    call. = FALSE
+  cli::cli_abort(
+    c(
+      "{.arg time} must be numeric, a date, a date-time or a period, not
+       {.obj_type_friendly {time}}.",
+      hint
+    ),
+    call = call
   )
 }
 
@@ -301,12 +304,4 @@ datetime_period <- function(time, unit) {
     hour = days * 24 + parts$hour,
     date_period(as.Date(parts), unit)
   )
-}
-
-check_periods <- function(n) {
-  if (
-    !is.numeric(n) || length(n) != 1L || !is.finite(n) || n < 0 || n %% 1 != 0
-  ) {
-    stop("`n` must be a single non-negative whole number.", call. = FALSE)
-  }
 }

@@ -44,11 +44,9 @@ as_dummy <- function(
   .names = c("value", "index"),
   .remove = FALSE
 ) {
-  if (!is.data.frame(.data)) {
-    stop("`.data` must be a data frame.", call. = FALSE)
-  }
+  check_data_frame(.data)
   .names <- match.arg(.names)
-  check_flag(.remove, ".remove")
+  check_bool(.remove)
   data <- dplyr::ungroup(table_working_data(.data))
   selected <- names(tidyselect::eval_select(
     rlang::expr(c(...)),
@@ -56,30 +54,26 @@ as_dummy <- function(
     allow_rename = FALSE
   ))
   if (!length(selected)) {
-    stop("Select at least one variable to expand.", call. = FALSE)
+    cli::cli_abort("Select at least one variable to expand.")
   }
   if (.remove && any(selected %in% dplyr::group_vars(.data))) {
-    stop(
-      "Grouping key `",
-      intersect(selected, dplyr::group_vars(.data))[[1L]],
-      "` cannot be removed; ungroup first or use `.remove = FALSE`.",
-      call. = FALSE
+    key <- intersect(selected, dplyr::group_vars(.data))[[1L]]
+    cli::cli_abort(
+      "Grouping key {.var {key}} cannot be removed; ungroup first or use
+       {.code .remove = FALSE}."
     )
   }
 
+  error_call <- rlang::current_env()
   dummies <- lapply(selected, function(var) {
-    dummy_columns(data[[var]], var, .names)
+    dummy_columns(data[[var]], var, .names, call = error_call)
   })
   names(dummies) <- selected
   new_names <- unlist(lapply(dummies, names), use.names = FALSE)
   clash <- intersect(new_names, setdiff(names(data), if (.remove) selected))
   if (length(clash) || anyDuplicated(new_names)) {
-    stop(
-      "Column `",
-      c(clash, new_names[duplicated(new_names)])[[1L]],
-      "` already exists; rename it first.",
-      call. = FALSE
-    )
+    column <- c(clash, new_names[duplicated(new_names)])[[1L]]
+    cli::cli_abort("Column {.var {column}} already exists; rename it first.")
   }
 
   order <- unlist(
@@ -113,13 +107,11 @@ as_dummy <- function(
 }
 
 # Indicator columns for one variable, named and labelled as in Stata.
-dummy_columns <- function(x, var, names) {
+dummy_columns <- function(x, var, names, call = rlang::caller_env()) {
   if (is.list(x) || !is.null(dim(x))) {
-    stop(
-      "`",
-      var,
-      "` is a list or matrix column and cannot be expanded.",
-      call. = FALSE
+    cli::cli_abort(
+      "{.var {var}} is a list or matrix column and cannot be expanded.",
+      call = call
     )
   }
   missing <- vctrs::vec_detect_missing(x)

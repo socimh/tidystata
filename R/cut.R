@@ -73,7 +73,7 @@ xtile <- function(
     x <- as.integer(x)
   }
   if (!is.numeric(x) || is.complex(x) || !is.null(dim(x))) {
-    stop("`x` must be a numeric or logical vector.", call. = FALSE)
+    stop_input_type(x, "a numeric or logical vector")
   }
   if (is.null(labels) && cut_in_grouped_mask()) {
     # Group-specific interval labels cannot be combined across groups.
@@ -81,28 +81,20 @@ xtile <- function(
   } else if (isTRUE(labels)) {
     labels <- NULL
   }
-  if (
-    !is.numeric(n) ||
-      is.complex(n) ||
-      length(n) != 1L ||
-      is.na(n) ||
-      !is.finite(n) ||
-      n < 1 ||
-      n != floor(n)
-  ) {
-    stop("`n` must be a single positive integer.", call. = FALSE)
-  }
+  check_number_whole(n, min = 1)
   if (!is.null(wt)) {
     if (method == "rank") {
-      stop("`wt` is not supported with `method = \"rank\"`.", call. = FALSE)
+      cli::cli_abort(
+        "{.arg wt} is not supported with {.code method = \"rank\"}."
+      )
     }
-    wt <- weights_check(wt, length(x), "`wt`")
+    wt <- weights_check(wt, length(x), "wt")
     # Observations with a missing weight get a missing code, as in Stata.
     x[is.na(wt)] <- NA
   }
   observed <- x[!is.na(x)]
   if (length(observed) == 0L) {
-    stop("`x` must contain non-missing observations.", call. = FALSE)
+    cli::cli_abort("{.arg x} must contain non-missing observations.")
   }
   if (method == "rank") {
     intervals <- min(n, length(observed))
@@ -111,19 +103,15 @@ xtile <- function(
         !identical(labels, FALSE) &&
         length(labels) != intervals
     ) {
-      stop(
-        "`labels` must have length ",
-        intervals,
-        ", the effective number of intervals.",
-        call. = FALSE
+      cli::cli_abort(
+        "{.arg labels} must have length {intervals}, the effective number of
+         intervals."
       )
     }
     if (n > length(observed)) {
-      warning(
-        "Requested more groups than non-missing observations; using ",
-        intervals,
-        " groups.",
-        call. = FALSE
+      cli::cli_warn(
+        "Requested more groups than non-missing observations; using
+         {intervals} groups."
       )
     }
     sizes <- rep(length(observed) %/% intervals, intervals)
@@ -148,7 +136,7 @@ xtile <- function(
   }
   limits <- range(observed)
   if (limits[[1L]] == limits[[2L]]) {
-    stop("Cannot cut a vector with only one unique value.", call. = FALSE)
+    cli::cli_abort("Can't cut a vector with only one unique value.")
   }
   # Stata xtile rule: a value joins the first group whose cutpoint is at least
   # the value, so distinct values are never merged into one group.
@@ -158,10 +146,7 @@ xtile <- function(
     weighted_quantile(observed, wt[!is.na(x)], seq_len(n - 1L) / n)
   }
   if (anyNA(cutpoints)) {
-    stop(
-      "Cannot form quantile cutpoints from these observations.",
-      call. = FALSE
-    )
+    cli::cli_abort("Can't form quantile cutpoints from these observations.")
   }
   maximum <- limits[[2L]]
   cutpoints <- unique(cutpoints[cutpoints < maximum])
@@ -174,21 +159,15 @@ xtile <- function(
   if (
     !is.null(labels) && !identical(labels, FALSE) && length(labels) != intervals
   ) {
-    stop(
-      "`labels` must have length ",
-      intervals,
-      ", the effective number of intervals.",
-      call. = FALSE
+    cli::cli_abort(
+      "{.arg labels} must have length {intervals}, the effective number of
+       intervals."
     )
   }
   if (intervals < n) {
-    warning(
-      "Tied values collapsed quantile cutpoints to ",
-      intervals,
-      " groups (requested ",
-      n,
-      ").",
-      call. = FALSE
+    cli::cli_warn(
+      "Tied values collapsed quantile cutpoints to {intervals} groups
+       (requested {n})."
     )
   }
   codes <- cumsum(present)[raw]
@@ -257,17 +236,7 @@ quantile_interval_labels <- function(bounds) {
 #' @rdname cut
 #' @export
 cut_length <- function(x, n = 4, labels = NULL) {
-  if (
-    !is.numeric(n) ||
-      is.complex(n) ||
-      length(n) != 1L ||
-      is.na(n) ||
-      !is.finite(n) ||
-      n < 1 ||
-      n != floor(n)
-  ) {
-    stop("`n` must be a single positive integer.", call. = FALSE)
-  }
+  check_number_whole(n, min = 1)
   breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = n + 1)
   cut_breaks(x, breaks = breaks, labels = labels)
 }
@@ -281,7 +250,7 @@ cut_breaks <- function(x, breaks = NULL, labels = NULL, right = TRUE) {
   x_min <- min(x, na.rm = TRUE)
   x_max <- max(x, na.rm = TRUE)
   if (x_min == x_max) {
-    stop("Cannot cut a vector with only one unique value.")
+    cli::cli_abort("Can't cut a vector with only one unique value.")
   }
 
   breaks <- unique(c(x_min, breaks, x_max))

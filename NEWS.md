@@ -1,5 +1,12 @@
 # statart 0.2.0.9000
 
+* Errors, warnings and messages now use cli, as in the tidyverse. Errors name
+  the function you called (for example ``Error in `summ()`:``), describe the
+  problem in one sentence, and give hints as `i` bullets. Argument checks
+  report what was supplied, as in "`n` must be a whole number larger than or
+  equal to 1, not the number 0.". Code that matched the old wording of these
+  messages may need updating; results are unchanged.
+
 ## Speed (2026-10-20)
 
 Results are unchanged; only the time taken to compute them is shorter.

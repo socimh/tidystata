@@ -51,11 +51,9 @@ misstable <- function(
   .patterns = FALSE,
   .all = FALSE
 ) {
-  if (!is.data.frame(.data)) {
-    stop("`.data` must be a data frame.", call. = FALSE)
-  }
-  check_flag(.patterns, ".patterns")
-  check_flag(.all, ".all")
+  check_data_frame(.data)
+  check_bool(.patterns)
+  check_bool(.all)
   by <- rlang::enquo(.by)
   .data <- aggregation_working_data(
     .data,
@@ -71,7 +69,7 @@ misstable <- function(
   if (!.all) {
     missing <- missing[vapply(missing, any, logical(1))]
     if (!length(missing) && length(values)) {
-      message("No missing values in the selected variables.")
+      cli::cli_inform("No missing values in the selected variables.")
     }
   }
   groups <- group_locations(.data, group_vars)
@@ -104,14 +102,18 @@ misstable_summary <- function(missing, groups) {
   vctrs::vec_rbind(dplyr::bind_cols(groups$keys[0L, ], empty), !!!out)
 }
 
-misstable_patterns <- function(missing, groups, group_vars) {
+misstable_patterns <- function(
+  missing,
+  groups,
+  group_vars,
+  call = rlang::caller_env()
+) {
   clash <- intersect(names(missing), c("n", "percent", group_vars))
   if (length(clash)) {
-    stop(
-      "Variable `",
-      clash[[1L]],
-      "` clashes with a pattern table column; rename it first.",
-      call. = FALSE
+    cli::cli_abort(
+      "Variable {.var {clash[[1L]]}} clashes with a pattern table column;
+       rename it first.",
+      call = call
     )
   }
   observed <- tibble::as_tibble(

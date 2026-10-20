@@ -6,12 +6,12 @@
 # and percentiles are weighted.
 
 # Evaluate `.wt` against the data and drop rows whose weight is missing.
-weights_prepare <- function(data, wt) {
+weights_prepare <- function(data, wt, call = rlang::caller_env()) {
   if (rlang::quo_is_null(wt)) {
     return(list(data = data, weights = NULL, column = NULL))
   }
   weights <- rlang::eval_tidy(wt, data)
-  weights <- weights_check(weights, nrow(data), "`.wt`")
+  weights <- weights_check(weights, nrow(data), ".wt", call = call)
   expr <- rlang::quo_get_expr(wt)
   column <- if (
     rlang::is_symbol(expr) && rlang::as_string(expr) %in% names(data)
@@ -24,44 +24,38 @@ weights_prepare <- function(data, wt) {
   }
   missing <- is.na(weights)
   if (any(missing)) {
-    message(
-      "Excluded ",
-      sum(missing),
-      if (sum(missing) == 1L) " row" else " rows",
-      " with missing weights."
-    )
+    cli::cli_inform("Excluded {sum(missing)} row{?s} with missing weights.")
     data <- dplyr::dplyr_row_slice(data, which(!missing))
     weights <- weights[!missing]
   }
   list(data = data, weights = weights, column = column)
 }
 
-weights_check <- function(weights, size, label) {
+weights_check <- function(weights, size, arg, call = rlang::caller_env()) {
   if (is.logical(weights) && !is.object(weights)) {
     weights <- as.integer(weights)
   }
   if (!is.numeric(weights) || is.object(weights) || !is.null(dim(weights))) {
-    stop(label, " must be a numeric column or vector.", call. = FALSE)
+    cli::cli_abort(
+      "{.arg {arg}} must be a numeric column or vector.",
+      call = call
+    )
   }
   if (length(weights) == 1L) {
     weights <- rep(weights, size)
   }
   if (length(weights) != size) {
-    stop(
-      label,
-      " must have one value per row (",
-      size,
-      "), not ",
-      length(weights),
-      ".",
-      call. = FALSE
+    cli::cli_abort(
+      "{.arg {arg}} must have one value per row ({size}), not
+       {length(weights)}.",
+      call = call
     )
   }
   if (any(!is.finite(weights) & !is.na(weights))) {
-    stop(label, " must be finite.", call. = FALSE)
+    cli::cli_abort("{.arg {arg}} must be finite.", call = call)
   }
   if (any(weights < 0, na.rm = TRUE)) {
-    stop(label, " must not be negative.", call. = FALSE)
+    cli::cli_abort("{.arg {arg}} must not be negative.", call = call)
   }
   as.double(weights)
 }

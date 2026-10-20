@@ -35,13 +35,10 @@ deprecate_rename <- function(old, new) {
     return(invisible())
   }
   deprecation_shown[[old]] <- TRUE
-  message(
-    "`",
-    old,
-    "()` was renamed to `",
-    new,
-    "` in statart 0.2.0.9000; the old name will be removed in a future ",
-    "release.\n\u2139 This notice is shown once per session."
-  )
+  cli::cli_inform(c(
+    "{.fn {old}} was renamed to {.code {new}} in statart 0.2.0.9000; the old
+     name will be removed in a future release.",
+    i = "This notice is shown once per session."
+  ))
   invisible()
 }

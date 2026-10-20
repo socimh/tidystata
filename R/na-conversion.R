@@ -80,20 +80,16 @@ value_if_na <- function(.x, .value) {
   na_encode(.x, .value, ".value")
 }
 
-na_conversion_missing <- function(argument, fn, value) {
-  stop(
-    "Missing `",
-    argument,
-    "`. Use ",
-    fn,
-    "(x, ",
-    value,
-    ") or x |> ",
-    fn,
-    "(",
-    value,
-    ").",
-    call. = FALSE
+na_conversion_missing <- function(
+  argument,
+  fn,
+  value,
+  call = rlang::caller_env()
+) {
+  cli::cli_abort(
+    "Missing {.arg {argument}}. Use {.code {fn}(x, {value})} or
+     {.code x |> {fn}({value})}.",
+    call = call
   )
 }
 
@@ -105,16 +101,14 @@ na_decode <- function(x, mv) {
   x
 }
 
-na_encode <- function(x, mv, argument) {
+na_encode <- function(x, mv, argument, call = rlang::caller_env()) {
   if (inherits(x, "haven_labelled_spss")) {
     # User-missing codes are missing under is.na(), but not for vctrs/tidyr.
     replacement <- vctrs::vec_cast(mv, vctrs::vec_ptype(x))
     if (length(replacement) != 1L) {
-      stop(
-        "`",
-        argument,
-        "` must be a single replacement value.",
-        call. = FALSE
+      cli::cli_abort(
+        "{.arg {argument}} must be a single replacement value.",
+        call = call
       )
     }
     x[is.na(x)] <- replacement

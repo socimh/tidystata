@@ -32,12 +32,10 @@
 #' try(assert(lifeexp, safewater > 50))
 #' @export
 assert <- function(.data, ..., .by = NULL) {
-  if (!is.data.frame(.data)) {
-    stop("`.data` must be a data frame.", call. = FALSE)
-  }
+  check_data_frame(.data)
   conditions <- rlang::enquos(...)
   if (!length(conditions)) {
-    stop("Supply at least one condition to check.", call. = FALSE)
+    cli::cli_abort("Supply at least one condition to check.")
   }
   labels <- vapply(conditions, rlang::as_label, character(1))
   names(conditions) <- paste0("...assert", seq_along(conditions))
@@ -52,13 +50,9 @@ assert <- function(.data, ..., .by = NULL) {
   for (i in seq_along(conditions)) {
     value <- results[[names(conditions)[[i]]]]
     if (!is.logical(value)) {
-      stop(
-        "Condition `",
-        labels[[i]],
-        "` must give TRUE or FALSE, not ",
-        class(value)[[1L]],
-        ".",
-        call. = FALSE
+      cli::cli_abort(
+        "Condition {.code {labels[[i]]}} must give {.code TRUE} or
+         {.code FALSE}, not {.obj_type_friendly {value}}."
       )
     }
     failed <- which(!value | is.na(value))
@@ -67,7 +61,7 @@ assert <- function(.data, ..., .by = NULL) {
       failures <- c(
         failures,
         paste0(
-          "* `",
+          "`",
           labels[[i]],
           "`: ",
           format(length(failed), big.mark = ","),
@@ -84,11 +78,9 @@ assert <- function(.data, ..., .by = NULL) {
     }
   }
   if (length(failures)) {
-    stop(
-      "Assertion failed:\n",
-      paste(failures, collapse = "\n"),
-      call. = FALSE
-    )
+    # Interpolate each failure so condition labels are never parsed by cli.
+    bullets <- sprintf("{failures[[%d]]}", seq_along(failures))
+    cli::cli_abort(c("Assertion failed:", rlang::set_names(bullets, "*")))
   }
   invisible(.data)
 }
