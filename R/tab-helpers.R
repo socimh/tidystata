@@ -4,7 +4,7 @@ tab_ungroup <- function(.data) {
     cli::cli_inform("Ungrouping the data.")
     .data <- dplyr::ungroup(.data)
   }
-  return(.data)
+  .data
 }
 
 tab_rename_reserved <- function(
@@ -111,7 +111,7 @@ tab_prepare_data <- function(.data, ..., group_vars = character(0)) {
     out <- .data %>%
       dplyr::ungroup()
   }
-  return(out)
+  out
 }
 
 tab_counts <- function(data, weights) {
@@ -355,7 +355,7 @@ append_tab_list <- function(.data, blank_row = FALSE) {
     purrr::list_rbind() %>%
     dplyr::relocate(variable)
 
-  return(out)
+  out
 }
 
 tab2_data <- function(.data, weights = NULL) {
@@ -423,7 +423,7 @@ tab2_data <- function(.data, weights = NULL) {
     )
   out <- out[c(names(out)[1L], unique(headers))]
 
-  return(out)
+  out
 }
 
 order_tab_groups <- function(
@@ -498,7 +498,7 @@ tab2_add_total <- function(out, .data, call = rlang::caller_env()) {
   }
   out$total <- totals
 
-  return(out)
+  out
 }
 
 result_to_flextable <- function(
@@ -556,7 +556,7 @@ result_to_flextable <- function(
       max_row = 1e3
     )
 
-  return(ft)
+  ft
 }
 
 # Pearson chi-square test of independence for a cross-tabulation from

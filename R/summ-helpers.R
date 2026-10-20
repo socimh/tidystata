@@ -6,7 +6,7 @@ summ_keep_measured <- function(.data, .data_num, group_vars) {
     ) %>%
     dplyr::bind_cols(.data_num)
 
-  return(out)
+  out
 }
 
 is_summable_chr <- function(chr) {
@@ -819,7 +819,7 @@ summ_list <- function(
     cli::cli_inform("A list is returned as statistics are heterogeneous.")
   }
 
-  return(out)
+  out
 }
 
 # In one stacked table, calendar spreads become plain numbers (days for Dates,

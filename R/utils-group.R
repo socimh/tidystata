@@ -20,7 +20,7 @@ extract_group_var <- function(.data, by, call = rlang::caller_env()) {
     )
   }
 
-  return(group_vars)
+  group_vars
 }
 
 # `.by` selects columns; a computed expression would otherwise fail with a
@@ -48,7 +48,7 @@ has_group_vars <- function(.data, group_vars) {
       tidyselect::all_of(group_vars)
     ) %>%
     capture()
-  return(contain)
+  contain
 }
 
 remove_group_vars <- function(.data, ..., group_vars) {
@@ -65,7 +65,7 @@ remove_group_vars <- function(.data, ..., group_vars) {
     ) %>%
     # Suppress "adding missing grouping variables" message
     suppressMessages()
-  return(out)
+  out
 }
 
 # A grouping key selected under another name would be summarised as data.
