@@ -334,3 +334,133 @@ test_that("timer: preserves call stack on error", {
 
   expect_error(outer_fn(), "Inner error")
 })
+
+test_that("PROBLEMS2 timer reports failures optionally and preserves the error", {
+  original <- structure(
+    list(message = "test failure", call = quote(original_call())),
+    class = c("problems2_error", "error", "condition")
+  )
+  count <- 0L
+  messages <- character()
+  error <- withCallingHandlers(
+    tryCatch(
+      timer(
+        {
+          count <- count + 1L
+          stop(original)
+        },
+        .on_error = TRUE
+      ),
+      error = identity
+    ),
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_identical(error, original)
+  expect_identical(count, 1L)
+  expect_length(messages, 1)
+  expect_match(messages, "[Ff]ailed.*[Tt]ime|[Tt]ime.*[Ff]ailed")
+  messages <- character()
+  withCallingHandlers(
+    tryCatch(timer(stop(original), .on_error = FALSE), error = identity),
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_length(messages, 0)
+  # Failed elapsed time is reported by default; the error call is not rewritten.
+  messages <- character()
+  failure <- withCallingHandlers(
+    tryCatch(timer(stop("plain failure")), error = identity),
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_length(messages, 1)
+  expect_match(messages, "Failed execution")
+  expect_identical(conditionMessage(failure), "plain failure")
+  expect_false(grepl("withCallingHandlers", deparse(conditionCall(failure))[1]))
+  expect_false(
+    suppressMessages(withVisible(timer(42, .on_error = TRUE)))$visible
+  )
+  expect_identical(
+    statart:::duration_to_chr(as.difftime(61, units = "secs")),
+    "1m1s"
+  )
+  for (bad in list(NA, 1, logical(), c(TRUE, FALSE))) {
+    expect_error(timer(42, .on_error = bad), ".on_error", fixed = TRUE)
+  }
+})
+
+test_that("PROBLEMS2 failure timing keeps warnings and nested timing intact", {
+  result <- NULL
+  expect_warning(
+    suppressMessages(
+      result <- timer(
+        {
+          warning("original warning")
+          42
+        },
+        .on_error = TRUE
+      )
+    ),
+    "original warning"
+  )
+  expect_identical(result, 42)
+  count <- 0L
+  messages <- character()
+  withCallingHandlers(
+    result <- timer(
+      timer(
+        {
+          count <- count + 1L
+          42
+        },
+        .on_error = TRUE
+      ),
+      .on_error = TRUE
+    ),
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_identical(result, 42)
+  expect_identical(count, 1L)
+  expect_length(messages, 2)
+})
+
+test_that("timer evaluates its promise once and returns the exact object invisibly", {
+  calls <- 0L
+  value <- structure(list(x = 1:2), class = "timed_result", note = "preserved")
+  expect_message(
+    out <- withVisible(timer({
+      calls <- calls + 1L
+      value
+    })),
+    "^Time spent: "
+  )
+  expect_identical(calls, 1L)
+  expect_identical(out, list(value = value, visible = FALSE))
+})
+
+test_that("timer propagates the original error without a message when disabled", {
+  condition <- structure(
+    list(message = "timed failure", call = NULL),
+    class = c("timed_error", "error", "condition")
+  )
+  messages <- character()
+  err <- withCallingHandlers(
+    tryCatch(timer(stop(condition), .on_error = FALSE), error = identity),
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_identical(err, condition)
+  expect_length(messages, 0L)
+})

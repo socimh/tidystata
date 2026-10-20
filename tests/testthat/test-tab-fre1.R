@@ -533,3 +533,14 @@ test_that("fre1: quality control multiple metrics", {
   )
   expect_equal(length(result), 3)
 })
+
+test_that("milestone fre1 adds totals within each retained group", {
+  d <- tibble::tibble(g = c("A", "A", "B", NA_character_), x = c(1, 2, 1, 2))
+  out <- fre1(d, x, .by = g, .type = "list")$x
+  totals <- out[!is.na(out$value) & out$value == "Total", ]
+  expect_equal(
+    totals$n[match(c("A", "B", NA_character_), totals$g)],
+    c(2, 1, 1)
+  )
+  expect_equal(totals$percent, rep(100, 3))
+})

@@ -586,3 +586,334 @@ test_that("summ: data.table input with table mode", {
   result <- summ(df, x, y, .mode = "table")
   expect_s3_class(result, "data.frame")
 })
+
+test_that("summary historical missingness and type cases stay supported", {
+  d <- tibble::tibble(type = c("a", "a", NA), x = c(1, NA, 3))
+  expect_message(out <- summ(d, x, .by = type), "type")
+  expect_equal(out$n, c(1, 1))
+  expect_message(clean <- summ(d, x, .by = type, .na.rm = TRUE), "type")
+  expect_equal(clean$n, 1)
+  result <- summ(c(-Inf, 1, 2, Inf))
+  expect_equal(result$n, 4)
+  expect_identical(result$min, -Inf)
+  expect_identical(result$max, Inf)
+  expect_true(is.nan(result$mean))
+  expect_equal(summ(c(1, NA, 2), .stat = "sum")$sum, 3)
+  expect_false("name" %in% names(summ(1:3, .name = FALSE)))
+  dates <- as.POSIXct(c("2024-01-01", "2024-01-02"), tz = "UTC")
+  calendar <- summ(dates)
+  expect_match(calendar$mean, "2024-01-01 12:00")
+  expect_identical(units(calendar$sd), "hours")
+  grouped <- dplyr::group_by(tibble::tibble(g = c("b", "a"), x = 1:2), g)
+  expect_message(summ(grouped, x), NA)
+})
+
+test_that("named constants are computed and grouping keys are never measured", {
+  tb <- tibble::tibble(
+    girl = c(0, 1, 0, 1),
+    ca3_2 = c("a", "a", "b", "b"),
+    score = c(10, 20, 30, 40)
+  )
+  out <- summ(tb, one = 1, .by = c(girl, ca3_2))
+  expect_identical(out$mean, rep(1, 4))
+  expect_identical(out$n, rep(1L, 4))
+  expect_identical(nrow(tab(tb, constant = "x")), 1L)
+  expect_identical(tab(tb, constant = "x")$n, 4L)
+  expect_identical(names(s_select(tb, one = 1)), "one")
+  expect_identical(s_select(tb, one = 1)$one, rep(1, 4))
+  expect_error(summ(tb, other = girl, .by = girl), "Grouping column `girl`")
+  expect_error(tab(tb, other = girl, .by = girl), "Grouping column `girl`")
+  kept <- summ(tb, tidyselect::where(is.numeric), .by = girl, .name = TRUE)
+  expect_identical(kept$name, c("score", "score"))
+})
+
+test_that("calendar spreads are difftime columns with one unit per column", {
+  day <- tibble::tibble(
+    g = c(1, 1, 2, 2, 2),
+    day = as.Date("2024-01-01") + c(0, 1, 0, 3, 9)
+  )
+  out <- summ(day, .by = g, .stat = c("sd", "se", "iqr", "mad"))
+  for (statistic in c("sd", "se", "iqr", "mad")) {
+    expect_s3_class(out[[statistic]], "difftime")
+    expect_identical(units(out[[statistic]]), "days")
+  }
+  expect_equal(as.numeric(out$sd), c(sd(0:1), sd(c(0, 3, 9))))
+  # A sub-day spread keeps its value instead of rounding to "0d".
+  expect_equal(
+    as.numeric(out$se, units = "hours")[[1L]],
+    sd(0:1) / sqrt(2) * 24
+  )
+
+  stamp <- tibble::tibble(
+    g = c(1, 1, 2, 2),
+    tm = as.POSIXct("2024-01-01 09:00", tz = "UTC") + c(0, 7200, 0, 3600)
+  )
+  spread <- summ(stamp, .by = g, .stat = "sd")
+  expect_identical(units(spread$sd), "hours")
+  expect_equal(
+    as.numeric(spread$sd, units = "secs"),
+    c(sd(c(0, 7200)), sd(c(0, 3600)))
+  )
+})
+
+test_that("hms times of day summarise as clock times", {
+  skip_if_not_installed("hms")
+  clock <- hms::as_hms(c(3600, 5400, 7200, NA))
+  out <- summ(clock, .stat = c("n", "mean", "min", "max", "sd"))
+  expect_identical(out$type, "time")
+  expect_identical(out$mean, "01:30:00")
+  expect_identical(out$min, "01:00:00")
+  expect_identical(out$max, "02:00:00")
+  expect_identical(units(out$sd), "mins")
+  expect_equal(as.numeric(out$sd), 30)
+  mixed <- summ(tibble::tibble(x = 1:2, clock = hms::as_hms(c(60, 120))))
+  expect_named(mixed, c("numeric", "time"))
+})
+
+test_that("table mode keeps numeric spreads and records their unit", {
+  input <- tibble::tibble(
+    x = c(1, 2.123456789, 3),
+    day = as.Date("2024-01-01") + 0:2
+  )
+  out <- summ(input, .mode = "table", .stat = c("mean", "sd"))
+  expect_type(out$sd, "double")
+  expect_identical(out$type, c("dbl", "date [days]"))
+  expect_equal(out$sd, c(sd(input$x), 1))
+  expect_identical(out$mean[[1L]], "2.041152")
+})
+
+test_that("a piped vector is named value", {
+  piped <- c(1, 2, 3) %>% summ(.name = TRUE, .stat = "mean")
+  expect_identical(piped$name, "value")
+  expect_identical(summ(c(1, 2), .name = TRUE)$name, "c(1, 2)")
+})
+
+test_that(".by expressions give an actionable error", {
+  input <- tibble::tibble(x = 1:3, y = 4:6)
+  expect_error(summ(input, y, .by = x > 1), "Create the grouping column first")
+  expect_error(tab(input, y, .by = x > 1), "must select existing columns")
+  expect_no_error(summ(input, y, .by = c(x)))
+})
+
+test_that("aggregation excludes alternate and additional geometry columns", {
+  skip_if_not_installed("sf")
+  d <- sf::st_as_sf(
+    tibble::tibble(x = c(1, 3, 5), g = c("b", "a", "b"), lon = 1:3, lat = 4:6),
+    coords = c("lon", "lat"),
+    sf_column_name = "shape"
+  )
+  d$extra_geometry <- sf::st_geometry(d)
+  attributes_only <- tibble::tibble(x = d$x, g = d$g)
+  expect_equal(summ(d, x, .by = g), summ(attributes_only, x, .by = g))
+  expect_equal(tab(d, x, .by = g), tab(attributes_only, x, .by = g))
+  expect_equal(tab1(d), tab1(attributes_only))
+  expect_warning(spatial_summary <- summ(d), "g is non-numeric")
+  expect_warning(attribute_summary <- summ(attributes_only), "g is non-numeric")
+  expect_equal(spatial_summary, attribute_summary)
+  expect_error(tab(d, shape), "shape")
+  expect_error(summ(d, x, .by = shape), "shape")
+  grouped <- dplyr::group_by(d, g)
+  expect_equal(tab(grouped, x), tab(dplyr::group_by(attributes_only, g), x))
+  expect_equal(summ(grouped, x), summ(dplyr::group_by(attributes_only, g), x))
+})
+
+test_that("summary requests avoid unrequested expensive statistics", {
+  testthat::local_mocked_bindings(
+    quantile = function(...) stop("Unrequested quantile calculation"),
+    sd = function(...) stop("Unrequested SD calculation"),
+    .package = "stats"
+  )
+  testthat::local_mocked_bindings(
+    skew = function(...) stop("Unrequested skew calculation"),
+    kurtosis = function(...) stop("Unrequested kurtosis calculation"),
+    .package = "statart"
+  )
+  expect_equal(summ(1:100, .stat = "mean")$mean, 50.5)
+  expect_equal(summ(1:100, .stat = "n")$n, 100)
+  day <- as.Date("2024-01-01") + 0:2
+  expect_equal(summ(day, .stat = "mean")$mean, "2024-01-02")
+  moment <- as.POSIXct("2024-01-01", tz = "UTC") + c(0, 120)
+  expect_equal(summ(moment, .stat = "mean")$mean, "2024-01-01 00:01")
+})
+
+test_that("summary percentile names retain requested order and type-7 values", {
+  x <- c(-9, 0, 3, 8, 24, NA_real_)
+  requested <- c("p97.5", "p0", "p2.5", "q1", "p25", "p100", "p97.5")
+  out <- summ(x, .stat = requested, .name = TRUE)
+  expect_named(out, c("name", "type", unique(requested)))
+  expect_equal(
+    unlist(out[unique(requested)], use.names = FALSE),
+    unname(stats::quantile(x, c(.975, 0, .025, .25, .25, 1), na.rm = TRUE))
+  )
+  day <- as.Date("2024-01-01") + c(0, 10)
+  expect_equal(summ(day, .stat = "p2.5")$p2.5, "2024-01-01")
+  moment <- as.POSIXct("2024-01-01", tz = "UTC") + c(0, 3600)
+  expect_equal(summ(moment, .stat = "p2.5")$p2.5, "2024-01-01 00:01")
+  labelled <- haven::labelled_spss(c(0, 100, 999), na_values = 999)
+  expect_warning(
+    observed <- summ(labelled, .stat = c("p2.5", "p97.5")),
+    "labelled"
+  )
+  expect_equal(observed$p2.5, 2.5)
+  expect_equal(observed$p97.5, 97.5)
+  collision <- tibble::tibble(p2.5 = c("b", "a"), x = c(0, 10))
+  expect_message(
+    by_percentile <- summ(
+      collision,
+      x,
+      .by = p2.5,
+      .stat = "p2.5",
+      .name = TRUE
+    ),
+    "Grouping column.*renamed"
+  )
+  expect_named(by_percentile, c(".p2.5", "name", "type", "p2.5"))
+  # Groups are sorted by key by default: "a" (x = 10) before "b" (x = 0).
+  expect_equal(by_percentile$.p2.5, c("a", "b"))
+  expect_equal(by_percentile$p2.5, c(10, 0))
+  for (invalid in c("p-1", "p101", "pNaN", "p2.5.1")) {
+    expect_error(summ(x, .stat = invalid), "Unsupported statistic")
+  }
+})
+
+test_that("sorted mixed summaries preserve selection order across type families", {
+  input <- tibble::tibble(
+    g = c("b", "a"),
+    x = 1:2,
+    day = as.Date("2024-01-01") + 0:1
+  )
+  out <- summ(input, day, x, .by = g, .mode = "table", .sort = TRUE)
+  expect_equal(out$g, c("a", "a", "b", "b"))
+  expect_equal(out$name, c("day", "x", "day", "x"))
+  grouped <- dplyr::group_by(input, g)
+  expect_equal(summ(grouped, x, .sort = TRUE)$g, c("a", "b"))
+  zero <- summ(input[0, ], .by = g, .sort = TRUE, .drop_empty = TRUE)
+  expect_equal(nrow(zero$numeric), 0L)
+  expect_equal(nrow(zero$date), 0L)
+})
+
+test_that("summary sorting uses key values and preserves measured-variable order", {
+  input <- tibble::tibble(
+    g = factor(c("low", "high", "low", NA), levels = c("high", "low")),
+    h = c(2, 1, 1, 0),
+    x = 1:4,
+    y = 5:8
+  )
+  for (fn in list(summ, tabstat)) {
+    out <- fn(input, y, x, .by = c(g, h), .sort = TRUE, .stat = "mean")
+    expect_equal(
+      as.character(out$g),
+      rep(c("high", "low", "low", NA), each = 2)
+    )
+    expect_equal(out$h, rep(c(1, 1, 2, 0), each = 2))
+    expect_equal(out$name, rep(c("y", "x"), 4))
+    expect_equal(
+      fn(input, x, .by = g, .stat = "n", .sort = FALSE)$g,
+      input$g[c(1, 2, 4)]
+    )
+    expect_equal(
+      fn(input, x, .by = g, .stat = "n")$g,
+      factor(c("high", "low", NA), levels = c("high", "low"))
+    )
+    expect_error(fn(input, .sort = NA), "single TRUE or FALSE")
+  }
+})
+
+test_that("summary empty-row removal is independent of missing-key removal", {
+  input <- tibble::tibble(
+    g = c("b", "a", NA),
+    x = c(NA_real_, 2, 3),
+    day = as.Date(c("2024-01-01", NA, "2024-01-03"))
+  )
+  for (fn in list(summ, tabstat)) {
+    out <- fn(input, .by = g, .drop_empty = TRUE, .stat = "mean")
+    expect_equal(out$numeric$g, c("a", NA))
+    expect_equal(out$date$g, c("b", NA))
+    expect_false("n" %in% names(out$numeric))
+    combined <- fn(
+      input,
+      .by = g,
+      .drop_empty = TRUE,
+      .na.rm = TRUE,
+      .mode = "table",
+      .stat = "mean",
+      .sort = TRUE
+    )
+    expect_equal(combined$g, c("a", "b"))
+    expect_equal(combined$name, c("x", "day"))
+    expect_error(fn(input, .drop_empty = 1), "single TRUE or FALSE")
+  }
+  expect_warning(
+    empty <- summ(c(NA_real_, NA_real_), .drop_empty = TRUE, .stat = "mean"),
+    "entirely missing"
+  )
+  expect_equal(nrow(empty), 0L)
+  expect_named(empty, c("type", "mean"))
+})
+
+test_that("summary defaults sort groups like tab and hide a single name", {
+  levels <- c("low", "middle", "high")
+  d <- tibble::tibble(
+    edu = factor(c("high", "middle", NA, "low", "high"), levels = levels),
+    x = 1:5
+  )
+  out <- summ(d, x, .by = "edu")
+  expect_identical(as.character(out$edu), c(levels, NA))
+  expect_identical(
+    as.character(out$edu),
+    as.character(unique(tab(d, x, .by = edu)$edu))
+  )
+  expect_identical(
+    as.character(summ(dplyr::group_by(d, edu), x)$edu),
+    c(levels, NA)
+  )
+  expect_false("name" %in% names(out))
+  expect_true("name" %in% names(summ(d, x, .by = edu, .name = TRUE)))
+  expect_true("name" %in% names(summ(dplyr::mutate(d, y = x), .by = edu)))
+  expect_identical(
+    as.character(summ(d, x, .by = edu, .sort = FALSE)$edu),
+    c("high", "middle", NA, "low")
+  )
+})
+
+test_that("tabstat detail, calendar skips and datetime zones", {
+  expect_true(all(
+    c("median", "sd", "sum") %in% names(tabstat(1:5, .detail = TRUE))
+  ))
+  expect_identical(names(tabstat(1:5)), c("type", "mean"))
+  mixed <- tibble::tibble(x = 1:2, day = as.Date("2024-01-01") + 0:1)
+  expect_warning(total <- summ(mixed, .stat = "sum"), "skipped: day")
+  expect_identical(total$sum, 3)
+  expect_error(summ(mixed["day"], .stat = "sum"), "sum.*date")
+  hk <- as.POSIXct(
+    c("2024-03-01 09:00", "2024-03-02 09:00"),
+    tz = "Asia/Hong_Kong"
+  )
+  zoned <- summ(hk)
+  expect_identical(zoned$min, "2024-03-01 09:00")
+  expect_identical(zoned$max, "2024-03-02 09:00")
+})
+
+test_that("calendar summaries distinguish infinite extrema from missing values", {
+  day <- as.Date(c(-Inf, 0, Inf, NA), origin = "1970-01-01")
+  out <- summ(day, .stat = c("n", "miss_n", "min", "max"))
+  expect_identical(out$n, 3L)
+  expect_identical(out$miss_n, 1L)
+  expect_identical(out$min, "-Inf")
+  expect_identical(out$max, "Inf")
+  finite <- summ(as.Date(c(0, 1), origin = "1970-01-01"), .stat = "min")
+  expect_identical(finite$min, "1970-01-01")
+})
+
+test_that("mixed calendar tables retain documented shared-column types", {
+  input <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
+  out <- summ(input, .mode = "table", .stat = c("n", "mean"))
+  expect_identical(out$mean, c("2", "2024-01-01"))
+  expect_identical(out$n, c(2L, 2L))
+  separate <- summ(input, .mode = "list", .stat = "mean")
+  expect_identical(separate$numeric$mean, 2)
+  piped <- 1:3 %>% summ(.name = TRUE, .stat = "mean")
+  # Magrittr placeholders are named `value` (see test-problems2-low.R).
+  expect_identical(piped$name, "value")
+  expect_identical(piped$mean, 2)
+})

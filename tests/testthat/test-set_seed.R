@@ -337,3 +337,112 @@ test_that("set_seed: subsequent random operations continue from the seeded state
   # result2 should be different (continued from different state)
   expect_false(identical(result1, result2))
 })
+
+test_that("set_seed() works in a pipeline and alone", {
+  set_seed(20261020)
+  first <- stats::runif(2)
+  set.seed(20261020)
+  expect_identical(first, stats::runif(2))
+  expect_invisible(set_seed(1))
+  expect_null(set_seed(seed = 1))
+  set_seed(seed = 7)
+  first <- stats::runif(1)
+  set.seed(7)
+  expect_identical(first, stats::runif(1))
+  piped <- sample(1:10, 3) %>% set_seed(123)
+  set.seed(123)
+  expect_identical(piped, sample(1:10, 3))
+  expect_error(set_seed(), "Supply a seed")
+  expect_error(set_seed("a"), "needs one number as the seed")
+  expect_error(set_seed(c(1, 2)), "needs one number as the seed")
+  expect_error(set_seed(NA_real_), "needs one number as the seed")
+})
+
+test_that("set_seed seeds before evaluation and leaves the advanced global RNG state", {
+  local({
+    old <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    on.exit(
+      if (is.null(old)) {
+        rm(".Random.seed", envir = .GlobalEnv)
+      } else {
+        assign(".Random.seed", old, envir = .GlobalEnv)
+      }
+    )
+    set.seed(419)
+    expected <- stats::runif(3)
+    expected_state <- .Random.seed
+    expected_next <- stats::runif(1)
+    calls <- 0L
+    out <- set_seed(
+      {
+        calls <- calls + 1L
+        stats::runif(3)
+      },
+      419
+    )
+    expect_identical(calls, 1L)
+    expect_identical(out, expected)
+    expect_identical(.Random.seed, expected_state)
+    expect_identical(stats::runif(1), expected_next)
+  })
+})
+
+test_that("set_seed keeps RNG effects when the expression fails", {
+  local({
+    old <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    on.exit(
+      if (is.null(old)) {
+        rm(".Random.seed", envir = .GlobalEnv)
+      } else {
+        assign(".Random.seed", old, envir = .GlobalEnv)
+      }
+    )
+    set.seed(117)
+    stats::runif(2)
+    expected_state <- .Random.seed
+    expect_error(
+      set_seed(
+        {
+          stats::runif(2)
+          stop("seeded failure")
+        },
+        117
+      ),
+      "seeded failure"
+    )
+    expect_identical(.Random.seed, expected_state)
+  })
+})
+
+test_that("set_seed preserves result attributes and invisible expressions", {
+  local({
+    old <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    on.exit(
+      if (is.null(old)) {
+        rm(".Random.seed", envir = .GlobalEnv)
+      } else {
+        assign(".Random.seed", old, envir = .GlobalEnv)
+      }
+    )
+    value <- structure(1:2, label = "Seeded result")
+    expect_identical(
+      withVisible(set_seed(invisible(value), 1)),
+      list(value = value, visible = FALSE)
+    )
+  })
+})
+
+test_that("set_seed rejects an invalid seed before forcing the expression", {
+  calls <- 0L
+  expect_error(
+    set_seed(
+      {
+        calls <- calls + 1L
+        1
+      },
+      NA_integer_
+    ),
+    "not a valid integer"
+  )
+  expect_identical(calls, 0L)
+})

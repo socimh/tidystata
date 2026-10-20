@@ -309,3 +309,39 @@ test_that("capture: reports an immediate error", {
 
   expect_identical(result, FALSE)
 })
+
+test_that("capture evaluates once and preserves warnings and messages", {
+  calls <- 0L
+  warnings <- character()
+  messages <- character()
+  out <- withCallingHandlers(
+    capture({
+      calls <- calls + 1L
+      warning("kept warning")
+      message("kept message")
+      FALSE
+    }),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    },
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_identical(calls, 1L)
+  expect_true(out)
+  expect_identical(warnings, "kept warning")
+  expect_identical(messages, "kept message\n")
+})
+
+test_that("capture preserves the existing try-error classification and visible result", {
+  value <- structure("already failed", class = "try-error")
+  expect_false(capture(value))
+  expect_false(capture(stop("new failure")))
+  expect_identical(
+    withVisible(capture(invisible(NULL))),
+    list(value = TRUE, visible = TRUE)
+  )
+})

@@ -561,3 +561,85 @@ test_that("print_all() prints every row and column and returns the input", {
   )
   expect_identical(r, grouped)
 })
+
+test_that("historical previews and repeated timers preserve complete values", {
+  d <- tibble::tibble(id = 1:25, x = letters[1:25])
+  expect_output(returned <- print_interval(d, n = Inf, width = Inf), "25")
+  expect_identical(returned, d)
+  preview <- preview_table(d, "interval", n = 5)
+  changed <- dplyr::mutate(preview, id = id + 1L)
+  expect_s3_class(changed, "statart_preview")
+  expect_identical(unpreview_table(changed)$id, 2:26)
+  expect_identical(
+    statart:::duration_to_chr(as.difftime(61, units = "secs")),
+    "1m1s"
+  )
+  calls <- 0L
+  messages <- character()
+  result <- withCallingHandlers(
+    {
+      value <- timer({
+        calls <- calls + 1L
+        1:5
+      })
+      timer(sum(value))
+    },
+    message = function(condition) {
+      messages <<- c(messages, conditionMessage(condition))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_identical(calls, 1L)
+  expect_equal(result, 15)
+  expect_length(messages, 2L)
+})
+
+test_that("slice and print helpers accept sf data", {
+  skip_if_not_installed("sf")
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  sliced <- slice_headtail(nc, 2)
+  expect_s3_class(sliced, "sf")
+  expect_identical(nrow(sliced), 2L)
+  expect_identical(nrow(slice_interval(nc, 3)), 3L)
+  expect_output(print_interval(nc[1:3], n = 2), "rows omitted")
+})
+
+test_that("slicing retains explicit row names and regenerates automatic ones", {
+  automatic <- data.frame(x = 1:8)
+  explicit <- data.frame(x = 1:8, row.names = letters[1:8])
+  expect_identical(
+    rownames(slice_headtail(automatic, n = 4)),
+    as.character(1:4)
+  )
+  expect_identical(
+    rownames(slice_headtail(explicit, n = 4)),
+    letters[c(1, 2, 7, 8)]
+  )
+  expect_identical(
+    rownames(slice_interval(automatic, n = 3)),
+    as.character(1:3)
+  )
+  expect_identical(
+    rownames(slice_interval(explicit, n = 3)),
+    letters[c(1, 4, 8)]
+  )
+})
+
+test_that("s_print() matches the print helpers for each style", {
+  data <- tibble::tibble(i = 1:30, sq = (1:30)^2)
+  expect_identical(
+    capture.output(s_print(data)),
+    capture.output(print_headtail(data))
+  )
+  expect_identical(
+    capture.output(s_print(data, "interval", n = 4)),
+    capture.output(print_interval(data, n = 4))
+  )
+  expect_identical(
+    capture.output(s_print(data, "all")),
+    capture.output(print_all(data))
+  )
+  expect_invisible(s_print(data, "interval"))
+  expect_identical(withVisible(s_print(data))$value, data)
+  expect_error(s_print(data, "middle"))
+})

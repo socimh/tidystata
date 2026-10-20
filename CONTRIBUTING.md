@@ -78,8 +78,9 @@ statart-specific decisions; consult the guide for everything else.
   `...`, `.by`, `.wt`) inherit from `@inheritParams statart_args` in
   `R/doc-params.R`. Use `@returns`, `@family` (plural, matching the pkgdown
   section) and `[fn()]` cross-links.
-- **Tests.** `tests/testthat/test-<file>.R` mirrors `R/<file>.R`; numbered
-  acceptance catalogues live beside it as `test-<file>-acceptance.R`. Test the
+- **Tests.** `tests/testthat/test-<file>.R` mirrors `R/<file>.R`. Large topics
+  and numbered acceptance catalogues live beside it as `test-<file>-<topic>.R`
+  (`test-summ-acceptance.R`, `test-tab-fre1.R`), kept verbatim. Test the
   wording of error and warning messages with `expect_snapshot(error = TRUE)`;
   test values with ordinary expectations.
 - **NEWS.** One bullet per user-facing change, present tense, the function name

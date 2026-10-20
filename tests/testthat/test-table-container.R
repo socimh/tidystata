@@ -161,3 +161,26 @@ test_that("data.table previews preserve native expressions and isolate inputs", 
   )
   expect_null(data.table::key(summ(input, x)))
 })
+
+test_that("serialized data.table inputs explain the missing optional dependency", {
+  x <- structure(data.frame(x = 1:8), class = c("data.table", "data.frame"))
+  require_namespace <- base::requireNamespace
+  testthat::local_mocked_bindings(
+    requireNamespace = function(package, ...) {
+      if (identical(package, "data.table")) {
+        FALSE
+      } else {
+        require_namespace(package, ...)
+      }
+    },
+    .package = "base"
+  )
+  expect_error(preview_table(x), "Install.*data.table")
+  expect_error(unpreview_table(x), "Install.*data.table")
+  expect_error(slice_headtail(x), "Install.*data.table")
+  expect_error(summ(x, x), "Install.*data.table")
+  expect_error(
+    table_restore(data.frame(x = 1), x),
+    "Install.*data.table"
+  )
+})

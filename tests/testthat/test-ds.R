@@ -385,3 +385,21 @@ test_that("names functions: retain every name of a wide data frame", {
   expect_equal(length(result), 1000)
   expect_identical(result, paste0("var", seq_len(1000)))
 })
+
+test_that("PROBLEMS2 ds reuses character name inventories", {
+  data <- tibble::tibble(x1 = 1, x2 = "a", other = TRUE)
+  inventory <- ds(data)
+  expect_identical(ds(inventory), c("x1", "x2", "other"))
+  expect_identical(ds(inventory, dplyr::starts_with("x")), c("x1", "x2"))
+  expect_identical(ds(inventory, 3, 1), c("other", "x1"))
+  expect_identical(ds(inventory, renamed = x2), "renamed")
+  expect_identical(ds(stats::setNames(inventory, letters[1:3])), inventory)
+  expect_identical(ds(character()), character())
+  expect_identical(ds(character(), dplyr::everything()), character())
+  expect_error(ds(inventory, dplyr::where(is.character)), "predicate")
+  expect_error(ds(inventory, absent), "absent")
+  for (bad in list(c("x", "x"), c("x", NA), c("x", ""), " ")) {
+    expect_error(ds(bad), "unique|nonempty|missing")
+  }
+  expect_identical(ds(data, dplyr::where(is.character)), "x2")
+})

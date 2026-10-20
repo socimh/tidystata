@@ -377,3 +377,78 @@ test_that("custom type names containing lbl do not confer haven semantics", {
   expect_identical(as_numeric(x), c(NA_real_, NA_real_))
   expect_identical(as_character(x), c("1", "2"))
 })
+
+# Regression contracts for the first maintenance milestone. Expectations use
+# scalar base-R calculations and independent group counts, not package helpers.
+
+test_that("milestone as_numeric parses character values without losing positions", {
+  expect_equal(
+    as_numeric(c("1", "$2,500.50", NA, "3e-2")),
+    c(1, 2500.5, NA, 0.03)
+  )
+  expect_identical(as_numeric(character()), numeric())
+})
+
+# Character parsing must work for real imported columns, including sparse and
+# empty ones. These fixtures also catch precision loss and row recycling.
+.milestone_parse_cases <- list(
+  integers = list(c("1", "2", "3"), c(1, 2, 3)),
+  decimals = list(c("1.25", "2.50", "0.01"), c(1.25, 2.5, 0.01)),
+  signs = list(c("-2", "+3", "-0.5"), c(-2, 3, -0.5)),
+  exponent = list(c("1e5", "2.5e-3", "3E10"), c(1e5, 0.0025, 3e10)),
+  dollars = list(c("$1,234.56", "$500.00"), c(1234.56, 500)),
+  currency = list(c("\u20ac500.25", "\u00a31,000"), c(500.25, 1000)),
+  spaces = list(c(" 1 ", "\t2.5", "3\n"), c(1, 2.5, 3)),
+  negative_currency = list(c("$-12.50", "-1,000.25"), c(-12.5, -1000.25)),
+  grouped_thousands = list(c("1,234,567", "12,345"), c(1234567, 12345)),
+  embedded_units = list(c("10 kg", "20.5 km"), c(10, 20.5)),
+  prefixes = list(c("USD 100.5", "EUR 20"), c(100.5, 20)),
+  missing_middle = list(c("1", NA, "3"), c(1, NA, 3)),
+  missing_edges = list(c(NA, "2", NA), c(NA, 2, NA)),
+  entirely_missing = list(rep(NA_character_, 3), rep(NA_real_, 3)),
+  empty = list(character(), numeric()),
+  singleton = list("42", 42),
+  nonnumeric = list(c("apple", "pear"), c(NA_real_, NA_real_)),
+  mixed_nonnumeric = list(c("1", "bad", "3"), c(1, NA, 3)),
+  blank_values = list(c("", " ", "4"), c(NA, NA, 4)),
+  zeros = list(c("0", "-0", "0.000"), c(0, 0, 0)),
+  leading_zeros = list(c("00012", "000.125"), c(12, 0.125)),
+  small_numbers = list(c("0.000000001", "2e-12"), c(1e-9, 2e-12)),
+  large_numbers = list(c("1000000000", "999999999999"), c(1e9, 999999999999))
+)
+
+for (.scenario in names(.milestone_parse_cases)) {
+  test_that(paste("milestone as_numeric imported character", .scenario), {
+    case <- .milestone_parse_cases[[.scenario]]
+    before <- case[[1]]
+    parsing_warning <- if (.scenario %in% c("nonnumeric", "mixed_nonnumeric")) {
+      "parsing failure"
+    } else {
+      NA
+    }
+    expect_warning(out <- as_numeric(case[[1]]), parsing_warning)
+    expect_type(out, "double")
+    expect_length(out, length(case[[1]]))
+    expect_equal(as.vector(out), case[[2]], tolerance = 1e-14)
+    expect_identical(case[[1]], before)
+    d <- tibble::tibble(raw = case[[1]])
+    expect_warning(
+      converted <- dplyr::mutate(d, value = as_numeric(raw)),
+      parsing_warning
+    )
+    expect_equal(as.vector(converted$value), case[[2]], tolerance = 1e-14)
+  })
+}
+
+test_that("tostring() gives codes as text, ignoring value labels", {
+  labelled <- haven::labelled(c(1, 2, NA), c(Low = 1, High = 2))
+  expect_identical(tostring(labelled), c("1", "2", NA))
+  expect_identical(decode(labelled), c("Low", "High", NA))
+  expect_identical(tostring(factor(c("b", "a", NA))), c("2", "1", NA))
+  expect_identical(tostring(c("x", NA)), c("x", NA))
+  expect_identical(tostring(c(0.5, NA, NaN)), c("0.5", NA, NA))
+  expect_identical(tostring(c(TRUE, NA)), c("TRUE", NA))
+  expect_identical(tostring(as.Date("2024-01-31")), "2024-01-31")
+  expect_identical(tostring(haven::tagged_na("a")), NA_character_)
+  expect_identical(tostring(integer()), character())
+})

@@ -561,3 +561,24 @@ test_that("richer list-of type descriptions do not force compatible values to te
   expect_identical(out$value, vctrs::list_of(1, 2, 1, 2))
   expect_identical(out$n, rep(1L, 4L))
 })
+
+test_that("milestone grouped tab1 keeps missing group keys and group counts", {
+  d <- tibble::tibble(g = c("A", "A", "B", NA_character_), x = c(1, 2, 1, 2))
+  out <- tab1(d, x, .by = g)$x
+  expect_true("g" %in% names(out))
+  counts <- dplyr::summarise(out, n = sum(n), .by = g)
+  expect_equal(
+    counts$n[match(c("A", "B", NA_character_), counts$g)],
+    c(2, 1, 1)
+  )
+})
+
+test_that("historical tab1 selections and expressions stay supported", {
+  d <- tibble::tibble(temp = c(26, 39, NA), text = c("a", "b", NA))
+  expect_equal(tab1(d), tab1(d, tidyselect::everything()))
+  result <- tab1(d, t1 = temp == 26, t2 = temp == 39)
+  expect_named(result, c("t1", "t2"))
+  expect_equal(result$t1$n, c(1L, 1L, 1L))
+  expect_equal(result$t2$n, c(1L, 1L, 1L))
+  expect_error(s_select(d, wrong_column), "wrong_column")
+})

@@ -697,3 +697,29 @@ test_that("custom unit-bearing classes retain their units method", {
   expect_identical(s_type(x), "time")
   expect_identical(s_unit(x), "hours")
 })
+
+test_that("s_type and s_unit preserve labelled and duration metadata", {
+  labelled <- haven::labelled(
+    c(1, NA, 2),
+    labels = c(Yes = 1, No = 2),
+    label = "Answer"
+  )
+  duration <- as.difftime(c(1, NA, 2), units = "hours")
+  before <- list(labelled, duration)
+  expect_identical(s_type(labelled, .abbr = TRUE), "dbl+lbl")
+  expect_identical(s_type(labelled), "double+label")
+  expect_identical(s_unit(labelled), NA_character_)
+  expect_identical(s_type(duration), "duration")
+  expect_identical(s_unit(duration), "hours")
+  expect_identical(list(labelled, duration), before)
+})
+
+test_that("s_type returns visible type names for empty and named vectors", {
+  expect_identical(s_type(integer()), "integer")
+  expect_identical(s_type(setNames(c(1, NA), c("a", "b"))), "double")
+  expect_identical(s_unit(integer()), NA_character_)
+  expect_identical(
+    withVisible(s_type(integer())),
+    list(value = "integer", visible = TRUE)
+  )
+})

@@ -616,3 +616,30 @@ test_that("cross totals preserve integer storage and promote overflow safely", {
     c(1.75, 1.75)
   )
 })
+
+test_that("tab2() returns every pairwise table for three or more variables", {
+  d <- tibble::tibble(
+    a = c(1, 1, 2, 2),
+    b = c("x", "y", "y", "x"),
+    c = c(TRUE, FALSE, TRUE, TRUE),
+    w = c(1, 2, 1, 3)
+  )
+  out <- tab2(d, a, b, c)
+  expect_type(out, "list")
+  expect_named(out, c("a x b", "a x c", "b x c"))
+  expect_identical(out[["a x c"]], tab2(d, a, c))
+  totals <- fre2(d, a, b, c, .wt = w)
+  expect_identical(totals[["b x c"]], tab2(d, b, c, .total = TRUE, .wt = w))
+  messages <- capture_messages(tested <- tab2(d, a, b, c, .chi2 = TRUE))
+  expect_identical(
+    grep("^-> ", messages, value = TRUE),
+    paste0("-> tabulation of ", c("a by b", "a by c", "b by c"), "\n")
+  )
+  expect_identical(
+    attr(tested[["b x c"]], "chi2"),
+    attr(suppressMessages(tab2(d, b, c, .chi2 = TRUE)), "chi2")
+  )
+  expect_error(tab2(d, a), "Please provide two variables")
+  dt <- data.table::as.data.table(d)
+  expect_s3_class(tab2(dt, a, b, c)[[1]], "data.table")
+})

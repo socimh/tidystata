@@ -392,3 +392,190 @@ test_that("s_select: selects the expected columns of a wide data frame", {
   expect_identical(names(result), expected)
   expect_equal(result, df[expected])
 })
+
+test_that("misspelled selections are reported instead of evaluated", {
+  d <- tibble::tibble(height = c(1, 2, 2), mass = 3:5)
+  mas <- 99
+  expect_error(summ(d, mas), "`mas`")
+  expect_error(tab(d, "heigth"), "`heigth`")
+  expect_error(summ(d, 4), "position 4")
+  expect_error(s_select(d, a1, a2, a3), "`a1`, `a2`, `a3`")
+  expect_identical(names(tab(d, height > 1))[1], "height > 1")
+  expect_identical(s_select(d, ratio = mass / height)$ratio, d$mass / d$height)
+  expect_identical(
+    tab(d, half = mass / height)$half,
+    sort(unique(d$mass / d$height))
+  )
+  mixed <- s_select(d, tidyselect::starts_with("h"), heavy = mass > 3)
+  expect_named(mixed, c("height", "heavy"))
+})
+
+test_that("spatial inspection and selection keep their geometry", {
+  skip_if_not_installed("sf")
+  d <- sf::st_as_sf(
+    data.frame(x = 1:2, lon = 1:2, lat = 3:4),
+    coords = c("lon", "lat")
+  )
+  expect_true("geometry" %in% ds(d))
+  expect_s3_class(s_select(d, x), "sf")
+  expect_identical(sf::st_geometry(d), sf::st_geometry(s_select(d, x)))
+})
+
+test_that("s_select forces its data promise once and preserves selected attributes", {
+  calls <- 0L
+  x <- structure(1:3, label = "Observed score")
+  data <- tibble::tibble(x = x, y = 4:6)
+  out <- s_select(
+    {
+      calls <- calls + 1L
+      data
+    },
+    x
+  )
+  expect_identical(calls, 1L)
+  expect_identical(out$x, x)
+  expect_identical(data, tibble::tibble(x = x, y = 4:6))
+})
+
+test_that("s_select no-argument return preserves grouping and object identity", {
+  data <- dplyr::group_by(tibble::tibble(g = c("a", "b"), x = 1:2), g)
+  out <- withVisible(s_select(data))
+  expect_identical(out$value, data)
+  expect_true(out$visible)
+  expect_identical(s_select(data, tidyselect::everything()), data)
+})
+
+test_that("s_select evaluates selection predicates once per column", {
+  calls <- 0L
+  predicate <- function(x) {
+    calls <<- calls + 1L
+    is.numeric(x)
+  }
+  data <- tibble::tibble(x = 1:2, y = c("a", "b"), z = c(TRUE, FALSE))
+  expect_identical(s_select(data, tidyselect::where(predicate)), data["x"])
+  expect_identical(calls, 3L)
+})
+
+test_that("s_select preserves successful warning conditions and their order", {
+  first <- structure(
+    list(message = "first selector warning", call = NULL),
+    class = c("selector_warning", "warning", "condition")
+  )
+  second <- simpleWarning("second selector warning")
+  choose <- function() {
+    warning(first)
+    warning(second)
+    "x"
+  }
+  observed <- list()
+  out <- withCallingHandlers(
+    s_select(tibble::tibble(x = 1:2), tidyselect::all_of(choose())),
+    warning = function(w) {
+      observed[[length(observed) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_identical(observed, list(first, second))
+  expect_identical(out, tibble::tibble(x = 1:2))
+})
+
+test_that("s_select reports both failed branches without replaying their warnings", {
+  compute <- function() {
+    warning("discarded branch warning")
+    stop("branch failure")
+  }
+  observed <- character()
+  err <- withCallingHandlers(
+    tryCatch(s_select(tibble::tibble(x = 1:2), compute()), error = identity),
+    warning = function(w) {
+      observed <<- c(observed, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(observed, 0L)
+  expect_s3_class(err, "error")
+  expect_match(conditionMessage(err), "select\\(\\) error:")
+  expect_match(conditionMessage(err), "mutate\\(\\) error:")
+  expect_match(conditionMessage(err), "branch failure", fixed = TRUE)
+})
+
+test_that("s_select evaluates computed expressions exactly once", {
+  local({
+    old <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    on.exit(
+      if (is.null(old)) {
+        rm(".Random.seed", envir = .GlobalEnv)
+      } else {
+        assign(".Random.seed", old, envir = .GlobalEnv)
+      }
+    )
+    set.seed(731)
+    stats::runif(1)
+    expected_state <- .Random.seed
+    set.seed(731)
+    calls <- 0L
+    compute <- function(x) {
+      calls <<- calls + 1L
+      stats::runif(1)
+      force(x)
+      x * 2
+    }
+    out <- s_select(tibble::tibble(x = 1:3), z = compute(x))
+    expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
+    expect_identical(calls, 1L)
+    expect_identical(.Random.seed, expected_state)
+  })
+})
+
+test_that("s_select emits successful selector warnings exactly once", {
+  d <- tibble::tibble(x = 1:3, y = 4:6)
+  choose <- function() {
+    warning("successful-selector-warning")
+    "x"
+  }
+  warnings <- character()
+  out <- withCallingHandlers(
+    s_select(d, tidyselect::all_of(choose())),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_identical(warnings, "successful-selector-warning")
+  expect_identical(out, d["x"])
+})
+
+test_that("s_select discards failed-probe warnings and retains successful fallback warning", {
+  d <- tibble::tibble(x = 1:3)
+  compute <- function(x) {
+    warning("branch-warning")
+    force(x)
+    x * 2
+  }
+  warnings <- character()
+  out <- withCallingHandlers(
+    s_select(d, z = compute(x)),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(warnings, 1L)
+  expect_match(warnings, "branch-warning", fixed = TRUE)
+  expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
+})
+
+test_that("s_select evaluates computed expressions once", {
+  d <- tibble::tibble(x = 1:3)
+  state <- new.env()
+  state$n <- 0L
+  compute <- function(x) {
+    state$n <- state$n + 1L
+    force(x)
+    x * 2
+  }
+  out <- s_select(d, z = compute(x))
+  # Computed expressions are classified before evaluation and run once.
+  expect_identical(state$n, 1L)
+  expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
+})
