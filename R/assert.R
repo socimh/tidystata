@@ -5,14 +5,14 @@
 #' number of contradictions when any fails. It returns the data invisibly
 #' when all hold, so it can sit inside a pipeline.
 #'
-#' @param .data A data frame, tibble, or data.table.
+#' @inheritParams statart_args
 #' @param ... Conditions evaluated like [dplyr::mutate()] expressions, each
 #' giving `TRUE` or `FALSE` per row (or a single value). Group functions such
 #' as `n()` and `mean()` use the groups of `.data` or `.by`.
 #' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping
 #' variables, like Stata's `by g: assert`.
 #'
-#' @return `.data`, invisibly, when every condition holds.
+#' @returns `.data`, invisibly, when every condition holds.
 #'
 #' @details
 #' The error lists each failing condition with its number of contradictions
@@ -30,6 +30,7 @@
 #' assert(lifeexp, dplyr::n() == dplyr::n_distinct(country), .by = region)
 #'
 #' try(assert(lifeexp, safewater > 50))
+#' @family data checking functions
 #' @export
 assert <- function(.data, ..., .by = NULL) {
   check_data_frame(.data)

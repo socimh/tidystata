@@ -41,3 +41,10 @@ assert(lifeexp, dplyr::n() == dplyr::n_distinct(country), .by = region)
 
 try(assert(lifeexp, safewater > 50))
 }
+\seealso{
+Other data checking functions:
+\code{\link[=is_first]{is_first()}},
+\code{\link{keys}},
+\code{\link[=s_merge]{s_merge()}}
+}
+\concept{data checking functions}

@@ -16,37 +16,30 @@ reference:
 - title: "Coming from Stata"
   contents:
   - findit
-- title: "Explore Data"
+- title: "Inspect variables"
   contents:
-  - browse
-  - names
-  - variables
-  - codebook
-  - keys
-  - is_first
-  - assert
-  - s_merge
-  - summ
-  - special-print
-  - matches("^(tab|fre)")
-  - pwcorr
-  - misstable
-  - matches("^row_")
-- title: "Type Conversion"
+  - has_concept("inspection functions")
+- title: "Tabulate"
   contents:
-  - na_conversion
-  - type_conversion
-  - std
-  - as_dummy
-  - panel
-- title: "Small Tools"
+  - has_concept("tabulation functions")
+- title: "Summarise"
   contents:
-  - cut
-  - varlist
-  - capture
-  - starts_with("s_")
-  - set_seed
-  - timer
+  - has_concept("summary functions")
+- title: "Check and combine data"
+  contents:
+  - has_concept("data checking functions")
+- title: "Generate variables"
+  contents:
+  - has_concept("variable generation functions")
+- title: "Convert types"
+  contents:
+  - has_concept("conversion functions")
+- title: "Select and preview"
+  contents:
+  - has_concept("selection and preview functions")
+- title: "Small tools"
+  contents:
+  - has_concept("utility functions")
   - "%>%"
 - title: "Sample Data"
   contents:

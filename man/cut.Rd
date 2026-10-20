@@ -96,3 +96,11 @@ cut_length(1:20)
 cut_breaks(1:20, breaks = c(5, 15))
 cut_breaks(1:20, breaks = 10)
 }
+\seealso{
+Other variable generation functions:
+\code{\link[=as_dummy]{as_dummy()}},
+\code{\link{panel}},
+\code{\link{row_egen}},
+\code{\link[=std]{std()}}
+}
+\concept{variable generation functions}

@@ -5,7 +5,7 @@
 #' Stata's `tabulate x, generate(x_)`. The new columns are placed right after
 #' their source variable. `tab_gen()` is an alias of `as_dummy()`.
 #'
-#' @param .data A data frame, tibble, or data.table.
+#' @inheritParams statart_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables
 #' to expand.
 #' @param .names How to name the new columns: `"value"` (default) appends the
@@ -14,7 +14,7 @@
 #' @param .remove A single `TRUE` or `FALSE`. If `TRUE`, drop the source
 #' variables.
 #'
-#' @return `.data` with integer indicator columns, keeping its data.frame,
+#' @returns `.data` with integer indicator columns, keeping its data.frame,
 #' tibble, data.table, grouped or sf container. Each indicator is `1` when the
 #' row has that category, `0` otherwise, and `NA` when the source value is
 #' missing, as in Stata. Each new column has a `"label"` attribute such as
@@ -34,6 +34,7 @@
 #' as_dummy(starwars, sex, .names = "index", .remove = TRUE)
 #' as_dummy(lifeexp, region)
 #' @name as_dummy
+#' @family variable generation functions
 NULL
 
 #' @rdname as_dummy

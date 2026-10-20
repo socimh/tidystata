@@ -55,3 +55,8 @@ mvdecode(x, c(-98, -99))
 
 mvencode(c(1, NA, 4), 0)
 }
+\seealso{
+Other conversion functions:
+\code{\link{type_conversion}}
+}
+\concept{conversion functions}

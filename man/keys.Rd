@@ -89,3 +89,10 @@ duplicates_tag(panel, id, wave)
 duplicates_list(panel, id, wave)
 duplicates_drop(panel)
 }
+\seealso{
+Other data checking functions:
+\code{\link[=assert]{assert()}},
+\code{\link[=is_first]{is_first()}},
+\code{\link[=s_merge]{s_merge()}}
+}
+\concept{data checking functions}

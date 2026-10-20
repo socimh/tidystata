@@ -50,7 +50,7 @@
 #' dplyr/tidyr verbs determine their own result container and grouping, while
 #' preview settings follow the result.
 #'
-#' @return `preview_table()` returns the complete input container with an additional
+#' @returns `preview_table()` returns the complete input container with an additional
 #' `statart_preview` class. `unpreview_table()` returns the table without that
 #' class or its settings, preserving grouping. The print helpers invisibly
 #' return their original input. The slice helpers return the selected rows in
@@ -72,6 +72,7 @@
 #' slice_headtail(mtcars, n = 6)
 #' slice_interval(mtcars, n = 6)
 #' @name special-print
+#' @family selection and preview functions
 NULL
 
 #' @rdname special-print

@@ -291,3 +291,8 @@ tab2(starwars, sex, gender, eye_color)
 chi2 <- tab2(starwars, sex, gender, .chi2 = TRUE)
 attr(chi2, "chi2")
 }
+\seealso{
+Other tabulation functions:
+\code{\link[=pwcorr]{pwcorr()}}
+}
+\concept{tabulation functions}

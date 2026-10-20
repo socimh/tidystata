@@ -26,7 +26,7 @@
 #'   with `NA`; any value equal to one of them becomes missing. For
 #'   `mvencode()` and `value_if_na()`, a single replacement value for missing
 #'   elements, cast to the type of `x`.
-#' @return A vector with the same type and size as `x`, with matching values
+#' @returns A vector with the same type and size as `x`, with matching values
 #'   replaced or missing values filled.
 #'
 #' @examples
@@ -35,6 +35,7 @@
 #' mvdecode(x, c(-98, -99))
 #'
 #' mvencode(c(1, NA, 4), 0)
+#' @family conversion functions
 
 #' @rdname na_conversion
 #' @export

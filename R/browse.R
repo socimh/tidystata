@@ -10,7 +10,7 @@
 #' Omit to browse all columns. Selection and computed expressions follow
 #' [s_select()].
 #'
-#' @return The viewed data, invisibly, with its data-frame class preserved.
+#' @returns The viewed data, invisibly, with its data-frame class preserved.
 #' With no selection this is the input data; otherwise it is the result of
 #' [s_select()]. The input is not modified.
 #'
@@ -19,6 +19,7 @@
 #' follow [s_select()]. Assign the invisible return value to keep the viewed
 #' columns for subsequent analysis. Precompute expressions with side effects
 #' before passing them to the selection interface.
+#' @family inspection functions
 #' @export
 #'
 #' @seealso [ds()], [variables()], [codebook()]

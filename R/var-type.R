@@ -6,7 +6,7 @@
 #' @param .x An object.
 #' @param .abbr A logical. If `TRUE`, the abbreviation
 #' of the type is returned.
-#' @return A character. `s_type()` returns `"units"` for measured vectors
+#' @returns A character. `s_type()` returns `"units"` for measured vectors
 #' in either abbreviation mode. `s_unit()` returns the unit string for measured
 #' or duration vectors, including empty or all-missing measured vectors, and
 #' `NA_character_` for vectors without units.
@@ -28,6 +28,7 @@
 #' `s_unit()` reads actual units/difftime metadata (including hms times), and
 #' retains custom unit methods for classes describing themselves as `units`,
 #' `drtn` or `time`. Other objects return `NA_character_`.
+#' @family inspection functions
 #' @export
 #'
 #' @examples

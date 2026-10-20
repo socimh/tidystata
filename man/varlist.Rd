@@ -81,3 +81,9 @@ tb \%>\%
   ds(x1:x5)
 
 }
+\seealso{
+Other selection and preview functions:
+\code{\link[=s_select]{s_select()}},
+\code{\link{special-print}}
+}
+\concept{selection and preview functions}

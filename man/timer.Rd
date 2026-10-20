@@ -34,3 +34,9 @@ x <- seq_len(1e6)
 mean(x) \%>\% timer()
 try(timer(stop("failure")))
 }
+\seealso{
+Other utility functions:
+\code{\link[=capture]{capture()}},
+\code{\link[=set_seed]{set_seed()}}
+}
+\concept{utility functions}

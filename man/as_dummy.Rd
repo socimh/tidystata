@@ -48,3 +48,11 @@ as_dummy(starwars, sex)
 as_dummy(starwars, sex, .names = "index", .remove = TRUE)
 as_dummy(lifeexp, region)
 }
+\seealso{
+Other variable generation functions:
+\code{\link{cut}},
+\code{\link{panel}},
+\code{\link{row_egen}},
+\code{\link[=std]{std()}}
+}
+\concept{variable generation functions}

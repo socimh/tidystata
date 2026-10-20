@@ -43,7 +43,7 @@
 #' Weeks start on Monday, and date-times use the local clock of their time
 #' zone. Must be `NULL` for numbers and period classes.
 #'
-#' @return A vector like `x`, with `NA` where the required period is absent
+#' @returns A vector like `x`, with `NA` where the required period is absent
 #' from the panel. `s_diff()` returns a double vector, or a `difftime` for
 #' dates, date-times and `difftime` input.
 #'
@@ -85,6 +85,7 @@
 #'   amount = c(5, 7, 4)
 #' )
 #' dplyr::mutate(sales, previous = s_lag(amount, time = month, unit = "month"))
+#' @family variable generation functions
 NULL
 
 #' @rdname panel

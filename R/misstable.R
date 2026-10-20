@@ -8,18 +8,16 @@
 #' * With `.patterns = TRUE`, it counts the combinations of observed and
 #'   missing variables across rows, like `misstable patterns`.
 #'
-#' @param .data A data frame, tibble, or data.table.
+#' @inheritParams statart_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Variables to check. Omit to
 #' check every column except grouping keys.
-#' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping
-#' variables. Grouped data use their groups unless `.by` is supplied.
 #' @param .patterns A single `TRUE` or `FALSE`. If `TRUE`, tabulate missing
 #' patterns instead of counting by variable.
 #' @param .all A single `TRUE` or `FALSE`. If `FALSE` (default), only
 #' variables with at least one missing value are shown, as in Stata; if
 #' `TRUE`, all checked variables are shown.
 #'
-#' @return
+#' @returns
 #' By default, a tibble with any grouping keys, `variable`, `miss_n` (missing
 #' values), `miss_pct` (percentage of rows, from zero to 100) and `valid_n`
 #' (observed values), one row per variable (and group).
@@ -43,6 +41,7 @@
 #' misstable(starwars, .all = TRUE)
 #' misstable(starwars, height, mass, birth_year, .patterns = TRUE)
 #' misstable(starwars, height, mass, .by = sex)
+#' @family inspection functions
 #' @export
 misstable <- function(
   .data,

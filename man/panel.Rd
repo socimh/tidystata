@@ -107,3 +107,11 @@ sales <- tibble::tibble(
 )
 dplyr::mutate(sales, previous = s_lag(amount, time = month, unit = "month"))
 }
+\seealso{
+Other variable generation functions:
+\code{\link[=as_dummy]{as_dummy()}},
+\code{\link{cut}},
+\code{\link{row_egen}},
+\code{\link[=std]{std()}}
+}
+\concept{variable generation functions}

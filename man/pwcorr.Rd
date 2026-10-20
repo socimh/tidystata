@@ -66,3 +66,8 @@ pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
 pwcorr(lifeexp, lexp, gnppc, .by = region)
 pwcorr(lifeexp, lexp, gnppc, .method = "spearman")
 }
+\seealso{
+Other tabulation functions:
+\code{\link[=tab]{tab()}}
+}
+\concept{tabulation functions}

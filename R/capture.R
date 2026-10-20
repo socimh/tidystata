@@ -23,6 +23,7 @@
 #'
 #' # Check a key without stopping the script
 #' capture(isid(starwars, name))
+#' @family utility functions
 NULL
 
 #' @rdname capture

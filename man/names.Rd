@@ -59,4 +59,12 @@ ds(numeric_names, dplyr::starts_with("pop"))
 }
 \seealso{
 \code{\link[=variables]{variables()}}, \code{\link[=codebook]{codebook()}}, \code{\link[=browse]{browse()}}
+
+Other inspection functions:
+\code{\link[=browse]{browse()}},
+\code{\link[=codebook]{codebook()}},
+\code{\link[=misstable]{misstable()}},
+\code{\link[=s_type]{s_type()}},
+\code{\link[=variables]{variables()}}
 }
+\concept{inspection functions}

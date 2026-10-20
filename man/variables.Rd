@@ -69,4 +69,12 @@ variables_search(survey, "earn")
 }
 \seealso{
 \code{\link[=ds]{ds()}}, \code{\link[=codebook]{codebook()}}, \code{\link[=browse]{browse()}}
+
+Other inspection functions:
+\code{\link[=browse]{browse()}},
+\code{\link[=codebook]{codebook()}},
+\code{\link[=misstable]{misstable()}},
+\code{\link{names}},
+\code{\link[=s_type]{s_type()}}
 }
+\concept{inspection functions}

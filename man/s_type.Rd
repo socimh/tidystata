@@ -53,3 +53,12 @@ retains custom unit methods for classes describing themselves as \code{units},
 s_type(1:10)
 s_type(letters)
 }
+\seealso{
+Other inspection functions:
+\code{\link[=browse]{browse()}},
+\code{\link[=codebook]{codebook()}},
+\code{\link[=misstable]{misstable()}},
+\code{\link{names}},
+\code{\link[=variables]{variables()}}
+}
+\concept{inspection functions}

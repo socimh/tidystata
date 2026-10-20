@@ -15,7 +15,7 @@
 #' represent zero or more, exactly one, and one or more characters, respectively.
 #' Use `^` and `$` anchors to require a complete name or label match.
 #'
-#' @return A table with a character `name` column. A character `label` column
+#' @returns A table with a character `name` column. A character `label` column
 #' is added only when at least one selected variable has a usable label;
 #' unlabelled variables then have `NA` labels. Search returns only matching
 #' rows, in selection order, with the same columns as the selected variable list.
@@ -54,6 +54,7 @@
 #' attr(survey$income, "label") <- "Monthly earnings"
 #' variables(survey, earnings = income, age)
 #' variables_search(survey, "earn")
+#' @family inspection functions
 
 #' @rdname variables
 #' @export

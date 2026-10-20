@@ -4,7 +4,7 @@
 #' @param x A numeric vector
 #' @param n The number of observations
 #'
-#' @return A numeric value
+#' @returns A numeric value
 #' @name stat
 #' @keywords internal
 

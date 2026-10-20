@@ -133,7 +133,7 @@
 #' a message. The input data are not modified.
 #' @name summ
 #'
-#' @return A table, or a list of tables in list mode when multiple
+#' @returns A table, or a list of tables in list mode when multiple
 #' variable-type families are present. Each table preserves the input's
 #' data.frame, tibble, or data.table container in both modes. Results are
 #' ungrouped, retaining grouping keys as columns and supported preview settings.
@@ -142,6 +142,7 @@
 #' name, or `value` for a multiline expression or a magrittr pipe (`.`). Wrap
 #' the vector in a named tibble to choose a stable variable name. Input data are
 #' not modified.
+#' @family summary functions
 #' @export
 #'
 #' @examples

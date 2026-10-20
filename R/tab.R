@@ -123,7 +123,7 @@
 #' including missing measured values. Missing grouping keys appear last and ties
 #' follow key order. `.desc` controls categories within each group independently.
 #'
-#' @return
+#' @returns
 #' A table, a list of tables, or an explicitly requested flextable. Default
 #' tables preserve the input's data.frame, tibble, or data.table container,
 #' including each table in a list. Results are ungrouped, with grouping keys
@@ -193,6 +193,7 @@
 #' # Chi-square test of independence, like Stata's tab x y, chi2 V
 #' chi2 <- tab2(starwars, sex, gender, .chi2 = TRUE)
 #' attr(chi2, "chi2")
+#' @family tabulation functions
 NULL
 
 #' @export

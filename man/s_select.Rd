@@ -57,3 +57,9 @@ try(dplyr::select(starwars, height > 50))
 starwars \%>\%
   s_select(height > 50)
 }
+\seealso{
+Other selection and preview functions:
+\code{\link{special-print}},
+\code{\link[=varlist]{varlist()}}
+}
+\concept{selection and preview functions}

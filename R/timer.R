@@ -7,7 +7,7 @@
 #' @param .on_error A single logical value. If `TRUE` (the default), also
 #'   report elapsed time when the expression fails, then let the original error
 #'   propagate. Use `FALSE` to report elapsed time only on success.
-#' @return The evaluated result, invisibly.
+#' @returns The evaluated result, invisibly.
 #' @details
 #' The expression is evaluated once. On success, elapsed time is emitted as a
 #' message. Warnings and errors propagate normally. When the expression fails
@@ -17,6 +17,7 @@
 #'
 #' Nested or repeated timers each measure everything evaluated inside them,
 #' so a later timer in a pipeline reports cumulative time from its own start.
+#' @family utility functions
 #' @export
 #'
 #' @examples

@@ -97,7 +97,7 @@
 #' [base::rowMeans()] and [base::rowSums()] without first copying the columns
 #' into a matrix. Rfast is no longer required.
 #'
-#' @return A vector with one value per input row. Extrema retain the compatible
+#' @returns A vector with one value per input row. Extrema retain the compatible
 #'   common type; arithmetic returns doubles or a supported class as described
 #'   above; unique and missing-value counts return integers.
 #' @name row_egen
@@ -123,6 +123,7 @@
 #' )
 #' row_min(dates)
 #' row_mean(dates)
+#' @family variable generation functions
 
 #' @rdname row_egen
 #' @export

@@ -174,3 +174,11 @@ dates <- tibble::tibble(
 row_min(dates)
 row_mean(dates)
 }
+\seealso{
+Other variable generation functions:
+\code{\link[=as_dummy]{as_dummy()}},
+\code{\link{cut}},
+\code{\link{panel}},
+\code{\link[=std]{std()}}
+}
+\concept{variable generation functions}

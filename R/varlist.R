@@ -13,7 +13,7 @@
 #'
 #' @param string A single character string containing patterns, separated by
 #' spaces, like selecting a varlist in Stata's `keep` command.
-#' @return An integer vector of positions in the available column names.
+#' @returns An integer vector of positions in the available column names.
 #' @inheritParams tidyselect::starts_with
 #'
 #' @details
@@ -64,6 +64,7 @@
 #' tb %>%
 #'   ds(x1:x5)
 #'
+#' @family selection and preview functions
 #' @export
 varlist <- function(
   string,

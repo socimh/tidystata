@@ -26,7 +26,7 @@
 #' @name type_conversion
 #' @param .x A vector or matrix.
 #' @param x A vector, for `tostring()`.
-#' @return `as_character()` and `tostring()` return a character vector. `as_numeric()` returns
+#' @returns `as_character()` and `tostring()` return a character vector. `as_numeric()` returns
 #'   a double vector; unsupported types such as lists, raw vectors, and complex
 #'   vectors return missing values of the same length. Empty inputs return
 #'   typed empty vectors. Names, dimensions, labels, and units are dropped.
@@ -43,6 +43,7 @@
 #'     region_fct = haven::as_factor(region),
 #'     .keep = "used"
 #'   )
+#' @family conversion functions
 
 #' @export
 #' @rdname type_conversion

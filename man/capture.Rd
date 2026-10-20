@@ -37,3 +37,9 @@ capture(means(1:10))
 # Check a key without stopping the script
 capture(isid(starwars, name))
 }
+\seealso{
+Other utility functions:
+\code{\link[=set_seed]{set_seed()}},
+\code{\link[=timer]{timer()}}
+}
+\concept{utility functions}

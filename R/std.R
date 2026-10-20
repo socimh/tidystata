@@ -20,7 +20,7 @@
 #' @param prop A single `TRUE` or `FALSE`. If `TRUE`, `pc()` returns
 #' proportions (summing to 1) instead of percentages (summing to 100).
 #'
-#' @return A double vector the same length as `x`. Missing values stay
+#' @returns A double vector the same length as `x`. Missing values stay
 #' missing. `std()` returns all `NA` when the standard deviation is zero or
 #' undefined (fewer than two observed values), and `pc()` when the total is
 #' zero, as Stata gives missing values there.
@@ -36,6 +36,7 @@
 #'     share = pc(popgrowth),
 #'     .by = region
 #'   )
+#' @family variable generation functions
 #' @export
 std <- function(x, mean = 0, sd = 1) {
   x <- egen_numeric(x)

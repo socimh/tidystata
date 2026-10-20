@@ -15,7 +15,7 @@
 #' * `duplicates_drop()` keeps the first row of each duplicated set, like
 #'   `duplicates drop`.
 #'
-#' @param .data A data frame, tibble, or data.table.
+#' @inheritParams statart_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The identifying columns.
 #' Omit to use all columns, as Stata does.
 #' @param .missok A single `TRUE` or `FALSE`. If `FALSE` (default), `isid()`
@@ -27,7 +27,7 @@
 #' `duplicates_drop()` errors unless `.force = TRUE`, like Stata's
 #' `duplicates drop varlist, force`.
 #'
-#' @return
+#' @returns
 #' * `isid()`: `.data`, invisibly.
 #' * `duplicates_report()`: a tibble with one row per number of copies:
 #'   `copies`, `observations` (rows with that many copies) and `surplus`
@@ -62,6 +62,7 @@
 #' duplicates_tag(panel, id, wave)
 #' duplicates_list(panel, id, wave)
 #' duplicates_drop(panel)
+#' @family data checking functions
 NULL
 
 #' @rdname keys

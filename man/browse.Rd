@@ -42,4 +42,12 @@ if (interactive()) {
 }
 \seealso{
 \code{\link[=ds]{ds()}}, \code{\link[=variables]{variables()}}, \code{\link[=codebook]{codebook()}}
+
+Other inspection functions:
+\code{\link[=codebook]{codebook()}},
+\code{\link[=misstable]{misstable()}},
+\code{\link{names}},
+\code{\link[=s_type]{s_type()}},
+\code{\link[=variables]{variables()}}
 }
+\concept{inspection functions}

@@ -46,3 +46,10 @@ sum(is_first(panel$id))
 # First row within each group
 dplyr::mutate(panel, first = is_first(), .by = id)
 }
+\seealso{
+Other data checking functions:
+\code{\link[=assert]{assert()}},
+\code{\link{keys}},
+\code{\link[=s_merge]{s_merge()}}
+}
+\concept{data checking functions}

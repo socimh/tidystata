@@ -14,7 +14,7 @@
 #' and give no notice.
 #'
 #' @param ... Arguments passed to the new function.
-#' @return The result of the new function.
+#' @returns The result of the new function.
 #' @name statart-deprecated
 #' @keywords internal
 NULL

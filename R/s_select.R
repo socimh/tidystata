@@ -7,7 +7,7 @@
 #' <[`data-masking`][args_data_masking]> expressions. Omit to return the input
 #' unchanged.
 #'
-#' @return The selected (and computed) columns. Data-frame classes and
+#' @returns The selected (and computed) columns. Data-frame classes and
 #' grouping follow [dplyr::select()]; a tibble input returns a tibble.
 #'
 #' @details
@@ -36,6 +36,7 @@
 #' if that also fails, the error reports both attempts. Computed expressions
 #' are evaluated once when selection succeeds. Grouping columns are retained
 #' according to dplyr's selection rules.
+#' @family selection and preview functions
 #' @export
 #'
 #' @examples

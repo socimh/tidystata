@@ -56,3 +56,12 @@ misstable(starwars, .all = TRUE)
 misstable(starwars, height, mass, birth_year, .patterns = TRUE)
 misstable(starwars, height, mass, .by = sex)
 }
+\seealso{
+Other inspection functions:
+\code{\link[=browse]{browse()}},
+\code{\link[=codebook]{codebook()}},
+\code{\link{names}},
+\code{\link[=s_type]{s_type()}},
+\code{\link[=variables]{variables()}}
+}
+\concept{inspection functions}

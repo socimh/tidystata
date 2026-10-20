@@ -18,6 +18,7 @@
 #' finite number. A pipeline that forgets the seed therefore errors, unless
 #' its result happens to be a single number, which is then used as the seed.
 #'
+#' @family utility functions
 #' @export
 #' @examples
 #' sample(1:10, 8) %>%

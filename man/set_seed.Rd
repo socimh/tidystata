@@ -42,3 +42,9 @@ sample(1:10, 8) \%>\%
 set_seed(123)
 sample(1:10, 8)
 }
+\seealso{
+Other utility functions:
+\code{\link[=capture]{capture()}},
+\code{\link[=timer]{timer()}}
+}
+\concept{utility functions}

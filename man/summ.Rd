@@ -226,3 +226,4 @@ summ(mixed, .mode = "list")
 scores <- c(4, 6, NA, 8)
 tibble::tibble(score = scores) |> summ(.name = TRUE)
 }
+\concept{summary functions}

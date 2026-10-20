@@ -23,7 +23,7 @@
 #' as `lm()` or `dplyr::left_join`. Use `!!` to look up a string stored in a
 #' variable: `findit(!!cmd)`. `NULL` (default) returns every entry.
 #'
-#' @return A tibble with one row per Stata idiom and the columns `match`
+#' @returns A tibble with one row per Stata idiom and the columns `match`
 #' (`"stata"` when the word is a Stata command, `"r"` when it is an R function
 #' used in the entry, `"keyword"` for a text match, `"all"` for the whole
 #' list), `stata` (the Stata code), `r` (equivalent R code), `package` (where

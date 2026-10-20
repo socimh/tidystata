@@ -10,7 +10,7 @@
 #' @param .type `"vector"` (the default) returns the names as a character
 #'   vector, like Stata's `ds`; `"table"` returns them as a one-column table.
 #'
-#' @return `ds()` returns a character vector. `ds(.type = "table")` returns a
+#' @returns `ds()` returns a character vector. `ds(.type = "table")` returns a
 #' table with one character column, `name`; `ds_as_column()` and
 #' `names_as_column()` are aliases for it. On ungrouped data, an empty
 #' selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
@@ -39,6 +39,7 @@
 #' numeric_names <- ds(lifeexp, where(is.numeric))
 #' dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 #' ds(numeric_names, dplyr::starts_with("pop"))
+#' @family inspection functions
 
 #' @rdname names
 #' @export

@@ -26,7 +26,7 @@
 #' @param .report A single `TRUE` or `FALSE`. If `TRUE` (default), print the
 #' match report as a message.
 #'
-#' @return The merged table, in the container of `.data`. Rows from `.data`
+#' @returns The merged table, in the container of `.data`. Rows from `.data`
 #' come first in their original order, followed by rows found only in
 #' `using`. The `.merge` column is a factor with levels `"master only"`,
 #' `"using only"` and `"matched"`.
@@ -37,6 +37,7 @@
 #' column is dropped with a message, as Stata does without `update`; rename
 #' the column first to keep both. Grouping is not retained.
 #'
+#' @family data checking functions
 #' @export
 #' @examples
 #' people <- tibble::tibble(id = 1:3, age = c(30, 41, 25))

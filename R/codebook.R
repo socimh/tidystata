@@ -11,7 +11,7 @@
 #' Omit to include all columns. Selection is attempted first; expressions that
 #' are not valid selections are evaluated as computed columns by [s_select()].
 #'
-#' @return An ungrouped table with one row per selected variable, in selection
+#' @returns An ungrouped table with one row per selected variable, in selection
 #' order. Columns are `variable`, optional `label`, `type`, `n`, and `unique`.
 #' `n` counts observed values and `unique` counts distinct observed values.
 #' Empty and all-missing columns have zero counts. A zero-column selection
@@ -59,6 +59,7 @@
 #' inventory
 #' codebook(survey, income_thousands = income / 1000)
 #'
+#' @family inspection functions
 
 #' @rdname codebook
 #' @export

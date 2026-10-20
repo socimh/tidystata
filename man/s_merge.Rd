@@ -75,3 +75,10 @@ members <- tibble::tibble(hh = c(1, 1, 2), person = 1:3)
 households <- tibble::tibble(hh = 1:2, region = c("north", "south"))
 s_merge(members, households, "m:1", by = "hh")
 }
+\seealso{
+Other data checking functions:
+\code{\link[=assert]{assert()}},
+\code{\link[=is_first]{is_first()}},
+\code{\link{keys}}
+}
+\concept{data checking functions}

@@ -46,7 +46,7 @@
 #' observation and warn. Default rank labels are `"1"` through the effective
 #' group count; custom labels must match that count.
 #'
-#' @return An ordered factor, or integer interval codes when `labels = FALSE`
+#' @returns An ordered factor, or integer interval codes when `labels = FALSE`
 #' or when `xtile()` runs in a grouped data mask with default labels.
 #'
 #' @name cut
@@ -58,6 +58,7 @@
 #'
 #' cut_breaks(1:20, breaks = c(5, 15))
 #' cut_breaks(1:20, breaks = 10)
+#' @family variable generation functions
 
 #' @rdname cut
 #' @export

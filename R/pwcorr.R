@@ -6,12 +6,10 @@
 #' deletion), and the table reports the correlation, the number of
 #' observations and the p-value.
 #'
-#' @param .data A data frame, tibble, or data.table.
+#' @inheritParams statart_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Numeric or logical
 #' variables. Omit to use every numeric or logical column; other columns are
 #' then skipped. Selecting another type is an error.
-#' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping
-#' variables. Grouped data use their groups unless `.by` is supplied.
 #' @param .method `"pearson"` (default) or `"spearman"`, like Stata's
 #' `pwcorr` and `spearman`.
 #' @param .wide A single `TRUE` or `FALSE`. If `TRUE`, return the correlation
@@ -24,7 +22,7 @@
 #' the same under both; with frequency weights, `n` and the p-value use the
 #' summed weight, and with analytic weights the number of rows.
 #'
-#' @return
+#' @returns
 #' By default, a tibble with one row per pair (and group): any grouping keys,
 #' `var1`, `var2`, `r`, `n` and `p`. With `.wide = TRUE`, a tibble with any
 #' grouping keys, `variable` and one column of correlations per variable.
@@ -44,6 +42,7 @@
 #' pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
 #' pwcorr(lifeexp, lexp, gnppc, .by = region)
 #' pwcorr(lifeexp, lexp, gnppc, .method = "spearman")
+#' @family tabulation functions
 #' @export
 pwcorr <- function(
   .data,

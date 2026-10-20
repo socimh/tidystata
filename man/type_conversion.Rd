@@ -70,3 +70,8 @@ lifeexp |>
     .keep = "used"
   )
 }
+\seealso{
+Other conversion functions:
+\code{\link{na_conversion}}
+}
+\concept{conversion functions}

@@ -48,6 +48,7 @@
     "R/data-lifeexp.R",
     "R/data-starwars.R",
     "R/deprec.R",
+    "R/doc-params.R",
     "R/ds.R",
     "R/findit.R",
     "R/globals.R",

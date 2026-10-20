@@ -128,3 +128,9 @@ s_print(mtcars, "interval", n = 6)
 slice_headtail(mtcars, n = 6)
 slice_interval(mtcars, n = 6)
 }
+\seealso{
+Other selection and preview functions:
+\code{\link[=s_select]{s_select()}},
+\code{\link[=varlist]{varlist()}}
+}
+\concept{selection and preview functions}

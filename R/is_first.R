@@ -18,7 +18,7 @@
 #' without its `missing` option. If `TRUE`, missing values form groups of
 #' their own.
 #'
-#' @return A logical vector. "First" follows the current row order, so sort
+#' @returns A logical vector. "First" follows the current row order, so sort
 #' first when a particular row should be flagged.
 #'
 #' @examples
@@ -34,6 +34,7 @@
 #' # First row within each group
 #' dplyr::mutate(panel, first = is_first(), .by = id)
 #' @name is_first
+#' @family data checking functions
 NULL
 
 #' @rdname is_first
