@@ -58,6 +58,31 @@ statart-specific decisions; consult the guide for everything else.
   wrappers in `R/deprec.R`. Vendored
   `R/import-standalone-*.R` files are updated with `usethis::use_standalone()`,
   never edited by hand.
+- **Function names.** Use the Stata command name when a function does what
+  that command does (`summ()`, `tab()`, `xtile()`, `isid()`, `destring()`).
+  Add the `s_` prefix only when the Stata name would clash with base R or the
+  tidyverse (`s_merge()`, `s_select()`, `s_lag()`). Functions without a Stata
+  counterpart use tidyverse verb names (`as_dummy()`, `preview_table()`).
+  Earlier names stay as quiet aliases on the primary's help page; add new
+  aliases only to keep existing code working.
+- **First argument.** Data-frame functions take `.data`; vector functions and
+  functions that evaluate an expression take `x`.
+- **Dot prefixes.** Functions that take `...` dot every other argument
+  (`.by`, `.wt`, `.type`, `.missing`), so options cannot clash with column
+  names passed through `...`. Functions without `...` use plain names
+  (`s_merge(by, keep)`, `xtile(wt)`, `timer(x, on_error)`). Exception:
+  `na.rm`, which keeps base R's spelling.
+- **Recurring arguments.** `na.rm` omits missing values from a calculation.
+  `.missing` decides whether missing values form their own group or value
+  (`is_first()`, `row_nvals()`, `summ()`); `.missok` keeps Stata's `isid`
+  option name. `.by` always means grouping columns, `by` always means merge
+  keys, `.wt`/`wt` frequency or analytic weights with `.wt_type`, and `.type`
+  the output container (`"list"`, `"tibble"`, `"auto"`, `"flextable"`,
+  `"vector"`). Grouped cross-tabulations return a named list of tables.
+- **Options and lifecycle.** Validate enumerated options with
+  `rlang::arg_match()`, which rejects abbreviations. Rename or retire public
+  functions and arguments with `lifecycle::deprecate_soft()`, keeping the old
+  form working and documented with a deprecated badge.
 - **Internal names.** Helpers take their family prefix (`summ_`, `tab_`,
   `row_`, `merge_`); the `s_` prefix is reserved for exported functions.
 - **Errors.** Signal conditions with `cli::cli_abort()`, `cli::cli_warn()` and
