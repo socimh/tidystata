@@ -28,7 +28,7 @@ check_by_selection <- function(.data, by) {
   stop(
     "`.by` must select existing columns, not compute `",
     rlang::as_label(expr),
-    "`.\nℹ Create the grouping column first, e.g. ",
+    "`.\n\u2139 Create the grouping column first, e.g. ",
     "`mutate(group = ",
     rlang::as_label(expr),
     ")`, then use `.by = group`.",
@@ -42,7 +42,7 @@ contain_vars <- function(.data, group_vars) {
     dplyr::select(
       tidyselect::all_of(group_vars)
     ) %>%
-    s_try()
+    capture()
   return(contain)
 }
 
@@ -105,30 +105,8 @@ keep_useful_vars <- function(.data, .data_num, group_vars) {
 is_summable_chr <- function(chr) {
   chr %>%
     stringr::str_detect(
-      "^(lgl|int|dbl|int64|units|drtn|time|date|dttm|fct|ord)"
+      "^(lgl|int|dbl|int64|units|drtn|time|date|dttm|fct|ord)(\\+lbl)?( \\[.*\\])?$"
     )
-}
-
-is_summable <- function(.x) {
-  s_type(.x, .abbr = TRUE) %>%
-    is_summable_chr()
-}
-
-check_summarise <- function(.data) {
-  out <- .data %>%
-    dplyr::select(tidyselect::where(
-      ~ is_summable(.x)
-    ))
-  summ_vars <- names(out)
-
-  if (length(summ_vars) == 0) {
-    stop(
-      "None of the provided variable(s) is suitable for `summ()`.",
-      call. = FALSE
-    )
-  } else {
-    return(out)
-  }
 }
 
 warning_vars <- function(vars, suffix) {
@@ -159,64 +137,71 @@ warning_vars <- function(vars, suffix) {
   }
 }
 
-check_numeric <- function(.data, .keep_all) {
-  # Check if vars are numeric
-  non_num_vars <- .data %>%
-    ds(
-      !tidyselect::where(
-        ~ is_summable(.x)
-      )
+summ_metadata <- function(data, keep_all) {
+  lapply(data, function(var) {
+    type <- s_type(var, .abbr = TRUE)
+    summable <- is_summable_chr(type)
+    retained <- summable || keep_all
+    list(
+      type = type,
+      unit = if (retained) s_unit(var) else NA_character_,
+      missing = if (retained) is.na(var) else NULL,
+      summable = summable
     )
-
-  suffix <- dplyr::if_else(
-    .keep_all,
-    "non-numeric (***).",
-    "non-numeric and thus removed."
-  )
-  warning_vars(non_num_vars, suffix)
+  })
 }
 
-check_missing <- function(.data, .keep_all) {
-  na_vars <- .data %>%
-    ds(tidyselect::where(
-      ~ is_summable(.x) && length(.x) > 0L && all(is.na(.x))
-    ))
-
-  suffix <- dplyr::if_else(
-    .keep_all,
-    "entirely missing.",
-    "entirely missing; retained with n = 0."
+summ_check_metadata <- function(metadata, keep_all) {
+  types <- vapply(metadata, `[[`, character(1), "type")
+  summable <- vapply(metadata, `[[`, logical(1), "summable")
+  warning_vars(
+    names(metadata)[!summable],
+    if (keep_all) {
+      "non-numeric (***)."
+    } else {
+      "non-numeric and thus removed."
+    }
   )
-  warning_vars(na_vars, suffix)
-}
-
-check_factor <- function(.data) {
-  fct_vars <- .data %>%
-    ds(tidyselect::where(
-      ~ s_type(.x, .abbr = TRUE) %in% c("fct", "ord")
-    ))
-
-  suffix <- dplyr::if_else(
-    length(fct_vars) == 1,
-    "a factor (**).",
-    "factors (**)."
+  entirely_missing <- vapply(
+    metadata,
+    function(info) {
+      info$summable && length(info$missing) > 0L && all(info$missing)
+    },
+    logical(1)
   )
-  warning_vars(fct_vars, suffix)
-}
-
-check_label <- function(.data) {
-  lbl_vars <- .data %>%
-    ds(tidyselect::where(
-      ~ s_type(.x, .abbr = TRUE) %>%
-        stringr::str_detect("lbl$")
-    ))
-
-  suffix <- dplyr::if_else(
-    length(lbl_vars) == 1,
-    "a labelled variable (*).",
-    "labelled variables (*)."
+  warning_vars(
+    names(metadata)[entirely_missing],
+    if (keep_all) {
+      "entirely missing."
+    } else {
+      "entirely missing; retained with n = 0."
+    }
   )
-  warning_vars(lbl_vars, suffix)
+  if (!any(summable) && !(keep_all && length(metadata))) {
+    stop(
+      "None of the provided variable(s) is suitable for `summ()`.",
+      call. = FALSE
+    )
+  }
+  factors <- names(metadata)[summable & types %in% c("fct", "ord")]
+  warning_vars(
+    factors,
+    if (length(factors) == 1L) {
+      "a factor (**)."
+    } else {
+      "factors (**)."
+    }
+  )
+  labelled <- names(metadata)[summable & grepl("lbl$", types)]
+  warning_vars(
+    labelled,
+    if (length(labelled) == 1L) {
+      "a labelled variable (*)."
+    } else {
+      "labelled variables (*)."
+    }
+  )
+  if (keep_all) metadata else metadata[summable]
 }
 
 summ_stat_names <- function(stat) {
@@ -327,21 +312,28 @@ summ_requested_stats <- function(stat, detail, calendar = FALSE) {
 
 # Summarise one variable for every group. Type metadata, numeric conversion
 # and distinct-value identities are computed once per variable, not per group.
-summ_variable <- function(var, locs, requested, calendar = FALSE) {
-  missing <- is.na(var)
-  unit <- s_unit(var)
-  type <- s_type(var, .abbr = TRUE)
+summ_variable <- function(
+  var,
+  numeric,
+  locs,
+  requested,
+  calendar = FALSE,
+  weights = NULL,
+  weight_type = "frequency",
+  metadata
+) {
+  missing <- metadata$missing
+  unit <- metadata$unit
+  type <- metadata$type
   # Calendar spreads carry their own difftime units, so the type stays bare.
   if (!is.na(unit) && !calendar) {
     type <- paste0(type, " [", unit, "]")
   }
-  counts <- c("type", "n", "unique", "miss_n", "valid_pct")
-  numeric <- if (any(!requested %in% counts) && is_summable(var)) {
-    as_numeric(var)
+  ids <- if ("unique" %in% requested && length(locs) > 1L) {
+    vctrs::vec_group_id(var)
   } else {
     NULL
   }
-  ids <- if ("unique" %in% requested) vctrs::vec_group_id(var) else NULL
 
   quantile_names <- requested[grepl("^p[0-9]", requested)]
   probabilities <- stats::setNames(
@@ -357,91 +349,107 @@ summ_variable <- function(var, locs, requested, calendar = FALSE) {
   mean_needed <- any(requested %in% c("mean", "skew", "kurtosis"))
   sd_needed <- any(requested %in% c("sd", "se", "skew", "kurtosis"))
   statistics <- setdiff(requested, "type")
-
-  one_group <- function(loc) {
-    kept <- loc[!missing[loc]]
-    n_val <- length(kept)
-    observed <- if (is.null(numeric)) numeric() else numeric[kept]
-    has_values <- length(observed) > 0L
-    center <- if (mean_needed && has_values) mean(observed) else NA_real_
-    spread <- if (sd_needed && has_values) stats::sd(observed) else NA_real_
-    quantiles <- stats::setNames(
-      rep(NA_real_, length(probabilities)),
-      names(probabilities)
-    )
-    if (has_values && length(probabilities)) {
-      quantiles[] <- stats::quantile(
-        observed,
-        probabilities,
-        type = 7,
-        names = FALSE
-      )
-    }
-    vapply(
+  if (!is.null(weights)) {
+    return(summ_weighted(
+      var,
+      numeric,
+      missing,
+      locs,
+      requested,
       statistics,
-      function(statistic) {
-        if (statistic %in% names(quantiles)) {
-          return(unname(quantiles[[statistic]]))
-        }
-        switch(
-          statistic,
-          n = n_val,
-          unique = length(unique(ids[kept])),
-          miss_n = length(loc) - n_val,
-          valid_pct = if (length(loc)) n_val / length(loc) else NA_real_,
-          min = if (has_values) min(observed) else NA_real_,
-          median = if (has_values) stats::median(observed) else NA_real_,
-          mean = center,
-          mad = if (has_values) stats::mad(observed) else NA_real_,
-          sd = spread,
-          max = if (has_values) max(observed) else NA_real_,
-          iqr = if (has_values) {
-            unname(quantiles[["q3"]] - quantiles[["q1"]])
-          } else {
-            NA_real_
-          },
-          skew = if (has_values) {
-            sum((observed - center)^3) / (n_val * spread^3)
-          } else {
-            NA_real_
-          },
-          kurtosis = if (has_values) {
-            sum((observed - center)^4) / (n_val * spread^4) - 3
-          } else {
-            NA_real_
-          },
-          se = if (n_val) spread / sqrt(n_val) else NA_real_,
-          sum = if (has_values) sum(observed) else NA_real_
-        )
+      probabilities,
+      type,
+      weights,
+      weight_type
+    ))
+  }
+
+  # Slice each group once, then dispatch each requested statistic once per
+  # variable. The numerical routines and original missingness semantics stay R's.
+  kept <- lapply(locs, function(loc) loc[!missing[loc]])
+  n_val <- lengths(kept)
+  observed <- if (is.null(numeric)) {
+    rep(list(numeric()), length(locs))
+  } else {
+    lapply(kept, function(loc) numeric[loc])
+  }
+  nonempty <- which(lengths(observed) > 0L)
+  apply_observed <- function(fn) {
+    result <- rep(NA_real_, length(locs))
+    result[nonempty] <- vapply(observed[nonempty], fn, numeric(1))
+    result
+  }
+  center <- if (mean_needed) apply_observed(mean) else NULL
+  spread <- if (sd_needed) apply_observed(stats::sd) else NULL
+  quantiles <- if (length(probabilities)) {
+    lapply(observed, function(x) {
+      if (length(x)) {
+        stats::quantile(x, probabilities, type = 7, names = FALSE)
+      } else {
+        rep(NA_real_, length(probabilities))
+      }
+    })
+  } else {
+    NULL
+  }
+  quantile_column <- function(name) {
+    vapply(quantiles, `[[`, numeric(1), match(name, names(probabilities)))
+  }
+  moment <- function(power) {
+    result <- rep(NA_real_, length(locs))
+    result[nonempty] <- vapply(
+      nonempty,
+      function(i) {
+        sum((observed[[i]] - center[[i]])^power) /
+          (n_val[[i]] * spread[[i]]^power)
       },
       numeric(1)
     )
+    result
   }
-
-  values <- matrix(
-    as.numeric(unlist(lapply(locs, one_group), use.names = FALSE)),
-    ncol = length(statistics),
-    byrow = TRUE
-  )
   out <- list(type = rep(type, length(locs)))
-  for (j in seq_along(statistics)) {
-    column <- values[, j]
-    if (statistics[[j]] %in% c("n", "unique", "miss_n")) {
-      column <- as.integer(column)
+  for (statistic in statistics) {
+    out[[statistic]] <- if (statistic %in% names(probabilities)) {
+      quantile_column(statistic)
+    } else {
+      switch(
+        statistic,
+        n = as.integer(n_val),
+        unique = if (length(kept) == 1L) {
+          vctrs::vec_unique_count(vctrs::vec_slice(var, kept[[1L]]))
+        } else {
+          vapply(kept, function(loc) length(unique(ids[loc])), integer(1))
+        },
+        miss_n = as.integer(lengths(locs) - n_val),
+        valid_pct = {
+          result <- n_val / lengths(locs)
+          result[lengths(locs) == 0L] <- NA_real_
+          result
+        },
+        min = apply_observed(min),
+        median = apply_observed(stats::median),
+        mean = center,
+        mad = apply_observed(stats::mad),
+        sd = spread,
+        max = apply_observed(max),
+        iqr = quantile_column("q3") - quantile_column("q1"),
+        skew = moment(3),
+        kurtosis = moment(4) - 3,
+        se = spread / sqrt(n_val),
+        sum = apply_observed(sum)
+      )
     }
-    out[[statistics[[j]]]] <- column
   }
-  tibble::as_tibble(out[requested])
+  out[requested]
 }
 
 # Format calendar locations: Dates as days, datetimes in their own time zone
 # and hms times of day as clock times.
-fmt_date <- function(x, var) {
+fmt_date <- function(x, var, type) {
   out <- rep(NA_character_, length(x))
   infinite <- is.infinite(x)
   out[infinite] <- as.character(x[infinite])
   finite <- is.finite(x)
-  type <- s_type(var, .abbr = TRUE)
   if (type == "date") {
     out[finite] <- format(
       as.Date(x[finite], origin = "1970-01-01"),
@@ -505,15 +513,15 @@ summ_spread_units <- function(column, date) {
 
 # Locations become display strings; spreads become difftime seconds, and
 # summ_data() then gives each spread column a single unit.
-summ_format_calendar <- function(out, var, requested) {
+summ_format_calendar <- function(out, var, requested, type) {
   locations <- setdiff(
     requested,
     c("type", "n", "unique", "miss_n", "valid_pct", calendar_spreads)
   )
   for (statistic in locations) {
-    out[[statistic]] <- fmt_date(out[[statistic]], var)
+    out[[statistic]] <- fmt_date(out[[statistic]], var, type)
   }
-  scale <- if (s_type(var, .abbr = TRUE) == "date") 86400 else 1
+  scale <- if (type == "date") 86400 else 1
   for (statistic in intersect(requested, calendar_spreads)) {
     out[[statistic]] <- as.difftime(out[[statistic]] * scale, units = "secs")
   }
@@ -526,7 +534,11 @@ summ_data <- function(
   group_vars,
   .detail,
   .stat,
-  calendar = FALSE
+  calendar = FALSE,
+  weights = NULL,
+  weight_type = "frequency",
+  groups,
+  metadata
 ) {
   if (length(summ_vars) == 0L) {
     return(NULL)
@@ -543,19 +555,37 @@ summ_data <- function(
       )
     }
   }
-  if (length(group_vars)) {
-    groups <- vctrs::vec_group_loc(.data[group_vars])
-    keys <- groups$key
-    locs <- groups$loc
-  } else {
-    keys <- NULL
-    locs <- list(seq_len(nrow(.data)))
-  }
+  keys <- groups$key
+  locs <- groups$loc
+  needs_numeric <- any(
+    !requested %in%
+      c(
+        "type",
+        "n",
+        "unique",
+        "miss_n",
+        "valid_pct"
+      )
+  )
   blocks <- lapply(summ_vars, function(column) {
     var <- .data[[column]]
-    out <- summ_variable(var, locs, requested, calendar)
+    numeric <- if (needs_numeric && metadata[[column]]$summable) {
+      as_numeric(var)
+    } else {
+      NULL
+    }
+    out <- summ_variable(
+      var,
+      numeric,
+      locs,
+      requested,
+      calendar,
+      weights,
+      weight_type,
+      metadata[[column]]
+    )
     if (calendar) {
-      out <- summ_format_calendar(out, var, requested)
+      out <- summ_format_calendar(out, var, requested, metadata[[column]]$type)
     }
     out
   })
@@ -567,9 +597,13 @@ summ_data <- function(
     seq_len(group_count),
     "+"
   ))
-  stats <- vctrs::vec_slice(vctrs::vec_rbind(!!!blocks), rows)
+  columns <- lapply(requested, function(statistic) {
+    column <- do.call(vctrs::vec_c, lapply(blocks, `[[`, statistic))
+    vctrs::vec_slice(column, rows)
+  })
+  stats <- tibble::as_tibble(stats::setNames(columns, requested))
   if (calendar) {
-    date <- s_type(.data[[summ_vars[[1L]]]], .abbr = TRUE) == "date"
+    date <- metadata[[summ_vars[[1L]]]]$type == "date"
     for (statistic in intersect(names(stats), calendar_spreads)) {
       units(stats[[statistic]]) <- summ_spread_units(stats[[statistic]], date)
     }
@@ -600,41 +634,19 @@ summ_list <- function(
   group_vars,
   .detail,
   .stat,
-  .mode = c("list", "table")
+  .mode = c("list", "table"),
+  weights = NULL,
+  weight_type = "frequency",
+  metadata
 ) {
   .mode <- match.arg(.mode)
 
-  numeric <- .data %>%
-    ds(
-      !tidyselect::all_of(group_vars) &
-        !tidyselect::where(
-          ~ s_type(.x) %in% c("date", "datetime", "time")
-        )
-    )
-
-  date <- .data %>%
-    ds(
-      !tidyselect::all_of(group_vars) &
-        tidyselect::where(
-          ~ s_type(.x) %in% c("date")
-        )
-    )
-
-  datetime <- .data %>%
-    ds(
-      !tidyselect::all_of(group_vars) &
-        tidyselect::where(
-          ~ s_type(.x) %in% c("datetime")
-        )
-    )
-
-  time <- .data %>%
-    ds(
-      !tidyselect::all_of(group_vars) &
-        tidyselect::where(
-          ~ s_type(.x) %in% c("time")
-        )
-    )
+  types <- vapply(metadata, `[[`, character(1), "type")
+  numeric <- names(types)[!types %in% c("date", "dttm", "time")]
+  date <- names(types)[types == "date"]
+  datetime <- names(types)[types == "dttm"]
+  time <- names(types)[types == "time"]
+  groups <- aggregation_groups(.data, group_vars)
 
   requested <- unique(unname(summ_stat_names(.stat)))
   skipped <- intersect(requested, calendar_unsupported)
@@ -666,7 +678,11 @@ summ_list <- function(
     numeric,
     group_vars,
     .detail,
-    .stat
+    .stat,
+    weights = weights,
+    weight_type = weight_type,
+    groups = groups,
+    metadata = metadata
   )
 
   if (!is.null(numeric) && nrow(numeric) > 0) {
@@ -685,16 +701,42 @@ summ_list <- function(
       )
   }
 
-  date <- summ_data(.data, date, group_vars, .detail, .stat, calendar = TRUE)
+  date <- summ_data(
+    .data,
+    date,
+    group_vars,
+    .detail,
+    .stat,
+    calendar = TRUE,
+    weights = weights,
+    weight_type = weight_type,
+    groups = groups,
+    metadata = metadata
+  )
   datetime <- summ_data(
     .data,
     datetime,
     group_vars,
     .detail,
     .stat,
-    calendar = TRUE
+    calendar = TRUE,
+    weights = weights,
+    weight_type = weight_type,
+    groups = groups,
+    metadata = metadata
   )
-  time <- summ_data(.data, time, group_vars, .detail, .stat, calendar = TRUE)
+  time <- summ_data(
+    .data,
+    time,
+    group_vars,
+    .detail,
+    .stat,
+    calendar = TRUE,
+    weights = weights,
+    weight_type = weight_type,
+    groups = groups,
+    metadata = metadata
+  )
 
   out <- list(
     numeric = numeric,
@@ -753,4 +795,107 @@ summ_table_text <- function(x) {
     x <- signif(x, 7)
   }
   as.character(x)
+}
+
+# Weighted statistics for one variable in every group. Frequency weights use
+# the summed weight W as the number of observations; analytic weights are first
+# rescaled within the group so that W equals the number of observed values.
+# Mean, variance (W - 1 denominator), moments and sums follow Stata's
+# `summarize [fweight/aweight]`; percentiles follow Stata's weighted rule.
+# `unique`, `miss_n` and `valid_pct` remain row counts.
+summ_weighted <- function(
+  var,
+  numeric,
+  missing,
+  locs,
+  requested,
+  statistics,
+  probabilities,
+  type,
+  weights,
+  weight_type
+) {
+  spread_needed <- any(statistics %in% c("sd", "se", "skew", "kurtosis"))
+  center_needed <- spread_needed || "mean" %in% statistics
+  median_needed <- any(statistics %in% c("median", "mad"))
+  if (median_needed) {
+    probabilities["median"] <- 0.5
+  }
+  one_group <- function(loc) {
+    kept <- loc[!missing[loc]]
+    w <- weights[kept]
+    if (weight_type == "analytic" && sum(w) > 0) {
+      w <- w * length(w) / sum(w)
+    }
+    total <- sum(w)
+    x <- if (is.null(numeric)) numeric() else numeric[kept]
+    has <- length(x) > 0L && total > 0
+    center <- if (has && center_needed) sum(w * x) / total else NA_real_
+    spread <- if (has && spread_needed && total > 1) {
+      sqrt(sum(w * (x - center)^2) / (total - 1))
+    } else {
+      NA_real_
+    }
+    quantiles <- if (has && length(probabilities)) {
+      weighted_quantile(x, w, probabilities)
+    } else {
+      rep(NA_real_, length(probabilities))
+    }
+    names(quantiles) <- names(probabilities)
+    positive <- if (any(statistics %in% c("min", "max"))) x[w > 0] else NULL
+    median <- if (median_needed) unname(quantiles[["median"]]) else NULL
+    vapply(
+      statistics,
+      function(statistic) {
+        if (statistic %in% names(quantiles)) {
+          return(unname(quantiles[[statistic]]))
+        }
+        switch(
+          statistic,
+          n = total,
+          unique = vctrs::vec_unique_count(vctrs::vec_slice(var, kept)),
+          miss_n = length(loc) - length(kept),
+          valid_pct = if (length(loc)) length(kept) / length(loc) else NA_real_,
+          min = if (has) min(positive) else NA_real_,
+          median = median,
+          mean = center,
+          mad = if (has) {
+            1.4826 * weighted_quantile(abs(x - median), w, 0.5)
+          } else {
+            NA_real_
+          },
+          sd = spread,
+          max = if (has) max(positive) else NA_real_,
+          iqr = unname(quantiles[["q3"]] - quantiles[["q1"]]),
+          skew = if (has) {
+            sum(w * (x - center)^3) / (total * spread^3)
+          } else {
+            NA_real_
+          },
+          kurtosis = if (has) {
+            sum(w * (x - center)^4) / (total * spread^4) - 3
+          } else {
+            NA_real_
+          },
+          se = spread / sqrt(total),
+          sum = if (has) sum(w * x) else NA_real_
+        )
+      },
+      numeric(1)
+    )
+  }
+  values <- matrix(
+    as.numeric(unlist(lapply(locs, one_group), use.names = FALSE)),
+    ncol = length(statistics),
+    byrow = TRUE
+  )
+  out <- list(type = rep(type, length(locs)))
+  for (j in seq_along(statistics)) {
+    column <- values[, j]
+    if (statistics[[j]] %in% c("unique", "miss_n")) {
+      column <- as.integer(column)
+    }
+    out[[statistics[[j]]]] <- column
+  }
+  out[requested]
 }

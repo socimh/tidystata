@@ -1,8 +1,9 @@
-#' Try a function and return a logical
+#' Capture an error and report success
 #'
-#' This function tries to evaluate a function,
-#' and if the function throws an error, it returns FALSE.
-#' Otherwise, it returns TRUE.
+#' `capture()` works like Stata's `capture`: it evaluates an expression,
+#' suppresses any error, and returns `TRUE` if the expression succeeded and
+#' `FALSE` if it failed. `capture()` was called `s_try()` before statart
+#' 0.2.0.9000; the old name still works with a once-per-session notice.
 #'
 #' @param .fn An expression to evaluate once.
 #' @returns A single logical value.
@@ -13,14 +14,17 @@
 #'
 #' @export
 #' @examples
-#' s_try(mean(1:10))
+#' capture(mean(1:10))
 #'
-#' # This gives a warning, but it is still working, so s_try() returns TRUE
-#' s_try(mean(letters[1:10]))
+#' # This gives a warning, but it is still working, so capture() returns TRUE
+#' capture(mean(letters[1:10]))
 #'
-#' # This throws an error, so s_try() returns FALSE
-#' s_try(means(1:10))
-s_try <- function(.fn) {
+#' # This throws an error, so capture() returns FALSE
+#' capture(means(1:10))
+#'
+#' # Check a key without stopping the script
+#' capture(isid(starwars, name))
+capture <- function(.fn) {
   try_result <- try(.fn, silent = TRUE)
   !inherits(try_result, "try-error")
 }

@@ -553,3 +553,11 @@ test_that("tab1: quality control flags", {
   result <- tab1(df, valid_id:valid_amount, .type = "list")
   expect_true(all(purrr::map_lgl(result, ~ nrow(.x) <= 2)))
 })
+
+
+test_that("richer list-of type descriptions do not force compatible values to text", {
+  d <- tibble::tibble(a = vctrs::list_of(1L, 2L), b = vctrs::list_of(1, 2))
+  out <- tab1(d, .type = "tibble")
+  expect_identical(out$value, vctrs::list_of(1, 2, 1, 2))
+  expect_identical(out$n, rep(1L, 4L))
+})

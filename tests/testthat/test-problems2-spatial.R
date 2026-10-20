@@ -8,10 +8,10 @@ test_that("spatial aggregation counts attributes without sticky geometry", {
   calls <- list(
     tab = function(x) tab(x, x),
     tab1 = function(x) tab1(x, x),
-    tab2 = function(x) tab2(x, g, x),
+    tab2 = function(x) xtab(x, g, x),
     fre = function(x) fre(x, x),
     fre1 = function(x) fre1(x, x),
-    fre2 = function(x) fre2(x, g, x),
+    fre2 = function(x) xtab(x, g, x, .total = TRUE),
     summ = function(x) summ(x, x),
     tabstat = function(x) tabstat(x, x)
   )

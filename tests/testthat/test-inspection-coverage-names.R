@@ -1075,7 +1075,7 @@ stopifnot(
   identical(vapply(inspect_names_cases, `[[`, integer(1), "id"), seq_len(100L))
 )
 
-for (function_name in c("ds", "ds_as_column", "names_as_column")) {
+for (function_name in c("ds", "ds_as_column", "ds_as_column")) {
   local({
     api <- getExportedValue("statart", function_name)
     check <- function(out, expected, container = "tibble") {

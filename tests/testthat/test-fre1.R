@@ -439,7 +439,7 @@ test_that("fre1: moderate size dataset with list output", {
   purrr::walk(result, ~ expect_true(any(grepl("Total", .x$value))))
 })
 
-test_that("fre1: many variables with tibble output", {
+test_that("fre1: fifteen variables stack into one tibble", {
   withr::local_preserve_seed()
   df <- tibble::as_tibble(
     replicate(15, sample(1:3, 100, replace = TRUE)),

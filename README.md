@@ -18,12 +18,19 @@ combines Stata-inspired features with tidyverse-style operations.
 
 The package focuses on exploring and preparing data:
 
-- `tab()`, `tab1()`, and `tab2()` for frequency tables.
-- `fre()`, `fre1()`, and `fre2()` for frequency tables with totals.
+- `tab()`, `tab1()`, and `xtab()` for frequency tables.
+- `fre()`, `fre1()`, and `xtab(.total = TRUE)` for frequency tables with
+  totals.
 - `summ()` and `tabstat()` for summary statistics.
+- `pwcorr()`, `misstable()`, and `xtab(.chi2 = TRUE)` for correlations,
+  missing values, and tests of independence.
 - `codebook()` and `variables()` for variable inspection.
-- `s_select()`, row calculations, conversion helpers, and binning for
-  data preparation.
+- `isid()`, `duplicates_report()`, `assert()`, `is_first()`, and
+  `s_merge()` for checking keys and merging, and `print_all()` for
+  listing every row.
+- `s_select()`, row calculations, conversion helpers, `std()`, `pct()`,
+  `as_dummy()`, panel lags (`s_lag()`, `s_lead()`, `s_diff()`), and
+  binning for data preparation.
 
 The `0.2.0.9000` development series retires the import/export,
 regression-table, and detailed-codebook wrappers in preparation for
@@ -76,6 +83,22 @@ values](https://socimh.github.io/statart/articles/containers-and-missing-values.
 for return types, grouping, labels and previews. In an installation that
 includes vignettes, use
 `vignette("getting-started", package = "statart")`.
+
+Coming from Stata? `findit()` gives the R equivalent of a Stata command.
+Type one Stata word bare, or quote anything longer; the usual Stata
+abbreviations work:
+
+``` r
+findit(reg)
+findit("merge 1:1 id, keep(match)")
+findit(left_join) # R functions work too
+```
+
+The [Coming from
+Stata](https://socimh.github.io/statart/articles/coming-from-stata.html)
+article lists every entry by topic, in English and
+[Chinese](https://socimh.github.io/statart/articles/coming-from-stata-zh.html),
+including the packages to use beyond statart.
 
 Plain manual scripts are included in the installed package. Open a
 script in your editor and run its lines individually, or run this
@@ -160,8 +183,8 @@ date/datetime restrictions and cross-tabulation naming rules.
 
 ``` r
 summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
-#>   name type missing  p50   sum
-#> 1  mpg  dbl       0 19.2 642.9
+#>   type missing  p50   sum
+#> 1  dbl       0 19.2 642.9
 ```
 
 With `.mode = "table"`, numeric and calendar summaries share character
@@ -184,11 +207,11 @@ tab(statart::starwars, sex)
 #> 5 <NA>               4    4.60 100   NA         NA
 ```
 
-`tab1()` tabulates variables one by one as a list, and `s_match()` can
+`tab1()` tabulates variables one by one as a list, and `varlist()` can
 select variables in a Stata style.
 
 ``` r
-tab1(statart::starwars, s_match("*color"))
+tab1(statart::starwars, varlist("*color"))
 #> $hair_color
 #> # A tibble: 13 x 6
 #>    value             n percent    cum valid valid_cum
@@ -248,10 +271,10 @@ One-way tabulation also counts list-column values. Selecting no
 variables returns an empty result; `tab1()` and `fre1()` return empty
 lists by default. Matrix columns are unsupported.
 
-`tab2()` cross-tabulates two variables.
+`xtab()` cross-tabulates two variables.
 
 ``` r
-tab2(statart::starwars, sex, gender)
+xtab(statart::starwars, sex, gender)
 #> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
@@ -265,11 +288,12 @@ tab2(statart::starwars, sex, gender)
 ### fre()
 
 `fre()` family functions simply add total rows (and total columns in
-`fre2()`) to their `tab()` counterparts.
+`xtab(.total = TRUE)`) to their `tab()` counterparts.
 
-`fre()` and `fre2()` default to `.type = "auto"`, preserving the input
-container. `fre1()` returns a list whose tables preserve that container.
-Request `.type = "tibble"` explicitly when a tibble is required.
+`fre()` and `xtab(.total = TRUE)` default to `.type = "auto"`,
+preserving the input container. `fre1()` returns a list whose tables
+preserve that container. Request `.type = "tibble"` explicitly when a
+tibble is required.
 
 ``` r
 fre(statart::starwars, sex)
@@ -307,9 +331,9 @@ tibble(a = c(1, NA, 3), b = c(3, NA, 5)) |>
 #> 3     3     5           4
 ```
 
-`cut_quantile()` keeps equal values in the same group. Ties can reduce
-the number of intervals, with a warning, rather than splitting equal
-values by row order.
+`xtile()` keeps equal values in the same group. Ties can reduce the
+number of intervals, with a warning, rather than splitting equal values
+by row order.
 
 ## Code of Conduct
 

@@ -556,3 +556,57 @@ test_that("tab: units class from units package", {
   result <- tab(df, x)
   expect_equal(nrow(result), 2)
 })
+
+
+test_that("joint counts preserve factor order and separate NA from NaN", {
+  d <- tibble::tibble(
+    g = factor(c("b", "a", "b", "b", "a", "b"), levels = c("b", "a", "unused")),
+    x = c(NA_real_, 2, NaN, NaN, 2, 1)
+  )
+  out <- tab(d, x, .by = g)
+  expect_identical(
+    out$g,
+    factor(c("b", "b", "b", "a"), levels = c("b", "a", "unused"))
+  )
+  expect_identical(out$x, c(1, NaN, NA_real_, 2))
+  expect_identical(out$n, c(1L, 2L, 1L, 2L))
+  expect_equal(out$percent, c(25, 50, 25, 100))
+})
+
+
+test_that("counts retain first-appearance list order and C-locale character order", {
+  inputs <- list(
+    tibble::tibble(x = list(1L, "a", NULL, 1L)),
+    tibble::tibble(x = c("z", "a", intToUtf8(228L), "A", NA_character_))
+  )
+  for (d in inputs) {
+    expected <- dplyr::count(d, dplyr::across(dplyr::everything()))
+    out <- tab(d)
+    expect_identical(out$x, expected$x)
+    expect_identical(out$n, expected$n)
+    expect_equal(out$cum, cumsum(expected$n / sum(expected$n) * 100))
+  }
+})
+
+
+test_that("explicit locale options preserve dplyr counting behavior", {
+  # dplyr >= 1.2 deprecates this option; verify the warning when emitted.
+  with_locale_warning <- function(expr) {
+    withCallingHandlers(expr, warning = function(w) {
+      expect_match(
+        conditionMessage(w),
+        "`options(dplyr.legacy_locale =)` was deprecated",
+        fixed = TRUE
+      )
+      invokeRestart("muffleWarning")
+    })
+  }
+  d <- tibble::tibble(x = c("z", "a", intToUtf8(228L), "A", NA_character_))
+  for (legacy in c(FALSE, TRUE)) {
+    withr::local_options(list(dplyr.legacy_locale = legacy))
+    expected <- with_locale_warning(dplyr::count(d, x))
+    out <- with_locale_warning(tab(d))
+    expect_identical(out$x, expected$x)
+    expect_identical(out$n, expected$n)
+  }
+})

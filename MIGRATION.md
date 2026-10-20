@@ -33,6 +33,12 @@ before the four-wrapper milestone and the restored printing/slicing helpers.
 | Previous upstream exports | Current destination or replacement |
 | --- | --- |
 | `s_time()` | Renamed to `timer()`; timing messages use compact duration text. |
+| `cut_quantile()` | Renamed to `xtile()`, the Stata command it follows; the old name works with a once-per-session notice. |
+| `s_match()` | Renamed to `varlist()`, since it parses a Stata varlist string; the old name works with a notice. |
+| `s_try()` | Renamed to `capture()`, after Stata's `capture`; the old name works with a notice. |
+| `names_as_column()` | Use the identical `ds_as_column()`; the old name works with a notice. |
+| `tab2()` | Renamed to `xtab()`; the old name works with a notice. |
+| `fre2()` | Use `xtab(.total = TRUE)`; the old name works with a notice. |
 | `read_data()`, `write_data()` | Retired; use format-specific packages directly. |
 | `codebook_detail()` | Retired; use `codebook()` or `datawizard::data_codebook()`. |
 | `tidy_coef()` | Reworked locally as `esttab()`, then retired; use broom/broom.mixed directly. `esttab()` was not an export in this upstream revision. |
@@ -45,6 +51,106 @@ new `statart_preview` class operates on full tables; it does not pretend that a
 row subset contains the full data. Retired implementations are unsupported and
 are not distributed in the package or checkout. Restored and reworked files are not byte-identical copies; the
 original upstream implementations remain in Git history.
+
+## Weights
+
+Stata's weight clauses map to `.wt` and `.wt_type`:
+
+| Stata | statart |
+| --- | --- |
+| `tab x [fw = w]` | `tab(d, x, .wt = w)` |
+| `tab x [aw = w]` | `tab(d, x, .wt = w, .wt_type = "analytic")` |
+| `tab x y [fw = w]` | `xtab(d, x, y, .wt = w)` |
+| `summarize x [aw = w]` | `summ(d, x, .wt = w, .wt_type = "analytic")` |
+| `xtile q = x [aw = w], n(5)` | `mutate(d, q = xtile(x, 5, wt = w))` |
+
+Frequency weights may be non-integer, unlike Stata's `[fw]`, matching
+`dplyr::count(wt =)`. For survey designs that need design-based standard
+errors, use srvyr or survey; statart's weighted standard errors treat the
+weights as frequency or analytic weights only.
+
+## Correlations, missing values and chi-square
+
+| Stata | statart |
+| --- | --- |
+| `pwcorr x y z, sig obs` | `pwcorr(d, x, y, z)` |
+| `pwcorr x y z` (matrix) | `pwcorr(d, x, y, z, .wide = TRUE)` |
+| `spearman x y` | `pwcorr(d, x, y, .method = "spearman")` |
+| `misstable summarize` | `misstable(d)` |
+| `misstable patterns` | `misstable(d, .patterns = TRUE)` |
+| `tab x y, chi2 V` | `xtab(d, x, y, .chi2 = TRUE)` |
+
+`pwcorr()` uses pairwise deletion as Stata does; drop incomplete rows first
+for `correlate`'s listwise deletion. `misstable()` treats empty strings as
+observed, unlike Stata; convert them with `na_if_value()` first.
+
+## Standardising, percentages and dummies
+
+| Stata | statart |
+| --- | --- |
+| `egen z = std(x)` | `mutate(d, z = std(x))` |
+| `by g: egen z = std(x)` | `mutate(d, z = std(x), .by = g)` |
+| `egen p = pc(x)` | `mutate(d, p = pct(x))` |
+| `tab x, gen(x_)` | `as_dummy(d, x, .names = "index")` |
+
+`as_dummy()` names columns by category (`x_male`) unless `.names = "index"`.
+For model formulas, factors already expand to dummies.
+
+## Panel lags and leads
+
+| Stata | statart |
+| --- | --- |
+| `xtset id year` then `gen l = L.x` | `mutate(d, l = s_lag(x, time = year), .by = id)` |
+| `L2.x`, `F.x`, `D.x`, `D2.x` | `s_lag(x, 2, ...)`, `s_lead(x, ...)`, `s_diff(x, ...)`, `s_diff(x, 2, ...)` |
+| `xtset id year, delta(5)` | `s_lag(x, time = year, delta = 5)` |
+| `xtset id month` (`%tm`) | `s_lag(x, time = date, unit = "month")` |
+| `xtset id t` with `%tc` clock times | `s_lag(x, time = datetime, unit = "hour")` |
+
+There is no `xtset` state to declare: give `time =` in each call and the panel
+with `.by`. Unlike `dplyr::lag()`, which shifts rows, gaps in time give missing
+values. Time values must be unique within each panel. Numbers (including
+Stata `%tm`/`%tq` variables read by haven), dates, date-times, tsibble or
+zoo period classes and ordered factors (such as survey waves) all work as
+`time`; text and unordered factors must be converted first.
+
+## Assertions, tags and listings
+
+| Stata | statart |
+| --- | --- |
+| `assert x > 0` | `assert(d, x > 0)` |
+| `by g: assert _N == 1` | `assert(d, n() == 1, .by = g)` |
+| `egen t = tag(id)` | `mutate(d, t = is_first(id))` |
+| `list` | `print_all(d)` |
+
+`assert()` counts a missing result as a contradiction, while Stata treats a
+missing value as larger than any number; write `is.na(x) | x > 0` for Stata's
+behaviour. `is_first()` returns `TRUE`/`FALSE` rather than 1/0.
+
+## Coming from Stata: where to find the rest
+
+statart covers the everyday Stata data loop: inspecting, selecting, tabulating,
+summarising, preparing and checking. For other Stata commands, these packages
+are the recommended R tools:
+
+| Stata | R |
+| --- | --- |
+| `regress`, `reghdfe`, `esttab`/`outreg2` | fixest, modelsummary |
+| `reshape` | `tidyr::pivot_longer()`, `tidyr::pivot_wider()` |
+| `winsor2` | `datawizard::winsorize()` |
+| `binscatter` | binsreg (or `statar::stat_binmean()`) |
+| `tsset` monthly/quarterly periods | tsibble (`yearmonth()`, `yearquarter()`) |
+| `svyset`, `svy:` | srvyr, survey |
+| `use`, `save`, `import` | haven, readr, readxl |
+
+statar can be attached alongside statart. Only `tab()` and `xtile()` share
+names; attach statart last, or call `statart::tab()`. statar's
+`tlag()`/`tlead()` correspond to statart's `s_lag()`/`s_lead()`.
+
+`findit()` looks up the R equivalent of a Stata command from the console, such
+as `findit(reg)` or `findit("merge 1:1 id, keep(match)")`; Stata's
+abbreviations work, and `findit()` alone lists every entry. The website's
+"Coming from Stata" articles, in English and Chinese, show the same list by
+topic with notes.
 
 ## Import and export directly
 

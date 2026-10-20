@@ -1,0 +1,92 @@
+dummy_data <- tibble::tibble(
+  id = 1:5,
+  sex = c("m", "f", NA, "m", "f"),
+  size = factor(c("s", "l", "s", NA, "s"), levels = c("s", "m", "l")),
+  score = c(1, 2, 3, 4, 5)
+)
+
+test_that("as_dummy() adds 0/1 columns after the source, like tab, gen()", {
+  out <- as_dummy(dummy_data, sex)
+  expect_named(out, c("id", "sex", "sex_f", "sex_m", "size", "score"))
+  expect_identical(
+    out$sex_m,
+    structure(c(1L, 0L, NA, 1L, 0L), label = "sex==m")
+  )
+  expect_identical(attr(out$sex_f, "label"), "sex==f")
+  # Missing source values give missing indicators.
+  expect_true(is.na(out$sex_f[[3]]))
+  # Rows with an observed value have exactly one 1.
+  observed <- !is.na(dummy_data$sex)
+  expect_true(all(out$sex_f[observed] + out$sex_m[observed] == 1L))
+})
+
+test_that("as_dummy() follows factor levels and supports index names", {
+  out <- as_dummy(dummy_data, size)
+  # Unused levels are skipped; level order is kept.
+  expect_identical(
+    names(out),
+    c("id", "sex", "size", "size_s", "size_l", "score")
+  )
+  index <- as_dummy(dummy_data, sex, size, .names = "index", .remove = TRUE)
+  expect_named(
+    index,
+    c("id", "sex_1", "sex_2", "size_1", "size_2", "score")
+  )
+  expect_identical(attr(index$size_2, "label"), "size==l")
+  logical <- as_dummy(tibble::tibble(flag = c(TRUE, FALSE)), flag)
+  expect_named(logical, c("flag", "flag_FALSE", "flag_TRUE"))
+})
+
+test_that("as_dummy() labels labelled codes with their value labels", {
+  out <- as_dummy(lifeexp, region)
+  expect_identical(
+    names(out)[1:4],
+    c("region", "region_1", "region_2", "region_3")
+  )
+  expect_identical(attr(out$region_1, "label"), "region==Europe & C. Asia")
+  expect_identical(
+    sum(out$region_2),
+    sum(vctrs::vec_data(lifeexp$region) == 2)
+  )
+})
+
+test_that("as_dummy() keeps containers and validates input", {
+  grouped <- as_dummy(dplyr::group_by(dummy_data, sex), size)
+  expect_identical(dplyr::group_vars(grouped), "sex")
+  expect_error(
+    as_dummy(dplyr::group_by(dummy_data, sex), sex, .remove = TRUE),
+    "cannot be removed"
+  )
+  base <- as_dummy(as.data.frame(dummy_data), sex)
+  expect_false(inherits(base, "tbl_df"))
+  skip_if_not_installed("data.table")
+  table <- data.table::as.data.table(dummy_data)
+  out <- as_dummy(table, sex, .remove = TRUE)
+  expect_s3_class(out, "data.table")
+  expect_named(out, c("id", "sex_f", "sex_m", "size", "score"))
+  # The input data.table is not modified by reference.
+  expect_named(table, names(dummy_data))
+
+  expect_error(as_dummy(dummy_data), "at least one variable")
+  expect_error(as_dummy(1:3, x), "must be a data frame")
+  expect_error(
+    as_dummy(tibble::tibble(x = 1:2, x_1 = 3:4), x),
+    "`x_1` already exists"
+  )
+  expect_error(
+    as_dummy(tibble::tibble(x = list(1, 2)), x),
+    "cannot be expanded"
+  )
+  expect_error(as_dummy(dummy_data, sex, .remove = NA), "single TRUE or FALSE")
+})
+
+test_that("as_dummy() keeps sf geometry", {
+  skip_if_not_installed("sf")
+  points <- sf::st_as_sf(
+    tibble::tibble(k = c("a", "b"), x = 1:2, y = 1:2),
+    coords = c("x", "y")
+  )
+  out <- as_dummy(points, k, .remove = TRUE)
+  expect_s3_class(out, "sf")
+  expect_identical(names(out), c("k_a", "k_b", "geometry"))
+})

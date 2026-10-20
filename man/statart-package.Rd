@@ -9,6 +9,9 @@
 Stata-inspired tools for frequency tables, summary statistics,
 variable inspection, column selection, row calculations, and binning.
 Use \code{\link[=tab]{tab()}}, \code{\link[=summ]{summ()}}, and \code{\link[=codebook]{codebook()}} to start exploring a dataset.
+
+Coming from Stata? \code{\link[=findit]{findit()}} gives the R equivalent of a Stata command,
+such as \code{findit(reg)} or \code{findit("merge 1:1 id")}.
 }
 \section{Tutorials and migration}{
 

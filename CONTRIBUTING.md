@@ -73,6 +73,25 @@ Inspect Git status and preserve uncommitted changes before switching branches
 or integrating updates. Current verification belongs in DEVELOPMENT.md; Git
 history and the maintainer's external backup retain historical material.
 
+## Aggregation boundary
+
+Tabulation and summary computation uses prepared vectors, native vctrs category
+identities, and per-call group locations in `R/aggregation-core.R`. Keep class
+conversion, selection, diagnostics, calendar formatting and table restoration at
+the boundaries. Numerical helpers return vectors or lists of columns and use
+base R, stats and vctrs; do not add grouped data-masking operations inside them.
+Reuse metadata and group locations across variables. Calculate only requested
+statistics and their prerequisites, including for weighted summaries. Keep
+cumulative sums local to each group, and distinguish raw category identity from
+cross-table display names. Ambiguous headers retain the existing pivot behavior.
+
+Measure complete public calls, including preparation and output construction,
+with warm-up, adaptive batches, at least seven repetitions and allocations. Run
+repeated before/after measurements without concurrent validation jobs. Retain an
+algorithmic optimization only with a targeted improvement of at least 20% and no
+repeatable regression exceeding both 10% and 5 ms; architectural extraction must
+stay performance-neutral. Timing assertions do not belong in unit tests.
+
 ## Source files
 
 | Change | Edit |

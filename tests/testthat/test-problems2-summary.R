@@ -134,22 +134,22 @@ test_that("summary empty-row removal is independent of missing-key removal", {
 
 test_that("rank cuts balance ties deterministically and restore missing positions", {
   x <- c(4, 1, 1, NA, 4, 1, 2, 9)
-  out <- cut_quantile(x, n = 3, method = "rank", labels = FALSE)
+  out <- xtile(x, n = 3, method = "rank", labels = FALSE)
   expect_identical(out, c(2L, 1L, 1L, NA_integer_, 3L, 1L, 2L, 3L))
   expect_equal(as.integer(table(out)), c(3L, 2L, 2L))
-  expect_identical(cut_quantile(x, n = 3, method = "rank", labels = FALSE), out)
-  constant <- cut_quantile(rep(5, 5), n = 2, method = "rank")
+  expect_identical(xtile(x, n = 3, method = "rank", labels = FALSE), out)
+  constant <- xtile(rep(5, 5), n = 2, method = "rank")
   expect_true(is.ordered(constant))
   expect_equal(levels(constant), c("1", "2"))
   expect_equal(as.integer(constant), c(1L, 1L, 1L, 2L, 2L))
   expect_warning(
-    scarce <- cut_quantile(c(4, NA, 2), n = 4, method = "rank"),
+    scarce <- xtile(c(4, NA, 2), n = 4, method = "rank"),
     "observations"
   )
   expect_equal(levels(scarce), c("1", "2"))
   expect_equal(as.integer(scarce), c(2L, NA_integer_, 1L))
   expect_equal(
-    levels(cut_quantile(
+    levels(xtile(
       1:4,
       n = 2,
       method = "rank",
@@ -158,12 +158,12 @@ test_that("rank cuts balance ties deterministically and restore missing position
     c("low", "high")
   )
   expect_error(
-    cut_quantile(1:4, n = 2, method = "rank", labels = "x"),
+    xtile(1:4, n = 2, method = "rank", labels = "x"),
     "length 2"
   )
-  expect_error(cut_quantile(NA_real_, method = "rank"), "non-missing")
+  expect_error(xtile(NA_real_, method = "rank"), "non-missing")
   expect_identical(
-    cut_quantile(
+    xtile(
       c(Inf, -Inf, NA, NaN, 0),
       n = 2,
       method = "rank",
@@ -172,45 +172,45 @@ test_that("rank cuts balance ties deterministically and restore missing position
     c(2L, 1L, NA_integer_, NA_integer_, 1L)
   )
   expect_identical(
-    cut_quantile(8, n = 1, method = "rank", labels = FALSE),
+    xtile(8, n = 1, method = "rank", labels = FALSE),
     1L
   )
-  expect_error(cut_quantile(1:5, method = "wrong"), "arg")
+  expect_error(xtile(1:5, method = "wrong"), "arg")
   expect_error(
-    cut_quantile(1:5, n = 1 + 1i, method = "rank"),
+    xtile(1:5, n = 1 + 1i, method = "rank"),
     "positive integer"
   )
 })
 
 test_that("default quantile cuts never merge distinct values", {
   dummy <- rep(0:1, c(7, 3))
-  expect_no_warning(two <- cut_quantile(dummy, 2))
+  expect_no_warning(two <- xtile(dummy, 2))
   expect_identical(as.integer(two), as.integer(dummy) + 1L)
   expect_identical(levels(two), c("[0,0]", "(0,1]"))
   expect_warning(
-    codes <- cut_quantile(rep(0:1, c(3, 8)), 10, labels = FALSE),
+    codes <- xtile(rep(0:1, c(3, 8)), 10, labels = FALSE),
     "2 groups"
   )
   expect_identical(codes, rep(1:2, c(3, 8)))
   expect_warning(
-    three <- cut_quantile(rep(1:3, c(500, 300, 200)), 10, labels = FALSE),
+    three <- xtile(rep(1:3, c(500, 300, 200)), 10, labels = FALSE),
     "3 groups"
   )
   expect_identical(sort(unique(three)), 1:3)
   expect_identical(as.integer(table(three)), c(500L, 300L, 200L))
   expect_warning(
-    labelled <- cut_quantile(dummy, 10, labels = c("no", "yes")),
+    labelled <- xtile(dummy, 10, labels = c("no", "yes")),
     "2 groups"
   )
   expect_identical(as.character(labelled), ifelse(dummy == 1, "yes", "no"))
-  expect_no_warning(even <- cut_quantile(1:8, 4, labels = FALSE))
+  expect_no_warning(even <- xtile(1:8, 4, labels = FALSE))
   expect_identical(even, rep(1:4, each = 2))
   expect_identical(
-    levels(cut_quantile(1:8, 4)),
+    levels(xtile(1:8, 4)),
     c("[1,2.75]", "(2.75,4.5]", "(4.5,6.25]", "(6.25,8]")
   )
   expect_identical(
-    cut_quantile(c(NA, 1:4), 2, labels = FALSE),
+    xtile(c(NA, 1:4), 2, labels = FALSE),
     c(NA, 1L, 1L, 2L, 2L)
   )
 })

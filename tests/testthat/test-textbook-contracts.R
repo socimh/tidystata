@@ -39,15 +39,15 @@ test_that("cut_length preserves valid intervals, labels and missing values", {
   )
 })
 
-test_that("s_match diagnoses noncharacter patterns without changing selections", {
+test_that("varlist diagnoses noncharacter patterns without changing selections", {
   for (pattern in list(1, TRUE, NULL, list("x*"), factor("x*"))) {
     expect_error(
-      s_match(pattern, vars = c("x1", "x2", "y")),
+      varlist(pattern, vars = c("x1", "x2", "y")),
       "`string` must be a character string"
     )
   }
-  expect_identical(s_match("x*", vars = c("x1", "x2", "y")), c(1L, 2L))
-  expect_identical(s_match(NA_character_, vars = c("NA", "x")), 1L)
+  expect_identical(varlist("x*", vars = c("x1", "x2", "y")), c(1L, 2L))
+  expect_identical(varlist(NA_character_, vars = c("NA", "x")), 1L)
 })
 
 test_that("slicing retains explicit row names and regenerates automatic ones", {

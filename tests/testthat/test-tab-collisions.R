@@ -100,13 +100,16 @@ test_that("fre2 rejects a total category before it can overwrite observed counts
     col = c("total", "other", "total")
   )
   before <- d
-  expect_error(fre2(d, row, col), "category.*total.*reserved.*Recode")
   expect_error(
-    fre2(d, col, row, .flip = TRUE),
+    xtab(d, row, col, .total = TRUE),
+    "category.*total.*reserved.*Recode"
+  )
+  expect_error(
+    xtab(d, col, row, .flip = TRUE, .total = TRUE),
     "category.*total.*reserved.*Recode"
   )
   expect_identical(d, before)
-  out <- tab2(d, row, col)
+  out <- xtab(d, row, col)
   expect_equal(out$total, c(1, 1))
   expect_equal(out$other, c(1, 0))
 })

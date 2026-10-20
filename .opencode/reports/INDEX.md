@@ -6,12 +6,19 @@ A passing demo is not a passing full package test suite.
 | Function | Description | Examples | Status | Report |
 | --- | --- | ---: | --- | --- |
 | browse | Browse data | 5 | PASS | [View](report_browse.md) |
-| codebook | Variable metadata | 6 | PASS | [View](report_codebook.md) |
+| checks | Assertions, first-row flags and full listings | 3 | PASS | [View](report_checks.md) |
+| codebook | Variable metadata | 7 | PASS | [View](report_codebook.md) |
 | containers | Table container preservation | 1 | PASS | [View](report_containers.md) |
 | conversion | Conversion and missing-value preparation | 4 | PASS | [View](report_conversion.md) |
 | cut | Numeric bins | 7 | PASS | [View](report_cut.md) |
+| dummy | Standardising, percentages and indicator variables | 3 | PASS | [View](report_dummy.md) |
+| findit | Stata command lookup | 6 | PASS | [View](report_findit.md) |
 | fre | Frequencies and totals | 6 | PASS | [View](report_fre.md) |
+| keys | Key checks, duplicates and merges | 6 | PASS | [View](report_keys.md) |
+| misstable | Missing-value summaries and patterns | 3 | PASS | [View](report_misstable.md) |
+| panel | Gap-aware panel lags, leads and differences | 3 | PASS | [View](report_panel.md) |
 | problems2 | Historical problem repairs and examples | 14 | PASS | [View](report_problems2.md) |
+| pwcorr | Pairwise correlations and chi-square tests | 4 | PASS | [View](report_pwcorr.md) |
 | readiness | Remaining-issue triage and small repairs | 9 | PASS | [View](report_readiness.md) |
 | row_egen | Row calculations | 11 | PASS | [View](report_row_egen.md) |
 | s_select | Selection and expressions | 6 | PASS | [View](report_s_select.md) |
@@ -21,6 +28,7 @@ A passing demo is not a passing full package test suite.
 | tab1 | Separate frequency tables | 6 | PASS | [View](report_tab1.md) |
 | textbook | Textbook alignment contracts | 6 | PASS | [View](report_textbook.md) |
 | timer | Timing | 6 | PASS | [View](report_timer.md) |
+| weights | Frequency and analytic weights | 5 | PASS | [View](report_weights.md) |
 
 ## Regeneration
 

@@ -38,10 +38,10 @@ stopifnot(grepl("Missing `.value`", diagnostic, fixed = TRUE))
 
 cat("```\n\n## Example 8: Grouped quantile cuts return integer codes\n\n```\n")
 grouped <- tibble::tibble(g = rep(c("a", "b"), each = 4), x = c(1:4, 11:14))
-print(lapply(split(grouped$x, grouped$g), cut_quantile, n = 2))
+print(lapply(split(grouped$x, grouped$g), xtile, n = 2))
 binned <- grouped %>%
   dplyr::group_by(g) %>%
-  dplyr::mutate(bin = cut_quantile(x, n = 2))
+  dplyr::mutate(bin = xtile(x, n = 2))
 print(binned)
 stopifnot(identical(binned$bin, rep(c(1L, 1L, 2L, 2L), 2)))
 

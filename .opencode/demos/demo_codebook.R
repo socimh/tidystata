@@ -58,3 +58,20 @@ cat("**Output:**\n\n")
 cat("```\n")
 print(codebook(starwars, height > 0))
 cat("```\n\n")
+
+
+cat("## Example 7: Structured and custom type descriptions\n\n")
+cat("```r\n")
+cat("metadata_examples <- tibble::tibble(\n")
+cat("  wrapped = I(c(1L, 2L, NA_integer_)),\n")
+cat("  pieces = vctrs::list_of(1:2, 1:2, integer()),\n")
+cat("  custom = structure(c(1, 2, NA), class = 'interval')\n")
+cat(")\ncodebook(metadata_examples)\n")
+cat("```\n\n**Output:**\n\n```\n")
+metadata_examples <- tibble::tibble(
+  wrapped = I(c(1L, 2L, NA_integer_)),
+  pieces = vctrs::list_of(1:2, 1:2, integer()),
+  custom = structure(c(1, 2, NA), class = "interval")
+)
+print(codebook(metadata_examples))
+cat("```\n\n")

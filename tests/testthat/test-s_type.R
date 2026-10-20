@@ -385,3 +385,315 @@ test_that("s_type: ETL pipeline type checking", {
   expect_equal(clean_types$value, "double")
   expect_equal(clean_types$date, "date")
 })
+
+
+test_that("type expansion preserves custom names and structured descriptions", {
+  x <- structure(1:3, class = "statart_type_probe")
+  for (label in c(
+    "interval",
+    "price-usd",
+    "integerish",
+    "list<int>",
+    "ymd<day>"
+  )) {
+    testthat::local_mocked_bindings(
+      type_sum = function(x) label,
+      .package = "pillar"
+    )
+    expect_identical(s_type(x, .abbr = TRUE), label)
+    expect_identical(s_type(x), label)
+  }
+})
+
+test_that("missing custom type summaries fall back to the class", {
+  x <- structure(1:3, class = "statart_type_probe")
+  for (label in list(NA_character_, "", character(), c("a", "b"), 1L)) {
+    testthat::local_mocked_bindings(
+      type_sum = function(x) label,
+      .package = "pillar"
+    )
+    expect_identical(s_type(x), "statart_type_probe")
+    expect_identical(s_type(x, .abbr = TRUE), "statart_type_probe")
+  }
+})
+
+test_that("numeric-looking custom class names do not imply summability", {
+  labels <- c("interval", "integerish", "dbl_extra", "timestamp", "date_custom")
+  expect_false(any(statart:::is_summable_chr(labels)))
+  expect_true(all(statart:::is_summable_chr(c(
+    "int",
+    "dbl+lbl",
+    "int64",
+    "units [m]"
+  ))))
+})
+
+test_that("structured extension type labels retain their element information", {
+  expect_identical(s_type(I(1:3), .abbr = TRUE), "I<int>")
+  expect_identical(s_type(vctrs::list_of(1:2), .abbr = TRUE), "list<int>")
+})
+
+
+# Exact contracts cover storage types and class metadata independently of values.
+type_contract_cases <- list(
+  logical = list(c(TRUE, FALSE, NA), "lgl", "logical"),
+  integer = list(c(1L, 2L, NA_integer_), "int", "integer"),
+  double = list(c(1, Inf, NaN, NA_real_), "dbl", "double"),
+  complex = list(c(1 + 2i, NA_complex_), "cpl", "complex"),
+  character = list(c("1", "2024-01-01", NA_character_), "chr", "character"),
+  raw = list(as.raw(1:3), "raw", "raw"),
+  list = list(list(1L, NULL, NA, list(a = 1)), "list", "list"),
+  factor = list(factor(c("a", NA), levels = c("a", "unused")), "fct", "factor"),
+  ordered = list(ordered(c("a", NA), levels = c("a", "b")), "ord", "ordered"),
+  date = list(as.Date(c("2024-01-01", NA)), "date", "date"),
+  datetime = list(
+    as.POSIXct(c("2024-01-01", NA), tz = "UTC"),
+    "dttm",
+    "datetime"
+  ),
+  datetime_list = list(
+    as.POSIXlt(c("2024-01-01", NA), tz = "UTC"),
+    "dttm",
+    "datetime"
+  ),
+  duration = list(
+    as.difftime(c(1, NA), units = "hours"),
+    "drtn",
+    "duration",
+    "hours"
+  ),
+  labelled_integer = list(
+    haven::labelled(c(1L, NA_integer_), c(yes = 1L)),
+    "int+lbl",
+    "integer+label"
+  ),
+  labelled_double = list(
+    haven::labelled(c(1, haven::tagged_na("a")), c(yes = 1)),
+    "dbl+lbl",
+    "double+label"
+  ),
+  labelled_character = list(
+    haven::labelled(c("a", NA), c(yes = "a")),
+    "chr+lbl",
+    "character+label"
+  ),
+  spss = list(
+    haven::labelled_spss(c(1, 99, NA), na_values = 99),
+    "dbl+lbl",
+    "double+label"
+  )
+)
+for (case_name in names(type_contract_cases)) {
+  local({
+    case <- type_contract_cases[[case_name]]
+    states <- list(observed = case[[1]], empty = case[[1]][0L])
+    if (case_name != "raw") {
+      states$missing <- case[[1]][NA_integer_]
+    }
+    for (state in names(states)) {
+      test_that(paste("type contract", case_name, state), {
+        x <- states[[state]]
+        before <- serialize(x, NULL)
+        expect_identical(s_type(x, .abbr = TRUE), case[[2]])
+        expect_identical(s_type(x), case[[3]])
+        expect_identical(
+          s_unit(x),
+          if (length(case) == 4L) case[[4]] else NA_character_
+        )
+        expect_identical(serialize(x, NULL), before)
+      })
+    }
+  })
+}
+
+test_that("nonvector type contracts are exact and have no units", {
+  cases <- list(
+    list(NULL, "NULL", "NULL"),
+    list(as.name("x"), "sym", "symbol"),
+    list(quote(x + 1), "language", "language"),
+    list(expression(x, y), "expression", "expression"),
+    list(pairlist(x = 1), "pairlist", "pairlist"),
+    list(new.env(parent = emptyenv()), "env", "environment"),
+    list(sum, "fn", "function"),
+    list(quote, "fn", "function"),
+    list(function(x) x, "fn", "function")
+  )
+  for (case in cases) {
+    expect_identical(s_type(case[[1]], .abbr = TRUE), case[[2]])
+    expect_identical(s_type(case[[1]]), case[[3]])
+    expect_identical(s_unit(case[[1]]), NA_character_)
+  }
+})
+
+test_that("structured base types preserve established element and container names", {
+  for (x in list(
+    matrix(1:4, 2),
+    matrix(integer(), 0, 2),
+    array(1:8, c(2, 2, 2))
+  )) {
+    expect_identical(s_type(x, .abbr = TRUE), "int")
+    expect_identical(s_type(x), "integer")
+    expect_identical(as_numeric(x), as.numeric(x))
+  }
+  expect_identical(s_type(data.frame(x = integer())), "dataframe")
+  expect_identical(s_type(tibble::tibble(x = integer())), "tibble")
+  expect_identical(s_type(I(integer())), "I<int>")
+  expect_identical(s_type(vctrs::list_of(.ptype = integer())), "list<int>")
+})
+
+test_that("type detection propagates extension method errors", {
+  testthat::local_mocked_bindings(
+    type_sum = function(x) stop("extension failed"),
+    .package = "pillar"
+  )
+  expect_error(
+    s_type(structure(1, class = "statart_probe")),
+    "extension failed"
+  )
+})
+
+test_that("custom numeric-looking labels remain unsupported in summaries", {
+  x <- structure(1:3, class = "interval")
+  testthat::local_mocked_bindings(
+    type_sum = function(x) "interval",
+    .package = "pillar"
+  )
+  expect_identical(s_type(x), "interval")
+  expect_identical(as_numeric(x), rep(NA_real_, 3))
+  expect_warning(expect_error(summ(tibble::tibble(x = x)), "None"), "numeric")
+  expect_warning(
+    out <- summ(
+      tibble::tibble(x = x),
+      .keep_all = TRUE,
+      .stat = c("n", "unique", "mean")
+    ),
+    "non-numeric"
+  )
+  expect_identical(out$n, 3L)
+  expect_identical(out$unique, 3L)
+  expect_true(is.na(out$mean))
+})
+
+test_that("integer64 metadata survives empty and missing values", {
+  skip_if_not_installed("bit64")
+  for (x in list(
+    bit64::as.integer64(c("9007199254740993", NA)),
+    bit64::integer64(),
+    bit64::as.integer64(NA)
+  )) {
+    expect_identical(s_type(x, .abbr = TRUE), "int64")
+    expect_identical(s_type(x), "integer64")
+    expect_identical(s_unit(x), NA_character_)
+  }
+})
+
+test_that("hms metadata survives empty and missing values", {
+  skip_if_not_installed("hms")
+  for (x in list(
+    hms::hms(seconds = c(1, NA_real_)),
+    hms::hms(numeric()),
+    hms::hms(NA_real_)
+  )) {
+    expect_identical(s_type(x, .abbr = TRUE), "time")
+    expect_identical(s_type(x), "time")
+    expect_identical(s_unit(x), "secs")
+  }
+})
+
+test_that("unit metadata covers compound and dimensionless vectors in every state", {
+  skip_if_not_installed("units")
+  for (unit in c("m", "m/s", "1")) {
+    for (values in list(c(1, NA_real_), numeric(), NA_real_)) {
+      x <- units::set_units(values, unit, mode = "standard")
+      expect_identical(s_type(x), "units")
+      expect_identical(s_type(x, .abbr = TRUE), "units")
+      expect_identical(s_unit(x), unit)
+    }
+  }
+})
+
+test_that("geometry labels and table extension names remain class-specific", {
+  skip_if_not_installed("sf")
+  x <- sf::st_sfc(sf::st_point(c(1, 2)))
+  expect_identical(s_type(x), "POINT")
+  expect_identical(s_type(x[0]), "POINT")
+  expect_identical(s_unit(x), NA_character_)
+})
+
+
+test_that("classed matrices retain their scalar type and numeric conversion", {
+  vectors <- list(
+    factor(c("a", "b", "a", NA)),
+    as.Date("2024-01-01") + c(0, 1, 2, NA),
+    as.difftime(c(1, 2, 3, NA), units = "mins")
+  )
+  for (x in vectors) {
+    matrix_x <- x
+    dim(matrix_x) <- c(2L, 2L)
+    expect_identical(s_type(matrix_x), s_type(x))
+    expect_identical(s_type(matrix_x, .abbr = TRUE), s_type(x, .abbr = TRUE))
+    expect_identical(as_numeric(matrix_x), as.numeric(x))
+  }
+})
+
+test_that("vctrs record types and complete element identities remain intact", {
+  x <- vctrs::new_rcrd(
+    list(a = c(1, 1, NA), b = c("x", "x", NA)),
+    class = "statart_record"
+  )
+  label <- pillar::type_sum(x)
+  expect_identical(s_type(x), label)
+  expect_identical(s_type(x[0]), label)
+  expect_identical(s_unit(x), NA_character_)
+  out <- codebook(tibble::tibble(x = x))
+  expect_identical(out$type, label)
+  expect_identical(out$n, 2L)
+  expect_identical(out$unique, 1L)
+})
+
+test_that("S4 metadata uses pillar descriptions without interpreting class substrings", {
+  x <- methods::getClass("numeric")
+  expect_identical(s_type(x), pillar::type_sum(x))
+  expect_identical(s_type(x, .abbr = TRUE), pillar::type_sum(x))
+  expect_identical(s_unit(x), NA_character_)
+})
+
+test_that("data.table metadata retains its container name", {
+  skip_if_not_installed("data.table")
+  x <- data.table::data.table(x = integer())
+  expect_identical(s_type(x), "dt")
+  expect_identical(s_type(x, .abbr = TRUE), "dt")
+})
+
+
+test_that("missing extension abbreviations do not defeat the class fallback", {
+  x <- structure(1:3, class = "statart_type_probe")
+  testthat::local_mocked_bindings(
+    type_sum = function(x) NA_character_,
+    .package = "pillar"
+  )
+  testthat::local_mocked_bindings(
+    vec_ptype_abbr = function(x) NA_character_,
+    .package = "vctrs"
+  )
+  expect_identical(s_type(x), "statart_type_probe")
+})
+
+
+test_that("custom unit-bearing classes retain their units method", {
+  registry <- get(".__S3MethodsTable__.", envir = asNamespace("base"))
+  registerS3method(
+    "units",
+    "statart_clock_probe",
+    function(x) attr(x, "clock_units"),
+    envir = asNamespace("base")
+  )
+  withr::defer(rm("units.statart_clock_probe", envir = registry))
+  testthat::local_mocked_bindings(
+    type_sum = function(x) "time",
+    .package = "pillar"
+  )
+  x <- structure(c(1, NA), class = "statart_clock_probe", clock_units = "hours")
+  expect_identical(s_type(x), "time")
+  expect_identical(s_unit(x), "hours")
+})

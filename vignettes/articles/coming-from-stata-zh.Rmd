@@ -1,0 +1,119 @@
+---
+title: "从 Stata 到 R"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(statart)
+
+entries <- statart:::findit_entries()
+
+# Pandoc reads markdown inside HTML blocks, so encode ASCII punctuation as
+# entities to keep code such as `x*` and quotes exactly as written. Non-ASCII
+# text is encoded too: pkgdown may render in a non-UTF-8 locale, where cat()
+# would print Chinese as <U+xxxx> escapes.
+escape_html <- function(x) {
+  vapply(
+    x,
+    function(text) {
+      codes <- utf8ToInt(text)
+      punct <- codes %in% c(33:47, 58:64, 91:96, 123:126) | codes > 127
+      chars <- vapply(codes, intToUtf8, character(1))
+      chars[punct] <- paste0("&#", codes[punct], ";")
+      paste(chars, collapse = "")
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
+}
+
+section_tables <- function(section, task, detail, headers) {
+  for (name in unique(entries[[section]])) {
+    rows <- entries[entries[[section]] == name, ]
+    notes <- ifelse(
+      nzchar(rows[[detail]]),
+      paste0(escape_html(rows[[task]]), "<br><small>", escape_html(rows[[detail]]), "</small>"),
+      escape_html(rows[[task]])
+    )
+    table <- data.frame(
+      paste0("<code>", escape_html(rows$stata), "</code>"),
+      paste0("<code>", escape_html(rows$r), "</code>"),
+      notes
+    )
+    names(table) <- escape_html(headers)
+    cat("\n\n## ", escape_html(name), "\n\n", sep = "")
+    cat(
+      knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
+      sep = "\n"
+    )
+  }
+}
+```
+
+[English version](coming-from-stata.html)
+
+熟悉 Stata 的用户已经知道自己想做什么，需要的只是知道在 R 中怎么写。本页把 Stata
+命令和完成同样任务的 R 代码并列：statart 中有 Stata 风格函数的，使用 statart；其他情况使用常用的
+R 包。
+
+## 在 R 中直接查询
+
+`findit()` 在 R 中查询同一份列表。单个 Stata 命令可以不加引号，更长的内容需要加引号；支持
+Stata 的标准缩写。控制台输出为英文。
+
+```{r}
+findit(reg)
+findit("merge 1:1 id, keep(match)")
+```
+
+不带参数的 `findit()` 返回完整列表；输入 `??stata` 可以再次找到它的帮助文档。
+
+## statart 以外的功能
+
+statart 覆盖日常的数据探索、制表、描述统计、数据准备和检查。其他任务通常使用以下 R 包：
+
+- **回归和固定效应**（`regress`、`reghdfe`、`xtreg`、`ivregress`）：`lm()`、`glm()`
+  或 `fixest::feols()`。
+- **回归结果表**（`esttab`、`outreg2`）：`modelsummary::modelsummary()`。
+- **边际效应**（`margins`）：marginaleffects。
+- **长宽数据转换**（`reshape`）：`tidyr::pivot_longer()` 和 `pivot_wider()`。
+- **缩尾**（`winsor2`）：`datawizard::winsorize()`。
+- **面板和日历时期**（`tsset`、`xtset`、`L.`、`mofd()`）：tsibble 和 lubridate。
+- **调查数据**（`svyset`、`svy:`）：srvyr 和 survey。
+- **作图**（`twoway`、`histogram`）：ggplot2；`binscatter` 可用 binsreg 或
+  `statar::stat_binmean()`。
+
+statart 和 [statar](https://github.com/matthieugomez/statar) 可以同时加载，只有 `tab()` 和
+`xtile()` 重名。请最后加载 statart，或写成 `statart::tab()`。
+
+一些 RStudio 操作可以代替 Stata 的界面：Ctrl+Enter（Mac 上为 Cmd+Return）运行当前行或选中的代码，Tab
+键补全名称，Environment 和 Files 窗口相当于 Stata 的 Variables 窗口和 `dir`。
+
+下表中，`data` 是你的数据，`data1` 和 `data2` 是合并时的主数据和被合并数据，`fit`
+是已估计的模型。大部分条目使用 dplyr，请先用 `library(dplyr)` 或 `library(tidyverse)` 加载。
+
+```{r, echo = FALSE, results = "asis"}
+# "\u8bf4\u660e" is the Chinese column header; the escape survives a non-UTF-8
+# locale, which a literal in R code would not.
+section_tables("section_zh", "task_zh", "detail_zh", c("Stata", "R", "\u8bf4\u660e"))
+```
+
+## 本指南中的 R 函数
+
+Stata 用户可能用到的 R 函数，包括上文用到的所有函数，及其所属的包、相关的 Stata 命令和用途。输入 `findit(函数名)`，例如 `findit(left_join)`，可以查看它对应的
+Stata 命令。
+
+```{r, echo = FALSE, results = "asis"}
+functions <- statart:::findit_functions()
+table <- data.frame(
+  paste0("<code>", escape_html(functions$`function`), "()</code>"),
+  escape_html(functions$package),
+  escape_html(functions$stata),
+  escape_html(functions[["description_zh"]])
+)
+names(table) <- escape_html(c("\u51fd\u6570", "\u5305", "\u76f8\u5173 Stata \u547d\u4ee4", "\u8bf4\u660e"))
+cat(
+  knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
+  sep = "\n"
+)
+```

@@ -89,7 +89,7 @@ test_that("own table results and list children preserve preview settings", {
       tab1(input, tidyselect::starts_with("absent"), .type = "tibble"),
       fre1(input, tidyselect::starts_with("absent"), .type = "tibble"),
       fre(wrapped, g, .type = "tibble"),
-      fre2(wrapped, g, x, .type = "tibble"),
+      xtab(wrapped, g, x, .type = "tibble", .total = TRUE),
       tab1(wrapped, g, .type = "tibble"),
       fre1(wrapped, g, .type = "tibble")
     )) {

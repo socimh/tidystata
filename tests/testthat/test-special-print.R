@@ -533,3 +533,31 @@ test_that("preview printing preserves duplicate and empty column names", {
     }
   }
 })
+
+test_that("print_all() prints every row and column and returns the input", {
+  data <- tibble::tibble(id = 1:40, value = (1:40)^2)
+  printed <- capture.output(out <- print_all(data))
+  expect_identical(out, data)
+  expect_true(any(grepl("^ *40 +40 +1600", printed)))
+  expect_false(any(grepl("more rows", printed)))
+  capture.output(expect_invisible(print_all(data)))
+
+  wide <- as.data.frame(matrix(1:60, 2))
+  printed <- withr::with_options(
+    list(width = 60),
+    capture.output(print_all(wide))
+  )
+  expect_true(any(grepl("V30", printed)))
+  expect_false(any(grepl("more variable", printed)))
+
+  table <- data.table::as.data.table(data)
+  printed <- capture.output(out <- print_all(table))
+  expect_identical(out, table)
+  expect_true(any(grepl("1600", printed)))
+  grouped <- dplyr::group_by(data, id > 20)
+  expect_identical(
+    suppressMessages(capture.output(r <- print_all(grouped)) |> length() > 40),
+    TRUE
+  )
+  expect_identical(r, grouped)
+})

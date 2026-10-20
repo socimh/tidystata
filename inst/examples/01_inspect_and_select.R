@@ -27,9 +27,9 @@ variables_search(survey, "absent") # An empty table is expected.
 # Names as a character vector or as a one-column table.
 ds(survey)
 ds(survey, age:income)
-ds(survey, s_match("score?"))
+ds(survey, varlist("score?"))
 ds_as_column(survey, starts_with("score"))
-names_as_column(survey, age, income)
+ds_as_column(survey, age, income)
 
 # Select, rename, or calculate columns.
 s_select(survey, id, age, income)

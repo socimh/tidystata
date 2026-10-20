@@ -1,13 +1,13 @@
 # Function: cut()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:42 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:21 | **Status:** PASS
 
 ## Example 1: Quartiles
 
 ```r
 x <- 1:100
-cut_quantile(x, n = 4)
-table(cut_quantile(x, n = 4))
+xtile(x, n = 4)
+table(xtile(x, n = 4))
 ```
 
 **Output:**
@@ -22,16 +22,16 @@ table(cut_quantile(x, n = 4))
 
 ```r
 x <- rnorm(1000)
-table(cut_quantile(x, n = 10))
+table(xtile(x, n = 10))
 ```
 
 **Output:**
 
 ```
 
-  [-3.18,-1.23]  (-1.23,-0.807] (-0.807,-0.481] (-0.481,-0.226]  (-0.226,0.033]
+  [-3.05,-1.28]  (-1.28,-0.888] (-0.888,-0.584] (-0.584,-0.255] (-0.255,0.0269]
             100             100             100             100             100
-  (0.033,0.337]   (0.337,0.604]   (0.604,0.927]    (0.927,1.41]     (1.41,3.01]
+ (0.0269,0.304]   (0.304,0.541]   (0.541,0.819]    (0.819,1.21]     (1.21,3.78]
             100             100             100             100             100
 ```
 
@@ -39,7 +39,7 @@ table(cut_quantile(x, n = 10))
 
 ```r
 x <- c(rep(1, 40), rep(2, 60))
-table(cut_quantile(x, n = 2))
+table(xtile(x, n = 2))
 ```
 
 **Output:**
@@ -55,7 +55,7 @@ Warning: Tied values collapsed quantile cutpoints to 1 groups (requested 2).
 
 ```r
 x <- c(1:98, NA, NA)
-table(cut_quantile(x, n = 4), useNA = 'ifany')
+table(xtile(x, n = 4), useNA = 'ifany')
 ```
 
 **Output:**
@@ -70,7 +70,7 @@ table(cut_quantile(x, n = 4), useNA = 'ifany')
 
 ```r
 x <- 1:12
-cut_quantile(x, n = 3, labels = c('low', 'mid', 'high'))
+xtile(x, n = 3, labels = c('low', 'mid', 'high'))
 ```
 
 **Output:**

@@ -8,26 +8,43 @@ articles:
   contents:
   - getting-started
   - containers-and-missing-values
+  - articles/coming-from-stata
+  - articles/coming-from-stata-zh
   - articles/migration
 
 reference:
+- title: "Coming from Stata"
+  contents:
+  - findit
 - title: "Explore Data"
   contents:
   - browse
   - names
   - variables
   - codebook
+  - keys
+  - is_first
+  - assert
+  - s_merge
   - summ
   - special-print
   - matches("^(tab|fre)")
+  - xtab
+  - pwcorr
+  - misstable
   - matches("^row_")
 - title: "Type Conversion"
   contents:
   - na_conversion
   - type_conversion
+  - std
+  - as_dummy
+  - panel
 - title: "Small Tools"
   contents:
   - cut
+  - varlist
+  - capture
   - starts_with("s_")
   - set_seed
   - timer

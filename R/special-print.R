@@ -6,7 +6,8 @@
 #' evenly spaced rows. `unpreview_table()` removes the preference.
 #'
 #' `print_headtail()` and `print_interval()` print once and invisibly return
-#' the unchanged input. `slice_headtail()` and `slice_interval()` actually
+#' the unchanged input. `print_all()` prints every row and every column, like
+#' Stata's `list`, and also returns the input invisibly. `slice_headtail()` and `slice_interval()` actually
 #' select rows, so use them only when a smaller data set is wanted.
 #'
 #' @param .data An in-memory data frame, data.table, ordinary tibble, grouped
@@ -63,6 +64,7 @@
 #' unpreview_table(x)
 #' print_headtail(mtcars, n = 6)
 #' print_interval(mtcars, n = 6)
+#' print_all(head(mtcars, 12))
 #' slice_headtail(mtcars, n = 6)
 #' slice_interval(mtcars, n = 6)
 #' @name special-print
@@ -318,6 +320,13 @@ print_headtail <- function(
     max_extra_cols = max_extra_cols,
     max_footer_lines = max_footer_lines
   )
+  invisible(.data)
+}
+
+#' @rdname special-print
+#' @export
+print_all <- function(.data, ...) {
+  print(preview_table(.data, "headtail", Inf), width = Inf, ...)
   invisible(.data)
 }
 

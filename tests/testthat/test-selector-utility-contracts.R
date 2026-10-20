@@ -76,14 +76,14 @@ test_that("s_select reports both failed branches without replaying their warning
   expect_match(conditionMessage(err), "branch failure", fixed = TRUE)
 })
 
-test_that("s_match returns positions with explicit variables and keeps matching boundaries", {
+test_that("varlist returns positions with explicit variables and keeps matching boundaries", {
   vars <- c("x1", "x2", "x10", "prefix_x1", "X1", "xa", "xb")
-  expect_identical(s_match("x[1-2]", vars = vars), c(1L, 2L, 5L))
-  expect_identical(s_match("x1", ignore.case = FALSE, vars = vars), 1L)
-  expect_identical(s_match("x[a-b]", vars = vars), c(6L, 7L))
-  expect_identical(s_match("absent*", vars = vars), integer())
-  expect_error(s_match("x[2-1]", vars = vars), "smaller number")
-  expect_error(s_match("x[1-2][3-4]", vars = vars), "Only one range")
+  expect_identical(varlist("x[1-2]", vars = vars), c(1L, 2L, 5L))
+  expect_identical(varlist("x1", ignore.case = FALSE, vars = vars), 1L)
+  expect_identical(varlist("x[a-b]", vars = vars), c(6L, 7L))
+  expect_identical(varlist("absent*", vars = vars), integer())
+  expect_error(varlist("x[2-1]", vars = vars), "smaller number")
+  expect_error(varlist("x[1-2][3-4]", vars = vars), "Only one range")
 })
 
 test_that("s_type and s_unit preserve labelled and duration metadata", {
@@ -217,12 +217,12 @@ test_that("set_seed preserves result attributes and invisible expressions", {
   })
 })
 
-test_that("s_try evaluates once and preserves warnings and messages", {
+test_that("capture evaluates once and preserves warnings and messages", {
   calls <- 0L
   warnings <- character()
   messages <- character()
   out <- withCallingHandlers(
-    s_try({
+    capture({
       calls <- calls + 1L
       warning("kept warning")
       message("kept message")
@@ -243,12 +243,12 @@ test_that("s_try evaluates once and preserves warnings and messages", {
   expect_identical(messages, "kept message\n")
 })
 
-test_that("s_try preserves the existing try-error classification and visible result", {
+test_that("capture preserves the existing try-error classification and visible result", {
   value <- structure("already failed", class = "try-error")
-  expect_false(s_try(value))
-  expect_false(s_try(stop("new failure")))
+  expect_false(capture(value))
+  expect_false(capture(stop("new failure")))
   expect_identical(
-    withVisible(s_try(invisible(NULL))),
+    withVisible(capture(invisible(NULL))),
     list(value = TRUE, visible = TRUE)
   )
 })

@@ -24,7 +24,7 @@ Enhanced select() with data-masking
 Each argument is classified before evaluation. Column names, strings,
 numeric positions, selection syntax (\code{c()}, \code{:}, \code{!}, \code{&}, \code{|}, unary \code{-})
 and tidyselect helpers such as \code{starts_with()}, \code{where()}, \code{all_of()} or
-\code{\link[=s_match]{s_match()}} select existing columns, as do calls that use no column names
+\code{\link[=varlist]{varlist()}} select existing columns, as do calls that use no column names
 (for example \code{all_of(vars)} or \code{seq_len(2)}). Any other expression that
 uses columns, such as \code{height > 50} or \code{bmi = mass / height^2}, is computed
 with \code{\link[dplyr:mutate]{dplyr::mutate()}} and then selected, so arithmetic on columns is never

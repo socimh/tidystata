@@ -17,7 +17,9 @@ summ(
   .mode = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
-  .drop_empty = FALSE
+  .drop_empty = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 )
 
 tabstat(
@@ -32,7 +34,9 @@ tabstat(
   .mode = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
-  .drop_empty = FALSE
+  .drop_empty = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 )
 }
 \arguments{
@@ -104,6 +108,18 @@ the selected variable order. If \code{FALSE}, groups follow first appearance.}
 \item{.drop_empty}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, remove individual
 summary rows with no observed measured values (\code{n == 0}), even when \code{n} is
 not requested. This is independent of \code{.na.rm}. Default is \code{FALSE}.}
+
+\item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector with
+one value per row), like Stata's \code{summarize [fweight/aweight]}. Rows with a
+missing weight are excluded with a message; negative weights are an error.
+When \code{...} is omitted, the weight column is not summarised itself.}
+
+\item{.wt_type}{\code{"frequency"} (default) or \code{"analytic"}. With frequency
+weights, \code{n} is the sum of the weights (non-integer weights are allowed).
+Analytic weights (Stata's \verb{[aweight]}, suitable for sampling weights) are
+rescaled within each group and variable to sum to the number of observed
+values, so \code{n} is the number of observations. Means and percentiles are the
+same under both types; \code{sd}, \code{se} and \code{sum} differ.}
 }
 \value{
 A table, or a list of tables in list mode when multiple
@@ -154,6 +170,16 @@ divided by the sample SD to the fourth power, minus three (excess kurtosis).
 These conventions are not promised to match Stata. For singleton or constant
 inputs, undefined spread or moment statistics may be \code{NA} or \code{NaN}.
 
+Weighted statistics:
+
+With \code{.wt}, the mean is \code{sum(w * x) / W} and the variance is
+\code{sum(w * (x - mean)^2) / (W - 1)}, where \code{W} is the summed weight (after
+rescaling for analytic weights); \code{se} is \code{sd / sqrt(W)}, and \code{sum} is
+\code{sum(w * x)}. Percentiles, \code{median}, \code{q1}, \code{q3}, \code{iqr} and \code{mad} use Stata's
+weighted percentile rule, so they can differ from the unweighted type-7
+quantiles even when all weights are 1. \code{min} and \code{max} ignore rows with zero
+weight. \code{unique}, \code{miss_n} and \code{valid_pct} remain unweighted row counts.
+
 Calendar output and grouping names:
 
 Date locations are displayed as \code{YYYY-MM-DD}; fractional days are not shown.
@@ -176,6 +202,11 @@ a message. The input data are not modified.
 summ(lifeexp)
 summ(lifeexp, .by = region)
 tabstat(lifeexp, .by = region)
+
+# Weighted summaries, like Stata's summarize [aweight = w]
+survey <- tibble::tibble(income = c(10, 20, 40), w = c(3, 1, 1))
+summ(survey, income, .wt = w, .stat = c("n", "mean", "sd", "p50"))
+summ(survey, income, .wt = w, .wt_type = "analytic", .stat = c("n", "sd"))
 
 lifeexp \%>\%
   summ(

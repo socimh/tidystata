@@ -370,3 +370,10 @@ test_that("type conversion: financial data parsing", {
   expect_type(result$amount_num, "double")
   expect_identical(result$amount_num, c(1234.56, 500, 2000, 750.5))
 })
+
+
+test_that("custom type names containing lbl do not confer haven semantics", {
+  x <- structure(c(1, 2), class = "lbl_currency", labels = c(one = 1))
+  expect_identical(as_numeric(x), c(NA_real_, NA_real_))
+  expect_identical(as_character(x), c("1", "2"))
+})

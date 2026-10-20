@@ -1,8 +1,8 @@
 # Actual outputs for repaired historical problems and supported alternatives.
 cat("## Example 1: Blank cross-tab categories remain distinct\n\n```\n")
 d <- tibble::tibble(x = c("a", "a", "b"), y = c("", "<empty>", "z"))
-print(tab2(d, x, y))
-stopifnot(sum(as.matrix(tab2(d, x, y)[-1])) == 3)
+print(xtab(d, x, y))
+stopifnot(sum(as.matrix(xtab(d, x, y)[-1])) == 3)
 cat("```\n\n## Example 2: Different ordered factors combine\n\n```\n")
 factors <- tibble::tibble(
   a = ordered(c("a", "b")),
@@ -28,7 +28,7 @@ print(tabstat(survey, x, .stat = c("mean", "p2.5", "p97.5")))
 print(tab(survey, x, .by = g, .group_order = "frequency", .desc = TRUE))
 cat("```\n\n## Example 5: Balanced bins explicitly permit split ties\n\n```\n")
 tied <- c(rep(0, 9), 1)
-rank_bins <- cut_quantile(tied, n = 5, labels = FALSE, method = "rank")
+rank_bins <- xtile(tied, n = 5, labels = FALSE, method = "rank")
 print(data.frame(value = tied, bin = rank_bins))
 print(table(rank_bins))
 stopifnot(identical(as.integer(table(rank_bins)), rep(2L, 5)))
@@ -64,8 +64,8 @@ cat(
   "```\n\n## Example 10: Logical axes have consistent category order\n\n```\n"
 )
 flags <- tibble::tibble(a = c(FALSE, TRUE, NA), b = c(TRUE, FALSE, NA))
-print(tab2(flags, a, b))
-stopifnot(identical(names(tab2(flags, a, b))[-1], c("FALSE", "TRUE", "NA")))
+print(xtab(flags, a, b))
+stopifnot(identical(names(xtab(flags, a, b))[-1], c("FALSE", "TRUE", "NA")))
 cat(
   "```\n\n## Example 11: Missing replacement arguments explain the call\n\n```\n"
 )
@@ -97,6 +97,6 @@ stopifnot(identical(
 ))
 cat("```\n\n## Example 14: Quantile cuts keep a dummy in two groups\n\n```\n")
 dummy <- rep(0:1, c(7, 3))
-print(table(cut_quantile(dummy, 2)))
-stopifnot(identical(nlevels(cut_quantile(dummy, 2)), 2L))
+print(table(xtile(dummy, 2)))
+stopifnot(identical(nlevels(xtile(dummy, 2)), 2L))
 cat("```\n")

@@ -5,6 +5,7 @@
 \alias{preview_table}
 \alias{unpreview_table}
 \alias{print_headtail}
+\alias{print_all}
 \alias{print_interval}
 \alias{slice_headtail}
 \alias{slice_interval}
@@ -22,6 +23,8 @@ print_headtail(
   max_extra_cols = NULL,
   max_footer_lines = NULL
 )
+
+print_all(.data, ...)
 
 print_interval(
   .data,
@@ -71,7 +74,8 @@ The default shows the first five and last five rows. Interval previews show
 evenly spaced rows. \code{unpreview_table()} removes the preference.
 
 \code{print_headtail()} and \code{print_interval()} print once and invisibly return
-the unchanged input. \code{slice_headtail()} and \code{slice_interval()} actually
+the unchanged input. \code{print_all()} prints every row and every column, like
+Stata's \code{list}, and also returns the input invisibly. \code{slice_headtail()} and \code{slice_interval()} actually
 select rows, so use them only when a smaller data set is wanted.
 }
 \details{
@@ -107,6 +111,7 @@ print(x, n = Inf)
 unpreview_table(x)
 print_headtail(mtcars, n = 6)
 print_interval(mtcars, n = 6)
+print_all(head(mtcars, 12))
 slice_headtail(mtcars, n = 6)
 slice_interval(mtcars, n = 6)
 }

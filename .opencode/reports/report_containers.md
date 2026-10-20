@@ -1,6 +1,6 @@
 # Function: containers()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:42 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:21 | **Status:** PASS
 
 ## Example: container preservation and downstream operations
 
@@ -16,7 +16,7 @@ data.frame fre2 data.frame PASS
 data.frame summ data.frame PASS
 data.frame tabstat data.frame PASS
 data.frame codebook data.frame PASS
-data.frame names_as_column data.frame PASS
+data.frame ds_as_column data.frame PASS
 data.frame ds_as_column data.frame PASS
 data.frame variables data.frame PASS
 data.frame variables_search data.frame PASS
@@ -32,7 +32,7 @@ tibble fre2 tbl_df/tbl/data.frame PASS
 tibble summ tbl_df/tbl/data.frame PASS
 tibble tabstat tbl_df/tbl/data.frame PASS
 tibble codebook tbl_df/tbl/data.frame PASS
-tibble names_as_column tbl_df/tbl/data.frame PASS
+tibble ds_as_column tbl_df/tbl/data.frame PASS
 tibble ds_as_column tbl_df/tbl/data.frame PASS
 tibble variables tbl_df/tbl/data.frame PASS
 tibble variables_search tbl_df/tbl/data.frame PASS
@@ -48,7 +48,7 @@ data.table fre2 data.table/data.frame PASS
 data.table summ data.table/data.frame PASS
 data.table tabstat data.table/data.frame PASS
 data.table codebook data.table/data.frame PASS
-data.table names_as_column data.table/data.frame PASS
+data.table ds_as_column data.table/data.frame PASS
 data.table ds_as_column data.table/data.frame PASS
 data.table variables data.table/data.frame PASS
 data.table variables_search data.table/data.frame PASS

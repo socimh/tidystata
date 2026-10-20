@@ -82,18 +82,20 @@ codebook <- function(.data, ...) {
     ))
   }
 
-  out <- purrr::imap(.data, function(value, name) {
-    dplyr::bind_cols(tibble::tibble(variable = name), codebook_var(value))
-  }) %>%
-    purrr::list_rbind() %>%
-    dplyr::mutate(
-      type = dplyr::if_else(
-        !is.na(unit),
-        paste0(type, " [", unit, "]"),
-        type
-      )
-    ) %>%
-    dplyr::select(-unit)
+  # Collect scalar metadata first, then construct the result once.
+  rows <- lapply(.data, codebook_var)
+  column <- function(name) unlist(lapply(rows, `[[`, name), use.names = FALSE)
+  type <- column("type")
+  unit <- column("unit")
+  measured <- !is.na(unit)
+  type[measured] <- paste0(type[measured], " [", unit[measured], "]")
+  variables <- names(.data)
+  out <- tibble::tibble(
+    variable = variables,
+    type = type,
+    n = column("n"),
+    unique = column("unique")
+  )
 
   labels <- variable_labels(.data)
   if (any(!is.na(labels))) {
@@ -111,10 +113,10 @@ codebook_var <- function(var) {
     rowSums(is.na(var)) == 0L
   }
   values <- vctrs::vec_slice(var, observed)
-  tibble::tibble(
+  list(
     type = s_type(var),
     unit = s_unit(var),
     n = sum(observed),
-    unique = dplyr::n_distinct(values)
+    unique = vctrs::vec_unique_count(values)
   )
 }

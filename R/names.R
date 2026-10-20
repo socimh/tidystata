@@ -8,9 +8,9 @@
 #' select or rename. Omit to include all columns. Computed columns are not
 #' created by this argument.
 #'
-#' @return `ds()` returns a character vector. `ds_as_column()` and
-#' `names_as_column()` are equivalent and return a table with one character
-#' column, `name`. On ungrouped data, an empty selection returns a zero-length
+#' @return `ds()` returns a character vector. `ds_as_column()` returns a table
+#' with one character column, `name` (`names_as_column()` is a deprecated
+#' alias). On ungrouped data, an empty selection returns a zero-length
 #' vector or a zero-row table, respectively. Tables preserve the input's
 #' data.frame, tibble, or data.table container and supported preview settings,
 #' but do not recreate grouping or arbitrary subclasses on the new rows.
@@ -31,7 +31,7 @@
 #' ds(starwars) # equivalent to names(starwars)
 #' ds(starwars, homeworld:starships)
 #' ds_as_column(starwars, ends_with("color"))
-#' names_as_column(starwars, where(is.character))
+#' ds_as_column(starwars, where(is.character))
 #'
 #' # Save a programmatic selection for later stages of a pipeline.
 #' numeric_names <- ds(lifeexp, where(is.numeric))
@@ -68,12 +68,6 @@ ds <- function(.data, ...) {
 #' @rdname names
 #' @export
 ds_as_column <- function(.data, ...) {
-  names_as_column(.data, ...)
-}
-
-#' @rdname names
-#' @export
-names_as_column <- function(.data, ...) {
   out <- tibble::as_tibble_col(ds(table_working_data(.data), ...), "name")
   table_restore(out, .data)
 }

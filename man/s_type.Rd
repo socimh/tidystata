@@ -24,6 +24,25 @@ or duration vectors, including empty or all-missing measured vectors, and
 \description{
 Know the type of an object.
 }
+\details{
+Types describe storage and class metadata, not the observed values: empty and
+all-missing vectors retain their type. Known scalar abbreviations are expanded
+exactly, including \code{int64} to \code{integer64}. Haven-labelled vectors append
+\code{+lbl} in abbreviation mode and \code{+label} otherwise.
+
+Plain matrices and arrays retain their element-type description, and data
+frames retain their container name without dimensions. Other classed objects
+use their pillar type description, preserving punctuation and structured
+labels such as \verb{I<int>} and \verb{list<int>} in both modes. An empty or missing
+custom description falls back to the first class name; errors in custom
+methods are propagated. Custom labels that merely start with a numeric
+abbreviation do not make a class suitable for numeric summaries. Haven-label
+conversion requires an actual haven-labelled class.
+
+\code{s_unit()} reads actual units/difftime metadata (including hms times), and
+retains custom unit methods for classes describing themselves as \code{units},
+\code{drtn} or \code{time}. Other objects return \code{NA_character_}.
+}
 \examples{
 s_type(1:10)
 s_type(letters)

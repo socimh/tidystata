@@ -12,12 +12,12 @@ for (n in list(0, -1, 1.5, NA_real_, Inf, c(2, 3))) {
 }
 cat("```\n\n## Example 3: Pattern diagnostics\n\n```\n")
 diagnostic <- tryCatch(
-  s_match(12, vars = c("x1", "x2")),
+  varlist(12, vars = c("x1", "x2")),
   error = conditionMessage
 )
 stopifnot(grepl("character string", diagnostic))
 cat(diagnostic, "\n")
-print(s_match("x*", vars = c("x1", "x2", "y")))
+print(varlist("x*", vars = c("x1", "x2", "y")))
 cat("```\n\n## Example 4: Container and row-name contracts\n\n```\n")
 base <- data.frame(x = 1:8)
 print(class(tab(base, x)))
@@ -31,9 +31,9 @@ cat(
   "\n## Example 5: Combined numeric-range patterns select every match\n\n```\n"
 )
 available <- c("x1", "x2", "y", "prefix_x1", "x2_suffix")
-print(available[s_match("x[1-2] y", vars = available)])
-print(available[s_match("y x[1-2]", vars = available)])
-stopifnot(identical(s_match("x[1-2] y", vars = available), 1:3))
+print(available[varlist("x[1-2] y", vars = available)])
+print(available[varlist("y x[1-2]", vars = available)])
+stopifnot(identical(varlist("x[1-2] y", vars = available), 1:3))
 cat("```\n\n## Example 6: Scalar breaks specify one interior cutpoint\n\n```\n")
 cutpoint <- cut_breaks(1:8, breaks = 4, labels = FALSE)
 print(cutpoint)

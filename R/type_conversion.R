@@ -34,8 +34,7 @@
 #' @export
 #' @rdname type_conversion
 as_character <- function(.x) {
-  type <- s_type(.x, .abbr = TRUE)
-  if (stringr::str_detect(type, "lbl") && length(attr(.x, "labels")) > 0L) {
+  if (inherits(.x, "haven_labelled") && length(attr(.x, "labels")) > 0L) {
     as.character(haven::as_factor(.x))
   } else {
     as.character(.x)
@@ -52,7 +51,7 @@ as_numeric <- function(.x) {
   type <- s_type(.x, .abbr = TRUE)
   if (type %in% c("units", "drtn", "time", "dttm", "fct", "ord")) {
     as.numeric(.x)
-  } else if (stringr::str_detect(type, "lbl")) {
+  } else if (inherits(.x, "haven_labelled")) {
     as.numeric(unclass(.x))
   } else if (is.character(.x)) {
     is_nan <- !is.na(.x) & trimws(.x) == "NaN"

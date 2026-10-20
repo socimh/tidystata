@@ -171,19 +171,19 @@ test_that("binning contracts: quantile codes use type-7 boundaries", {
   x <- c(10, 0, 4, 1, 7, NA, 2, 9)
   breaks <- stats::quantile(x, c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE, type = 7)
   expected <- cut(x, breaks, include.lowest = TRUE, ordered_result = TRUE)
-  expect_identical(cut_quantile(x), expected)
-  expect_identical(cut_quantile(x, labels = FALSE), as.integer(expected))
+  expect_identical(xtile(x), expected)
+  expect_identical(xtile(x, labels = FALSE), as.integer(expected))
 })
 
 test_that("binning contracts: collapsed quantile boundaries preserve all ties", {
   x <- c(rep(1, 4), rep(2, 4), NA)
   expect_warning(
-    out <- cut_quantile(x, n = 4, labels = FALSE),
+    out <- xtile(x, n = 4, labels = FALSE),
     "collapsed quantile cutpoints to 2 groups"
   )
   expect_identical(out, c(rep(1L, 4), rep(2L, 4), NA_integer_))
   expect_warning(
-    labelled <- cut_quantile(x, n = 4, labels = c("Low", "High")),
+    labelled <- xtile(x, n = 4, labels = c("Low", "High")),
     "collapsed quantile cutpoints to 2 groups"
   )
   expect_identical(levels(labelled), c("Low", "High"))
@@ -193,8 +193,8 @@ test_that("binning contracts: quantile permutation preserves value assignments",
   x <- c(0, 1, 1, 2, 3, 5, 8, 13, NA)
   order <- c(9, 4, 7, 1, 3, 6, 2, 8, 5)
   expect_identical(
-    cut_quantile(x[order], labels = FALSE),
-    cut_quantile(x, labels = FALSE)[order]
+    xtile(x[order], labels = FALSE),
+    xtile(x, labels = FALSE)[order]
   )
 })
 
@@ -243,7 +243,7 @@ test_that("binning contracts: defaults and custom labels preserve ordering", {
 test_that("binning contracts: binning does not mutate source values or labels", {
   x <- structure(c(0, 2, 4, 6, NA), label = "Income")
   before <- serialize(x, NULL)
-  cut_quantile(x, n = 2)
+  xtile(x, n = 2)
   cut_length(x, n = 2)
   cut_breaks(x, breaks = 3)
   expect_identical(serialize(x, NULL), before)

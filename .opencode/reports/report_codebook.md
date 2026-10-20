@@ -1,6 +1,6 @@
 # Function: codebook()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 01:02:41 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:20 | **Status:** PASS
 
 ## Example 1: Basic codebook
 
@@ -115,5 +115,27 @@ codebook(starwars, height > 0)
   variable   type        n unique
   <chr>      <chr>   <int>  <int>
 1 height > 0 logical    81      1
+```
+
+## Example 7: Structured and custom type descriptions
+
+```r
+metadata_examples <- tibble::tibble(
+  wrapped = I(c(1L, 2L, NA_integer_)),
+  pieces = vctrs::list_of(1:2, 1:2, integer()),
+  custom = structure(c(1, 2, NA), class = 'interval')
+)
+codebook(metadata_examples)
+```
+
+**Output:**
+
+```
+# A tibble: 3 x 4
+  variable type          n unique
+  <chr>    <chr>     <int>  <int>
+1 wrapped  I<int>        2      2
+2 pieces   list<int>     3      2
+3 custom   interval      2      2
 ```
 

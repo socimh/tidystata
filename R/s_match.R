@@ -1,13 +1,15 @@
-#' Tidyselect columns in stata style
+#' Select columns with a Stata varlist
 #'
 #' @description
-#' `s_match()` is a simpler version of `matches()`
-#' in <[`tidy-select`][dplyr_tidy_select]>.
-#' It is designed to select columns in a Stata-like style.
+#' `varlist()` selects columns with a Stata-style varlist string such as
+#' `"inc* age? x[1-12]"`, as in Stata's `keep inc* age?`. It is a simpler
+#' version of `matches()` in <[`tidy-select`][dplyr_tidy_select]>.
 #'
-#' Use `s_match()` within a *selecting* function, such as `ds()` or
+#' Use `varlist()` within a *selecting* function, such as `ds()`, `tab()` or
 #' `dplyr::across()`. Alternatively, provide `vars` explicitly to return
-#' matching positions in a standalone call.
+#' matching positions in a standalone call. `varlist()` was called `varlist()`
+#' before statart 0.2.0.9000; the old name still works with a once-per-session
+#' notice.
 #'
 #' @param string A single character string containing patterns, separated by
 #' spaces, like selecting a varlist in Stata's `keep` command.
@@ -22,7 +24,7 @@
 #' * `[a-h]` matches any character in the range from `a` to `h`.
 #' * `[1-12]` matches any number in the range from `1` to `12`.
 #' * `var1-var5` is NOT used to select a range of variables.
-#' Use `var1:var5` out of `s_match()` instead.
+#' Use `var1:var5` outside `varlist()` instead.
 #'
 #' Space-separated patterns are alternatives, each matched against complete
 #' column names. Numeric ranges expand within each pattern before matching.
@@ -30,7 +32,7 @@
 #' contain their own range.
 #'
 #' @examples
-#' s_match("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
+#' varlist("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
 #'
 #' tb <- paste0("x", 1:15) %>%
 #'   tibble::as_tibble() %>%
@@ -41,29 +43,29 @@
 #' ds(tb)
 #'
 #' tb %>%
-#'   ds(s_match("x1*"))
+#'   ds(varlist("x1*"))
 #'
 #' tb %>%
-#'   ds(s_match("x1~"))
+#'   ds(varlist("x1~"))
 #'
 #' tb %>%
-#'   ds(s_match("*5"))
+#'   ds(varlist("*5"))
 #'
 #' tb %>%
-#'   ds(s_match("?5"))
+#'   ds(varlist("?5"))
 #'
 #' tb %>%
-#'   ds(s_match("x[9-15]"))
+#'   ds(varlist("x[9-15]"))
 #'
 #' # A literal hyphen pattern selects no columns here; it is not a range.
 #' tb %>%
-#'   ds(s_match("x1-x5"))
+#'   ds(varlist("x1-x5"))
 #'
 #' tb %>%
 #'   ds(x1:x5)
 #'
 #' @export
-s_match <- function(
+varlist <- function(
   string,
   ignore.case = TRUE,
   vars = NULL
@@ -114,7 +116,7 @@ num_range_to_regex <- function(string) {
 
   num_range <- start_end %>%
     as.integer() %>%
-    s_try()
+    capture()
 
   if (num_range) {
     begin <- as.integer(start_end[1])

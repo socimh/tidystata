@@ -45,8 +45,8 @@ test_that("variables_search accepts letter ranges without numeric-coercion warni
   expect_identical(out$name, c("item_a", "item_b", "item_c"))
   expect_identical(d, before)
 })
-test_that("letter range translation remains compatible with ds and s_match", {
+test_that("letter range translation remains compatible with ds and varlist", {
   d <- tibble::tibble(xA = 1:2, xB = 3:4, xC = 5:6, xZ = 7:8)
-  expect_no_warning(out <- ds(d, s_match("x[A-C]")))
+  expect_no_warning(out <- ds(d, varlist("x[A-C]")))
   expect_identical(out, c("xA", "xB", "xC"))
 })

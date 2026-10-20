@@ -133,3 +133,35 @@ for (function_name in c("summ", "tabstat")) {
     )
   })
 }
+
+
+test_that("grouped summaries preserve numerical stability and degenerate groups", {
+  d <- tibble::tibble(
+    g = rep(c("offset", "singleton", "constant", "missing"), c(3, 1, 3, 2)),
+    x = c(1e12 + 1:3, 7, 4, 4, 4, NA_real_, NaN)
+  )
+  out <- summ(
+    d,
+    x,
+    .by = g,
+    .sort = FALSE,
+    .stat = c("n", "mean", "sd", "sum", "p25", "q1", "se")
+  )
+  expect_identical(out$n, c(3L, 1L, 3L, 0L))
+  expect_equal(out$mean, c(mean(1e12 + 1:3), 7, 4, NA_real_))
+  expect_equal(out$sd, c(1, NA_real_, 0, NA_real_))
+  expect_equal(out$sum, c(sum(1e12 + 1:3), 7, 12, NA_real_))
+  expect_identical(out$p25, out$q1)
+  expect_equal(out$se, c(1 / sqrt(3), NA_real_, 0, NA_real_))
+})
+
+
+test_that("zero-group valid percentages remain double", {
+  out <- summ(
+    tibble::tibble(g = integer(), x = double()),
+    x,
+    .by = g,
+    .stat = "valid_pct"
+  )
+  expect_identical(out$valid_pct, double())
+})

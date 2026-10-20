@@ -78,24 +78,24 @@ test_that("fre(), tab1() and fre1() accept atomic vectors like tab()", {
   expect_error(fre1(x, .by = value), "omit `.by`")
 })
 
-test_that("cut_quantile() accepts logical dummies and labels = TRUE", {
+test_that("xtile() accepts logical dummies and labels = TRUE", {
   dummy <- c(TRUE, FALSE, TRUE, FALSE, FALSE)
   expect_identical(
-    cut_quantile(dummy, 2, labels = FALSE),
-    cut_quantile(as.integer(dummy), 2, labels = FALSE)
+    xtile(dummy, 2, labels = FALSE),
+    xtile(as.integer(dummy), 2, labels = FALSE)
   )
-  expect_identical(cut_quantile(1:4, 2, labels = TRUE), cut_quantile(1:4, 2))
-  expect_error(cut_quantile("a"), "numeric or logical")
+  expect_identical(xtile(1:4, 2, labels = TRUE), xtile(1:4, 2))
+  expect_error(xtile("a"), "numeric or logical")
 })
 
-test_that("grouped cut_quantile() returns group-relative integer codes", {
+test_that("grouped xtile() returns group-relative integer codes", {
   data <- dplyr::group_by(
     tibble::tibble(k = rep(1:2, each = 4), a = c(1:4, 11:14)),
     k
   )
-  out <- dplyr::mutate(data, q = cut_quantile(a, 2))
+  out <- dplyr::mutate(data, q = xtile(a, 2))
   expect_identical(out$q, rep(c(1L, 1L, 2L, 2L), 2))
-  ungrouped <- dplyr::mutate(dplyr::ungroup(data), q = cut_quantile(a, 2))
+  ungrouped <- dplyr::mutate(dplyr::ungroup(data), q = xtile(a, 2))
   expect_s3_class(ungrouped$q, "ordered")
 })
 

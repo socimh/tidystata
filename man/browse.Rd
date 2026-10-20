@@ -33,7 +33,7 @@ before passing them to the selection interface.
 if (interactive()) {
   browse(starwars)
   browse(starwars, name:mass)
-  browse(starwars, s_match("*color"))
+  browse(starwars, varlist("*color"))
 
   # Retain the viewed columns for the next pipeline stage.
   selected <- browse(starwars, name, height, mass)

@@ -2,19 +2,19 @@
 % Please edit documentation in R/cut.R
 \name{cut}
 \alias{cut}
-\alias{cut_quantile}
+\alias{xtile}
 \alias{cut_length}
 \alias{cut_breaks}
 \title{Cut a numeric vector into intervals.}
 \usage{
-cut_quantile(x, n = 4, labels = NULL, method = c("quantile", "rank"))
+xtile(x, n = 4, labels = NULL, method = c("quantile", "rank"), wt = NULL)
 
 cut_length(x, n = 4, labels = NULL)
 
 cut_breaks(x, breaks = NULL, labels = NULL, right = TRUE)
 }
 \arguments{
-\item{x}{A numeric vector. \code{cut_quantile()} also accepts a logical vector,
+\item{x}{A numeric vector. \code{xtile()} also accepts a logical vector,
 treated as 0/1.}
 
 \item{n}{A positive integer. The number of intervals.}
@@ -28,6 +28,11 @@ treated as 0/1.}
 rank groups (\code{"rank"}). Rank groups may split ties, breaking them by original
 position. They differ in size by at most one; earlier groups get extra rows.}
 
+\item{wt}{Optional weights for \code{xtile()}, one per element of \code{x}, like
+Stata's \verb{xtile ... [aweight = w]}. Cutpoints then follow Stata's weighted
+percentile rule; elements with a missing weight get a missing code. Not
+available with \code{method = "rank"}.}
+
 \item{breaks}{Numeric cutpoints for \code{cut_breaks()}. The observed minimum and
 maximum are included automatically. \code{NULL} uses the observed median as an
 interior cutpoint. A single number supplies one interior cutpoint, rather
@@ -38,13 +43,20 @@ than the number of intervals.}
 }
 \value{
 An ordered factor, or integer interval codes when \code{labels = FALSE}
-or when \code{cut_quantile()} runs in a grouped data mask with default labels.
+or when \code{xtile()} runs in a grouped data mask with default labels.
 }
 \description{
-Cut a numeric vector into intervals.
+\itemize{
+\item \code{xtile()} creates \code{n} quantile groups, following Stata's \code{xtile}.
+\item \code{cut_length()} creates \code{n} intervals of equal length.
+\item \code{cut_breaks()} cuts at given cutpoints.
+}
+
+\code{xtile()} was called \code{cut_quantile()} before statart 0.2.0.9000; the old
+name still works with a once-per-session notice.
 }
 \details{
-\code{cut_quantile()} follows Stata's \code{xtile} rule with type-7
+\code{xtile()} follows Stata's \code{xtile} rule with type-7
 quantile cutpoints at \verb{1/n, 2/n, ...}: each value joins the first group
 whose cutpoint is at least that value. Equal values stay in the same group
 and distinct values are never merged, so a 0/1 dummy always gives two
@@ -68,7 +80,8 @@ observation and warn. Default rank labels are \code{"1"} through the effective
 group count; custom labels must match that count.
 }
 \examples{
-cut_quantile(1:20)
+xtile(1:20)
+xtile(c(0, 0, 0, 1, 1), 2)
 
 cut_length(1:20)
 

@@ -3,16 +3,16 @@ test_that("blank cross-tab categories have collision-safe headers", {
     x = c("a", "a", "b", "b"),
     y = c("", "b", "<empty>", "<empty>1")
   )
-  out <- tab2(data, x, y)
+  out <- xtab(data, x, y)
   expect_equal(out[["<empty>2"]], c(1L, 0L))
   expect_equal(out[["<empty>"]], c(0L, 1L))
   expect_equal(out[["<empty>1"]], c(0L, 1L))
   expect_equal(rowSums(as.data.frame(out[-1])), c(2, 2))
-  expect_equal(tail(fre2(data, x, y)$total, 1), 4)
-  expect_equal(tab2(data, y, x, .flip = TRUE), out)
+  expect_equal(tail(xtab(data, x, y, .total = TRUE)$total, 1), 4)
+  expect_equal(xtab(data, y, x, .flip = TRUE), out)
 
   missing <- tibble::tibble(x = c("a", "a", "b"), y = c("", NA, ""))
-  out <- tab2(missing, x, y)
+  out <- xtab(missing, x, y)
   expect_equal(out[["<empty>"]], c(1L, 1L))
   expect_equal(out[["NA"]], c(1L, 0L))
   expect_identical(missing$y, c("", NA_character_, ""))
@@ -37,15 +37,15 @@ test_that("logical cross-tabulation axes have consistent ordering", {
     x = c(FALSE, FALSE, TRUE, NA),
     y = c(TRUE, FALSE, NA, FALSE)
   )
-  out <- tab2(data, x, y)
+  out <- xtab(data, x, y)
   expect_identical(names(out)[-1], c("FALSE", "TRUE", "NA"))
   expect_identical(out[[1]], c(FALSE, TRUE, NA))
   expect_identical(
-    names(fre2(data, x, y))[-1],
+    names(xtab(data, x, y, .total = TRUE))[-1],
     c("FALSE", "TRUE", "NA", "total")
   )
   expect_identical(
-    names(tab2(data, x, y, .flip = TRUE))[-1],
+    names(xtab(data, x, y, .flip = TRUE))[-1],
     c("FALSE", "TRUE", "NA")
   )
 })
@@ -121,29 +121,32 @@ test_that("frequency group ties respect factors and multiple keys", {
 
 test_that("cross-tab columns follow value and level order with missing last", {
   numbers <- tibble::tibble(x = c("a", "b", "b", "c"), y = c(3, 1, 2, 10))
-  expect_identical(names(tab2(numbers, x, y))[-1], c("1", "2", "3", "10"))
+  expect_identical(names(xtab(numbers, x, y))[-1], c("1", "2", "3", "10"))
   text <- tibble::tibble(x = c("a", "b", "b"), y = c("z", NA, "m"))
-  expect_identical(names(tab2(text, x, y))[-1], c("m", "z", "NA"))
-  expect_identical(names(fre2(text, x, y))[-1], c("m", "z", "NA", "total"))
+  expect_identical(names(xtab(text, x, y))[-1], c("m", "z", "NA"))
+  expect_identical(
+    names(xtab(text, x, y, .total = TRUE))[-1],
+    c("m", "z", "NA", "total")
+  )
   levels <- tibble::tibble(
     x = c("a", "b"),
     y = factor(c("lo", "hi"), levels = c("hi", "lo"))
   )
-  expect_identical(names(tab2(levels, x, y))[-1], c("hi", "lo"))
+  expect_identical(names(xtab(levels, x, y))[-1], c("hi", "lo"))
   blank <- tibble::tibble(x = c("a", "b", "b"), y = c("z", "", "a"))
-  expect_identical(names(tab2(blank, x, y))[-1], c("<empty>", "a", "z"))
-  out <- tab2(numbers, x, y)
+  expect_identical(names(xtab(blank, x, y))[-1], c("<empty>", "a", "z"))
+  out <- xtab(numbers, x, y)
   expect_equal(out[["10"]], c(0L, 0L, 1L))
   expect_equal(out[["1"]], c(0L, 1L, 0L))
 })
 
 test_that("cross-tabs reject one-way and grouping controls", {
   d <- tibble::tibble(g = c("a", "b", "b"), x = c("p", "q", "q"))
-  expect_error(tab2(d, x, g, .desc = TRUE), "`.desc`.*tab2")
-  expect_error(tab2(d, x, .by = g), "`.by`.*tab2")
+  expect_error(xtab(d, x, g, .desc = TRUE), "`.desc`.*xtab")
+  expect_error(xtab(d, x, .by = g), "`.by`.*xtab")
   expect_error(
-    fre2(d, x, g, .group_order = "frequency"),
-    "`.group_order`.*fre2"
+    xtab(d, x, g, .group_order = "frequency", .total = TRUE),
+    "`.group_order`.*xtab"
   )
 })
 

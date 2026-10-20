@@ -12,7 +12,7 @@
 #' Each argument is classified before evaluation. Column names, strings,
 #' numeric positions, selection syntax (`c()`, `:`, `!`, `&`, `|`, unary `-`)
 #' and tidyselect helpers such as `starts_with()`, `where()`, `all_of()` or
-#' [s_match()] select existing columns, as do calls that use no column names
+#' [varlist()] select existing columns, as do calls that use no column names
 #' (for example `all_of(vars)` or `seq_len(2)`). Any other expression that
 #' uses columns, such as `height > 50` or `bmi = mass / height^2`, is computed
 #' with [dplyr::mutate()] and then selected, so arithmetic on columns is never
@@ -135,6 +135,7 @@ selection_helpers <- c(
   "last_col",
   "where",
   "one_of",
+  "varlist",
   "s_match"
 )
 

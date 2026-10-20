@@ -62,6 +62,16 @@
 #' @param .drop_empty A single `TRUE` or `FALSE`. If `TRUE`, remove individual
 #' summary rows with no observed measured values (`n == 0`), even when `n` is
 #' not requested. This is independent of `.na.rm`. Default is `FALSE`.
+#' @param .wt Optional weights: a numeric column of `.data` (or a vector with
+#' one value per row), like Stata's `summarize [fweight/aweight]`. Rows with a
+#' missing weight are excluded with a message; negative weights are an error.
+#' When `...` is omitted, the weight column is not summarised itself.
+#' @param .wt_type `"frequency"` (default) or `"analytic"`. With frequency
+#' weights, `n` is the sum of the weights (non-integer weights are allowed).
+#' Analytic weights (Stata's `[aweight]`, suitable for sampling weights) are
+#' rescaled within each group and variable to sum to the number of observed
+#' values, so `n` is the number of observations. Means and percentiles are the
+#' same under both types; `sd`, `se` and `sum` differ.
 #' @details
 #' Counts and missing values:
 #'
@@ -93,6 +103,16 @@
 #' divided by the sample SD to the fourth power, minus three (excess kurtosis).
 #' These conventions are not promised to match Stata. For singleton or constant
 #' inputs, undefined spread or moment statistics may be `NA` or `NaN`.
+#'
+#' Weighted statistics:
+#'
+#' With `.wt`, the mean is `sum(w * x) / W` and the variance is
+#' `sum(w * (x - mean)^2) / (W - 1)`, where `W` is the summed weight (after
+#' rescaling for analytic weights); `se` is `sd / sqrt(W)`, and `sum` is
+#' `sum(w * x)`. Percentiles, `median`, `q1`, `q3`, `iqr` and `mad` use Stata's
+#' weighted percentile rule, so they can differ from the unweighted type-7
+#' quantiles even when all weights are 1. `min` and `max` ignore rows with zero
+#' weight. `unique`, `miss_n` and `valid_pct` remain unweighted row counts.
 #'
 #' Calendar output and grouping names:
 #'
@@ -129,6 +149,11 @@
 #' summ(lifeexp, .by = region)
 #' tabstat(lifeexp, .by = region)
 #'
+#' # Weighted summaries, like Stata's summarize [aweight = w]
+#' survey <- tibble::tibble(income = c(10, 20, 40), w = c(3, 1, 1))
+#' summ(survey, income, .wt = w, .stat = c("n", "mean", "sd", "p50"))
+#' summ(survey, income, .wt = w, .wt_type = "analytic", .stat = c("n", "sd"))
+#'
 #' lifeexp %>%
 #'   summ(
 #'     dplyr::where(is.numeric),
@@ -158,7 +183,9 @@ summ <- function(
   .mode = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
-  .drop_empty = FALSE
+  .drop_empty = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 ) {
   # Validate controls before data-dependent branching.
   controls <- list(
@@ -178,6 +205,7 @@ summ <- function(
   summ_stat_names(.stat)
   .mode <- match.arg(.mode)
   .duration_format <- match.arg(.duration_format)
+  .wt_type <- match.arg(.wt_type)
 
   input_expr <- substitute(.data)
   template <- .data
@@ -212,6 +240,11 @@ summ <- function(
       )
   }
 
+  # Weights are evaluated after missing keys are removed.
+  weighted <- weights_prepare(.data, rlang::enquo(.wt))
+  .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
+  weights <- weighted$weights
+
   # Prepare data
   .data_summ <- remove_group_vars(
     .data,
@@ -226,23 +259,12 @@ summ <- function(
     )
   }
 
-  # Confirm variables
-  check_numeric(.data_summ, .keep_all)
-  check_missing(.data_summ, .keep_all)
-  .data_num <- if (.keep_all && ncol(.data_summ) > 0L) {
-    dplyr::select(.data_summ, tidyselect::where(is_summable))
-  } else {
-    check_summarise(.data_summ)
-  }
-  check_factor(.data_num)
-  check_label(.data_num)
-
-  # Add group variables
-  if (.keep_all == TRUE) {
-    .data <- keep_useful_vars(.data, .data_summ, group_vars)
-  } else {
-    .data <- keep_useful_vars(.data, .data_num, group_vars)
-  }
+  # Classify selected vectors once, preserving original missingness methods.
+  metadata <- summ_check_metadata(
+    summ_metadata(.data_summ, .keep_all),
+    .keep_all
+  )
+  .data <- keep_useful_vars(.data, .data_summ[names(metadata)], group_vars)
 
   # Group keys must remain distinct from summary metadata and pivot fields.
   reserved <- c(
@@ -299,7 +321,10 @@ summ <- function(
     group_vars,
     .detail,
     working_stats,
-    .mode
+    .mode,
+    weights = weights,
+    weight_type = .wt_type,
+    metadata = metadata
   )
   finalize <- function(data) {
     if (.drop_empty) {
@@ -357,7 +382,9 @@ tabstat <- function(
   .mode = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
-  .drop_empty = FALSE
+  .drop_empty = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 ) {
   # Detailed output replaces the default mean-only request.
   if (isTRUE(.detail) && missing(.stat)) {
@@ -383,7 +410,9 @@ tabstat <- function(
       .mode = .mode,
       .duration_format = .duration_format,
       .sort = .sort,
-      .drop_empty = .drop_empty
+      .drop_empty = .drop_empty,
+      .wt = {{ .wt }},
+      .wt_type = .wt_type
     )
   )
 }

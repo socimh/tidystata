@@ -34,7 +34,7 @@ modify_invalid_names <- function(
     invalid_names <- invalid_names
   } else if (
     function_name %in%
-      c("fre()", "fre1()", "tab2()", "fre2()")
+      c("fre()", "fre1()", "xtab()")
   ) {
     invalid_names <- invalid_names %>%
       c("total")
@@ -57,7 +57,7 @@ modify_invalid_names <- function(
       ~ paste0(".", .x),
       tidyselect::all_of(detected_names)
     ) %>%
-    s_try()
+    capture()
 
   if (can_rename) {
     dplyr::rename_with(
@@ -126,10 +126,33 @@ prepare_tab_data <- function(.data, ..., group_vars = character(0)) {
   return(out)
 }
 
+tab_counts <- function(data, weights) {
+  # Use the same native ordering as dplyr grouping, without per-category masks.
+  # Keep dplyr's option validation and legacy locale behavior when configured.
+  if (is.null(getOption("dplyr.legacy_locale"))) {
+    out <- tibble::as_tibble(aggregation_counts(data, weights))
+  } else if (is.null(weights)) {
+    out <- dplyr::count(data, dplyr::across(dplyr::everything()))
+  } else {
+    data$...wt <- weights
+    out <- dplyr::count(
+      data,
+      dplyr::across(-...wt),
+      wt = ...wt
+    )
+  }
+
+  out
+}
+
 tab_data <- function(
   .data,
   group_vars = character(0),
-  .desc = FALSE
+  .desc = FALSE,
+  weights = NULL,
+  total = FALSE,
+  group_order = "keys",
+  input_groups = NULL
 ) {
   if (any(vapply(.data, function(x) !is.null(dim(x)), logical(1)))) {
     stop("Matrix columns are not supported in tabulation.", call. = FALSE)
@@ -139,7 +162,7 @@ tab_data <- function(
     return(dplyr::bind_cols(
       .data[0L, group_vars, drop = FALSE],
       tibble::tibble(
-        n = integer(),
+        n = if (is.null(weights)) integer() else double(),
         percent = double(),
         cum = double(),
         valid = double(),
@@ -148,36 +171,12 @@ tab_data <- function(
       )
     ))
   }
-  out <- .data %>%
-    dplyr::count(
-      dplyr::across(
-        dplyr::everything()
-      )
-    )
-
-  if (group_vars %>% length() > 0) {
-    out <- out %>%
-      dplyr::group_by(
-        dplyr::pick(
-          dplyr::all_of(group_vars)
-        )
-      )
-  }
+  out <- tab_counts(.data, weights)
 
   measured <- setdiff(names(out), c(group_vars, "n"))
   out$...any_miss <- rowSums(is.na(as.data.frame(out)[measured])) > 0L
-  out <- out %>%
-    dplyr::mutate(
-      percent = n / sum(n) * 100,
-      ...valid_sum = sum(n[!...any_miss]),
-      valid = dplyr::if_else(
-        ...any_miss | ...valid_sum == 0,
-        NA_real_,
-        n / ...valid_sum * 100
-      )
-    )
 
-  # Issue 2.3: sort within each group — non-missing first, then missing
+  # Issue 2.3: sort within each group - non-missing first, then missing
   # Issue 2.5: .desc sorts non-NA rows by -n descending, then NA rows after
   if (.desc) {
     out <- out %>%
@@ -194,31 +193,18 @@ tab_data <- function(
       )
   }
 
-  out <- out %>%
-    dplyr::mutate(
-      cum = cumsum(percent),
-      valid_cum = cumsum(valid)
-    )
+  groups <- aggregation_groups(out, group_vars)
+  columns <- aggregation_percentages(out$n, out$...any_miss, groups$loc)
+  out[names(columns)] <- columns
+  out <- out[c(group_vars, measured, "n", names(columns), "...any_miss")]
 
-  if (group_vars %>% length() > 0) {
-    out <- out %>%
-      dplyr::ungroup()
+  if (total) {
+    out <- add_total(out, group_vars, groups)
   }
-
-  out <- out %>%
-    dplyr::relocate(
-      percent,
-      cum,
-      valid,
-      valid_cum,
-      .after = n
-    ) %>%
-    dplyr::select(-...valid_sum)
-
-  return(out)
+  order_tab_groups(out, .data, group_vars, group_order, weights, input_groups)
 }
 
-add_total <- function(data, group_vars = character(0)) {
+add_total <- function(data, group_vars = character(0), groups) {
   if (nrow(data) == 0L) {
     return(data)
   }
@@ -232,18 +218,8 @@ add_total <- function(data, group_vars = character(0)) {
     data[[label]] <- ""
   }
 
-  if (length(group_vars) > 0L) {
-    groups <- vctrs::vec_group_loc(data[group_vars])
-    group_id <- integer(nrow(data))
-    group_id[unlist(groups$loc)] <- rep(
-      seq_along(groups$loc),
-      lengths(groups$loc)
-    )
-    first <- vapply(groups$loc, `[[`, integer(1), 1L)
-  } else {
-    group_id <- rep(1L, nrow(data))
-    first <- 1L
-  }
+  group_id <- aggregation_group_id(groups, nrow(data))
+  first <- vapply(groups$loc, `[[`, integer(1), 1L)
   group_count <- length(first)
   sum_by <- function(x) {
     as.vector(rowsum(x, factor(group_id, levels = seq_len(group_count))))
@@ -338,6 +314,8 @@ append_tab_list <- function(.data, blank_row = FALSE) {
     purrr::map_chr(
       ~ dplyr::pull(., value) %>%
         s_type(.abbr = TRUE) %>%
+        # Element descriptions refine a family; vctrs checks compatibility below.
+        sub("<.*$", "", .) %>%
         dplyr::if_else(
           . %in% c("int", "dbl"),
           "num",
@@ -388,21 +366,14 @@ append_tab_list <- function(.data, blank_row = FALSE) {
   return(out)
 }
 
-tab2_data <- function(.data) {
+tab2_data <- function(.data, weights = NULL) {
   .data <- tibble::as_tibble(.data)
   join_name <- .data %>%
     names() %>%
     stringr::str_flatten(" \\ ")
 
-  counts <- .data %>%
-    dplyr::rename(
-      {{ join_name }} := 1
-    ) %>%
-    dplyr::count(
-      dplyr::across(
-        dplyr::everything()
-      )
-    )
+  .data <- dplyr::rename(.data, {{ join_name }} := 1)
+  counts <- tab_counts(.data, weights)
 
   column_values <- counts[[2L]]
   # Count raw values before assigning display headers, so identities stay apart.
@@ -423,6 +394,33 @@ tab2_data <- function(.data) {
   raw_order <- vctrs::vec_order(counts[[2L]])
   headers <- as.character(column_values)[raw_order]
   headers[is.na(headers)] <- "NA"
+  columns <- vctrs::vec_group_loc(counts[[2L]])
+  column_headers <- as.character(columns$key)
+  column_headers[is.na(column_headers)] <- "NA"
+  simple <- is.atomic(counts[[2L]]) &&
+    is.null(dim(counts[[2L]])) &&
+    (!is.object(counts[[2L]]) || is.factor(counts[[2L]])) &&
+    !anyDuplicated(column_headers) &&
+    !any(column_headers == join_name | grepl("^\\.\\.[0-9.]*$", column_headers))
+  if (simple && nrow(counts)) {
+    rows <- vctrs::vec_group_loc(counts[[1L]])
+    row_id <- vctrs::vec_match(counts[[1L]], rows$key)
+    display <- as.character(column_values)
+    display[is.na(display)] <- "NA"
+    column_id <- match(display, unique(headers))
+    cells <- aggregation_cells(
+      counts$n,
+      row_id,
+      column_id,
+      length(rows$loc),
+      length(columns$loc)
+    )
+    out <- tibble::as_tibble_col(rows$key, column_name = join_name)
+    out[unique(headers)] <- cells
+    return(out)
+  }
+  # Ambiguous display names and specialized classes keep pivot's diagnostics
+  # and list-column behavior at the output boundary.
   out <- counts %>%
     tidyr::pivot_wider(
       names_from = 2,
@@ -436,13 +434,28 @@ tab2_data <- function(.data) {
   return(out)
 }
 
-order_tab_groups <- function(out, data, group_vars, group_order) {
+order_tab_groups <- function(
+  out,
+  data,
+  group_vars,
+  group_order,
+  weights = NULL,
+  groups = NULL
+) {
   if (group_order == "keys" || length(group_vars) == 0L || nrow(out) == 0L) {
     return(out)
   }
-  groups <- vctrs::vec_group_loc(data[group_vars])
+  if (is.null(groups)) {
+    groups <- aggregation_groups(data, group_vars)
+  }
   keys <- dplyr::arrange(groups$key, dplyr::across(dplyr::everything()))
-  sizes <- lengths(groups$loc)[vctrs::vec_match(keys, groups$key)]
+  # Group size is the (weighted) number of observations in the group.
+  group_sizes <- if (is.null(weights)) {
+    lengths(groups$loc)
+  } else {
+    vapply(groups$loc, function(loc) sum(weights[loc]), numeric(1))
+  }
+  sizes <- group_sizes[vctrs::vec_match(keys, groups$key)]
   missing_keys <- rowSums(is.na(as.data.frame(keys))) > 0L
   ranked_keys <- keys[
     order(missing_keys, -sizes, seq_len(nrow(keys))),
@@ -459,8 +472,8 @@ add_total2 <- function(out, .data) {
   }
   if ("total" %in% names(out)[-1L]) {
     stop(
-      "Column category `total` is reserved for totals in `fre2()`. ",
-      "Recode this category before calling `fre2()`, or use `tab2()`.",
+      "Column category `total` is reserved for totals in ",
+      "`xtab(.total = TRUE)`. Recode this category first, or omit `.total`.",
       call. = FALSE
     )
   }
@@ -480,14 +493,17 @@ add_total2 <- function(out, .data) {
     out_sum[[col]] <- sum(out[[col]])
   }
 
-  out <- out %>%
-    dplyr::bind_rows(out_sum) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(
-      total = dplyr::c_across(-1) %>%
-        sum()
-    ) %>%
-    dplyr::ungroup()
+  out <- dplyr::bind_rows(out, out_sum)
+  counts <- out[-1L]
+  totals <- rowSums(as.matrix(counts))
+  # sum(integer) retains integer storage unless any row overflows that range.
+  if (
+    all(vapply(counts, is.integer, logical(1))) &&
+      all(totals <= .Machine$integer.max)
+  ) {
+    totals <- as.integer(totals)
+  }
+  out$total <- totals
 
   return(out)
 }
@@ -539,4 +555,50 @@ result_to_flextable <- function(tb, group_vars, fre1 = FALSE, fre2 = FALSE) {
     )
 
   return(ft)
+}
+
+# Pearson chi-square test of independence for a cross-tabulation from
+# `tab2_data()`, with Cramer's V as in Stata's `tab x y, chi2 V`. Categories
+# shown in the table, including missing ones, are tested; rows or columns with
+# no observations are dropped. For 2 x 2 tables, V keeps its sign, as in Stata.
+xtab_chi2 <- function(out) {
+  counts <- as.matrix(out[-1L])
+  counts <- counts[rowSums(counts) > 0, colSums(counts) > 0, drop = FALSE]
+  n <- sum(counts)
+  statistic <- p_value <- cramers_v <- NA_real_
+  df <- NA_integer_
+  if (nrow(counts) >= 2L && ncol(counts) >= 2L) {
+    row_totals <- rowSums(counts)
+    column_totals <- colSums(counts)
+    expected <- outer(row_totals, column_totals) / n
+    statistic <- sum((counts - expected)^2 / expected)
+    df <- as.integer((nrow(counts) - 1L) * (ncol(counts) - 1L))
+    p_value <- stats::pchisq(statistic, df, lower.tail = FALSE)
+    cramers_v <- if (df == 1L) {
+      (counts[1L, 1L] * counts[2L, 2L] - counts[1L, 2L] * counts[2L, 1L]) /
+        sqrt(prod(row_totals) * prod(column_totals))
+    } else {
+      sqrt(statistic / (n * (min(dim(counts)) - 1L)))
+    }
+    cramers_v <- unname(cramers_v)
+    text <- c(
+      sprintf("Pearson chi2(%d) = %.4f   Pr = %.3f", df, statistic, p_value),
+      sprintf("Cramer's V = %.4f", cramers_v)
+    )
+  } else {
+    text <- paste(
+      "Pearson chi2 is not computed: the table needs at least two rows and",
+      "two columns with observations."
+    )
+  }
+  message(paste(text, collapse = "\n"))
+  test <- tibble::tibble(
+    statistic = statistic,
+    df = df,
+    p_value = p_value,
+    cramers_v = cramers_v,
+    n = n
+  )
+  attr(test, "text") <- text
+  test
 }

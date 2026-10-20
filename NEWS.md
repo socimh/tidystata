@@ -1,5 +1,182 @@
 # statart 0.2.0.9000
 
+## Assertions, first-row flags and full listings (2026-10-19)
+
+- New `assert()`, like Stata's `assert`: checks conditions on every row (with
+  `.by` or groups for `n()`, `mean()` and similar), stops with the number of
+  contradictions and the first failing rows, and otherwise returns the data
+  invisibly so it fits in a pipe. Missing results count as contradictions.
+- New `is_first()`, like `egen tag()`: `TRUE` for the first row of each
+  distinct combination of its arguments, or of each group when called
+  without arguments in grouped `mutate()`. Rows with missing keys are `FALSE`
+  unless `.missing = TRUE`.
+- New `print_all()`, like Stata's `list`: prints every row and column of a
+  data frame, tibble, data.table, grouped or sf table and returns it
+  invisibly.
+
+## Panel lags, leads and differences (2026-10-19)
+
+- New `s_lag()`, `s_lead()` and `s_diff()` for `mutate()`, like Stata's
+  `L.x`, `F.x` and `D.x` after `xtset`. Values are found by time, not row
+  position, so gaps give missing values and row order does not matter.
+  Supply the panel with `.by` or `group_by()` and the time with `time =`;
+  `delta` mirrors `xtset, delta()`, and `unit = "month"`, `"quarter"`,
+  `"week"` or `"year"` compares `Date`s by whole periods like `%tm`/`%tq`.
+  Date-times (with `"second"` to `"year"` units, on the local clock),
+  tsibble's `yearweek`/`yearmonth`/`yearquarter` and zoo's
+  `yearmon`/`yearqtr`, and ordered factors such as survey waves (level
+  order, so an unused level is a gap) also work as `time`. `s_diff(x, 2)` is `D2.x`, and
+  `s_diff()` of dates gives a `difftime`. Results were checked against
+  StataNow 19.
+
+## Standardising, percentages and dummies (2026-10-19)
+
+- New `std()` and `pct()` for `mutate()`, like Stata's `egen std()` and
+  `egen pc()`: `std()` returns a plain standardised vector (with optional
+  `mean` and `sd`), and `pct()` a percentage of the total (or a proportion
+  with `prop = TRUE`). In grouped `mutate()` or with `.by`, each group uses
+  its own statistics, like `by g: egen`.
+- New `as_dummy()`: one 0/1 column per observed category, placed after its
+  source, like `tabulate x, generate(x_)`. Missing values give missing
+  indicators; columns carry Stata-style labels such as `"sex==male"`.
+  `.names = "index"` numbers the columns and `.remove = TRUE` drops the
+  source. The input container (data.table, grouped, sf) is kept.
+
+## Aggregation internals (2026-10-19)
+
+- Frequency tables calculate percentages and cumulative values on count vectors,
+  with cumulative sums restarted within each group. Cross-tabulations fill a
+  preallocated rectangle when display headers are unambiguous.
+- Summaries share type, unit, missingness and group preparation across families.
+  Weighted requests now skip unrequested medians, quantiles and spreads, and
+  combine requested percentiles into one sorting pass per variable/group.
+- Public interfaces, aliases, statistical definitions and dependencies are
+  unchanged. Existing native routines are retained; no new C++ is added.
+
+## Correlations, missing values and chi-square (2026-10-19)
+
+- New `pwcorr()`: a tidy table of pairwise correlations with `n` and the
+  p-value for each pair, like Stata's `pwcorr, sig obs`. It supports
+  `.method = "spearman"`, `.by`, frequency and analytic weights (`.wt`), and
+  `.wide = TRUE` for Stata's lower-triangle matrix.
+- New `misstable()`: missing values by variable, like `misstable summarize`,
+  or missing patterns with `.patterns = TRUE`, like `misstable patterns`.
+  Supports `.by`; `.all = TRUE` also lists complete variables.
+- `xtab()` gains `.chi2 = TRUE`, like `tab x y, chi2 V`: Pearson's chi-square,
+  its p-value and Cramer's V are printed and stored in `attr(x, "chi2")`
+  (and added as a flextable footer). It matches
+  `chisq.test(correct = FALSE)`.
+
+## Weights (2026-10-19)
+
+- `tab()`, `tab1()`, `fre()`, `fre1()`, `xtab()`, `summ()` and `tabstat()`
+  gain `.wt` and `.wt_type`, like Stata's `[fweight]` and `[aweight]`.
+  Frequency weights (default) count each row `w` times, as in
+  `dplyr::count(wt =)`, and allow non-integer weights. Analytic weights,
+  suited to sampling weights, are rescaled within each group to sum to the
+  number of rows, so counts stay on the sample scale.
+- Weighted summaries follow Stata's formulas: the mean is `sum(w * x) / W`,
+  the variance uses `W - 1`, and percentiles, `median`, `iqr` and `mad` use
+  Stata's weighted percentile rule. `unique`, `miss_n` and `valid_pct` stay
+  unweighted row counts.
+- `xtile()` gains `wt` for weighted cutpoints, as in Stata's `xtile [w]`.
+- Rows with missing weights are excluded with a message; negative weights are
+  an error. When no variables are selected, the weight column is not itself
+  tabulated or summarised.
+
+## Coming from Stata (2026-10-19)
+
+- New `findit()` gives the R equivalent of a Stata command: the statart
+  function where one exists, and the standard package otherwise (fixest,
+  modelsummary, tidyr, binsreg, srvyr and others). Type one word bare
+  (`findit(reg)`) or quote longer Stata code
+  (`findit("merge 1:1 id, keep(match)")`); Stata's minimum abbreviations
+  work, extra words rank the closest idioms first, and unmatched text falls
+  back to a keyword search with suggestions. `findit()` alone lists every
+  entry. Results print the Stata line and task above the full R code.
+- The entries live in `inst/extdata/stata-to-r.csv`, with English and Chinese
+  descriptions. New website articles, "Coming from Stata" in English and
+  Chinese, show them by topic, and the "where to find the rest" section of
+  MIGRATION.md points to `findit()`.
+- Coverage was checked against the Stata Training cheat sheets (data
+  processing, transformation, analysis, programming, visualisation) and the
+  Stata 17-18 table commands, then widened to about 410 idioms and 250 Stata
+  commands and functions. It now includes `collapse`, `levelsof`, `egen`
+  functions, `generate` functions such as `cond()`, `inlist()` and
+  `inrange()`, string and date functions, basic tests, multinomial, ordered,
+  count, quantile, multilevel and selection models, postestimation,
+  `dtable`/`etable`/`putexcel`, causal methods (`teffects`, `didregress`,
+  `csdid`, `rdrobust`, `synth`), multiple imputation, a new survival section,
+  survey subpopulations and more graph types. External entries remain text
+  only; statart gains no dependencies.
+- `findit()` also accepts R function names, so beginners need not know which
+  is which: `findit(left_join)`, `findit(lm())` or `findit(dplyr::left_join)`
+  describe the function and list the Stata idioms it replaces. Words that are
+  both, such as `log`, `round` or `summ`, show the Stata command and the R
+  function under separate headings. Results gain a `match` column. A new
+  `inst/extdata/r-functions.csv` describes about 600 R functions in one
+  English and one Chinese line each: every function in the entries, plus
+  common ones a Stata user meets (dplyr, tidyr, stringr, forcats, lubridate,
+  purrr, base and stats, ggplot2, haven, labelled, janitor and model
+  packages). Functions that no entry uses yet, such as `findit(n_distinct)`,
+  print their description and a related Stata command. Both articles end
+  with an index of these functions.
+
+## Cross-tabulation and merging (2026-10-19)
+
+- New `xtab()` cross-tabulates two variables, like Stata's `tab x y`, and
+  replaces `tab2()` and `fre2()`: `xtab(.total = TRUE)` adds the total row and
+  column. `tab2()` and `fre2()` remain as deprecated aliases with identical
+  results. Stata's own `tab2` produces every pairwise table, so the old name
+  misled Stata users.
+- `tab()` and `tab1()` gain `.total`; `tab(.total = TRUE)` equals `fre()` and
+  `tab1(.total = TRUE)` equals `fre1()`. `fre()` and `fre1()` stay as
+  shortcuts.
+- New `s_merge()` joins like Stata's `merge`: it requires and checks the key
+  relationship (`"1:1"`, `"m:1"`, `"1:m"`), prints a matched/unmatched report,
+  adds a `.merge` factor (Stata's `_merge`), and supports `.keep`, `.assert`
+  and `.generate`. Values from `.data` win for shared non-key columns.
+- R sources are now plain ASCII: information glyphs in messages use escapes,
+  removing a non-ASCII portability warning from package checks.
+
+## Stata names and key checks (2026-10-19)
+
+- New `isid()` checks that columns uniquely identify the rows, like Stata's
+  `isid`; it returns the data invisibly or errors with the number of repeated
+  keys, and `.missok` allows missing key values.
+- New `duplicates_report()`, `duplicates_tag()`, `duplicates_list()` and
+  `duplicates_drop()` follow Stata's `duplicates` subcommands. Dropping on a
+  subset of columns errors when the removed rows differ elsewhere, unless
+  `.force = TRUE`.
+- Renamed, with the old names kept as deprecated aliases that give identical
+  results and a once-per-session notice: `cut_quantile()` is now `xtile()`,
+  `s_match()` is now `varlist()`, `s_try()` is now `capture()`, and
+  `names_as_column()` is folded into the identical `ds_as_column()`.
+
+## Metadata and distinct-counting performance (2026-10-19)
+
+- Expand only recognized type abbreviations; preserve custom and structured
+  pillar descriptions instead of truncating or rewriting their names. Empty or
+  missing descriptions fall back to the class. Numeric-looking prefixes no
+  longer confer summary support, and haven conversion requires a haven class.
+- Use direct storage-type detection for plain vectors and direct unit metadata
+  where available. Extend exact type/unit coverage across empty, missing,
+  classed, structured, custom S3/vctrs, S4 and optional-package inputs.
+- Assemble codebooks once, avoid redundant identity construction for single-group
+  distinct counts, and vectorize cross-table totals while preserving integer
+  storage and safe promotion for large totals. No dependency or native kernel
+  is added.
+
+## Aggregation performance (2026-10-19)
+
+- Reduce per-category overhead in one-way and joint tabulations by using the
+  existing native grouping routine directly, preserving category order and
+  separate NA/NaN identities. Explicit legacy locale options retain dplyr counting.
+- Dispatch summary statistics once per variable and reuse observed group slices.
+  Existing statistical routines, requested-statistic calculation, missingness,
+  output contracts and dependencies are unchanged. Gains are largest with many
+  groups; repeated-call and allocation benchmarks cover small, large and wide data.
+
 ## Repository cleanup (2026-10-19)
 
 - Consolidate current development status and backlog in DEVELOPMENT.md, retain

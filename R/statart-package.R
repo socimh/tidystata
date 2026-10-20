@@ -3,6 +3,9 @@
 #' variable inspection, column selection, row calculations, and binning.
 #' Use [tab()], [summ()], and [codebook()] to start exploring a dataset.
 #'
+#' Coming from Stata? [findit()] gives the R equivalent of a Stata command,
+#' such as `findit(reg)` or `findit("merge 1:1 id")`.
+#'
 #' @section Tutorials and migration:
 #' Read `vignette("getting-started", package = "statart")` for a short workflow
 #' and `vignette("containers-and-missing-values", package = "statart")` for

@@ -45,21 +45,21 @@ test_that("milestone frequency defaults remain usable as data", {
   d <- tibble::tibble(x = c("a", "a", "b"), y = c("u", "v", "u"))
   expect_s3_class(fre(d, x), "tbl_df")
   expect_named(fre1(d, x), "x")
-  out <- fre2(d, x, y)
+  out <- xtab(d, x, y, .total = TRUE)
   expect_s3_class(out, "tbl_df")
   expect_equal(tail(out$total, 1), 3)
 })
 
 test_that("milestone quantile ties stay together after row permutation", {
   x <- c(rep(1, 8), rep(2, 4), rep(3, 4))
-  expect_warning(out <- cut_quantile(x, n = 4), "[Cc]ollaps|[Tt]ie|[Ff]ewer")
+  expect_warning(out <- xtile(x, n = 4), "[Cc]ollaps|[Tt]ie|[Ff]ewer")
   expect_true(all(vapply(
     split(as.integer(out), x),
     function(z) length(unique(z)) == 1L,
     logical(1)
   )))
   p <- rev(seq_along(x))
-  expect_warning(other <- cut_quantile(x[p], n = 4), "Tied values collapsed")
+  expect_warning(other <- xtile(x[p], n = 4), "Tied values collapsed")
   expect_identical(as.integer(other)[order(p)], as.integer(out))
 })
 
@@ -485,7 +485,7 @@ for (.function_name in setdiff(
 )
 for (.scenario in names(.milestone_quantile_cases)) {
   test_that(
-    paste("milestone cut_quantile stable value boundaries", .scenario),
+    paste("milestone xtile stable value boundaries", .scenario),
     {
       case <- .milestone_quantile_cases[[.scenario]]
       before <- case$x
@@ -505,11 +505,11 @@ for (.scenario in names(.milestone_quantile_cases)) {
       collapsed <- groups < case$n
       if (collapsed) {
         expect_warning(
-          out <- do.call(cut_quantile, case),
+          out <- do.call(xtile, case),
           "[Cc]ollaps|[Tt]ie|[Ff]ewer"
         )
       } else {
-        expect_no_warning(out <- do.call(cut_quantile, case))
+        expect_no_warning(out <- do.call(xtile, case))
       }
       expect_identical(as.integer(out), expected_codes)
       if (!collapsed && is.null(case$labels)) {
@@ -539,7 +539,7 @@ for (.scenario in names(.milestone_quantile_cases)) {
       shuffled <- case
       shuffled$x <- case$x[p]
       expect_warning(
-        other <- do.call(cut_quantile, shuffled),
+        other <- do.call(xtile, shuffled),
         if (collapsed) "Tied values collapsed" else NA
       )
       expect_identical(as.integer(other)[order(p)], codes)
@@ -579,9 +579,9 @@ for (.scenario in names(.milestone_quantile_cases)) {
   null_values = list(x = NULL)
 )
 for (.scenario in names(.milestone_invalid_quantiles)) {
-  test_that(paste("milestone cut_quantile validates", .scenario), {
+  test_that(paste("milestone xtile validates", .scenario), {
     case <- .milestone_invalid_quantiles[[.scenario]]
-    expect_error(do.call(cut_quantile, case))
+    expect_error(do.call(xtile, case))
   })
 }
 
@@ -845,7 +845,7 @@ for (.function_name in c("fre", "fre1", "fre2")) {
           }
           expect_equal(out, fre1(d, x, y, .type = "list"))
         } else {
-          out <- fre2(d, x, y)
+          out <- xtab(d, x, y, .total = TRUE)
           expect_identical(class(out), class(d))
           expect_equal(tail(out$total, 1), nrow(d))
           expect_equal(sum(head(out$total, -1)), nrow(d))
@@ -858,7 +858,10 @@ for (.function_name in c("fre", "fre1", "fre2")) {
               drop = FALSE
             ])))
           )
-          expect_equal(tibble::as_tibble(out), fre2(d, x, y, .type = "tibble"))
+          expect_equal(
+            tibble::as_tibble(out),
+            xtab(d, x, y, .type = "tibble", .total = TRUE)
+          )
         }
         expect_identical(d, before)
       }
@@ -870,7 +873,10 @@ test_that("milestone optional frequency formatting remains explicit", {
   d <- .milestone_frequency_cases$unequal_margins
   expect_s3_class(fre(d, x, .type = "flextable"), "flextable")
   expect_s3_class(fre1(d, x, y, .type = "flextable"), "flextable")
-  expect_s3_class(fre2(d, x, y, .type = "flextable"), "flextable")
+  expect_s3_class(
+    xtab(d, x, y, .type = "flextable", .total = TRUE),
+    "flextable"
+  )
   expect_s3_class(fre1(d, x, y, .type = "tibble"), "tbl_df")
 })
 
@@ -965,7 +971,7 @@ for (.scenario in names(.milestone_frequency_cases)) {
           .format_function,
           fre = fre(d, x, .type = "flextable"),
           fre1 = fre1(d, x, y, .type = "flextable"),
-          fre2 = fre2(d, x, y, .type = "flextable")
+          fre2 = xtab(d, x, y, .type = "flextable", .total = TRUE)
         )
         expect_s3_class(out, "flextable")
         displayed <- out$body$dataset

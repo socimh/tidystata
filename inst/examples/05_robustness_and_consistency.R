@@ -86,8 +86,8 @@ mean(checks$x, na.rm = TRUE) # 4
 sd(checks$x, na.rm = TRUE)
 
 # Deliberately invalid calls: uncomment and run ONE at a time to see each error.
-# tab2(tbl, group)                     # Needs two variables.
+# xtab(tbl, group)                     # Needs two variables.
 # summ(tbl, x, .stat = "not_a_stat")   # Unknown statistic.
-# cut_quantile(rep(1, 5))              # Cannot split a constant vector.
+# xtile(rep(1, 5))              # Cannot split a constant vector.
 # preview_table(tbl, n = 0)            # n must be positive.
 # row_mean(select(tbl, starts_with("absent"))) # No columns selected.

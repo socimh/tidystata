@@ -3,10 +3,9 @@
 \name{tab}
 \alias{tab}
 \alias{tab1}
-\alias{tab2}
+\alias{xtab}
 \alias{fre}
 \alias{fre1}
-\alias{fre2}
 \title{Tabulate columns}
 \usage{
 tab(
@@ -14,7 +13,10 @@ tab(
   ...,
   .by = NULL,
   .desc = FALSE,
-  .group_order = c("keys", "frequency")
+  .group_order = c("keys", "frequency"),
+  .total = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 )
 
 tab1(
@@ -23,10 +25,22 @@ tab1(
   .by = NULL,
   .desc = FALSE,
   .type = c("list", "tibble"),
-  .group_order = c("keys", "frequency")
+  .group_order = c("keys", "frequency"),
+  .total = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 )
 
-tab2(.data, ..., .flip = FALSE)
+xtab(
+  .data,
+  ...,
+  .flip = FALSE,
+  .total = FALSE,
+  .type = c("auto", "tibble", "flextable"),
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic"),
+  .chi2 = FALSE
+)
 
 fre(
   .data,
@@ -34,7 +48,9 @@ fre(
   .by = NULL,
   .desc = FALSE,
   .type = c("auto", "tibble", "flextable"),
-  .group_order = c("keys", "frequency")
+  .group_order = c("keys", "frequency"),
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 )
 
 fre1(
@@ -43,17 +59,17 @@ fre1(
   .by = NULL,
   .desc = FALSE,
   .type = c("list", "tibble", "flextable"),
-  .group_order = c("keys", "frequency")
+  .group_order = c("keys", "frequency"),
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic")
 )
-
-fre2(.data, ..., .flip = FALSE, .type = c("auto", "tibble", "flextable"))
 }
 \arguments{
 \item{.data}{An in-memory data frame, tibble, or data.table.
 Collect lazy tables before tabulating. \code{tab()}, \code{tab1()}, \code{fre()} and
 \code{fre1()} also accept an atomic vector, tabulated as a tibble column named
-\code{value}; omit selectors and \code{.by} in this form. \code{tab2()} and \code{fre2()} need
-a data frame.
+\code{value}; omit selectors and \code{.by} in this form. \code{xtab()} needs a data
+frame.
 All spatial \code{sfc} geometry columns are excluded before attribute tabulation;
 geometry columns cannot be selected as measured variables or grouping keys.}
 
@@ -67,8 +83,8 @@ See examples below.}
 \item{.by}{Optional grouping columns, selected with tidyselect. For \code{tab()},
 \code{tab1()}, \code{fre()} and \code{fre1()}, \code{NULL} inherits existing \code{group_by()} groups;
 an explicit selection replaces them. Grouping columns are not measured
-variables. \code{tab2()} and \code{fre2()} do not accept \code{.by}, \code{.desc} or
-\code{.group_order}; supplying them is an error.}
+variables. \code{xtab()} does not accept \code{.by}, \code{.desc} or \code{.group_order};
+supplying them is an error.}
 
 \item{.desc}{If \code{TRUE}, sort categories by descending count within each
 group (missing categories stay last). To order the \code{.by} group blocks by
@@ -79,12 +95,33 @@ retains key order; \code{"frequency"} orders by descending observation count,
 including missing measured values. Missing grouping keys appear last and ties
 follow key order. \code{.desc} controls categories within each group independently.}
 
+\item{.total}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, add "Total" rows:
+\code{tab(.total = TRUE)} is \code{fre()} and \code{tab1(.total = TRUE)} is \code{fre1()}.
+\code{xtab(.total = TRUE)} adds a total row and a total column. Flextable output
+from \code{xtab()} requires totals.}
+
+\item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector
+with one value per row), like Stata's \verb{[fweight]}/\verb{[aweight]}. Rows with a
+missing weight are excluded with a message; negative weights are an error.
+When \code{...} is omitted, the weight column is not tabulated itself.}
+
+\item{.wt_type}{\code{"frequency"} (default) or \code{"analytic"}. Frequency weights
+count each row \code{w} times, so \code{n} is the sum of the weights, as in
+\code{dplyr::count(wt =)}; non-integer weights are allowed. Analytic weights
+(Stata's \verb{[aweight]}, suitable for sampling weights) are rescaled within
+each \code{.by} group to sum to the number of rows, so \code{n} stays on the sample
+scale. Percentages are the same under both types.}
+
 \item{.type}{Output type. \code{tab1()} and \code{fre1()} default to a list of
-tables; \code{fre()} and \code{fre2()} default to \code{"auto"}, preserving the input
+tables; \code{fre()} and \code{xtab()} default to \code{"auto"}, preserving the input
 container. Explicit \code{"tibble"} always returns a plain tibble. Explicit
 \code{"flextable"} output requires the optional flextable package.}
 
 \item{.flip}{If TRUE, will transpose the output tibble.}
+
+\item{.chi2}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, \code{xtab()} reports
+Pearson's chi-square test of independence and Cramer's V, like Stata's
+\verb{tab x y, chi2 V}. See Details.}
 }
 \value{
 A table, a list of tables, or an explicitly requested flextable. Default
@@ -100,15 +137,17 @@ Enhanced \code{count()}.
 \itemize{
 \item \code{tab()} - Tabulates variable(s) simultaneously, similar to \code{count()}.
 \item \code{tab1()} - Tabulates variable(s) one by one.
-\item \code{tab2()} - Cross-tabulates two variables.
-\item \code{fre()} - Adds "Total" row(s) to the output of \code{tab()}.
-\item \code{fre1()} - Adds "Total" row(s) to the output of \code{tab1()}.
-\item \code{fre2()} - Adds a "Total" row and a "total" column to the output of \code{tab2()}.
+\item \code{xtab()} - Cross-tabulates two variables, like Stata's \verb{tab x y}.
 }
 
-The tabulation and frequency functions return data by default. The \code{fre()}
-family adds totals; rich output is available with \code{.type = "flextable"}
-when the optional flextable package is installed.
+Each takes \code{.total = TRUE} to add "Total" rows (and, for \code{xtab()}, a
+"total" column). \code{fre()} and \code{fre1()} are shortcuts for \code{tab(.total = TRUE)}
+and \code{tab1(.total = TRUE)}, named after Stata's \code{fre}. \code{tab2()} and \code{fre2()}
+are deprecated names for \code{xtab()} and \code{xtab(.total = TRUE)}.
+
+The functions return data by default. With totals, rich output is
+available from \code{fre()}, \code{fre1()} and \code{xtab(.total = TRUE)} with
+\code{.type = "flextable"} when the optional flextable package is installed.
 
 For \code{tab()}, \code{tab1()}, \code{fre()} and \code{fre1()}, \code{n} counts observations.
 \code{percent} and \code{cum} are percentages from zero to 100 using all observations
@@ -129,9 +168,9 @@ an observed \code{"Total"} category. Counts remain separate; use \code{tab()} or
 flattening their contents. Selecting no measured variables returns no rows:
 \code{tab()} and \code{fre()} retain their count and percentage columns and any grouping
 keys; \code{tab1()} and \code{fre1()} return an empty list by default or an empty table
-with \code{.type = "tibble"}. \code{tab2()} and \code{fre2()} return an empty table when no
+with \code{.type = "tibble"}. \code{xtab()} returns an empty table when no
 variables are selected; otherwise exactly two variables are required.
-With no selected variables, \code{fre2(..., .type = "flextable")} errors because
+With no selected variables, \code{xtab(..., .type = "flextable")} errors because
 rich cross-tabulation requires two selected variables.
 
 Cross-tabulation keeps category names unchanged. Categories may match the
@@ -139,13 +178,24 @@ original variable names. Column categories follow their values: factor
 levels in order, other types ascending, with missing values last.
 A category matching the combined row-header name,
 or literal \code{"NA"} alongside a missing column category, causes a name-collision
-error. In \code{fre2()}, the column category \code{"total"} is reserved for marginal
-totals; recode it first or use \code{tab2()}.
-The final row in \code{fre2()} is the marginal total, labelled \code{"total"}; an
+error. With \code{xtab(.total = TRUE)}, the column category \code{"total"} is reserved
+for marginal totals; recode it first or omit the totals.
+The final row of \code{xtab(.total = TRUE)} is the marginal total, labelled \code{"total"}; an
 observed row category with the same label remains a separate row.
 Blank column categories use \code{"<empty>"}, with the smallest unused numeric
 suffix when that header is already taken. Logical cross-tabulation axes
 follow \code{FALSE}, \code{TRUE}, then missing values.
+
+With \code{.chi2 = TRUE}, \code{xtab()} tests the categories shown in the table,
+including missing ones (filter them out first to exclude them), and drops
+rows or columns with no observations. It prints Pearson's chi-square, its
+degrees of freedom, the p-value and Cramer's V as a message, and stores
+them as a one-row tibble in \code{attr(result, "chi2")} with columns
+\code{statistic}, \code{df}, \code{p_value}, \code{cramers_v} and \code{n}. Flextable output adds
+them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The test
+matches \code{chisq.test(correct = FALSE)}. Frequency weights are treated as
+counts; analytic weights are an error, because a design-based test such as
+\code{survey::svychisq()} is needed for sampling weights.
 
 Combined \code{tab1()} output uses character values when factor types cannot be
 combined; each variable's category order is retained. List output preserves
@@ -175,13 +225,18 @@ tab(starwars, male = sex == "male")
 
 tab(starwars, ends_with("color"))
 
-tab(starwars, s_match("s*e"))
+tab(starwars, varlist("s*e"))
 
 tab(starwars)
 
 tab(c(1, 1, 2, NA))
 
 fre(c(1, 1, 2, NA))
+
+# Weighted frequencies, like Stata's tab x [fw=w] or [aw=w]
+survey <- tibble::tibble(edu = c("low", "high", "high"), w = c(2, 1, 1.5))
+tab(survey, edu, .wt = w)
+tab(survey, edu, .wt = w, .wt_type = "analytic")
 
 tab(starwars, sex, .by = species, .group_order = "frequency")
 
@@ -195,9 +250,15 @@ fre1(starwars, ends_with("color"))
 
 fre1(starwars, ends_with("color"), .type = "list")
 
-tab2(starwars, sex, gender)
+tab(starwars, sex, .total = TRUE)
 
-tab2(starwars, height, gender)
+xtab(starwars, sex, gender)
 
-fre2(starwars, height, gender)
+xtab(starwars, height, gender)
+
+xtab(starwars, height, gender, .total = TRUE)
+
+# Chi-square test of independence, like Stata's tab x y, chi2 V
+chi2 <- xtab(starwars, sex, gender, .chi2 = TRUE)
+attr(chi2, "chi2")
 }

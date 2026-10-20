@@ -1,0 +1,128 @@
+---
+title: "Coming from Stata"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(statart)
+
+entries <- statart:::findit_entries()
+
+# Pandoc reads markdown inside HTML blocks, so encode ASCII punctuation as
+# entities to keep code such as `x*` and quotes exactly as written. Non-ASCII
+# text is encoded too: pkgdown may render in a non-UTF-8 locale, where cat()
+# would print Chinese as <U+xxxx> escapes.
+escape_html <- function(x) {
+  vapply(
+    x,
+    function(text) {
+      codes <- utf8ToInt(text)
+      punct <- codes %in% c(33:47, 58:64, 91:96, 123:126) | codes > 127
+      chars <- vapply(codes, intToUtf8, character(1))
+      chars[punct] <- paste0("&#", codes[punct], ";")
+      paste(chars, collapse = "")
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
+}
+
+section_tables <- function(section, task, detail, headers) {
+  for (name in unique(entries[[section]])) {
+    rows <- entries[entries[[section]] == name, ]
+    notes <- ifelse(
+      nzchar(rows[[detail]]),
+      paste0(escape_html(rows[[task]]), "<br><small>", escape_html(rows[[detail]]), "</small>"),
+      escape_html(rows[[task]])
+    )
+    table <- data.frame(
+      paste0("<code>", escape_html(rows$stata), "</code>"),
+      paste0("<code>", escape_html(rows$r), "</code>"),
+      notes
+    )
+    names(table) <- escape_html(headers)
+    cat("\n\n## ", escape_html(name), "\n\n", sep = "")
+    cat(
+      knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
+      sep = "\n"
+    )
+  }
+}
+```
+
+[中文版](coming-from-stata-zh.html)
+
+If you know Stata, you already know what you want to do; the question is how
+to say it in R. This page lists Stata commands next to the R code that does the
+same job, using statart where it has a Stata-style function and the standard
+package everywhere else.
+
+## Look it up from the console
+
+`findit()` searches the same list from R. Type one Stata word bare, or quote
+anything longer. Stata's abbreviations work.
+
+```{r}
+findit(reg)
+findit("merge 1:1 id, keep(match)")
+```
+
+Call `findit()` with no argument for the whole list, or `??stata` to find this
+help again.
+
+## Where to find the rest
+
+statart covers the everyday loop of inspecting, tabulating, summarising,
+preparing and checking data. For everything else, these packages are the usual
+choices:
+
+- **Regression and fixed effects** (`regress`, `reghdfe`, `xtreg`,
+  `ivregress`): `lm()` and `glm()`, or `fixest::feols()`.
+- **Regression tables** (`esttab`, `outreg2`): `modelsummary::modelsummary()`.
+- **Marginal effects** (`margins`): marginaleffects.
+- **Reshaping** (`reshape`): `tidyr::pivot_longer()` and `pivot_wider()`.
+- **Winsorising** (`winsor2`): `datawizard::winsorize()`.
+- **Panels and calendar periods** (`tsset`, `xtset`, `L.`, `mofd()`): tsibble
+  and lubridate.
+- **Survey data** (`svyset`, `svy:`): srvyr and survey.
+- **Graphs** (`twoway`, `histogram`): ggplot2; for `binscatter`, binsreg or
+  `statar::stat_binmean()`.
+
+statart and [statar](https://github.com/matthieugomez/statar) can be attached
+together; only `tab()` and `xtile()` share names. Attach statart last, or write
+`statart::tab()`.
+
+A few RStudio habits replace Stata's interface: Ctrl+Enter (Cmd+Return on a
+Mac) runs the current line or selection, Tab completes names, and the
+Environment and Files panes play the roles of Stata's Variables window and
+`dir`.
+
+In the tables below, `data` is your dataset, `data1` and `data2` are the master
+and using data of a merge, and `fit` is a fitted model. Most entries use dplyr,
+so attach it with `library(dplyr)` or `library(tidyverse)`.
+
+```{r, echo = FALSE, results = "asis"}
+section_tables("section", "task", "detail", c("Stata", "R", "Notes"))
+```
+
+## R functions in this guide
+
+R functions a Stata user is likely to meet, including every function used
+above, with its package, a related Stata command and what it does. Type
+`findit(name)`, such as `findit(left_join)`, to see the Stata commands it
+replaces.
+
+```{r, echo = FALSE, results = "asis"}
+functions <- statart:::findit_functions()
+table <- data.frame(
+  paste0("<code>", escape_html(functions$`function`), "()</code>"),
+  escape_html(functions$package),
+  escape_html(functions$stata),
+  escape_html(functions[["description"]])
+)
+names(table) <- escape_html(c("Function", "Package", "Related Stata", "Description"))
+cat(
+  knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
+  sep = "\n"
+)
+```

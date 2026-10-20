@@ -81,7 +81,7 @@ group_vars(summary)
 Summary and inventory results are ungrouped. Grouping keys remain ordinary
 columns where reported. For `tab()`, `tab1()`, `fre()`, `fre1()`, `summ()` and
 `tabstat()`, `.by = NULL` inherits existing groups; an explicit `.by` replaces
-them. Cross-tabulation with `tab2()` or `fre2()` has no `.by` argument.
+them. Cross-tabulation with `xtab()` or `xtab(.total = TRUE)` has no `.by` argument.
 
 ```{r group-override}
 summ(grouped, score, .by = answer, .stat = c("n", "mean"))

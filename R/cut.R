@@ -1,18 +1,30 @@
 #' Cut a numeric vector into intervals.
 #'
-#' @param x A numeric vector. `cut_quantile()` also accepts a logical vector,
+#' @description
+#' * `xtile()` creates `n` quantile groups, following Stata's `xtile`.
+#' * `cut_length()` creates `n` intervals of equal length.
+#' * `cut_breaks()` cuts at given cutpoints.
+#'
+#' `xtile()` was called `cut_quantile()` before statart 0.2.0.9000; the old
+#' name still works with a once-per-session notice.
+#'
+#' @param x A numeric vector. `xtile()` also accepts a logical vector,
 #' treated as 0/1.
 #' @param n A positive integer. The number of intervals.
 #' @param method Quantile boundaries (`"quantile"`, the default), or balanced
 #' rank groups (`"rank"`). Rank groups may split ties, breaking them by original
 #' position. They differ in size by at most one; earlier groups get extra rows.
+#' @param wt Optional weights for `xtile()`, one per element of `x`, like
+#' Stata's `xtile ... [aweight = w]`. Cutpoints then follow Stata's weighted
+#' percentile rule; elements with a missing weight get a missing code. Not
+#' available with `method = "rank"`.
 #' @param breaks Numeric cutpoints for `cut_breaks()`. The observed minimum and
 #' maximum are included automatically. `NULL` uses the observed median as an
 #' interior cutpoint. A single number supplies one interior cutpoint, rather
 #' than the number of intervals.
 #' @inheritParams base::cut
 #'
-#' @details `cut_quantile()` follows Stata's `xtile` rule with type-7
+#' @details `xtile()` follows Stata's `xtile` rule with type-7
 #' quantile cutpoints at `1/n, 2/n, ...`: each value joins the first group
 #' whose cutpoint is at least that value. Equal values stay in the same group
 #' and distinct values are never merged, so a 0/1 dummy always gives two
@@ -36,11 +48,12 @@
 #' group count; custom labels must match that count.
 #'
 #' @return An ordered factor, or integer interval codes when `labels = FALSE`
-#' or when `cut_quantile()` runs in a grouped data mask with default labels.
+#' or when `xtile()` runs in a grouped data mask with default labels.
 #'
 #' @name cut
 #' @examples
-#' cut_quantile(1:20)
+#' xtile(1:20)
+#' xtile(c(0, 0, 0, 1, 1), 2)
 #'
 #' cut_length(1:20)
 #'
@@ -49,11 +62,12 @@
 
 #' @rdname cut
 #' @export
-cut_quantile <- function(
+xtile <- function(
   x,
   n = 4,
   labels = NULL,
-  method = c("quantile", "rank")
+  method = c("quantile", "rank"),
+  wt = NULL
 ) {
   method <- match.arg(method)
   if (is.logical(x) && is.null(dim(x))) {
@@ -78,6 +92,14 @@ cut_quantile <- function(
       n != floor(n)
   ) {
     stop("`n` must be a single positive integer.", call. = FALSE)
+  }
+  if (!is.null(wt)) {
+    if (method == "rank") {
+      stop("`wt` is not supported with `method = \"rank\"`.", call. = FALSE)
+    }
+    wt <- weights_check(wt, length(x), "`wt`")
+    # Observations with a missing weight get a missing code, as in Stata.
+    x[is.na(wt)] <- NA
   }
   observed <- x[!is.na(x)]
   if (length(observed) == 0L) {
@@ -130,12 +152,16 @@ cut_quantile <- function(
   }
   # Stata xtile rule: a value joins the first group whose cutpoint is at least
   # the value, so distinct values are never merged into one group.
-  cutpoints <- stats::quantile(
-    observed,
-    probs = seq_len(n - 1L) / n,
-    type = 7,
-    names = FALSE
-  )
+  cutpoints <- if (is.null(wt)) {
+    stats::quantile(
+      observed,
+      probs = seq_len(n - 1L) / n,
+      type = 7,
+      names = FALSE
+    )
+  } else {
+    weighted_quantile(observed, wt[!is.na(x)], seq_len(n - 1L) / n)
+  }
   if (anyNA(cutpoints)) {
     stop(
       "Cannot form quantile cutpoints from these observations.",

@@ -60,13 +60,13 @@ typeof(row_min(integers)) # integer
 
 # Quantile groups, equal-width groups, and your own cut point.
 amounts <- c(1:8, NA)
-cut_quantile(amounts, n = 2)
+xtile(amounts, n = 2)
 cut_length(amounts, n = 2)
 cut_breaks(amounts, breaks = 4)
 
 # Ties stay together; fewer than four intervals and a warning are expected.
 tied <- c(rep(1, 8), 2, 3)
-cut_quantile(tied, n = 4)
+xtile(tied, n = 4)
 
 # Repeat random draws and time an expression.
 set_seed(runif(4), 2026)

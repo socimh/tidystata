@@ -12,6 +12,7 @@ utils::globalVariables(
     "valid",
     "sum_valid",
     "...any_miss",
+    "...wt",
     "...tmp",
     "...valid_sum",
     "head",

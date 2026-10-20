@@ -33,7 +33,7 @@ assign(
 )
 stopifnot(!requireNamespace("flextable", quietly = TRUE))
 library(statart)
-stopifnot(length(getNamespaceExports("statart")) == 46L)
+stopifnot(length(getNamespaceExports("statart")) == 68L)
 preview <- preview_table(tibble::tibble(id = 1:30), n = 4)
 stopifnot(nrow(preview) == 30L, identical(preview$id, 1:30))
 stopifnot(inherits(dplyr::mutate(preview, twice = id * 2), "statart_preview"))
@@ -48,13 +48,13 @@ d <- data.frame(g = c("A", "A", NA), x = c(1, NA, 2), y = c(3, NA, 4))
 stopifnot(
   identical(class(fre(d, x)), "data.frame"),
   is.list(fre1(d, x)),
-  identical(class(fre2(d, x, y)), "data.frame"),
+  identical(class(xtab(d, x, y, .total = TRUE)), "data.frame"),
   identical(row_max(d[c("x", "y")]), c(3, NA_real_, 4)),
   identical(as_numeric(c("1", "2")), c(1, 2)),
   nrow(tab1(d, x, .by = g)$x) == 3L,
   nrow(codebook(d)) == 3L,
   nrow(summ(d, x, .mode = "table")) == 1L,
-  length(cut_quantile(1:20)) == 20L
+  length(xtile(1:20)) == 20L
 )
 error <- tryCatch(fre(d, x, .type = "flextable"), error = function(e) {
   conditionMessage(e)
