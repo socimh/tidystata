@@ -52,8 +52,7 @@ assert <- function(.data, ..., .by = NULL) {
     value <- results[[names(conditions)[[i]]]]
     if (!is.logical(value)) {
       cli::cli_abort(
-        "Condition {.code {labels[[i]]}} must give {.code TRUE} or
-         {.code FALSE}, not {.obj_type_friendly {value}}."
+        "Condition {.code {labels[[i]]}} must give {.code TRUE} or {.code FALSE}, not {.obj_type_friendly {value}}."
       )
     }
     failed <- which(!value | is.na(value))

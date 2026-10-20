@@ -46,8 +46,7 @@ weights_check <- function(weights, size, arg, call = rlang::caller_env()) {
   }
   if (length(weights) != size) {
     cli::cli_abort(
-      "{.arg {arg}} must have one value per row ({size}), not
-       {length(weights)}.",
+      "{.arg {arg}} must have one value per row ({size}), not {length(weights)}.",
       call = call
     )
   }

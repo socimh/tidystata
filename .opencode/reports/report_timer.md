@@ -1,6 +1,6 @@
 # Function: timer()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:23 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:37 | **Status:** PASS
 
 ## Example 1: Basic timing
 
@@ -11,8 +11,7 @@ timer(Sys.sleep(0.5))
 **Output:**
 
 ```
-Time spent: 0.511s
-
+Time spent: 0.504s
 ```
 
 ## Example 2: Timing with return value
@@ -25,8 +24,7 @@ result
 **Output:**
 
 ```
-Time spent: 0.004s
-
+Time spent: 0.003s
 ```
 
 **Return value:**
@@ -45,7 +43,6 @@ timer(1 + 1)
 
 ```
 Time spent: 0.000s
-
 ```
 
 ## Example 4: With pipe operations
@@ -59,7 +56,6 @@ nrow(result)
 
 ```
 Time spent: 0.001s
-
 ```
 
 **Return value (nrow):**
@@ -81,8 +77,7 @@ timer({
 **Output:**
 
 ```
-Time spent: 0.000s
-
+Time spent: 0.001s
 ```
 
 ## Example 6: Internal duration formatting helper

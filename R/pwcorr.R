@@ -79,16 +79,14 @@ pwcorr <- function(
   values <- pwcorr_values(values, selected = !missing(...), call = error_call)
   if (.wide && "variable" %in% names(values)) {
     cli::cli_abort(
-      "Column {.var variable} holds the row names of the wide table; rename
-       the variable {.var variable} first."
+      "Column {.var variable} holds the row names of the wide table; rename the variable {.var variable} first."
     )
   }
   reserved <- if (.wide) "variable" else c("var1", "var2", "r", "n", "p")
   clash <- intersect(group_vars, c(reserved, if (.wide) names(values)))
   if (length(clash)) {
     cli::cli_abort(
-      "Grouping variable {.var {clash[[1L]]}} clashes with an output column
-       name; rename it first."
+      "Grouping variable {.var {clash[[1L]]}} clashes with an output column name; rename it first."
     )
   }
 
@@ -134,8 +132,7 @@ pwcorr_values <- function(data, selected, call = rlang::caller_env()) {
   invalid <- vapply(numeric, is.null, logical(1))
   if (selected && any(invalid)) {
     cli::cli_abort(
-      "{.var {names(data)[invalid]}} must be numeric or logical to be
-       correlated.",
+      "{.var {names(data)[invalid]}} must be numeric or logical to be correlated.",
       call = call
     )
   }

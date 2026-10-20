@@ -110,8 +110,7 @@ misstable_patterns <- function(
   clash <- intersect(names(missing), c("n", "percent", group_vars))
   if (length(clash)) {
     cli::cli_abort(
-      "Variable {.var {clash[[1L]]}} clashes with a pattern table column;
-       rename it first.",
+      "Variable {.var {clash[[1L]]}} clashes with a pattern table column; rename it first.",
       call = call
     )
   }

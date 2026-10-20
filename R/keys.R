@@ -75,8 +75,7 @@ isid <- function(.data, ..., .missok = FALSE) {
     missing <- vapply(keys, function(x) any(is.na(x)), logical(1))
     if (any(missing)) {
       cli::cli_abort(c(
-        "{.var {names(keys)[missing]}} should never be missing to identify
-         rows.",
+        "{.var {names(keys)[missing]}} should never be missing to identify rows.",
         i = "Use {.code .missok = TRUE} to allow missing key values."
       ))
     }
@@ -87,8 +86,7 @@ isid <- function(.data, ..., .missok = FALSE) {
     sets <- length(unique(vctrs::vec_group_id(keys)[copies > 1L]))
     verb <- if (ncol(keys) == 1L) "does" else "do"
     cli::cli_abort(c(
-      "{labels} {verb} not uniquely identify the rows: {sets} value{?s}
-       appear{?s/} more than once ({repeated} rows).",
+      "{labels} {verb} not uniquely identify the rows: {sets} value{?s} appear{?s/} more than once ({repeated} rows).",
       i = "See them with {.fn duplicates_list}."
     ))
   }
@@ -161,10 +159,8 @@ duplicates_drop <- function(.data, ..., .force = FALSE) {
     kept <- vctrs::vec_slice(full, which(!surplus))
     if (vctrs::vec_unique_count(kept) < vctrs::vec_unique_count(full)) {
       cli::cli_abort(c(
-        "Rows sharing {sub('^V', 'v', key_label(names(keys)))} differ in
-         other columns, so dropping them loses data.",
-        i = "Use {.code .force = TRUE} to keep the first row of each set
-             anyway."
+        "Rows sharing {sub('^V', 'v', key_label(names(keys)))} differ in other columns, so dropping them loses data.",
+        i = "Use {.code .force = TRUE} to keep the first row of each set anyway."
       ))
     }
   }

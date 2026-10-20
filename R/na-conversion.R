@@ -88,8 +88,7 @@ na_conversion_missing <- function(
   call = rlang::caller_env()
 ) {
   cli::cli_abort(
-    "Missing {.arg {argument}}. Use {.code {fn}(x, {value})} or
-     {.code x |> {fn}({value})}.",
+    "Missing {.arg {argument}}. Use {.code {fn}(x, {value})} or {.code x |> {fn}({value})}.",
     call = call
   )
 }

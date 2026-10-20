@@ -1,6 +1,6 @@
 # Function: pwcorr()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:22 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:36 | **Status:** PASS
 
 ## Example 1: pairwise correlations with n and p
 
@@ -44,7 +44,6 @@
 ```
 Pearson chi2(8) = 168.6368   Pr = 0.000
 Cramer's V = 0.9845
-
 # A tibble: 5 x 4
   `sex \\ gender` feminine masculine  `NA`
   <chr>              <int>     <int> <int>

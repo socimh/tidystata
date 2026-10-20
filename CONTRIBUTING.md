@@ -66,7 +66,9 @@ statart-specific decisions; consult the guide for everything else.
   whole number, not {.obj_type_friendly {n}}.``) and "can't" otherwise. Add
   `x`/`i` bullets for details and a final `i` hint ending in `?` only when the
   fix is clear. Refer to arguments with `{.arg}`, to data columns as
-  "column", and let cli wrap long lines.
+  "column", and let cli wrap long lines. Keep each message string on one
+  source line: `conditionMessage()` reflows text, but `e$message` keeps
+  source line breaks.
 - **Checks.** Validate public inputs with the vendored rlang checkers
   (`check_bool()`, `check_string()`, `check_number_whole()`,
   `check_data_frame()`, ...) or a `check_*()` helper in `R/utils-check.R`.

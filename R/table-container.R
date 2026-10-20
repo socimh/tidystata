@@ -80,8 +80,7 @@ aggregation_working_data <- function(
 table_check_data_table <- function(call = rlang::caller_env()) {
   if (!requireNamespace("data.table", quietly = TRUE)) {
     cli::cli_abort(
-      "Install the optional package {.pkg data.table} to work with data.table
-       inputs.",
+      "Install the optional package {.pkg data.table} to work with data.table inputs.",
       call = call
     )
   }

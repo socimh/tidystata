@@ -121,8 +121,7 @@ summ_stat_names <- function(stat, call = rlang::caller_env()) {
   }
   if (!is.character(stat) || anyNA(stat) || any(!nzchar(stat))) {
     cli::cli_abort(
-      "{.arg .stat} must be a character vector of non-missing statistic
-       names.",
+      "{.arg .stat} must be a character vector of non-missing statistic names.",
       call = call
     )
   }
@@ -158,8 +157,7 @@ summ_stat_names <- function(stat, call = rlang::caller_env()) {
   if (length(unknown)) {
     unknown <- paste(unknown, collapse = ", ")
     cli::cli_abort(
-      "Unsupported statistic: {unknown}. See {.code ?summ} for supported
-       names.",
+      "Unsupported statistic: {unknown}. See {.code ?summ} for supported names.",
       call = call
     )
   }
@@ -598,8 +596,7 @@ summ_data <- function(
     unavailable <- intersect(requested, calendar_unsupported)
     if (length(unavailable)) {
       cli::cli_abort(
-        "Unsupported statistic {.code {unavailable}}: not supported for
-         date/datetime/time variables.",
+        "Unsupported statistic {.code {unavailable}}: not supported for date/datetime/time variables.",
         call = call
       )
     }
@@ -704,15 +701,13 @@ summ_list <- function(
   if (length(skipped) && length(calendar)) {
     if (length(numeric) == 0L) {
       cli::cli_abort(
-        "Unsupported statistic {.code {skipped}}: not supported for
-         date/datetime/time variables.",
+        "Unsupported statistic {.code {skipped}}: not supported for date/datetime/time variables.",
         call = call
       )
     }
     skipped_variables <- paste(calendar, collapse = ", ")
     cli::cli_warn(
-      "{.code {skipped}} {?is/are} not available for date/datetime/time
-       variables; skipped: {skipped_variables}."
+      "{.code {skipped}} {?is/are} not available for date/datetime/time variables; skipped: {skipped_variables}."
     )
     date <- character()
     datetime <- character()

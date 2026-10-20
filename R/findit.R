@@ -177,9 +177,7 @@ findit_query <- function(expr, call = rlang::caller_env()) {
     return(paste(deparse(expr), collapse = ""))
   }
   cli::cli_abort(
-    "{.arg command} must be one Stata word, an R function name or a quoted
-     string, as in {.code findit(reg)}, {.code findit(left_join)} or
-     {.code findit(\"merge 1:1 id\")}.",
+    "{.arg command} must be one Stata word, an R function name or a quoted string, as in {.code findit(reg)}, {.code findit(left_join)} or {.code findit(\"merge 1:1 id\")}.",
     call = call
   )
 }

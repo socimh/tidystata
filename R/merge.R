@@ -67,8 +67,7 @@ s_merge <- function(
   }
   if (missing(relationship)) {
     cli::cli_abort(
-      "Specify the key {.arg relationship}: {.val 1:1}, {.val m:1} or
-       {.val 1:m}."
+      "Specify the key {.arg relationship}: {.val 1:1}, {.val m:1} or {.val 1:m}."
     )
   }
   relationship <- match.arg(relationship, c("1:1", "m:1", "1:m"))
@@ -110,8 +109,7 @@ s_merge <- function(
   )
   if (length(shared)) {
     cli::cli_inform(c(
-      "Kept the values from {.arg .data} for column{?s} also in {.arg using}:
-       {.var {shared}}.",
+      "Kept the values from {.arg .data} for column{?s} also in {.arg using}: {.var {shared}}.",
       i = "Rename them in {.arg using} first to keep both."
     ))
     other <- other[setdiff(names(other), shared)]
@@ -120,8 +118,7 @@ s_merge <- function(
     check_string(.generate, allow_empty = FALSE, allow_null = TRUE)
     if (.generate %in% c(names(master), names(other))) {
       cli::cli_abort(
-        "Column {.var {(.generate)}} already exists; choose another
-         {.arg .generate} name."
+        "Column {.var {(.generate)}} already exists; choose another {.arg .generate} name."
       )
     }
   }
@@ -162,8 +159,7 @@ s_merge <- function(
     )
     allowed <- paste(merge_group_label(.assert), collapse = ", ")
     cli::cli_abort(
-      "Merge assertion failed: found {found}; {.arg .assert} allows only
-       {allowed}."
+      "Merge assertion failed: found {found}; {.arg .assert} allows only {allowed}."
     )
   }
   if (!is.null(.generate)) {
@@ -184,8 +180,7 @@ merge_groups <- function(value, argument, call = rlang::caller_env()) {
   groups <- c("master", "using", "match")
   if (!is.character(value) || !length(value) || !all(value %in% groups)) {
     cli::cli_abort(
-      "{.arg {argument}} must contain {.val master}, {.val using} and/or
-       {.val match}.",
+      "{.arg {argument}} must contain {.val master}, {.val using} and/or {.val match}.",
       call = call
     )
   }
@@ -221,8 +216,7 @@ merge_check_unique <- function(data, keys, label, call = rlang::caller_env()) {
           label,
           " ({shared} rows share a key)."
         ),
-        i = "Check the relationship, or see the rows with
-             {.fn duplicates_list}."
+        i = "Check the relationship, or see the rows with {.fn duplicates_list}."
       ),
       call = call
     )

@@ -415,8 +415,7 @@ tab2 <- function(
   .data <- weighted$data
   if (.chi2 && !is.null(weighted$weights) && .wt_type == "analytic") {
     cli::cli_abort(c(
-      "{.arg .chi2} is not available with analytic weights, whose counts are
-       not observation counts.",
+      "{.arg .chi2} is not available with analytic weights, whose counts are not observation counts.",
       i = "For sampling weights, use {.fn survey::svychisq}."
     ))
   }
@@ -706,10 +705,8 @@ reject_cross_controls <- function(
   if (length(supplied)) {
     cli::cli_abort(
       c(
-        "{.arg {supplied[[1L]]}} is not supported by {.code {function_name}};
-         cross-tabulations have no groups or category sorting.",
-        i = "Use {.fn tab} or {.fn fre} with {.arg .by}, or filter the data
-             first."
+        "{.arg {supplied[[1L]]}} is not supported by {.code {function_name}}; cross-tabulations have no groups or category sorting.",
+        i = "Use {.fn tab} or {.fn fre} with {.arg .by}, or filter the data first."
       ),
       call = call
     )

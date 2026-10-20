@@ -1,6 +1,6 @@
 # Function: readiness()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:22 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:36 | **Status:** PASS
 
 ## Example 1: Calendar spreads as comparable difftime columns
 
@@ -20,7 +20,6 @@
 1 x     dbl       2 2
 2 day   date      2 2024-01-01
 A list is returned as statistics are heterogeneous.
-
 $numeric
 # A tibble: 1 x 3
   name  type   mean
@@ -84,7 +83,7 @@ statart   dplyr
 ## Example 7: Missing argument diagnostic
 
 ```
-[1] "Missing `.value`. Use na_if_value(x, value) or x |> na_if_value(value)."
+[1] "Missing `.value`. Use `na_if_value(x, value)` or `x |>\nna_if_value(value)`."
 ```
 
 ## Example 8: Grouped quantile cuts return integer codes
@@ -116,8 +115,6 @@ Levels: [11,12.5] < (12.5,14]
 
 ```
 Time spent: 0.000s
-
-Time spent: 0.000s
-
+Time spent: 0.006s
 No duration threshold is asserted. Each timer measures its own expression.
 ```

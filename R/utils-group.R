@@ -34,8 +34,7 @@ check_by_selection <- function(.data, by, call = rlang::caller_env()) {
   cli::cli_abort(
     c(
       "{.arg .by} must select existing columns, not compute {.code {label}}.",
-      i = "Create the grouping column first, e.g.
-           {.code mutate(group = {label})}, then use {.code .by = group}."
+      i = "Create the grouping column first, e.g. {.code mutate(group = {label})}, then use {.code .by = group}."
     ),
     call = call
   )
@@ -87,9 +86,7 @@ check_group_selection <- function(.data, ..., group_vars) {
   renamed <- source %in% group_vars & names(selected) != source
   if (any(renamed)) {
     cli::cli_abort(
-      "Grouping column {.var {source[renamed][[1L]]}} cannot also be measured
-       (selected as {.var {names(selected)[renamed][[1L]]}}). Copy it first,
-       e.g. with {.fn mutate}, to summarise its values.",
+      "Grouping column {.var {source[renamed][[1L]]}} cannot also be measured (selected as {.var {names(selected)[renamed][[1L]]}}). Copy it first, e.g. with {.fn mutate}, to summarise its values.",
       call = rlang::caller_env()
     )
   }

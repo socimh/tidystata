@@ -79,10 +79,8 @@ reserved_name_inform <- function(old, new, function_name, what = NULL) {
   uses <- if (length(old) == 1L) quote(old) else "these names"
   columns <- if (length(old) == 1L) "column" else "columns"
   cli::cli_inform(c(
-    "{renamed} renamed to {replacement} because {.code {function_name}} output
-     uses {uses}.",
-    i = "Rename the input {columns} before calling {.code {function_name}} to
-         choose another name."
+    "{renamed} renamed to {replacement} because {.code {function_name}} output uses {uses}.",
+    i = "Rename the input {columns} before calling {.code {function_name}} to choose another name."
   ))
 }
 
@@ -91,8 +89,7 @@ tab2_check_vars <- function(.data, call = rlang::caller_env()) {
     cli::cli_abort(
       c(
         "Only 1 variable is input.",
-        i = "Provide two variables for cross-tabulation, or more for every
-             pairwise table."
+        i = "Provide two variables for cross-tabulation, or more for every pairwise table."
       ),
       call = call
     )
@@ -464,9 +461,7 @@ tab2_add_total <- function(out, .data, call = rlang::caller_env()) {
   }
   if ("total" %in% names(out)[-1L]) {
     cli::cli_abort(
-      "Column category {.val total} is reserved for totals in
-       {.code tab2(.total = TRUE)}. Recode this category first, or omit
-       {.arg .total}.",
+      "Column category {.val total} is reserved for totals in {.code tab2(.total = TRUE)}. Recode this category first, or omit {.arg .total}.",
       call = call
     )
   }
@@ -511,8 +506,7 @@ result_to_flextable <- function(
   if (!requireNamespace("flextable", quietly = TRUE)) {
     cli::cli_abort(
       c(
-        "{.code .type = \"flextable\"} requires the optional {.pkg flextable}
-         package.",
+        "{.code .type = \"flextable\"} requires the optional {.pkg flextable} package.",
         i = "Install it with {.code install.packages(\"flextable\")}."
       ),
       call = call

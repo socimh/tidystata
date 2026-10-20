@@ -60,8 +60,7 @@ as_dummy <- function(
   if (.remove && any(selected %in% dplyr::group_vars(.data))) {
     key <- intersect(selected, dplyr::group_vars(.data))[[1L]]
     cli::cli_abort(
-      "Grouping key {.var {key}} cannot be removed; ungroup first or use
-       {.code .remove = FALSE}."
+      "Grouping key {.var {key}} cannot be removed; ungroup first or use {.code .remove = FALSE}."
     )
   }
 

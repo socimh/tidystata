@@ -1,11 +1,11 @@
 # Function: keys()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 00:14:01 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:35 | **Status:** PASS
 
 ## Example 1: isid() asserts a key inside a pipeline
 
 ```
-[1] "Variables `id`, `wave` do not uniquely identify the rows: 1 value appears more than once (2 rows).\n<U+2139> See them with `duplicates_list()`."
+[1] "Variables `id`, `wave` do not uniquely identify the rows: 1 value\nappears more than once (2 rows).\ni See them with `duplicates_list()`."
 ```
 
 ## Example 2: duplicates report, tag and list
@@ -34,9 +34,8 @@
 ## Example 3: dropping duplicates guards against data loss
 
 ```
-[1] "Rows sharing Variable `id` differ in other columns, so dropping them loses data.\n<U+2139> Use `.force = TRUE` to keep the first row of each set anyway."
+[1] "Rows sharing variable `id` differ in other columns, so dropping them\nloses data.\ni Use `.force = TRUE` to keep the first row of each set anyway."
 (1 row removed)
-
 # A tibble: 4 x 3
      id  wave score
   <dbl> <dbl> <dbl>
@@ -65,7 +64,6 @@ Not matched                          2
 
 Matched                              2  (.merge == "matched")
 --------------------------------------
-
 # A tibble: 4 x 4
      id   age income .merge
   <int> <dbl>  <dbl> <fct>
@@ -81,8 +79,7 @@ Not matched                          2
 
 Matched                              2  (.merge == "matched")
 --------------------------------------
-
-[1] "Merge assertion failed: found 1 master only row(s) and 1 using only row(s); `.assert` allows only matched."
+[1] "Merge assertion failed: found 1 master only row(s) and 1 using only\nrow(s); `.assert` allows only matched."
 ```
 
 ## Example 6: tab2() cross-tabulates, optionally with totals

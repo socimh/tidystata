@@ -245,8 +245,7 @@ row_missing_count <- function(data) {
 row_reject_na_rm <- function(..., fn, call = rlang::caller_env()) {
   if ("na.rm" %in% ...names()) {
     cli::cli_abort(
-      "{.arg na.rm} is not an argument of {.fn {fn}}; it counts values across
-       all selected columns.",
+      "{.arg na.rm} is not an argument of {.fn {fn}}; it counts values across all selected columns.",
       call = call
     )
   }
@@ -315,8 +314,7 @@ row_extreme_input <- function(..., .values = NULL) {
   scalars <- extra[scalar]
   if (ncol(data) == 0L && !length(scalars)) {
     cli::cli_abort(
-      "Select at least one column; {.code NULL} and zero columns are not
-       supported."
+      "Select at least one column; {.code NULL} and zero columns are not supported."
     )
   }
   list(data = data, scalars = scalars)
@@ -384,8 +382,7 @@ row_common_values <- function(data, call = rlang::caller_env()) {
   original_missing <- unlist(lapply(data, is.na), use.names = FALSE)
   if (any(is.na(values) != original_missing)) {
     cli::cli_abort(
-      "Selected columns have incompatible missing-value definitions; convert
-       labelled missing values explicitly before combining them.",
+      "Selected columns have incompatible missing-value definitions; convert labelled missing values explicitly before combining them.",
       call = call
     )
   }
@@ -414,8 +411,7 @@ row_add_values <- function(data, values, call = rlang::caller_env()) {
     }
     if (is.null(value) || !length(value) %in% c(1L, rows)) {
       cli::cli_abort(
-        "Each vector in {.arg .values} must have length one or the input row
-         count ({rows}).",
+        "Each vector in {.arg .values} must have length one or the input row count ({rows}).",
         call = call
       )
     }
@@ -433,8 +429,7 @@ row_extreme_typed <- function(data, maximum, call = rlang::caller_env()) {
   ordered <- vapply(data, is.ordered, logical(1))
   if (any(ordered) && !all(ordered)) {
     cli::cli_abort(
-      "Ordered factor extrema require compatible ordered columns; convert
-       explicitly before combining them with other types.",
+      "Ordered factor extrema require compatible ordered columns; convert explicitly before combining them with other types.",
       call = call
     )
   }
@@ -465,8 +460,7 @@ row_extreme_typed <- function(data, maximum, call = rlang::caller_env()) {
   if (!all(supported)) {
     unsupported <- paste(names(data)[!supported], collapse = ", ")
     cli::cli_abort(
-      "Row extrema require supported ordered columns; unordered factors, lists
-       and complex columns have no supported ordering: {unsupported}",
+      "Row extrema require supported ordered columns; unordered factors, lists and complex columns have no supported ordering: {unsupported}",
       call = call
     )
   }
@@ -501,23 +495,19 @@ row_numeric_summary <- function(
     measured <- all(vapply(data, inherits, logical(1), "units"))
     if (calendar && !operation %in% c("mean", "median")) {
       cli::cli_abort(
-        "Calendar Date/POSIXct columns support mean and median, not sums or
-         dispersion; convert explicitly first.",
+        "Calendar Date/POSIXct columns support mean and median, not sums or dispersion; convert explicitly first.",
         call = call
       )
     }
     if (duration && operation == "var") {
       cli::cli_abort(
-        "Duration variance has squared units; convert durations explicitly to
-         one numeric unit first.",
+        "Duration variance has squared units; convert durations explicitly to one numeric unit first.",
         call = call
       )
     }
     if (!calendar && !duration && !measured) {
       cli::cli_abort(
-        "Numeric row calculations require compatible supported numeric or
-         logical columns; integer64 and other classes require explicit
-         conversion.",
+        "Numeric row calculations require compatible supported numeric or logical columns; integer64 and other classes require explicit conversion.",
         call = call
       )
     }
@@ -562,8 +552,7 @@ row_check_unit_scale <- function(data, operation, call = rlang::caller_env()) {
       ))),
       error = function(e) {
         cli::cli_abort(
-          "Unsupported measurement scale; convert to an explicit linear unit
-           first.",
+          "Unsupported measurement scale; convert to an explicit linear unit first.",
           parent = e,
           call = call
         )
@@ -576,15 +565,13 @@ row_check_unit_scale <- function(data, operation, call = rlang::caller_env()) {
         !isTRUE(all.equal(increments[1L], increments[2L], tolerance = 1e-10))
     ) {
       cli::cli_abort(
-        "Nonlinear measurement scales require explicit conversion to a linear
-         unit first.",
+        "Nonlinear measurement scales require explicit conversion to a linear unit first.",
         call = call
       )
     }
     if (operation %in% c("sum", "var", "sd") && base[1L] != 0) {
       cli::cli_abort(
-        "Sums and dispersion of offset units require explicit conversion to a
-         zero-origin unit first.",
+        "Sums and dispersion of offset units require explicit conversion to a zero-origin unit first.",
         call = call
       )
     }
@@ -680,8 +667,7 @@ row_input <- function(...) {
   }
   if (ncol(data) == 0L) {
     cli::cli_abort(
-      "Select at least one column; {.code NULL} and zero columns are not
-       supported."
+      "Select at least one column; {.code NULL} and zero columns are not supported."
     )
   }
   valid <- vapply(data, function(x) is.null(dim(x)), logical(1))

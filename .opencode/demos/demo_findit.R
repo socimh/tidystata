@@ -32,7 +32,7 @@ cat("```\n\n## Example 5: no match suggests similar commands\n\n```\n")
 none <- withCallingHandlers(
   findit(regresss),
   message = function(m) {
-    cat(conditionMessage(m))
+    cat(conditionMessage(m), "\n", sep = "")
     invokeRestart("muffleMessage")
   }
 )

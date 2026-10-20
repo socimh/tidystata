@@ -253,8 +253,7 @@ summ <- function(
 
   if (any(vapply(.data_summ, function(x) !is.null(dim(x)), logical(1)))) {
     cli::cli_abort(
-      "Matrix/data-frame columns are not supported; use atomic or list
-       columns."
+      "Matrix/data-frame columns are not supported; use atomic or list columns."
     )
   }
 

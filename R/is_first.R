@@ -46,8 +46,7 @@ is_first <- function(..., .missing = FALSE) {
     error_call <- rlang::current_env()
     size <- tryCatch(dplyr::n(), error = function(e) {
       cli::cli_abort(
-        "Supply the variables that define the groups, or call {.fn is_first}
-         inside a grouped {.fn dplyr::mutate}.",
+        "Supply the variables that define the groups, or call {.fn is_first} inside a grouped {.fn dplyr::mutate}.",
         call = error_call
       )
     })

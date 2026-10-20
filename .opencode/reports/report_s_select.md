@@ -1,6 +1,6 @@
 # Function: s_select()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:22 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:36 | **Status:** PASS
 
 ## Example 1: Select columns by name
 
@@ -190,7 +190,7 @@ tryCatch(
 **Output:**
 
 ```
-Error: Can't select columns that don't exist: `nonexistent_col` (the data have 11 columns). Check the spelling, or name a computed value, e.g. `new = expression`.
+Error: Can't select columns that don't exist: `nonexistent_col` (the data have 11 columns).
 ```
 
 ## Example 6: With data.table

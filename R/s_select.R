@@ -98,8 +98,7 @@ select_abort_unrecognised <- function(
 ) {
   cli::cli_abort(
     c(
-      "Neither {.code <tidy-select>} nor {.code <data-masking>} recognised the
-       input.",
+      "Neither {.code <tidy-select>} nor {.code <data-masking>} recognised the input.",
       " " = "select() error: {select_error}",
       " " = "mutate() error: {mutate_error}"
     ),
@@ -238,10 +237,8 @@ select_check_unmatched <- function(.data, dots, call = rlang::caller_env()) {
     unmatched <- paste(unmatched, collapse = ", ")
     cli::cli_abort(
       c(
-        "Can't select columns that don't exist: {unmatched} (the data have
-         {length(columns)} column{?s}).",
-        i = "Check the spelling, or name a computed value, e.g.
-             {.code new = expression}."
+        "Can't select columns that don't exist: {unmatched} (the data have {length(columns)} column{?s}).",
+        i = "Check the spelling, or name a computed value, e.g. {.code new = expression}."
       ),
       call = call
     )

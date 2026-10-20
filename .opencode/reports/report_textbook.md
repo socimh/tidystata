@@ -1,6 +1,6 @@
 # Function contracts: textbook alignment
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:23 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:37 | **Status:** PASS
 
 ## Example 1: Valid interval counts retain their results
 
@@ -16,18 +16,22 @@ Levels: [1,4.5] < (4.5,8]
 ## Example 2: Invalid counts explain the contract
 
 ```
-n = 0 : `n` must be a single positive integer.
-n = -1 : `n` must be a single positive integer.
-n = 1.5 : `n` must be a single positive integer.
-n = NA : `n` must be a single positive integer.
-n = Inf : `n` must be a single positive integer.
-n = 2,3 : `n` must be a single positive integer.
+n = 0 : `n` must be a whole number larger than or equal to 1, not the number 0.
+n = -1 : `n` must be a whole number larger than or equal to 1, not the number -1.
+n = 1.5 : `n` must be a whole number larger than or equal to 1, not the number
+1.5.
+n = NA : `n` must be a whole number larger than or equal to 1, not a numeric
+`NA`.
+n = Inf : `n` must be a whole number larger than or equal to 1, not the number
+Inf.
+n = 2,3 : `n` must be a whole number larger than or equal to 1, not a double
+vector.
 ```
 
 ## Example 3: Pattern diagnostics
 
 ```
-`string` must be a character string.
+`string` must be a character vector, not the number 12.
 [1] 1 2
 ```
 

@@ -155,8 +155,7 @@ panel_rows <- function(period, shift, time, call = rlang::caller_env()) {
 panel_period <- function(time, x, delta, unit, call = rlang::caller_env()) {
   if (missing(time)) {
     cli::cli_abort(
-      "{.arg time} must be supplied, such as {.code time = year}; it plays the
-       role of the time variable in Stata's {.code xtset}.",
+      "{.arg time} must be supplied, such as {.code time = year}; it plays the role of the time variable in Stata's {.code xtset}.",
       call = call
     )
   }
@@ -183,11 +182,9 @@ panel_check_unique <- function(period, time, call = rlang::caller_env()) {
     )
     example <- format(vctrs::vec_slice(time, which(repeated)[[1L]]))
     hint <- if (grouped) {
-      "Each time should appear once per panel; find the repeats with
-       {.code isid(data, id, time)}."
+      "Each time should appear once per panel; find the repeats with {.code isid(data, id, time)}."
     } else {
-      "Supply the panel identifier, such as {.code .by = id}, and check it
-       with {.code isid(data, id, time)}."
+      "Supply the panel identifier, such as {.code .by = id}, and check it with {.code isid(data, id, time)}."
     }
     cli::cli_abort(
       c("Repeated time values within panel, such as {example}.", i = hint),
@@ -238,21 +235,16 @@ time_period <- function(time, unit, call = rlang::caller_env()) {
   }
   hint <- if (is.factor(time)) {
     c(
-      i = "Its levels need not be in time order. Use
-           {.code factor(wave, levels = ..., ordered = TRUE)}, or
-           {.code as.numeric(as.character(year))} for numeric labels."
+      i = "Its levels need not be in time order. Use {.code factor(wave, levels = ..., ordered = TRUE)}, or {.code as.numeric(as.character(year))} for numeric labels."
     )
   } else if (is.character(time)) {
     c(
-      i = "Convert it first, such as {.code as.numeric(year)},
-           {.code as.Date(date)} or
-           {.code factor(wave, levels = ..., ordered = TRUE)}."
+      i = "Convert it first, such as {.code as.numeric(year)}, {.code as.Date(date)} or {.code factor(wave, levels = ..., ordered = TRUE)}."
     )
   }
   cli::cli_abort(
     c(
-      "{.arg time} must be numeric, a date, a date-time or a period, not
-       {.obj_type_friendly {time}}.",
+      "{.arg time} must be numeric, a date, a date-time or a period, not {.obj_type_friendly {time}}.",
       hint
     ),
     call = call

@@ -39,8 +39,7 @@ set_seed <- function(.fn, seed) {
     seed <- .fn
     if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed)) {
       cli::cli_abort(c(
-        "Used alone, {.fn set_seed} needs one number as the seed, as in
-         {.code set_seed(123)}.",
+        "Used alone, {.fn set_seed} needs one number as the seed, as in {.code set_seed(123)}.",
         i = "In a pipeline, give the seed: {.code x %>% set_seed(123)}."
       ))
     }

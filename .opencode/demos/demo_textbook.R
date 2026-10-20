@@ -6,7 +6,7 @@ for (n in list(0, -1, 1.5, NA_real_, Inf, c(2, 3))) {
   diagnostic <- tryCatch(cut_length(1:8, n), error = conditionMessage)
   stopifnot(
     is.character(diagnostic),
-    grepl("single positive integer", diagnostic)
+    grepl("whole number larger than or equal to 1", diagnostic)
   )
   cat("n =", paste(n, collapse = ","), ":", diagnostic, "\n")
 }
@@ -15,7 +15,7 @@ diagnostic <- tryCatch(
   varlist(12, vars = c("x1", "x2")),
   error = conditionMessage
 )
-stopifnot(grepl("character string", diagnostic))
+stopifnot(grepl("character vector", diagnostic))
 cat(diagnostic, "\n")
 print(varlist("x*", vars = c("x1", "x2", "y")))
 cat("```\n\n## Example 4: Container and row-name contracts\n\n```\n")

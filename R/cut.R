@@ -105,14 +105,12 @@ xtile <- function(
         length(labels) != intervals
     ) {
       cli::cli_abort(
-        "{.arg labels} must have length {intervals}, the effective number of
-         intervals."
+        "{.arg labels} must have length {intervals}, the effective number of intervals."
       )
     }
     if (n > length(observed)) {
       cli::cli_warn(
-        "Requested more groups than non-missing observations; using
-         {intervals} groups."
+        "Requested more groups than non-missing observations; using {intervals} groups."
       )
     }
     sizes <- rep(length(observed) %/% intervals, intervals)
@@ -161,14 +159,12 @@ xtile <- function(
     !is.null(labels) && !identical(labels, FALSE) && length(labels) != intervals
   ) {
     cli::cli_abort(
-      "{.arg labels} must have length {intervals}, the effective number of
-       intervals."
+      "{.arg labels} must have length {intervals}, the effective number of intervals."
     )
   }
   if (intervals < n) {
     cli::cli_warn(
-      "Tied values collapsed quantile cutpoints to {intervals} groups
-       (requested {n})."
+      "Tied values collapsed quantile cutpoints to {intervals} groups (requested {n})."
     )
   }
   codes <- cumsum(present)[raw]

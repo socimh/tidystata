@@ -125,11 +125,8 @@ preview_check_data <- function(x, call = rlang::caller_env()) {
   if (!is.data.frame(x) || !all(class(x) %in% supported)) {
     cli::cli_abort(
       c(
-        "{.arg .data} must be an in-memory data frame, data.table, sf data
-         frame, or ordinary/grouped/rowwise tibble.",
-        i = "Collect lazy tables and convert other subclasses explicitly with
-             {.fn tibble::as_tibble}; apply the wrapper to each table in a
-             list."
+        "{.arg .data} must be an in-memory data frame, data.table, sf data frame, or ordinary/grouped/rowwise tibble.",
+        i = "Collect lazy tables and convert other subclasses explicitly with {.fn tibble::as_tibble}; apply the wrapper to each table in a list."
       ),
       call = call
     )

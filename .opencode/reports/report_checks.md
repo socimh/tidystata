@@ -1,6 +1,6 @@
 # Function: checks()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:20 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:34 | **Status:** PASS
 
 ## Example 1: assertions inside a pipeline
 
@@ -10,7 +10,8 @@
   <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
 1 dbl      68     18    54  72.3  4.72    79
 Assertion failed:
-* `safewater > 50`: 30 contradictions (28 missing) in 68 rows; rows 2, 3, 4, 5, 6, ...
+* `safewater > 50`: 30 contradictions (28 missing) in 68 rows; rows 2, 3, 4, 5,
+  6, ...
 * `popgrowth < 1`: 30 contradictions in 68 rows; rows 1, 2, 4, 22, 38, ...
 ```
 
