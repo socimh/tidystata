@@ -7,6 +7,22 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**Tidyverse conventions pass, 2026-10-20 (branch
+`refactor/tidyverse-conventions`):** `--release` suite **19,469 passing
+expectations**, zero failures, errors, warnings or skips (snapshot tests now
+run with `NOT_CRAN=true`); `R CMD check --as-cran` gives 0 errors, 0 warnings
+and the existing CRAN-incoming NOTE (new submission, six unpublished URLs). The
+seeded shuffle (`--shuffle-seed 20261020`) passes identically. Style check:
+144 sources, 0 findings; `pkgdown::check_pkgdown()` finds no problems.
+Changes: R files named after their functions or families; tests regrouped to
+mirror `R/` (1,319 blocks retained); conditions via cli with shared
+`R/utils-check.R` checkers and per-family error snapshots; `@returns`,
+`@family` and `statart_args`; family-prefixed helpers; demos refreshed for the
+new wording. The baseline before this pass found two unasserted warnings in
+`test-aggregation-core.R`, now asserted. An in-place `load_all()` debug build
+once returned `NA` for a `NaN` group sum in `group_sum_dbl`; fresh installed
+builds match, but the payload rule may deserve a targeted check.
+
 **Speed audit, 2026-10-20 (live checkout):** `--release` suite **19,416
 passing expectations across 3,364 blocks**, zero failures, errors, warnings or
 skips; `R CMD check --as-cran` gives 0 errors, 0 warnings and 1 NOTE (CRAN
@@ -278,7 +294,7 @@ are quiet aliases (`xtab`, `na_if_value`, `value_if_na`, `as_numeric`,
 `as_character`, `pct`, `s_tag`, `tab_gen`, `var_type`, `var_unit`,
 `cut_quantile`, `s_try`, `ds_as_column`, `names_as_column`) documented on their
 primary's help page, and one is deprecated (`s_match`). The package has
-12 required Imports, two bundled datasets (`lifeexp`, `starwars`), and cpp11
+13 required Imports (cli joined on 2026-10-20), two bundled datasets (`lifeexp`, `starwars`), and cpp11
 native row kernels. R >= 4.1 is required.
 
 | Area | Public functions |
@@ -339,7 +355,9 @@ The user-approved follow-up decisions remain binding:
   significant digits, returns calendar spreads as `difftime` columns in list
   mode and numeric unit-labelled spreads in table mode, and handles `hms` clocks.
   It also adds actionable `.by` errors, grouping-column row inputs and supported
-  sf previews/slices. These have active regressions in `test-problems2-low.R`;
+  sf previews/slices. Their regressions, formerly `test-problems2-low.R`, now
+  live in `test-summ.R`, `test-tab.R`, `test-cut.R`, `test-row-stats.R` and
+  `test-preview.R`;
   older readiness triage dispositions deferring them are superseded.
 
 Mixed calendar/numeric location columns in table mode remain character; choose
@@ -376,6 +394,44 @@ installation and direct calls; [current reports](.opencode/reports/INDEX.md)
 show generated console output.
 
 ## Open backlog and release gates
+
+- **API harmonization proposal (decision needed; 2026-10-20):** the tidyverse
+  conventions pass changed no exported names, arguments or defaults. These
+  remaining inconsistencies each need a maintainer decision, and any change
+  would use `lifecycle` soft deprecation with the old form kept working:
+  - *First argument of vector functions.* `x` (`std`, `pc`, `mvdecode`,
+    `tostring`, `xtile`, `s_lag`) versus `.x` (`destring`, `as_numeric`,
+    `na_if_value`, `s_type`, `timer`). Tidyverse: `x` for vector functions,
+    dot prefixes only where `...` could capture the name (design.tidyverse.org,
+    "Dot prefix"). Cost: aliases currently share pages with differently named
+    arguments.
+  - *Missing-value controls.* `na.rm` (`row_*`, default `TRUE`), `.na.rm`
+    (`summ`, default `FALSE`), `.missing` (`is_first`, `row_nvals`) and
+    `.missok` (`isid`). Options: keep the Stata-mirroring names, or one
+    spelling with documented family-specific defaults.
+  - *Undotted options beside dotted ones.* `s_merge(by, using, relationship)`
+    next to `.keep`/`.assert`, `xtile(wt)` versus `summ(.wt)`/`tab(.wt)`, and
+    `varlist(ignore.case)`. Plain `by` is easily confused with `.by`.
+  - *Output selectors.* `.type = c("list", "tibble")` (`tab1`) versus
+    `c("auto", "tibble", "flextable")` (`tab2`, `fre`) versus
+    `c("vector", "table")` (`ds`) versus `.mode` (`summ`).
+  - *Enumerated options.* `match.arg()` still accepts partial matches;
+    `rlang::arg_match()` would give tidyverse errors but rejects abbreviations.
+  - *Grouping.* `tab2()`/`xtab()` have no `.by`.
+  - *Deprecation.* `deprecate_rename()` versus `lifecycle::deprecate_soft()`
+    (lifecycle is only in Suggests).
+  - *Naming schemes.* Stata abbreviations, `s_`-prefixed clash avoiders and
+    verb names coexist; the agreed policy should be written down before new
+    functions are added.
+- **Long-function refactors (deferred):** `summ_variable()` (about 210 lines),
+  `summ()` (196), `xtile()` (140) and `s_merge()` (131) should be split into
+  validate/prepare/compute/assemble steps, one function per focused commit,
+  each measured with `.opencode/tests/benchmark_core.R` under the
+  CONTRIBUTING thresholds. Not done in the conventions pass because these
+  paths were just optimized and need before/after timings.
+- **Argument checks:** `R/utils-check.R` mirrors the checkers rlang 1.2.0
+  exports. Requiring `rlang (>= 1.2.0)` would allow using rlang's own versions
+  once the dependency floor is reviewed.
 
 - **Naming and additions (in progress, one batch per round):** follow the
   [naming and gaps review](.opencode/notes/naming-and-gaps-review.md); its
