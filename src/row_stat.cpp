@@ -1,8 +1,9 @@
 #include "cpp11.hpp"
 #include "cpp11/matrix.hpp"
 #include "cpp11/doubles.hpp"
+#include "cpp11/list.hpp"
+#include "cpp11/logicals.hpp"
 #include <vector>
-#include <set>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -11,114 +12,213 @@ using namespace cpp11;
 namespace writable = cpp11::writable;
 using namespace std;
 
-// Allocate results independently of the input columns and skip missing values.
-writable::doubles row_extreme(data_frame tb, bool maximum)
+// Read each column's data pointer once. Constructing a cpp11 vector per cell
+// costs a protection-list insertion, which dominated every kernel. Logical
+// and integer columns are converted here, NA to NA_real_, as as.double()
+// would, so R need not copy them first.
+struct row_data {
+    std::vector<const double*> columns;
+    std::vector<std::vector<double>> converted;
+    R_xlen_t nrow = 0;
+};
+
+row_data row_columns(const list& tb)
 {
-    if (tb.size() == 0) stop("Select at least one column.");
-    int nrow = tb.nrow();
+    R_xlen_t ncol = tb.size();
+    if (ncol == 0) stop("Select at least one column.");
+    row_data data;
+    data.columns.resize(ncol);
+    data.converted.reserve(ncol);
+    data.nrow = Rf_xlength(VECTOR_ELT(tb, 0));
+    for (R_xlen_t j = 0; j < ncol; ++j) {
+        SEXP column = VECTOR_ELT(tb, j);
+        if (Rf_xlength(column) != data.nrow) stop("Row kernels require equal-length columns.");
+        if (TYPEOF(column) == REALSXP) {
+            data.columns[j] = REAL_RO(column);
+        } else if (TYPEOF(column) == INTSXP || TYPEOF(column) == LGLSXP) {
+            const int* values = TYPEOF(column) == INTSXP ? INTEGER_RO(column) : LOGICAL_RO(column);
+            std::vector<double> doubles(data.nrow);
+            for (R_xlen_t i = 0; i < data.nrow; ++i) {
+                doubles[i] = values[i] == NA_INTEGER ? NA_REAL : values[i];
+            }
+            data.converted.push_back(std::move(doubles));
+            data.columns[j] = data.converted.back().data();
+        } else {
+            stop("Row kernels require logical, integer or double columns.");
+        }
+    }
+    return data;
+}
+
+// Results need at least `minimum` observed values in the row and, with
+// na.rm = FALSE, no missing value at all.
+inline bool row_defined(size_t observed, size_t minimum, bool na_rm, size_t ncol)
+{
+    return observed >= minimum && (na_rm || observed == ncol);
+}
+
+// Allocate results independently of the input columns and skip missing values.
+// Columns are visited in order, so ties keep the first observed value.
+writable::doubles row_extreme(list tb, bool maximum)
+{
+    row_data data = row_columns(tb);
+    const std::vector<const double*>& columns = data.columns;
+    R_xlen_t nrow = data.nrow;
     writable::doubles out(nrow);
-    for (int i = 0; i < nrow; ++i) {
-        double best = NA_REAL;
-        bool observed = false;
-        for (int j = 0; j < tb.size(); ++j) {
-            doubles col = tb[j];
-            double value = col[i];
+    double* best = REAL(out);
+    std::vector<char> observed(nrow, 0);
+    std::fill(best, best + nrow, NA_REAL);
+    for (const double* column : columns) {
+        for (R_xlen_t i = 0; i < nrow; ++i) {
+            double value = column[i];
             if (std::isnan(value)) continue;
-            if (!observed || (maximum ? value > best : value < best)) {
-                best = value;
-                observed = true;
+            if (!observed[i] || (maximum ? value > best[i] : value < best[i])) {
+                best[i] = value;
+                observed[i] = 1;
             }
         }
-        out[i] = best;
     }
     return out;
 }
 
-[[cpp11::register]] writable::doubles row_max_dbl(data_frame tb)
+[[cpp11::register]] writable::doubles row_max_dbl(list tb)
 {
     return row_extreme(tb, true);
 }
 
-[[cpp11::register]] writable::doubles row_min_dbl(data_frame tb)
+[[cpp11::register]] writable::doubles row_min_dbl(list tb)
 {
     return row_extreme(tb, false);
 }
 
-writable::doubles row_total(data_frame tb, bool average)
+// Like rowSums(na.rm = TRUE) and rowMeans(na.rm = TRUE): accumulate column by
+// column in long double and divide before rounding, so results are identical
+// without first copying the columns into a matrix.
+writable::doubles row_total(list tb, bool average, bool na_rm)
 {
-    if (tb.size() == 0) stop("Select at least one column.");
-    int nrow = tb.nrow();
+    row_data data = row_columns(tb);
+    R_xlen_t nrow = data.nrow;
+    std::vector<long double> total(nrow, 0.0L);
+    std::vector<int> observed(nrow, 0);
+    for (const double* column : data.columns) {
+        for (R_xlen_t i = 0; i < nrow; ++i) {
+            if (std::isnan(column[i])) continue;
+            total[i] += column[i];
+            ++observed[i];
+        }
+    }
     writable::doubles out(nrow);
-    for (int i = 0; i < nrow; ++i) {
-        double total = 0;
-        int observed = 0;
-        for (int j = 0; j < tb.size(); ++j) {
-            doubles col = tb[j];
-            if (std::isnan(col[i])) continue;
-            total += col[i];
-            ++observed;
-        }
-        out[i] = average ? (observed ? total / observed : NA_REAL) : total;
+    double* result = REAL(out);
+    size_t minimum = average ? 1 : 0;
+    for (R_xlen_t i = 0; i < nrow; ++i) {
+        result[i] = row_defined(observed[i], minimum, na_rm, data.columns.size())
+            ? static_cast<double>(average ? total[i] / observed[i] : total[i])
+            : NA_REAL;
     }
     return out;
 }
 
-[[cpp11::register]] writable::doubles row_sum_dbl(data_frame tb)
+[[cpp11::register]] writable::doubles row_sum_dbl(list tb, bool na_rm)
 {
-    return row_total(tb, false);
+    return row_total(tb, false, na_rm);
 }
 
-[[cpp11::register]] writable::doubles row_mean_dbl(data_frame tb)
+[[cpp11::register]] writable::doubles row_mean_dbl(list tb, bool na_rm)
 {
-    return row_total(tb, true);
+    return row_total(tb, true, na_rm);
 }
 
-[[cpp11::register]] writable::integers row_unique_dbl(data_frame tb)
+// Number of missing values in each row. Columns flagged in `masks` are
+// already is.na() results; the others are logical, integer, double or
+// character values.
+[[cpp11::register]] writable::integers row_na_count(list tb, logicals masks)
 {
-    if (tb.size() == 0) stop("Select at least one column.");
-    int nrow = tb.nrow();
+    R_xlen_t ncol = tb.size();
+    if (masks.size() != ncol) stop("Each column needs a mask flag.");
+    R_xlen_t nrow = ncol ? Rf_xlength(VECTOR_ELT(tb, 0)) : 0;
     writable::integers out(nrow);
-    for (int i = 0; i < nrow; ++i) {
-        std::set<double> values;
-        bool missing = false;
-        for (int j = 0; j < tb.size(); ++j) {
-            doubles col = tb[j];
-            double value = col[i];
-            if (std::isnan(value)) missing = true;
-            else values.insert(value);
+    int* count = INTEGER(out);
+    std::fill(count, count + nrow, 0);
+    for (R_xlen_t j = 0; j < ncol; ++j) {
+        SEXP column = VECTOR_ELT(tb, j);
+        if (Rf_xlength(column) != nrow) stop("Row kernels require equal-length columns.");
+        bool mask = masks[j] == TRUE;
+        if (mask && TYPEOF(column) == LGLSXP) {
+            const int* values = LOGICAL_RO(column);
+            for (R_xlen_t i = 0; i < nrow; ++i) count[i] += values[i] == 1;
+        } else if (!mask && TYPEOF(column) == REALSXP) {
+            const double* values = REAL_RO(column);
+            for (R_xlen_t i = 0; i < nrow; ++i) count[i] += std::isnan(values[i]);
+        } else if (!mask && (TYPEOF(column) == INTSXP || TYPEOF(column) == LGLSXP)) {
+            const int* values = TYPEOF(column) == INTSXP ? INTEGER_RO(column) : LOGICAL_RO(column);
+            for (R_xlen_t i = 0; i < nrow; ++i) count[i] += values[i] == NA_INTEGER;
+        } else if (!mask && TYPEOF(column) == STRSXP) {
+            for (R_xlen_t i = 0; i < nrow; ++i) count[i] += STRING_ELT(column, i) == NA_STRING;
+        } else {
+            stop("Unsupported column type for counting missing values.");
         }
-        out[i] = static_cast<int>(values.size()) + (missing ? 1 : 0);
     }
     return out;
 }
 
-[[cpp11::register]] writable::doubles row_median_dbl(data_frame tb)
+// Sorting the observed values counts distinct values as an ordered set would:
+// -0 and 0 are equal, and all missing values form one category.
+[[cpp11::register]] writable::integers row_unique_dbl(list tb)
 {
-    if (tb.size() == 0) stop("Select at least one column.");
-    writable::doubles out(tb.nrow());
+    row_data data = row_columns(tb);
+    const std::vector<const double*>& columns = data.columns;
+    R_xlen_t nrow = data.nrow;
+    writable::integers out(nrow);
+    int* counts = INTEGER(out);
     std::vector<double> values;
-    values.reserve(tb.size());
-    for (int i = 0; i < tb.nrow(); ++i) {
+    values.reserve(columns.size());
+    for (R_xlen_t i = 0; i < nrow; ++i) {
         values.clear();
-        for (int j = 0; j < tb.size(); ++j) {
-            doubles col = tb[j];
-            if (!std::isnan(col[i])) values.push_back(col[i]);
+        bool missing = false;
+        for (const double* column : columns) {
+            double value = column[i];
+            if (std::isnan(value)) missing = true;
+            else values.push_back(value);
         }
-        if (values.empty()) {
-            out[i] = NA_REAL;
+        std::sort(values.begin(), values.end());
+        int distinct = values.empty() ? 0 : 1;
+        for (size_t k = 1; k < values.size(); ++k) {
+            if (values[k] != values[k - 1]) ++distinct;
+        }
+        counts[i] = distinct + (missing ? 1 : 0);
+    }
+    return out;
+}
+
+[[cpp11::register]] writable::doubles row_median_dbl(list tb, bool na_rm)
+{
+    row_data data = row_columns(tb);
+    const std::vector<const double*>& columns = data.columns;
+    R_xlen_t nrow = data.nrow;
+    writable::doubles out(nrow);
+    double* median = REAL(out);
+    std::vector<double> values;
+    values.reserve(columns.size());
+    for (R_xlen_t i = 0; i < nrow; ++i) {
+        values.clear();
+        for (const double* column : columns) {
+            if (!std::isnan(column[i])) values.push_back(column[i]);
+        }
+        if (!row_defined(values.size(), 1, na_rm, columns.size())) {
+            median[i] = NA_REAL;
             continue;
         }
         size_t middle = values.size() / 2;
         std::nth_element(values.begin(), values.begin() + middle, values.end());
         double upper = values[middle];
         if (values.size() % 2) {
-            out[i] = upper;
+            median[i] = upper;
         } else {
             double lower = *std::max_element(values.begin(), values.begin() + middle);
             // Avoid overflow of two finite endpoints, without underflowing
             // small endpoints unnecessarily. Opposing infinities remain NaN.
             double threshold = std::numeric_limits<double>::max() / 2;
-            out[i] = std::isfinite(lower) && std::isfinite(upper) &&
+            median[i] = std::isfinite(lower) && std::isfinite(upper) &&
                 (std::abs(lower) > threshold || std::abs(upper) > threshold)
                 ? lower / 2 + upper / 2 : (lower + upper) / 2;
         }
@@ -126,30 +226,32 @@ writable::doubles row_total(data_frame tb, bool average)
     return out;
 }
 
-writable::doubles row_dispersion(data_frame tb, bool standard_deviation)
+writable::doubles row_dispersion(list tb, bool standard_deviation, bool na_rm)
 {
-    if (tb.size() == 0) stop("Select at least one column.");
-    writable::doubles out(tb.nrow());
+    row_data data = row_columns(tb);
+    const std::vector<const double*>& columns = data.columns;
+    R_xlen_t nrow = data.nrow;
+    writable::doubles out(nrow);
+    double* result = REAL(out);
     std::vector<double> values;
-    values.reserve(tb.size());
-    for (int i = 0; i < tb.nrow(); ++i) {
+    values.reserve(columns.size());
+    for (R_xlen_t i = 0; i < nrow; ++i) {
         values.clear();
         bool finite = true;
         double largest = 0;
-        for (int j = 0; j < tb.size(); ++j) {
-            doubles col = tb[j];
-            double value = col[i];
+        for (const double* column : columns) {
+            double value = column[i];
             if (std::isnan(value)) continue;
             values.push_back(value);
             finite = finite && std::isfinite(value);
             largest = std::max(largest, std::abs(value));
         }
-        if (values.size() < 2) {
-            out[i] = NA_REAL;
+        if (!row_defined(values.size(), 2, na_rm, columns.size())) {
+            result[i] = NA_REAL;
             continue;
         }
         if (!finite) {
-            out[i] = R_NaN;
+            result[i] = R_NaN;
             continue;
         }
         // Shift before centering to preserve small differences at large
@@ -167,7 +269,7 @@ writable::doubles row_dispersion(data_frame tb, bool standard_deviation)
             scale = std::max(scale, std::abs(delta));
         }
         if (scale == 0) {
-            out[i] = 0;
+            result[i] = 0;
             continue;
         }
         long double squares = 0;
@@ -180,17 +282,17 @@ writable::doubles row_dispersion(data_frame tb, bool standard_deviation)
         long double normalized = std::max(static_cast<long double>(0),
             (squares - correction * correction / values.size()) / (values.size() - 1));
         long double sd = scale * std::sqrt(normalized) * factor;
-        out[i] = static_cast<double>(standard_deviation ? sd : sd * sd);
+        result[i] = static_cast<double>(standard_deviation ? sd : sd * sd);
     }
     return out;
 }
 
-[[cpp11::register]] writable::doubles row_var_dbl(data_frame tb)
+[[cpp11::register]] writable::doubles row_var_dbl(list tb, bool na_rm)
 {
-    return row_dispersion(tb, false);
+    return row_dispersion(tb, false, na_rm);
 }
 
-[[cpp11::register]] writable::doubles row_sd_dbl(data_frame tb)
+[[cpp11::register]] writable::doubles row_sd_dbl(list tb, bool na_rm)
 {
-    return row_dispersion(tb, true);
+    return row_dispersion(tb, true, na_rm);
 }

@@ -91,9 +91,11 @@
 #' observed. Count helpers return integer vectors.
 #'
 #' @section Implementation:
-#' Means and sums use base R's compiled row aggregations. Extrema, distinct
-#' counts, medians, and sample variance/standard deviation use native C++ kernels
-#' registered through cpp11; Rfast is no longer required.
+#' All row summaries and counts use native C++ kernels registered through
+#' cpp11, which read logical, integer and double columns directly and count
+#' missing values in the same pass. Means and sums give the same results as
+#' [base::rowMeans()] and [base::rowSums()] without first copying the columns
+#' into a matrix. Rfast is no longer required.
 #'
 #' @return A vector with one value per input row. Extrema retain the compatible
 #'   common type; arithmetic returns doubles or a supported class as described
@@ -175,9 +177,41 @@ row_sd <- function(..., na.rm = TRUE) {
 #' @export
 row_unique <- function(...) {
   row_reject_na_rm(..., fn = "row_unique()")
+  row_unique_count(row_input(...))
+}
+
+#' @rdname row_egen
+#' @export
+row_nvals <- function(..., .missing = FALSE) {
+  check_flag(.missing, ".missing")
+  row_reject_na_rm(..., fn = "row_unique()")
+  # Select the columns once for both counts.
   data <- row_input(...)
+  out <- row_unique_count(data)
+  if (.missing) {
+    return(out)
+  }
+  out - (row_missing_count(data) > 0L)
+}
+
+#' @rdname row_egen
+#' @export
+row_miss <- function(...) {
+  row_reject_na_rm(..., fn = "row_miss()")
+  row_missing_count(row_input(...))
+}
+
+#' @rdname row_egen
+#' @export
+row_non_miss <- function(...) {
+  row_reject_na_rm(..., fn = "row_non_miss()")
+  data <- row_input(...)
+  ncol(data) - row_missing_count(data)
+}
+
+row_unique_count <- function(data) {
   if (all(vapply(data, row_plain_numeric, logical(1)))) {
-    return(row_unique_dbl(row_double_columns(data)))
+    return(row_unique_dbl(unname(as.list(data))))
   }
   values <- row_common_values(data)
   keys <- as.double(vctrs::vec_match(values, values))
@@ -185,29 +219,26 @@ row_unique <- function(...) {
   row_unique_dbl(row_key_columns(keys, nrow(data), ncol(data)))
 }
 
-#' @rdname row_egen
-#' @export
-row_nvals <- function(..., .missing = FALSE) {
-  check_flag(.missing, ".missing")
-  out <- row_unique(...)
-  if (.missing) {
-    return(out)
+# Missing values per row, from each column's is.na() as is.na() on the data
+# frame gives them. Plain vectors are read natively; other classes pass their
+# is.na() result, which keeps methods such as SPSS user-missing values.
+row_missing_count <- function(data) {
+  plain <- vapply(
+    data,
+    function(x) row_plain_numeric(x) || (is.character(x) && !is.object(x)),
+    logical(1)
+  )
+  columns <- unname(as.list(data))
+  columns[!plain] <- lapply(columns[!plain], is.na)
+  valid <- vapply(
+    columns[!plain],
+    function(x) is.logical(x) && is.null(dim(x)) && length(x) == nrow(data),
+    logical(1)
+  )
+  if (!all(valid)) {
+    return(as.integer(rowSums(is.na(data))))
   }
-  out - (row_miss(...) > 0L)
-}
-
-#' @rdname row_egen
-#' @export
-row_miss <- function(...) {
-  row_reject_na_rm(..., fn = "row_miss()")
-  as.integer(rowSums(is.na(row_input(...))))
-}
-
-#' @rdname row_egen
-#' @export
-row_non_miss <- function(...) {
-  row_reject_na_rm(..., fn = "row_non_miss()")
-  as.integer(rowSums(!is.na(row_input(...))))
+  row_na_count(columns, !plain)
 }
 
 row_check_na_rm <- function(na.rm) {
@@ -297,12 +328,9 @@ row_extreme_input <- function(..., .values = NULL) {
 
 row_extreme_constants <- function(input, maximum, na.rm) {
   data <- input$data
-  missing <- matrix(
-    unlist(lapply(data, is.na), use.names = FALSE),
-    nrow = nrow(data)
-  )
-  observed <- if (ncol(data)) rowSums(!missing) > 0L else rep(TRUE, nrow(data))
-  complete <- if (ncol(data)) rowSums(missing) == 0L else rep(TRUE, nrow(data))
+  missing <- if (ncol(data)) row_missing_count(data) else integer(nrow(data))
+  observed <- if (ncol(data)) missing < ncol(data) else rep(TRUE, nrow(data))
+  complete <- missing == 0L
   if (length(input$scalars)) {
     data <- row_add_values(data, unname(input$scalars))
   }
@@ -318,11 +346,16 @@ row_plain_numeric <- function(x) {
   !is.object(x) && typeof(x) %in% c("logical", "integer", "double")
 }
 
-row_double_columns <- function(data) {
-  tibble::as_tibble(lapply(data, function(x) {
+# Columns for the native kernels, which read logical, integer and double
+# vectors directly. Other classes become doubles with NA wherever is.na() is
+# TRUE, determined before SPSS user-missing metadata is stripped.
+row_kernel_columns <- function(data) {
+  unname(lapply(data, function(x) {
+    if (row_plain_numeric(x)) {
+      return(x)
+    }
     missing <- is.na(x)
     values <- as.double(x)
-    # Determine missingness before stripping SPSS user-missing metadata.
     values[missing] <- NA_real_
     values
   }))
@@ -359,12 +392,9 @@ row_common_values <- function(data) {
 }
 
 row_key_columns <- function(keys, rows, columns) {
-  tibble::as_tibble(stats::setNames(
-    lapply(seq_len(columns), function(j) {
-      keys[seq_len(rows) + (j - 1L) * rows]
-    }),
-    paste0("x", seq_len(columns))
-  ))
+  lapply(seq_len(columns), function(j) {
+    keys[seq_len(rows) + (j - 1L) * rows]
+  })
 }
 
 row_add_values <- function(data, values) {
@@ -407,7 +437,7 @@ row_extreme_typed <- function(data, maximum) {
   }
   if (all(vapply(data, row_plain_numeric, logical(1)))) {
     prototype <- vctrs::vec_ptype_common(!!!data)
-    return(vctrs::vec_cast(kernel(row_double_columns(data)), prototype))
+    return(vctrs::vec_cast(kernel(row_kernel_columns(data)), prototype))
   }
   supported <- vapply(
     data,
@@ -492,27 +522,21 @@ row_numeric_summary <- function(data, operation, na.rm = TRUE) {
     }
     data <- tibble::as_tibble(values)
   }
-  data <- row_double_columns(data)
-  observed <- rowSums(!is.na(data))
+  # The kernels return NA where too few values are observed (one, or two for
+  # var and sd) or, with na.rm = FALSE, where any value is missing.
   out <- if (nrow(data) == 0L) {
     numeric()
   } else {
+    columns <- row_kernel_columns(data)
     switch(
       operation,
-      sum = rowSums(data, na.rm = TRUE),
-      mean = rowMeans(data, na.rm = TRUE),
-      median = row_median_dbl(data),
-      var = row_var_dbl(data),
-      sd = row_sd_dbl(data)
+      sum = row_sum_dbl(columns, na.rm),
+      mean = row_mean_dbl(columns, na.rm),
+      median = row_median_dbl(columns, na.rm),
+      var = row_var_dbl(columns, na.rm),
+      sd = row_sd_dbl(columns, na.rm)
     )
   }
-  if (operation != "sum") {
-    out[observed < if (operation %in% c("var", "sd")) 2L else 1L] <- NA_real_
-  }
-  if (!na.rm) {
-    out[observed < ncol(data)] <- NA_real_
-  }
-  out <- as.double(out)
   if (is.null(prototype)) out else vctrs::vec_restore(out, prototype)
 }
 
@@ -554,6 +578,9 @@ row_check_unit_scale <- function(data, operation) {
 
 # Test the context without evaluating selections or computed arguments twice.
 dots_is_tibble <- function(...) {
+  if (!in_dplyr_verb()) {
+    return(TRUE)
+  }
   tryCatch(
     {
       dplyr::cur_group_id()
@@ -561,6 +588,20 @@ dots_is_tibble <- function(...) {
     },
     error = function(e) TRUE
   )
+}
+
+# A dplyr data mask is active only while a dplyr verb is on the call stack.
+# Probing with dplyr::cur_group_id() outside one signals a classed error whose
+# message rlang formats with cli, costing milliseconds per call, so skip the
+# probe when no frame belongs to dplyr.
+in_dplyr_verb <- function() {
+  dplyr <- asNamespace("dplyr")
+  for (frame in sys.frames()) {
+    if (identical(topenv(frame), dplyr)) {
+      return(TRUE)
+    }
+  }
+  FALSE
 }
 
 # pick() omits grouping columns. When a selection fails, retry with the group

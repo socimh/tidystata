@@ -146,18 +146,14 @@ xtile <- function(
       ordered = TRUE
     ))
   }
-  if (length(unique(observed)) == 1L) {
+  limits <- range(observed)
+  if (limits[[1L]] == limits[[2L]]) {
     stop("Cannot cut a vector with only one unique value.", call. = FALSE)
   }
   # Stata xtile rule: a value joins the first group whose cutpoint is at least
   # the value, so distinct values are never merged into one group.
   cutpoints <- if (is.null(wt)) {
-    stats::quantile(
-      observed,
-      probs = seq_len(n - 1L) / n,
-      type = 7,
-      names = FALSE
-    )
+    quantile7(observed, seq_len(n - 1L) / n)
   } else {
     weighted_quantile(observed, wt[!is.na(x)], seq_len(n - 1L) / n)
   }
@@ -167,11 +163,13 @@ xtile <- function(
       call. = FALSE
     )
   }
-  maximum <- max(observed)
+  maximum <- limits[[2L]]
   cutpoints <- unique(cutpoints[cutpoints < maximum])
   raw <- findInterval(x, cutpoints, left.open = TRUE) + 1L
   raw[is.na(x)] <- NA_integer_
-  occupied <- sort(unique(raw[!is.na(raw)]))
+  # Raw codes run 1..k, so occupancy and renumbering need no sorting.
+  present <- tabulate(raw, nbins = length(cutpoints) + 1L) > 0L
+  occupied <- which(present)
   intervals <- length(occupied)
   if (
     !is.null(labels) && !identical(labels, FALSE) && length(labels) != intervals
@@ -193,13 +191,13 @@ xtile <- function(
       call. = FALSE
     )
   }
-  codes <- match(raw, occupied)
+  codes <- cumsum(present)[raw]
   if (identical(labels, FALSE)) {
     return(codes)
   }
   if (is.null(labels)) {
     upper <- c(cutpoints, maximum)[occupied]
-    labels <- quantile_interval_labels(c(min(observed), upper))
+    labels <- quantile_interval_labels(c(limits[[1L]], upper))
   }
   factor(codes, levels = seq_len(intervals), labels = labels, ordered = TRUE)
 }
@@ -209,7 +207,27 @@ xtile <- function(
 #' @export
 cut_quantile <- xtile
 
+# stats::quantile(x, probs, type = 7, names = FALSE) for x without missing
+# values and probs in [0, 1], with the same partial sort and arithmetic but
+# without its argument handling, which dominates per-group calls.
+quantile7 <- function(x, probs) {
+  n <- length(x)
+  index <- 1 + max(n - 1, 0) * probs
+  lo <- floor(index)
+  hi <- ceiling(index)
+  x <- sort(x, partial = if (n == 0) numeric() else unique(c(lo, hi)))
+  qs <- x[lo]
+  i <- which(index > lo & x[hi] != qs)
+  h <- (index - lo)[i]
+  qs[i] <- (1 - h) * qs[i] + h * x[hi[i]]
+  # quantile() always returns doubles, even for integer x.
+  as.double(qs)
+}
+
 cut_in_grouped_mask <- function() {
+  if (!in_dplyr_verb()) {
+    return(FALSE)
+  }
   keys <- tryCatch(dplyr::cur_group(), error = function(e) NULL)
   !is.null(keys) && ncol(keys) > 0L
 }

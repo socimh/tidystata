@@ -20,24 +20,24 @@ aggregation_group_id <- function(groups, size) {
 }
 
 # Each cumulative sum starts afresh: a zero-weight group must not poison later
-# groups, and a large preceding total must not cancel small increments.
+# groups, and a large preceding total must not cancel small increments. The
+# native group sums match sum() and cumsum() on each group's slice exactly.
 aggregation_percentages <- function(n, missing, locs) {
-  percent <- valid <- cum <- valid_cum <- rep(NA_real_, length(n))
-  for (loc in locs) {
-    counts <- n[loc]
-    absent <- missing[loc]
-    total <- sum(counts)
-    valid_total <- sum(counts[!absent])
-    percent[loc] <- counts / total * 100
-    valid[loc] <- ifelse(
-      absent | valid_total == 0,
-      NA_real_,
-      counts / valid_total * 100
-    )
-    cum[loc] <- cumsum(percent[loc])
-    valid_cum[loc] <- cumsum(valid[loc])
-  }
-  list(percent = percent, cum = cum, valid = valid, valid_cum = valid_cum)
+  n <- as.double(n)
+  id <- aggregation_group_id(list(loc = locs), length(n))
+  total <- group_sum_dbl(n, locs)[id]
+  valid_total <- group_sum_dbl(replace(n, missing, 0), locs)[id]
+  percent <- n / total * 100
+  valid <- n / valid_total * 100
+  # As ifelse() did, an undetermined test also gives NA.
+  absent <- missing | valid_total == 0
+  valid[is.na(absent) | absent] <- NA_real_
+  list(
+    percent = percent,
+    cum = group_cumsum_dbl(percent, locs),
+    valid = valid,
+    valid_cum = group_cumsum_dbl(valid, locs)
+  )
 }
 
 aggregation_counts <- function(data, weights) {
@@ -46,9 +46,14 @@ aggregation_counts <- function(data, weights) {
   out$n <- if (is.null(weights)) {
     lengths(groups$loc)
   } else {
-    vapply(groups$loc, function(loc) sum(weights[loc]), numeric(1))
+    aggregation_group_sums(weights, groups$loc)
   }
   out
+}
+
+# Like vapply(locs, function(loc) sum(weights[loc]), numeric(1)).
+aggregation_group_sums <- function(weights, locs) {
+  group_sum_dbl(as.double(weights), locs)
 }
 
 aggregation_cells <- function(n, row, column, nrow, ncol) {

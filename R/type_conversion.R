@@ -92,7 +92,9 @@ as_numeric <- function(.x) {
   } else if (inherits(.x, "haven_labelled")) {
     as.numeric(unclass(.x))
   } else if (is.character(.x)) {
-    is_nan <- !is.na(.x) & trimws(.x) == "NaN"
+    # Only strings containing "NaN" can trim to it; trimming all is slow.
+    is_nan <- grepl("NaN", .x, fixed = TRUE)
+    is_nan[is_nan] <- trimws(.x[is_nan]) == "NaN"
     .x[is_nan] <- NA_character_
     .x <- readr::parse_number(.x)
     .x[is_nan] <- NaN

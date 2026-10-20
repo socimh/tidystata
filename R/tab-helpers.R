@@ -444,7 +444,7 @@ order_tab_groups <- function(
   group_sizes <- if (is.null(weights)) {
     lengths(groups$loc)
   } else {
-    vapply(groups$loc, function(loc) sum(weights[loc]), numeric(1))
+    aggregation_group_sums(weights, groups$loc)
   }
   sizes <- group_sizes[vctrs::vec_match(keys, groups$key)]
   missing_keys <- rowSums(is.na(as.data.frame(keys))) > 0L

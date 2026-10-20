@@ -210,3 +210,173 @@ test_that("matrix column headers retain the pivot boundary diagnostic", {
   data <- tibble::tibble(a = 1:3, b = matrix(1:6, 3))
   expect_error(xtab(data, a, b), "Can't recycle")
 })
+
+test_that("native group sums follow sum() and cumsum() for missing values", {
+  x <- c(1, NA, 2, 1, NaN, NA, 0 / 0, 1, 1e16, 1, -1e16)
+  locs <- list(1:3, 4:6, 7:8, 9:11, integer())
+  expect_identical(
+    group_sum_dbl(x, locs),
+    vapply(locs, function(loc) sum(x[loc]), numeric(1))
+  )
+  cumulative <- rep(NA_real_, length(x))
+  for (loc in locs) {
+    cumulative[loc] <- cumsum(x[loc])
+  }
+  expect_identical(group_cumsum_dbl(x, locs), cumulative)
+  expect_identical(
+    group_mean_dbl(c(1e308, 1e308, 0.1, 0.2, Inf, -Inf), list(1:2, 3:4, 5:6)),
+    c(mean(c(1e308, 1e308)), mean(c(0.1, 0.2)), NaN)
+  )
+})
+
+test_that("zero-weight groups keep undefined percentages", {
+  data <- tibble::tibble(
+    g = c(1, 1, 2, 2, 2),
+    x = c("a", NA, "a", "b", NA),
+    w = c(0, 0, 1, 2, 1)
+  )
+  out <- tab(data, x, .by = g, .wt = w)
+  expect_true(all(is.nan(out$percent[out$g == 1])))
+  expect_identical(out$valid[out$g == 1], c(NA_real_, NA_real_))
+  expect_identical(out$cum[out$g == 2], c(25, 75, 100))
+})
+
+test_that("many small groups summarise like per-group base statistics", {
+  withr::local_seed(20261020)
+  data <- tibble::tibble(
+    g = rep(1:30, length.out = 300),
+    x = round(rnorm(300), 1)
+  )
+  data$x[data$g == 1] <- NA
+  data$x[data$g == 2] <- c(Inf, rep(NA, 9))
+  data$x[data$g == 3] <- c(1e308, 1e308, 2, 3, rep(NA, 6))
+  out <- summ(
+    data,
+    x,
+    .by = g,
+    .stat = c("median", "mad", "q1", "p37", "mean", "sum", "skew", "unique")
+  )
+  per_group <- function(fn) {
+    vapply(
+      split(data$x, data$g),
+      function(x) {
+        x <- x[!is.na(x)]
+        if (length(x)) fn(x) else NA_real_
+      },
+      numeric(1),
+      USE.NAMES = FALSE
+    )
+  }
+  expect_identical(out$median, per_group(median))
+  expect_identical(out$mad, per_group(mad))
+  expect_identical(
+    out$q1,
+    per_group(function(x) quantile(x, 0.25, names = FALSE))
+  )
+  expect_identical(
+    out$p37,
+    per_group(function(x) quantile(x, 0.37, names = FALSE))
+  )
+  expect_identical(out$mean, per_group(mean))
+  expect_identical(out$sum, per_group(sum))
+  expect_identical(
+    out$unique,
+    vapply(
+      split(data$x, data$g),
+      function(x) {
+        length(unique(x[!is.na(x)]))
+      },
+      integer(1),
+      USE.NAMES = FALSE
+    )
+  )
+})
+
+test_that("native group extrema and variances follow min(), max() and sd()", {
+  segments <- list(
+    c(3, -0, 0, 1),
+    c(0, -0),
+    c(2, NaN, 1),
+    c(NaN, NA, 5),
+    c(Inf, -Inf),
+    7,
+    numeric(),
+    c(1e308, 1e308, -1e308),
+    c(1e16, 1e16 + 2, 1e16 + 4)
+  )
+  values <- unlist(segments)
+  sizes <- lengths(segments)
+  base <- function(fn) {
+    vapply(
+      segments,
+      function(x) if (length(x)) fn(x) else NA_real_,
+      numeric(1)
+    )
+  }
+  expect_identical(group_min_dbl(values, sizes), base(min))
+  expect_identical(group_max_dbl(values, sizes), base(max))
+  expect_identical(sqrt(group_var_dbl(values, sizes)), base(stats::sd))
+  expect_error(group_var_dbl(values, sizes[-1]), "add up")
+})
+
+test_that("native weighted percentiles follow Stata's weighted rule", {
+  segments <- list(
+    list(x = c(1, 2, 3, 4), w = c(1, 1, 1, 1)),
+    list(x = c(-0, 0, 0, 5), w = c(0, 2, 2, 0)),
+    list(x = c(1, 1, 2, 9), w = c(0.1, 0.2, 0.3, 0.4)),
+    list(x = c(4, 5), w = c(0, 0)),
+    list(x = numeric(), w = numeric())
+  )
+  probs <- c(0, 0.1, 0.25, 0.5, 0.75, 1)
+  out <- group_weighted_quantile_dbl(
+    unlist(lapply(segments, `[[`, "x")),
+    unlist(lapply(segments, `[[`, "w")),
+    vapply(segments, function(s) length(s$x), integer(1)),
+    probs
+  )
+  expected <- t(vapply(
+    segments,
+    function(s) weighted_quantile(s$x, s$w, probs),
+    numeric(length(probs))
+  ))
+  expect_identical(matrix(out, nrow = length(segments)), expected)
+})
+
+test_that("weighted summaries of many groups equal one group at a time", {
+  withr::local_seed(20261020)
+  data <- tibble::tibble(
+    g = rep(1:40, length.out = 400),
+    x = round(rnorm(400) * 3),
+    w = sample(c(0, 0.5, 1, 2), 400, replace = TRUE)
+  )
+  data$x[data$g == 1] <- NA
+  data$w[data$g == 2] <- 0
+  data$x[data$g == 3] <- c(Inf, 1, rep(NA, 8))
+  stats <- c(
+    "n",
+    "unique",
+    "miss_n",
+    "valid_pct",
+    "min",
+    "p10",
+    "q1",
+    "median",
+    "mean",
+    "q3",
+    "max",
+    "sd",
+    "mad",
+    "iqr",
+    "se",
+    "skew",
+    "kurtosis",
+    "sum"
+  )
+  for (type in c("frequency", "analytic")) {
+    many <- summ(data, x, .by = g, .wt = w, .wt_type = type, .stat = stats)
+    one <- dplyr::bind_rows(lapply(split(data, data$g), function(group) {
+      summ(group, x, .wt = w, .wt_type = type, .stat = stats)
+    }))
+    expect_identical(as.list(many[stats]), as.list(one[stats]))
+  }
+})

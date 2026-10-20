@@ -21,7 +21,7 @@ test_that("s_merge() keeps all rows and records Stata's _merge groups", {
 
 test_that("the merge report counts each group", {
   report <- merge_report(
-    c("master", "match", "match", "using"),
+    c(master = 1L, using = 1L, match = 2L),
     ".merge"
   )
   lines <- strsplit(report, "\n", fixed = TRUE)[[1]]

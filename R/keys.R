@@ -107,7 +107,7 @@ isid <- function(.data, ..., .missok = FALSE) {
 duplicates_report <- function(.data, ...) {
   copies <- key_copies(key_columns(.data, ...))
   levels <- sort(unique(copies))
-  observations <- vapply(levels, function(k) sum(copies == k), integer(1))
+  observations <- tabulate(copies)[levels]
   tibble::tibble(
     copies = as.integer(levels),
     observations = observations,

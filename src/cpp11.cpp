@@ -5,73 +5,145 @@
 #include "cpp11/declarations.hpp"
 #include <R_ext/Visibility.h>
 
+// group_stat.cpp
+writable::doubles group_sum_dbl(doubles x, list locs);
+extern "C" SEXP _statart_group_sum_dbl(SEXP x, SEXP locs) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_sum_dbl(cpp11::as_cpp<cpp11::decay_t<doubles>>(x), cpp11::as_cpp<cpp11::decay_t<list>>(locs)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::doubles group_mean_dbl(doubles x, list locs);
+extern "C" SEXP _statart_group_mean_dbl(SEXP x, SEXP locs) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_mean_dbl(cpp11::as_cpp<cpp11::decay_t<doubles>>(x), cpp11::as_cpp<cpp11::decay_t<list>>(locs)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::doubles group_cumsum_dbl(doubles x, list locs);
+extern "C" SEXP _statart_group_cumsum_dbl(SEXP x, SEXP locs) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_cumsum_dbl(cpp11::as_cpp<cpp11::decay_t<doubles>>(x), cpp11::as_cpp<cpp11::decay_t<list>>(locs)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::doubles group_min_dbl(doubles values, integers sizes);
+extern "C" SEXP _statart_group_min_dbl(SEXP values, SEXP sizes) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_min_dbl(cpp11::as_cpp<cpp11::decay_t<doubles>>(values), cpp11::as_cpp<cpp11::decay_t<integers>>(sizes)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::doubles group_max_dbl(doubles values, integers sizes);
+extern "C" SEXP _statart_group_max_dbl(SEXP values, SEXP sizes) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_max_dbl(cpp11::as_cpp<cpp11::decay_t<doubles>>(values), cpp11::as_cpp<cpp11::decay_t<integers>>(sizes)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::doubles group_var_dbl(doubles values, integers sizes);
+extern "C" SEXP _statart_group_var_dbl(SEXP values, SEXP sizes) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_var_dbl(cpp11::as_cpp<cpp11::decay_t<doubles>>(values), cpp11::as_cpp<cpp11::decay_t<integers>>(sizes)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::doubles group_weighted_quantile_dbl(doubles values, doubles weights, integers sizes, doubles probs);
+extern "C" SEXP _statart_group_weighted_quantile_dbl(SEXP values, SEXP weights, SEXP sizes, SEXP probs) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_weighted_quantile_dbl(cpp11::as_cpp<cpp11::decay_t<doubles>>(values), cpp11::as_cpp<cpp11::decay_t<doubles>>(weights), cpp11::as_cpp<cpp11::decay_t<integers>>(sizes), cpp11::as_cpp<cpp11::decay_t<doubles>>(probs)));
+  END_CPP11
+}
+// panel_shift.cpp
+SEXP panel_lag_index(doubles period, SEXP order, double shift);
+extern "C" SEXP _statart_panel_lag_index(SEXP period, SEXP order, SEXP shift) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(panel_lag_index(cpp11::as_cpp<cpp11::decay_t<doubles>>(period), cpp11::as_cpp<cpp11::decay_t<SEXP>>(order), cpp11::as_cpp<cpp11::decay_t<double>>(shift)));
+  END_CPP11
+}
 // row_stat.cpp
-writable::doubles row_max_dbl(data_frame tb);
+writable::doubles row_max_dbl(list tb);
 extern "C" SEXP _statart_row_max_dbl(SEXP tb) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_max_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_max_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb)));
   END_CPP11
 }
 // row_stat.cpp
-writable::doubles row_min_dbl(data_frame tb);
+writable::doubles row_min_dbl(list tb);
 extern "C" SEXP _statart_row_min_dbl(SEXP tb) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_min_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_min_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb)));
   END_CPP11
 }
 // row_stat.cpp
-writable::doubles row_sum_dbl(data_frame tb);
-extern "C" SEXP _statart_row_sum_dbl(SEXP tb) {
+writable::doubles row_sum_dbl(list tb, bool na_rm);
+extern "C" SEXP _statart_row_sum_dbl(SEXP tb, SEXP na_rm) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_sum_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_sum_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb), cpp11::as_cpp<cpp11::decay_t<bool>>(na_rm)));
   END_CPP11
 }
 // row_stat.cpp
-writable::doubles row_mean_dbl(data_frame tb);
-extern "C" SEXP _statart_row_mean_dbl(SEXP tb) {
+writable::doubles row_mean_dbl(list tb, bool na_rm);
+extern "C" SEXP _statart_row_mean_dbl(SEXP tb, SEXP na_rm) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_mean_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_mean_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb), cpp11::as_cpp<cpp11::decay_t<bool>>(na_rm)));
   END_CPP11
 }
 // row_stat.cpp
-writable::integers row_unique_dbl(data_frame tb);
+writable::integers row_na_count(list tb, logicals masks);
+extern "C" SEXP _statart_row_na_count(SEXP tb, SEXP masks) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(row_na_count(cpp11::as_cpp<cpp11::decay_t<list>>(tb), cpp11::as_cpp<cpp11::decay_t<logicals>>(masks)));
+  END_CPP11
+}
+// row_stat.cpp
+writable::integers row_unique_dbl(list tb);
 extern "C" SEXP _statart_row_unique_dbl(SEXP tb) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_unique_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_unique_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb)));
   END_CPP11
 }
 // row_stat.cpp
-writable::doubles row_median_dbl(data_frame tb);
-extern "C" SEXP _statart_row_median_dbl(SEXP tb) {
+writable::doubles row_median_dbl(list tb, bool na_rm);
+extern "C" SEXP _statart_row_median_dbl(SEXP tb, SEXP na_rm) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_median_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_median_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb), cpp11::as_cpp<cpp11::decay_t<bool>>(na_rm)));
   END_CPP11
 }
 // row_stat.cpp
-writable::doubles row_var_dbl(data_frame tb);
-extern "C" SEXP _statart_row_var_dbl(SEXP tb) {
+writable::doubles row_var_dbl(list tb, bool na_rm);
+extern "C" SEXP _statart_row_var_dbl(SEXP tb, SEXP na_rm) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_var_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_var_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb), cpp11::as_cpp<cpp11::decay_t<bool>>(na_rm)));
   END_CPP11
 }
 // row_stat.cpp
-writable::doubles row_sd_dbl(data_frame tb);
-extern "C" SEXP _statart_row_sd_dbl(SEXP tb) {
+writable::doubles row_sd_dbl(list tb, bool na_rm);
+extern "C" SEXP _statart_row_sd_dbl(SEXP tb, SEXP na_rm) {
   BEGIN_CPP11
-    return cpp11::as_sexp(row_sd_dbl(cpp11::as_cpp<cpp11::decay_t<data_frame>>(tb)));
+    return cpp11::as_sexp(row_sd_dbl(cpp11::as_cpp<cpp11::decay_t<list>>(tb), cpp11::as_cpp<cpp11::decay_t<bool>>(na_rm)));
   END_CPP11
 }
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_statart_row_max_dbl",    (DL_FUNC) &_statart_row_max_dbl,    1},
-    {"_statart_row_mean_dbl",   (DL_FUNC) &_statart_row_mean_dbl,   1},
-    {"_statart_row_median_dbl", (DL_FUNC) &_statart_row_median_dbl, 1},
-    {"_statart_row_min_dbl",    (DL_FUNC) &_statart_row_min_dbl,    1},
-    {"_statart_row_sd_dbl",     (DL_FUNC) &_statart_row_sd_dbl,     1},
-    {"_statart_row_sum_dbl",    (DL_FUNC) &_statart_row_sum_dbl,    1},
-    {"_statart_row_unique_dbl", (DL_FUNC) &_statart_row_unique_dbl, 1},
-    {"_statart_row_var_dbl",    (DL_FUNC) &_statart_row_var_dbl,    1},
+    {"_statart_group_cumsum_dbl",            (DL_FUNC) &_statart_group_cumsum_dbl,            2},
+    {"_statart_group_max_dbl",               (DL_FUNC) &_statart_group_max_dbl,               2},
+    {"_statart_group_mean_dbl",              (DL_FUNC) &_statart_group_mean_dbl,              2},
+    {"_statart_group_min_dbl",               (DL_FUNC) &_statart_group_min_dbl,               2},
+    {"_statart_group_sum_dbl",               (DL_FUNC) &_statart_group_sum_dbl,               2},
+    {"_statart_group_var_dbl",               (DL_FUNC) &_statart_group_var_dbl,               2},
+    {"_statart_group_weighted_quantile_dbl", (DL_FUNC) &_statart_group_weighted_quantile_dbl, 4},
+    {"_statart_panel_lag_index",             (DL_FUNC) &_statart_panel_lag_index,             3},
+    {"_statart_row_max_dbl",                 (DL_FUNC) &_statart_row_max_dbl,                 1},
+    {"_statart_row_mean_dbl",                (DL_FUNC) &_statart_row_mean_dbl,                2},
+    {"_statart_row_median_dbl",              (DL_FUNC) &_statart_row_median_dbl,              2},
+    {"_statart_row_min_dbl",                 (DL_FUNC) &_statart_row_min_dbl,                 1},
+    {"_statart_row_na_count",                (DL_FUNC) &_statart_row_na_count,                2},
+    {"_statart_row_sd_dbl",                  (DL_FUNC) &_statart_row_sd_dbl,                  2},
+    {"_statart_row_sum_dbl",                 (DL_FUNC) &_statart_row_sum_dbl,                 2},
+    {"_statart_row_unique_dbl",              (DL_FUNC) &_statart_row_unique_dbl,              1},
+    {"_statart_row_var_dbl",                 (DL_FUNC) &_statart_row_var_dbl,                 2},
     {NULL, NULL, 0}
 };
 }

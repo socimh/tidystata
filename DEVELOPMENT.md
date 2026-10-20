@@ -7,6 +7,49 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**Speed audit, 2026-10-20 (live checkout):** `--release` suite **19,416
+passing expectations across 3,364 blocks**, zero failures, errors, warnings or
+skips; `R CMD check --as-cran` gives 0 errors, 0 warnings and 1 NOTE (CRAN
+incoming feasibility). The style check (157 sources) and demos pass; the
+regenerated reports differed only in timestamps, `timer()` durations and the
+unseeded `rnorm()` example in `report_cut.md`, so they were restored.
+
+The new `.opencode/tests/benchmark_core.R` times 57 workloads across every
+core family (`--references` adds Rfast, matrixStats, collapse and data.table
+as diagnostic ceilings, `--profile` profiles). Three alternating rounds of the
+committed and candidate builds produced identical output hashes for all 57;
+`benchmark_problems2.R` records (30) and all 80 export interfaces are
+bit-identical too. An edge battery of 163 cases (NA/NaN payloads, signed
+zeros, overflow, empty and single-value groups, errors and warnings) is
+byte-identical. Paired medians:
+
+| Workload | Before | After |
+| --- | ---: | ---: |
+| `row_unique`, 1,000,000 x 5 | 300 ms | 55 ms |
+| `row_max`, 100,000 x 50 | 240 ms | 70 ms |
+| `row_sd`, 1,000,000 x 5 | 320 ms | 115 ms |
+| `summ(.detail = TRUE)`, 10,000 groups | 1,060 ms | 240 ms |
+| weighted `tab`, 10,000 groups | 200 ms | 80 ms |
+| `s_merge` m:1, 1,000,000 rows | 170 ms | 70 ms |
+| `destring`, 1,000,000 strings | 250 ms | 85 ms |
+| `pwcorr`, 20 variables | 330 ms | 200 ms |
+| grouped `xtile`, 10,000 groups | 980 ms | 640 ms |
+
+Causes and fixes: row kernels built a protected cpp11 vector per cell (now
+column pointers read once; sums and means are native with long double, like
+`rowSums()`); row helpers and `xtile()` probed `dplyr::cur_group_id()` outside
+verbs, costing about 5 ms per call in rlang/cli message formatting (now
+skipped unless a dplyr frame is on the stack); `tab` and weighted counts used
+per-group R loops (now `src/group_stat.cpp`, reproducing `sum()`, `cumsum()`
+and `mean()` bit for bit, including `cumsum()`'s NA/NaN rules); `summ()` with
+many small groups (average size at most 1,000) sorts once for quantiles,
+medians and MADs; `destring()` trimmed every string; `pwcorr()` copied both
+columns per pair; `s_merge()` built character statuses. No dependencies,
+exports or outputs changed. No other workload slowed by more than both 10%
+and 5 ms; two first-pass flags (`duplicates_report`, `s_lag_single`, code
+unchanged) were noise in five further alternations. Receipts are under
+ignored `.opencode/results/perf-core/`.
+
 **Round 8 Stata names and aliases, 2026-10-20 (live checkout):**
 `--release` suite **19,379 passing expectations across 3,357 blocks**, zero
 failures, errors, warnings or skips; `R CMD check --as-cran` gives 0 errors,
@@ -371,6 +414,13 @@ show generated console output.
   needs review: compact timer formatting can round a value just below one minute
   to `60.00s`. Preserve the agreed cumulative timing contract while addressing
   display separately. No formatter behavior is changed by repository cleanup.
+- **Remaining speed gaps (2026-10-20 audit):** weighted `summ(.detail = TRUE)`
+  still computes weighted quantiles per group (about 710 ms for 10,000
+  groups); `std()`, `pc()`, `s_lag()` and `s_diff()` inside grouped `mutate()`
+  are dominated by dplyr's per-group evaluation (3-12 times slower than
+  collapse's vectorized equivalents); `tostring()` cost is base
+  `as.character()` formatting. Each needs a separate design that keeps
+  outputs identical.
 - **Optional work:** consider suite-runtime optimization without removing coverage;
   obtain the original labelled-factor failing call and actual `fre()` dataset for
   exact historical reproduction if desired. Existing representative tests do not

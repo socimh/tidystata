@@ -145,9 +145,10 @@ observed. Count helpers return integer vectors.
 
 \section{Implementation}{
 
-Means and sums use base R's compiled row aggregations. Extrema, distinct
-counts, medians, and sample variance/standard deviation use native C++ kernels
-registered through cpp11; Rfast is no longer required.
+All row summaries use native C++ kernels registered through cpp11, which
+read the columns directly. Means and sums give the same results as
+\code{\link[base:rowMeans]{base::rowMeans()}} and \code{\link[base:rowSums]{base::rowSums()}} without first copying the columns
+into a matrix. Rfast is no longer required.
 }
 
 \examples{

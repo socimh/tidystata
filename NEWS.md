@@ -1,5 +1,24 @@
 # statart 0.2.0.9000
 
+## Speed (2026-10-20)
+
+Results are unchanged; only the time taken to compute them is shorter.
+
+- Row helpers are 2-5 times faster: `row_max()`, `row_min()`, `row_median()`,
+  `row_var()`, `row_sd()`, `row_unique()` and `row_nvals()` on 1,000,000 rows
+  fell from about 300 ms to 55-115 ms. `row_sum()` and `row_mean()` no longer
+  copy the columns into a matrix.
+- Row helpers and `xtile()` no longer spend about 5 ms per call outside
+  `mutate()` checking whether they are inside a dplyr verb.
+- `summ()` with many small groups is faster: `.detail = TRUE` over 10,000
+  groups fell from about 1,060 to 240 ms, and the default statistics by about
+  20%.
+- `tab()`, `fre()` and `tab2()` with many groups are faster, especially with
+  weights (weighted `tab()` over 10,000 groups: 200 to 80 ms).
+- `s_merge()` (170 to 70 ms for 1,000,000 rows), `destring()` (250 to 85 ms),
+  `pwcorr()` (about 40% faster) and grouped `xtile()` (about 35% faster) also
+  do less work.
+
 ## Stata names and aliases (2026-10-20)
 
 - Functions now carry their Stata names, with the earlier names kept as quiet

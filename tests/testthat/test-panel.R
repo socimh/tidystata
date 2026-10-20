@@ -276,3 +276,29 @@ test_that("panel operators validate their input", {
   expect_error(s_lag(1:2, time = 1:2, delta = 0), "must be positive")
   expect_error(s_diff(letters[1:2], time = 1:2), "must be numeric or logical")
 })
+
+test_that("lags of distinct times match the earlier time exactly", {
+  x <- c(10, 12, 15, 13, 20, 9)
+  times <- list(
+    c(2001, 2002, 2004, 2003, 2005, 2000),
+    c(-Inf, 1, 2, 3, 4, Inf),
+    c(-1, -0, 1, 2.5, 3.5, 7),
+    c(1, NA, 2, 3, NaN, 4)
+  )
+  for (time in times) {
+    expect_identical(
+      s_lag(x, time = time),
+      x[match(time - 1, time, incomparables = NA)]
+    )
+    expect_identical(
+      s_lead(x, 2, time = time),
+      x[match(time + 2, time, incomparables = NA)]
+    )
+    previous <- match(time - 1, time, incomparables = NA)
+    once <- x - x[previous]
+    expect_identical(s_diff(x, 2, time = time), once - once[previous])
+  }
+  expect_error(s_lag(1:3, time = c(-0, 0, 1)), "such as 0")
+  expect_error(s_lag(1:4, time = c(3, 1, 2, 1)), "such as 1")
+  expect_error(s_diff(1:3, 0, time = c(1, 1, 2)), "Repeated time values")
+})

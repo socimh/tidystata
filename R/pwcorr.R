@@ -152,20 +152,36 @@ pwcorr_values <- function(data, selected) {
   numeric
 }
 
-# Correlation, observation count and p-value for one pair of columns.
-pwcorr_pair <- function(x, y, w, method, weight_type) {
-  ok <- !is.na(x) & !is.na(y)
-  x <- x[ok]
-  y <- y[ok]
+# Correlation, observation count and p-value for one pair of columns. `ok`
+# marks complete pairs; callers pass it to reuse each column's missing mask.
+pwcorr_pair <- function(
+  x,
+  y,
+  w,
+  method,
+  weight_type,
+  ok = !is.na(x) & !is.na(y)
+) {
   if (is.null(w)) {
-    n <- length(x)
+    n <- sum(ok)
+    # cor() drops incomplete pairs itself, with the same result as on the
+    # complete subsets, so the columns are not copied for every pair.
     r <- if (n > 1L) {
-      suppressWarnings(stats::cor(x, y, method = method))
+      suppressWarnings(stats::cor(
+        x,
+        y,
+        method = method,
+        use = if (n == length(ok)) "everything" else "complete.obs"
+      ))
     } else {
       NA_real_
     }
   } else {
-    w <- w[ok]
+    if (!all(ok)) {
+      x <- x[ok]
+      y <- y[ok]
+      w <- w[ok]
+    }
     n <- if (weight_type == "frequency") sum(w) else length(x)
     total <- sum(w)
     r <- NA_real_
@@ -192,10 +208,12 @@ pwcorr_pair <- function(x, y, w, method, weight_type) {
 pwcorr_long <- function(columns, w, method, weight_type) {
   variables <- names(columns)
   pairs <- utils::combn(length(variables), 2L)
+  observed <- lapply(columns, Negate(is.na))
   results <- lapply(seq_len(ncol(pairs)), function(k) {
     i <- pairs[1L, k]
     j <- pairs[2L, k]
-    pwcorr_pair(columns[[i]], columns[[j]], w, method, weight_type)
+    ok <- observed[[i]] & observed[[j]]
+    pwcorr_pair(columns[[i]], columns[[j]], w, method, weight_type, ok)
   })
   n <- vapply(results, `[[`, numeric(1), "n")
   if (is.null(w) || weight_type == "analytic") {
@@ -214,12 +232,14 @@ pwcorr_wide <- function(columns, w, method) {
   variables <- names(columns)
   size <- length(variables)
   matrix <- matrix(NA_real_, size, size)
+  observed <- lapply(columns, Negate(is.na))
   for (i in seq_len(size)) {
     for (j in seq_len(i)) {
       matrix[i, j] <- if (i == j) {
         1
       } else {
-        pwcorr_pair(columns[[i]], columns[[j]], w, method, "frequency")$r
+        ok <- observed[[i]] & observed[[j]]
+        pwcorr_pair(columns[[i]], columns[[j]], w, method, "frequency", ok)$r
       }
     }
   }

@@ -416,3 +416,20 @@ test_that("cut functions: retain size and interval counts for large inputs", {
   expect_identical(nlevels(result_q), 10L)
   expect_identical(nlevels(result_l), 10L)
 })
+
+test_that("xtile cutpoints reproduce quantile(type = 7)", {
+  withr::local_seed(20261020)
+  for (x in list(
+    rnorm(97),
+    sample(-3:3, 40, TRUE),
+    c(1, Inf, 2, -Inf, 0, -0)
+  )) {
+    for (n in c(2, 3, 7)) {
+      probs <- seq_len(n - 1L) / n
+      expect_identical(
+        quantile7(x, probs),
+        stats::quantile(x, probs, type = 7, names = FALSE)
+      )
+    }
+  }
+})

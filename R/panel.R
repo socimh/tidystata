@@ -91,14 +91,16 @@ NULL
 #' @export
 s_lag <- function(x, n = 1L, time, delta = 1, unit = NULL) {
   check_periods(n)
-  panel_shift(x, n * delta, panel_period(time, x, delta, unit))
+  period <- panel_period(time, x, delta, unit)
+  vctrs::vec_slice(x, panel_rows(period, n * delta, time))
 }
 
 #' @rdname panel
 #' @export
 s_lead <- function(x, n = 1L, time, delta = 1, unit = NULL) {
   check_periods(n)
-  panel_shift(x, -n * delta, panel_period(time, x, delta, unit))
+  period <- panel_period(time, x, delta, unit)
+  vctrs::vec_slice(x, panel_rows(period, -n * delta, time))
 }
 
 #' @rdname panel
@@ -111,8 +113,10 @@ s_diff <- function(x, n = 1L, time, delta = 1, unit = NULL) {
     out <- as.POSIXct(out)
   }
   period <- panel_period(time, x, delta, unit)
+  # Every difference looks up the same earlier rows.
+  rows <- panel_rows(period, delta, time)
   for (i in seq_len(n)) {
-    previous <- panel_shift(out, delta, period)
+    previous <- vctrs::vec_slice(out, rows)
     out <- if (calendar && i == 1L) {
       difftime(
         out,
@@ -126,12 +130,27 @@ s_diff <- function(x, n = 1L, time, delta = 1, unit = NULL) {
   out
 }
 
-# Value of `x` in the row whose time is `shift` units earlier.
-panel_shift <- function(x, shift, period) {
-  vctrs::vec_slice(x, match(period - shift, period, incomparables = NA))
+# The row whose time is `shift` units earlier, after checking that times are
+# unique. Distinct, nonmissing periods are matched natively in one sorted walk;
+# otherwise duplicated() reports repeats and match() finds the rows.
+panel_rows <- function(period, shift, time) {
+  if (is.double(period) && !anyNA(period)) {
+    # The kernel sorts short vectors itself; long ones use the radix sort.
+    order <- if (
+      length(period) > 10000L && is.unsorted(period, strictly = TRUE)
+    ) {
+      order(period, method = "radix")
+    }
+    rows <- panel_lag_index(period, order, as.double(shift))
+    if (!is.null(rows)) {
+      return(rows)
+    }
+  }
+  panel_check_unique(period, time)
+  match(period - shift, period, incomparables = NA)
 }
 
-# Time as a whole-period index, after checking that it is unique.
+# Time as a whole-period index.
 panel_period <- function(time, x, delta, unit) {
   if (missing(time)) {
     stop(
@@ -147,7 +166,10 @@ panel_period <- function(time, x, delta, unit) {
   if (delta <= 0) {
     stop("`delta` must be positive.", call. = FALSE)
   }
-  period <- time_period(time, unit)
+  time_period(time, unit)
+}
+
+panel_check_unique <- function(period, time) {
   repeated <- duplicated(period, incomparables = NA)
   if (any(repeated)) {
     # Inside grouped mutate(), the panel is already supplied.
@@ -168,7 +190,6 @@ panel_period <- function(time, x, delta, unit) {
       call. = FALSE
     )
   }
-  period
 }
 
 # Whole-period index for each supported time type.

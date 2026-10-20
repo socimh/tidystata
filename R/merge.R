@@ -143,25 +143,21 @@ s_merge <- function(
       "1:m" = "one-to-many"
     )
   )
-  from_master <- !is.na(joined[[in_master]])
-  from_using <- !is.na(joined[[in_using]])
-  status <- ifelse(
-    from_master & from_using,
-    "match",
-    ifelse(from_master, "master", "using")
-  )
+  # Status codes index `groups`: 1 master only, 2 using only, 3 matched.
+  status <- (!is.na(joined[[in_master]])) + 2L * (!is.na(joined[[in_using]]))
+  counts <- stats::setNames(tabulate(status, nbins = 3L), groups)
   joined[[in_master]] <- NULL
   joined[[in_using]] <- NULL
 
   if (.report) {
-    message(merge_report(status, .generate))
+    message(merge_report(counts, .generate))
   }
-  if (!is.null(.assert) && !all(status %in% .assert)) {
-    found <- setdiff(unique(status), .assert)
+  if (!is.null(.assert) && !all(counts[setdiff(groups, .assert)] == 0L)) {
+    found <- setdiff(groups[unique(status)], .assert)
     stop(
       "Merge assertion failed: found ",
       paste0(
-        vapply(found, function(g) sum(status == g), integer(1)),
+        counts[found],
         " ",
         merge_group_label(found),
         " row(s)",
@@ -175,11 +171,15 @@ s_merge <- function(
   }
   if (!is.null(.generate)) {
     joined[[.generate]] <- factor(
-      merge_group_label(status),
-      levels = merge_group_label(groups)
+      status,
+      levels = seq_along(groups),
+      labels = merge_group_label(groups)
     )
   }
-  joined <- joined[status %in% .keep, , drop = FALSE]
+  keep <- groups[status] %in% .keep
+  if (!all(keep)) {
+    joined <- joined[keep, , drop = FALSE]
+  }
   table_restore(joined, .data)
 }
 
@@ -241,9 +241,9 @@ merge_marker <- function(taken, stem) {
   name
 }
 
-# A Stata-like summary of the merge result.
-merge_report <- function(status, generate) {
-  count <- function(group) sum(status == group)
+# A Stata-like summary of the merge result from the row count of each group.
+merge_report <- function(counts, generate) {
+  count <- function(group) counts[[group]]
   marker <- function(group) {
     if (is.null(generate)) {
       ""

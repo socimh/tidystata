@@ -495,3 +495,84 @@ test_that("row functions: work with data.table input", {
   expect_equal(length(result), 10)
   expect_equal(result[1], 11)
 })
+
+# ============================================================================
+# Native kernels and dplyr context detection
+# ============================================================================
+
+test_that("row sums and means equal rowSums() and rowMeans() exactly", {
+  df <- data.frame(
+    a = c(1e16, NA, Inf, 0.1, -0, NA, 1e308),
+    b = c(1, NA, -Inf, 0.2, -0, 3, 1e308),
+    c = c(-1e16, NaN, 1, 0.3, NA, NA, -1e308)
+  )
+  sums <- rowSums(as.matrix(df), na.rm = TRUE)
+  means <- rowMeans(as.matrix(df), na.rm = TRUE)
+  means[rowSums(!is.na(df)) == 0L] <- NA_real_
+  expect_identical(row_sum(df), sums)
+  expect_identical(row_mean(df), means)
+  expect_identical(row_sum(df)[[1]], 1)
+})
+
+test_that("native extrema, spread and distinct counts keep their rules", {
+  df <- data.frame(
+    a = c(2, NA, -0, NaN, 1, Inf),
+    b = c(2, NA, 0, 1, NA, -Inf),
+    c = c(1, NaN, 0, 1, 3, Inf)
+  )
+  expect_identical(row_max(df), c(2, NA, 0, 1, 3, Inf))
+  expect_identical(row_min(df), c(1, NA, -0, 1, 1, -Inf))
+  expect_identical(row_unique(df), c(2L, 1L, 1L, 2L, 3L, 2L))
+  expect_identical(row_nvals(df), c(2L, 0L, 1L, 1L, 2L, 2L))
+  expect_identical(row_median(df), c(2, NA, 0, 1, 2, Inf))
+  expect_equal(row_sd(df)[1:3], c(sd(c(2, 2, 1)), NA, 0))
+  expect_identical(row_var(df[6, ]), NaN)
+  expect_identical(row_max(df[0, ]), numeric())
+  expect_identical(row_unique(df["a"]), c(1L, 1L, 1L, 1L, 1L, 1L))
+})
+
+test_that("row helpers detect mutate() through wrapper functions", {
+  df <- tibble::tibble(g = c(1, 1, 2), x = c(1, 3, 5), y = c(3, 5, 7))
+  wrapper <- function(...) row_mean(...)
+  expect_identical(
+    dplyr::mutate(df, m = wrapper(x, y), .by = g)$m,
+    c(2, 4, 6)
+  )
+  expect_identical(wrapper(df[c("x", "y")]), c(2, 4, 6))
+  expect_identical(row_sum(df$x, df$y), c(4, 8, 12))
+})
+
+test_that("row kernels read logical and integer columns directly", {
+  df <- data.frame(
+    x = c(1L, NA, 3L, 3L, NA),
+    y = c(1.5, 2, NA, NaN, NA),
+    z = c(TRUE, NA, FALSE, TRUE, NA)
+  )
+  doubles <- as.matrix(data.frame(lapply(df, as.double)))
+  observed <- rowSums(!is.na(doubles))
+  means <- rowMeans(doubles, na.rm = TRUE)
+  means[observed == 0L] <- NA_real_
+  expect_identical(row_mean(df), means)
+  expect_identical(row_sum(df), rowSums(doubles, na.rm = TRUE))
+  expect_identical(row_sum(df, na.rm = FALSE), c(3.5, NA, NA, NA, NA))
+  expect_identical(
+    is.na(row_var(df, na.rm = FALSE)),
+    c(FALSE, TRUE, TRUE, TRUE, TRUE)
+  )
+  expect_identical(row_max(df[c("x", "z")]), c(1L, NA, 3L, 3L, NA))
+  expect_identical(row_miss(df), c(0L, 2L, 1L, 1L, 3L))
+  expect_identical(row_non_miss(df), c(3L, 1L, 2L, 2L, 0L))
+  expect_identical(row_nvals(df), c(2L, 1L, 2L, 2L, 0L))
+})
+
+test_that("missing-value counts keep each class's is.na() method", {
+  df <- tibble::tibble(
+    p = haven::labelled_spss(c(1, 99, NA), na_values = 99),
+    s = c("a", NA, "b"),
+    l = list(1, NA, NULL),
+    q = c(2, 3, NA)
+  )
+  expect_identical(row_miss(df), as.integer(rowSums(is.na(df))))
+  expect_identical(row_non_miss(df), c(4L, 1L, 2L))
+  expect_identical(row_sum(df[c("p", "q")], na.rm = FALSE), c(3, NA, NA))
+})
