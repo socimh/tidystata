@@ -20,7 +20,7 @@ grouped <- dplyr::group_by(data, group)
 calls <- list(
   summary = quote(summ(data, x, y)),
   summary_grouped = quote(summ(grouped, x, y)),
-  summary_table = quote(summ(data, x, y, .mode = "table")),
+  summary_table = quote(summ(data, x, y, .type = "table")),
   tabstat = quote(tabstat(data, x, y, .stat = c("mean", "p50", "sum"))),
   tab = quote(tab(data, category)),
   tab1 = quote(tab1(data, x, category)),

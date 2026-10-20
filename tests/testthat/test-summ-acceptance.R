@@ -190,7 +190,7 @@ for (function_name in c("summ", "tabstat")) {
         "logical control arguments reject missing and nonscalar values"
       ),
       {
-        for (argument in c(".keep_all", ".detail", ".na.rm", ".name")) {
+        for (argument in c(".keep_all", ".detail", ".missing", ".name")) {
           for (value in list(NA, logical(), c(TRUE, FALSE), "yes", 1)) {
             args <- c(
               list(tibble::tibble(x = 1:3)),
@@ -217,7 +217,7 @@ for (function_name in c("summ", "tabstat")) {
           df,
           x,
           .by = c(a, b),
-          .na.rm = TRUE,
+          .missing = FALSE,
           .stat = c("n", "missing", "mean")
         )
         expect_equal(nrow(out), 1L)
@@ -242,7 +242,7 @@ for (function_name in c("summ", "tabstat")) {
         expect_named(out, c("numeric", "date", "datetime"))
         expect_type(out$numeric$mean, "double")
         expect_type(out$date$mean, "character")
-        table <- api(df, .mode = "table", .stat = c("n", "mean"))
+        table <- api(df, .type = "table", .stat = c("n", "mean"))
         expect_type(table$n, "integer")
         expect_type(table$mean, "character")
         expect_equal(table$name, c("x", "d", "t"))

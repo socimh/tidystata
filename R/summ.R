@@ -36,23 +36,26 @@
 #' Percentiles `p0` through `p100`, including decimals such as `p2.5`, use
 #' type-7 quantiles. Only requested statistics and their prerequisites are
 #' calculated when `.stat` is nonempty.
-#' @param .na.rm A single `TRUE` or `FALSE`. If `TRUE`, remove rows missing
-#' any grouping key before summarising. Default is `FALSE`. Missing measured
-#' values are always omitted from numeric statistics, regardless of this flag.
+#' @param .missing A single `TRUE` or `FALSE`. If `TRUE` (default), rows with
+#' a missing grouping key form their own group, like Stata's `tabstat, by()
+#' missing`. If `FALSE`, drop them before summarising. Missing measured values
+#' are always omitted from numeric statistics, regardless of this flag.
 #' @param .name A single `TRUE` or `FALSE`. If `FALSE` (default), drop the
 #' `name` column when exactly one measured variable is summarised, including
 #' zero-row grouped output; with several variables it is always kept. If
 #' `TRUE`, always retain it.
-#' @param .mode A character string. Either `"list"` (default) or `"table"`.
-#' List mode returns a single table when one variable-type family is present,
+#' @param .type The output container: `"list"` (default) or `"table"`.
+#' `"list"` returns a single table when one variable-type family is present,
 #' otherwise a list named `numeric`, `date`, `datetime`, and/or `time` (for
 #' `hms` times of day). The `numeric` family also contains nonnumeric columns
 #' retained by `.keep_all`.
-#' Table mode combines all families. Calendar location columns are text, so a
+#' `"table"` combines all families in one table. Calendar location columns are text, so a
 #' shared location column (such as `mean`) becomes character, with numeric
 #' values rounded to seven significant digits; counts remain numeric. Calendar
 #' spreads become plain numbers in days (Dates) or seconds (datetimes and
 #' times), and the unit is appended to `type`, for example `"date [days]"`.
+#' @param .na.rm,.mode `r lifecycle::badge("deprecated")` Use `.missing`
+#' (with the opposite value) and `.type` instead.
 #' @param .duration_format Retained for compatibility and no longer affects the
 #' output: calendar spreads are always `difftime` columns (see Details).
 #' @param .sort A single `TRUE` or `FALSE`. If `TRUE` (default), sort grouping
@@ -61,7 +64,7 @@
 #' the selected variable order. If `FALSE`, groups follow first appearance.
 #' @param .drop_empty A single `TRUE` or `FALSE`. If `TRUE`, remove individual
 #' summary rows with no observed measured values (`n == 0`), even when `n` is
-#' not requested. This is independent of `.na.rm`. Default is `FALSE`.
+#' not requested. This is independent of `.missing`. Default is `FALSE`.
 #' @param .wt Optional weights: a numeric column of `.data` (or a vector with
 #' one value per row), like Stata's `summarize [fweight/aweight]`. Rows with a
 #' missing weight are excluded with a message; negative weights are an error.
@@ -133,12 +136,12 @@
 #' a message. The input data are not modified.
 #' @name summ
 #'
-#' @returns A table, or a list of tables in list mode when multiple
+#' @returns A table, or a list of tables with `.type = "list"` when multiple
 #' variable-type families are present. Each table preserves the input's
 #' data.frame, tibble, or data.table container in both modes. Results are
 #' ungrouped, retaining grouping keys as columns and supported preview settings.
 #' Other subclasses are not reconstructed. Vector input returns a tibble in
-#' list mode or a data.frame in table mode, using its expression as the variable
+#' with `.type = "list"` or a data.frame with `.type = "table"`, using its expression as the variable
 #' name, or `value` for a multiline expression or a magrittr pipe (`.`). Wrap
 #' the vector in a named tibble to choose a stable variable name. Input data are
 #' not modified.
@@ -163,11 +166,11 @@
 #'   )
 #'
 #' # Remove rows missing a grouping key; measured NAs are always omitted
-#' summ(lifeexp, .by = region, .na.rm = TRUE)
+#' summ(lifeexp, .by = region, .missing = FALSE)
 #'
 #' # Keep numeric and calendar summaries in separate tables
 #' mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
-#' summ(mixed, .mode = "list")
+#' summ(mixed, .type = "list")
 #'
 #' # Choose a stable variable name when starting from a vector
 #' scores <- c(4, 6, NA, 8)
@@ -179,21 +182,40 @@ summ <- function(
   .keep_all = FALSE,
   .detail = FALSE,
   .stat = character(0),
-  .na.rm = FALSE,
+  .missing = TRUE,
   .name = FALSE,
-  .mode = c("list", "table"),
+  .type = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic")
+  .wt_type = c("frequency", "analytic"),
+  .na.rm = lifecycle::deprecated(),
+  .mode = lifecycle::deprecated()
 ) {
   local_wrapper_error_call()
+  if (lifecycle::is_present(.na.rm)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "summ(.na.rm)",
+      "summ(.missing)",
+      details = "`.missing = FALSE` drops rows with missing grouping keys."
+    )
+    .missing <- !.na.rm
+  }
+  if (lifecycle::is_present(.mode)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "summ(.mode)",
+      "summ(.type)"
+    )
+    .type <- .mode
+  }
   # Validate controls before data-dependent branching.
   controls <- list(
     .keep_all = .keep_all,
     .detail = .detail,
-    .na.rm = .na.rm,
+    .missing = .missing,
     .name = .name,
     .sort = .sort,
     .drop_empty = .drop_empty
@@ -202,9 +224,9 @@ summ <- function(
     check_bool(controls[[argument]], arg = argument)
   }
   summ_stat_names(.stat)
-  .mode <- match.arg(.mode)
-  .duration_format <- match.arg(.duration_format)
-  .wt_type <- match.arg(.wt_type)
+  .type <- rlang::arg_match(.type)
+  .duration_format <- rlang::arg_match(.duration_format)
+  .wt_type <- rlang::arg_match(.wt_type)
 
   input_expr <- substitute(.data)
   template <- .data
@@ -216,7 +238,7 @@ summ <- function(
   if (!is.data.frame(.data)) {
     var_name <- summ_vector_name(input_expr)
     .data <- tibble::as_tibble_col(.data, column_name = var_name)
-    template <- if (.mode == "table") as.data.frame(.data) else .data
+    template <- if (.type == "table") as.data.frame(.data) else .data
   }
 
   # Identify group variables
@@ -229,7 +251,7 @@ summ <- function(
   input_names <- names(.data)
 
   # Missing-key filtering does not change how measured missing values are handled.
-  if (.na.rm && length(group_vars) > 0) {
+  if (!.missing && length(group_vars) > 0) {
     .data <- .data %>%
       dplyr::filter(
         dplyr::if_all(
@@ -319,7 +341,7 @@ summ <- function(
     group_vars,
     .detail,
     working_stats,
-    .mode,
+    .type,
     weights = weights,
     weight_type = .wt_type,
     metadata = metadata
@@ -375,15 +397,35 @@ tabstat <- function(
   .keep_all = FALSE,
   .detail = FALSE,
   .stat = "mean",
-  .na.rm = FALSE,
+  .missing = TRUE,
   .name = FALSE,
-  .mode = c("list", "table"),
+  .type = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic")
+  .wt_type = c("frequency", "analytic"),
+  .na.rm = lifecycle::deprecated(),
+  .mode = lifecycle::deprecated()
 ) {
+  if (lifecycle::is_present(.na.rm)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "tabstat(.na.rm)",
+      "tabstat(.missing)",
+      details = "`.missing = FALSE` drops rows with missing grouping keys."
+    )
+    .missing <- !.na.rm
+  }
+  if (lifecycle::is_present(.mode)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "tabstat(.mode)",
+      "tabstat(.type)"
+    )
+    .type <- .mode
+  }
+  .type <- rlang::arg_match(.type)
   # Detailed output replaces the default mean-only request.
   if (isTRUE(.detail) && missing(.stat)) {
     .stat <- character(0)
@@ -391,7 +433,7 @@ tabstat <- function(
   if (!is.data.frame(.data)) {
     var_name <- summ_vector_name(substitute(.data))
     .data <- tibble::as_tibble_col(.data, column_name = var_name)
-    if (match.arg(.mode) == "table") {
+    if (.type == "table") {
       .data <- as.data.frame(.data)
     }
   }
@@ -403,9 +445,9 @@ tabstat <- function(
       .keep_all = .keep_all,
       .detail = .detail,
       .stat = .stat,
-      .na.rm = .na.rm,
+      .missing = .missing,
       .name = .name,
-      .mode = .mode,
+      .type = .type,
       .duration_format = .duration_format,
       .sort = .sort,
       .drop_empty = .drop_empty,

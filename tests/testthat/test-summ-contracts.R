@@ -176,7 +176,7 @@ test_that("mixed table summaries retain missing numeric rows alongside dates", {
     x = c(NA_real_, NA_real_),
     d = as.Date("2024-01-01") + 0:1
   )
-  expect_warning(out <- summ(df, .mode = "table"), "entirely missing")
+  expect_warning(out <- summ(df, .type = "table"), "entirely missing")
   expect_equal(out$name, c("x", "d"))
   expect_equal(out$n, c(0, 2))
   expect_identical(out$mean, c(NA_character_, "2024-01-01"))
@@ -185,7 +185,7 @@ test_that("mixed table summaries retain missing numeric rows alongside dates", {
 test_that("zero-row mixed table summaries keep numeric and date rows", {
   out <- summ(
     tibble::tibble(x = numeric(), d = as.Date(character())),
-    .mode = "table"
+    .type = "table"
   )
   expect_equal(out$name, c("x", "d"))
   expect_equal(out$n, c(0, 0))
@@ -195,7 +195,7 @@ test_that("zero-row mixed table summaries keep numeric and date rows", {
 test_that("mixed observed table summaries use compatible formatted statistics", {
   out <- summ(
     tibble::tibble(x = c(1, 3), d = as.Date("2024-01-01") + 0:1),
-    .mode = "table"
+    .type = "table"
   )
   expect_equal(out$n, c(2, 2))
   expect_identical(out$mean, c("2", "2024-01-01"))

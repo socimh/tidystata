@@ -1,6 +1,6 @@
 # Function: summ()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:22 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 16:23:08 | **Status:** PASS
 
 ## Example 1: Basic numeric summary
 
@@ -90,7 +90,7 @@ summ(data.frame(x = c(1, 2, Inf, -Inf, 3)))
 
 ```r
 df <- data.frame(x = c(1, 2, 3, 4), g = c('a', 'a', NA, 'b'))
-summ(df, .by = g, .na.rm = TRUE)
+summ(df, .by = g, .missing = FALSE)
 ```
 
 **Output:**

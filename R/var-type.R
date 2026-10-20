@@ -3,9 +3,11 @@
 #' `var_type()` and `var_unit()` are aliases of `s_type()` and `s_unit()`.
 #'
 #' @name s_type
-#' @param .x An object.
-#' @param .abbr A logical. If `TRUE`, the abbreviation
-#' of the type is returned.
+#' @param x An object.
+#' @param abbr A single `TRUE` or `FALSE`. If `TRUE`, the abbreviation of the
+#'   type is returned.
+#' @param .x,.abbr `r lifecycle::badge("deprecated")` Use `x` and `abbr`
+#'   instead.
 #' @returns A character. `s_type()` returns `"units"` for measured vectors
 #' in either abbreviation mode. `s_unit()` returns the unit string for measured
 #' or duration vectors, including empty or all-missing measured vectors, and
@@ -37,12 +39,29 @@
 
 #' @export
 #' @rdname s_type
-s_type <- function(.x, .abbr = FALSE) {
+s_type <- function(
+  x,
+  abbr = FALSE,
+  .x = lifecycle::deprecated(),
+  .abbr = lifecycle::deprecated()
+) {
+  if (lifecycle::is_present(.x)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "s_type(.x)", "s_type(x)")
+    # In old calls such as s_type(.x = v, TRUE), the positional value fills `x`.
+    if (!missing(x) && missing(abbr)) {
+      abbr <- x
+    }
+    x <- .x
+  }
+  if (lifecycle::is_present(.abbr)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "s_type(.abbr)", "s_type(abbr)")
+    abbr <- .abbr
+  }
   # Plain storage types need no formatting or S3 dispatch. Matrix/array input
   # retains the established element-type description.
-  type <- if (!is.object(.x)) {
+  type <- if (!is.object(x)) {
     switch(
-      typeof(.x),
+      typeof(x),
       integer = "int",
       double = "dbl",
       character = "chr",
@@ -59,14 +78,14 @@ s_type <- function(.x, .abbr = FALSE) {
       language = "language",
       expression = "expression",
       pairlist = "pairlist",
-      pillar::type_sum(.x)
+      pillar::type_sum(x)
     )
-  } else if (inherits(.x, "haven_labelled")) {
-    paste0(s_type(unclass(.x), .abbr = TRUE), "+lbl")
+  } else if (inherits(x, "haven_labelled")) {
+    paste0(s_type(unclass(x), abbr = TRUE), "+lbl")
   } else {
-    label <- pillar::type_sum(.x)
+    label <- pillar::type_sum(x)
     if (
-      vctrs::obj_is_vector(.x) && isTRUE(vctrs::vec_ptype_abbr(.x) == "units")
+      vctrs::obj_is_vector(x) && isTRUE(vctrs::vec_ptype_abbr(x) == "units")
     ) {
       label <- "units"
     }
@@ -76,16 +95,16 @@ s_type <- function(.x, .abbr = FALSE) {
         is.na(label) ||
         !nzchar(label)
     ) {
-      label <- class(.x)[[1L]]
+      label <- class(x)[[1L]]
     }
-    if (!is.null(dim(.x))) sub("\\[[ ,0-9]*\\]$", "", label) else label
+    if (!is.null(dim(x))) sub("\\[[ ,0-9]*\\]$", "", label) else label
   }
-  if (.abbr) {
+  if (abbr) {
     return(type)
   }
 
   # Expand only recognized complete tokens, never substrings of custom labels.
-  labelled <- inherits(.x, "haven_labelled")
+  labelled <- inherits(x, "haven_labelled")
   token <- if (labelled) sub("\\+lbl$", "", type) else type
   expanded <- switch(
     token,
@@ -110,16 +129,18 @@ s_type <- function(.x, .abbr = FALSE) {
 
 #' @export
 #' @rdname s_type
-s_unit <- function(.x) {
-  if (inherits(.x, c("units", "difftime"))) {
-    return(as.character(units(.x)))
+s_unit <- function(x, .x = lifecycle::deprecated()) {
+  if (lifecycle::is_present(.x)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "s_unit(.x)", "s_unit(x)")
+    x <- .x
+  }
+  if (inherits(x, c("units", "difftime"))) {
+    return(as.character(units(x)))
   }
   # Preserve custom unit-bearing classes while avoiding repeated type detection
   # for plain vectors, which cannot have a class-specific units method.
-  if (
-    is.object(.x) && s_type(.x, .abbr = TRUE) %in% c("units", "drtn", "time")
-  ) {
-    return(as.character(units(.x)))
+  if (is.object(x) && s_type(x, abbr = TRUE) %in% c("units", "drtn", "time")) {
+    return(as.character(units(x)))
   }
   NA_character_
 }

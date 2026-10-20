@@ -4,15 +4,16 @@
 #' `sample(x, 5) %>% set_seed(123)`, or set it alone like Stata's
 #' `set seed 123` with `set_seed(123)`.
 #'
-#' @param .fn An expression evaluated after setting the seed. When `seed` is
-#'   omitted, `.fn` is the seed itself, as in `set_seed(123)`.
+#' @param x An expression evaluated after setting the seed. When `seed` is
+#'   omitted, `x` is the seed itself, as in `set_seed(123)`.
 #' @param seed An integer for reproducibility.
+#' @param .fn `r lifecycle::badge("deprecated")` Use `x` instead.
 #' @returns The expression's result, preserving its visibility. Used alone,
 #'   `set_seed()` returns `NULL` invisibly.
 #' @details
-#' Calls [set.seed()] before evaluating `.fn` once. The global random-number
-#' state is changed and is not restored, including when `.fn` fails. Subsequent
-#' random draws continue from the state left by `.fn`.
+#' Calls [set.seed()] before evaluating `x` once. The global random-number
+#' state is changed and is not restored, including when `x` fails. Subsequent
+#' random draws continue from the state left by `x`.
 #'
 #' With only one argument, that argument is the seed and must be a single
 #' finite number. A pipeline that forgets the seed therefore errors, unless
@@ -31,12 +32,20 @@
 #' # Alone, like Stata's set seed 123
 #' set_seed(123)
 #' sample(1:10, 8)
-set_seed <- function(.fn, seed) {
+set_seed <- function(x, seed, .fn = lifecycle::deprecated()) {
+  if (!missing(.fn)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "set_seed(.fn)", "set_seed(x)")
+    # In old calls such as set_seed(.fn = f(), 1), the positional seed fills `x`.
+    if (!missing(x) && missing(seed)) {
+      seed <- x
+    }
+    return(set_seed(.fn, seed))
+  }
   if (missing(seed)) {
-    if (missing(.fn)) {
+    if (missing(x)) {
       cli::cli_abort("Supply a seed, as in {.code set_seed(123)}.")
     }
-    seed <- .fn
+    seed <- x
     if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed)) {
       cli::cli_abort(c(
         "Used alone, {.fn set_seed} needs one number as the seed, as in {.code set_seed(123)}.",
@@ -47,8 +56,8 @@ set_seed <- function(.fn, seed) {
     return(invisible(NULL))
   }
   set.seed(seed)
-  if (missing(.fn)) {
+  if (missing(x)) {
     return(invisible(NULL))
   }
-  .fn
+  x
 }

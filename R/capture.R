@@ -4,7 +4,8 @@
 #' suppresses any error, and returns `TRUE` if the expression succeeded and
 #' `FALSE` if it failed. `s_try()` is an alias of `capture()`.
 #'
-#' @param .fn An expression to evaluate once.
+#' @param x An expression to evaluate once.
+#' @param .fn `r lifecycle::badge("deprecated")` Use `x` instead.
 #' @returns A single logical value.
 #' @details
 #' Errors are caught without printing their messages; warnings and messages
@@ -28,8 +29,12 @@ NULL
 
 #' @rdname capture
 #' @export
-capture <- function(.fn) {
-  try_result <- try(.fn, silent = TRUE)
+capture <- function(x, .fn = lifecycle::deprecated()) {
+  if (!missing(.fn)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "capture(.fn)", "capture(x)")
+    return(capture(.fn))
+  }
+  try_result <- try(x, silent = TRUE)
   !inherits(try_result, "try-error")
 }
 

@@ -9,10 +9,14 @@ s_merge(
   using,
   relationship,
   by,
-  .keep = c("master", "using", "match"),
-  .assert = NULL,
-  .generate = ".merge",
-  .report = TRUE
+  keep = c("master", "using", "match"),
+  assert = NULL,
+  generate = ".merge",
+  report = TRUE,
+  .keep = lifecycle::deprecated(),
+  .assert = lifecycle::deprecated(),
+  .generate = lifecycle::deprecated(),
+  .report = lifecycle::deprecated()
 )
 }
 \arguments{
@@ -29,19 +33,22 @@ supported, as in Stata; use \code{\link[dplyr:inner_join]{dplyr::inner_join()}} 
 \item{by}{A character vector of key columns. Use a named vector, such as
 \code{c(id = "person_id")}, when the names differ (\code{.data} name = \code{using} name).}
 
-\item{.keep}{Which rows to keep: any of \code{"master"} (only in \code{.data}),
+\item{keep}{Which rows to keep: any of \code{"master"} (only in \code{.data}),
 \code{"using"} (only in \code{using}) and \code{"match"} (in both). Default keeps all, as
 Stata does.}
 
-\item{.assert}{\code{NULL} (default) or any of \code{"master"}, \code{"using"} and
+\item{assert}{\code{NULL} (default) or any of \code{"master"}, \code{"using"} and
 \code{"match"}. If given, every row must be in one of these groups, otherwise
 \code{s_merge()} errors, like Stata's \code{assert()} option.}
 
-\item{.generate}{Name of the result column, \code{".merge"} by default. Use
+\item{generate}{Name of the result column, \code{".merge"} by default. Use
 \code{NULL} to omit it (Stata's \code{nogenerate}).}
 
-\item{.report}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), print the
+\item{report}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), print the
 match report as a message.}
+
+\item{.keep, .assert, .generate, .report}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+Use \code{keep}, \code{assert}, \code{generate} and \code{report} instead.}
 }
 \value{
 The merged table, in the container of \code{.data}. Rows from \code{.data}
@@ -67,8 +74,8 @@ income <- tibble::tibble(id = c(2, 3, 4), income = c(10, 20, 30))
 s_merge(people, income, "1:1", by = "id")
 
 # Keep matched rows only, and insist that every person is matched
-try(s_merge(people, income, "1:1", by = "id", .assert = "match"))
-s_merge(people, income, "1:1", by = "id", .keep = "match", .report = FALSE)
+try(s_merge(people, income, "1:1", by = "id", assert = "match"))
+s_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
 
 # Many people per household
 members <- tibble::tibble(hh = c(1, 1, 2), person = 1:3)

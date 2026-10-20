@@ -9,20 +9,20 @@
 \alias{as_numeric}
 \title{Convert vectors for data preparation}
 \usage{
-destring(.x)
+destring(x, .x = lifecycle::deprecated())
 
-decode(.x)
+decode(x, .x = lifecycle::deprecated())
 
 tostring(x)
 
-as_character(.x)
+as_character(x, .x = lifecycle::deprecated())
 
-as_numeric(.x)
+as_numeric(x, .x = lifecycle::deprecated())
 }
 \arguments{
-\item{.x}{A vector or matrix.}
+\item{x}{A vector or matrix; a vector for \code{tostring()}.}
 
-\item{x}{A vector, for \code{tostring()}.}
+\item{.x}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} instead.}
 }
 \value{
 \code{as_character()} and \code{tostring()} return a character vector. \code{as_numeric()} returns

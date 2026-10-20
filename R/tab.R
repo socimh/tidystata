@@ -91,8 +91,10 @@
 #' @param .by Optional grouping columns, selected with tidyselect. For `tab()`,
 #' `tab1()`, `fre()` and `fre1()`, `NULL` inherits existing `group_by()` groups;
 #' an explicit selection replaces them. Grouping columns are not measured
-#' variables. `tab2()` does not accept `.by`, `.desc` or `.group_order`;
-#' supplying them is an error.
+#' variables. For `tab2()` and `fre2()`, `.by` returns a list with one
+#' cross-table per group, named like `"g = a"`, as Stata's `by g: tab x y`;
+#' grouped data are not split without `.by`. `tab2()` does not accept `.desc`
+#' or `.group_order`.
 #' @param .desc If `TRUE`, sort categories by descending count within each
 #' group (missing categories stay last). To order the `.by` group blocks by
 #' size, use `.group_order = "frequency"`.
@@ -100,7 +102,8 @@
 #' tables; `fre()`, `tab2()` and `fre2()` default to `"auto"`, preserving the input
 #' container. Explicit `"tibble"` always returns a plain tibble. Explicit
 #' `"flextable"` output requires the optional flextable package.
-#' @param .flip If TRUE, will transpose the output tibble.
+#' @param .flip A single `TRUE` or `FALSE`. If `TRUE`, swap the rows and
+#' columns of the cross-table.
 #' @param .wt Optional weights: a numeric column of `.data` (or a vector
 #' with one value per row), like Stata's `[fweight]`/`[aweight]`. Rows with a
 #' missing weight are excluded with a message; negative weights are an error.
@@ -190,6 +193,9 @@
 #' # Every pairwise table, like Stata's tab2 sex gender eye_color
 #' tab2(starwars, sex, gender, eye_color)
 #'
+#' # One cross-table per group, like Stata's by species: tab sex gender
+#' tab2(starwars, sex, gender, .by = species) |> head(2)
+#'
 #' # Chi-square test of independence, like Stata's tab x y, chi2 V
 #' chi2 <- tab2(starwars, sex, gender, .chi2 = TRUE)
 #' attr(chi2, "chi2")
@@ -220,7 +226,7 @@ tab <- function(
       .wt_type = .wt_type
     ))
   }
-  .group_order <- match.arg(.group_order)
+  .group_order <- rlang::arg_match(.group_order)
   if (!is.data.frame(.data)) {
     .data <- tab_vector_data(.data, ..., .by = {{ .by }})
   }
@@ -236,7 +242,7 @@ tab <- function(
     by
   )
   .data <- dplyr::ungroup(.data)
-  .wt_type <- match.arg(.wt_type)
+  .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
   .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
@@ -301,13 +307,13 @@ tab1 <- function(
       ...,
       .by = {{ .by }},
       .desc = .desc,
-      .type = match.arg(.type),
+      .type = rlang::arg_match(.type),
       .group_order = .group_order,
       .wt = {{ .wt }},
       .wt_type = .wt_type
     ))
   }
-  .group_order <- match.arg(.group_order)
+  .group_order <- rlang::arg_match(.group_order)
   if (!is.data.frame(.data)) {
     .data <- tab_vector_data(.data, ..., .by = {{ .by }})
   }
@@ -323,7 +329,7 @@ tab1 <- function(
     by
   )
   .data <- dplyr::ungroup(.data)
-  .wt_type <- match.arg(.wt_type)
+  .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
   .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
@@ -339,7 +345,7 @@ tab1 <- function(
     groups
   )
 
-  .type <- match.arg(.type)
+  .type <- rlang::arg_match(.type)
   keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))
   values <- tab_prepare_data(.data, ..., group_vars = group_vars)
   .data <- dplyr::bind_cols(keys, values)
@@ -390,6 +396,7 @@ tab1 <- function(
 tab2 <- function(
   .data,
   ...,
+  .by = NULL,
   .flip = FALSE,
   .total = FALSE,
   .type = c("auto", "tibble", "flextable"),
@@ -402,15 +409,22 @@ tab2 <- function(
   check_bool(.flip)
   check_bool(.total)
   check_bool(.chi2)
-  .type <- match.arg(.type)
+  .type <- rlang::arg_match(.type)
   if (.type == "flextable" && !.total) {
     cli::cli_abort(
       "Flextable cross-tabulation requires {.code .total = TRUE}."
     )
   }
   template <- .data
-  .data <- aggregation_working_data(.data)
-  .wt_type <- match.arg(.wt_type)
+  by <- rlang::enquo(.by)
+  grouped <- !rlang::quo_is_null(by)
+  .data <- aggregation_working_data(.data, override_groups = grouped)
+  group_vars <- if (grouped) {
+    extract_group_var(dplyr::ungroup(.data), by)
+  } else {
+    character()
+  }
+  .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
   .data <- weighted$data
   if (.chi2 && !is.null(weighted$weights) && .wt_type == "analytic") {
@@ -419,11 +433,13 @@ tab2 <- function(
       i = "For sampling weights, use {.fn survey::svychisq}."
     ))
   }
-  weights <- weights_scale(weighted$weights, .data, character(), .wt_type)
   # Prepare data
-  .data <- .data %>%
-    s_select(...)
-  .data <- tab_ungroup(.data)
+  keys <- dplyr::ungroup(.data)[group_vars]
+  .data <- if (grouped) {
+    remove_group_vars(.data, ..., group_vars = group_vars)
+  } else {
+    tab_ungroup(s_select(.data, ...))
+  }
   if (ncol(.data) == 0L) {
     if (.type == "flextable") {
       cli::cli_abort(
@@ -436,20 +452,53 @@ tab2 <- function(
   # Confirm names
   tab2_check_vars(.data)
   .data <- tab_rename_reserved(.data, "tab2()")
-  # Three or more variables: every pairwise table, like Stata's tab2.
-  if (ncol(.data) > 2L) {
-    pairs <- utils::combn(names(.data), 2L, simplify = FALSE)
-    out <- lapply(pairs, function(pair) {
-      if (.chi2) {
-        cli::cli_inform("-> tabulation of {pair[[1L]]} by {pair[[2L]]}")
-      }
-      pair_data <- dplyr::select(.data, dplyr::all_of(pair))
-      tab2_pair(pair_data, weights, template, .flip, .total, .type, .chi2)
-    })
-    names(out) <- vapply(pairs, paste, character(1), collapse = " x ")
-    return(out)
+  if (!grouped) {
+    weights <- weights_scale(weighted$weights, .data, character(), .wt_type)
+    return(tab2_tables(.data, weights, template, .flip, .total, .type, .chi2))
   }
-  tab2_pair(.data, weights, template, .flip, .total, .type, .chi2)
+  # Like Stata's `by g: tab x y`, one result per group, named "g = value".
+  groups <- group_locations(keys, group_vars)
+  labels <- tab2_group_labels(groups$keys)
+  out <- lapply(seq_along(groups$locs), function(i) {
+    loc <- groups$locs[[i]]
+    if (.chi2) {
+      cli::cli_inform("-> {labels[[i]]}")
+    }
+    rows <- vctrs::vec_slice(.data, loc)
+    weights <- if (is.null(weighted$weights)) {
+      NULL
+    } else {
+      weights_scale(weighted$weights[loc], rows, character(), .wt_type)
+    }
+    tab2_tables(rows, weights, template, .flip, .total, .type, .chi2)
+  })
+  rlang::set_names(out, labels)
+}
+
+# Three or more variables: every pairwise table, like Stata's tab2.
+tab2_tables <- function(.data, weights, template, .flip, .total, .type, .chi2) {
+  rlang::local_error_call(rlang::caller_env())
+  if (ncol(.data) <= 2L) {
+    return(tab2_pair(.data, weights, template, .flip, .total, .type, .chi2))
+  }
+  pairs <- utils::combn(names(.data), 2L, simplify = FALSE)
+  out <- lapply(pairs, function(pair) {
+    if (.chi2) {
+      cli::cli_inform("-> tabulation of {pair[[1L]]} by {pair[[2L]]}")
+    }
+    pair_data <- dplyr::select(.data, dplyr::all_of(pair))
+    tab2_pair(pair_data, weights, template, .flip, .total, .type, .chi2)
+  })
+  names(out) <- vapply(pairs, paste, character(1), collapse = " x ")
+  out
+}
+
+# "g = a" for one key, "g = a, h = b" for several; missing keys print as NA.
+tab2_group_labels <- function(keys) {
+  parts <- lapply(names(keys), function(name) {
+    paste(name, "=", tostring(as_character(keys[[name]])))
+  })
+  do.call(paste, c(parts, sep = ", "))
 }
 
 #' @export
@@ -461,6 +510,7 @@ xtab <- tab2
 fre2 <- function(
   .data,
   ...,
+  .by = NULL,
   .flip = FALSE,
   .type = c("auto", "tibble", "flextable"),
   .wt = NULL,
@@ -470,11 +520,12 @@ fre2 <- function(
   tab2(
     .data,
     ...,
+    .by = {{ .by }},
     .flip = .flip,
     .total = TRUE,
-    .type = match.arg(.type),
+    .type = rlang::arg_match(.type),
     .wt = {{ .wt }},
-    .wt_type = match.arg(.wt_type),
+    .wt_type = rlang::arg_match(.wt_type),
     .chi2 = .chi2
   )
 }
@@ -523,7 +574,7 @@ fre <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
-  .group_order <- match.arg(.group_order)
+  .group_order <- rlang::arg_match(.group_order)
   if (!is.data.frame(.data)) {
     .data <- tab_vector_data(.data, ..., .by = {{ .by }})
   }
@@ -532,7 +583,7 @@ fre <- function(
     .data,
     override_groups = !rlang::quo_is_null(rlang::enquo(.by))
   )
-  .type <- match.arg(.type)
+  .type <- rlang::arg_match(.type)
   # Identify group variables
   by <- rlang::enquo(.by)
   group_vars <- extract_group_var(
@@ -540,7 +591,7 @@ fre <- function(
     by
   )
   .data <- dplyr::ungroup(.data)
-  .wt_type <- match.arg(.wt_type)
+  .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
   .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
@@ -605,7 +656,7 @@ fre1 <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
-  .group_order <- match.arg(.group_order)
+  .group_order <- rlang::arg_match(.group_order)
   if (!is.data.frame(.data)) {
     .data <- tab_vector_data(.data, ..., .by = {{ .by }})
   }
@@ -621,7 +672,7 @@ fre1 <- function(
     by
   )
   .data <- dplyr::ungroup(.data)
-  .wt_type <- match.arg(.wt_type)
+  .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
   .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
@@ -637,7 +688,7 @@ fre1 <- function(
     groups
   )
 
-  .type <- match.arg(.type)
+  .type <- rlang::arg_match(.type)
   keys <- dplyr::select(dplyr::ungroup(.data), tidyselect::all_of(group_vars))
   values <- tab_prepare_data(.data, ..., group_vars = group_vars)
   .data <- dplyr::bind_cols(keys, values)
@@ -701,12 +752,12 @@ reject_cross_controls <- function(
   function_name,
   call = rlang::caller_env()
 ) {
-  supplied <- intersect(c(".by", ".desc", ".group_order"), ...names())
+  supplied <- intersect(c(".desc", ".group_order"), ...names())
   if (length(supplied)) {
     cli::cli_abort(
       c(
-        "{.arg {supplied[[1L]]}} is not supported by {.code {function_name}}; cross-tabulations have no groups or category sorting.",
-        i = "Use {.fn tab} or {.fn fre} with {.arg .by}, or filter the data first."
+        "{.arg {supplied[[1L]]}} is not supported by {.code {function_name}}; cross-tabulations keep categories in value order.",
+        i = "Use {.fn tab} or {.fn fre} to order categories by frequency."
       ),
       call = call
     )

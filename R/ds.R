@@ -44,7 +44,7 @@
 #' @rdname names
 #' @export
 ds <- function(.data, ..., .type = c("vector", "table")) {
-  .type <- match.arg(.type)
+  .type <- rlang::arg_match(.type)
   if (.type == "table") {
     out <- tibble::as_tibble_col(ds(table_working_data(.data), ...), "name")
     return(table_restore(out, .data))

@@ -649,7 +649,7 @@ test_that("rank cuts balance ties deterministically and restore missing position
     xtile(8, n = 1, method = "rank", labels = FALSE),
     1L
   )
-  expect_error(xtile(1:5, method = "wrong"), "arg")
+  expect_error(xtile(1:5, method = "wrong"), "must be one of")
   expect_error(
     xtile(1:5, n = 1 + 1i, method = "rank"),
     "whole number larger than or equal to 1"

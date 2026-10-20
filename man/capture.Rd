@@ -5,12 +5,14 @@
 \alias{s_try}
 \title{Capture an error and report success}
 \usage{
-capture(.fn)
+capture(x, .fn = lifecycle::deprecated())
 
-s_try(.fn)
+s_try(x, .fn = lifecycle::deprecated())
 }
 \arguments{
-\item{.fn}{An expression to evaluate once.}
+\item{x}{An expression to evaluate once.}
+
+\item{.fn}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} instead.}
 }
 \value{
 A single logical value.

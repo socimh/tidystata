@@ -15,16 +15,18 @@
 #' `relationship = "many-to-many"` if you really need all pairings.
 #' @param by A character vector of key columns. Use a named vector, such as
 #' `c(id = "person_id")`, when the names differ (`.data` name = `using` name).
-#' @param .keep Which rows to keep: any of `"master"` (only in `.data`),
+#' @param keep Which rows to keep: any of `"master"` (only in `.data`),
 #' `"using"` (only in `using`) and `"match"` (in both). Default keeps all, as
 #' Stata does.
-#' @param .assert `NULL` (default) or any of `"master"`, `"using"` and
+#' @param assert `NULL` (default) or any of `"master"`, `"using"` and
 #' `"match"`. If given, every row must be in one of these groups, otherwise
 #' `s_merge()` errors, like Stata's `assert()` option.
-#' @param .generate Name of the result column, `".merge"` by default. Use
+#' @param generate Name of the result column, `".merge"` by default. Use
 #' `NULL` to omit it (Stata's `nogenerate`).
-#' @param .report A single `TRUE` or `FALSE`. If `TRUE` (default), print the
+#' @param report A single `TRUE` or `FALSE`. If `TRUE` (default), print the
 #' match report as a message.
+#' @param .keep,.assert,.generate,.report `r lifecycle::badge("deprecated")`
+#'   Use `keep`, `assert`, `generate` and `report` instead.
 #'
 #' @returns The merged table, in the container of `.data`. Rows from `.data`
 #' come first in their original order, followed by rows found only in
@@ -45,8 +47,8 @@
 #' s_merge(people, income, "1:1", by = "id")
 #'
 #' # Keep matched rows only, and insist that every person is matched
-#' try(s_merge(people, income, "1:1", by = "id", .assert = "match"))
-#' s_merge(people, income, "1:1", by = "id", .keep = "match", .report = FALSE)
+#' try(s_merge(people, income, "1:1", by = "id", assert = "match"))
+#' s_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
 #'
 #' # Many people per household
 #' members <- tibble::tibble(hh = c(1, 1, 2), person = 1:3)
@@ -57,11 +59,43 @@ s_merge <- function(
   using,
   relationship,
   by,
-  .keep = c("master", "using", "match"),
-  .assert = NULL,
-  .generate = ".merge",
-  .report = TRUE
+  keep = c("master", "using", "match"),
+  assert = NULL,
+  generate = ".merge",
+  report = TRUE,
+  .keep = lifecycle::deprecated(),
+  .assert = lifecycle::deprecated(),
+  .generate = lifecycle::deprecated(),
+  .report = lifecycle::deprecated()
 ) {
+  if (lifecycle::is_present(.keep)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "s_merge(.keep)", "s_merge(keep)")
+    keep <- .keep
+  }
+  if (lifecycle::is_present(.assert)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "s_merge(.assert)",
+      "s_merge(assert)"
+    )
+    assert <- .assert
+  }
+  if (lifecycle::is_present(.generate)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "s_merge(.generate)",
+      "s_merge(generate)"
+    )
+    generate <- .generate
+  }
+  if (lifecycle::is_present(.report)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "s_merge(.report)",
+      "s_merge(report)"
+    )
+    report <- .report
+  }
   if (!is.data.frame(.data) || !is.data.frame(using)) {
     cli::cli_abort("{.arg .data} and {.arg using} must be data frames.")
   }
@@ -70,16 +104,16 @@ s_merge <- function(
       "Specify the key {.arg relationship}: {.val 1:1}, {.val m:1} or {.val 1:m}."
     )
   }
-  relationship <- match.arg(relationship, c("1:1", "m:1", "1:m"))
+  relationship <- rlang::arg_match(relationship, c("1:1", "m:1", "1:m"))
   if (missing(by) || !is.character(by) || !length(by) || anyNA(by)) {
     cli::cli_abort("{.arg by} must be a character vector of key columns.")
   }
   groups <- c("master", "using", "match")
-  .keep <- merge_groups(.keep, ".keep")
-  if (!is.null(.assert)) {
-    .assert <- merge_groups(.assert, ".assert")
+  keep <- merge_groups(keep, "keep")
+  if (!is.null(assert)) {
+    assert <- merge_groups(assert, "assert")
   }
-  check_bool(.report)
+  check_bool(report)
 
   master <- dplyr::ungroup(table_working_data(.data))
   other <- dplyr::ungroup(table_working_data(using))
@@ -114,11 +148,11 @@ s_merge <- function(
     ))
     other <- other[setdiff(names(other), shared)]
   }
-  if (!is.null(.generate)) {
-    check_string(.generate, allow_empty = FALSE, allow_null = TRUE)
-    if (.generate %in% c(names(master), names(other))) {
+  if (!is.null(generate)) {
+    check_string(generate, allow_empty = FALSE, allow_null = TRUE)
+    if (generate %in% c(names(master), names(other))) {
       cli::cli_abort(
-        "Column {.var {(.generate)}} already exists; choose another {.arg .generate} name."
+        "Column {.var {(generate)}} already exists; choose another {.arg generate} name."
       )
     }
   }
@@ -144,12 +178,12 @@ s_merge <- function(
   joined[[in_master]] <- NULL
   joined[[in_using]] <- NULL
 
-  if (.report) {
+  if (report) {
     # The report is a fixed-width table, so keep its spacing as written.
-    rlang::inform(merge_report(counts, .generate))
+    rlang::inform(merge_report(counts, generate))
   }
-  if (!is.null(.assert) && !all(counts[setdiff(groups, .assert)] == 0L)) {
-    found <- setdiff(groups[unique(status)], .assert)
+  if (!is.null(assert) && !all(counts[setdiff(groups, assert)] == 0L)) {
+    found <- setdiff(groups[unique(status)], assert)
     found <- paste0(
       counts[found],
       " ",
@@ -157,21 +191,21 @@ s_merge <- function(
       " row(s)",
       collapse = " and "
     )
-    allowed <- paste(merge_group_label(.assert), collapse = ", ")
+    allowed <- paste(merge_group_label(assert), collapse = ", ")
     cli::cli_abort(
-      "Merge assertion failed: found {found}; {.arg .assert} allows only {allowed}."
+      "Merge assertion failed: found {found}; {.arg assert} allows only {allowed}."
     )
   }
-  if (!is.null(.generate)) {
-    joined[[.generate]] <- factor(
+  if (!is.null(generate)) {
+    joined[[generate]] <- factor(
       status,
       levels = seq_along(groups),
       labels = merge_group_label(groups)
     )
   }
-  keep <- groups[status] %in% .keep
-  if (!all(keep)) {
-    joined <- joined[keep, , drop = FALSE]
+  kept <- groups[status] %in% keep
+  if (!all(kept)) {
+    joined <- joined[kept, , drop = FALSE]
   }
   table_restore(joined, .data)
 }

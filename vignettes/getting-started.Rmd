@@ -86,10 +86,10 @@ mean(survey$score1, na.rm = TRUE)
 
 `summ()` can return several statistics. `tabstat()` selects means by default.
 Both omit missing measured values from numeric calculations. Missing grouping
-keys remain as a group unless you request `.na.rm = TRUE`:
+keys remain as a group unless you request `.missing = FALSE`:
 
 ```{r groups}
-summ(survey, score1, .by = group, .na.rm = TRUE, .stat = c("n", "mean"))
+summ(survey, score1, .by = group, .missing = FALSE, .stat = c("n", "mean"))
 ```
 
 Numeric-only summaries return a table. When numeric and calendar measurements

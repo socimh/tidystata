@@ -7,12 +7,15 @@
 #'
 #' Use `varlist()` within a *selecting* function, such as `ds()`, `tab()` or
 #' `dplyr::across()`. Alternatively, provide `vars` explicitly to return
-#' matching positions in a standalone call. `varlist()` was called `varlist()`
-#' before statart 0.2.0.9000; the old name still works with a once-per-session
-#' notice.
+#' matching positions in a standalone call. `varlist()` was called `s_match()`
+#' before statart 0.2.0.9000; the old name still works with a deprecation
+#' warning.
 #'
 #' @param string A single character string containing patterns, separated by
 #' spaces, like selecting a varlist in Stata's `keep` command.
+#' @param ignore_case If `TRUE` (the default), matching ignores case.
+#' @param ignore.case `r lifecycle::badge("deprecated")` Use `ignore_case`
+#'   instead.
 #' @returns An integer vector of positions in the available column names.
 #' @inheritParams tidyselect::starts_with
 #'
@@ -68,9 +71,18 @@
 #' @export
 varlist <- function(
   string,
-  ignore.case = TRUE,
-  vars = NULL
+  ignore_case = TRUE,
+  vars = NULL,
+  ignore.case = lifecycle::deprecated()
 ) {
+  if (lifecycle::is_present(ignore.case)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "varlist(ignore.case)",
+      "varlist(ignore_case)"
+    )
+    ignore_case <- ignore.case
+  }
   if (!is.character(string)) {
     stop_input_type(string, "a character vector")
   }
@@ -93,7 +105,7 @@ varlist <- function(
 
   tidyselect::matches(
     out,
-    ignore.case,
+    ignore_case,
     vars = vars
   )
 }

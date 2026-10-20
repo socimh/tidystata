@@ -28,11 +28,11 @@
       ! Only 1 variable is input.
       i Provide two variables for cross-tabulation, or more for every pairwise table.
     Code
-      tab2(d, a, b, .by = a)
+      tab2(d, a, b, .desc = TRUE)
     Condition
       Error in `tab2()`:
-      ! `.by` is not supported by `tab2()`; cross-tabulations have no groups or category sorting.
-      i Use `tab()` or `fre()` with `.by`, or filter the data first.
+      ! `.desc` is not supported by `tab2()`; cross-tabulations keep categories in value order.
+      i Use `tab()` or `fre()` to order categories by frequency.
     Code
       tab2(d, a, b, .wt = w, .wt_type = "analytic", .chi2 = TRUE)
     Condition

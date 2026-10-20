@@ -16,7 +16,6 @@ Suggests:
     ggplot2,
     hms,
     knitr,
-    lifecycle,
     rmarkdown,
     roxygen2,
     sf,
@@ -36,6 +35,7 @@ Imports:
     vctrs (>= 0.6.0),
     rlang,
     haven (>= 2.5.3),
+    lifecycle,
     purrr (>= 1.0.0),
     pillar (>= 1.8.0),
     readr (>= 1.0.0)

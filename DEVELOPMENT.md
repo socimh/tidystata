@@ -7,6 +7,12 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**API naming pass, 2026-10-20 (same branch):** `--release` suite **19,518
+passing expectations**, zero failures, errors, warnings or skips; `R CMD check
+--as-cran` 0 errors, 0 warnings, the same CRAN-incoming NOTE; seeded shuffle
+identical; style check 144 sources, 0 findings; all 24 demos pass (reports
+changed only for the renamed arguments). README re-rendered with ASCII output.
+
 **Tidyverse conventions pass, 2026-10-20 (branch
 `refactor/tidyverse-conventions`):** `--release` suite **19,469 passing
 expectations**, zero failures, errors, warnings or skips (snapshot tests now
@@ -294,7 +300,7 @@ are quiet aliases (`xtab`, `na_if_value`, `value_if_na`, `as_numeric`,
 `as_character`, `pct`, `s_tag`, `tab_gen`, `var_type`, `var_unit`,
 `cut_quantile`, `s_try`, `ds_as_column`, `names_as_column`) documented on their
 primary's help page, and one is deprecated (`s_match`). The package has
-13 required Imports (cli joined on 2026-10-20), two bundled datasets (`lifeexp`, `starwars`), and cpp11
+14 required Imports (cli and lifecycle joined on 2026-10-20), two bundled datasets (`lifeexp`, `starwars`), and cpp11
 native row kernels. R >= 4.1 is required.
 
 | Area | Public functions |
@@ -341,7 +347,7 @@ The user-approved follow-up decisions remain binding:
 
 - Summaries sort groups by default (`.sort = TRUE`) and hide the single-variable
   `name` column (`.name = FALSE`); `.drop_empty` remains opt-in.
-- `timer()` reports on failure (`.on_error = TRUE`) and rethrows the untouched
+- `timer()` reports on failure (`on_error = TRUE`) and rethrows the untouched
   error. Nested timers measure their entire enclosed expressions cumulatively.
 - Row numeric constants are values, as in `pmin()`; they never fill an all-missing
   row. Named tabulation/summary constants are computed; unnamed numbers select
@@ -395,34 +401,14 @@ show generated console output.
 
 ## Open backlog and release gates
 
-- **API harmonization proposal (decision needed; 2026-10-20):** the tidyverse
-  conventions pass changed no exported names, arguments or defaults. These
-  remaining inconsistencies each need a maintainer decision, and any change
-  would use `lifecycle` soft deprecation with the old form kept working:
-  - *First argument of vector functions.* `x` (`std`, `pc`, `mvdecode`,
-    `tostring`, `xtile`, `s_lag`) versus `.x` (`destring`, `as_numeric`,
-    `na_if_value`, `s_type`, `timer`). Tidyverse: `x` for vector functions,
-    dot prefixes only where `...` could capture the name (design.tidyverse.org,
-    "Dot prefix"). Cost: aliases currently share pages with differently named
-    arguments.
-  - *Missing-value controls.* `na.rm` (`row_*`, default `TRUE`), `.na.rm`
-    (`summ`, default `FALSE`), `.missing` (`is_first`, `row_nvals`) and
-    `.missok` (`isid`). Options: keep the Stata-mirroring names, or one
-    spelling with documented family-specific defaults.
-  - *Undotted options beside dotted ones.* `s_merge(by, using, relationship)`
-    next to `.keep`/`.assert`, `xtile(wt)` versus `summ(.wt)`/`tab(.wt)`, and
-    `varlist(ignore.case)`. Plain `by` is easily confused with `.by`.
-  - *Output selectors.* `.type = c("list", "tibble")` (`tab1`) versus
-    `c("auto", "tibble", "flextable")` (`tab2`, `fre`) versus
-    `c("vector", "table")` (`ds`) versus `.mode` (`summ`).
-  - *Enumerated options.* `match.arg()` still accepts partial matches;
-    `rlang::arg_match()` would give tidyverse errors but rejects abbreviations.
-  - *Grouping.* `tab2()`/`xtab()` have no `.by`.
-  - *Deprecation.* `deprecate_rename()` versus `lifecycle::deprecate_soft()`
-    (lifecycle is only in Suggests).
-  - *Naming schemes.* Stata abbreviations, `s_`-prefixed clash avoiders and
-    verb names coexist; the agreed policy should be written down before new
-    functions are added.
+- **API naming (decided 2026-10-20):** the maintainer's decisions are written
+  as the naming policy in CONTRIBUTING ("Package conventions"): `x` as the
+  first argument of vector and expression functions; dots only in functions
+  with `...` (`na.rm` excepted); `by` for merge keys and `.by` for groups;
+  `.missing` for missing-as-group controls (replacing `summ(.na.rm)`);
+  `.type` for output containers (replacing `summ(.mode)`); `arg_match()`;
+  lifecycle deprecations; and `tab2(.by)` returning a list. Old argument names
+  keep working with soft deprecation warnings; remove them in a later release.
 - **Long-function refactors (deferred):** `summ_variable()` (about 210 lines),
   `summ()` (196), `xtile()` (140) and `s_merge()` (131) should be split into
   validate/prepare/compute/assemble steps, one function per focused commit,

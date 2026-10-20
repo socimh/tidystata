@@ -20,7 +20,7 @@ test_that("vector summaries retain the caller expression after normalization", {
   observations <- c(1, 3, 5)
   expect_identical(summ(observations, .name = TRUE)$name, "observations")
   expect_identical(
-    summ(observations, .mode = "table", .name = TRUE)$name,
+    summ(observations, .type = "table", .name = TRUE)$name,
     "observations"
   )
 })
@@ -92,7 +92,7 @@ test_that("list members preserve containers and explicit output wins", {
       "tbl_df"
     )
     expect_identical(
-      class(summ(input, x, .mode = "table")),
+      class(summ(input, x, .type = "table")),
       container_class(kind)
     )
   }

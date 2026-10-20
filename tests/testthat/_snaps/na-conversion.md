@@ -14,12 +14,12 @@
       na_if_value(1)
     Condition
       Error in `na_if_value()`:
-      ! Missing `.value`. Use `na_if_value(x, value)` or `x |> na_if_value(value)`.
+      ! Missing `value`. Use `na_if_value(x, value)` or `x |> na_if_value(value)`.
     Code
-      value_if_na(.value = 1)
+      value_if_na(value = 1)
     Condition
       Error in `value_if_na()`:
-      ! Missing `.x`. Use `value_if_na(x, replacement)` or `x |> value_if_na(replacement)`.
+      ! Missing `x`. Use `value_if_na(x, value)` or `x |> value_if_na(value)`.
     Code
       mvencode(haven::labelled_spss(c(1, NA), na_values = 9), c(1, 2))
     Condition

@@ -646,3 +646,32 @@ test_that("tab2() returns every pairwise table for three or more variables", {
   dt <- data.table::as.data.table(d)
   expect_s3_class(tab2(dt, a, b, c)[[1]], "data.table")
 })
+
+test_that("tab2(.by) returns one cross-table per group", {
+  d <- tibble::tibble(
+    g = c("a", "a", "b", "b", NA),
+    x = c(1, 2, 1, 1, 2),
+    y = c("u", "v", "u", "u", "v"),
+    w = c(1, 3, 1, 1, 1)
+  )
+  out <- tab2(d, x, y, .by = g)
+  expect_type(out, "list")
+  expect_named(out, c("g = a", "g = b", "g = NA"))
+  expect_identical(out[["g = a"]], tab2(d[1:2, ], x, y))
+  expect_identical(out[["g = NA"]], tab2(d[5, ], x, y))
+  expect_identical(
+    fre2(d, x, y, .by = g)[["g = b"]],
+    tab2(d[3:4, ], x, y, .total = TRUE)
+  )
+  # Weights are evaluated on the whole table and rescaled within each group.
+  weighted <- tab2(d, x, y, .by = g, .wt = w, .wt_type = "analytic")
+  expect_identical(
+    weighted[["g = a"]],
+    tab2(d[1:2, ], x, y, .wt = w, .wt_type = "analytic")
+  )
+  three <- tab2(d, x, y, w, .by = g)
+  expect_named(three[["g = a"]], c("x x y", "x x w", "y x w"))
+  keys <- tab2(d, x, y, .by = c(g, w))
+  expect_true("g = a, w = 1" %in% names(keys))
+  expect_message(tab2(d, x, y, .by = g, .chi2 = TRUE), "-> g = a")
+})

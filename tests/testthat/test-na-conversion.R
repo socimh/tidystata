@@ -31,7 +31,7 @@ test_that("historical units and labelled metadata remain usable", {
 test_that("PROBLEMS2 missing value replacement arguments explain valid calls", {
   expect_error(value_if_na(4), ".value.*value_if_na", fixed = FALSE)
   expect_error(value_if_na(), ".x.*value_if_na", fixed = FALSE)
-  expect_error(value_if_na(.value = 4), ".x.*value_if_na", fixed = FALSE)
+  expect_error(value_if_na(value = 4), "`x`.*value_if_na", fixed = FALSE)
   expect_identical(value_if_na(c(1L, NA_integer_), 2L), c(1L, 2L))
   expect_error(value_if_na(c(1L, NA_integer_), "bad"))
 })
@@ -52,10 +52,10 @@ test_that("PROBLEMS2 value replacement follows SPSS user-missing values", {
 })
 
 test_that("missing replacement arguments have actionable diagnostics", {
-  expect_error(na_if_value(4), "Missing `.value`.*na_if_value", fixed = FALSE)
+  expect_error(na_if_value(4), "Missing `value`.*na_if_value", fixed = FALSE)
   expect_error(
-    na_if_value(.value = 4),
-    "Missing `.x`.*na_if_value",
+    na_if_value(value = 4),
+    "Missing `x`.*na_if_value",
     fixed = FALSE
   )
   expect_identical(na_if_value(c(1, 4, NA), 4), c(1, NA_real_, NA_real_))
@@ -89,7 +89,7 @@ test_that("missing-value conversion reports missing arguments", {
     mvdecode(1)
     mvencode()
     na_if_value(1)
-    value_if_na(.value = 1)
+    value_if_na(value = 1)
     mvencode(haven::labelled_spss(c(1, NA), na_values = 9), c(1, 2))
   })
 })

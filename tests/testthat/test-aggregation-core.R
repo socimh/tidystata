@@ -75,7 +75,7 @@ test_that("prepared weights stay aligned after missing-key and weight filtering"
       data,
       x,
       .by = g,
-      .na.rm = TRUE,
+      .missing = FALSE,
       .wt = 2 * w,
       .stat = c("n", "mean")
     ),

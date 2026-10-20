@@ -1,6 +1,6 @@
 # Historical problems: repaired examples
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:36 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 16:23:07 | **Status:** PASS
 
 ## Example 1: Blank cross-tab categories remain distinct
 
@@ -89,7 +89,7 @@ rank_bins
 ## Example 7: Failed expressions retain the true error
 
 ```
-Failed execution. Time spent: 0.001s
+Failed execution. Time spent: 0.000s
 [1] "original fitting error"
 ```
 
@@ -131,7 +131,7 @@ Levels: Yes No
 ## Example 11: Missing replacement arguments explain the call
 
 ```
-[1] "Missing `.value`. Use `value_if_na(x, replacement)` or `x |>\nvalue_if_na(replacement)`."
+[1] "Missing `value`. Use `value_if_na(x, value)` or `x |>\nvalue_if_na(value)`."
 ```
 
 ## Example 12: Constants cap values like pmin()

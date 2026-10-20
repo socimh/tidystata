@@ -12,17 +12,30 @@ mvdecode(x, mv)
 
 mvencode(x, mv)
 
-na_if_value(.x, .value)
+na_if_value(
+  x,
+  value,
+  .x = lifecycle::deprecated(),
+  .value = lifecycle::deprecated()
+)
 
-value_if_na(.x, .value)
+value_if_na(
+  x,
+  value,
+  .x = lifecycle::deprecated(),
+  .value = lifecycle::deprecated()
+)
 }
 \arguments{
-\item{x, .x}{A vector.}
+\item{x}{A vector.}
 
-\item{mv, .value}{For \code{mvdecode()} and \code{na_if_value()}, the codes to replace
+\item{mv, value}{For \code{mvdecode()} and \code{na_if_value()}, the codes to replace
 with \code{NA}; any value equal to one of them becomes missing. For
 \code{mvencode()} and \code{value_if_na()}, a single replacement value for missing
 elements, cast to the type of \code{x}.}
+
+\item{.x, .value}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} and \code{value}
+instead.}
 }
 \value{
 A vector with the same type and size as \code{x}, with matching values

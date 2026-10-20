@@ -274,7 +274,7 @@ summ_cov_register(
       h = c(1, NA, 1, 1),
       x = c(1, 4, 8, 3)
     )
-    out <- api(df, x, .by = c(g, h), .na.rm = TRUE, .stat = c("n", "sum"))
+    out <- api(df, x, .by = c(g, h), .missing = FALSE, .stat = c("n", "sum"))
     expect_equal(nrow(out), 1L)
     expect_equal(out$n, 2)
     expect_equal(out$sum, 4)
@@ -356,7 +356,7 @@ summ_cov_register(
   "dropping all missing keys yields typed empty output",
   function(api) {
     df <- tibble::tibble(g = c(NA_character_, NA_character_), x = c(1, 3))
-    out <- api(df, x, .by = g, .na.rm = TRUE, .stat = c("n", "mean"))
+    out <- api(df, x, .by = g, .missing = FALSE, .stat = c("n", "mean"))
     expect_equal(nrow(out), 0L)
     expect_named(out, c("g", "name", "type", "n", "mean"))
     expect_type(out$g, "character")

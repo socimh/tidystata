@@ -1,6 +1,6 @@
 # Function: keys()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:35 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 16:23:07 | **Status:** PASS
 
 ## Example 1: isid() asserts a key inside a pipeline
 
@@ -79,7 +79,7 @@ Not matched                          2
 
 Matched                              2  (.merge == "matched")
 --------------------------------------
-[1] "Merge assertion failed: found 1 master only row(s) and 1 using only\nrow(s); `.assert` allows only matched."
+[1] "Merge assertion failed: found 1 master only row(s) and 1 using only\nrow(s); `assert` allows only matched."
 ```
 
 ## Example 6: tab2() cross-tabulates, optionally with totals

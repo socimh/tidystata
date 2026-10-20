@@ -16,28 +16,28 @@
       Error in `s_merge()`:
       ! `by` must be a character vector of key columns.
     Code
-      s_merge(people, income, "1:1", by = "id", .keep = "both")
+      s_merge(people, income, "1:1", by = "id", keep = "both")
     Condition
       Error in `s_merge()`:
-      ! `.keep` must contain "master", "using" and/or "match".
+      ! `keep` must contain "master", "using" and/or "match".
     Code
       s_merge(people, income, "1:1", by = "missing_key")
     Condition
       Error in `s_merge()`:
       ! Key column(s) not found in `.data`: `missing_key`.
     Code
-      s_merge(people, income, "1:1", by = "id", .generate = "age")
+      s_merge(people, income, "1:1", by = "id", generate = "age")
     Condition
       Error in `s_merge()`:
-      ! Column `age` already exists; choose another `.generate` name.
+      ! Column `age` already exists; choose another `generate` name.
     Code
-      s_merge(tibble::tibble(id = c(1, 1)), income, "1:1", by = "id", .report = FALSE)
+      s_merge(tibble::tibble(id = c(1, 1)), income, "1:1", by = "id", report = FALSE)
     Condition
       Error in `s_merge()`:
       ! Variable `id` does not uniquely identify rows in the master data (`.data`) (2 rows share a key).
       i Check the relationship, or see the rows with `duplicates_list()`.
     Code
-      s_merge(people, income, "1:1", by = "id", .assert = "match")
+      s_merge(people, income, "1:1", by = "id", assert = "match")
     Message
       Result                            Rows
       --------------------------------------
@@ -49,5 +49,5 @@
       --------------------------------------
     Condition
       Error in `s_merge()`:
-      ! Merge assertion failed: found 1 master only row(s) and 1 using only row(s); `.assert` allows only matched.
+      ! Merge assertion failed: found 1 master only row(s) and 1 using only row(s); `assert` allows only matched.
 

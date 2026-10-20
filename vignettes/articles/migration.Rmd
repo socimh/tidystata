@@ -39,7 +39,7 @@ before the four-wrapper milestone and the restored printing/slicing helpers.
 | --- | --- |
 | `s_time()` | Renamed to `timer()`; timing messages use compact duration text. |
 | `cut_quantile()` | Now `xtile()`, the Stata command it follows; `cut_quantile()` stays as a quiet alias. |
-| `s_match()` | Renamed to `varlist()`, since it parses a Stata varlist string; the old name works with a once-per-session notice. |
+| `s_match()` | Renamed to `varlist()`, since it parses a Stata varlist string; the old name works with a deprecation warning. |
 | `s_try()` | Now `capture()`, after Stata's `capture`; `s_try()` stays as a quiet alias. |
 | `names_as_column()` | Now `ds(.type = "table")`; `names_as_column()` and `ds_as_column()` stay as quiet aliases. |
 | `tab2()`, `fre2()` | Kept as the cross-tabulation functions; `tab2()` with three or more variables now returns every pairwise table, as Stata's `tab2` does. |
@@ -55,6 +55,27 @@ new `statart_preview` class operates on full tables; it does not pretend that a
 row subset contains the full data. Retired implementations are unsupported and
 are not distributed in the package or checkout. Restored and reworked files are not byte-identical copies; the
 original upstream implementations remain in Git history.
+
+## Renamed arguments
+
+Argument names now follow one rule: functions that take `...` dot their other
+arguments, and functions without `...` use plain names (see CONTRIBUTING).
+The old names still work with a lifecycle deprecation warning.
+
+| Old call | New call |
+| --- | --- |
+| `destring(.x)`, `decode(.x)`, `s_type(.x, .abbr)`, `s_unit(.x)` | `x`, `abbr` |
+| `na_if_value(.x, .value)`, `value_if_na(.x, .value)` | `x`, `value` |
+| `timer(.x, .on_error)`, `capture(.fn)`, `set_seed(.fn)` | `x`, `on_error` |
+| `s_merge(.keep, .assert, .generate, .report)` | `keep`, `assert`, `generate`, `report` |
+| `varlist(ignore.case)` | `ignore_case` |
+| `summ(.na.rm = TRUE)`, `tabstat(.na.rm = TRUE)` | `.missing = FALSE` |
+| `summ(.mode)`, `tabstat(.mode)` | `.type` (same values) |
+
+Enumerated options such as `.type`, `.wt_type` and `method` must now be
+spelled out in full: `rlang::arg_match()` rejects abbreviations that
+`match.arg()` accepted, and suggests the intended value. `tab2()` and `fre2()`
+gain `.by`, which returns one cross-table per group.
 
 ## Stata names and aliases
 
@@ -423,13 +444,13 @@ Unknown statistics produce an error. `sum` is supported for numeric summaries;
 calendar dates, datetimes and `hms` times support neither `sum` nor
 `skew`/`kurtosis`.
 
-When `.mode = "table"` combines numeric and calendar summaries, shared location
+When `.type = "table"` combines numeric and calendar summaries, shared location
 columns (such as `mean`) become character so the rows can coexist, with numeric
 values rounded to seven significant digits. Calendar spreads stay numeric, in
 days for Dates and seconds otherwise, and `type` records the unit
 (`"date [days]"`). Count columns remain numeric, and numeric-only summary
 tables retain numeric statistic columns.
-Default `.mode = "list"` separates variable types and preserves numeric statistic
+Default `.type = "list"` separates variable types and preserves numeric statistic
 types in the numeric summary.
 
 With `.keep_all = TRUE`, character/list columns retain observed counts,
@@ -441,8 +462,8 @@ is a fraction from zero to one, rather than a percentage from zero to 100.
 
 An explicit `.by` overrides existing `group_by()` groups. A grouping key that
 collides with summary metadata is renamed with leading dots until unique among
-input names, with a message; input data remain unchanged. `.na.rm` removes
-missing grouping keys only: numeric statistics always omit missing measured
+input names, with a message; input data remain unchanged. `.missing = FALSE`
+removes missing grouping keys only: numeric statistics always omit missing measured
 values. `.name = FALSE` drops the variable-name column only for one measured
 variable, including an empty grouped result.
 
@@ -495,8 +516,8 @@ regression tests preserve the repaired cases. A follow-up review changed four
 defaults to match the original requests:
 `summ()`/`tabstat()` sort groups like `tab()` (`.sort = TRUE`) and hide the
 `name` column for a single variable (`.name = FALSE`); `timer()` reports time
-on failure (`.on_error = TRUE`); and `xtile()` follows Stata's `xtile`
-rule. Pass `.sort = FALSE`, `.name = TRUE` or `.on_error = FALSE` for the
+on failure (`on_error = TRUE`); and `xtile()` follows Stata's `xtile`
+rule. Pass `.sort = FALSE`, `.name = TRUE` or `on_error = FALSE` for the
 previous summary and timer behavior.
 
 ```r
@@ -506,7 +527,7 @@ survey <- tibble::tibble(
 )
 
 # Groups are sorted by key; omission of summaries with no observed values is
-# independent of removing rows with missing grouping keys (.na.rm = TRUE).
+# independent of removing rows with missing grouping keys (.missing = FALSE).
 summ(survey, x, .by = group, .drop_empty = TRUE)
 tabstat(survey, x, .stat = c("mean", "p2.5", "p97.5"))
 
@@ -527,7 +548,7 @@ fre(c(1, 1, 2)) # tab1(), fre() and fre1() accept vectors too
 ds(ds(survey), dplyr::starts_with("x"))
 
 # Preserve the actual error while reporting elapsed time for failed work.
-tryCatch(timer(stop("example failure"), .on_error = TRUE), error = conditionMessage)
+tryCatch(timer(stop("example failure"), on_error = TRUE), error = conditionMessage)
 ```
 
 Summary percentiles use `p0` through `p100`, including decimal percentages, and

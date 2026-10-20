@@ -153,7 +153,7 @@ test_that("varlist: case sensitive when specified", {
     TEMP = 6:10,
     temp = 11:15
   )
-  result <- df %>% dplyr::select(varlist("temp", ignore.case = FALSE))
+  result <- df %>% dplyr::select(varlist("temp", ignore_case = FALSE))
   expect_equal(ncol(result), 1)
 })
 
@@ -350,7 +350,7 @@ test_that("varlist composes ranged patterns with tidyselect exclusions", {
   expect_identical(ds(data, varlist("x[1-2] y")), c("x1", "x2", "y", "X1"))
   expect_identical(ds(data, -varlist("y x[1-2]")), "x2_tail")
   expect_identical(
-    ds(data, varlist("y x[1-2]", ignore.case = FALSE)),
+    ds(data, varlist("y x[1-2]", ignore_case = FALSE)),
     c("x1", "x2", "y")
   )
 })
@@ -370,7 +370,7 @@ test_that("varlist supports separate ranged tokens without broadening a token", 
 test_that("varlist returns positions with explicit variables and keeps matching boundaries", {
   vars <- c("x1", "x2", "x10", "prefix_x1", "X1", "xa", "xb")
   expect_identical(varlist("x[1-2]", vars = vars), c(1L, 2L, 5L))
-  expect_identical(varlist("x1", ignore.case = FALSE, vars = vars), 1L)
+  expect_identical(varlist("x1", ignore_case = FALSE, vars = vars), 1L)
   expect_identical(varlist("x[a-b]", vars = vars), c(6L, 7L))
   expect_identical(varlist("absent*", vars = vars), integer())
   expect_error(varlist("x[2-1]", vars = vars), "smaller number")

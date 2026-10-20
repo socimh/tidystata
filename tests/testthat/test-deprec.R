@@ -1,27 +1,12 @@
-reset_deprecation_notices <- function() {
-  shown <- deprecation_shown
-  rm(list = ls(shown), envir = shown)
-}
-
-test_that("s_match() gives identical results with a single notice", {
-  reset_deprecation_notices()
-  withr::defer(reset_deprecation_notices())
+test_that("s_match() is deprecated and gives identical results", {
   data <- tibble::tibble(x1 = 1, x2 = 2, y = 3)
-  expect_message(
-    old <- ds(data, s_match("x*")),
-    "renamed to `varlist()`",
-    fixed = TRUE
-  )
-  expect_identical(old, ds(data, varlist("x*")))
-  expect_identical(
-    s_match("x?", vars = names(data)),
-    varlist("x?", vars = names(data))
-  )
+  lifecycle::expect_deprecated(old <- s_match("x*", vars = names(data)))
+  expect_identical(old, varlist("x*", vars = names(data)))
+  withr::local_options(lifecycle_verbosity = "quiet")
+  expect_identical(ds(data, s_match("x*")), ds(data, varlist("x*")))
 })
 
 test_that("earlier names are quiet aliases or current names", {
-  reset_deprecation_notices()
-  withr::defer(reset_deprecation_notices())
   data <- tibble::tibble(x1 = 1, x2 = 2, y = 3)
   cross <- tibble::tibble(a = c("p", "q"), b = c("u", "u"))
   expect_silent(cut_quantile(1:8, 2))
@@ -83,4 +68,59 @@ test_that("wrapper aliases give the same results as their primary functions", {
     row_nvals(rows[[1]], rows[[2]], rows[[3]], .missing = TRUE),
     row_unique(rows[[1]], rows[[2]], rows[[3]])
   )
+})
+
+test_that("renamed arguments still work with a deprecation warning", {
+  d <- tibble::tibble(g = c("a", NA), x = 1:2)
+  people <- tibble::tibble(id = 1:2, age = c(30, 41))
+  income <- tibble::tibble(id = 2:3, income = c(10, 20))
+  merge_args <- list(people, income, "1:1", by = "id")
+  # Each renamed argument warns once and gives the new argument's result.
+  expect_renamed <- function(old, new) {
+    lifecycle::expect_deprecated(out <- old)
+    expect_identical(out, new)
+  }
+  expect_renamed(destring(.x = "1"), destring("1"))
+  expect_renamed(decode(.x = 1), decode(1))
+  expect_renamed(s_type(.x = 1L), s_type(1L))
+  expect_renamed(s_type(1L, .abbr = TRUE), s_type(1L, abbr = TRUE))
+  expect_renamed(s_unit(.x = 1), s_unit(1))
+  expect_renamed(na_if_value(.x = c(1, 9), 9), na_if_value(c(1, 9), 9))
+  expect_renamed(s_type(.x = 1L, TRUE), s_type(1L, TRUE))
+  expect_renamed(na_if_value(c(1, 9), .value = 9), na_if_value(c(1, 9), 9))
+  expect_renamed(value_if_na(.x = c(1, NA), 0), value_if_na(c(1, NA), 0))
+  expect_renamed(value_if_na(c(1, NA), .value = 0), value_if_na(c(1, NA), 0))
+  lifecycle::expect_deprecated(expect_message(timer(.x = 1), "Time spent"))
+  lifecycle::expect_deprecated(expect_message(timer(1, .on_error = TRUE)))
+  lifecycle::expect_deprecated(expect_false(capture(.fn = stop("x"))))
+  expect_renamed(
+    set_seed(.fn = stats::runif(1), seed = 1),
+    set_seed(stats::runif(1), 1)
+  )
+  expect_renamed(
+    varlist("X*", ignore.case = FALSE, vars = c("x1", "X2")),
+    varlist("X*", ignore_case = FALSE, vars = c("x1", "X2"))
+  )
+  quiet <- c(merge_args, report = FALSE)
+  expect_renamed(
+    do.call(s_merge, c(quiet, .keep = "match")),
+    do.call(s_merge, c(quiet, keep = "match"))
+  )
+  expect_renamed(
+    do.call(s_merge, c(quiet, .generate = "m")),
+    do.call(s_merge, c(quiet, generate = "m"))
+  )
+  expect_renamed(
+    do.call(s_merge, c(merge_args, .report = FALSE)),
+    do.call(s_merge, quiet)
+  )
+  expect_error(
+    lifecycle::expect_deprecated(do.call(s_merge, c(quiet, .assert = "match"))),
+    "Merge assertion failed"
+  )
+  expect_renamed(
+    summ(d, x, .by = g, .na.rm = TRUE),
+    summ(d, x, .by = g, .missing = FALSE)
+  )
+  expect_renamed(tabstat(d, x, .mode = "table"), tabstat(d, x, .type = "table"))
 })

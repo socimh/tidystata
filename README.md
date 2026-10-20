@@ -186,7 +186,7 @@ summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
 #> 1  dbl       0 19.2 642.9
 ```
 
-With `.mode = "table"`, numeric and calendar summaries share character
+With `.type = "table"`, numeric and calendar summaries share character
 columns for formatted statistics; counts remain numeric. Default list
 mode preserves numeric statistic types in the numeric summary.
 

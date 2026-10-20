@@ -164,7 +164,7 @@ for the date/datetime restrictions and cross-tabulation naming rules.
 summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
 ```
 
-With `.mode = "table"`, numeric and calendar summaries share character columns
+With `.type = "table"`, numeric and calendar summaries share character columns
 for formatted statistics; counts remain numeric. Default list mode preserves
 numeric statistic types in the numeric summary.
 

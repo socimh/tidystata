@@ -1181,7 +1181,7 @@ test_that("frequency group order uses observations and preserves categories", {
   expect_equal(out$x[out$g %in% "c"], c(1, 2))
   expect_equal(out$cum[out$g %in% "c"], c(200 / 3, 100))
   expect_equal(tab(data, x, .group_order = "frequency"), tab(data, x))
-  expect_error(tab(data, .group_order = "bad"), "arg")
+  expect_error(tab(data, .group_order = "bad"), "must be one of")
 })
 
 test_that("frequency group ties respect factors and multiple keys", {
@@ -1234,10 +1234,9 @@ test_that("cross-tab columns follow value and level order with missing last", {
   expect_equal(out[["1"]], c(0L, 1L, 0L))
 })
 
-test_that("cross-tabs reject one-way and grouping controls", {
+test_that("cross-tabs reject one-way sorting controls", {
   d <- tibble::tibble(g = c("a", "b", "b"), x = c("p", "q", "q"))
   expect_error(xtab(d, x, g, .desc = TRUE), "`.desc`.*tab2")
-  expect_error(xtab(d, x, .by = g), "`.by`.*tab2")
   expect_error(
     xtab(d, x, g, .group_order = "frequency", .total = TRUE),
     "`.group_order`.*tab2"
@@ -1330,7 +1329,7 @@ test_that("tabulation reports invalid input", {
     tab(1:3, a)
     tab2(d, a)
     fre2(d, a)
-    tab2(d, a, b, .by = a)
+    tab2(d, a, b, .desc = TRUE)
     tab2(d, a, b, .wt = w, .wt_type = "analytic", .chi2 = TRUE)
     tab(d, a, .wt = c(1, 2, 3))
     tab(d, a, .wt = c(-1, 2))

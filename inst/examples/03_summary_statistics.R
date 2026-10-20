@@ -25,19 +25,19 @@ summ(survey, income, .by = group)
 survey |> group_by(group) |> summ(income)
 
 # This removes missing GROUP KEYS, rather than changing measured-value handling.
-summ(survey, income, .by = group, .na.rm = TRUE)
+summ(survey, income, .by = group, .missing = FALSE)
 
 # An explicit .by replaces existing grouping.
 survey |> group_by(hours) |> summ(income, .by = group)
 
 # Numeric and calendar summaries: compare the returned objects and column types.
-separate <- summ(survey, income, day, .mode = "list")
+separate <- summ(survey, income, day, .type = "list")
 separate
 class(separate)
 separate$numeric
 separate$date
 
-combined <- summ(survey, income, day, .mode = "table")
+combined <- summ(survey, income, day, .type = "table")
 combined
 str(combined) # Shared calendar/numeric locations are formatted as character.
 

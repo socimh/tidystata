@@ -1,5 +1,30 @@
 # statart 0.2.0.9000
 
+* Arguments follow one naming rule: functions that take `...` dot their other
+  arguments, and functions without `...` use plain names. Renamed arguments
+  keep working with a lifecycle deprecation warning:
+  `destring()`, `decode()`, `s_type()`, `s_unit()`, `na_if_value()`,
+  `value_if_na()` and `timer()` take `x` (not `.x`); `capture()` and
+  `set_seed()` take `x` (not `.fn`); `s_type(abbr)`, `timer(on_error)`,
+  `na_if_value(value)` and `value_if_na(value)` drop their dots;
+  `s_merge()` takes `keep`, `assert`, `generate` and `report`; and
+  `varlist()` takes `ignore_case`. See MIGRATION for the full table.
+
+* `summ()` and `tabstat()` replace `.na.rm` with `.missing` (with the opposite
+  value, default `TRUE`), matching `is_first()` and `row_nvals()`: missing
+  grouping keys form their own group unless `.missing = FALSE`. `.mode`
+  becomes `.type`, with the same `"list"` and `"table"` values.
+
+* `tab2()`, `fre2()` and `xtab()` gain `.by`, returning one cross-table per
+  group in a list named like `"g = a"`, as Stata's `by g: tab x y`.
+
+* Enumerated options (`.type`, `.wt_type`, `.group_order`, `method`, `unit`,
+  `relationship`, `style`) are checked with `rlang::arg_match()`: they must be
+  spelled in full, and a mistyped value suggests the intended one.
+
+* `s_match()` now signals a lifecycle deprecation warning instead of a
+  once-per-session message. lifecycle moves from Suggests to Imports.
+
 * Errors, warnings and messages now use cli, as in the tidyverse. Errors name
   the function you called (for example ``Error in `summ()`:``), describe the
   problem in one sentence, and give hints as `i` bullets. Argument checks

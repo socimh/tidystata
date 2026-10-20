@@ -46,7 +46,7 @@ as_dummy <- function(
   .remove = FALSE
 ) {
   check_data_frame(.data)
-  .names <- match.arg(.names)
+  .names <- rlang::arg_match(.names)
   check_bool(.remove)
   data <- dplyr::ungroup(table_working_data(.data))
   selected <- names(tidyselect::eval_select(

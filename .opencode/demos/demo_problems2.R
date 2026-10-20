@@ -37,7 +37,7 @@ print(tab(c(1, 1, 2)))
 print(ds(ds(rows), dplyr::starts_with("a")))
 cat("```\n\n## Example 7: Failed expressions retain the true error\n\n```\n")
 diagnostic <- tryCatch(
-  timer(stop("original fitting error"), .on_error = TRUE),
+  timer(stop("original fitting error"), on_error = TRUE),
   error = conditionMessage
 )
 print(diagnostic)
@@ -71,7 +71,7 @@ cat(
 )
 diagnostic <- tryCatch(value_if_na(4), error = conditionMessage)
 print(diagnostic)
-stopifnot(grepl(".value", diagnostic, fixed = TRUE))
+stopifnot(grepl("Missing `value`", diagnostic, fixed = TRUE))
 cat("```\n\n## Example 12: Constants cap values like pmin()\n\n```\n")
 shares <- tibble::tibble(id = 1:3, pct = c(0.2, 0.7, NA))
 capped <- dplyr::mutate(shares, capped = row_min(pct, 0.5))

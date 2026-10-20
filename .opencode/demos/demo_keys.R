@@ -43,7 +43,7 @@ stopifnot(identical(
   c("master only", "matched", "matched", "using only")
 ))
 print(tryCatch(
-  s_merge(people, income, "1:1", by = "id", .assert = "match"),
+  s_merge(people, income, "1:1", by = "id", assert = "match"),
   error = conditionMessage
 ))
 

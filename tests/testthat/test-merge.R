@@ -28,28 +28,28 @@ test_that("the merge report counts each group", {
   expect_match(lines[[3]], "Not matched +2$")
   expect_match(lines[[4]], "from master +1 +\\(\\.merge == \"master only\"\\)")
   expect_match(lines[[7]], "Matched +2 +\\(\\.merge == \"matched\"\\)")
-  expect_silent(s_merge(people, income, "1:1", by = "id", .report = FALSE))
+  expect_silent(s_merge(people, income, "1:1", by = "id", report = FALSE))
 })
 
 test_that("relationships are checked before joining", {
   members <- tibble::tibble(hh = c(1, 1, 2), person = 1:3)
   households <- tibble::tibble(hh = 1:2, region = c("north", "south"))
-  out <- s_merge(members, households, "m:1", by = "hh", .report = FALSE)
+  out <- s_merge(members, households, "m:1", by = "hh", report = FALSE)
   expect_identical(out$region, c("north", "north", "south"))
   expect_error(
-    s_merge(members, households, "1:1", by = "hh", .report = FALSE),
+    s_merge(members, households, "1:1", by = "hh", report = FALSE),
     "does not uniquely identify rows in the master data"
   )
   expect_error(
-    s_merge(households, members, "m:1", by = "hh", .report = FALSE),
+    s_merge(households, members, "m:1", by = "hh", report = FALSE),
     "does not uniquely identify rows in the using data"
   )
   expect_identical(
-    nrow(s_merge(households, members, "1:m", by = "hh", .report = FALSE)),
+    nrow(s_merge(households, members, "1:m", by = "hh", report = FALSE)),
     3L
   )
   expect_error(s_merge(people, income, by = "id"), "Specify the key")
-  expect_error(s_merge(people, income, "m:m", by = "id"), "should be one of")
+  expect_error(s_merge(people, income, "m:m", by = "id"), "must be one of")
   expect_error(
     s_merge(people, income, "1:1", by = "pid"),
     "not found in `.data`"
@@ -62,8 +62,8 @@ test_that(".keep, .assert and .generate follow Stata's options", {
     income,
     "1:1",
     by = "id",
-    .keep = "match",
-    .report = FALSE
+    keep = "match",
+    report = FALSE
   )
   expect_identical(matched$id, c(2L, 3L))
   expect_error(
@@ -72,8 +72,8 @@ test_that(".keep, .assert and .generate follow Stata's options", {
       income,
       "1:1",
       by = "id",
-      .assert = "match",
-      .report = FALSE
+      assert = "match",
+      report = FALSE
     ),
     "found 1 master only row\\(s\\) and 1 using only row\\(s\\)"
   )
@@ -83,8 +83,8 @@ test_that(".keep, .assert and .generate follow Stata's options", {
       income,
       "1:1",
       by = "id",
-      .assert = c("master", "using", "match"),
-      .report = FALSE
+      assert = c("master", "using", "match"),
+      report = FALSE
     )
   )
   bare <- s_merge(
@@ -92,8 +92,8 @@ test_that(".keep, .assert and .generate follow Stata's options", {
     income,
     "1:1",
     by = "id",
-    .generate = NULL,
-    .report = FALSE
+    generate = NULL,
+    report = FALSE
   )
   expect_identical(names(bare), c("id", "age", "income"))
   named <- s_merge(
@@ -101,16 +101,16 @@ test_that(".keep, .assert and .generate follow Stata's options", {
     income,
     "1:1",
     by = "id",
-    .generate = "_merge",
-    .report = FALSE
+    generate = "_merge",
+    report = FALSE
   )
   expect_true("_merge" %in% names(named))
   expect_error(
-    s_merge(people, income, "1:1", by = "id", .generate = "age"),
+    s_merge(people, income, "1:1", by = "id", generate = "age"),
     "already exists"
   )
   expect_error(
-    s_merge(people, income, "1:1", by = "id", .keep = "both"),
+    s_merge(people, income, "1:1", by = "id", keep = "both"),
     "must contain"
   )
 })
@@ -127,7 +127,7 @@ test_that("keys with different names and shared columns follow Stata", {
       other,
       "1:1",
       by = c(id = "person"),
-      .report = FALSE
+      report = FALSE
     ),
     "Kept the values from `.data`.*`age`"
   )
@@ -138,7 +138,7 @@ test_that("keys with different names and shared columns follow Stata", {
 test_that("missing keys match each other and containers are kept", {
   left <- data.frame(id = c(NA, 1), x = 1:2)
   right <- data.frame(id = c(NA, 2), y = 3:4)
-  out <- s_merge(left, right, "1:1", by = "id", .report = FALSE)
+  out <- s_merge(left, right, "1:1", by = "id", report = FALSE)
   expect_identical(
     as.character(out$.merge),
     c("matched", "master only", "using only")
@@ -147,7 +147,7 @@ test_that("missing keys match each other and containers are kept", {
   skip_if_not_installed("data.table")
   table <- data.table::as.data.table(people)
   expect_s3_class(
-    s_merge(table, income, "1:1", by = "id", .report = FALSE),
+    s_merge(table, income, "1:1", by = "id", report = FALSE),
     "data.table"
   )
 })
@@ -157,16 +157,16 @@ test_that("s_merge() reports invalid input and failed assertions", {
     s_merge(people, 1:3, "1:1", by = "id")
     s_merge(people, income)
     s_merge(people, income, "1:1", by = 1)
-    s_merge(people, income, "1:1", by = "id", .keep = "both")
+    s_merge(people, income, "1:1", by = "id", keep = "both")
     s_merge(people, income, "1:1", by = "missing_key")
-    s_merge(people, income, "1:1", by = "id", .generate = "age")
+    s_merge(people, income, "1:1", by = "id", generate = "age")
     s_merge(
       tibble::tibble(id = c(1, 1)),
       income,
       "1:1",
       by = "id",
-      .report = FALSE
+      report = FALSE
     )
-    s_merge(people, income, "1:1", by = "id", .assert = "match")
+    s_merge(people, income, "1:1", by = "id", assert = "match")
   })
 })

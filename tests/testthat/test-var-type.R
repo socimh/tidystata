@@ -49,8 +49,8 @@ test_that("s_type: ordered factor", {
 
 test_that("s_type: abbreviation mode", {
   x <- 1:5
-  result_full <- s_type(x, .abbr = FALSE)
-  result_abbr <- s_type(x, .abbr = TRUE)
+  result_full <- s_type(x, abbr = FALSE)
+  result_abbr <- s_type(x, abbr = TRUE)
   expect_equal(result_full, "integer")
   expect_equal(result_abbr, "int")
 })
@@ -208,7 +208,7 @@ test_that("s_type and s_unit: measured length metadata", {
   original <- x
 
   expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_type(x, abbr = TRUE), "units")
   expect_identical(s_unit(x), "m")
   expect_identical(x, original)
 })
@@ -218,7 +218,7 @@ test_that("s_type and s_unit: compound speed metadata", {
   x <- units::set_units(c(1, 2, 3), "m/s")
 
   expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_type(x, abbr = TRUE), "units")
   expect_identical(s_unit(x), "m/s")
 })
 
@@ -227,7 +227,7 @@ test_that("s_type and s_unit: dimensionless metadata", {
   x <- units::set_units(c(1, 2, 3), "1")
 
   expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_type(x, abbr = TRUE), "units")
   expect_identical(s_unit(x), "1")
 })
 
@@ -236,7 +236,7 @@ test_that("s_type and s_unit: empty measured vector metadata", {
   x <- units::set_units(numeric(0), "m")
 
   expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_type(x, abbr = TRUE), "units")
   expect_identical(s_unit(x), "m")
 })
 
@@ -245,7 +245,7 @@ test_that("s_type and s_unit: all-missing measured vector metadata", {
   x <- units::set_units(c(NA_real_, NA_real_), "m")
 
   expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, .abbr = TRUE), "units")
+  expect_identical(s_type(x, abbr = TRUE), "units")
   expect_identical(s_unit(x), "m")
 })
 
@@ -323,7 +323,7 @@ test_that("s_type: used in codebook workflow", {
 
 test_that("s_type: type validation function", {
   is_numeric_type <- function(x) {
-    type <- s_type(x, .abbr = TRUE)
+    type <- s_type(x, abbr = TRUE)
     type %in% c("int", "dbl")
   }
 
@@ -400,7 +400,7 @@ test_that("type expansion preserves custom names and structured descriptions", {
       type_sum = function(x) label,
       .package = "pillar"
     )
-    expect_identical(s_type(x, .abbr = TRUE), label)
+    expect_identical(s_type(x, abbr = TRUE), label)
     expect_identical(s_type(x), label)
   }
 })
@@ -413,7 +413,7 @@ test_that("missing custom type summaries fall back to the class", {
       .package = "pillar"
     )
     expect_identical(s_type(x), "statart_type_probe")
-    expect_identical(s_type(x, .abbr = TRUE), "statart_type_probe")
+    expect_identical(s_type(x, abbr = TRUE), "statart_type_probe")
   }
 })
 
@@ -429,8 +429,8 @@ test_that("numeric-looking custom class names do not imply summability", {
 })
 
 test_that("structured extension type labels retain their element information", {
-  expect_identical(s_type(I(1:3), .abbr = TRUE), "I<int>")
-  expect_identical(s_type(vctrs::list_of(1:2), .abbr = TRUE), "list<int>")
+  expect_identical(s_type(I(1:3), abbr = TRUE), "I<int>")
+  expect_identical(s_type(vctrs::list_of(1:2), abbr = TRUE), "list<int>")
 })
 
 
@@ -494,7 +494,7 @@ for (case_name in names(type_contract_cases)) {
       test_that(paste("type contract", case_name, state), {
         x <- states[[state]]
         before <- serialize(x, NULL)
-        expect_identical(s_type(x, .abbr = TRUE), case[[2]])
+        expect_identical(s_type(x, abbr = TRUE), case[[2]])
         expect_identical(s_type(x), case[[3]])
         expect_identical(
           s_unit(x),
@@ -519,7 +519,7 @@ test_that("nonvector type contracts are exact and have no units", {
     list(function(x) x, "fn", "function")
   )
   for (case in cases) {
-    expect_identical(s_type(case[[1]], .abbr = TRUE), case[[2]])
+    expect_identical(s_type(case[[1]], abbr = TRUE), case[[2]])
     expect_identical(s_type(case[[1]]), case[[3]])
     expect_identical(s_unit(case[[1]]), NA_character_)
   }
@@ -531,7 +531,7 @@ test_that("structured base types preserve established element and container name
     matrix(integer(), 0, 2),
     array(1:8, c(2, 2, 2))
   )) {
-    expect_identical(s_type(x, .abbr = TRUE), "int")
+    expect_identical(s_type(x, abbr = TRUE), "int")
     expect_identical(s_type(x), "integer")
     expect_identical(as_numeric(x), as.numeric(x))
   }
@@ -581,7 +581,7 @@ test_that("integer64 metadata survives empty and missing values", {
     bit64::integer64(),
     bit64::as.integer64(NA)
   )) {
-    expect_identical(s_type(x, .abbr = TRUE), "int64")
+    expect_identical(s_type(x, abbr = TRUE), "int64")
     expect_identical(s_type(x), "integer64")
     expect_identical(s_unit(x), NA_character_)
   }
@@ -594,7 +594,7 @@ test_that("hms metadata survives empty and missing values", {
     hms::hms(numeric()),
     hms::hms(NA_real_)
   )) {
-    expect_identical(s_type(x, .abbr = TRUE), "time")
+    expect_identical(s_type(x, abbr = TRUE), "time")
     expect_identical(s_type(x), "time")
     expect_identical(s_unit(x), "secs")
   }
@@ -606,7 +606,7 @@ test_that("unit metadata covers compound and dimensionless vectors in every stat
     for (values in list(c(1, NA_real_), numeric(), NA_real_)) {
       x <- units::set_units(values, unit, mode = "standard")
       expect_identical(s_type(x), "units")
-      expect_identical(s_type(x, .abbr = TRUE), "units")
+      expect_identical(s_type(x, abbr = TRUE), "units")
       expect_identical(s_unit(x), unit)
     }
   }
@@ -631,7 +631,7 @@ test_that("classed matrices retain their scalar type and numeric conversion", {
     matrix_x <- x
     dim(matrix_x) <- c(2L, 2L)
     expect_identical(s_type(matrix_x), s_type(x))
-    expect_identical(s_type(matrix_x, .abbr = TRUE), s_type(x, .abbr = TRUE))
+    expect_identical(s_type(matrix_x, abbr = TRUE), s_type(x, abbr = TRUE))
     expect_identical(as_numeric(matrix_x), as.numeric(x))
   }
 })
@@ -654,7 +654,7 @@ test_that("vctrs record types and complete element identities remain intact", {
 test_that("S4 metadata uses pillar descriptions without interpreting class substrings", {
   x <- methods::getClass("numeric")
   expect_identical(s_type(x), pillar::type_sum(x))
-  expect_identical(s_type(x, .abbr = TRUE), pillar::type_sum(x))
+  expect_identical(s_type(x, abbr = TRUE), pillar::type_sum(x))
   expect_identical(s_unit(x), NA_character_)
 })
 
@@ -662,7 +662,7 @@ test_that("data.table metadata retains its container name", {
   skip_if_not_installed("data.table")
   x <- data.table::data.table(x = integer())
   expect_identical(s_type(x), "dt")
-  expect_identical(s_type(x, .abbr = TRUE), "dt")
+  expect_identical(s_type(x, abbr = TRUE), "dt")
 })
 
 
@@ -706,7 +706,7 @@ test_that("s_type and s_unit preserve labelled and duration metadata", {
   )
   duration <- as.difftime(c(1, NA, 2), units = "hours")
   before <- list(labelled, duration)
-  expect_identical(s_type(labelled, .abbr = TRUE), "dbl+lbl")
+  expect_identical(s_type(labelled, abbr = TRUE), "dbl+lbl")
   expect_identical(s_type(labelled), "double+label")
   expect_identical(s_unit(labelled), NA_character_)
   expect_identical(s_type(duration), "duration")

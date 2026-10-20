@@ -3,15 +3,17 @@
 #' @description
 #' `timer()` works like the `timer` command in Stata.
 #'
-#' @param .x An expression to evaluate and time.
-#' @param .on_error A single logical value. If `TRUE` (the default), also
+#' @param x An expression to evaluate and time.
+#' @param on_error A single `TRUE` or `FALSE`. If `TRUE` (the default), also
 #'   report elapsed time when the expression fails, then let the original error
 #'   propagate. Use `FALSE` to report elapsed time only on success.
+#' @param .x,.on_error `r lifecycle::badge("deprecated")` Use `x` and
+#'   `on_error` instead.
 #' @returns The evaluated result, invisibly.
 #' @details
 #' The expression is evaluated once. On success, elapsed time is emitted as a
 #' message. Warnings and errors propagate normally. When the expression fails
-#' (or is interrupted) and `.on_error = TRUE`, a message marked as failed
+#' (or is interrupted) and `on_error = TRUE`, a message marked as failed
 #' execution reports the elapsed time while the error unwinds; the original
 #' condition object, including its call, is not modified.
 #'
@@ -24,20 +26,41 @@
 #' x <- seq_len(1e6)
 #' mean(x) %>% timer()
 #' try(timer(stop("failure")))
-timer <- function(.x, .on_error = TRUE) {
-  check_bool(.on_error)
+timer <- function(
+  x,
+  on_error = TRUE,
+  .x = lifecycle::deprecated(),
+  .on_error = lifecycle::deprecated()
+) {
+  if (lifecycle::is_present(.on_error)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "timer(.on_error)",
+      "timer(on_error)"
+    )
+    on_error <- .on_error
+  }
+  if (!missing(.x)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "timer(.x)", "timer(x)")
+    # In old calls such as timer(.x = f(), FALSE), the positional value fills `x`.
+    if (!missing(x) && missing(on_error)) {
+      on_error <- x
+    }
+    return(timer(.x, on_error = on_error))
+  }
+  check_bool(on_error)
   begin_time <- Sys.time()
   completed <- FALSE
   # Report failures while unwinding, without wrapping the evaluation frame.
   on.exit(
-    if (!completed && .on_error) {
+    if (!completed && on_error) {
       cli::cli_inform(
         "Failed execution. Time spent: {duration_to_chr(Sys.time() - begin_time)}"
       )
     },
     add = TRUE
   )
-  out <- .x
+  out <- x
   completed <- TRUE
   end_time <- Sys.time()
   time <- end_time - begin_time

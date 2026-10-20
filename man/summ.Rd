@@ -12,14 +12,16 @@ summ(
   .keep_all = FALSE,
   .detail = FALSE,
   .stat = character(0),
-  .na.rm = FALSE,
+  .missing = TRUE,
   .name = FALSE,
-  .mode = c("list", "table"),
+  .type = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic")
+  .wt_type = c("frequency", "analytic"),
+  .na.rm = lifecycle::deprecated(),
+  .mode = lifecycle::deprecated()
 )
 
 tabstat(
@@ -29,14 +31,16 @@ tabstat(
   .keep_all = FALSE,
   .detail = FALSE,
   .stat = "mean",
-  .na.rm = FALSE,
+  .missing = TRUE,
   .name = FALSE,
-  .mode = c("list", "table"),
+  .type = c("list", "table"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic")
+  .wt_type = c("frequency", "analytic"),
+  .na.rm = lifecycle::deprecated(),
+  .mode = lifecycle::deprecated()
 )
 }
 \arguments{
@@ -77,21 +81,21 @@ Percentiles \code{p0} through \code{p100}, including decimals such as \code{p2.5
 type-7 quantiles. Only requested statistics and their prerequisites are
 calculated when \code{.stat} is nonempty.}
 
-\item{.na.rm}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, remove rows missing
-any grouping key before summarising. Default is \code{FALSE}. Missing measured
-values are always omitted from numeric statistics, regardless of this flag.}
+\item{.missing}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), rows with
+a missing grouping key form their own group, like Stata's \verb{tabstat, by() missing}. If \code{FALSE}, drop them before summarising. Missing measured values
+are always omitted from numeric statistics, regardless of this flag.}
 
 \item{.name}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), drop the
 \code{name} column when exactly one measured variable is summarised, including
 zero-row grouped output; with several variables it is always kept. If
 \code{TRUE}, always retain it.}
 
-\item{.mode}{A character string. Either \code{"list"} (default) or \code{"table"}.
-List mode returns a single table when one variable-type family is present,
+\item{.type}{The output container: \code{"list"} (default) or \code{"table"}.
+\code{"list"} returns a single table when one variable-type family is present,
 otherwise a list named \code{numeric}, \code{date}, \code{datetime}, and/or \code{time} (for
 \code{hms} times of day). The \code{numeric} family also contains nonnumeric columns
 retained by \code{.keep_all}.
-Table mode combines all families. Calendar location columns are text, so a
+\code{"table"} combines all families in one table. Calendar location columns are text, so a
 shared location column (such as \code{mean}) becomes character, with numeric
 values rounded to seven significant digits; counts remain numeric. Calendar
 spreads become plain numbers in days (Dates) or seconds (datetimes and
@@ -107,7 +111,7 @@ the selected variable order. If \code{FALSE}, groups follow first appearance.}
 
 \item{.drop_empty}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, remove individual
 summary rows with no observed measured values (\code{n == 0}), even when \code{n} is
-not requested. This is independent of \code{.na.rm}. Default is \code{FALSE}.}
+not requested. This is independent of \code{.missing}. Default is \code{FALSE}.}
 
 \item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector with
 one value per row), like Stata's \code{summarize [fweight/aweight]}. Rows with a
@@ -120,14 +124,17 @@ Analytic weights (Stata's \verb{[aweight]}, suitable for sampling weights) are
 rescaled within each group and variable to sum to the number of observed
 values, so \code{n} is the number of observations. Means and percentiles are the
 same under both types; \code{sd}, \code{se} and \code{sum} differ.}
+
+\item{.na.rm, .mode}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{.missing}
+(with the opposite value) and \code{.type} instead.}
 }
 \value{
-A table, or a list of tables in list mode when multiple
+A table, or a list of tables with \code{.type = "list"} when multiple
 variable-type families are present. Each table preserves the input's
 data.frame, tibble, or data.table container in both modes. Results are
 ungrouped, retaining grouping keys as columns and supported preview settings.
 Other subclasses are not reconstructed. Vector input returns a tibble in
-list mode or a data.frame in table mode, using its expression as the variable
+with \code{.type = "list"} or a data.frame with \code{.type = "table"}, using its expression as the variable
 name, or \code{value} for a multiline expression or a magrittr pipe (\code{.}). Wrap
 the vector in a named tibble to choose a stable variable name. Input data are
 not modified.
@@ -216,11 +223,11 @@ lifeexp \%>\%
   )
 
 # Remove rows missing a grouping key; measured NAs are always omitted
-summ(lifeexp, .by = region, .na.rm = TRUE)
+summ(lifeexp, .by = region, .missing = FALSE)
 
 # Keep numeric and calendar summaries in separate tables
 mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
-summ(mixed, .mode = "list")
+summ(mixed, .type = "list")
 
 # Choose a stable variable name when starting from a vector
 scores <- c(4, 6, NA, 8)

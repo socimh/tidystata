@@ -1,6 +1,6 @@
 # Function: readiness()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:36 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 16:23:08 | **Status:** PASS
 
 ## Example 1: Calendar spreads as comparable difftime columns
 
@@ -83,7 +83,7 @@ statart   dplyr
 ## Example 7: Missing argument diagnostic
 
 ```
-[1] "Missing `.value`. Use `na_if_value(x, value)` or `x |>\nna_if_value(value)`."
+[1] "Missing `value`. Use `na_if_value(x, value)` or `x |>\nna_if_value(value)`."
 ```
 
 ## Example 8: Grouped quantile cuts return integer codes
@@ -115,6 +115,6 @@ Levels: [11,12.5] < (12.5,14]
 
 ```
 Time spent: 0.000s
-Time spent: 0.006s
+Time spent: 0.007s
 No duration threshold is asserted. Each timer measures its own expression.
 ```

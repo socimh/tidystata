@@ -2,7 +2,7 @@
 #'
 #' @description
 #' These functions were renamed in statart 0.2.0.9000. The old names still
-#' work and give identical results; each shows a notice once per session.
+#' work and give identical results with a lifecycle deprecation warning.
 #' They will be removed in a future release.
 #'
 #' | Old name | New name |
@@ -22,22 +22,6 @@ NULL
 #' @rdname statart-deprecated
 #' @export
 s_match <- function(...) {
-  deprecate_rename("s_match", "varlist()")
+  lifecycle::deprecate_soft("0.2.0.9000", "s_match()", "varlist()")
   varlist(...)
-}
-
-deprecation_shown <- new.env(parent = emptyenv())
-
-# One notice per old name and session. Package code uses only the new names.
-# `new` is the replacement call as users should write it, e.g. "varlist()".
-deprecate_rename <- function(old, new) {
-  if (isTRUE(deprecation_shown[[old]])) {
-    return(invisible())
-  }
-  deprecation_shown[[old]] <- TRUE
-  cli::cli_inform(c(
-    "{.fn {old}} was renamed to {.code {new}} in statart 0.2.0.9000; the old name will be removed in a future release.",
-    i = "This notice is shown once per session."
-  ))
-  invisible()
 }

@@ -5,10 +5,10 @@ stopifnot(inherits(spread$sd, "difftime"), identical(units(spread$sd), "days"))
 
 cat("```\n\n## Example 2: Shared numeric/calendar table columns\n\n```\n")
 mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
-combined <- summ(mixed, .mode = "table", .stat = c("n", "mean"))
+combined <- summ(mixed, .type = "table", .stat = c("n", "mean"))
 print(combined)
 stopifnot(is.character(combined$mean), is.integer(combined$n))
-print(summ(mixed, .mode = "list", .stat = "mean"))
+print(summ(mixed, .type = "list", .stat = "mean"))
 
 cat(
   "```\n\n## Example 3: Piped vector expression name and explicit-name workaround\n\n```\n"
@@ -34,7 +34,7 @@ print(find("starwars"))
 cat("```\n\n## Example 7: Missing argument diagnostic\n\n```\n")
 diagnostic <- tryCatch(na_if_value(4), error = conditionMessage)
 print(diagnostic)
-stopifnot(grepl("Missing `.value`", diagnostic, fixed = TRUE))
+stopifnot(grepl("Missing `value`", diagnostic, fixed = TRUE))
 
 cat("```\n\n## Example 8: Grouped quantile cuts return integer codes\n\n```\n")
 grouped <- tibble::tibble(g = rep(c("a", "b"), each = 4), x = c(1:4, 11:14))

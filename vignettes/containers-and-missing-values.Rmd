@@ -90,13 +90,13 @@ summ(grouped, score, .by = answer, .stat = c("n", "mean"))
 One-way tabulations use all observations within a group for `percent` and `cum`,
 on a zero-to-100 scale. `valid` and `valid_cum` exclude missing measured values.
 Missing grouping keys are ordinary groups. In summaries, `valid_pct` is instead
-a fraction from zero to one. The `.na.rm` argument to `summ()` removes missing
+a fraction from zero to one. `summ(.missing = FALSE)` removes missing
 grouping keys; numeric calculations always omit missing measured values.
 
 ```{r denominators}
 tab(tbl, answer)
 summ(tbl, score, .stat = c("n", "miss_n", "valid_pct", "mean"))
-summ(tbl, score, .by = group, .na.rm = TRUE, .stat = c("n", "mean"))
+summ(tbl, score, .by = group, .missing = FALSE, .stat = c("n", "mean"))
 ```
 
 ## Empty and all-missing measurements
@@ -153,7 +153,7 @@ separate <- summ(mixed, .stat = c("n", "min", "mean", "max"))
 names(separate)
 separate$numeric
 separate$date
-summ(mixed, .mode = "table", .stat = c("n", "min", "mean", "max"))
+summ(mixed, .type = "table", .stat = c("n", "min", "mean", "max"))
 ```
 
 Default list mode keeps numeric statistics numeric in their own table. Table

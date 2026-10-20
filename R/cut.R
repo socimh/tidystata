@@ -69,7 +69,7 @@ xtile <- function(
   method = c("quantile", "rank"),
   wt = NULL
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
   if (is.logical(x) && is.null(dim(x))) {
     x <- as.integer(x)
   }

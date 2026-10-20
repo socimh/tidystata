@@ -54,8 +54,8 @@ pwcorr <- function(
   .wt_type = c("frequency", "analytic")
 ) {
   check_data_frame(.data)
-  .method <- match.arg(.method)
-  .wt_type <- match.arg(.wt_type)
+  .method <- rlang::arg_match(.method)
+  .wt_type <- rlang::arg_match(.wt_type)
   check_bool(.wide)
   by <- rlang::enquo(.by)
   .data <- aggregation_working_data(
@@ -241,24 +241,5 @@ pwcorr_wide <- function(columns, w, method) {
   dplyr::bind_cols(
     tibble::tibble(variable = variables),
     tibble::as_tibble(matrix, .name_repair = "minimal")
-  )
-}
-
-# Group keys in sorted order with the row locations of each group. Ungrouped
-# data form one group with no key columns.
-group_locations <- function(data, group_vars) {
-  if (!length(group_vars)) {
-    return(list(
-      keys = tibble::new_tibble(list(), nrow = 1L),
-      locs = list(seq_len(nrow(data)))
-    ))
-  }
-  groups <- vctrs::vec_group_loc(
-    tibble::as_tibble(data[group_vars], .name_repair = "minimal")
-  )
-  order <- vctrs::vec_order(groups$key)
-  list(
-    keys = vctrs::vec_slice(groups$key, order),
-    locs = groups$loc[order]
   )
 }

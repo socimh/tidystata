@@ -358,7 +358,7 @@ oneway_add("nested data frame column rejected", function(fn, frequency) {
   expect_error(fn(d), "Matrix")
 })
 oneway_add("invalid output type rejected", function(fn, frequency) {
-  expect_error(fn(oneway_data(), x, .type = "wrong"), "arg.*should be one of")
+  expect_error(fn(oneway_data(), x, .type = "wrong"), "must be one of")
 })
 oneway_add("missing selected column rejected", function(fn, frequency) {
   expect_error(fn(oneway_data(), absent), "absent")

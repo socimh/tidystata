@@ -92,3 +92,22 @@ check_group_selection <- function(.data, ..., group_vars) {
   }
   invisible()
 }
+
+# Group keys in sorted order with the row locations of each group. Ungrouped
+# data form one group with no key columns.
+group_locations <- function(data, group_vars) {
+  if (!length(group_vars)) {
+    return(list(
+      keys = tibble::new_tibble(list(), nrow = 1L),
+      locs = list(seq_len(nrow(data)))
+    ))
+  }
+  groups <- vctrs::vec_group_loc(
+    tibble::as_tibble(data[group_vars], .name_repair = "minimal")
+  )
+  order <- vctrs::vec_order(groups$key)
+  list(
+    keys = vctrs::vec_slice(groups$key, order),
+    locs = groups$loc[order]
+  )
+}

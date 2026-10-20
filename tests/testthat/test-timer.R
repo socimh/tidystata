@@ -349,7 +349,7 @@ test_that("PROBLEMS2 timer reports failures optionally and preserves the error",
           count <- count + 1L
           stop(original)
         },
-        .on_error = TRUE
+        on_error = TRUE
       ),
       error = identity
     ),
@@ -364,7 +364,7 @@ test_that("PROBLEMS2 timer reports failures optionally and preserves the error",
   expect_match(messages, "[Ff]ailed.*[Tt]ime|[Tt]ime.*[Ff]ailed")
   messages <- character()
   withCallingHandlers(
-    tryCatch(timer(stop(original), .on_error = FALSE), error = identity),
+    tryCatch(timer(stop(original), on_error = FALSE), error = identity),
     message = function(m) {
       messages <<- c(messages, conditionMessage(m))
       invokeRestart("muffleMessage")
@@ -385,14 +385,14 @@ test_that("PROBLEMS2 timer reports failures optionally and preserves the error",
   expect_identical(conditionMessage(failure), "plain failure")
   expect_false(grepl("withCallingHandlers", deparse(conditionCall(failure))[1]))
   expect_false(
-    suppressMessages(withVisible(timer(42, .on_error = TRUE)))$visible
+    suppressMessages(withVisible(timer(42, on_error = TRUE)))$visible
   )
   expect_identical(
     statart:::duration_to_chr(as.difftime(61, units = "secs")),
     "1m1s"
   )
   for (bad in list(NA, 1, logical(), c(TRUE, FALSE))) {
-    expect_error(timer(42, .on_error = bad), ".on_error", fixed = TRUE)
+    expect_error(timer(42, on_error = bad), "on_error", fixed = TRUE)
   }
 })
 
@@ -405,7 +405,7 @@ test_that("PROBLEMS2 failure timing keeps warnings and nested timing intact", {
           warning("original warning")
           42
         },
-        .on_error = TRUE
+        on_error = TRUE
       )
     ),
     "original warning"
@@ -420,9 +420,9 @@ test_that("PROBLEMS2 failure timing keeps warnings and nested timing intact", {
           count <- count + 1L
           42
         },
-        .on_error = TRUE
+        on_error = TRUE
       ),
-      .on_error = TRUE
+      on_error = TRUE
     ),
     message = function(m) {
       messages <<- c(messages, conditionMessage(m))
@@ -455,7 +455,7 @@ test_that("timer propagates the original error without a message when disabled",
   )
   messages <- character()
   err <- withCallingHandlers(
-    tryCatch(timer(stop(condition), .on_error = FALSE), error = identity),
+    tryCatch(timer(stop(condition), on_error = FALSE), error = identity),
     message = function(m) {
       messages <<- c(messages, conditionMessage(m))
       invokeRestart("muffleMessage")
@@ -467,6 +467,6 @@ test_that("timer propagates the original error without a message when disabled",
 
 test_that("timer() reports invalid input", {
   expect_snapshot(error = TRUE, {
-    timer(1, .on_error = NA)
+    timer(1, on_error = NA)
   })
 })

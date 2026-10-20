@@ -210,14 +210,30 @@ time_period <- function(time, unit, call = rlang::caller_env()) {
     return(date_period(as.Date(time), natural))
   }
   if (inherits(time, "POSIXt")) {
-    unit <- match.arg(
-      unit,
-      c("second", "minute", "hour", "day", "week", "month", "quarter", "year")
+    units <- c(
+      "second",
+      "minute",
+      "hour",
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year"
     )
+    unit <- if (is.null(unit)) {
+      units[[1L]]
+    } else {
+      rlang::arg_match(unit, units, error_call = call)
+    }
     return(datetime_period(time, unit))
   }
   if (inherits(time, "Date")) {
-    unit <- match.arg(unit, c("day", "week", "month", "quarter", "year"))
+    units <- c("day", "week", "month", "quarter", "year")
+    unit <- if (is.null(unit)) {
+      units[[1L]]
+    } else {
+      rlang::arg_match(unit, units, error_call = call)
+    }
     return(date_period(time, unit))
   }
   if (

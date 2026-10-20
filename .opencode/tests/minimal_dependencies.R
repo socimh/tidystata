@@ -53,7 +53,7 @@ stopifnot(
   identical(as_numeric(c("1", "2")), c(1, 2)),
   nrow(tab1(d, x, .by = g)$x) == 3L,
   nrow(codebook(d)) == 3L,
-  nrow(summ(d, x, .mode = "table")) == 1L,
+  nrow(summ(d, x, .type = "table")) == 1L,
   length(xtile(1:20)) == 20L
 )
 error <- tryCatch(fre(d, x, .type = "flextable"), error = function(e) {

@@ -21,11 +21,13 @@
 #'
 #' @name na_conversion
 #'
-#' @param x,.x A vector.
-#' @param mv,.value For `mvdecode()` and `na_if_value()`, the codes to replace
+#' @param x A vector.
+#' @param mv,value For `mvdecode()` and `na_if_value()`, the codes to replace
 #'   with `NA`; any value equal to one of them becomes missing. For
 #'   `mvencode()` and `value_if_na()`, a single replacement value for missing
 #'   elements, cast to the type of `x`.
+#' @param .x,.value `r lifecycle::badge("deprecated")` Use `x` and `value`
+#'   instead.
 #' @returns A vector with the same type and size as `x`, with matching values
 #'   replaced or missing values filled.
 #'
@@ -57,28 +59,70 @@ mvencode <- function(x, mv) {
 
 #' @rdname na_conversion
 #' @export
-na_if_value <- function(.x, .value) {
-  if (missing(.x) || missing(.value)) {
+na_if_value <- function(
+  x,
+  value,
+  .x = lifecycle::deprecated(),
+  .value = lifecycle::deprecated()
+) {
+  if (lifecycle::is_present(.x)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "na_if_value(.x)", "na_if_value(x)")
+    # In old calls such as na_if_value(.x = v, 9), the positional value fills `x`.
+    if (!missing(x) && missing(value)) {
+      value <- x
+    }
+    x <- .x
+  }
+  if (lifecycle::is_present(.value)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "na_if_value(.value)",
+      "na_if_value(value)"
+    )
+    value <- .value
+  }
+  if (missing(x) || missing(value)) {
     na_conversion_missing(
-      if (missing(.x)) ".x" else ".value",
+      if (missing(x)) "x" else "value",
       "na_if_value",
       "value"
     )
   }
-  na_decode(.x, .value)
+  na_decode(x, value)
 }
 
 #' @rdname na_conversion
 #' @export
-value_if_na <- function(.x, .value) {
-  if (missing(.x) || missing(.value)) {
+value_if_na <- function(
+  x,
+  value,
+  .x = lifecycle::deprecated(),
+  .value = lifecycle::deprecated()
+) {
+  if (lifecycle::is_present(.x)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "value_if_na(.x)", "value_if_na(x)")
+    # In old calls such as value_if_na(.x = v, 9), the positional value fills `x`.
+    if (!missing(x) && missing(value)) {
+      value <- x
+    }
+    x <- .x
+  }
+  if (lifecycle::is_present(.value)) {
+    lifecycle::deprecate_soft(
+      "0.2.0.9000",
+      "value_if_na(.value)",
+      "value_if_na(value)"
+    )
+    value <- .value
+  }
+  if (missing(x) || missing(value)) {
     na_conversion_missing(
-      if (missing(.x)) ".x" else ".value",
+      if (missing(x)) "x" else "value",
       "value_if_na",
-      "replacement"
+      "value"
     )
   }
-  na_encode(.x, .value, ".value")
+  na_encode(x, value, "value")
 }
 
 na_conversion_missing <- function(

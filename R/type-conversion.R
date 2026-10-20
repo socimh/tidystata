@@ -24,8 +24,8 @@
 #' vectors retain their numeric values in their existing units.
 #'
 #' @name type_conversion
-#' @param .x A vector or matrix.
-#' @param x A vector, for `tostring()`.
+#' @param x A vector or matrix; a vector for `tostring()`.
+#' @param .x `r lifecycle::badge("deprecated")` Use `x` instead.
 #' @returns `as_character()` and `tostring()` return a character vector. `as_numeric()` returns
 #'   a double vector; unsupported types such as lists, raw vectors, and complex
 #'   vectors return missing values of the same length. Empty inputs return
@@ -47,11 +47,48 @@
 
 #' @export
 #' @rdname type_conversion
-destring <- function(.x) as_numeric(.x)
+destring <- function(x, .x = lifecycle::deprecated()) {
+  if (lifecycle::is_present(.x)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "destring(.x)", "destring(x)")
+    x <- .x
+  }
+  if (length(x) == 0L) {
+    return(numeric())
+  }
+
+  type <- s_type(x, abbr = TRUE)
+  if (type %in% c("units", "drtn", "time", "dttm", "fct", "ord")) {
+    as.numeric(x)
+  } else if (inherits(x, "haven_labelled")) {
+    as.numeric(unclass(x))
+  } else if (is.character(x)) {
+    # Only strings containing "NaN" can trim to it; trimming all is slow.
+    is_nan <- grepl("NaN", x, fixed = TRUE)
+    is_nan[is_nan] <- trimws(x[is_nan]) == "NaN"
+    x[is_nan] <- NA_character_
+    x <- readr::parse_number(x)
+    x[is_nan] <- NaN
+    x
+  } else if (!is_summable_chr(type)) {
+    rep(NA_real_, length(x))
+  } else {
+    as.numeric(x)
+  }
+}
 
 #' @export
 #' @rdname type_conversion
-decode <- function(.x) as_character(.x)
+decode <- function(x, .x = lifecycle::deprecated()) {
+  if (lifecycle::is_present(.x)) {
+    lifecycle::deprecate_soft("0.2.0.9000", "decode(.x)", "decode(x)")
+    x <- .x
+  }
+  if (inherits(x, "haven_labelled") && length(attr(x, "labels")) > 0L) {
+    as.character(haven::as_factor(x))
+  } else {
+    as.character(x)
+  }
+}
 
 #' @export
 #' @rdname type_conversion
@@ -72,37 +109,8 @@ tostring <- function(x) {
 
 #' @export
 #' @rdname type_conversion
-as_character <- function(.x) {
-  if (inherits(.x, "haven_labelled") && length(attr(.x, "labels")) > 0L) {
-    as.character(haven::as_factor(.x))
-  } else {
-    as.character(.x)
-  }
-}
+as_character <- decode
 
 #' @export
 #' @rdname type_conversion
-as_numeric <- function(.x) {
-  if (length(.x) == 0L) {
-    return(numeric())
-  }
-
-  type <- s_type(.x, .abbr = TRUE)
-  if (type %in% c("units", "drtn", "time", "dttm", "fct", "ord")) {
-    as.numeric(.x)
-  } else if (inherits(.x, "haven_labelled")) {
-    as.numeric(unclass(.x))
-  } else if (is.character(.x)) {
-    # Only strings containing "NaN" can trim to it; trimming all is slow.
-    is_nan <- grepl("NaN", .x, fixed = TRUE)
-    is_nan[is_nan] <- trimws(.x[is_nan]) == "NaN"
-    .x[is_nan] <- NA_character_
-    .x <- readr::parse_number(.x)
-    .x[is_nan] <- NaN
-    .x
-  } else if (!is_summable_chr(type)) {
-    rep(NA_real_, length(.x))
-  } else {
-    as.numeric(.x)
-  }
-}
+as_numeric <- destring

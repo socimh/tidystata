@@ -36,6 +36,7 @@ tab1(
 tab2(
   .data,
   ...,
+  .by = NULL,
   .flip = FALSE,
   .total = FALSE,
   .type = c("auto", "tibble", "flextable"),
@@ -47,6 +48,7 @@ tab2(
 xtab(
   .data,
   ...,
+  .by = NULL,
   .flip = FALSE,
   .total = FALSE,
   .type = c("auto", "tibble", "flextable"),
@@ -58,6 +60,7 @@ xtab(
 fre2(
   .data,
   ...,
+  .by = NULL,
   .flip = FALSE,
   .type = c("auto", "tibble", "flextable"),
   .wt = NULL,
@@ -106,8 +109,10 @@ See examples below.}
 \item{.by}{Optional grouping columns, selected with tidyselect. For \code{tab()},
 \code{tab1()}, \code{fre()} and \code{fre1()}, \code{NULL} inherits existing \code{group_by()} groups;
 an explicit selection replaces them. Grouping columns are not measured
-variables. \code{tab2()} does not accept \code{.by}, \code{.desc} or \code{.group_order};
-supplying them is an error.}
+variables. For \code{tab2()} and \code{fre2()}, \code{.by} returns a list with one
+cross-table per group, named like \code{"g = a"}, as Stata's \verb{by g: tab x y};
+grouped data are not split without \code{.by}. \code{tab2()} does not accept \code{.desc}
+or \code{.group_order}.}
 
 \item{.desc}{If \code{TRUE}, sort categories by descending count within each
 group (missing categories stay last). To order the \code{.by} group blocks by
@@ -140,7 +145,8 @@ tables; \code{fre()}, \code{tab2()} and \code{fre2()} default to \code{"auto"}, 
 container. Explicit \code{"tibble"} always returns a plain tibble. Explicit
 \code{"flextable"} output requires the optional flextable package.}
 
-\item{.flip}{If TRUE, will transpose the output tibble.}
+\item{.flip}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, swap the rows and
+columns of the cross-table.}
 
 \item{.chi2}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, \code{tab2()} reports
 Pearson's chi-square test of independence and Cramer's V, like Stata's
@@ -286,6 +292,9 @@ fre2(starwars, height, gender)
 
 # Every pairwise table, like Stata's tab2 sex gender eye_color
 tab2(starwars, sex, gender, eye_color)
+
+# One cross-table per group, like Stata's by species: tab sex gender
+tab2(starwars, sex, gender, .by = species) |> head(2)
 
 # Chi-square test of independence, like Stata's tab x y, chi2 V
 chi2 <- tab2(starwars, sex, gender, .chi2 = TRUE)

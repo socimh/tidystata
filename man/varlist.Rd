@@ -4,18 +4,25 @@
 \alias{varlist}
 \title{Select columns with a Stata varlist}
 \usage{
-varlist(string, ignore.case = TRUE, vars = NULL)
+varlist(
+  string,
+  ignore_case = TRUE,
+  vars = NULL,
+  ignore.case = lifecycle::deprecated()
+)
 }
 \arguments{
 \item{string}{A single character string containing patterns, separated by
 spaces, like selecting a varlist in Stata's \code{keep} command.}
 
-\item{ignore.case}{If \code{TRUE}, the default, ignores case when matching
-names.}
+\item{ignore_case}{If \code{TRUE} (the default), matching ignores case.}
 
 \item{vars}{A character vector of variable names. If not supplied,
 the variables are taken from the current selection context (as
 established by functions like \code{select()} or \code{pivot_longer()}).}
+
+\item{ignore.case}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{ignore_case}
+instead.}
 }
 \value{
 An integer vector of positions in the available column names.
@@ -27,9 +34,9 @@ version of \code{matches()} in <\code{\link[dplyr:dplyr_tidy_select]{tidy-select
 
 Use \code{varlist()} within a \emph{selecting} function, such as \code{ds()}, \code{tab()} or
 \code{dplyr::across()}. Alternatively, provide \code{vars} explicitly to return
-matching positions in a standalone call. \code{varlist()} was called \code{varlist()}
-before statart 0.2.0.9000; the old name still works with a once-per-session
-notice.
+matching positions in a standalone call. \code{varlist()} was called \code{s_match()}
+before statart 0.2.0.9000; the old name still works with a deprecation
+warning.
 }
 \details{
 \itemize{

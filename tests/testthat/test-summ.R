@@ -19,7 +19,7 @@ test_that("summ: list mode with multiple variable types", {
     datetime_var = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 100),
     char_var = sample(letters[1:5], 100, replace = TRUE)
   )
-  expect_warning(result <- summ(df, .mode = "list"), "char_var.*non-numeric")
+  expect_warning(result <- summ(df, .type = "list"), "char_var.*non-numeric")
   expect_type(result, "list")
 })
 
@@ -29,7 +29,7 @@ test_that("summ: table mode with date variables", {
     start_date = seq(as.Date("2024-01-01"), by = "day", length.out = 50),
     end_date = seq(as.Date("2024-03-01"), by = "day", length.out = 50)
   )
-  result <- summ(df, start_date, end_date, .mode = "table")
+  result <- summ(df, start_date, end_date, .type = "table")
   expect_s3_class(result, "data.frame")
 })
 
@@ -37,11 +37,11 @@ test_that("summ: duration format long vs compact", {
   df <- tibble::tibble(
     dates = seq(as.Date("2024-01-01"), by = "day", length.out = 100)
   )
-  result_long <- summ(df, dates, .mode = "table", .duration_format = "long")
+  result_long <- summ(df, dates, .type = "table", .duration_format = "long")
   result_compact <- summ(
     df,
     dates,
-    .mode = "table",
+    .type = "table",
     .duration_format = "compact"
   )
   expect_s3_class(result_long, "data.frame")
@@ -142,7 +142,7 @@ test_that("summ: .na.rm=TRUE removes NA groups", {
     group = c(rep("A", 50), rep(NA, 50)),
     x = rnorm(100)
   )
-  result <- summ(df, x, .by = group, .na.rm = TRUE)
+  result <- summ(df, x, .by = group, .missing = FALSE)
   expect_false(any(is.na(result$group)))
   expect_equal(nrow(result), 1)
 })
@@ -347,7 +347,7 @@ test_that("summ: datetime variables in list mode", {
   df <- tibble::tibble(
     timestamps = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 100)
   )
-  result <- summ(df, .mode = "list")
+  result <- summ(df, .type = "list")
   expect_type(result, "list")
 })
 
@@ -583,7 +583,7 @@ test_that("summ: data.table input with table mode", {
     x = rnorm(100),
     y = rnorm(100)
   )
-  result <- summ(df, x, y, .mode = "table")
+  result <- summ(df, x, y, .type = "table")
   expect_s3_class(result, "data.frame")
 })
 
@@ -591,7 +591,7 @@ test_that("summary historical missingness and type cases stay supported", {
   d <- tibble::tibble(type = c("a", "a", NA), x = c(1, NA, 3))
   expect_message(out <- summ(d, x, .by = type), "type")
   expect_equal(out$n, c(1, 1))
-  expect_message(clean <- summ(d, x, .by = type, .na.rm = TRUE), "type")
+  expect_message(clean <- summ(d, x, .by = type, .missing = FALSE), "type")
   expect_equal(clean$n, 1)
   result <- summ(c(-Inf, 1, 2, Inf))
   expect_equal(result$n, 4)
@@ -675,7 +675,7 @@ test_that("table mode keeps numeric spreads and records their unit", {
     x = c(1, 2.123456789, 3),
     day = as.Date("2024-01-01") + 0:2
   )
-  out <- summ(input, .mode = "table", .stat = c("mean", "sd"))
+  out <- summ(input, .type = "table", .stat = c("mean", "sd"))
   expect_type(out$sd, "double")
   expect_identical(out$type, c("dbl", "date [days]"))
   expect_equal(out$sd, c(sd(input$x), 1))
@@ -782,7 +782,7 @@ test_that("sorted mixed summaries preserve selection order across type families"
     x = 1:2,
     day = as.Date("2024-01-01") + 0:1
   )
-  out <- summ(input, day, x, .by = g, .mode = "table", .sort = TRUE)
+  out <- summ(input, day, x, .by = g, .type = "table", .sort = TRUE)
   expect_equal(out$g, c("a", "a", "b", "b"))
   expect_equal(out$name, c("day", "x", "day", "x"))
   grouped <- dplyr::group_by(input, g)
@@ -834,8 +834,8 @@ test_that("summary empty-row removal is independent of missing-key removal", {
       input,
       .by = g,
       .drop_empty = TRUE,
-      .na.rm = TRUE,
-      .mode = "table",
+      .missing = FALSE,
+      .type = "table",
       .stat = "mean",
       .sort = TRUE
     )
@@ -907,10 +907,10 @@ test_that("calendar summaries distinguish infinite extrema from missing values",
 
 test_that("mixed calendar tables retain documented shared-column types", {
   input <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
-  out <- summ(input, .mode = "table", .stat = c("n", "mean"))
+  out <- summ(input, .type = "table", .stat = c("n", "mean"))
   expect_identical(out$mean, c("2", "2024-01-01"))
   expect_identical(out$n, c(2L, 2L))
-  separate <- summ(input, .mode = "list", .stat = "mean")
+  separate <- summ(input, .type = "list", .stat = "mean")
   expect_identical(separate$numeric$mean, 2)
   piped <- 1:3 %>% summ(.name = TRUE, .stat = "mean")
   # Magrittr placeholders are named `value` (see test-problems2-low.R).

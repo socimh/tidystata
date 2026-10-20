@@ -18,7 +18,7 @@ for (function_name in c("summ", "tabstat")) {
       {
         input <- data.frame(x = c(2, 4, 9), row.names = c("a", "b", "c"))
         before <- input
-        out <- api(input, .mode = "table", .stat = c("n", "mean"))
+        out <- api(input, .type = "table", .stat = c("n", "mean"))
         expect_identical(class(out), "data.frame")
         expect_equal(out$n, 3)
         expect_equal(out$mean, 5)
@@ -36,7 +36,7 @@ for (function_name in c("summ", "tabstat")) {
       ),
       {
         input <- tibble::tibble(second = c(2, 4), first = c(6, 8))
-        out <- api(input, .mode = "table", .stat = "mean")
+        out <- api(input, .type = "table", .stat = "mean")
         expect_s3_class(out, "tbl_df")
         expect_equal(out$name, c("second", "first"))
         expect_equal(out$mean, c(3, 7))
@@ -55,7 +55,7 @@ for (function_name in c("summ", "tabstat")) {
         skip_if_not_installed("data.table")
         input <- data.table::data.table(x = c(2, 4, NA_real_))
         before <- data.table::copy(input)
-        out <- api(input, .mode = "table", .stat = c("n", "sum"))
+        out <- api(input, .type = "table", .stat = c("n", "sum"))
         expect_s3_class(out, "data.table")
         expect_equal(out$n, 2)
         expect_equal(out$sum, 6)
@@ -537,7 +537,7 @@ for (function_name in c("summ", "tabstat")) {
           instant = as.POSIXct("2024-01-01", tz = "UTC") + c(0, 120)
         )
         expect_message(
-          out <- api(input, .mode = "list", .stat = c("n", "mean")),
+          out <- api(input, .type = "list", .stat = c("n", "mean")),
           "heterogeneous"
         )
         expect_named(out, c("numeric", "date", "datetime"))
@@ -565,7 +565,7 @@ for (function_name in c("summ", "tabstat")) {
           day = as.Date("2024-01-01") + c(0, 2),
           instant = as.POSIXct("2024-01-01", tz = "UTC") + c(0, 120)
         )
-        out <- api(input, .mode = "table", .stat = c("n", "missing", "mean"))
+        out <- api(input, .type = "table", .stat = c("n", "missing", "mean"))
         expect_equal(out$name, c("x", "day", "instant"))
         expect_equal(out$n, c(2, 2, 2))
         expect_equal(out$missing, c(0, 0, 0))
@@ -614,7 +614,7 @@ for (function_name in c("summ", "tabstat")) {
           x = numeric(),
           day = as.Date(character())
         )
-        out <- api(input, .by = g, .mode = "table", .stat = c("n", "mean"))
+        out <- api(input, .by = g, .type = "table", .stat = c("n", "mean"))
         expect_equal(nrow(out), 0L)
         expect_named(out, c("g", "name", "type", "n", "mean"))
         expect_type(out$g, "character")
@@ -823,8 +823,8 @@ for (function_name in c("summ", "tabstat")) {
       ),
       {
         expect_error(
-          api(tibble::tibble(x = 1:3), .mode = "wide"),
-          "arg.*list.*table"
+          api(tibble::tibble(x = 1:3), .type = "wide"),
+          "must be one of.*list.*table"
         )
       }
     )
@@ -840,7 +840,7 @@ for (function_name in c("summ", "tabstat")) {
       {
         expect_error(
           api(tibble::tibble(x = 1:3), .duration_format = "seconds"),
-          "arg.*long.*compact"
+          "must be one of.*long.*compact"
         )
       }
     )

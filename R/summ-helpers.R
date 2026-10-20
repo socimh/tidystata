@@ -46,7 +46,7 @@ summ_warn_vars <- function(vars, suffix) {
 
 summ_metadata <- function(data, keep_all) {
   lapply(data, function(var) {
-    type <- s_type(var, .abbr = TRUE)
+    type <- s_type(var, abbr = TRUE)
     summable <- is_summable_chr(type)
     retained <- summable || keep_all
     list(
@@ -680,13 +680,13 @@ summ_list <- function(
   group_vars,
   .detail,
   .stat,
-  .mode = c("list", "table"),
+  type = c("list", "table"),
   weights = NULL,
   weight_type = "frequency",
   metadata,
   call = rlang::caller_env()
 ) {
-  .mode <- match.arg(.mode)
+  type <- rlang::arg_match(type)
 
   types <- vapply(metadata, `[[`, character(1), "type")
   numeric <- names(types)[!types %in% c("date", "dttm", "time")]
@@ -791,7 +791,7 @@ summ_list <- function(
   ) %>%
     purrr::discard(~ is.null(.))
 
-  if (.mode == "table") {
+  if (type == "table") {
     if (length(out) > 0) {
       out <- lapply(out, summ_table_spreads)
       # Calendar locations are text. Shared statistic columns use text too,

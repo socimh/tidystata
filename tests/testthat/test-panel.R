@@ -173,7 +173,7 @@ test_that("date-times compare local clock periods", {
   expect_identical(s_lag(1:2, time = stamps, delta = 5), c(NA, 1L))
   expect_error(
     s_lag(1:2, time = days, unit = "decade"),
-    "should be one of"
+    "must be one of"
   )
 })
 
@@ -269,7 +269,7 @@ test_that("panel operators validate their input", {
   expect_error(s_lag(1:2, time = 1:2, unit = "month"), "dates and date-times")
   expect_error(
     s_lag(1:2, time = as.Date(c("2024-01-01", "2024-02-01")), unit = "decade"),
-    "should be one of"
+    "must be one of"
   )
   expect_error(
     s_lag(1:2, -1, time = 1:2),

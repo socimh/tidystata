@@ -79,7 +79,7 @@ NULL
 #' @export
 preview_table <- function(.data, style = c("headtail", "interval"), n = 10) {
   preview_check_data(.data)
-  style <- match.arg(style)
+  style <- rlang::arg_match(style)
   preview_check_n(n)
   out <- unpreview_table(.data)
   if (inherits(out, "data.table")) {
@@ -342,7 +342,7 @@ s_print <- function(
   width = NULL,
   ...
 ) {
-  style <- match.arg(style)
+  style <- rlang::arg_match(style)
   switch(
     style,
     headtail = print_headtail(.data, n = n, width = width, ...),
