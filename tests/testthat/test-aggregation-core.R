@@ -375,6 +375,13 @@ test_that("weighted summaries of many groups equal one group at a time", {
   for (type in c("frequency", "analytic")) {
     many <- summ(data, x, .by = g, .wt = w, .wt_type = type, .stat = stats)
     one <- dplyr::bind_rows(lapply(split(data, data$g), function(group) {
+      if (all(is.na(group$x))) {
+        expect_warning(
+          out <- summ(group, x, .wt = w, .wt_type = type, .stat = stats),
+          "entirely missing"
+        )
+        return(out)
+      }
       summ(group, x, .wt = w, .wt_type = type, .stat = stats)
     }))
     expect_identical(as.list(many[stats]), as.list(one[stats]))
