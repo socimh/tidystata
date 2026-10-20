@@ -53,8 +53,9 @@ statart-specific decisions; consult the guide for everything else.
 - **Files.** A file holding one function is named after it (`is_first.R`); a
   family file gets a short hyphenated name (`row-stats.R`, `type-conversion.R`).
   Exported functions and their documentation come first, private helpers after.
-  Small helpers shared across families live in `R/utils.R`; argument checks in
-  `R/utils-check.R`; deprecated wrappers in `R/deprec.R`. Vendored
+  Helpers shared across families live in `R/utils-<topic>.R` (grouping in
+  `R/utils-group.R`, argument checks in `R/utils-check.R`); deprecated
+  wrappers in `R/deprec.R`. Vendored
   `R/import-standalone-*.R` files are updated with `usethis::use_standalone()`,
   never edited by hand.
 - **Internal names.** Helpers take their family prefix (`summ_`, `tab_`,
