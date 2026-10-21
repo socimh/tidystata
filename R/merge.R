@@ -68,34 +68,10 @@ s_merge <- function(
   .generate = lifecycle::deprecated(),
   .report = lifecycle::deprecated()
 ) {
-  if (lifecycle::is_present(.keep)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "s_merge(.keep)", "s_merge(keep)")
-    keep <- .keep
-  }
-  if (lifecycle::is_present(.assert)) {
-    lifecycle::deprecate_soft(
-      "0.2.0.9000",
-      "s_merge(.assert)",
-      "s_merge(assert)"
-    )
-    assert <- .assert
-  }
-  if (lifecycle::is_present(.generate)) {
-    lifecycle::deprecate_soft(
-      "0.2.0.9000",
-      "s_merge(.generate)",
-      "s_merge(generate)"
-    )
-    generate <- .generate
-  }
-  if (lifecycle::is_present(.report)) {
-    lifecycle::deprecate_soft(
-      "0.2.0.9000",
-      "s_merge(.report)",
-      "s_merge(report)"
-    )
-    report <- .report
-  }
+  keep <- merge_renamed(.keep, keep, "keep")
+  assert <- merge_renamed(.assert, assert, "assert")
+  generate <- merge_renamed(.generate, generate, "generate")
+  report <- merge_renamed(.report, report, "report")
   if (!is.data.frame(.data) || !is.data.frame(using)) {
     cli::cli_abort("{.arg .data} and {.arg using} must be data frames.")
   }
@@ -108,7 +84,6 @@ s_merge <- function(
   if (missing(by) || !is.character(by) || !length(by) || anyNA(by)) {
     cli::cli_abort("{.arg by} must be a character vector of key columns.")
   }
-  groups <- c("master", "using", "match")
   keep <- merge_groups(keep, "keep")
   if (!is.null(assert)) {
     assert <- merge_groups(assert, "assert")
@@ -123,31 +98,8 @@ s_merge <- function(
     ifelse(nzchar(names(by)), names(by), by)
   }
   using_keys <- unname(by)
-  merge_check_keys(master, master_keys, "{.arg .data}")
-  merge_check_keys(other, using_keys, "{.arg using}")
-  if (relationship %in% c("1:1", "1:m")) {
-    merge_check_unique(
-      master,
-      master_keys,
-      "the master data ({.arg .data})"
-    )
-  }
-  if (relationship %in% c("1:1", "m:1")) {
-    merge_check_unique(other, using_keys, "the using data")
-  }
-
-  # Stata keeps the master's values for shared non-key columns.
-  shared <- intersect(
-    setdiff(names(master), master_keys),
-    setdiff(names(other), using_keys)
-  )
-  if (length(shared)) {
-    cli::cli_inform(c(
-      "Kept the values from {.arg .data} for column{?s} also in {.arg using}: {.var {shared}}.",
-      i = "Rename them in {.arg using} first to keep both."
-    ))
-    other <- other[setdiff(names(other), shared)]
-  }
+  merge_check_relationship(master, other, master_keys, using_keys, relationship)
+  other <- merge_drop_shared(master, other, master_keys, using_keys)
   if (!is.null(generate)) {
     check_string(generate, allow_empty = FALSE, allow_null = TRUE)
     if (generate %in% c(names(master), names(other))) {
@@ -157,6 +109,98 @@ s_merge <- function(
     }
   }
 
+  merged <- merge_join(master, other, by, relationship)
+  status <- merged$status
+  if (report) {
+    # The report is a fixed-width table, so keep its spacing as written.
+    rlang::inform(merge_report(merged$counts, generate))
+  }
+  if (!is.null(assert)) {
+    merge_check_assert(status, merged$counts, assert)
+  }
+  joined <- merged$joined
+  if (!is.null(generate)) {
+    joined[[generate]] <- factor(
+      status,
+      levels = seq_along(merge_group_names),
+      labels = merge_group_label(merge_group_names)
+    )
+  }
+  kept <- merge_group_names[status] %in% keep
+  if (!all(kept)) {
+    joined <- joined[kept, , drop = FALSE]
+  }
+  table_restore(joined, .data)
+}
+
+merge_group_names <- c("master", "using", "match")
+
+# Old dotted arguments keep working with a deprecation warning. `env` and
+# `user_env` point lifecycle at s_merge() and its caller, not this helper.
+merge_renamed <- function(
+  old,
+  new,
+  arg,
+  env = rlang::caller_env(),
+  user_env = rlang::caller_env(2)
+) {
+  if (!lifecycle::is_present(old)) {
+    return(new)
+  }
+  lifecycle::deprecate_soft(
+    "0.2.0.9000",
+    paste0("s_merge(.", arg, ")"),
+    paste0("s_merge(", arg, ")"),
+    env = env,
+    user_env = user_env
+  )
+  old
+}
+
+# Key columns must exist, and the side(s) the relationship names as "1" must
+# be unique on them.
+merge_check_relationship <- function(
+  master,
+  other,
+  master_keys,
+  using_keys,
+  relationship,
+  call = rlang::caller_env()
+) {
+  merge_check_keys(master, master_keys, "{.arg .data}", call = call)
+  merge_check_keys(other, using_keys, "{.arg using}", call = call)
+  if (relationship %in% c("1:1", "1:m")) {
+    merge_check_unique(
+      master,
+      master_keys,
+      "the master data ({.arg .data})",
+      call = call
+    )
+  }
+  if (relationship %in% c("1:1", "m:1")) {
+    merge_check_unique(other, using_keys, "the using data", call = call)
+  }
+}
+
+# Stata keeps the master's values for shared non-key columns.
+merge_drop_shared <- function(master, other, master_keys, using_keys) {
+  shared <- intersect(
+    setdiff(names(master), master_keys),
+    setdiff(names(other), using_keys)
+  )
+  if (!length(shared)) {
+    return(other)
+  }
+  cli::cli_inform(c(
+    "Kept the values from {.arg .data} for column{?s} also in {.arg using}: {.var {shared}}.",
+    i = "Rename them in {.arg using} first to keep both."
+  ))
+  other[setdiff(names(other), shared)]
+}
+
+# Full join with a status code per row, indexing `merge_group_names`:
+# 1 master only, 2 using only, 3 matched.
+merge_join <- function(master, other, by, relationship) {
   in_master <- merge_marker(c(names(master), names(other)), "master")
   in_using <- merge_marker(c(names(master), names(other), in_master), "using")
   master[[in_master]] <- TRUE
@@ -172,47 +216,47 @@ s_merge <- function(
       "1:m" = "one-to-many"
     )
   )
-  # Status codes index `groups`: 1 master only, 2 using only, 3 matched.
   status <- (!is.na(joined[[in_master]])) + 2L * (!is.na(joined[[in_using]]))
-  counts <- stats::setNames(tabulate(status, nbins = 3L), groups)
   joined[[in_master]] <- NULL
   joined[[in_using]] <- NULL
+  list(
+    joined = joined,
+    status = status,
+    counts = stats::setNames(tabulate(status, nbins = 3L), merge_group_names)
+  )
+}
 
-  if (report) {
-    # The report is a fixed-width table, so keep its spacing as written.
-    rlang::inform(merge_report(counts, generate))
+merge_check_assert <- function(
+  status,
+  counts,
+  assert,
+  call = rlang::caller_env()
+) {
+  groups <- merge_group_names
+  if (all(counts[setdiff(groups, assert)] == 0L)) {
+    return(invisible())
   }
-  if (!is.null(assert) && !all(counts[setdiff(groups, assert)] == 0L)) {
-    found <- setdiff(groups[unique(status)], assert)
-    found <- paste0(
-      counts[found],
-      " ",
-      merge_group_label(found),
-      " row(s)",
-      collapse = " and "
-    )
-    allowed <- paste(merge_group_label(assert), collapse = ", ")
-    cli::cli_abort(
-      "Merge assertion failed: found {found}; {.arg assert} allows only {allowed}."
-    )
-  }
-  if (!is.null(generate)) {
-    joined[[generate]] <- factor(
-      status,
-      levels = seq_along(groups),
-      labels = merge_group_label(groups)
-    )
-  }
-  kept <- groups[status] %in% keep
-  if (!all(kept)) {
-    joined <- joined[kept, , drop = FALSE]
-  }
-  table_restore(joined, .data)
+  found <- setdiff(groups[unique(status)], assert)
+  found <- paste0(
+    counts[found],
+    " ",
+    merge_group_label(found),
+    " row(s)",
+    collapse = " and "
+  )
+  allowed <- paste(merge_group_label(assert), collapse = ", ")
+  cli::cli_abort(
+    "Merge assertion failed: found {found}; {.arg assert} allows only {allowed}.",
+    call = call
+  )
 }
 
 merge_groups <- function(value, argument, call = rlang::caller_env()) {
-  groups <- c("master", "using", "match")
-  if (!is.character(value) || !length(value) || !all(value %in% groups)) {
+  if (
+    !is.character(value) ||
+      !length(value) ||
+      !all(value %in% merge_group_names)
+  ) {
     cli::cli_abort(
       "{.arg {argument}} must contain {.val master}, {.val using} and/or {.val match}.",
       call = call
