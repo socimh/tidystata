@@ -7,6 +7,13 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**Policy consistency pass, 2026-10-20 (same branch):** `var_type()` and
+`var_unit()` made primary; naming policy clarified (dot rule, `.type` values,
+alias vs deprecation, `.missing` defaults, re-raised conditions). `--release`
+suite **19,518 passing expectations**, zero failures, errors, warnings or
+skips; `R CMD check --as-cran` 0 errors, 0 warnings, the same CRAN-incoming
+NOTE; style check 144 sources, 0 findings; vignette `tab2(.by)` chunk renders.
+
 **API naming pass, 2026-10-20 (same branch):** `--release` suite **19,518
 passing expectations**, zero failures, errors, warnings or skips; `R CMD check
 --as-cran` 0 errors, 0 warnings, the same CRAN-incoming NOTE; seeded shuffle
@@ -403,8 +410,10 @@ show generated console output.
 
 - **API naming (decided 2026-10-20):** the maintainer's decisions are written
   as the naming policy in CONTRIBUTING ("Package conventions"): `x` as the
-  first argument of vector and expression functions; dots only in functions
-  with `...` (`na.rm` excepted); `by` for merge keys and `.by` for groups;
+  first argument of vector and expression functions; dots only on options
+  after a `...` taking columns or expressions (`na.rm` excepted);
+  `var_type()`/`var_unit()` primary over `s_type()`/`s_unit()`; `by` for
+  merge keys and `.by` for groups;
   `.missing` for missing-as-group controls (replacing `summ(.na.rm)`);
   `.type` for output containers (replacing `summ(.mode)`); `arg_match()`;
   lifecycle deprecations; and `tab2(.by)` returning a list. Old argument names

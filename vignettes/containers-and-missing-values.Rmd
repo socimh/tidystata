@@ -79,12 +79,20 @@ group_vars(summary)
 ```
 
 Summary and inventory results are ungrouped. Grouping keys remain ordinary
-columns where reported. For `tab()`, `tab1()`, `fre()`, `fre1()`, `summ()` and
-`tabstat()`, `.by = NULL` inherits existing groups; an explicit `.by` replaces
-them. Cross-tabulation with `tab2()` or `fre2()` has no `.by` argument.
+columns where reported. For `tab()`, `tab1()`, `tab2()`, `fre()`, `fre1()`,
+`fre2()`, `summ()` and `tabstat()`, `.by = NULL` inherits existing groups; an explicit `.by` replaces
+them.
 
 ```{r group-override}
 summ(grouped, score, .by = answer, .stat = c("n", "mean"))
+```
+
+Cross-tabulation with `tab2()` or `fre2()` returns one table per group, in a
+list named after each group, as Stata's `by group: tab2 x y` does:
+
+```{r grouped-cross}
+crossed <- tab2(df, answer, score, .by = group)
+names(crossed)
 ```
 
 One-way tabulations use all observations within a group for `percent` and `cum`,

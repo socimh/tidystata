@@ -17,12 +17,14 @@ sources, tests and maintained examples. The reviewed file list is
 `.opencode/style-scope.json`.
 
 - Use two-space indentation, an 80-character target and descriptive snake_case
-  internal names. Preserve exported names and argument names for compatibility.
+  internal names. Preserve exported names and argument names for compatibility;
+  rename them only through the aliases and lifecycle route described below.
 - Keep functions focused. Extract helpers for meaningful shared operations,
   rather than creating a framework around small wrappers. Base R calls and
   loops are appropriate when they make the operation clear.
 - Prefer direct calls for single operations and `|>` for readable sequences in
-  new or deliberately revised code. Preserve `%>%` support. Do not mechanically
+  new or deliberately revised code. `%>%` remains the dominant pipe in existing
+  sources and is not a review finding by itself. Do not mechanically
   replace pipes: review promise forcing, warnings, side effects and visibility.
   Use only native-pipe syntax supported by R 4.1 (no newer placeholders or
   extraction syntax). Use `function()` for named and multiline functions.
@@ -55,30 +57,37 @@ statart-specific decisions; consult the guide for everything else.
   Exported functions and their documentation come first, private helpers after.
   Helpers shared across families live in `R/utils-<topic>.R` (grouping in
   `R/utils-group.R`, argument checks in `R/utils-check.R`); deprecated
-  wrappers in `R/deprec.R`. Vendored
-  `R/import-standalone-*.R` files are updated with `usethis::use_standalone()`,
-  never edited by hand.
+  wrappers in `R/deprec.R`.
 - **Function names.** Use the Stata command name when a function does what
   that command does (`summ()`, `tab()`, `xtile()`, `isid()`, `destring()`).
   Add the `s_` prefix only when the Stata name would clash with base R or the
   tidyverse (`s_merge()`, `s_select()`, `s_lag()`). Functions without a Stata
   counterpart use tidyverse verb names (`as_dummy()`, `preview_table()`).
-  Earlier names stay as quiet aliases on the primary's help page; add new
-  aliases only to keep existing code working.
+  Earlier names stay as quiet aliases on the primary's help page (`s_type()`
+  for `var_type()`); add new aliases only to keep existing code working. A
+  name that is retired or whose behaviour differs from its replacement
+  (`s_match()`) goes through `lifecycle::deprecate_soft()` instead.
 - **First argument.** Data-frame functions take `.data`; vector functions and
   functions that evaluate an expression take `x`.
-- **Dot prefixes.** Functions that take `...` dot every other argument
-  (`.by`, `.wt`, `.type`, `.missing`), so options cannot clash with column
-  names passed through `...`. Functions without `...` use plain names
-  (`s_merge(by, keep)`, `xtile(wt)`, `timer(x, on_error)`). Exception:
-  `na.rm`, which keeps base R's spelling.
+- **Dot prefixes.** When `...` takes columns or expressions, the options after
+  it are dotted (`.by`, `.wt`, `.type`, `.missing`), so they cannot clash with
+  column names. Arguments before `...` keep plain names
+  (`variables_search(.data, string, ...)`), as do options of print methods
+  whose `...` passes through to pillar (`print_headtail(max_extra_cols)`).
+  Functions without `...` use plain names (`s_merge(by, keep)`, `xtile(wt)`,
+  `timer(x, on_error)`). Exception: `na.rm`, which keeps base R's spelling.
 - **Recurring arguments.** `na.rm` omits missing values from a calculation.
   `.missing` decides whether missing values form their own group or value
-  (`is_first()`, `row_nvals()`, `summ()`); `.missok` keeps Stata's `isid`
-  option name. `.by` always means grouping columns, `by` always means merge
-  keys, `.wt`/`wt` frequency or analytic weights with `.wt_type`, and `.type`
-  the output container (`"list"`, `"tibble"`, `"auto"`, `"flextable"`,
-  `"vector"`). Grouped cross-tabulations return a named list of tables.
+  (`is_first()`, `row_nvals()`, `summ()`). Its default follows the source
+  command: `FALSE` for egen-style row and tag functions, `TRUE` for summaries,
+  which keep missing grouping keys as `dplyr::group_by()` does. `.missok`
+  keeps Stata's `isid` option name. `.by` always means grouping columns, `by`
+  always means merge keys, `.wt`/`wt` frequency or analytic weights with
+  `.wt_type`, and `.type` the output form: `"list"` (one table per variable
+  or family), `"tibble"` (always a tibble), `"table"` (one combined data
+  frame, keeping the input's container where the function preserves it),
+  `"vector"`, `"flextable"`, or `"auto"` (chosen by the result). Grouped
+  cross-tabulations return a named list of tables.
 - **Options and lifecycle.** Validate enumerated options with
   `rlang::arg_match()`, which rejects abbreviations. Rename or retire public
   functions and arguments with `lifecycle::deprecate_soft()`, keeping the old
@@ -94,13 +103,16 @@ statart-specific decisions; consult the guide for everything else.
   "column", and let cli wrap long lines. Keep each message string on one
   source line: `conditionMessage()` reflows text, but `e$message` keeps
   source line breaks.
-- **Checks.** Validate public inputs with the vendored rlang checkers
-  (`check_bool()`, `check_string()`, `check_number_whole()`,
-  `check_data_frame()`, ...) or a `check_*()` helper in `R/utils-check.R`.
-  Every checker takes `arg = caller_arg(x)` and `call = caller_env()`, and
-  public functions forward `call` so errors name the user's call. Validate
-  enumerated options with `rlang::arg_match()`. Re-signalled errors keep their
-  cause with `parent = cnd`.
+- **Checks.** Validate public inputs with the `check_*()` helpers in
+  `R/utils-check.R` (`check_bool()`, `check_string()`, `check_number_whole()`,
+  `check_data_frame()`, ...), which mirror rlang's standalone checkers without
+  requiring rlang 1.2.0. Every checker takes `arg = caller_arg(x)` and
+  `call = caller_env()`, and public functions forward `call` so errors name
+  the user's call. Validate
+  enumerated options with `rlang::arg_match()`. An error that adds context
+  keeps its cause with `parent = cnd`; an untouched condition re-raised after
+  a failed fallback (`row_pick()`) uses `stop(cnd)` so it reaches the user
+  unchanged.
 - **Documentation.** Titles are sentence case without a full stop; `@param`
   entries are sentences ending in a full stop. Shared arguments (`.data`,
   `...`, `.by`, `.wt`) inherit from `@inheritParams statart_args` in
