@@ -97,7 +97,7 @@ quiet aliases, with no notice, and are documented on the same help pages.
 | `set seed 123` | `set_seed(123)`, now also alone; the pipe form `x %>% set_seed(123)` is unchanged | |
 
 `var_type()` and `var_unit()` are now the primary names; `s_type()` and
-`s_unit()` remain quiet aliases.
+`s_unit()` still work but are deprecated with a lifecycle warning.
 `pct()` shares its name with `gt::pct()`, so prefer `pc()` when gt is attached.
 
 One behaviour changed: several codes in `na_if_value(x, c(-98, -99))` now
@@ -501,8 +501,8 @@ Recode that category or use `tab2()` to avoid silently replacing category counts
 
 ## Measured vectors
 
-`s_type()` identifies measured vectors as `"units"` in either abbreviation mode,
-including compound units such as `m/s`. `s_unit()` returns the unit string even
+`var_type()` identifies measured vectors as `"units"` in either abbreviation
+mode, including compound units such as `m/s`. `var_unit()` returns the unit string even
 for empty and all-missing measured vectors; ordinary vectors return
 `NA_character_`.
 

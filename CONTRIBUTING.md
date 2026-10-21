@@ -63,10 +63,11 @@ statart-specific decisions; consult the guide for everything else.
   Add the `s_` prefix only when the Stata name would clash with base R or the
   tidyverse (`s_merge()`, `s_select()`, `s_lag()`). Functions without a Stata
   counterpart use tidyverse verb names (`as_dummy()`, `preview_table()`).
-  Earlier names stay as quiet aliases on the primary's help page (`s_type()`
-  for `var_type()`); add new aliases only to keep existing code working. A
-  name that is retired or whose behaviour differs from its replacement
-  (`s_match()`) goes through `lifecycle::deprecate_soft()` instead.
+  Earlier names stay as quiet aliases on the primary's help page (`s_try()`
+  for `capture()`); add new aliases only to keep existing code working. A
+  name being retired (`s_match()`, `s_type()`), or one whose behaviour
+  differs from its replacement, goes through `lifecycle::deprecate_soft()`
+  instead.
 - **First argument.** Data-frame functions take `.data`; vector functions and
   functions that evaluate an expression take `x`.
 - **Dot prefixes.** When `...` takes columns or expressions, the options after

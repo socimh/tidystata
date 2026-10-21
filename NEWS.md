@@ -2,7 +2,7 @@
 
 * `var_type()` and `var_unit()` are now the primary names, following the
   naming rule for functions without a Stata counterpart. `s_type()` and
-  `s_unit()` remain quiet aliases on the same help page.
+  `s_unit()` are deprecated: they still work, with a lifecycle warning.
 
 * Arguments follow one naming rule: options after a `...` that takes columns
   or expressions are dotted, and functions without `...` use plain names. Renamed arguments
@@ -63,8 +63,7 @@ Results are unchanged; only the time taken to compute them is shorter.
   `as_numeric()`/`as_character()`), `pc()` (alias `pct()`, which clashes
   with `gt::pct()`), and `tab2()`/`fre2()` (alias `xtab()`). Further
   aliases: `s_tag()` for `is_first()`, `tab_gen()` for `as_dummy()`,
-  `var_type()`/`var_unit()` for `s_type()`/`s_unit()`, and
-  `cut_quantile()`, `s_try()` and `names_as_column()` without a notice.
+  and `cut_quantile()`, `s_try()` and `names_as_column()` without a notice.
 - `tab2()` and `fre2()` with three or more variables return every pairwise
   table as a named list, as Stata's `tab2` does; with `.chi2 = TRUE`, each
   test is headed "-> tabulation of x by y".

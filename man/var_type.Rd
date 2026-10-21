@@ -3,8 +3,6 @@
 \name{var_type}
 \alias{var_type}
 \alias{var_unit}
-\alias{s_type}
-\alias{s_unit}
 \title{Report an object's type or unit}
 \usage{
 var_type(
@@ -15,15 +13,6 @@ var_type(
 )
 
 var_unit(x, .x = lifecycle::deprecated())
-
-s_type(
-  x,
-  abbr = FALSE,
-  .x = lifecycle::deprecated(),
-  .abbr = lifecycle::deprecated()
-)
-
-s_unit(x, .x = lifecycle::deprecated())
 }
 \arguments{
 \item{x}{An object.}
@@ -41,7 +30,7 @@ or duration vectors, including empty or all-missing measured vectors, and
 \code{NA_character_} for vectors without units.
 }
 \description{
-\code{s_type()} and \code{s_unit()} are aliases of \code{var_type()} and \code{var_unit()}.
+Report an object's type or unit
 }
 \details{
 Types describe storage and class metadata, not the observed values: empty and

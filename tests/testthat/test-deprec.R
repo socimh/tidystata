@@ -6,6 +6,15 @@ test_that("s_match() is deprecated and gives identical results", {
   expect_identical(ds(data, s_match("x*")), ds(data, varlist("x*")))
 })
 
+test_that("s_type() and s_unit() are deprecated and give identical results", {
+  lifecycle::expect_deprecated(old_type <- s_type(1L, abbr = TRUE))
+  expect_identical(old_type, var_type(1L, abbr = TRUE))
+  lifecycle::expect_deprecated(
+    old_unit <- s_unit(as.difftime(1, units = "secs"))
+  )
+  expect_identical(old_unit, var_unit(as.difftime(1, units = "secs")))
+})
+
 test_that("earlier names are quiet aliases or current names", {
   data <- tibble::tibble(x1 = 1, x2 = 2, y = 3)
   cross <- tibble::tibble(a = c("p", "q"), b = c("u", "u"))
@@ -36,9 +45,7 @@ test_that("aliases are exported and identical to their primary functions", {
     names_as_column = "ds_as_column",
     pct = "pc",
     s_tag = "is_first",
-    tab_gen = "as_dummy",
-    s_type = "var_type",
-    s_unit = "var_unit"
+    tab_gen = "as_dummy"
   )
   exports <- getNamespaceExports("statart")
   for (alias in names(same)) {

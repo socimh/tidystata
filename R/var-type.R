@@ -1,7 +1,5 @@
 #' Report an object's type or unit
 #'
-#' `s_type()` and `s_unit()` are aliases of `var_type()` and `var_unit()`.
-#'
 #' @name var_type
 #' @param x An object.
 #' @param abbr A single `TRUE` or `FALSE`. If `TRUE`, the abbreviation of the
@@ -146,11 +144,3 @@ var_unit <- function(x, .x = lifecycle::deprecated()) {
   }
   NA_character_
 }
-
-#' @export
-#' @rdname var_type
-s_type <- var_type
-
-#' @export
-#' @rdname var_type
-s_unit <- var_unit

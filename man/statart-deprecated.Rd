@@ -3,9 +3,15 @@
 \name{statart-deprecated}
 \alias{statart-deprecated}
 \alias{s_match}
+\alias{s_type}
+\alias{s_unit}
 \title{Renamed functions}
 \usage{
 s_match(...)
+
+s_type(...)
+
+s_unit(...)
 }
 \arguments{
 \item{...}{Arguments passed to the new function.}
@@ -19,11 +25,13 @@ work and give identical results with a lifecycle deprecation warning.
 They will be removed in a future release.\tabular{ll}{
    Old name \tab New name \cr
    \code{s_match()} \tab \code{\link[=varlist]{varlist()}} \cr
+   \code{s_type()} \tab \code{\link[=var_type]{var_type()}} \cr
+   \code{s_unit()} \tab \code{\link[=var_unit]{var_unit()}} \cr
 }
 
 
-Other earlier names, such as \code{cut_quantile()}, \code{s_try()},
-\code{names_as_column()}, \code{tab2()} and \code{fre2()}, are current names or aliases
-and give no notice.
+Quiet aliases such as \code{cut_quantile()}, \code{s_try()}, \code{names_as_column()},
+\code{xtab()} and \code{pct()} are documented with their primary functions and give
+no notice.
 }
 \keyword{internal}
