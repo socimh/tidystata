@@ -7,6 +7,18 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**Long-function splits, 2026-10-20 (same branch):** `xtile()` 140 to 41
+lines (`xtile_rank()`, `xtile_quantile()`), `s_merge()` 131 to 78
+(`merge_renamed()`, `merge_check_relationship()`, `merge_drop_shared()`,
+`merge_join()`, `merge_check_assert()`), `summ()` 196 to 143
+(`summ_check_flags()`, `summ_rename_reserved_groups()`, `summ_finalize()`),
+`summ_variable()` 210 to 166 (pure statistic steps extracted). Full suite
+19,518 passing, zero failures/warnings/skips; style 144 sources, 0 findings.
+`benchmark_core.R --filter=xtile|s_merge|summ`, two interleaved rounds per
+build: result hashes identical; timing changes -6% to +5% (largest
+`xtile_grouped` +60 ms on 1,965 ms, 10,000 groups), inside the 10%/5 ms
+tolerance. `s_type()`/`s_unit()` now soft-deprecated.
+
 **Policy consistency pass, 2026-10-20 (same branch):** `var_type()` and
 `var_unit()` made primary; naming policy clarified (dot rule, `.type` values,
 alias vs deprecation, `.missing` defaults, re-raised conditions). `--release`
@@ -418,12 +430,9 @@ show generated console output.
   `.type` for output containers (replacing `summ(.mode)`); `arg_match()`;
   lifecycle deprecations; and `tab2(.by)` returning a list. Old argument names
   keep working with soft deprecation warnings; remove them in a later release.
-- **Long-function refactors (deferred):** `summ_variable()` (about 210 lines),
-  `summ()` (196), `xtile()` (140) and `s_merge()` (131) should be split into
-  validate/prepare/compute/assemble steps, one function per focused commit,
-  each measured with `.opencode/tests/benchmark_core.R` under the
-  CONTRIBUTING thresholds. Not done in the conventions pass because these
-  paths were just optimized and need before/after timings.
+- **Long-function refactors:** done 2026-10-20 (see Current verification).
+  `summ_variable()` keeps its lazily cached per-group closures; splitting
+  those further would need an explicit state object and new timings.
 - **Argument checks:** `R/utils-check.R` mirrors the checkers rlang 1.2.0
   exports. Requiring `rlang (>= 1.2.0)` would allow using rlang's own versions
   once the dependency floor is reviewed.
