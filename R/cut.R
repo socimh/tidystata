@@ -98,44 +98,53 @@ xtile <- function(
     cli::cli_abort("{.arg x} must contain non-missing observations.")
   }
   if (method == "rank") {
-    intervals <- min(n, length(observed))
-    if (
-      !is.null(labels) &&
-        !identical(labels, FALSE) &&
-        length(labels) != intervals
-    ) {
-      cli::cli_abort(
-        "{.arg labels} must have length {intervals}, the effective number of intervals."
-      )
-    }
-    if (n > length(observed)) {
-      cli::cli_warn(
-        "Requested more groups than non-missing observations; using {intervals} groups."
-      )
-    }
-    sizes <- rep(length(observed) %/% intervals, intervals)
-    extra <- length(observed) %% intervals
-    sizes[seq_len(extra)] <- sizes[seq_len(extra)] + 1L
-    observed_positions <- which(!is.na(x))
-    ranked_positions <- observed_positions[order(observed, seq_along(observed))]
-    codes <- rep(NA_integer_, length(x))
-    codes[ranked_positions] <- rep(seq_len(intervals), sizes)
-    if (identical(labels, FALSE)) {
-      return(codes)
-    }
-    if (is.null(labels)) {
-      labels <- as.character(seq_len(intervals))
-    }
-    return(factor(
-      codes,
-      levels = seq_len(intervals),
-      labels = labels,
-      ordered = TRUE
-    ))
+    xtile_rank(x, observed, n, labels)
+  } else {
+    xtile_quantile(x, observed, n, labels, wt)
   }
+}
+
+#' @rdname cut
+#' @export
+cut_quantile <- xtile
+
+# Balanced rank groups: ties are broken by original position, and earlier
+# groups get the extra rows.
+xtile_rank <- function(x, observed, n, labels, call = rlang::caller_env()) {
+  intervals <- min(n, length(observed))
+  xtile_check_labels(labels, intervals, call = call)
+  if (n > length(observed)) {
+    cli::cli_warn(
+      "Requested more groups than non-missing observations; using {intervals} groups."
+    )
+  }
+  sizes <- rep(length(observed) %/% intervals, intervals)
+  extra <- length(observed) %% intervals
+  sizes[seq_len(extra)] <- sizes[seq_len(extra)] + 1L
+  observed_positions <- which(!is.na(x))
+  ranked_positions <- observed_positions[order(observed, seq_along(observed))]
+  codes <- rep(NA_integer_, length(x))
+  codes[ranked_positions] <- rep(seq_len(intervals), sizes)
+  if (is.null(labels)) {
+    labels <- as.character(seq_len(intervals))
+  }
+  xtile_codes(codes, intervals, labels)
+}
+
+xtile_quantile <- function(
+  x,
+  observed,
+  n,
+  labels,
+  wt,
+  call = rlang::caller_env()
+) {
   limits <- range(observed)
   if (limits[[1L]] == limits[[2L]]) {
-    cli::cli_abort("Can't cut a vector with only one unique value.")
+    cli::cli_abort(
+      "Can't cut a vector with only one unique value.",
+      call = call
+    )
   }
   # Stata xtile rule: a value joins the first group whose cutpoint is at least
   # the value, so distinct values are never merged into one group.
@@ -145,7 +154,10 @@ xtile <- function(
     weighted_quantile(observed, wt[!is.na(x)], seq_len(n - 1L) / n)
   }
   if (anyNA(cutpoints)) {
-    cli::cli_abort("Can't form quantile cutpoints from these observations.")
+    cli::cli_abort(
+      "Can't form quantile cutpoints from these observations.",
+      call = call
+    )
   }
   maximum <- limits[[2L]]
   cutpoints <- unique(cutpoints[cutpoints < maximum])
@@ -155,33 +167,37 @@ xtile <- function(
   present <- tabulate(raw, nbins = length(cutpoints) + 1L) > 0L
   occupied <- which(present)
   intervals <- length(occupied)
-  if (
-    !is.null(labels) && !identical(labels, FALSE) && length(labels) != intervals
-  ) {
-    cli::cli_abort(
-      "{.arg labels} must have length {intervals}, the effective number of intervals."
-    )
-  }
+  xtile_check_labels(labels, intervals, call = call)
   if (intervals < n) {
     cli::cli_warn(
       "Tied values collapsed quantile cutpoints to {intervals} groups (requested {n})."
     )
   }
-  codes <- cumsum(present)[raw]
-  if (identical(labels, FALSE)) {
-    return(codes)
-  }
   if (is.null(labels)) {
     upper <- c(cutpoints, maximum)[occupied]
     labels <- quantile_interval_labels(c(limits[[1L]], upper))
   }
-  factor(codes, levels = seq_len(intervals), labels = labels, ordered = TRUE)
+  xtile_codes(cumsum(present)[raw], intervals, labels)
 }
 
-# TRUE inside a grouped dplyr verb such as group_by() |> mutate().
-#' @rdname cut
-#' @export
-cut_quantile <- xtile
+xtile_check_labels <- function(labels, intervals, call = rlang::caller_env()) {
+  if (
+    !is.null(labels) && !identical(labels, FALSE) && length(labels) != intervals
+  ) {
+    cli::cli_abort(
+      "{.arg labels} must have length {intervals}, the effective number of intervals.",
+      call = call
+    )
+  }
+}
+
+# Integer codes for `labels = FALSE`, otherwise an ordered factor.
+xtile_codes <- function(codes, intervals, labels) {
+  if (identical(labels, FALSE)) {
+    return(codes)
+  }
+  factor(codes, levels = seq_len(intervals), labels = labels, ordered = TRUE)
+}
 
 # stats::quantile(x, probs, type = 7, names = FALSE) for x without missing
 # values and probs in [0, 1], with the same partial sort and arithmetic but
@@ -200,6 +216,7 @@ quantile7 <- function(x, probs) {
   as.double(qs)
 }
 
+# TRUE inside a grouped dplyr verb such as group_by() |> mutate().
 cut_in_grouped_mask <- function() {
   if (!in_dplyr_verb()) {
     return(FALSE)
