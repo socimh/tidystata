@@ -1,163 +1,163 @@
-# Comprehensive Test Suite for s_type() and s_unit() Functions
+# Comprehensive Test Suite for var_type() and var_unit() Functions
 # Type detection and unit extraction
 
-# CHALLENGE: Comprehensive testing for s_type, s_unit
-# FUNCTIONS: s_type, s_unit
+# CHALLENGE: Comprehensive testing for var_type, var_unit
+# FUNCTIONS: var_type, var_unit
 # KEY BEHAVIORS: type detection, unit extraction
 # EDGE CASES: ambiguous types, compound units
 
 # ============================================================================
-# CHALLENGING TESTS - s_type() Basic Types
+# CHALLENGING TESTS - var_type() Basic Types
 # ============================================================================
 
-test_that("s_type: integer vector", {
+test_that("var_type: integer vector", {
   x <- 1:5
-  result <- s_type(x)
+  result <- var_type(x)
   expect_type(result, "character")
   expect_equal(result, "integer")
 })
 
-test_that("s_type: double vector", {
+test_that("var_type: double vector", {
   x <- c(1.5, 2.5, 3.5)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "double")
 })
 
-test_that("s_type: character vector", {
+test_that("var_type: character vector", {
   x <- letters[1:5]
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "character")
 })
 
-test_that("s_type: logical vector", {
+test_that("var_type: logical vector", {
   x <- c(TRUE, FALSE, TRUE)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "logical")
 })
 
-test_that("s_type: factor", {
+test_that("var_type: factor", {
   x <- factor(c("a", "b", "c"))
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "factor")
 })
 
-test_that("s_type: ordered factor", {
+test_that("var_type: ordered factor", {
   x <- ordered(c("low", "medium", "high"))
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "ordered")
 })
 
-test_that("s_type: abbreviation mode", {
+test_that("var_type: abbreviation mode", {
   x <- 1:5
-  result_full <- s_type(x, abbr = FALSE)
-  result_abbr <- s_type(x, abbr = TRUE)
+  result_full <- var_type(x, abbr = FALSE)
+  result_abbr <- var_type(x, abbr = TRUE)
   expect_equal(result_full, "integer")
   expect_equal(result_abbr, "int")
 })
 
 # ============================================================================
-# CHALLENGING TESTS - s_type() Date/Time Types
+# CHALLENGING TESTS - var_type() Date/Time Types
 # ============================================================================
 
-test_that("s_type: Date", {
+test_that("var_type: Date", {
   x <- as.Date(c("2024-01-01", "2024-06-15"))
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "date")
 })
 
-test_that("s_type: POSIXct (datetime)", {
+test_that("var_type: POSIXct (datetime)", {
   x <- as.POSIXct(c("2024-01-01 10:00:00", "2024-06-15 14:30:00"))
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "datetime")
 })
 
-test_that("s_type: difftime (duration)", {
+test_that("var_type: difftime (duration)", {
   x <- as.difftime(c(1, 2, 3), units = "hours")
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "duration")
 })
 
-test_that("s_type: hms time", {
+test_that("var_type: hms time", {
   skip_if_not_installed("hms")
   x <- hms::as_hms(c("08:00:00", "12:00:00"))
-  result <- s_type(x)
+  result <- var_type(x)
   expect_type(result, "character")
 })
 
 # ============================================================================
-# CHALLENGING TESTS - s_type() Complex Types
+# CHALLENGING TESTS - var_type() Complex Types
 # ============================================================================
 
-test_that("s_type: haven labelled", {
+test_that("var_type: haven labelled", {
   x <- haven::labelled(c(1, 2, 1), labels = c(Yes = 1, No = 2))
-  result <- s_type(x)
+  result <- var_type(x)
   expect_type(result, "character")
   expect_true(grepl("label|lbl", result))
 })
 
-test_that("s_type: list", {
+test_that("var_type: list", {
   x <- list(1, 2, 3)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_type(result, "character")
 })
 
-test_that("s_type: data frame", {
+test_that("var_type: data frame", {
   x <- tibble::tibble(a = 1:5, b = 6:10)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_type(result, "character")
 })
 
-test_that("s_type: complex numbers", {
+test_that("var_type: complex numbers", {
   x <- c(1 + 2i, 3 + 4i)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "complex")
 })
 
-test_that("s_type: function", {
+test_that("var_type: function", {
   x <- mean
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "function")
 })
 
 # ============================================================================
-# CHALLENGING TESTS - s_type() Edge Cases
+# CHALLENGING TESTS - var_type() Edge Cases
 # ============================================================================
 
-test_that("s_type: NA vector", {
+test_that("var_type: NA vector", {
   x <- c(NA, NA, NA)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_type(result, "character")
 })
 
-test_that("s_type: empty vector", {
+test_that("var_type: empty vector", {
   x <- numeric(0)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_type(result, "character")
 })
 
-test_that("s_type: single element", {
+test_that("var_type: single element", {
   x <- 42
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "double")
 })
 
-test_that("s_type: Inf values", {
+test_that("var_type: Inf values", {
   x <- c(1, Inf, -Inf)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "double")
 })
 
-test_that("s_type: NaN values", {
+test_that("var_type: NaN values", {
   x <- c(1, NaN, 3)
-  result <- s_type(x)
+  result <- var_type(x)
   expect_equal(result, "double")
 })
 
 # ============================================================================
-# CHALLENGING TESTS - s_type() Within Data Frames
+# CHALLENGING TESTS - var_type() Within Data Frames
 # ============================================================================
 
-test_that("s_type: applied to each column with summarise", {
+test_that("var_type: applied to each column with summarise", {
   df <- tibble::tibble(
     int_col = 1:5,
     dbl_col = c(1.5, 2.5, 3.5, 4.5, 5.5),
@@ -167,7 +167,7 @@ test_that("s_type: applied to each column with summarise", {
   )
 
   result <- df %>%
-    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_s3_class(result, "tbl_df")
   expect_equal(result$int_col, "integer")
@@ -177,79 +177,79 @@ test_that("s_type: applied to each column with summarise", {
   expect_equal(result$logi_col, "logical")
 })
 
-test_that("s_type: within mutate for type checking", {
+test_that("var_type: within mutate for type checking", {
   df <- tibble::tibble(
     x = 1:5,
     y = letters[1:5]
   )
 
   result <- df %>%
-    dplyr::mutate(x_type = s_type(x), y_type = s_type(y))
+    dplyr::mutate(x_type = var_type(x), y_type = var_type(y))
 
   expect_equal(result$x_type[1], "integer")
   expect_equal(result$y_type[1], "character")
 })
 
 # ============================================================================
-# CHALLENGING TESTS - s_unit()
+# CHALLENGING TESTS - var_unit()
 # ============================================================================
 
-test_that("s_unit: units object", {
+test_that("var_unit: units object", {
   skip_if_not_installed("units")
   x <- units::set_units(c(1, 2, 3), "m")
-  result <- s_unit(x)
+  result <- var_unit(x)
   expect_type(result, "character")
   expect_false(is.na(result))
 })
 
-test_that("s_type and s_unit: measured length metadata", {
+test_that("var_type and var_unit: measured length metadata", {
   skip_if_not_installed("units")
   x <- units::set_units(c(1, 2, 3), "m")
   original <- x
 
-  expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, abbr = TRUE), "units")
-  expect_identical(s_unit(x), "m")
+  expect_identical(var_type(x), "units")
+  expect_identical(var_type(x, abbr = TRUE), "units")
+  expect_identical(var_unit(x), "m")
   expect_identical(x, original)
 })
 
-test_that("s_type and s_unit: compound speed metadata", {
+test_that("var_type and var_unit: compound speed metadata", {
   skip_if_not_installed("units")
   x <- units::set_units(c(1, 2, 3), "m/s")
 
-  expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, abbr = TRUE), "units")
-  expect_identical(s_unit(x), "m/s")
+  expect_identical(var_type(x), "units")
+  expect_identical(var_type(x, abbr = TRUE), "units")
+  expect_identical(var_unit(x), "m/s")
 })
 
-test_that("s_type and s_unit: dimensionless metadata", {
+test_that("var_type and var_unit: dimensionless metadata", {
   skip_if_not_installed("units")
   x <- units::set_units(c(1, 2, 3), "1")
 
-  expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, abbr = TRUE), "units")
-  expect_identical(s_unit(x), "1")
+  expect_identical(var_type(x), "units")
+  expect_identical(var_type(x, abbr = TRUE), "units")
+  expect_identical(var_unit(x), "1")
 })
 
-test_that("s_type and s_unit: empty measured vector metadata", {
+test_that("var_type and var_unit: empty measured vector metadata", {
   skip_if_not_installed("units")
   x <- units::set_units(numeric(0), "m")
 
-  expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, abbr = TRUE), "units")
-  expect_identical(s_unit(x), "m")
+  expect_identical(var_type(x), "units")
+  expect_identical(var_type(x, abbr = TRUE), "units")
+  expect_identical(var_unit(x), "m")
 })
 
-test_that("s_type and s_unit: all-missing measured vector metadata", {
+test_that("var_type and var_unit: all-missing measured vector metadata", {
   skip_if_not_installed("units")
   x <- units::set_units(c(NA_real_, NA_real_), "m")
 
-  expect_identical(s_type(x), "units")
-  expect_identical(s_type(x, abbr = TRUE), "units")
-  expect_identical(s_unit(x), "m")
+  expect_identical(var_type(x), "units")
+  expect_identical(var_type(x, abbr = TRUE), "units")
+  expect_identical(var_unit(x), "m")
 })
 
-test_that("s_type and s_unit: codebook retains measurement metadata", {
+test_that("var_type and var_unit: codebook retains measurement metadata", {
   skip_if_not_installed("units")
   df <- tibble::tibble(distance = units::set_units(c(1, NA, 3), "m"))
   original <- df
@@ -263,35 +263,35 @@ test_that("s_type and s_unit: codebook retains measurement metadata", {
   expect_identical(df, original)
 })
 
-test_that("s_unit: difftime with units", {
+test_that("var_unit: difftime with units", {
   x <- as.difftime(c(1, 2, 3), units = "hours")
-  result <- s_unit(x)
+  result <- var_unit(x)
   expect_type(result, "character")
   expect_false(is.na(result))
 })
 
-test_that("s_unit: hms time", {
+test_that("var_unit: hms time", {
   skip_if_not_installed("hms")
   x <- hms::as_hms(c("08:00:00", "12:00:00"))
-  result <- s_unit(x)
+  result <- var_unit(x)
   expect_type(result, "character")
 })
 
-test_that("s_unit: regular numeric returns NA", {
+test_that("var_unit: regular numeric returns NA", {
   x <- 1:5
-  result <- s_unit(x)
+  result <- var_unit(x)
   expect_true(is.na(result))
 })
 
-test_that("s_unit: character returns NA", {
+test_that("var_unit: character returns NA", {
   x <- letters[1:5]
-  result <- s_unit(x)
+  result <- var_unit(x)
   expect_true(is.na(result))
 })
 
-test_that("s_unit: factor returns NA", {
+test_that("var_unit: factor returns NA", {
   x <- factor(c("a", "b", "c"))
-  result <- s_unit(x)
+  result <- var_unit(x)
   expect_true(is.na(result))
 })
 
@@ -299,7 +299,7 @@ test_that("s_unit: factor returns NA", {
 # CHALLENGING TESTS - Integration with Codebook Workflow
 # ============================================================================
 
-test_that("s_type: used in codebook workflow", {
+test_that("var_type: used in codebook workflow", {
   withr::local_preserve_seed()
   df <- tibble::tibble(
     id = 1:100,
@@ -313,7 +313,7 @@ test_that("s_type: used in codebook workflow", {
     dplyr::summarise(dplyr::across(
       dplyr::everything(),
       list(
-        type = s_type,
+        type = var_type,
         n = ~ sum(!is.na(.))
       )
     ))
@@ -321,9 +321,9 @@ test_that("s_type: used in codebook workflow", {
   expect_s3_class(var_summary, "tbl_df")
 })
 
-test_that("s_type: type validation function", {
+test_that("var_type: type validation function", {
   is_numeric_type <- function(x) {
-    type <- s_type(x, abbr = TRUE)
+    type <- var_type(x, abbr = TRUE)
     type %in% c("int", "dbl")
   }
 
@@ -337,7 +337,7 @@ test_that("s_type: type validation function", {
 # CHALLENGING TESTS - Real-world Scenarios
 # ============================================================================
 
-test_that("s_type: data audit workflow", {
+test_that("var_type: data audit workflow", {
   withr::local_preserve_seed()
   audit_data <- tibble::tibble(
     transaction_id = 1:1000,
@@ -349,7 +349,7 @@ test_that("s_type: data audit workflow", {
 
   # Get type summary for all columns
   type_summary <- audit_data %>%
-    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_equal(type_summary$transaction_id, "integer")
   expect_equal(type_summary$amount, "double")
@@ -357,7 +357,7 @@ test_that("s_type: data audit workflow", {
   expect_equal(type_summary$is_valid, "logical")
 })
 
-test_that("s_type: ETL pipeline type checking", {
+test_that("var_type: ETL pipeline type checking", {
   raw_data <- tibble::tibble(
     id = as.character(1:100), # IDs stored as character
     value = rep(c("100.5", "200.3", "150.0"), length.out = 100), # Values as character
@@ -366,7 +366,7 @@ test_that("s_type: ETL pipeline type checking", {
 
   # Check types before conversion
   original_types <- raw_data %>%
-    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_equal(unique(unlist(original_types)), "character")
 
@@ -379,7 +379,7 @@ test_that("s_type: ETL pipeline type checking", {
     )
 
   clean_types <- clean_data %>%
-    dplyr::summarise(dplyr::across(dplyr::everything(), s_type))
+    dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_equal(clean_types$id, "integer")
   expect_equal(clean_types$value, "double")
@@ -400,8 +400,8 @@ test_that("type expansion preserves custom names and structured descriptions", {
       type_sum = function(x) label,
       .package = "pillar"
     )
-    expect_identical(s_type(x, abbr = TRUE), label)
-    expect_identical(s_type(x), label)
+    expect_identical(var_type(x, abbr = TRUE), label)
+    expect_identical(var_type(x), label)
   }
 })
 
@@ -412,8 +412,8 @@ test_that("missing custom type summaries fall back to the class", {
       type_sum = function(x) label,
       .package = "pillar"
     )
-    expect_identical(s_type(x), "statart_type_probe")
-    expect_identical(s_type(x, abbr = TRUE), "statart_type_probe")
+    expect_identical(var_type(x), "statart_type_probe")
+    expect_identical(var_type(x, abbr = TRUE), "statart_type_probe")
   }
 })
 
@@ -429,8 +429,8 @@ test_that("numeric-looking custom class names do not imply summability", {
 })
 
 test_that("structured extension type labels retain their element information", {
-  expect_identical(s_type(I(1:3), abbr = TRUE), "I<int>")
-  expect_identical(s_type(vctrs::list_of(1:2), abbr = TRUE), "list<int>")
+  expect_identical(var_type(I(1:3), abbr = TRUE), "I<int>")
+  expect_identical(var_type(vctrs::list_of(1:2), abbr = TRUE), "list<int>")
 })
 
 
@@ -494,10 +494,10 @@ for (case_name in names(type_contract_cases)) {
       test_that(paste("type contract", case_name, state), {
         x <- states[[state]]
         before <- serialize(x, NULL)
-        expect_identical(s_type(x, abbr = TRUE), case[[2]])
-        expect_identical(s_type(x), case[[3]])
+        expect_identical(var_type(x, abbr = TRUE), case[[2]])
+        expect_identical(var_type(x), case[[3]])
         expect_identical(
-          s_unit(x),
+          var_unit(x),
           if (length(case) == 4L) case[[4]] else NA_character_
         )
         expect_identical(serialize(x, NULL), before)
@@ -519,9 +519,9 @@ test_that("nonvector type contracts are exact and have no units", {
     list(function(x) x, "fn", "function")
   )
   for (case in cases) {
-    expect_identical(s_type(case[[1]], abbr = TRUE), case[[2]])
-    expect_identical(s_type(case[[1]]), case[[3]])
-    expect_identical(s_unit(case[[1]]), NA_character_)
+    expect_identical(var_type(case[[1]], abbr = TRUE), case[[2]])
+    expect_identical(var_type(case[[1]]), case[[3]])
+    expect_identical(var_unit(case[[1]]), NA_character_)
   }
 })
 
@@ -531,14 +531,14 @@ test_that("structured base types preserve established element and container name
     matrix(integer(), 0, 2),
     array(1:8, c(2, 2, 2))
   )) {
-    expect_identical(s_type(x, abbr = TRUE), "int")
-    expect_identical(s_type(x), "integer")
+    expect_identical(var_type(x, abbr = TRUE), "int")
+    expect_identical(var_type(x), "integer")
     expect_identical(as_numeric(x), as.numeric(x))
   }
-  expect_identical(s_type(data.frame(x = integer())), "dataframe")
-  expect_identical(s_type(tibble::tibble(x = integer())), "tibble")
-  expect_identical(s_type(I(integer())), "I<int>")
-  expect_identical(s_type(vctrs::list_of(.ptype = integer())), "list<int>")
+  expect_identical(var_type(data.frame(x = integer())), "dataframe")
+  expect_identical(var_type(tibble::tibble(x = integer())), "tibble")
+  expect_identical(var_type(I(integer())), "I<int>")
+  expect_identical(var_type(vctrs::list_of(.ptype = integer())), "list<int>")
 })
 
 test_that("type detection propagates extension method errors", {
@@ -547,7 +547,7 @@ test_that("type detection propagates extension method errors", {
     .package = "pillar"
   )
   expect_error(
-    s_type(structure(1, class = "statart_probe")),
+    var_type(structure(1, class = "statart_probe")),
     "extension failed"
   )
 })
@@ -558,7 +558,7 @@ test_that("custom numeric-looking labels remain unsupported in summaries", {
     type_sum = function(x) "interval",
     .package = "pillar"
   )
-  expect_identical(s_type(x), "interval")
+  expect_identical(var_type(x), "interval")
   expect_identical(as_numeric(x), rep(NA_real_, 3))
   expect_warning(expect_error(summ(tibble::tibble(x = x)), "None"), "numeric")
   expect_warning(
@@ -581,9 +581,9 @@ test_that("integer64 metadata survives empty and missing values", {
     bit64::integer64(),
     bit64::as.integer64(NA)
   )) {
-    expect_identical(s_type(x, abbr = TRUE), "int64")
-    expect_identical(s_type(x), "integer64")
-    expect_identical(s_unit(x), NA_character_)
+    expect_identical(var_type(x, abbr = TRUE), "int64")
+    expect_identical(var_type(x), "integer64")
+    expect_identical(var_unit(x), NA_character_)
   }
 })
 
@@ -594,9 +594,9 @@ test_that("hms metadata survives empty and missing values", {
     hms::hms(numeric()),
     hms::hms(NA_real_)
   )) {
-    expect_identical(s_type(x, abbr = TRUE), "time")
-    expect_identical(s_type(x), "time")
-    expect_identical(s_unit(x), "secs")
+    expect_identical(var_type(x, abbr = TRUE), "time")
+    expect_identical(var_type(x), "time")
+    expect_identical(var_unit(x), "secs")
   }
 })
 
@@ -605,9 +605,9 @@ test_that("unit metadata covers compound and dimensionless vectors in every stat
   for (unit in c("m", "m/s", "1")) {
     for (values in list(c(1, NA_real_), numeric(), NA_real_)) {
       x <- units::set_units(values, unit, mode = "standard")
-      expect_identical(s_type(x), "units")
-      expect_identical(s_type(x, abbr = TRUE), "units")
-      expect_identical(s_unit(x), unit)
+      expect_identical(var_type(x), "units")
+      expect_identical(var_type(x, abbr = TRUE), "units")
+      expect_identical(var_unit(x), unit)
     }
   }
 })
@@ -615,9 +615,9 @@ test_that("unit metadata covers compound and dimensionless vectors in every stat
 test_that("geometry labels and table extension names remain class-specific", {
   skip_if_not_installed("sf")
   x <- sf::st_sfc(sf::st_point(c(1, 2)))
-  expect_identical(s_type(x), "POINT")
-  expect_identical(s_type(x[0]), "POINT")
-  expect_identical(s_unit(x), NA_character_)
+  expect_identical(var_type(x), "POINT")
+  expect_identical(var_type(x[0]), "POINT")
+  expect_identical(var_unit(x), NA_character_)
 })
 
 
@@ -630,8 +630,8 @@ test_that("classed matrices retain their scalar type and numeric conversion", {
   for (x in vectors) {
     matrix_x <- x
     dim(matrix_x) <- c(2L, 2L)
-    expect_identical(s_type(matrix_x), s_type(x))
-    expect_identical(s_type(matrix_x, abbr = TRUE), s_type(x, abbr = TRUE))
+    expect_identical(var_type(matrix_x), var_type(x))
+    expect_identical(var_type(matrix_x, abbr = TRUE), var_type(x, abbr = TRUE))
     expect_identical(as_numeric(matrix_x), as.numeric(x))
   }
 })
@@ -642,9 +642,9 @@ test_that("vctrs record types and complete element identities remain intact", {
     class = "statart_record"
   )
   label <- pillar::type_sum(x)
-  expect_identical(s_type(x), label)
-  expect_identical(s_type(x[0]), label)
-  expect_identical(s_unit(x), NA_character_)
+  expect_identical(var_type(x), label)
+  expect_identical(var_type(x[0]), label)
+  expect_identical(var_unit(x), NA_character_)
   out <- codebook(tibble::tibble(x = x))
   expect_identical(out$type, label)
   expect_identical(out$n, 2L)
@@ -653,16 +653,16 @@ test_that("vctrs record types and complete element identities remain intact", {
 
 test_that("S4 metadata uses pillar descriptions without interpreting class substrings", {
   x <- methods::getClass("numeric")
-  expect_identical(s_type(x), pillar::type_sum(x))
-  expect_identical(s_type(x, abbr = TRUE), pillar::type_sum(x))
-  expect_identical(s_unit(x), NA_character_)
+  expect_identical(var_type(x), pillar::type_sum(x))
+  expect_identical(var_type(x, abbr = TRUE), pillar::type_sum(x))
+  expect_identical(var_unit(x), NA_character_)
 })
 
 test_that("data.table metadata retains its container name", {
   skip_if_not_installed("data.table")
   x <- data.table::data.table(x = integer())
-  expect_identical(s_type(x), "dt")
-  expect_identical(s_type(x, abbr = TRUE), "dt")
+  expect_identical(var_type(x), "dt")
+  expect_identical(var_type(x, abbr = TRUE), "dt")
 })
 
 
@@ -676,7 +676,7 @@ test_that("missing extension abbreviations do not defeat the class fallback", {
     vec_ptype_abbr = function(x) NA_character_,
     .package = "vctrs"
   )
-  expect_identical(s_type(x), "statart_type_probe")
+  expect_identical(var_type(x), "statart_type_probe")
 })
 
 
@@ -694,11 +694,11 @@ test_that("custom unit-bearing classes retain their units method", {
     .package = "pillar"
   )
   x <- structure(c(1, NA), class = "statart_clock_probe", clock_units = "hours")
-  expect_identical(s_type(x), "time")
-  expect_identical(s_unit(x), "hours")
+  expect_identical(var_type(x), "time")
+  expect_identical(var_unit(x), "hours")
 })
 
-test_that("s_type and s_unit preserve labelled and duration metadata", {
+test_that("var_type and var_unit preserve labelled and duration metadata", {
   labelled <- haven::labelled(
     c(1, NA, 2),
     labels = c(Yes = 1, No = 2),
@@ -706,20 +706,20 @@ test_that("s_type and s_unit preserve labelled and duration metadata", {
   )
   duration <- as.difftime(c(1, NA, 2), units = "hours")
   before <- list(labelled, duration)
-  expect_identical(s_type(labelled, abbr = TRUE), "dbl+lbl")
-  expect_identical(s_type(labelled), "double+label")
-  expect_identical(s_unit(labelled), NA_character_)
-  expect_identical(s_type(duration), "duration")
-  expect_identical(s_unit(duration), "hours")
+  expect_identical(var_type(labelled, abbr = TRUE), "dbl+lbl")
+  expect_identical(var_type(labelled), "double+label")
+  expect_identical(var_unit(labelled), NA_character_)
+  expect_identical(var_type(duration), "duration")
+  expect_identical(var_unit(duration), "hours")
   expect_identical(list(labelled, duration), before)
 })
 
-test_that("s_type returns visible type names for empty and named vectors", {
-  expect_identical(s_type(integer()), "integer")
-  expect_identical(s_type(setNames(c(1, NA), c("a", "b"))), "double")
-  expect_identical(s_unit(integer()), NA_character_)
+test_that("var_type returns visible type names for empty and named vectors", {
+  expect_identical(var_type(integer()), "integer")
+  expect_identical(var_type(setNames(c(1, NA), c("a", "b"))), "double")
+  expect_identical(var_unit(integer()), NA_character_)
   expect_identical(
-    withVisible(s_type(integer())),
+    withVisible(var_type(integer())),
     list(value = "integer", visible = TRUE)
   )
 })

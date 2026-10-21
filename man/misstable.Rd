@@ -61,7 +61,7 @@ Other inspection functions:
 \code{\link[=browse]{browse()}},
 \code{\link[=codebook]{codebook()}},
 \code{\link{names}},
-\code{\link[=s_type]{s_type()}},
+\code{\link[=var_type]{var_type()}},
 \code{\link[=variables]{variables()}}
 }
 \concept{inspection functions}

@@ -1,11 +1,15 @@
 # statart 0.2.0.9000
 
-* Arguments follow one naming rule: functions that take `...` dot their other
-  arguments, and functions without `...` use plain names. Renamed arguments
+* `var_type()` and `var_unit()` are now the primary names, following the
+  naming rule for functions without a Stata counterpart. `s_type()` and
+  `s_unit()` remain quiet aliases on the same help page.
+
+* Arguments follow one naming rule: options after a `...` that takes columns
+  or expressions are dotted, and functions without `...` use plain names. Renamed arguments
   keep working with a lifecycle deprecation warning:
-  `destring()`, `decode()`, `s_type()`, `s_unit()`, `na_if_value()`,
+  `destring()`, `decode()`, `var_type()`, `var_unit()`, `na_if_value()`,
   `value_if_na()` and `timer()` take `x` (not `.x`); `capture()` and
-  `set_seed()` take `x` (not `.fn`); `s_type(abbr)`, `timer(on_error)`,
+  `set_seed()` take `x` (not `.fn`); `var_type(abbr)`, `timer(on_error)`,
   `na_if_value(value)` and `value_if_na(value)` drop their dots;
   `s_merge()` takes `keep`, `assert`, `generate` and `report`; and
   `varlist()` takes `ignore_case`. See MIGRATION for the full table.

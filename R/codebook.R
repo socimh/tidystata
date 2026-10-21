@@ -115,8 +115,8 @@ codebook_var <- function(var) {
   }
   values <- vctrs::vec_slice(var, observed)
   list(
-    type = s_type(var),
-    unit = s_unit(var),
+    type = var_type(var),
+    unit = var_unit(var),
     n = sum(observed),
     unique = vctrs::vec_unique_count(values)
   )

@@ -302,7 +302,7 @@ append_tab_list <- function(.data, blank_row = FALSE) {
   vec_types <- out %>%
     purrr::map_chr(
       ~ dplyr::pull(., value) %>%
-        s_type(abbr = TRUE) %>%
+        var_type(abbr = TRUE) %>%
         # Element descriptions refine a family; vctrs checks compatibility below.
         sub("<.*$", "", .) %>%
         dplyr::if_else(

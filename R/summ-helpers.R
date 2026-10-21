@@ -46,12 +46,12 @@ summ_warn_vars <- function(vars, suffix) {
 
 summ_metadata <- function(data, keep_all) {
   lapply(data, function(var) {
-    type <- s_type(var, abbr = TRUE)
+    type <- var_type(var, abbr = TRUE)
     summable <- is_summable_chr(type)
     retained <- summable || keep_all
     list(
       type = type,
-      unit = if (retained) s_unit(var) else NA_character_,
+      unit = if (retained) var_unit(var) else NA_character_,
       missing = if (retained) is.na(var) else NULL,
       summable = summable
     )

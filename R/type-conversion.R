@@ -56,7 +56,7 @@ destring <- function(x, .x = lifecycle::deprecated()) {
     return(numeric())
   }
 
-  type <- s_type(x, abbr = TRUE)
+  type <- var_type(x, abbr = TRUE)
   if (type %in% c("units", "drtn", "time", "dttm", "fct", "ord")) {
     as.numeric(x)
   } else if (inherits(x, "haven_labelled")) {

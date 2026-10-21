@@ -53,13 +53,14 @@ original upstream implementations remain in Git history.
 
 ## Renamed arguments
 
-Argument names now follow one rule: functions that take `...` dot their other
-arguments, and functions without `...` use plain names (see CONTRIBUTING).
+Argument names now follow one rule: options after a `...` that takes columns
+or expressions are dotted, and functions without `...` use plain names (see
+CONTRIBUTING).
 The old names still work with a lifecycle deprecation warning.
 
 | Old call | New call |
 | --- | --- |
-| `destring(.x)`, `decode(.x)`, `s_type(.x, .abbr)`, `s_unit(.x)` | `x`, `abbr` |
+| `destring(.x)`, `decode(.x)`, `var_type(.x, .abbr)`, `var_unit(.x)` | `x`, `abbr` |
 | `na_if_value(.x, .value)`, `value_if_na(.x, .value)` | `x`, `value` |
 | `timer(.x, .on_error)`, `capture(.fn)`, `set_seed(.fn)` | `x`, `on_error` |
 | `s_merge(.keep, .assert, .generate, .report)` | `keep`, `assert`, `generate`, `report` |
@@ -70,7 +71,7 @@ The old names still work with a lifecycle deprecation warning.
 Enumerated options such as `.type`, `.wt_type` and `method` must now be
 spelled out in full: `rlang::arg_match()` rejects abbreviations that
 `match.arg()` accepted, and suggests the intended value. `tab2()` and `fre2()`
-gain `.by`, which returns one cross-table per group.
+gain `.by`, which returns one cross-table per group in a named list.
 
 ## Stata names and aliases
 
@@ -95,7 +96,8 @@ quiet aliases, with no notice, and are documented on the same help pages.
 | `list` | `s_print()` (new: `style = "headtail"`, `"interval"` or `"all"`) | |
 | `set seed 123` | `set_seed(123)`, now also alone; the pipe form `x %>% set_seed(123)` is unchanged | |
 
-`s_type()` and `s_unit()` also have the aliases `var_type()` and `var_unit()`.
+`var_type()` and `var_unit()` are now the primary names; `s_type()` and
+`s_unit()` remain quiet aliases.
 `pct()` shares its name with `gt::pct()`, so prefer `pc()` when gt is attached.
 
 One behaviour changed: several codes in `na_if_value(x, c(-98, -99))` now

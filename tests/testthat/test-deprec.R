@@ -37,8 +37,8 @@ test_that("aliases are exported and identical to their primary functions", {
     pct = "pc",
     s_tag = "is_first",
     tab_gen = "as_dummy",
-    var_type = "s_type",
-    var_unit = "s_unit"
+    s_type = "var_type",
+    s_unit = "var_unit"
   )
   exports <- getNamespaceExports("statart")
   for (alias in names(same)) {
@@ -82,11 +82,11 @@ test_that("renamed arguments still work with a deprecation warning", {
   }
   expect_renamed(destring(.x = "1"), destring("1"))
   expect_renamed(decode(.x = 1), decode(1))
-  expect_renamed(s_type(.x = 1L), s_type(1L))
-  expect_renamed(s_type(1L, .abbr = TRUE), s_type(1L, abbr = TRUE))
-  expect_renamed(s_unit(.x = 1), s_unit(1))
+  expect_renamed(var_type(.x = 1L), var_type(1L))
+  expect_renamed(var_type(1L, .abbr = TRUE), var_type(1L, abbr = TRUE))
+  expect_renamed(var_unit(.x = 1), var_unit(1))
   expect_renamed(na_if_value(.x = c(1, 9), 9), na_if_value(c(1, 9), 9))
-  expect_renamed(s_type(.x = 1L, TRUE), s_type(1L, TRUE))
+  expect_renamed(var_type(.x = 1L, TRUE), var_type(1L, TRUE))
   expect_renamed(na_if_value(c(1, 9), .value = 9), na_if_value(c(1, 9), 9))
   expect_renamed(value_if_na(.x = c(1, NA), 0), value_if_na(c(1, NA), 0))
   expect_renamed(value_if_na(c(1, NA), .value = 0), value_if_na(c(1, NA), 0))

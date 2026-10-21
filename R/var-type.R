@@ -1,15 +1,15 @@
 #' Report an object's type or unit
 #'
-#' `var_type()` and `var_unit()` are aliases of `s_type()` and `s_unit()`.
+#' `s_type()` and `s_unit()` are aliases of `var_type()` and `var_unit()`.
 #'
-#' @name s_type
+#' @name var_type
 #' @param x An object.
 #' @param abbr A single `TRUE` or `FALSE`. If `TRUE`, the abbreviation of the
 #'   type is returned.
 #' @param .x,.abbr `r lifecycle::badge("deprecated")` Use `x` and `abbr`
 #'   instead.
-#' @returns A character. `s_type()` returns `"units"` for measured vectors
-#' in either abbreviation mode. `s_unit()` returns the unit string for measured
+#' @returns A character. `var_type()` returns `"units"` for measured vectors
+#' in either abbreviation mode. `var_unit()` returns the unit string for measured
 #' or duration vectors, including empty or all-missing measured vectors, and
 #' `NA_character_` for vectors without units.
 #' @details
@@ -27,34 +27,34 @@
 #' abbreviation do not make a class suitable for numeric summaries. Haven-label
 #' conversion requires an actual haven-labelled class.
 #'
-#' `s_unit()` reads actual units/difftime metadata (including hms times), and
+#' `var_unit()` reads actual units/difftime metadata (including hms times), and
 #' retains custom unit methods for classes describing themselves as `units`,
 #' `drtn` or `time`. Other objects return `NA_character_`.
 #' @family inspection functions
 #' @export
 #'
 #' @examples
-#' s_type(1:10)
-#' s_type(letters)
+#' var_type(1:10)
+#' var_type(letters)
 
 #' @export
-#' @rdname s_type
-s_type <- function(
+#' @rdname var_type
+var_type <- function(
   x,
   abbr = FALSE,
   .x = lifecycle::deprecated(),
   .abbr = lifecycle::deprecated()
 ) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "s_type(.x)", "s_type(x)")
-    # In old calls such as s_type(.x = v, TRUE), the positional value fills `x`.
+    lifecycle::deprecate_soft("0.2.0.9000", "var_type(.x)", "var_type(x)")
+    # In old calls such as var_type(.x = v, TRUE), the positional value fills `x`.
     if (!missing(x) && missing(abbr)) {
       abbr <- x
     }
     x <- .x
   }
   if (lifecycle::is_present(.abbr)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "s_type(.abbr)", "s_type(abbr)")
+    lifecycle::deprecate_soft("0.2.0.9000", "var_type(.abbr)", "var_type(abbr)")
     abbr <- .abbr
   }
   # Plain storage types need no formatting or S3 dispatch. Matrix/array input
@@ -81,7 +81,7 @@ s_type <- function(
       pillar::type_sum(x)
     )
   } else if (inherits(x, "haven_labelled")) {
-    paste0(s_type(unclass(x), abbr = TRUE), "+lbl")
+    paste0(var_type(unclass(x), abbr = TRUE), "+lbl")
   } else {
     label <- pillar::type_sum(x)
     if (
@@ -128,10 +128,10 @@ s_type <- function(
 }
 
 #' @export
-#' @rdname s_type
-s_unit <- function(x, .x = lifecycle::deprecated()) {
+#' @rdname var_type
+var_unit <- function(x, .x = lifecycle::deprecated()) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "s_unit(.x)", "s_unit(x)")
+    lifecycle::deprecate_soft("0.2.0.9000", "var_unit(.x)", "var_unit(x)")
     x <- .x
   }
   if (inherits(x, c("units", "difftime"))) {
@@ -139,16 +139,18 @@ s_unit <- function(x, .x = lifecycle::deprecated()) {
   }
   # Preserve custom unit-bearing classes while avoiding repeated type detection
   # for plain vectors, which cannot have a class-specific units method.
-  if (is.object(x) && s_type(x, abbr = TRUE) %in% c("units", "drtn", "time")) {
+  if (
+    is.object(x) && var_type(x, abbr = TRUE) %in% c("units", "drtn", "time")
+  ) {
     return(as.character(units(x)))
   }
   NA_character_
 }
 
 #' @export
-#' @rdname s_type
-var_type <- s_type
+#' @rdname var_type
+s_type <- var_type
 
 #' @export
-#' @rdname s_type
-var_unit <- s_unit
+#' @rdname var_type
+s_unit <- var_unit
