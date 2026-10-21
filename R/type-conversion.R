@@ -49,7 +49,7 @@
 #' @rdname type_conversion
 destring <- function(x, .x = lifecycle::deprecated()) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "destring(.x)", "destring(x)")
+    lifecycle::deprecate_soft("0.3.0", "destring(.x)", "destring(x)")
     x <- .x
   }
   if (length(x) == 0L) {
@@ -80,7 +80,7 @@ destring <- function(x, .x = lifecycle::deprecated()) {
 #' @rdname type_conversion
 decode <- function(x, .x = lifecycle::deprecated()) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "decode(.x)", "decode(x)")
+    lifecycle::deprecate_soft("0.3.0", "decode(.x)", "decode(x)")
     x <- .x
   }
   if (inherits(x, "haven_labelled") && length(attr(x, "labels")) > 0L) {
@@ -110,6 +110,24 @@ tostring <- function(x) {
 #' @export
 #' @rdname type_conversion
 as_character <- decode
+
+# Missing-value mask that also counts SPSS user-defined missing codes and
+# ranges, as haven's is.na() method does; vctrs sees only the stored values.
+detect_missing <- function(x) {
+  if (inherits(x, "haven_labelled_spss")) {
+    return(unname(is.na(x)))
+  }
+  vctrs::vec_detect_missing(x)
+}
+
+# Doubles behind a numeric labelled vector, with SPSS user-missing codes and
+# ranges set to NA before the metadata is dropped. Stored NA, NaN and tagged NA
+# values keep their payloads.
+labelled_numeric <- function(x) {
+  out <- as.numeric(vctrs::vec_data(x))
+  out[detect_missing(x) & !is.na(out)] <- NA_real_
+  out
+}
 
 #' @export
 #' @rdname type_conversion

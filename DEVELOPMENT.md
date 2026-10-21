@@ -1,11 +1,108 @@
 # Developing statart
 
-statart **0.2.0.9000** provides Stata-inspired data exploration and preparation
-and is stabilizing toward a future 0.3.0 release. This is the single current
+statart **0.3.0** provides Stata-inspired data exploration and preparation
+and is stabilizing toward a future 1.0.0 release. This is the single current
 package map, verification status and backlog. See [CONTRIBUTING.md](CONTRIBUTING.md)
 for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
+
+**Version named 0.3.0, 2026-10-21 (same branch):** DESCRIPTION, NEWS heading,
+README, MIGRATION (and generated copies) and all lifecycle deprecation calls
+say 0.3.0; Rd regenerated. `--release`: `R CMD check --as-cran` 0 errors,
+0 warnings, 1 NOTE (new submission and unpublished URLs; the "large version
+components" item is gone), tests inside check pass. The workflow's new
+`snapshots` step failed all 21 snapshot files with `could not find function`,
+because the in-progress harness did not attach statart; run directly against
+the installed 0.3.0 bundle with `NOT_CRAN=true`, the same files pass (5,909
+expectations, 0 failures) with no snapshot changes.
+
+**Check redesign, 2026-10-21 (same branch):** all 55 test files and unique
+numbered scenarios remain. Duplicate wrapper/backend executions and weak large
+fixtures are consolidated; the repeated `ds_as_column()` catalogue is removed.
+The final reordered suite passes **18,497 expectations across 3,187 uniquely
+named blocks**, with zero failures, errors, warnings or skips; its outcomes match
+the retained normal-run cases. The portable comparison baseline has 19,576
+expectations / 3,403 blocks. Measured coverage rises **97.32% to 97.51%**, with no
+covered statement lost in unchanged source. Coverage's mixed NA/NaN sum assertion
+now follows R's documented platform-dependent payload choice; native arithmetic
+is unchanged. New independent regressions fix weighted-correlation overflow,
+zero-weight outliers, large-offset precision, analytic-weight normalization,
+duplicate metadata collisions and grouped duplicate lists. `pwcorr()` now rejects
+explicitly selected matrix/array columns and skips them in automatic selection,
+instead of silently using only part of a column. Regressions also cover
+summary algorithm boundaries, composite/empty merges, panel labels/DST and a
+composed survey workflow.
+
+Verification: **45 infrastructure tests**, pinned style/parsing/lint on **145
+sources**, required-only dependency smoke, all **24 demos**, regenerated help,
+identical README render and pkgdown metadata checks pass. Complete `--release`
+passes with **0 errors, 0 warnings, 1 incoming NOTE** (new submission, development
+version and six unpublished URLs), including vignettes, PDF/HTML manuals, archive
+identity, installed resources and six usage scripts. The full behavioral suite
+runs once inside `R CMD check`; its installed snapshot supplement passes **24
+expectations / 21 blocks**. Release CSVs describe that supplement, not the full
+check's test count. Receipts record source identity, stages and current outputs;
+snapshot selection rejects unsupported helper-defined expectations. Temporary
+`.Rd2pdf*` work directories are preserved but excluded from Git, staging and
+archives. The faster `--check` mode also passes end to end with **0 errors,
+0 warnings, 0 notes**: it now explicitly skips vignette checks to match its
+vignette-free build, retaining tests, examples, archive checks and snapshots.
+
+Ordinary-suite timing is variable: baseline 159 / 236 seconds, candidate
+211 / 215 seconds in alternating-order comparisons before the final 100-case
+exact-duplicate removal. This does not establish an ordinary-suite speedup;
+release verification removes one entire duplicate suite run. The successful
+release ran outside the agent sandbox after its network/TeX restrictions caused
+earlier failures; no checks were disabled in the successful run. Current receipts
+and the detailed audit are under ignored `.opencode/results/check-redesign-*`.
+Dataset-distribution, hosted compatibility and viewer gates below remain open.
+
+**Frozen candidate, 2026-10-20 (same branch, uncommitted):** working tree
+`7a3108e715d8f901c17896637ba2cbb1df1c7a5a` (`git write-tree` of HEAD `b9c5454`
+plus all working changes, from a scratch index), combining the R Packages pass
+and the audit fixes below. `labelled_numeric()` sets only SPSS user-missing
+codes to NA, keeping stored NA, NaN and tagged-NA payloads (new regressions);
+the CONTRIBUTING missing-value rule is scoped to calculations; the style manifest
+drops `R/globals.R` (removal maintainer-approved) and adds
+`test-utils-check.R`. Against that tree: style 144 sources, 0 findings;
+`--release` **19,575 passing across 3,403 blocks**, zero failures, errors,
+warnings or skips; seeded reorder (`--shuffle-seed 20261020`) identical totals;
+`--minimal` PASS (33 required packages); `R CMD check --as-cran` 0 errors,
+0 warnings, 1 NOTE (new submission, development version, unpublished URLs),
+package dependencies OK, PDF manual OK. The tree hash recomputed after all runs
+was unchanged; only this entry was edited afterwards.
+
+**Audit fixes, 2026-10-20 (same branch):** SPSS user-missing codes and ranges
+are now missing in `pwcorr()`, `misstable()`, `std()`, `pc()`,
+`is_first(.missing = FALSE)`, `as_dummy()` and the panel operators, through new
+internal `detect_missing()` and `labelled_numeric()` (CONTRIBUTING rule added).
+They gain base-R-referenced regressions covering codes, ranges, groups and
+weights. README and the containers vignette name the tibble-only
+`pwcorr()`, `misstable()` and `duplicates_report()`. The vignette's calendar
+prose now describes `difftime` spreads and shows `sd`. `test-capture.R` signals
+`packageNotFoundError` instead of loading a fake package. DESCRIPTION adds
+`dplyr authors` as `cph` for the starwars material. `--release`: **19,563
+passing across 3,402 blocks**, zero failures, warnings or skips. `R CMD check
+--as-cran` gives 0 errors, 0 warnings and the CRAN-incoming NOTE (new
+submission, development version, the two known unpublished URLs). Package
+dependencies OK; the PDF manual built. The dataset-redistribution and OS/R
+matrix gates below remain open; local runs cannot clear them.
+
+**R Packages (2e) conformance pass, 2026-10-20 (same branch):** `stats` and
+`utils` declared in Imports; DESCRIPTION tidied (`use_tidy_description()`,
+`Config/Needs/website`). `globalVariables()` declarations retired: column
+references use `.data$` or column-name strings, and `R/globals.R` is removed
+(maintainer-approved 2026-10-20). Internal
+`skew()`/`kurtosis()` are `@noRd` (`man/stat.Rd` regenerated away). Tests guard
+`data.table` with `skip_if_not_installed()`, use `withr::local_options()`, and
+gain `test-utils-check.R`. `.Rbuildignore` covers `.quarto/` and nested
+`.Rhistory`; LICENSE.md holder matches LICENSE; NEWS heading is
+`(development version)`; README installs with `pak::pak()` (re-rendered with
+`LC_ALL=C`, only that line changed). `--release` suite **19,535 passing across
+3,397 blocks**, zero failures, errors, warnings or skips; `R CMD check
+--as-cran` 0 errors, 0 warnings, the same CRAN-incoming NOTE ("R code for
+possible problems" OK, so no undefined globals); style 144 sources, 0 findings.
 
 **Long-function splits, 2026-10-20 (same branch):** `xtile()` 140 to 41
 lines (`xtile_rank()`, `xtile_quantile()`), `s_merge()` 131 to 78
@@ -467,6 +564,11 @@ show generated console output.
   [viewer checklist](inst/examples/VIEWER_CHECKLIST.md). Verify a protected
   interactive launch first; the batch launcher cannot drive an interactive
   terminal. Record editor/extension versions and any watcher failure.
+- **Toward 1.0.0:** the version is named 0.3.0 (2026-10-21) and every lifecycle
+  deprecation says `"0.3.0"`. Before 1.0.0: no public renames for a release
+  cycle, the 0.3.0 deprecations removed or moved to `deprecate_stop()`, the
+  remote platform and dependency-floor checks run, and README no longer calls
+  the package experimental.
 - **Publication:** review release version/metadata and six unpublished URLs.
   Existing incoming-check notes require a recorded publication decision. Local
   verification does not authorize push, deployment, release or submission.
@@ -481,9 +583,8 @@ show generated console output.
   collapse's vectorized equivalents); `tostring()` cost is base
   `as.character()` formatting. Each needs a separate design that keeps
   outputs identical.
-- **Optional work:** consider suite-runtime optimization without removing coverage;
-  obtain the original labelled-factor failing call and actual `fre()` dataset for
-  exact historical reproduction if desired. Existing representative tests do not
+- **Optional work:** obtain the original labelled-factor failing call and actual
+  `fre()` dataset for exact historical reproduction if desired. Existing representative tests do not
   prove those unavailable originals. Review preview styling only on maintainer
   feedback. New weighted cuts, PCA, regression wrappers, plotting, profiling and
   output presets require separate feature design.

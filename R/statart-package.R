@@ -19,7 +19,7 @@
 
 ## usethis namespace: start
 #' @importFrom magrittr %>%
-#' @importFrom rlang :=
+#' @importFrom rlang := .data
 #' @importFrom stats IQR mad median quantile sd
 #' @useDynLib statart, .registration = TRUE
 ## usethis namespace: end

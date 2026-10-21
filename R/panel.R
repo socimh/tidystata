@@ -247,6 +247,9 @@ time_period <- function(time, unit, call = rlang::caller_env()) {
         call = call
       )
     }
+    if (inherits(time, "haven_labelled")) {
+      return(labelled_numeric(time))
+    }
     return(as.numeric(vctrs::vec_data(time)))
   }
   hint <- if (is.factor(time)) {

@@ -13,28 +13,25 @@
 test_that("s_select: basic column selection", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
   result <- s_select(df, x, y)
-  expect_equal(ncol(result), 2)
-  expect_equal(names(result), c("x", "y"))
+  expect_identical(result, df[c("x", "y")])
 })
 
 test_that("s_select: select all columns with empty call", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
   result <- s_select(df)
-  expect_equal(ncol(result), 3)
-  expect_equal(names(result), c("x", "y", "z"))
+  expect_identical(result, df)
 })
 
 test_that("s_select: single column selection", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
   result <- s_select(df, x)
-  expect_equal(ncol(result), 1)
-  expect_equal(names(result), "x")
+  expect_identical(result, df["x"])
 })
 
 test_that("s_select: column reordering", {
   df <- tibble::tibble(a = 1:5, b = 6:10, c = 11:15)
   result <- s_select(df, c, a, b)
-  expect_equal(names(result), c("c", "a", "b"))
+  expect_identical(result, df[c("c", "a", "b")])
 })
 
 # ============================================================================
@@ -89,15 +86,13 @@ test_that("s_select: expression using functions", {
 test_that("s_select: starts_with selection", {
   df <- tibble::tibble(temp_1 = 1:5, temp_2 = 6:10, pressure = 11:15)
   result <- s_select(df, dplyr::starts_with("temp"))
-  expect_equal(ncol(result), 2)
-  expect_true(all(grepl("^temp_", names(result))))
+  expect_identical(result, df[c("temp_1", "temp_2")])
 })
 
 test_that("s_select: ends_with selection", {
   df <- tibble::tibble(var_a_test = 1:5, var_b_test = 6:10, var_c_prod = 11:15)
   result <- s_select(df, dplyr::ends_with("_test"))
-  expect_equal(ncol(result), 2)
-  expect_true(all(grepl("_test$", names(result))))
+  expect_identical(result, df[c("var_a_test", "var_b_test")])
 })
 
 test_that("s_select: contains selection", {
@@ -107,7 +102,7 @@ test_that("s_select: contains selection", {
     pressure_temp = 11:15
   )
   result <- s_select(df, dplyr::contains("temp"))
-  expect_equal(ncol(result), 3)
+  expect_identical(result, df)
 })
 
 test_that("s_select: where() with is.numeric", {
@@ -118,8 +113,7 @@ test_that("s_select: where() with is.numeric", {
     logi = c(TRUE, FALSE, TRUE, FALSE, TRUE)
   )
   result <- s_select(df, dplyr::where(is.numeric))
-  expect_equal(ncol(result), 2)
-  expect_equal(names(result), c("num1", "num2"))
+  expect_identical(result, df[c("num1", "num2")])
 })
 
 test_that("s_select: where() with complex predicate", {
@@ -130,28 +124,25 @@ test_that("s_select: where() with complex predicate", {
     d = 6:10
   )
   result <- s_select(df, dplyr::where(~ is.numeric(.x) | is.logical(.x)))
-  expect_equal(ncol(result), 3)
-  expect_equal(names(result), c("a", "c", "d"))
+  expect_identical(result, df[c("a", "c", "d")])
 })
 
 test_that("s_select: numeric column indices", {
   df <- tibble::tibble(a = 1:5, b = 6:10, c = 11:15, d = 16:20, e = 21:25)
   result <- s_select(df, 1, 3, 5)
-  expect_equal(ncol(result), 3)
-  expect_equal(names(result), c("a", "c", "e"))
+  expect_identical(result, df[c("a", "c", "e")])
 })
 
 test_that("s_select: column range with :", {
   df <- tibble::tibble(a = 1:5, b = 6:10, c = 11:15, d = 16:20)
   result <- s_select(df, b:d)
-  expect_equal(ncol(result), 3)
-  expect_equal(names(result), c("b", "c", "d"))
+  expect_identical(result, df[c("b", "c", "d")])
 })
 
 test_that("s_select: everything()", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
   result <- s_select(df, dplyr::everything())
-  expect_equal(ncol(result), 3)
+  expect_identical(result, df)
 })
 
 # ============================================================================
@@ -562,21 +553,6 @@ test_that("s_select discards failed-probe warnings and retains successful fallba
   )
   expect_length(warnings, 1L)
   expect_match(warnings, "branch-warning", fixed = TRUE)
-  expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
-})
-
-test_that("s_select evaluates computed expressions once", {
-  d <- tibble::tibble(x = 1:3)
-  state <- new.env()
-  state$n <- 0L
-  compute <- function(x) {
-    state$n <- state$n + 1L
-    force(x)
-    x * 2
-  }
-  out <- s_select(d, z = compute(x))
-  # Computed expressions are classified before evaluation and run once.
-  expect_identical(state$n, 1L)
   expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
 })
 

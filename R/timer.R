@@ -34,14 +34,14 @@ timer <- function(
 ) {
   if (lifecycle::is_present(.on_error)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "timer(.on_error)",
       "timer(on_error)"
     )
     on_error <- .on_error
   }
   if (!missing(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "timer(.x)", "timer(x)")
+    lifecycle::deprecate_soft("0.3.0", "timer(.x)", "timer(x)")
     # In old calls such as timer(.x = f(), FALSE), the positional value fills `x`.
     if (!missing(x) && missing(on_error)) {
       on_error <- x

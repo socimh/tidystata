@@ -1,7 +1,7 @@
 # Moving to the smaller statart core
 
-The `0.2.0.9000` development series prepares a breaking `0.3.0` release focused
-on data exploration and preparation. Four wrappers have been retired:
+statart `0.3.0` is a breaking release focused on data exploration and
+preparation. Four wrappers have been retired:
 `read_data()`, `write_data()`, `esttab()`, and `codebook_detail()`.
 
 The retired implementations, original help, dedicated tests and demos were

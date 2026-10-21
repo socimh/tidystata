@@ -214,10 +214,20 @@ test_that("matrix column headers retain the pivot boundary diagnostic", {
 test_that("native group sums follow sum() and cumsum() for missing values", {
   x <- c(1, NA, 2, 1, NaN, NA, 0 / 0, 1, 1e16, 1, -1e16)
   locs <- list(1:3, 4:6, 7:8, 9:11, integer())
-  expect_identical(
-    group_sum_dbl(x, locs),
-    vapply(locs, function(loc) sum(x[loc]), numeric(1))
+  actual <- group_sum_dbl(x, locs)
+  expected <- vapply(locs, function(loc) sum(x[loc]), numeric(1))
+  # R permits either missing payload when arithmetic combines NA and NaN;
+  # instrumentation/compiler choices can change which wins (see ?is.finite).
+  mixed <- vapply(
+    locs,
+    function(loc) {
+      values <- x[loc]
+      any(is.na(values) & !is.nan(values)) && any(is.nan(values))
+    },
+    logical(1)
   )
+  expect_identical(actual[!mixed], expected[!mixed])
+  expect_true(all(is.na(actual[mixed])))
   cumulative <- rep(NA_real_, length(x))
   for (loc in locs) {
     cumulative[loc] <- cumsum(x[loc])
@@ -385,5 +395,53 @@ test_that("weighted summaries of many groups equal one group at a time", {
       summ(group, x, .wt = w, .wt_type = type, .stat = stats)
     }))
     expect_identical(as.list(many[stats]), as.list(one[stats]))
+  }
+})
+
+
+test_that("summary statistics agree across the observed group-size boundary", {
+  statistics <- c(
+    "n",
+    "q1",
+    "p37",
+    "median",
+    "mad",
+    "mean",
+    "sd",
+    "skew",
+    "kurtosis"
+  )
+  for (size in c(999L, 1000L, 1001L)) {
+    # Missing rows do not count toward the average observed-size threshold.
+    values <- ((seq_len(size) * 17) %% 101)^2 / 13
+    data <- data.frame(
+      g = rep(c("a", "b"), each = size + 2L),
+      x = c(values, NA, NaN, -values / 7 + 3, NA, NaN)
+    )
+    out <- summ(data, x, .by = g, .stat = statistics)
+    expect_identical(out$n, rep(size, 2))
+    reference <- lapply(split(data$x, data$g), function(x) {
+      x <- x[!is.na(x)]
+      center <- mean(x)
+      spread <- stats::sd(x)
+      c(
+        q1 = stats::quantile(x, 0.25, names = FALSE),
+        p37 = stats::quantile(x, 0.37, names = FALSE),
+        median = stats::median(x),
+        mad = stats::mad(x),
+        mean = center,
+        sd = spread,
+        skew = mean((x - center)^3) / spread^3,
+        kurtosis = mean((x - center)^4) / spread^4 - 3
+      )
+    })
+    for (statistic in setdiff(statistics, "n")) {
+      expected <- vapply(reference, `[[`, numeric(1), statistic)
+      expect_equal(
+        out[[statistic]],
+        unname(expected),
+        info = paste(size, statistic)
+      )
+    }
   }
 })

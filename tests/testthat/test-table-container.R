@@ -56,7 +56,6 @@ test_that("table APIs preserve supported containers and usable values", {
     codebook = function(x) codebook(x),
     variables = function(x) variables(x),
     variables_search = function(x) variables_search(x, "g"),
-    ds_as_column = function(x) ds_as_column(x),
     ds_as_column = function(x) ds_as_column(x)
   )
   for (kind in names(container_inputs())) {

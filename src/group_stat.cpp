@@ -12,8 +12,8 @@ namespace writable = cpp11::writable;
 
 // Sums and cumulative sums over the 1-based row locations of each group.
 // Both accumulate in long double in location order, as base sum() and
-// cumsum() do, so each group's result is identical to calling them on
-// x[loc] without allocating one subset per group.
+// cumsum() do, without allocating one subset per group. As in base R,
+// arithmetic mixing NA and NaN does not guarantee which missing payload wins.
 
 SEXP group_locations(const list& locs, R_xlen_t g)
 {

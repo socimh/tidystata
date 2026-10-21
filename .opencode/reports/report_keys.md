@@ -1,6 +1,6 @@
 # Function: keys()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 16:23:07 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 23:06:32 | **Status:** PASS
 
 ## Example 1: isid() asserts a key inside a pipeline
 
@@ -102,4 +102,16 @@ Matched                              2  (.merge == "matched")
 4 none                   1         5     0     6
 5 <NA>                   0         0     4     4
 6 total                 17        66     4    87
+```
+
+## Example 7: duplicate metadata is safe for grouped data
+
+```
+# A tibble: 2 x 5
+# Groups:   id [1]
+     id  wave score .dup_group  .row
+  <dbl> <dbl> <dbl>      <int> <int>
+1     2     1     7          1     3
+2     2     1     7          1     4
+[1] "Column `.row` already exists.\ni Rename it before calling `duplicates_list()`."
 ```

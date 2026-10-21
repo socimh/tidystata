@@ -31,7 +31,7 @@ NULL
 #' @export
 capture <- function(x, .fn = lifecycle::deprecated()) {
   if (!missing(.fn)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "capture(.fn)", "capture(x)")
+    lifecycle::deprecate_soft("0.3.0", "capture(.fn)", "capture(x)")
     return(capture(.fn))
   }
   try_result <- try(x, silent = TRUE)

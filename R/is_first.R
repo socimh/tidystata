@@ -63,7 +63,7 @@ is_first <- function(..., .missing = FALSE) {
   if (!.missing) {
     incomplete <- Reduce(
       `|`,
-      lapply(keys, vctrs::vec_detect_missing),
+      lapply(keys, detect_missing),
       logical(nrow(keys))
     )
     first[incomplete] <- FALSE

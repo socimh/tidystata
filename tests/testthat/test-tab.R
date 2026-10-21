@@ -429,16 +429,16 @@ test_that("tab: factor ordering preserved even with .desc=TRUE", {
 # CHALLENGING TESTS - Large-ish Data (but still fast)
 # ============================================================================
 
-test_that("tab: 10000 rows with 100 unique combinations", {
-  withr::local_preserve_seed()
-  set.seed(42)
+test_that("tab: all joint combinations retain identities and counts", {
   df <- tibble::tibble(
-    x = sample(1:10, 10000, replace = TRUE),
-    y = sample(letters[1:10], 10000, replace = TRUE)
+    x = rep(1:3, each = 2),
+    y = rep(c("a", "b"), 3)
   )
   result <- tab(df, x, y)
-  expect_true(nrow(result) <= 100)
-  expect_equal(sum(result$n), 10000)
+  expect_identical(result$x, df$x)
+  expect_identical(result$y, df$y)
+  expect_identical(result$n, rep(1L, 6))
+  expect_equal(result$percent, rep(100 / 6, 6))
 })
 
 test_that("tab: many columns selected", {
@@ -521,10 +521,12 @@ test_that("tab: time series data with gaps", {
 # ============================================================================
 
 test_that("tab: highly duplicated data", {
-  df <- tibble::tibble(x = rep(1, 10000), y = rep("a", 10000))
+  df <- tibble::tibble(x = rep(1, 4), y = rep("a", 4))
   result <- tab(df, x, y)
-  expect_equal(nrow(result), 1)
-  expect_equal(result$n, 10000)
+  expect_identical(result$x, 1)
+  expect_identical(result$y, "a")
+  expect_identical(result$n, 4L)
+  expect_identical(result$percent, 100)
 })
 
 test_that("tab: completely unique data across multiple vars", {

@@ -147,54 +147,24 @@ test_that("capture: ggplot2 operations", {
 # CHALLENGING TESTS - Edge Cases
 # ============================================================================
 
-test_that("capture: empty expression", {
-  result <- capture({})
-  expect_true(result)
-})
-
-test_that("capture: returns NULL successfully", {
-  result <- capture(NULL)
-  expect_true(result)
-})
-
-test_that("capture: returns NA successfully", {
-  result <- capture(NA)
-  expect_true(result)
-})
-
-test_that("capture: returns Inf successfully", {
-  result <- capture(Inf)
-  expect_true(result)
-})
-
-test_that("capture: returns NaN successfully", {
-  result <- capture(NaN)
-  expect_true(result)
-})
-
-test_that("capture: logical value", {
-  expect_true(capture(TRUE))
-  expect_true(capture(FALSE))
-})
-
-test_that("capture: character value", {
-  expect_true(capture("hello"))
-  expect_true(capture(""))
-})
-
-test_that("capture: vector result", {
-  result <- capture(1:100)
-  expect_true(result)
-})
-
-test_that("capture: data frame result", {
-  result <- capture(tibble::tibble(x = 1:5, y = 6:10))
-  expect_true(result)
-})
-
-test_that("capture: list result", {
-  result <- capture(list(a = 1, b = 2))
-  expect_true(result)
+test_that("capture: successful value shapes all return scalar TRUE", {
+  expressions <- list(
+    empty = quote({}),
+    null = quote(NULL),
+    missing = quote(NA),
+    infinity = quote(Inf),
+    nan = quote(NaN),
+    true = quote(TRUE),
+    false = quote(FALSE),
+    character = quote("hello"),
+    empty_character = quote(""),
+    vector = quote(1:3),
+    table = quote(tibble::tibble(x = 1:2, y = 3:4)),
+    list = quote(list(a = 1, b = 2))
+  )
+  for (name in names(expressions)) {
+    expect_identical(capture(eval(expressions[[name]])), TRUE, info = name)
+  }
 })
 
 # ============================================================================
@@ -205,8 +175,17 @@ test_that("capture: checking if package is available", {
   is_dplyr_available <- capture(loadNamespace("dplyr"))
   expect_true(is_dplyr_available)
 
-  is_fake_package_available <- capture(loadNamespace("fakepackage123"))
-  expect_false(is_fake_package_available)
+  # Signal the condition loadNamespace() raises for a missing package without
+  # naming one, so dependency scanners never see an undeclared package.
+  load_missing_package <- function() {
+    stop(errorCondition(
+      "there is no package called 'unavailable'",
+      class = "packageNotFoundError",
+      package = "unavailable"
+    ))
+  }
+  expect_error(load_missing_package(), class = "packageNotFoundError")
+  expect_false(capture(load_missing_package()))
 })
 
 test_that("capture: checking if function exists", {

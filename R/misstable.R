@@ -64,7 +64,7 @@ misstable <- function(
   )
   .data <- dplyr::ungroup(.data)
   values <- remove_group_vars(.data, ..., group_vars = group_vars)
-  missing <- lapply(values, vctrs::vec_detect_missing)
+  missing <- lapply(values, detect_missing)
   if (!.all) {
     missing <- missing[vapply(missing, any, logical(1))]
     if (!length(missing) && length(values)) {

@@ -40,7 +40,8 @@ def main():
 
     def ignore(directory, names):
         return [name for name in names if
-                (Path(directory) == root and name in excluded) or
+                (Path(directory) == root and (name in excluded or
+                                             name.startswith(".Rd2pdf"))) or
                 name in {".git", ".Rproj.user", ".Rhistory", "__pycache__"} or
                 (Path(directory).name == "src" and
                  Path(name).suffix.lower() in {".o", ".dll", ".so", ".a"})]

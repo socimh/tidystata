@@ -40,5 +40,10 @@ Authors:
   \item Minghong Shen \email{mhshenaa@connect.ust.hk} [copyright holder]
 }
 
+Other contributors:
+\itemize{
+  \item dplyr authors (starwars data and documentation derived from dplyr 1.1.3; see inst/THIRD-PARTY-NOTICES.md) [copyright holder]
+}
+
 }
 \keyword{internal}

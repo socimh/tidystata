@@ -1,4 +1,21 @@
-# statart 0.2.0.9000
+# statart 0.3.0
+
+* `pwcorr()` rejects explicitly selected matrix or array columns and skips them
+  during automatic selection, rather than silently correlating only part of them.
+
+* `duplicates_list()` preserves grouping and errors when `.row` or `.dup_group`
+  already exists, preventing the returned metadata from replacing user columns.
+
+* `pwcorr()` excludes zero-weight values from arithmetic and handles very large
+  finite weights and variable scales without intermediate overflow. Analytic
+  weights in tabulations and summaries normalize safely within each group even
+  when their unscaled sum overflows.
+
+* `pwcorr()`, `misstable()`, `std()`, `pc()`, `is_first(.missing = FALSE)`,
+  `as_dummy()` and the panel operators (`s_lag()`, `s_lead()`, `s_diff()`)
+  now treat SPSS user-defined missing codes and ranges
+  (`haven::labelled_spss()`) as missing, as `summ()` and `tab()` already did.
+  Previously the codes were used as ordinary values.
 
 * `var_type()` and `var_unit()` are now the primary names, following the
   naming rule for functions without a Stata counterpart. `s_type()` and

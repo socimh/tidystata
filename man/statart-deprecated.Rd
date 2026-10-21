@@ -20,7 +20,7 @@ s_unit(...)
 The result of the new function.
 }
 \description{
-These functions were renamed in statart 0.2.0.9000. The old names still
+These functions were renamed in statart 0.3.0. The old names still
 work and give identical results with a lifecycle deprecation warning.
 They will be removed in a future release.\tabular{ll}{
    Old name \tab New name \cr

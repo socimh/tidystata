@@ -8,8 +8,7 @@ preview_test_data <- function(n = 30L) {
 }
 
 preview_test_output <- function(x, ...) {
-  old <- options(cli.num_colors = 1L, pillar.width = 120L)
-  on.exit(options(old), add = TRUE)
+  withr::local_options(cli.num_colors = 1L, pillar.width = 120L)
   paste(capture.output(print(x, width = 120, ...)), collapse = "\n")
 }
 
@@ -550,16 +549,18 @@ test_that("print_all() prints every row and column and returns the input", {
   expect_true(any(grepl("V30", printed)))
   expect_false(any(grepl("more variable", printed)))
 
-  table <- data.table::as.data.table(data)
-  printed <- capture.output(out <- print_all(table))
-  expect_identical(out, table)
-  expect_true(any(grepl("1600", printed)))
   grouped <- dplyr::group_by(data, id > 20)
   expect_identical(
     suppressMessages(capture.output(r <- print_all(grouped)) |> length() > 40),
     TRUE
   )
   expect_identical(r, grouped)
+
+  skip_if_not_installed("data.table")
+  table <- data.table::as.data.table(data)
+  printed <- capture.output(out <- print_all(table))
+  expect_identical(out, table)
+  expect_true(any(grepl("1600", printed)))
 })
 
 test_that("historical previews and repeated timers preserve complete values", {

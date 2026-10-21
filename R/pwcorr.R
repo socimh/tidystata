@@ -8,8 +8,9 @@
 #'
 #' @inheritParams statart_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Numeric or logical
-#' variables. Omit to use every numeric or logical column; other columns are
-#' then skipped. Selecting another type is an error.
+#' vector columns. Matrix columns are unsupported. Omit to use every numeric
+#' or logical vector column; other columns are then skipped. Selecting another
+#' type is an error.
 #' @param .method `"pearson"` (default) or `"spearman"`, like Stata's
 #' `pwcorr` and `spearman`.
 #' @param .wide A single `TRUE` or `FALSE`. If `TRUE`, return the correlation
@@ -118,11 +119,14 @@ pwcorr <- function(
 # are skipped; explicitly selected ones are an error.
 pwcorr_values <- function(data, selected, call = rlang::caller_env()) {
   numeric <- lapply(data, function(x) {
+    if (!is.null(dim(x))) {
+      return(NULL)
+    }
     if (is.logical(x) && !is.object(x)) {
       return(as.numeric(x))
     }
     if (inherits(x, "haven_labelled") && is.numeric(vctrs::vec_data(x))) {
-      return(as.numeric(vctrs::vec_data(x)))
+      return(labelled_numeric(x))
     }
     if (is.numeric(x) && !is.object(x)) {
       return(as.numeric(x))
@@ -177,9 +181,18 @@ pwcorr_pair <- function(
       w <- w[ok]
     }
     n <- if (weight_type == "frequency") sum(w) else length(x)
-    total <- sum(w)
+    positive <- w > 0
     r <- NA_real_
-    if (total > 0) {
+    if (any(positive)) {
+      # Zero-weight rows contribute to analytic n, but not to arithmetic.
+      x <- x[positive]
+      y <- y[positive]
+      w <- w[positive] / max(w[positive])
+      # Center before scaling to preserve small representable differences
+      # when a variable has a large common offset.
+      x <- pwcorr_rescale(x)
+      y <- pwcorr_rescale(y)
+      total <- sum(w)
       dx <- x - sum(w * x) / total
       dy <- y - sum(w * y) / total
       r <- sum(w * dx * dy) / sqrt(sum(w * dx^2) * sum(w * dy^2))
@@ -197,6 +210,19 @@ pwcorr_pair <- function(
     2 * stats::pt(abs(statistic), df = n - 2, lower.tail = FALSE)
   }
   list(r = r, n = n, p = p)
+}
+
+
+# Anchor subtraction preserves nearby gaps. Opposite finite extremes can
+# overflow during subtraction, so only that case needs scaling first.
+pwcorr_rescale <- function(x) {
+  centered <- x - x[[1L]]
+  if (all(is.finite(x)) && any(!is.finite(centered))) {
+    x <- x / max(abs(x))
+    centered <- x - x[[1L]]
+  }
+  scale <- max(abs(centered))
+  if (is.finite(scale) && scale > 0) centered / scale else centered
 }
 
 pwcorr_long <- function(columns, w, method, weight_type) {

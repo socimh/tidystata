@@ -703,8 +703,8 @@ summ_data <- function(
     out <- dplyr::select(
       out,
       tidyselect::all_of(group_vars),
-      name,
-      type,
+      "name",
+      "type",
       tidyselect::all_of(mapped)
     )
   }

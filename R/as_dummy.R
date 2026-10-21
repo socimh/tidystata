@@ -114,7 +114,7 @@ dummy_columns <- function(x, var, names, call = rlang::caller_env()) {
       call = call
     )
   }
-  missing <- vctrs::vec_detect_missing(x)
+  missing <- detect_missing(x)
   values <- vctrs::vec_unique(vctrs::vec_slice(x, !missing))
   if (is.factor(x)) {
     values <- factor(intersect(levels(x), as.character(values)), levels(x))

@@ -1,6 +1,6 @@
 # Function: pwcorr()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:36 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 23:06:33 | **Status:** PASS
 
 ## Example 1: pairwise correlations with n and p
 
@@ -56,4 +56,13 @@ Cramer's V = 0.9845
   statistic    df  p_value cramers_v     n
       <dbl> <int>    <dbl>     <dbl> <int>
 1      169.     8 2.49e-32     0.984    87
+```
+
+## Example 5: zero-weight outliers do not affect correlation
+
+```
+# A tibble: 1 x 5
+  var1  var2      r     n     p
+  <chr> <chr> <dbl> <dbl> <dbl>
+1 x     y         1     2    NA
 ```

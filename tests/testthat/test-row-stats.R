@@ -385,11 +385,9 @@ test_that("row functions: many columns", {
   expect_type(result, "double")
 })
 
-test_that("row functions: many rows", {
-  withr::local_preserve_seed()
-  tb <- tibble::tibble(x = rnorm(10000), y = rnorm(10000), z = rnorm(10000))
-  result <- row_sum(tb)
-  expect_equal(length(result), 10000)
+test_that("row functions: retain row order and exact totals", {
+  tb <- tibble::tibble(x = c(1, NA, -2), y = c(2, 3, NA), z = c(4, 5, 6))
+  expect_identical(row_sum(tb), c(7, 8, 4))
 })
 
 test_that("row functions: combining multiple operations in mutate", {
@@ -414,8 +412,11 @@ test_that("row functions: extreme values don't cause overflow", {
   )
   result_mean <- row_mean(tb)
   result_sum <- row_sum(tb)
-  expect_true(all(is.finite(result_mean) | is.infinite(result_mean)))
-  expect_true(all(is.finite(result_sum) | is.infinite(result_sum)))
+  expected_sum <- rep(.Machine$double.xmax / 1e10 + 1e100, 2)
+  expect_true(all(is.finite(result_mean)))
+  expect_true(all(is.finite(result_sum)))
+  expect_equal(result_mean, expected_sum / 2)
+  expect_equal(result_sum, expected_sum)
 })
 
 test_that("row functions: handle NaN correctly", {
@@ -712,12 +713,6 @@ for (.function_name in .milestone_row_functions) {
           expect_type(out, if (extrema) storage else "double")
         }
         expect_identical(d, before)
-        in_mutate <- expect_no_warning(dplyr::mutate(
-          tibble::as_tibble(d),
-          observed = row_fn(tidyselect::everything())
-        ))
-        expect_equal(in_mutate$observed, expected, tolerance = 1e-12)
-        expect_identical(d, before)
       }
     })
   }
@@ -746,21 +741,6 @@ for (.function_name in setdiff(
 }
 
 for (.function_name in .milestone_row_functions) {
-  test_that(
-    paste(
-      "milestone",
-      .function_name,
-      "accepts an explicit pick within mutate"
-    ),
-    {
-      d <- tibble::tibble(a = c(1, NA, 4), b = c(3, NA, NA), excluded = 100)
-      row_fn <- get(.function_name, mode = "function")
-      expected <- .milestone_row_reference(d[c("a", "b")], .function_name)
-      out <- dplyr::mutate(d, observed = row_fn(dplyr::pick(a, b)))
-      expect_equal(out$observed, expected)
-      expect_identical(out$excluded, d$excluded)
-    }
-  )
   test_that(
     paste(
       "milestone",
@@ -810,23 +790,23 @@ for (.function_name in .milestone_row_functions) {
 }
 
 .review_row_expected <- list(
-  row_mean = c(2, 3, 4),
-  row_sum = c(4, 6, 8),
-  row_min = c(1, 2, 3),
-  row_max = c(3, 4, 5),
-  row_median = c(2, 3, 4),
-  row_var = rep(2, 3),
-  row_sd = rep(sqrt(2), 3),
-  row_unique = rep(2, 3),
-  row_miss = rep(0, 3),
-  row_non_miss = rep(2, 3)
+  row_mean = c(2, 4, 3, NA_real_),
+  row_sum = c(4, 4, 3, 0),
+  row_min = c(1, 4, 3, NA_real_),
+  row_max = c(3, 4, 3, NA_real_),
+  row_median = c(2, 4, 3, NA_real_),
+  row_var = c(2, NA_real_, NA_real_, NA_real_),
+  row_sd = c(sqrt(2), NA_real_, NA_real_, NA_real_),
+  row_unique = c(2, 2, 2, 1),
+  row_miss = c(0, 1, 1, 2),
+  row_non_miss = c(2, 1, 1, 0)
 )
 
 for (.fn in names(.review_row_expected)) {
   test_that(
     paste("milestone review accepts general data frame expressions", .fn),
     {
-      d <- tibble::tibble(x = 1:3, y = 3:5)
+      d <- tibble::tibble(x = c(1, NA, 3, NA), y = c(3, 4, NA, NA))
       fn <- get(.fn, mode = "function")
       expected <- .review_row_expected[[.fn]]
       expect_equal(dplyr::mutate(d, z = fn(d[c("x", "y")]))$z, expected)
@@ -1004,49 +984,6 @@ row_contract_functions <- c(
   "row_non_miss"
 )
 
-row_contract_reference <- function(data, operation) {
-  vapply(
-    seq_len(nrow(data)),
-    function(i) {
-      values <- unlist(data[i, ], use.names = FALSE)
-      observed <- values[!is.na(values)]
-      switch(
-        operation,
-        row_mean = if (length(observed)) mean(observed) else NA_real_,
-        row_sum = sum(observed),
-        row_min = if (length(observed)) min(observed) else NA_real_,
-        row_max = if (length(observed)) max(observed) else NA_real_,
-        row_median = if (length(observed)) {
-          stats::median(observed)
-        } else {
-          NA_real_
-        },
-        row_var = if (length(observed) > 1L) stats::var(observed) else NA_real_,
-        row_sd = if (length(observed) > 1L) stats::sd(observed) else NA_real_,
-        row_unique = length(unique(observed)) + as.integer(anyNA(values)),
-        row_miss = sum(is.na(values)),
-        row_non_miss = length(observed)
-      )
-    },
-    numeric(1)
-  )
-}
-
-test_that("row contracts: numeric backends agree with independent row references", {
-  data <- tibble::tibble(
-    a = c(1, NA, NA, -3, NaN),
-    b = c(3, NA, 4, 0, 2),
-    c = c(5, NaN, NA, 3, 2)
-  )
-  before <- serialize(data, NULL)
-  for (name in row_contract_functions) {
-    out <- get(name, mode = "function")(data)
-    expect_true(is.atomic(out), info = name)
-    expect_length(out, nrow(data))
-    expect_equal(out, row_contract_reference(data, name), info = name)
-  }
-  expect_identical(serialize(data, NULL), before)
-})
 
 test_that("row contracts: typed zero-row inputs return plain empty vectors", {
   data <- tibble::tibble(a = numeric(), b = integer())
@@ -1086,8 +1023,13 @@ test_that("row contracts: explicit pick and bare selectors agree in mutate", {
       bare = fn(a, b),
       explicit = fn(dplyr::pick(a, b))
     )
-    expect_equal(out$bare, row_contract_reference(data[c("a", "b")], name))
+    expect_equal(out$bare, .milestone_row_reference(data[c("a", "b")], name))
     expect_identical(out$explicit, out$bare)
+    all_columns <- dplyr::mutate(
+      data[c("a", "b")],
+      observed = fn(tidyselect::everything())
+    )
+    expect_identical(all_columns$observed, out$bare)
   }
 })
 

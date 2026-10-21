@@ -196,7 +196,7 @@ summ <- function(
   local_wrapper_error_call()
   if (lifecycle::is_present(.na.rm)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "summ(.na.rm)",
       "summ(.missing)",
       details = "`.missing = FALSE` drops rows with missing grouping keys."
@@ -205,7 +205,7 @@ summ <- function(
   }
   if (lifecycle::is_present(.mode)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "summ(.mode)",
       "summ(.type)"
     )
@@ -312,7 +312,7 @@ summ <- function(
   # A single measured variable can omit its otherwise redundant name column.
   if (!.name && is.data.frame(out) && "name" %in% names(out)) {
     if (measured_count == 1L) {
-      out <- dplyr::select(out, -name)
+      out <- dplyr::select(out, -"name")
     }
   }
 
@@ -341,7 +341,7 @@ tabstat <- function(
 ) {
   if (lifecycle::is_present(.na.rm)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "tabstat(.na.rm)",
       "tabstat(.missing)",
       details = "`.missing = FALSE` drops rows with missing grouping keys."
@@ -350,7 +350,7 @@ tabstat <- function(
   }
   if (lifecycle::is_present(.mode)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "tabstat(.mode)",
       "tabstat(.type)"
     )

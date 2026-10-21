@@ -31,9 +31,8 @@ The package focuses on exploring and preparing data:
   `as_dummy()`, panel lags (`s_lag()`, `s_lead()`, `s_diff()`), and
   binning for data preparation.
 
-The `0.2.0.9000` development series retires the import/export,
-regression-table, and detailed-codebook wrappers in preparation for
-`0.3.0`. See the [migration
+statart `0.3.0` retires the import/export, regression-table, and
+detailed-codebook wrappers. See the [migration
 guide](https://socimh.github.io/statart/articles/migration.html) for
 direct package alternatives and breaking changes. This experimental
 package is undergoing stabilization; see
@@ -45,7 +44,8 @@ for the verified status and remaining work.
 You can install the development version of statart like so:
 
 ``` r
-devtools::install_github("socimh/statart")
+# install.packages("pak")
+pak::pak("socimh/statart")
 ```
 
 R 4.1.0 or later and a suitable build toolchain are required to install
@@ -115,14 +115,17 @@ both guides.
 
 ## Table return types
 
-Table-producing helpers preserve the input container by default: a
+Most table-producing helpers, including the `tab`, `summ`, `codebook`
+and `variables` families, preserve the input container by default: a
 tibble returns a tibble, a base data frame returns a base data frame,
 and a data.table returns a data.table. List outputs remain lists, with
 each table following the same rule. Explicit output options override
-this default. Summaries and variable inventories are ungrouped; grouping
-columns are retained where the function normally reports them. Arbitrary
-data-frame subclass metadata is not guaranteed on newly constructed
-tables. Vector and scalar helpers retain their usual outputs.
+this default. `pwcorr()`, `misstable()` and `duplicates_report()` always
+return tibbles, as their help pages state. Summaries and variable
+inventories are ungrouped; grouping columns are retained where the
+function normally reports them. Arbitrary data-frame subclass metadata
+is not guaranteed on newly constructed tables. Vector and scalar helpers
+retain their usual outputs.
 
 `preview_table()` preserves the underlying container while changing its
 console display. `unpreview_table()` removes that display setting.

@@ -36,6 +36,7 @@
 #'   other rows sharing the same values (0 for unique rows).
 #' * `duplicates_list()`: the duplicated rows, ordered by their identifying
 #'   values, with `.dup_group` (set number) and `.row` (original position).
+#'   Existing columns with either metadata name cause an error; rename them first.
 #' * `duplicates_drop()`: `.data` without the surplus rows, with a message
 #'   giving the number of rows removed.
 #'
@@ -129,18 +130,21 @@ duplicates_tag <- function(.data, ..., .name = "dup") {
 #' @export
 duplicates_list <- function(.data, ...) {
   keys <- key_columns(.data, ...)
+  clash <- intersect(c(".dup_group", ".row"), names(.data))
+  if (length(clash)) {
+    cli::cli_abort(c(
+      "Column {.var {clash[[1L]]}} already exists.",
+      i = "Rename it before calling {.fn duplicates_list}."
+    ))
+  }
   copies <- key_copies(keys)
   rows <- which(copies > 1L)
   rows <- rows[vctrs::vec_order(vctrs::vec_slice(keys, rows))]
-  out <- tibble::as_tibble(
-    dplyr::ungroup(table_working_data(.data)),
-    .name_repair = "minimal"
-  )
-  out <- vctrs::vec_slice(out, rows)
+  out <- key_row_slice(.data, rows)
   group <- vctrs::vec_group_id(vctrs::vec_slice(keys, rows))
   out$.dup_group <- as.integer(group)
   out$.row <- rows
-  table_restore(out, .data)
+  out
 }
 
 #' @rdname keys

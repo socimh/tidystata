@@ -132,4 +132,34 @@ test_that("xtile() uses weighted cutpoints like Stata's xtile [w]", {
     q = xtile(x, 2, wt = w)
   )
   expect_type(grouped$q, "integer")
+  expect_identical(grouped$q, c(1L, 1L, 1L, 2L, 1L, 1L, 1L, 2L))
+})
+
+
+test_that("analytic tabulation rescales finite weights without overflow", {
+  data <- data.frame(x = letters[1:3], w = rep(1e308, 3))
+  out <- tab(data, x, .wt = w, .wt_type = "analytic")
+  expect_equal(out$n, rep(1, 3))
+  expect_equal(out$percent, rep(100 / 3, 3))
+
+  grouped <- data.frame(
+    g = c("large", "large", "small", "small", "zero", "zero", "missing"),
+    x = c("a", "b", "a", "b", "a", "b", "a"),
+    w = c(1.2e308, 6e307, 1e-300, 2e-300, 0, 0, NA)
+  )
+  expect_message(
+    out <- tab(grouped, x, .by = g, .wt = w, .wt_type = "analytic"),
+    "Excluded 1 row"
+  )
+  expect_identical(out$g, rep(c("large", "small", "zero"), each = 2))
+  expect_equal(out$n, c(4 / 3, 2 / 3, 2 / 3, 4 / 3, 0, 0))
+  expect_true(all(is.nan(out$percent[out$g == "zero"])))
+  grouped$w[1:4] <- c(2, 1, 1, 2)
+  expect_message(
+    reference <- tab(grouped, x, .by = g, .wt = w, .wt_type = "analytic"),
+    "Excluded 1 row"
+  )
+  expect_equal(out, reference)
+  empty <- data[integer(), ]
+  expect_equal(nrow(tab(empty, x, .wt = w, .wt_type = "analytic")), 0L)
 })

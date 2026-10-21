@@ -418,33 +418,30 @@ test_that("summ: Date vector input", {
 # CHALLENGING TESTS - Large-ish Datasets
 # ============================================================================
 
-test_that("summ: 10000 rows with multiple variables", {
-  withr::local_preserve_seed()
-  df <- tibble::tibble(
-    x = rnorm(10000),
-    y = rnorm(10000),
-    z = rnorm(10000)
-  )
-  result <- summ(df)
-  expect_equal(nrow(result), 3)
+test_that("summ: multiple variables retain identities and statistics", {
+  df <- tibble::tibble(x = 1:3, y = c(2, NA, 6), z = c(-1, 0, 1))
+  result <- summ(df, .stat = c("n", "mean", "sum"))
+  expect_identical(result$name, c("x", "y", "z"))
+  expect_equal(result$n, c(3, 2, 3))
+  expect_equal(result$mean, c(2, 4, 0))
+  expect_equal(result$sum, c(6, 8, 0))
 })
 
 test_that("summ: many variables (50+)", {
-  withr::local_preserve_seed()
-  df <- tibble::as_tibble(replicate(50, rnorm(100)), .name_repair = "minimal")
+  df <- tibble::as_tibble(replicate(50, 1:3), .name_repair = "minimal")
   names(df) <- paste0("var", 1:50)
   result <- summ(df)
-  expect_equal(nrow(result), 50)
+  expect_identical(result$name, names(df))
+  expect_equal(result$n, rep(3, 50))
+  expect_equal(result$mean, rep(2, 50))
 })
 
 test_that("summ: grouped data with many groups", {
-  withr::local_preserve_seed()
-  df <- tibble::tibble(
-    group = rep(1:100, each = 10),
-    x = rnorm(1000)
-  )
+  df <- tibble::tibble(group = rep(1:100, each = 2), x = rep(c(1, 3), 100))
   result <- summ(df, x, .by = group)
-  expect_equal(nrow(result), 100)
+  expect_identical(result$group, 1:100)
+  expect_equal(result$n, rep(2, 100))
+  expect_equal(result$mean, rep(2, 100))
 })
 
 # ============================================================================

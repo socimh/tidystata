@@ -28,12 +28,14 @@ jobs:
         run: |
           python -m pip install air-formatter==0.12.0
           Rscript -e 'remotes::install_version("lintr", version = "3.4.0", upgrade = "never")'
-      - name: Check adopted sources
-        run: python .opencode/workflows/check_style.py
+      - name: Check adopted sources and pull-request additions
+        env:
+          STYLE_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+        run: |
+          if [ -n "$STYLE_BASE" ]; then
+            python .opencode/workflows/check_style.py --base "$STYLE_BASE"
+          else
+            python .opencode/workflows/check_style.py
+          fi
       - name: Check verification, identity and dependency-bound regressions
         run: python -m unittest discover -s .opencode/tests -p 'test_*.py'
-      - name: Check new pull-request sources are adopted
-        if: github.event_name == 'pull_request'
-        env:
-          STYLE_BASE: ${{ github.event.pull_request.base.sha }}
-        run: python .opencode/workflows/check_style.py --base "$STYLE_BASE"

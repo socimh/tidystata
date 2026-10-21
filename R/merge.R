@@ -148,7 +148,7 @@ merge_renamed <- function(
     return(new)
   }
   lifecycle::deprecate_soft(
-    "0.2.0.9000",
+    "0.3.0",
     paste0("s_merge(.", arg, ")"),
     paste0("s_merge(", arg, ")"),
     env = env,

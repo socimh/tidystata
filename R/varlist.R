@@ -8,7 +8,7 @@
 #' Use `varlist()` within a *selecting* function, such as `ds()`, `tab()` or
 #' `dplyr::across()`. Alternatively, provide `vars` explicitly to return
 #' matching positions in a standalone call. `varlist()` was called `s_match()`
-#' before statart 0.2.0.9000; the old name still works with a deprecation
+#' before statart 0.3.0; the old name still works with a deprecation
 #' warning.
 #'
 #' @param string A single character string containing patterns, separated by
@@ -77,7 +77,7 @@ varlist <- function(
 ) {
   if (lifecycle::is_present(ignore.case)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "varlist(ignore.case)",
       "varlist(ignore_case)"
     )

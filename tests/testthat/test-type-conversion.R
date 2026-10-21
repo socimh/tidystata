@@ -431,12 +431,6 @@ for (.scenario in names(.milestone_parse_cases)) {
     expect_length(out, length(case[[1]]))
     expect_equal(as.vector(out), case[[2]], tolerance = 1e-14)
     expect_identical(case[[1]], before)
-    d <- tibble::tibble(raw = case[[1]])
-    expect_warning(
-      converted <- dplyr::mutate(d, value = as_numeric(raw)),
-      parsing_warning
-    )
-    expect_equal(as.vector(converted$value), case[[2]], tolerance = 1e-14)
   })
 }
 
@@ -451,4 +445,54 @@ test_that("tostring() gives codes as text, ignoring value labels", {
   expect_identical(tostring(as.Date("2024-01-31")), "2024-01-31")
   expect_identical(tostring(haven::tagged_na("a")), NA_character_)
   expect_identical(tostring(integer()), character())
+})
+
+test_that("labelled_numeric() drops only SPSS user-missing codes", {
+  # Ordinary labelled vectors keep NA, NaN and tagged NA payloads.
+  plain <- haven::labelled(
+    c(1, NA, NaN, haven::tagged_na("a"), 99),
+    c(dk = 99)
+  )
+  out <- labelled_numeric(plain)
+  expect_identical(out[c(1, 5)], c(1, 99))
+  expect_true(is.na(out[[2]]) && !is.nan(out[[2]]))
+  expect_true(is.nan(out[[3]]))
+  expect_identical(haven::na_tag(out), c(NA, NA, NA, "a", NA))
+  expect_identical(detect_missing(plain), c(FALSE, TRUE, TRUE, TRUE, FALSE))
+
+  # SPSS codes and ranges become NA; stored missing values are untouched.
+  spss <- haven::labelled_spss(
+    c(1, 99, NaN, haven::tagged_na("b"), 97, NA),
+    na_values = 99,
+    na_range = c(90, 98)
+  )
+  out <- labelled_numeric(spss)
+  expect_identical(out[[1]], 1)
+  expect_true(all(is.na(out[c(2, 5)])) && !any(is.nan(out[c(2, 5)])))
+  expect_true(is.nan(out[[3]]))
+  expect_identical(haven::na_tag(out[[4]]), "b")
+  expect_true(is.na(out[[6]]) && !is.nan(out[[6]]))
+  expect_identical(
+    detect_missing(spss),
+    c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE)
+  )
+
+  integer_spss <- haven::labelled_spss(c(1L, 9L, NA), na_values = 9L)
+  expect_identical(labelled_numeric(integer_spss), c(1, NA, NA))
+})
+
+
+test_that("as_numeric imported columns retain positions in mutate", {
+  data <- tibble::tibble(
+    raw = c("$1,234.50", NA, "3e-2", "bad"),
+    id = 1:4
+  )
+  expect_warning(
+    out <- dplyr::mutate(data, value = as_numeric(raw)),
+    "parsing failure"
+  )
+  expect_identical(as.vector(out$value), c(1234.5, NA, 0.03, NA))
+  expect_identical(out[c("raw", "id")], data)
+  empty <- dplyr::mutate(data[0, ], value = as_numeric(raw))
+  expect_identical(empty$value, numeric())
 })

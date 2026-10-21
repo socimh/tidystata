@@ -135,6 +135,72 @@ test_that("keys with different names and shared columns follow Stata", {
   expect_identical(out$job, c("a", "b", NA))
 })
 
+test_that("composite renamed keys keep master order and user marker columns", {
+  master <- dplyr::group_by(
+    tibble::tibble(
+      hh = c(2L, 1L, 2L, 1L),
+      wave = c(2L, 1L, 2L, 2L),
+      .statart_in_master = c("m1", "m2", "m3", "m4")
+    ),
+    hh
+  )
+  using <- tibble::tibble(
+    household = c(1L, 2L, 3L),
+    period = c(1L, 2L, 1L),
+    value = c(10, 20, 30),
+    .statart_in_using = c("u1", "u2", "u3")
+  )
+  before_master <- master
+  before_using <- using
+  join <- function(left, right) {
+    s_merge(
+      left,
+      right,
+      "m:1",
+      by = c(hh = "household", wave = "period"),
+      report = FALSE
+    )
+  }
+  match_levels <- c("master only", "using only", "matched")
+  expected <- tibble::tibble(
+    hh = c(2L, 1L, 2L, 1L, 3L),
+    wave = c(2L, 1L, 2L, 2L, 1L),
+    .statart_in_master = c("m1", "m2", "m3", "m4", NA),
+    value = c(20, 10, 20, NA, 30),
+    .statart_in_using = c("u2", "u1", "u2", NA, "u3"),
+    .merge = factor(
+      c("matched", "matched", "matched", "master only", "using only"),
+      levels = match_levels
+    )
+  )
+  expect_identical(join(master, using), expected)
+  expect_identical(
+    join(master, using[0, ]),
+    tibble::tibble(
+      hh = master$hh,
+      wave = master$wave,
+      .statart_in_master = master$.statart_in_master,
+      value = rep(NA_real_, 4),
+      .statart_in_using = rep(NA_character_, 4),
+      .merge = factor(rep("master only", 4), levels = match_levels)
+    )
+  )
+  expect_identical(
+    join(master[0, ], using),
+    tibble::tibble(
+      hh = using$household,
+      wave = using$period,
+      .statart_in_master = rep(NA_character_, 3),
+      value = using$value,
+      .statart_in_using = using$.statart_in_using,
+      .merge = factor(rep("using only", 3), levels = match_levels)
+    )
+  )
+  expect_identical(join(master[0, ], using[0, ]), expected[0, ])
+  expect_identical(master, before_master)
+  expect_identical(using, before_using)
+})
+
 test_that("missing keys match each other and containers are kept", {
   left <- data.frame(id = c(NA, 1), x = 1:2)
   right <- data.frame(id = c(NA, 2), y = 3:4)

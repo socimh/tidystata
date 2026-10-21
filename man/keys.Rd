@@ -46,6 +46,7 @@ selected, rows that share those columns can still differ elsewhere, and
 other rows sharing the same values (0 for unique rows).
 \item \code{duplicates_list()}: the duplicated rows, ordered by their identifying
 values, with \code{.dup_group} (set number) and \code{.row} (original position).
+Existing columns with either metadata name cause an error; rename them first.
 \item \code{duplicates_drop()}: \code{.data} without the surplus rows, with a message
 giving the number of rows removed.
 }

@@ -1,6 +1,6 @@
 # Function: weights()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:23 | **Status:** PASS
+**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 23:06:35 | **Status:** PASS
 
 ## Example 1: frequency weights count each row w times
 
@@ -54,4 +54,14 @@
 ```
 [1] [5,10]  (10,40] (10,40] [5,10]  [5,10]
 Levels: [5,10] < (10,40]
+```
+
+## Example 6: analytic weights keep their scale safely
+
+```
+# A tibble: 2 x 6
+  edu       n percent   cum valid valid_cum
+  <chr> <dbl>   <dbl> <dbl> <dbl>     <dbl>
+1 high      2    66.7  66.7  66.7      66.7
+2 low       1    33.3 100    33.3     100
 ```

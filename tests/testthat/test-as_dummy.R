@@ -50,6 +50,21 @@ test_that("as_dummy() labels labelled codes with their value labels", {
   )
 })
 
+test_that("as_dummy() treats SPSS user-missing codes as missing", {
+  data <- tibble::tibble(
+    answer = haven::labelled_spss(
+      c(1, 2, 99, 1, 97),
+      labels = c(yes = 1, no = 2, refused = 99),
+      na_values = 99,
+      na_range = c(97, 98)
+    )
+  )
+  out <- as_dummy(data, answer)
+  expect_named(out, c("answer", "answer_1", "answer_2"))
+  expect_identical(as.vector(out$answer_1), c(1L, 0L, NA, 1L, NA))
+  expect_identical(as.vector(out$answer_2), c(0L, 1L, NA, 0L, NA))
+})
+
 test_that("as_dummy() keeps containers and validates input", {
   grouped <- as_dummy(dplyr::group_by(dummy_data, sex), size)
   expect_identical(dplyr::group_vars(grouped), "sex")

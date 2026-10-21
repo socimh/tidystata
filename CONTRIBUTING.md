@@ -89,6 +89,15 @@ statart-specific decisions; consult the guide for everything else.
   frame, keeping the input's container where the function preserves it),
   `"vector"`, `"flextable"`, or `"auto"` (chosen by the result). Grouped
   cross-tabulations return a named list of tables.
+- **Missing values.** In statistical calculations and missingness-sensitive
+  operations (counts of missing values, complete pairs, `.missing` rules,
+  indicator columns), test missingness with `detect_missing()` and take the
+  numbers behind a labelled vector with `labelled_numeric()`. Both count SPSS
+  user-missing codes and ranges as missing, as `is.na()` does for
+  `haven::labelled_spss()`, and leave stored NA, NaN and tagged NA values
+  unchanged. Use `vctrs::vec_detect_missing()` or `vctrs::vec_data()` only
+  where the public contract exposes stored codes, such as `destring()` and
+  `tostring()`, which keep user-missing codes as values.
 - **Options and lifecycle.** Validate enumerated options with
   `rlang::arg_match()`, which rejects abbreviations. Rename or retire public
   functions and arguments with `lifecycle::deprecate_soft()`, keeping the old
@@ -121,7 +130,9 @@ statart-specific decisions; consult the guide for everything else.
   section) and `[fn()]` cross-links.
 - **Tests.** `tests/testthat/test-<file>.R` mirrors `R/<file>.R`. Large topics
   and numbered acceptance catalogues live beside it as `test-<file>-<topic>.R`
-  (`test-summ-acceptance.R`, `test-tab-fre1.R`), kept verbatim. Test the
+  (`test-summ-acceptance.R`, `test-tab-fre1.R`). Preserve unique scenarios and
+  their numbered identities; consolidate duplicate executions only after mapping
+  their assertions to retained coverage. Test the
   wording of error and warning messages with `expect_snapshot(error = TRUE)`;
   test values with ordinary expectations.
 - **NEWS.** One bullet per user-facing change, present tense, the function name
@@ -258,7 +269,8 @@ python .opencode/workflows/verify_package.py --release --prefix .opencode/result
 ```
 
 It builds vignettes and checks with `--as-cran`, including the PDF manual.
-Ordinary `--check` remains a faster development check. Both use a fresh source
+Ordinary `--check` skips vignette and PDF-manual work for faster development
+feedback, retaining tests and examples. Both use a fresh source
 copy and installation and retain command options and logs.
 
 After editing MIGRATION.md, run
@@ -291,11 +303,30 @@ thresholds, which vary with machine load. Keep performance measurements in
 separate reproducible benchmarks and record timing variability. Do not skip
 accepted behavioral coverage solely to reach a suite-runtime target.
 
+Choose small asymmetric fixtures with exact expected values. A large input is
+justified when it reaches a distinct algorithm, cardinality or allocation path;
+checking its dimensions alone is insufficient. Numerical references should use
+base R, documented formulas or hand-calculated values rather than the production
+helper under test. Use bounded deterministic invariants for permutation,
+replication and weight rescaling. Test a forwarding wrapper's defaults and option
+forwarding separately from the full numerical catalogue of its implementation.
+Keep grouping, metadata, input preservation, conditions and one realistic composed
+workflow covered. Unsupported types should fail clearly, without incidental
+coercion or new type support introduced solely to satisfy a test.
+
 `--release` parses the complete check log and fails for errors, warnings, failed
 processes, or incomplete output. Notes remain visible and need a recorded
 publication decision. It installs the actual built archive into an empty private
 library, writes its checksum/install receipt, and validates installed resources.
 A successful local command does not itself authorize publication.
+
+Check and release modes run the full behavioral suite inside `R CMD check` once,
+then run only snapshot-bearing blocks against the archive installation with
+`NOT_CRAN=true`. Ordinary mode runs all tests and snapshots. Inspect the current
+`<prefix>-paths.json` receipt before using results: its run ID, status, source
+SHA-256, selected mode and stage records identify current evidence. Retained files
+from an earlier invocation do not establish a later run's success. Verification
+helpers execute from the same staged copy as the candidate source.
 
 Website builds always install their staged source into a fresh private library.
 The website helper's optional `--library` supplies dependencies only. Missing or

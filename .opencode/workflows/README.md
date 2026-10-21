@@ -16,7 +16,14 @@ python .opencode/workflows/verify_package.py --release --prefix .opencode/result
 ```
 
 `--release` includes vignettes, PDF manual and `--as-cran`; `--check` is a faster
-development check. Check, release, minimal and demos are mutually exclusive.
+development check that skips vignette and PDF-manual work, retaining tests and
+examples. Both run the behavioral suite once inside native `R CMD
+check`, then run only snapshot-bearing test blocks against a fresh installation
+of that archive with `NOT_CRAN=true`. The CRAN check itself never inherits that
+flag. Ordinary mode runs the full suite, including snapshots, against its fresh
+installation. Snapshot selection preserves original test and fixture identities;
+unsupported helper-defined snapshots and incomplete selections fail explicitly.
+Check, release, minimal and demos are mutually exclusive.
 Filters and shuffle seeds apply only to ordinary tests. The seeded run records
 actual test file/block order and maps temporary names to original test identities;
 compare outcomes by identity rather than timings.
@@ -33,7 +40,14 @@ select another verified protected launcher. An absent launcher is an error.
 Inspect native exit status and full logs. The release workflow parses the check
 result, fails for errors/warnings/incomplete checks, installs the actual built
 archive into an empty private library and records its checksum/install receipt.
-Notes remain visible and require a publication decision. Website checks install
+Notes remain visible and require a publication decision. `<prefix>-paths.json`
+is initialized before staging and finalized on every exit, including exceptions.
+Its run ID, status, full staged-source SHA-256, stage timing/status and current
+output list identify evidence from this invocation. The same identity is recorded
+in suite metadata and the archive installation receipt. Old artifacts remain on
+disk but are never evidence for a new invocation; inspect the receipt first.
+All R helpers execute from the staged copy. Installed usage examples share one
+warning policy and semantic-check implementation. Website checks install
 their staged candidate separately; a dependency library never substitutes for
 that candidate. Building a site does not authorize deployment.
 

@@ -281,7 +281,7 @@ tab <- function(
     group_order = .group_order,
     input_groups = groups
   ) %>%
-    dplyr::select(-...any_miss)
+    dplyr::select(-"...any_miss")
 
   # Output
   table_restore(out, template)
@@ -368,7 +368,7 @@ tab1 <- function(
         input_groups = groups,
         call = error_call
       ) %>%
-      dplyr::select(-...any_miss)
+      dplyr::select(-"...any_miss")
   })
 
   if (length(out) == 0L && .type[1] == "tibble") {
@@ -633,7 +633,7 @@ fre <- function(
       input_groups = groups,
       call = error_call
     ) %>%
-    dplyr::select(-...any_miss)
+    dplyr::select(-"...any_miss")
 
   if (.type[1] == "flextable") {
     out <- out %>%
@@ -711,7 +711,7 @@ fre1 <- function(
         input_groups = groups,
         call = error_call
       ) %>%
-      dplyr::select(-...any_miss)
+      dplyr::select(-"...any_miss")
   })
 
   if (length(out) == 0L && .type[1] == "tibble") {

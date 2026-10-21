@@ -18,8 +18,9 @@ pwcorr(
 \item{.data}{A data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Numeric or logical
-variables. Omit to use every numeric or logical column; other columns are
-then skipped. Selecting another type is an error.}
+vector columns. Matrix columns are unsupported. Omit to use every numeric
+or logical vector column; other columns are then skipped. Selecting another
+type is an error.}
 
 \item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping
 variables. Grouped data use their groups unless \code{.by} is supplied.}

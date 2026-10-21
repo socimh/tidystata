@@ -122,8 +122,8 @@ tab_counts <- function(data, weights) {
     data$...wt <- weights
     out <- dplyr::count(
       data,
-      dplyr::across(-...wt),
-      wt = ...wt
+      dplyr::across(-"...wt"),
+      wt = .data$...wt
     )
   }
 
@@ -171,14 +171,14 @@ tab_data <- function(
     out <- out %>%
       dplyr::arrange(
         dplyr::across(tidyselect::all_of(group_vars)),
-        ...any_miss,
-        dplyr::desc(n)
+        .data$...any_miss,
+        dplyr::desc(.data$n)
       )
   } else {
     out <- out %>%
       dplyr::arrange(
         dplyr::across(tidyselect::all_of(group_vars)),
-        ...any_miss
+        .data$...any_miss
       )
   }
 
@@ -263,7 +263,7 @@ tab_add_total <- function(data, group_vars = character(0), groups) {
   if (narrow_data) {
     out
   } else {
-    out <- dplyr::rename(out, total = ...tmp)
+    out <- dplyr::rename(out, total = "...tmp")
     dplyr::relocate(
       out,
       tidyselect::all_of(c(
@@ -350,7 +350,7 @@ append_tab_list <- function(.data, blank_row = FALSE) {
 
   out <- out %>%
     purrr::list_rbind() %>%
-    dplyr::relocate(variable)
+    dplyr::relocate("variable")
 
   out
 }
@@ -413,7 +413,7 @@ tab2_data <- function(.data, weights = NULL) {
   out <- counts %>%
     tidyr::pivot_wider(
       names_from = 2,
-      values_from = n
+      values_from = "n"
     ) %>%
     dplyr::mutate(
       dplyr::across(-1, ~ tidyr::replace_na(.x, 0))

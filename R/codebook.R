@@ -101,7 +101,7 @@ codebook <- function(.data, ...) {
   labels <- variable_labels(.data)
   if (any(!is.na(labels))) {
     out$label <- unname(labels[out$variable])
-    out <- dplyr::relocate(out, label, .after = variable)
+    out <- dplyr::relocate(out, "label", .after = "variable")
   }
 
   table_restore(out, template)

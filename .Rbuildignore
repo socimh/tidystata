@@ -16,5 +16,7 @@
 ^Makefile$
 ^run_tests\.R$
 ^air\.toml$
-^\.Rhistory$
+(^|/)\.Rhistory$
+^\.quarto$
+^\.Rd2pdf.*$
 ^vignettes/articles$

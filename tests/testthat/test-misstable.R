@@ -94,3 +94,21 @@ test_that("misstable() reports invalid input", {
     misstable(tibble::tibble(n = c(1, NA)), .patterns = TRUE)
   })
 })
+
+test_that("misstable() counts SPSS user-missing codes and ranges", {
+  data <- tibble::tibble(
+    g = c("a", "a", "b", "b"),
+    coded = haven::labelled_spss(c(1, 99, NA, 2), na_values = 99),
+    ranged = haven::labelled_spss(c(97, 1, 2, 98), na_range = c(90, 100))
+  )
+  out <- misstable(data, coded, ranged)
+  expect_identical(out$miss_n, c(2L, 2L))
+  expect_identical(out$valid_n, c(2L, 2L))
+
+  grouped <- misstable(data, coded, ranged, .by = g)
+  expect_identical(grouped$miss_n, c(1L, 1L, 1L, 1L))
+
+  patterns <- misstable(data, coded, ranged, .patterns = TRUE)
+  expect_identical(sum(patterns$n), 4L)
+  expect_identical(nrow(patterns), 2L)
+})

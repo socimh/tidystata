@@ -94,6 +94,15 @@ class ReleaseIdentityTests(unittest.TestCase):
         self.assert_rejected(self.verify(receipt=self.case / "missing.json"),
                              "installation receipt")
 
+    def test_unknown_resource_mode_cannot_omit_vignette_checks(self):
+        result = subprocess.run(
+            r_command(["Rscript", ROOT / ".opencode/tests/verify_release_resources.R",
+                       self.library, self.archive, self.receipt, "releas"]),
+            env=r_environment(libraries=[self.fallback]), capture_output=True,
+            text=True, encoding="utf-8", errors="replace",
+        )
+        self.assert_rejected(result, "mode must be check or release")
+
     def test_changed_archive_is_rejected(self):
         self.record["tarball_md5"] = "0" * 32
         self.write_receipt()

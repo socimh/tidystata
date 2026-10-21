@@ -1,7 +1,10 @@
 # Run in a fresh session against an installation of the final source bundle.
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 3L) {
+if (!length(args) %in% c(3L, 4L)) {
   stop("Supply candidate library, source tarball and installation receipt.")
+}
+if (length(args) == 4L && !args[[4L]] %in% c("check", "release")) {
+  stop("Resource mode must be check or release.")
 }
 if (!file.exists(file.path(args[[1L]], "statart", "DESCRIPTION"))) {
   stop("Candidate installation is missing from the supplied library.")
@@ -119,12 +122,15 @@ for (name in c(
   path <- system.file(name, package = "statart", mustWork = TRUE)
   stopifnot(file.info(path)$size > 0)
 }
-for (name in c("getting-started", "containers-and-missing-values")) {
-  stopifnot(file.exists(system.file(
-    "doc",
-    paste0(name, ".html"),
-    package = "statart"
-  )))
+release <- length(args) == 3L || args[[4L]] == "release"
+if (release) {
+  for (name in c("getting-started", "containers-and-missing-values")) {
+    stopifnot(file.exists(system.file(
+      "doc",
+      paste0(name, ".html"),
+      package = "statart"
+    )))
+  }
 }
 scripts <- list.files(
   system.file("examples", package = "statart"),
@@ -132,42 +138,23 @@ scripts <- list.files(
   full.names = TRUE
 )
 stopifnot(length(scripts) == 7L)
-patterns <- c(
-  "03_summary_statistics.R" = "non-numeric|factor",
-  "04_prepare_and_calculate.R" = "parsing failure|collapsed quantile",
-  "05_robustness_and_consistency.R" = "entirely missing|labelled"
+# Share warning policy and semantic assertions with standalone example checks.
+script_arg <- grep("^--file=", commandArgs(), value = TRUE)[1L]
+helper <- file.path(
+  dirname(sub("^--file=", "", script_arg)),
+  "verify_manual_examples.R"
 )
-for (path in scripts) {
-  name <- basename(path)
-  parse(path)
-  if (name == "00_install.R") {
-    next
-  }
-  if (
-    name == "06_data_table_optional.R" &&
-      !requireNamespace("data.table", quietly = TRUE)
-  ) {
-    next
-  }
-  withCallingHandlers(
-    source(path, local = new.env(parent = globalenv()), echo = TRUE),
-    warning = function(w) {
-      pattern <- patterns[name]
-      if (is.na(pattern) || !grepl(pattern, conditionMessage(w))) {
-        stop("Unexpected script warning: ", conditionMessage(w))
-      }
-      cat("Expected warning:", conditionMessage(w), "\n")
-      invokeRestart("muffleWarning")
-    }
-  )
-  cat("PASS installed script:", name, "\n")
-}
+Sys.setenv(STATART_EXAMPLE_OUTPUT = tempfile("statart-installed-examples-"))
+source(helper, local = new.env(parent = globalenv()))
 stopifnot(
   any(grepl("inst/examples/01_inspect_and_select.R$", contents)),
-  any(grepl("inst/doc/getting-started.html$", contents)),
+  (!release || any(grepl("inst/doc/getting-started.html$", contents))),
   !any(grepl("/(extra_functions|[.]opencode|vignettes/articles)/", contents)),
   !any(grepl("[.](o|dll|so)$", contents))
 )
 cat(
-  "PASS: source manifest, installed resources, vignettes and six usage scripts.\n"
+  "PASS: source manifest, installed resources",
+  if (release) ", vignettes" else "",
+  " and six usage scripts.\n",
+  sep = ""
 )

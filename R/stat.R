@@ -1,14 +1,10 @@
-#' @title Skewness and kurtosis
-#' @description Calculate skewness and kurtosis
+#' Skewness and kurtosis
 #'
 #' @param x A numeric vector
 #' @param n The number of observations
 #'
 #' @returns A numeric value
-#' @name stat
-#' @keywords internal
-
-#' @rdname stat
+#' @noRd
 skew <- function(x, n) {
   mean_val <- mean(x, na.rm = TRUE)
   sd_val <- sd(x, na.rm = TRUE)
@@ -16,7 +12,8 @@ skew <- function(x, n) {
   skew_val
 }
 
-#' @rdname stat
+#' @rdname skew
+#' @noRd
 kurtosis <- function(x, n) {
   mean_val <- mean(x, na.rm = TRUE)
   sd_val <- sd(x, na.rm = TRUE)

@@ -31,11 +31,16 @@ jobs:
           remotes::install_local(".", lib = lib, upgrade = "never", build_vignettes = FALSE)
           .libPaths(c(lib, .libPaths()))
           roxygen2::roxygenise()
-          devtools::build_readme()
-      - name: Fail on stale help or namespace
+          options(crayon.enabled = FALSE, cli.num_colors = 1L, width = 80L)
+          Sys.setenv(LC_ALL = "C", LANG = "C", TZ = "UTC", COLUMNS = "80",
+                     R_CLI_NUM_COLORS = "0", NO_COLOR = "1")
+          Sys.setlocale("LC_ALL", "C")
+          rmarkdown::render("README.Rmd", quiet = TRUE, encoding = "UTF-8",
+                            envir = new.env(parent = globalenv()))
+      - name: Fail on stale help, namespace or README
         run: |
-          git status --porcelain --untracked-files=all -- man NAMESPACE
-          test -z "$(git status --porcelain --untracked-files=all -- man NAMESPACE)"
+          git status --porcelain --untracked-files=all -- man NAMESPACE README.md
+          test -z "$(git status --porcelain --untracked-files=all -- man NAMESPACE README.md)"
       - name: Record README rendering differences
         if: always()
         run: git diff -- README.md > readme-render.diff

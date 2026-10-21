@@ -71,6 +71,80 @@ test_that("duplicates_list() returns sets in key order with positions", {
   expect_identical(nrow(duplicates_list(dplyr::distinct(panel))), 0L)
 })
 
+test_that("duplicate metadata never replaces input columns", {
+  for (name in c(".row", ".dup_group")) {
+    data <- tibble::tibble(id = c(1L, 1L), original = c("a", "b"))
+    names(data)[2L] <- name
+    before <- data
+    expect_error(duplicates_list(data, id), "already exists")
+    expect_identical(data, before)
+    # The same schema must be safe even when no duplicated rows remain.
+    expect_error(duplicates_list(data[0, ], id), "already exists")
+  }
+})
+
+test_that("row-returning duplicate functions retain grouping and row identity", {
+  data <- tibble::tibble(
+    g = factor(c("b", "a", "b", "a"), levels = c("a", "b", "unused")),
+    id = c(2L, 1L, 2L, 3L),
+    value = c("first", "second", "third", "fourth")
+  )
+  grouped <- dplyr::group_by(data, g, .drop = FALSE)
+  before <- grouped
+  listed <- duplicates_list(grouped, id)
+  expected <- dplyr::dplyr_row_slice(grouped, c(1L, 3L))
+  expect_identical(listed[names(grouped)], expected)
+  expect_identical(listed$.row, c(1L, 3L))
+  expect_identical(listed$.dup_group, c(1L, 1L))
+  expect_identical(dplyr::group_data(listed), dplyr::group_data(expected))
+  expect_identical(dplyr::group_vars(duplicates_tag(grouped, id)), "g")
+  expect_message(
+    dropped <- duplicates_drop(grouped, id, .force = TRUE),
+    "1 row removed"
+  )
+  expect_identical(dropped, dplyr::dplyr_row_slice(grouped, c(1L, 2L, 4L)))
+  empty <- duplicates_list(grouped[0, ], id)
+  expect_identical(dplyr::group_data(empty), dplyr::group_data(grouped[0, ]))
+  expect_identical(grouped, before)
+})
+
+test_that("survey preparation, key checks, joins and panel summaries compose", {
+  raw <- tibble::tibble(
+    id = c("a", "a", "a", "b", "b", "b"),
+    wave = c(2L, 1L, 4L, 1L, 2L, 3L),
+    score = c("12", "10", "15", "20", "25", "99")
+  )
+  before <- raw
+  prepared <- dplyr::mutate(
+    raw,
+    score = haven::labelled_spss(destring(score), na_values = 99)
+  )
+  expect_invisible(isid(prepared, id, wave))
+  joined <- s_merge(
+    prepared,
+    tibble::tibble(id = c("a", "b"), region = c("north", "south")),
+    "m:1",
+    by = "id",
+    assert = "match",
+    report = FALSE
+  )
+  out <- dplyr::mutate(joined, change = s_diff(score, time = wave), .by = id)
+  expect_identical(out$change, c(2, NA, NA, NA, 5, NA))
+  expect_warning(
+    summary <- summ(out, score, .by = region, .stat = c("n", "mean", "miss_n")),
+    "labelled variable"
+  )
+  expect_identical(summary$region, c("north", "south"))
+  expect_equal(summary$n, c(3, 2))
+  expect_equal(summary$mean, c(37 / 3, 22.5))
+  expect_equal(summary$miss_n, c(0, 1))
+  counts <- tab(out, region)
+  expect_identical(counts$region, c("north", "south"))
+  expect_identical(counts$n, c(3L, 3L))
+  expect_equal(counts$percent, c(50, 50))
+  expect_identical(raw, before)
+})
+
 test_that("duplicates_drop() keeps first rows and guards against data loss", {
   expect_message(out <- duplicates_drop(panel), "(1 row removed)", fixed = TRUE)
   expect_identical(out, panel[-4, ])

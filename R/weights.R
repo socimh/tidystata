@@ -69,7 +69,7 @@ weights_drop_column <- function(data, column, selected) {
 
 # Analytic weights sum to the number of rows within each group.
 weights_scale <- function(weights, data, group_vars, type, groups = NULL) {
-  if (is.null(weights) || type == "frequency") {
+  if (is.null(weights) || !length(weights) || type == "frequency") {
     return(weights)
   }
   id <- if (!is.null(groups)) {
@@ -79,6 +79,12 @@ weights_scale <- function(weights, data, group_vars, type, groups = NULL) {
   } else {
     rep(1L, length(weights))
   }
+  # Normalize within each group before summing: finite weights can have an
+  # infinite total, and groups can have very different weight scales.
+  locs <- if (is.null(groups)) vctrs::vec_group_loc(id)$loc else groups$loc
+  maxima <- vapply(locs, function(loc) max(weights[loc]), numeric(1))
+  maxima[maxima == 0] <- 1
+  weights <- weights / maxima[id]
   # Group ids run 1..k, so totals and sizes can be indexed by id directly.
   totals <- as.vector(rowsum(weights, id))
   sizes <- tabulate(id, nbins = length(totals))

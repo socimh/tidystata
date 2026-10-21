@@ -1,7 +1,7 @@
 # Scenarios 051-100 complement the numeric/grouping scenarios 001-050.
-# Each scenario exercises both exported entry points, with explicit .stat
-# requests where their different defaults are not the behavior under test.
-for (function_name in c("summ", "tabstat")) {
+# Shared core scenarios run once through summ(); tabstat wrapper contracts
+# live in test-summ-contracts.R. Scenario numbers remain unchanged.
+for (function_name in "summ") {
   local({
     api <- summary_legacy_layout(
       getExportedValue("statart", function_name)

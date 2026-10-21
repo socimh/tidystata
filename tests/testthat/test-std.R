@@ -44,3 +44,28 @@ test_that("std() and pct() report invalid inputs", {
     pct(as.Date("2020-01-01"))
   })
 })
+
+test_that("std() and pct() treat SPSS user-missing values as missing", {
+  coded <- haven::labelled_spss(
+    c(1, 2, 99),
+    labels = c(dk = 99),
+    na_values = 99
+  )
+  expect_equal(std(coded), c(as.vector(scale(c(1, 2))), NA))
+  expect_equal(pct(coded), c(100 / 3, 200 / 3, NA))
+
+  ranged <- haven::labelled_spss(c(1, 3, 97, 98), na_range = c(90, 100))
+  expect_equal(std(ranged), c(as.vector(scale(c(1, 3))), NA, NA))
+  expect_equal(pct(ranged, prop = TRUE), c(0.25, 0.75, NA, NA))
+
+  data <- tibble::tibble(
+    g = c("a", "a", "a", "b", "b"),
+    x = haven::labelled_spss(c(1, 3, 99, 2, 6), na_values = 99)
+  )
+  out <- dplyr::mutate(data, z = std(x), share = pct(x), .by = g)
+  expect_equal(
+    out$z,
+    c(as.vector(scale(c(1, 3))), NA, as.vector(scale(c(2, 6))))
+  )
+  expect_equal(out$share, c(25, 75, NA, 25, 75))
+})

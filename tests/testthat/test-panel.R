@@ -135,8 +135,15 @@ test_that("panel operators keep the type of x and handle edge cases", {
   expect_identical(s_lag(c("c", "a", "b"), time = time), c("b", NA, "a"))
   f <- factor(c("c", "a", "b"))
   expect_identical(s_lag(f, time = time), factor(c("b", NA, "a"), levels(f)))
-  labelled <- haven::labelled(c(3, 1, 2), c(low = 1))
-  expect_s3_class(s_lag(labelled, time = time), "haven_labelled")
+  labelled <- haven::labelled(c(3, 1, 2), c(low = 1), label = "Score")
+  expect_identical(
+    s_lag(labelled, time = time),
+    haven::labelled(c(2, NA, 1), c(low = 1), label = "Score")
+  )
+  expect_identical(
+    s_lead(labelled, time = time),
+    haven::labelled(c(NA, 2, 3), c(low = 1), label = "Score")
+  )
   expect_identical(s_lag(1:3, 0, time = time), 1:3)
   expect_identical(s_diff(c(3, 1, 2), 0, time = time), c(3, 1, 2))
   expect_identical(s_diff(c(TRUE, FALSE), time = 1:2), c(NA, -1))
@@ -146,6 +153,51 @@ test_that("panel operators keep the type of x and handle edge cases", {
     s_lag(1:2, time = haven::labelled(c(2001, 2002))),
     c(NA, 1L)
   )
+  # SPSS user-missing codes are missing times and missing values.
+  expect_identical(
+    s_lag(
+      1:3,
+      time = haven::labelled_spss(c(2001, 2002, 9999), na_values = 9999)
+    ),
+    c(NA, 1L, NA)
+  )
+  expect_identical(
+    s_diff(haven::labelled_spss(c(10, 12, 99), na_values = 99), time = 1:3),
+    c(NA, 2, NA)
+  )
+})
+
+test_that("shifts preserve SPSS metadata without changing the input", {
+  x <- haven::labelled_spss(
+    c(10, 99, 12),
+    labels = c(start = 10, refused = 99),
+    na_values = 99,
+    label = "Survey score"
+  )
+  before <- x
+  expected <- x[c(NA_integer_, 1L, 2L)]
+  expect_identical(s_lag(x, time = 1:3), expected)
+  expect_identical(s_lead(x, time = 1:3), x[c(2L, 3L, NA_integer_)])
+  expect_identical(x, before)
+})
+
+test_that("daylight-saving transitions follow documented local periods", {
+  # Construct instants in UTC so skipped and repeated local hours are unambiguous.
+  spring <- as.POSIXct(
+    c("2024-03-10 06:30:00", "2024-03-10 07:30:00", "2024-03-10 08:30:00"),
+    tz = "UTC"
+  )
+  attr(spring, "tzone") <- "America/New_York"
+  expect_identical(s_lag(1:3, time = spring, unit = "hour"), c(NA, NA, 2L))
+  expect_identical(s_lead(1:3, time = spring, unit = "hour"), c(NA, 3L, NA))
+  expect_identical(s_lag(1:3, time = spring, delta = 3600), c(NA, 1L, 2L))
+  autumn <- as.POSIXct(
+    c("2024-11-03 05:30:00", "2024-11-03 06:30:00"),
+    tz = "UTC"
+  )
+  attr(autumn, "tzone") <- "America/New_York"
+  expect_error(s_lag(1:2, time = autumn, unit = "hour"), "Repeated time")
+  expect_identical(s_lag(1:2, time = autumn, delta = 3600), c(NA, 1L))
 })
 
 test_that("date-times compare local clock periods", {

@@ -44,7 +44,7 @@ var_type <- function(
   .abbr = lifecycle::deprecated()
 ) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "var_type(.x)", "var_type(x)")
+    lifecycle::deprecate_soft("0.3.0", "var_type(.x)", "var_type(x)")
     # In old calls such as var_type(.x = v, TRUE), the positional value fills `x`.
     if (!missing(x) && missing(abbr)) {
       abbr <- x
@@ -52,7 +52,7 @@ var_type <- function(
     x <- .x
   }
   if (lifecycle::is_present(.abbr)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "var_type(.abbr)", "var_type(abbr)")
+    lifecycle::deprecate_soft("0.3.0", "var_type(.abbr)", "var_type(abbr)")
     abbr <- .abbr
   }
   # Plain storage types need no formatting or S3 dispatch. Matrix/array input
@@ -129,7 +129,7 @@ var_type <- function(
 #' @rdname var_type
 var_unit <- function(x, .x = lifecycle::deprecated()) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "var_unit(.x)", "var_unit(x)")
+    lifecycle::deprecate_soft("0.3.0", "var_unit(.x)", "var_unit(x)")
     x <- .x
   }
   if (inherits(x, c("units", "difftime"))) {

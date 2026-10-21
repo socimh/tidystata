@@ -90,11 +90,11 @@ variables_search <- function(.data, string, ...) {
   if ("label" %in% colnames(out)) {
     dplyr::filter(
       out,
-      stringr::str_detect(name, string) |
-        stringr::str_detect(label, string)
+      stringr::str_detect(.data$name, string) |
+        stringr::str_detect(.data$label, string)
     )
   } else {
-    dplyr::filter(out, stringr::str_detect(name, string))
+    dplyr::filter(out, stringr::str_detect(.data$name, string))
   }
 }
 

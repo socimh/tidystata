@@ -1,12 +1,13 @@
 test_that("assert() returns the data invisibly when conditions hold", {
   expect_invisible(out <- assert(lifeexp, lexp > 0, popgrowth < 10))
   expect_identical(out, lifeexp)
-  table <- data.table::as.data.table(lifeexp)
-  expect_identical(assert(table, lexp > 0), table)
   grouped <- dplyr::group_by(lifeexp, region)
   expect_identical(assert(grouped, lexp > 0), grouped)
   # A single value is recycled, like mutate().
   expect_identical(assert(lifeexp, nrow(lifeexp) == 68), lifeexp)
+  skip_if_not_installed("data.table")
+  table <- data.table::as.data.table(lifeexp)
+  expect_identical(assert(table, lexp > 0), table)
 })
 
 test_that("assert() counts contradictions like Stata", {

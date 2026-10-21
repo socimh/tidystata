@@ -29,4 +29,15 @@ crossed <- withCallingHandlers(
 )
 print(crossed)
 print(attr(crossed, "chi2"))
+cat(
+  "```\n\n## Example 5: zero-weight outliers do not affect correlation\n\n```\n"
+)
+weighted <- tibble::tibble(
+  x = c(1, 2, 1e200),
+  y = c(1, 2, 3),
+  w = c(1, 1, 0)
+)
+result <- pwcorr(weighted, x, y, .wt = w)
+print(result)
+stopifnot(isTRUE(all.equal(result$r, 1)), result$n == 2)
 cat("```\n")

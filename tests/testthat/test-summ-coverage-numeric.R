@@ -1,4 +1,5 @@
-# Cases 001-050 are shared public contracts, independently run for each export.
+# Cases 001-050 cover the shared summary core once through summ().
+# tabstat forwarding and its distinct defaults are in test-summ-contracts.R.
 # The oracle uses the documented R conventions, never statart internals.
 summ_cov_reference <- function(x) {
   observed <- as.numeric(x[!is.na(x)])
@@ -511,7 +512,7 @@ stopifnot(identical(
   vapply(summ_cov_numeric_cases, `[[`, integer(1), "id"),
   1:50
 ))
-for (function_name in c("summ", "tabstat")) {
+for (function_name in "summ") {
   for (case in summ_cov_numeric_cases) {
     test_that(
       paste(

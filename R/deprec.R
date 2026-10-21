@@ -1,7 +1,7 @@
 #' Renamed functions
 #'
 #' @description
-#' These functions were renamed in statart 0.2.0.9000. The old names still
+#' These functions were renamed in statart 0.3.0. The old names still
 #' work and give identical results with a lifecycle deprecation warning.
 #' They will be removed in a future release.
 #'
@@ -24,20 +24,20 @@ NULL
 #' @rdname statart-deprecated
 #' @export
 s_match <- function(...) {
-  lifecycle::deprecate_soft("0.2.0.9000", "s_match()", "varlist()")
+  lifecycle::deprecate_soft("0.3.0", "s_match()", "varlist()")
   varlist(...)
 }
 
 #' @rdname statart-deprecated
 #' @export
 s_type <- function(...) {
-  lifecycle::deprecate_soft("0.2.0.9000", "s_type()", "var_type()")
+  lifecycle::deprecate_soft("0.3.0", "s_type()", "var_type()")
   var_type(...)
 }
 
 #' @rdname statart-deprecated
 #' @export
 s_unit <- function(...) {
-  lifecycle::deprecate_soft("0.2.0.9000", "s_unit()", "var_unit()")
+  lifecycle::deprecate_soft("0.3.0", "s_unit()", "var_unit()")
   var_unit(...)
 }

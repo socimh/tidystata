@@ -36,7 +36,7 @@ class SourceStagingTests(unittest.TestCase):
             ".opencode/tools/library/pkg/DESCRIPTION",
             ".opencode/notes/screenshot.png", ".opencode/results/old.log",
             ".opencode/workflows/__pycache__/fixture.pyc", "src/fixture.o",
-            "src/statart.dll",
+            "src/statart.dll", ".Rd2pdf50804/Rd2.tex",
         }
         with tempfile.TemporaryDirectory(prefix="statart-staging-fixture-") as temporary:
             base = Path(temporary)

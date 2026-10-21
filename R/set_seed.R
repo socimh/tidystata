@@ -34,7 +34,7 @@
 #' sample(1:10, 8)
 set_seed <- function(x, seed, .fn = lifecycle::deprecated()) {
   if (!missing(.fn)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "set_seed(.fn)", "set_seed(x)")
+    lifecycle::deprecate_soft("0.3.0", "set_seed(.fn)", "set_seed(x)")
     # In old calls such as set_seed(.fn = f(), 1), the positional seed fills `x`.
     if (!missing(x) && missing(seed)) {
       seed <- x

@@ -848,15 +848,23 @@ joint_add(
     expect_equal(second$valid, first$valid)
   }
 )
-joint_data_case(
-  "deterministic 1000-row grouped survey",
-  tibble::tibble(
-    g = rep(letters[1:5], 200),
-    x = rep(c(1, 1, 2, 3, NA), 200),
-    y = rep(c("a", "b", "a", NA), 250)
-  ),
-  c("x", "y"),
-  "g"
+joint_add(
+  "deterministic 1000-row grouped survey via its complete 20-row period",
+  function(fun, is_fre) {
+    data <- tibble::tibble(
+      g = rep(letters[1:5], 4),
+      x = rep(c(1, 1, 2, 3, NA), 4),
+      y = rep(c("a", "b", "a", NA), 5)
+    )
+    before <- data
+    out <- fun(data, x, y, .by = g)
+    joint_check(out, data, c("x", "y"), "g", is_fre)
+    real <- out[!is.na(out$cum), , drop = FALSE]
+    # Fifty copies of this complete period gave the original survey counts.
+    expect_equal(sort(real$n * 50), c(rep(50, 10), rep(100, 5)))
+    expect_equal(sum(real$n * 50), 1000)
+    expect_identical(data, before)
+  }
 )
 joint_add("matrix columns reject unsupported structure", function(fun, is_fre) {
   data <- tibble::tibble(x = matrix(1:6, nrow = 3))

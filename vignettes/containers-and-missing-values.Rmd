@@ -34,9 +34,11 @@ class(summ(df, score))
 class(summ(tbl, score))
 ```
 
-New tables preserve a base data frame, tibble or data.table input. A list result
-remains a list, and each table inside follows the same rule. An explicit output
-option takes precedence:
+New tables from the `tab`, `summ`, `codebook` and `variables` families preserve
+a base data frame, tibble or data.table input. A list result remains a list, and
+each table inside follows the same rule. An explicit output option takes
+precedence. `pwcorr()`, `misstable()` and `duplicates_report()` are exceptions:
+they always return tibbles.
 
 ```{r list-and-override}
 base_tables <- tab1(df, answer, group)
@@ -157,18 +159,23 @@ every labelled refusal into an ordinary `NA`.
 
 ```{r calendar}
 mixed <- tibble(score = c(2, 4), day = as.Date("2024-01-01") + c(0, 2))
-separate <- summ(mixed, .stat = c("n", "min", "mean", "max"))
+separate <- summ(mixed, .stat = c("n", "min", "mean", "sd", "max"))
 names(separate)
 separate$numeric
 separate$date
-summ(mixed, .type = "table", .stat = c("n", "min", "mean", "max"))
+class(separate$date$sd)
+combined <- summ(mixed, .type = "table", .stat = c("n", "min", "mean", "sd", "max"))
+combined
+class(combined$sd)
 ```
 
-Default list mode keeps numeric statistics numeric in their own table. Table
-mode combines families, using character statistic columns when numeric and
-calendar output share them. Calendar statistics are formatted text in both
-modes. Use raw inputs and base R statistics when full calendar precision is
-needed. SD uses the sample denominator, quantiles use type 7, and these
+Default list mode keeps numeric statistics numeric in their own table. Calendar
+locations such as `min`, `mean` and `max` are formatted dates or date-times,
+while a spread such as `sd` stays a `difftime`. Table mode combines families.
+A location column shared by numeric and calendar rows becomes character, and the
+spread column becomes a plain number of days for dates or seconds for
+date-times, with the unit shown in the `type` column. Use raw inputs and base R
+statistics when full calendar precision is needed. SD uses the sample denominator, quantiles use type 7, and these
 conventions are not promises of exact Stata equivalence.
 
 ## A preview retains every row

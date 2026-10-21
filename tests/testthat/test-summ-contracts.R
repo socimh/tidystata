@@ -213,3 +213,101 @@ test_that("list mode keeps numeric statistics numeric alongside dates", {
   expect_identical(out$numeric$mean, NA_real_)
   expect_type(out$date$mean, "character")
 })
+
+
+# Shared scenarios 001-100 run through summ(); these exercise tabstat's own
+# argument handling and forwarding without repeating the numerical catalogue.
+test_that("tabstat keeps default and explicit detail requests distinct", {
+  data <- tibble::tibble(x = c(1, 3, NA))
+  default <- tabstat(data)
+  expect_identical(default, summ(data, .stat = "mean"))
+  expect_identical(names(default), c("type", "mean"))
+  expect_identical(default$mean, 2)
+  expect_identical(
+    tabstat(data, .detail = TRUE),
+    summ(data, .detail = TRUE, .stat = character())
+  )
+  explicit <- tabstat(data, .detail = TRUE, .stat = "mean")
+  expect_identical(explicit, default)
+  expect_identical(
+    tabstat(data, .stat = c("sum", "p50", "missing"), .name = TRUE),
+    summ(data, .stat = c("sum", "p50", "missing"), .name = TRUE)
+  )
+})
+
+test_that("tabstat names vector symbols, expressions and piped values", {
+  values <- c(1, 3)
+  expect_identical(tabstat(values, .name = TRUE)$name, "values")
+  expect_identical(tabstat(c(1, 3), .name = TRUE)$name, "c(1, 3)")
+  piped <- values %>% tabstat(.name = TRUE)
+  expect_identical(piped$name, "value")
+  table <- tabstat(values, .type = "table", .name = TRUE)
+  expect_identical(class(table), "data.frame")
+  expect_identical(table$mean, 2)
+})
+
+test_that("tabstat forwards grouped selections, weights and output controls", {
+  data <- tibble::tibble(
+    g = c("b", "a", "a", NA),
+    x = c(NA, 2, 4, 8),
+    y = c(1, 3, 5, 9),
+    w = c(1, 2, 1, 1)
+  )
+  before <- data
+  grouped <- dplyr::group_by(data, g)
+  for (input in list(data, grouped)) {
+    out <- tabstat(
+      input,
+      twice = x * 2,
+      y,
+      .by = g,
+      .wt = w,
+      .wt_type = "analytic",
+      .stat = c("mean", "sum"),
+      .missing = FALSE,
+      .name = TRUE,
+      .sort = FALSE,
+      .drop_empty = TRUE,
+      .type = "table"
+    )
+    expected <- summ(
+      input,
+      twice = x * 2,
+      y,
+      .by = g,
+      .wt = w,
+      .wt_type = "analytic",
+      .stat = c("mean", "sum"),
+      .missing = FALSE,
+      .name = TRUE,
+      .sort = FALSE,
+      .drop_empty = TRUE,
+      .type = "table"
+    )
+    expect_identical(out, expected)
+    expect_identical(out$name, c("y", "twice", "y"))
+  }
+  mixed <- tibble::tibble(x = 1:2, day = as.Date("2024-01-01") + 0:1)
+  expect_identical(
+    tabstat(mixed, .type = "list", .duration_format = "compact"),
+    summ(mixed, .stat = "mean", .type = "list", .duration_format = "compact")
+  )
+  expect_warning(
+    out <- tabstat(tibble::tibble(text = c("a", NA)), .keep_all = TRUE),
+    "non-numeric"
+  )
+  expect_true(is.na(out$mean))
+  expect_identical(data, before)
+})
+
+test_that("tabstat forwards deprecated grouping and output aliases", {
+  withr::local_options(lifecycle_verbosity = "warning")
+  data <- data.frame(g = c("a", NA), x = 1:2)
+  expect_warning(
+    old_missing <- tabstat(data, x, .by = g, .na.rm = TRUE),
+    "deprecated"
+  )
+  expect_identical(old_missing, tabstat(data, x, .by = g, .missing = FALSE))
+  expect_warning(old_type <- tabstat(data, x, .mode = "table"), "deprecated")
+  expect_identical(old_type, tabstat(data, x, .type = "table"))
+})

@@ -643,6 +643,7 @@ test_that("tab2() returns every pairwise table for three or more variables", {
     attr(suppressMessages(tab2(d, b, c, .chi2 = TRUE)), "chi2")
   )
   expect_error(tab2(d, a), "Provide two variables")
+  skip_if_not_installed("data.table")
   dt <- data.table::as.data.table(d)
   expect_s3_class(tab2(dt, a, b, c)[[1]], "data.table")
 })

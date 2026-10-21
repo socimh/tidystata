@@ -18,6 +18,17 @@ test_that("is_first() treats missing keys like Stata's tag()", {
   )
 })
 
+test_that("is_first() treats SPSS user-missing keys as missing", {
+  coded <- haven::labelled_spss(c(1, 99, 1, 99), na_values = 99)
+  expect_identical(is_first(coded), c(TRUE, FALSE, FALSE, FALSE))
+  expect_identical(
+    is_first(coded, .missing = TRUE),
+    c(TRUE, TRUE, FALSE, FALSE)
+  )
+  ranged <- haven::labelled_spss(c(97, 2, 98), na_range = c(90, 100))
+  expect_identical(is_first(ranged), c(FALSE, TRUE, FALSE))
+})
+
 test_that("is_first() without arguments flags the first row of each group", {
   panel <- tibble::tibble(id = c(1, 1, 2, 2, 2), year = 1:5)
   out <- dplyr::mutate(panel, first = is_first(), .by = id)

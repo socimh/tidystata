@@ -31,7 +31,7 @@ test_that("timer: works with pipe operations", {
 test_that("timer: handles complex expressions", {
   withr::local_preserve_seed()
   result <- timer({
-    x <- rnorm(1000)
+    x <- c(-2, 0, 1, 4)
     y <- summary(x)
     y
   })
@@ -74,7 +74,7 @@ test_that("timer: duration formatting covers unit boundaries without waiting", {
 
 test_that("timer: displays sub-second timing", {
   result <- capture_messages(
-    timer(Sys.sleep(0.01))
+    timer(invisible(NULL))
   )
   expect_true(any(grepl("Time spent", result)))
   # Should show milliseconds format
@@ -104,10 +104,10 @@ test_that("timer: displays minutes format for longer operations", {
 
 test_that("timer: works with data frame operations", {
   withr::local_preserve_seed()
-  df <- tibble::tibble(x = 1:1000, y = rnorm(1000))
+  df <- tibble::tibble(x = 1:4, y = c(-1, 2, 0, 3))
   result <- timer(df %>% dplyr::summarise(mean_x = mean(x), sd_y = sd(y)))
   expect_s3_class(result, "tbl_df")
-  expect_equal(result$mean_x, 500.5)
+  expect_equal(result$mean_x, 2.5)
 })
 
 test_that("timer: works with model fitting", {
@@ -119,19 +119,19 @@ test_that("timer: works with model fitting", {
 test_that("timer: works with iterative operations", {
   result <- timer({
     total <- 0
-    for (i in 1:1000) {
+    for (i in 1:4) {
       total <- total + i
     }
     total
   })
-  expect_equal(result, 500500)
+  expect_equal(result, 10)
 })
 
 test_that("timer: works with lapply/map operations", {
   result <- timer({
-    lapply(1:100, function(x) x^2) %>% unlist() %>% sum()
+    lapply(1:4, function(x) x^2) %>% unlist() %>% sum()
   })
-  expect_equal(result, sum((1:100)^2))
+  expect_equal(result, 30)
 })
 
 # ============================================================================
@@ -207,28 +207,18 @@ test_that("timer: works with nested function calls", {
 # CHALLENGING TESTS - Memory-Intensive Operations
 # ============================================================================
 
-test_that("timer: handles large data creation", {
-  withr::local_preserve_seed()
-  result <- timer({
-    large_df <- tibble::tibble(
-      x = rnorm(100000),
-      y = sample(letters, 100000, replace = TRUE),
-      z = Sys.time() + 1:100000
-    )
-    nrow(large_df)
-  })
-  expect_equal(result, 100000)
+test_that("timer: handles data creation and preserves the complete object", {
+  expected <- tibble::tibble(x = 1:3, y = letters[1:3])
+  result <- timer(tibble::tibble(x = 1:3, y = letters[1:3]))
+  expect_identical(result, expected)
 })
 
 test_that("timer: handles matrix operations", {
-  withr::local_preserve_seed()
   result <- timer({
-    mat <- matrix(rnorm(10000), nrow = 100)
-    eigen_vals <- eigen(crossprod(mat))$values
-    sum(eigen_vals)
+    mat <- matrix(1:6, nrow = 2)
+    crossprod(mat)
   })
-  expect_type(result, "double")
-  expect_true(result > 0)
+  expect_identical(result, matrix(c(5, 11, 17, 11, 25, 39, 17, 39, 61), 3))
 })
 
 # ============================================================================
@@ -266,22 +256,15 @@ test_that("timer: data analysis workflow", {
   expect_true(any(grepl("Time spent", analysis_result)))
 })
 
-test_that("timer: simulation workflow", {
-  withr::local_preserve_seed()
-  set.seed(42)
-  result <- timer({
-    # Monte Carlo simulation
-    n_sims <- 10000
-    estimates <- replicate(n_sims, {
-      sample_data <- rnorm(100, mean = 5, sd = 2)
-      mean(sample_data)
-    })
-    c(mean_est = mean(estimates), sd_est = sd(estimates))
-  })
-
-  expect_equal(length(result), 2)
-  expect_equal(names(result), c("mean_est", "sd_est"))
-  expect_true(abs(result["mean_est"] - 5) < 0.1)
+test_that("timer: repeated calls evaluate each expression once", {
+  state <- new.env(parent = emptyenv())
+  state$calls <- 0L
+  result <- timer(replicate(3, {
+    state$calls <- state$calls + 1L
+    state$calls * 2L
+  }))
+  expect_identical(state$calls, 3L)
+  expect_identical(result, c(2L, 4L, 6L))
 })
 
 # ============================================================================
@@ -291,18 +274,16 @@ test_that("timer: simulation workflow", {
 test_that("timer: reports duration and preserves the result compared to system.time", {
   st <- system.time(
     expected <- {
-      Sys.sleep(0.05)
       "done"
     }
   )
   messages <- capture_messages(
     result <- timer({
-      Sys.sleep(0.05)
       "done"
     })
   )
 
-  # Sleep and clock resolution vary; validate the reported duration and result.
+  # Clock resolution varies; validate the reported duration and result.
   expect_true(is.finite(st[["elapsed"]]))
   expect_identical(result, expected)
   expect_length(messages, 1)

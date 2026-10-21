@@ -66,7 +66,7 @@ na_if_value <- function(
   .value = lifecycle::deprecated()
 ) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "na_if_value(.x)", "na_if_value(x)")
+    lifecycle::deprecate_soft("0.3.0", "na_if_value(.x)", "na_if_value(x)")
     # In old calls such as na_if_value(.x = v, 9), the positional value fills `x`.
     if (!missing(x) && missing(value)) {
       value <- x
@@ -75,7 +75,7 @@ na_if_value <- function(
   }
   if (lifecycle::is_present(.value)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "na_if_value(.value)",
       "na_if_value(value)"
     )
@@ -100,7 +100,7 @@ value_if_na <- function(
   .value = lifecycle::deprecated()
 ) {
   if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.2.0.9000", "value_if_na(.x)", "value_if_na(x)")
+    lifecycle::deprecate_soft("0.3.0", "value_if_na(.x)", "value_if_na(x)")
     # In old calls such as value_if_na(.x = v, 9), the positional value fills `x`.
     if (!missing(x) && missing(value)) {
       value <- x
@@ -109,7 +109,7 @@ value_if_na <- function(
   }
   if (lifecycle::is_present(.value)) {
     lifecycle::deprecate_soft(
-      "0.2.0.9000",
+      "0.3.0",
       "value_if_na(.value)",
       "value_if_na(value)"
     )
