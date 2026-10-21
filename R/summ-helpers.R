@@ -233,29 +233,14 @@ summ_variable <- function(
   metadata
 ) {
   missing <- metadata$missing
-  unit <- metadata$unit
-  type <- metadata$type
-  # Calendar spreads carry their own difftime units, so the type stays bare.
-  if (!is.na(unit) && !calendar) {
-    type <- paste0(type, " [", unit, "]")
-  }
+  type <- summ_type_label(metadata, calendar)
   ids <- if ("unique" %in% requested && length(locs) > 1L) {
     vctrs::vec_group_id(var)
   } else {
     NULL
   }
 
-  quantile_names <- requested[grepl("^p[0-9]", requested)]
-  probabilities <- stats::setNames(
-    as.numeric(sub("^p", "", quantile_names)) / 100,
-    quantile_names
-  )
-  if (any(requested %in% c("q1", "iqr"))) {
-    probabilities["q1"] <- .25
-  }
-  if (any(requested %in% c("q3", "iqr"))) {
-    probabilities["q3"] <- .75
-  }
+  probabilities <- summ_probabilities(requested)
   mean_needed <- any(requested %in% c("mean", "skew", "kurtosis"))
   sd_needed <- any(requested %in% c("sd", "se", "skew", "kurtosis"))
   statistics <- setdiff(requested, "type")
@@ -356,43 +341,24 @@ summ_variable <- function(
   }
   mad_column <- function() {
     if (is.null(sorted)) {
-      return(apply_observed(stats::mad))
+      apply_observed(stats::mad)
+    } else {
+      summ_sorted_mad(sorted, nonempty)
     }
-    # As mad(): 1.4826 times the median absolute deviation from the median.
-    deviation <- abs(sorted$values - summ_sorted_median(sorted)[sorted$group])
-    typical <- summ_sorted_median(summ_sorted_groups(
-      deviation,
-      sorted$group,
-      n_val
-    ))
-    # median() returns NA when a deviation is NaN, such as Inf - Inf.
-    undefined <- tabulate(sorted$group[is.na(deviation)], nbins = length(locs))
-    typical[undefined > 0L] <- NA_real_
-    result <- rep(NA_real_, length(locs))
-    result[nonempty] <- 1.4826 * typical[nonempty]
-    result
   }
   moment <- function(power) {
+    if (many_small) {
+      return(summ_group_moment(numeric, kept, nonempty, center, spread, power))
+    }
     result <- rep(NA_real_, length(locs))
-    if (!many_small) {
-      result[nonempty] <- vapply(
-        nonempty,
-        function(i) {
-          sum((observed_list()[[i]] - center[[i]])^power) /
-            (n_val[[i]] * spread[[i]]^power)
-        },
-        numeric(1)
-      )
-      return(result)
-    }
-    if (!length(nonempty)) {
-      return(result)
-    }
-    rows <- unlist(kept, use.names = FALSE)
-    deviation <- rep(NA_real_, length(missing))
-    deviation[rows] <- (numeric[rows] - rep.int(center, n_val))^power
-    result[nonempty] <- group_sum_dbl(deviation, kept[nonempty]) /
-      (n_val[nonempty] * spread[nonempty]^power)
+    result[nonempty] <- vapply(
+      nonempty,
+      function(i) {
+        sum((observed_list()[[i]] - center[[i]])^power) /
+          (n_val[[i]] * spread[[i]]^power)
+      },
+      numeric(1)
+    )
     result
   }
   out <- list(type = rep(type, length(locs)))
@@ -403,19 +369,9 @@ summ_variable <- function(
       switch(
         statistic,
         n = as.integer(n_val),
-        unique = if (length(kept) == 1L) {
-          vctrs::vec_unique_count(vctrs::vec_slice(var, kept[[1L]]))
-        } else if (many_small) {
-          summ_group_unique(ids, kept, n_val)
-        } else {
-          vapply(kept, function(loc) length(unique(ids[loc])), integer(1))
-        },
+        unique = summ_unique_counts(var, ids, kept, n_val, many_small),
         miss_n = as.integer(lengths(locs) - n_val),
-        valid_pct = {
-          result <- n_val / lengths(locs)
-          result[lengths(locs) == 0L] <- NA_real_
-          result
-        },
+        valid_pct = summ_valid_pct(n_val, lengths(locs)),
         min = apply_segments(group_min_dbl),
         median = median_column(),
         mean = center,
@@ -431,6 +387,86 @@ summ_variable <- function(
     }
   }
   out[requested]
+}
+
+# The displayed type, with the unit appended for measured vectors. Calendar
+# spreads carry their own difftime units, so their type stays bare.
+summ_type_label <- function(metadata, calendar) {
+  if (is.na(metadata$unit) || calendar) {
+    metadata$type
+  } else {
+    paste0(metadata$type, " [", metadata$unit, "]")
+  }
+}
+
+# Named probabilities for requested percentiles (`p25` and so on), plus the
+# quartiles behind `q1`, `q3` and `iqr`.
+summ_probabilities <- function(requested) {
+  quantile_names <- requested[grepl("^p[0-9]", requested)]
+  probabilities <- stats::setNames(
+    as.numeric(sub("^p", "", quantile_names)) / 100,
+    quantile_names
+  )
+  if (any(requested %in% c("q1", "iqr"))) {
+    probabilities["q1"] <- .25
+  }
+  if (any(requested %in% c("q3", "iqr"))) {
+    probabilities["q3"] <- .75
+  }
+  probabilities
+}
+
+# Distinct values per group. `ids` holds vctrs group identities of `var`.
+summ_unique_counts <- function(var, ids, kept, n_val, many_small) {
+  if (length(kept) == 1L) {
+    vctrs::vec_unique_count(vctrs::vec_slice(var, kept[[1L]]))
+  } else if (many_small) {
+    summ_group_unique(ids, kept, n_val)
+  } else {
+    vapply(kept, function(loc) length(unique(ids[loc])), integer(1))
+  }
+}
+
+# Share of observed values in each group, NA for empty groups.
+summ_valid_pct <- function(n_val, sizes) {
+  result <- n_val / sizes
+  result[sizes == 0L] <- NA_real_
+  result
+}
+
+# As mad() for every group: 1.4826 times the median absolute deviation from
+# the median, read from values already sorted by group.
+summ_sorted_mad <- function(sorted, nonempty) {
+  deviation <- abs(sorted$values - summ_sorted_median(sorted)[sorted$group])
+  typical <- summ_sorted_median(summ_sorted_groups(
+    deviation,
+    sorted$group,
+    sorted$n
+  ))
+  # median() returns NA when a deviation is NaN, such as Inf - Inf.
+  undefined <- tabulate(
+    sorted$group[is.na(deviation)],
+    nbins = length(sorted$n)
+  )
+  typical[undefined > 0L] <- NA_real_
+  result <- rep(NA_real_, length(sorted$n))
+  result[nonempty] <- 1.4826 * typical[nonempty]
+  result
+}
+
+# Standardized central moment of every group at once, for many small groups.
+summ_group_moment <- function(numeric, kept, nonempty, center, spread, power) {
+  n_val <- lengths(kept)
+  result <- rep(NA_real_, length(kept))
+  if (!length(nonempty)) {
+    return(result)
+  }
+  rows <- unlist(kept, use.names = FALSE)
+  deviation <- rep(NA_real_, length(numeric))
+  deviation[rows] <- (numeric[rows] - rep.int(center, n_val))^power
+  result[nonempty] <- group_sum_dbl(deviation, kept[nonempty]) /
+    (n_val[nonempty] * spread[nonempty]^power)
+  result
 }
 
 # Observed values sorted by group, then by value. `values` and `group` are in
