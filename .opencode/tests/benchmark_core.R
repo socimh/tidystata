@@ -187,7 +187,7 @@ add(
 )
 add(
   "s_merge_m1", "keys",
-  function() s_merge(long, using, "m:1", by = "g10k", .report = FALSE),
+  function() s_merge(long, using, "m:1", by = "g10k", report = FALSE),
   dplyr = function() {
     dplyr::left_join(long, using, by = "g10k", relationship = "many-to-one")
   }
