@@ -212,17 +212,14 @@ summ <- function(
     .type <- .mode
   }
   # Validate controls before data-dependent branching.
-  controls <- list(
+  summ_check_flags(list(
     .keep_all = .keep_all,
     .detail = .detail,
     .missing = .missing,
     .name = .name,
     .sort = .sort,
     .drop_empty = .drop_empty
-  )
-  for (argument in names(controls)) {
-    check_bool(controls[[argument]], arg = argument)
-  }
+  ))
   summ_stat_names(.stat)
   .type <- rlang::arg_match(.type)
   .duration_format <- rlang::arg_match(.duration_format)
@@ -286,49 +283,9 @@ summ <- function(
   )
   .data <- summ_keep_measured(.data, .data_summ[names(metadata)], group_vars)
 
-  # Group keys must remain distinct from summary metadata and pivot fields.
-  reserved <- c(
-    "name",
-    "value",
-    "type",
-    "n",
-    "unique",
-    "min",
-    "mean",
-    "sd",
-    "max",
-    "miss_n",
-    "valid_pct",
-    "q1",
-    "median",
-    "mad",
-    "q3",
-    "iqr",
-    "skew",
-    "kurtosis",
-    "se",
-    "sum",
-    "missing",
-    "p25",
-    "p50",
-    "p75"
-  )
-  reserved <- unique(c(reserved, .stat))
-  for (position in which(group_vars %in% reserved)) {
-    old_name <- group_vars[[position]]
-    new_name <- paste0(".", old_name)
-    while (new_name %in% c(input_names, names(.data))) {
-      new_name <- paste0(".", new_name)
-    }
-    names(.data)[names(.data) == old_name] <- new_name
-    group_vars[[position]] <- new_name
-    reserved_name_inform(
-      old_name,
-      new_name,
-      "summ()",
-      what = "Grouping column"
-    )
-  }
+  renamed <- summ_rename_reserved_groups(.data, group_vars, input_names, .stat)
+  .data <- renamed$data
+  group_vars <- renamed$group_vars
   measured_count <- ncol(.data) - length(group_vars)
   # Keep observed counts internally when filtering a selected-statistic result.
   working_stats <- if (.drop_empty && length(.stat)) {
@@ -346,35 +303,9 @@ summ <- function(
     weight_type = .wt_type,
     metadata = metadata
   )
+  measured_names <- setdiff(names(.data), group_vars)
   finalize <- function(data) {
-    if (.drop_empty) {
-      data <- data[data$n > 0L, , drop = FALSE]
-      if (length(.stat) && !"n" %in% .stat) {
-        data$n <- NULL
-      }
-    }
-    if (.sort) {
-      # Strip only the marker added for this type; actual leading stars remain.
-      prefix_length <- ifelse(
-        !is_summable_chr(data$type),
-        3L,
-        ifelse(
-          data$type %in% c("fct", "ord"),
-          2L,
-          ifelse(stringr::str_detect(data$type, "lbl$"), 1L, 0L)
-        )
-      )
-      variable_positions <- match(
-        substring(data$name, prefix_length + 1L),
-        setdiff(names(.data), group_vars)
-      )
-      data <- dplyr::arrange(
-        data,
-        !!!rlang::syms(group_vars),
-        !!variable_positions
-      )
-    }
-    data
+    summ_finalize(data, group_vars, measured_names, .stat, .drop_empty, .sort)
   }
   out <- if (is.data.frame(out)) finalize(out) else lapply(out, finalize)
 
@@ -461,4 +392,97 @@ tabstat <- function(
 summ_vector_name <- function(expr) {
   name <- deparse(expr)
   if (length(name) > 1L || identical(name, ".")) "value" else name
+}
+
+# Summary statistic names, and the metadata and pivot columns of summ() output.
+# Grouping columns must not share these names.
+summ_reserved_names <- c(
+  "name",
+  "value",
+  "type",
+  "n",
+  "unique",
+  "min",
+  "mean",
+  "sd",
+  "max",
+  "miss_n",
+  "valid_pct",
+  "q1",
+  "median",
+  "mad",
+  "q3",
+  "iqr",
+  "skew",
+  "kurtosis",
+  "se",
+  "sum",
+  "missing",
+  "p25",
+  "p50",
+  "p75"
+)
+
+summ_check_flags <- function(flags, call = rlang::caller_env()) {
+  for (argument in names(flags)) {
+    check_bool(flags[[argument]], arg = argument, call = call)
+  }
+}
+
+# Prefix grouping columns that share a reserved name with dots, avoiding the
+# input's column names, and tell the user.
+summ_rename_reserved_groups <- function(data, group_vars, input_names, stat) {
+  reserved <- unique(c(summ_reserved_names, stat))
+  for (position in which(group_vars %in% reserved)) {
+    old_name <- group_vars[[position]]
+    new_name <- paste0(".", old_name)
+    while (new_name %in% c(input_names, names(data))) {
+      new_name <- paste0(".", new_name)
+    }
+    names(data)[names(data) == old_name] <- new_name
+    group_vars[[position]] <- new_name
+    reserved_name_inform(
+      old_name,
+      new_name,
+      "summ()",
+      what = "Grouping column"
+    )
+  }
+  list(data = data, group_vars = group_vars)
+}
+
+# Drop empty rows when asked, then order rows by group and by the position of
+# each variable in the input.
+summ_finalize <- function(
+  data,
+  group_vars,
+  measured_names,
+  stat,
+  drop_empty,
+  sort
+) {
+  if (drop_empty) {
+    data <- data[data$n > 0L, , drop = FALSE]
+    if (length(stat) && !"n" %in% stat) {
+      data$n <- NULL
+    }
+  }
+  if (!sort) {
+    return(data)
+  }
+  # Strip only the marker added for this type; actual leading stars remain.
+  prefix_length <- ifelse(
+    !is_summable_chr(data$type),
+    3L,
+    ifelse(
+      data$type %in% c("fct", "ord"),
+      2L,
+      ifelse(stringr::str_detect(data$type, "lbl$"), 1L, 0L)
+    )
+  )
+  variable_positions <- match(
+    substring(data$name, prefix_length + 1L),
+    measured_names
+  )
+  dplyr::arrange(data, !!!rlang::syms(group_vars), !!variable_positions)
 }
