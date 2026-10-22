@@ -1,6 +1,5 @@
-"""Offline checks for the remote compatibility handoff and hosted launcher."""
+"""Offline checks for the remote compatibility matrix and the local R launcher."""
 import json
-import importlib.util
 import os
 from pathlib import Path
 import re
@@ -8,16 +7,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from types import SimpleNamespace
-from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 LAUNCHER = ROOT / ".opencode/workflows/run_r_safe.py"
-sys.path.insert(0, str(ROOT / ".opencode/workflows"))
-SPEC = importlib.util.spec_from_file_location(
-    "ci_check", ROOT / ".opencode/workflows/ci_check.py")
-CI = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(CI)
 
 
 class CompatibilityWorkflowTests(unittest.TestCase):
@@ -32,40 +24,14 @@ class CompatibilityWorkflowTests(unittest.TestCase):
         self.assertEqual(len(rows), 6)
         self.assertIn("  workflow_dispatch:", workflow)
 
-    def test_windows_check_has_portable_protection_and_retained_diagnostics(self):
+    def test_every_runner_uses_the_standard_package_check(self):
+        # Hosted runners need no crash-dialog protection; the launcher is for
+        # local Windows runs only.
         workflow = (ROOT / ".github/workflows/R-CMD-check.yaml").read_text(encoding="utf-8")
-        self.assertIn("python .opencode/workflows/ci_check.py", workflow)
-        self.assertIn("runner.os == 'Windows'", workflow)
-        self.assertIn("always()", workflow)
-        self.assertIn("actions/upload-artifact@v4", workflow)
+        self.assertIn("r-lib/actions/check-r-package@v2", workflow)
+        self.assertNotIn("runner.os", workflow)
+        self.assertNotIn("ci_check.py", workflow)
         self.assertNotIn("C:/Users/", workflow)
-
-
-class HostedCheckTests(unittest.TestCase):
-    def test_failed_check_is_propagated_without_parsing_stale_logs(self):
-        with tempfile.TemporaryDirectory() as temporary, \
-                patch.object(CI, "DESTINATION", Path(temporary)), \
-                patch.object(CI.subprocess, "check_output", side_effect=["commit\n", ""]), \
-                patch.object(CI.subprocess, "run", return_value=SimpleNamespace(returncode=17)) as run:
-            self.assertEqual(CI.main(), 17)
-            self.assertEqual(run.call_count, 1)
-            self.assertEqual(
-                Path(run.call_args.kwargs["env"]["TIDYSTATA_R_LAUNCHER"]), LAUNCHER)
-            if os.name == "nt":
-                self.assertIn("run_r_safe.py", run.call_args.args[0][1])
-            receipt = json.loads((Path(temporary) / "source.json").read_text(encoding="utf-8"))
-            self.assertEqual(receipt["git_commit"], "commit")
-
-    def test_successful_process_still_requires_complete_condition_audit(self):
-        with tempfile.TemporaryDirectory() as temporary, \
-                patch.object(CI, "DESTINATION", Path(temporary)), \
-                patch.object(CI.subprocess, "check_output", side_effect=["commit\n", ""]), \
-                patch.object(CI.subprocess, "run", side_effect=[
-                    SimpleNamespace(returncode=0), SimpleNamespace(returncode=1)]) as run:
-            (Path(temporary) / "native-status.txt").write_text("0\n", encoding="utf-8")
-            self.assertEqual(CI.main(), 1)
-            self.assertEqual(run.call_count, 2)
-            self.assertIn("parse_check_result.R", " ".join(run.call_args.args[0]))
 
 
 class HostedLauncherTests(unittest.TestCase):
