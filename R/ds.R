@@ -30,10 +30,10 @@
 #' @seealso [variables()], [codebook()], [browse()]
 #'
 #' @examples
-#' ds(starwars) # equivalent to names(starwars)
-#' ds(starwars, homeworld:starships)
-#' ds(starwars, ends_with("color"), .type = "table")
-#' ds_as_column(starwars, where(is.character))
+#' ds(dplyr::starwars) # equivalent to names(dplyr::starwars)
+#' ds(dplyr::starwars, homeworld:starships)
+#' ds(dplyr::starwars, ends_with("color"), .type = "table")
+#' ds_as_column(dplyr::starwars, where(is.character))
 #'
 #' # Save a programmatic selection for later stages of a pipeline.
 #' numeric_names <- ds(lifeexp, where(is.numeric))

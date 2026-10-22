@@ -229,7 +229,7 @@ test_that("browse: works in dplyr pipeline", {
 })
 
 test_that("browse: chain with other operations", {
-  result <- starwars |>
+  result <- dplyr::starwars |>
     dplyr::select(name:mass) |>
     dplyr::filter(!is.na(mass)) |>
     browse(name, mass)

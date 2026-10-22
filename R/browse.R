@@ -26,12 +26,12 @@
 #'
 #' @examples
 #' if (interactive()) {
-#'   browse(starwars)
-#'   browse(starwars, name:mass)
-#'   browse(starwars, varlist("*color"))
+#'   browse(dplyr::starwars)
+#'   browse(dplyr::starwars, name:mass)
+#'   browse(dplyr::starwars, varlist("*color"))
 #'
 #'   # Retain the viewed columns for the next pipeline stage.
-#'   selected <- browse(starwars, name, height, mass)
+#'   selected <- browse(dplyr::starwars, name, height, mass)
 #'   summ(selected, height, mass)
 #' }
 browse <- function(.data, ...) {

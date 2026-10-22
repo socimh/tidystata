@@ -21,7 +21,7 @@ print(pwcorr(lifeexp, lexp, gnppc, .method = "spearman"))
 
 cat("```\n\n## Example 4: chi-square test with Cramer's V\n\n```\n")
 crossed <- withCallingHandlers(
-  tab2(starwars, sex, gender, .chi2 = TRUE),
+  tab2(dplyr::starwars, sex, gender, .chi2 = TRUE),
   message = function(m) {
     cat(conditionMessage(m), "\n", sep = "")
     invokeRestart("muffleMessage")

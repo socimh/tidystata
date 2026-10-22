@@ -156,10 +156,10 @@ codebook(lifeexp)
 #>   <chr>     <chr>                    <chr>        <int>  <int>
 #> 1 region    Region                   double+label    68      3
 #> 2 country   Country                  character       68     68
-#> 3 popgrowth Avg. annual % growth     double          68     30
-#> 4 lexp      Life expectancy at birth double          68     18
-#> 5 gnppc     GNP per capita           double          63     62
-#> 6 safewater Safe water               double          40     29
+#> 3 popgrowth Avg. annual % growth     double          68     32
+#> 4 lexp      Life expectancy at birth double          68     20
+#> 5 gnppc     GNP per capita           double          67     64
+#> 6 safewater Safe water               double          54     32
 ```
 
 ### summ()
@@ -200,7 +200,7 @@ mode preserves numeric statistic types in the numeric summary.
 Tabulate a single variable:
 
 ``` r
-tab(tidystata::starwars, sex)
+tab(dplyr::starwars, sex)
 #> # A tibble: 5 x 6
 #>   sex                n percent   cum valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
@@ -215,9 +215,9 @@ tab(tidystata::starwars, sex)
 select variables in a Stata style.
 
 ``` r
-tab1(tidystata::starwars, varlist("*color"))
+tab1(dplyr::starwars, varlist("*color"))
 #> $hair_color
-#> # A tibble: 13 x 6
+#> # A tibble: 12 x 6
 #>    value             n percent    cum valid valid_cum
 #>    <chr>         <int>   <dbl>  <dbl> <dbl>     <dbl>
 #>  1 auburn            1    1.15   1.15  1.22      1.22
@@ -229,10 +229,9 @@ tab1(tidystata::starwars, varlist("*color"))
 #>  7 brown            18   20.7   43.7  22.0      46.3 
 #>  8 brown, grey       1    1.15  44.8   1.22     47.6 
 #>  9 grey              1    1.15  46.0   1.22     48.8 
-#> 10 none             37   42.5   88.5  45.1      93.9 
-#> 11 unknown           1    1.15  89.7   1.22     95.1 
-#> 12 white             4    4.60  94.3   4.88    100   
-#> 13 <NA>              5    5.75 100    NA        NA   
+#> 10 none             38   43.7   89.7  46.3      95.1 
+#> 11 white             4    4.60  94.3   4.88    100   
+#> 12 <NA>              5    5.75 100    NA        NA   
 #> 
 #> $skin_color
 #> # A tibble: 31 x 6
@@ -278,7 +277,7 @@ lists by default. Matrix columns are unsupported.
 `tab2()` cross-tabulates two variables.
 
 ``` r
-tab2(tidystata::starwars, sex, gender)
+tab2(dplyr::starwars, sex, gender)
 #> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
@@ -299,7 +298,7 @@ container. `fre1()` returns a list whose tables preserve that container.
 Request `.type = "tibble"` explicitly when a tibble is required.
 
 ``` r
-fre(tidystata::starwars, sex)
+fre(dplyr::starwars, sex)
 #> # A tibble: 7 x 6
 #>   sex                n percent   cum  valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
@@ -316,7 +315,7 @@ For optional rich formatting, install `flextable` and request it
 explicitly:
 
 ``` r
-fre(tidystata::starwars, sex, .type = "flextable")
+fre(dplyr::starwars, sex, .type = "flextable")
 ```
 
 ### Row calculations and binning

@@ -7,26 +7,30 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
-**Rename to tidystata, 2026-10-22 (branch `refactor/tidyverse-conventions`):**
-the package, its S3 classes, native symbols, help topics, `.Rproj`, workflow
-environment variables (`TIDYSTATA_*`) and GitHub/pkgdown/CRAN URLs move from
-statart to tidystata; NEWS records the rename. `.opencode/notes/` keeps the
-old name as read-only source material, and `inst/DATA-PROVENANCE.md` keeps the
-historical statart commit reference. The preceding R Packages conformance pass
-(native pipe throughout, `?tab` Details, regrouped NEWS) is commit `e76fb89`.
-Older dated entries are in Git history.
+**Dataset distribution resolved, 2026-10-22 (branch
+`refactor/tidyverse-conventions`):** `lifeexp` is rebuilt from World Bank WDI
+(CC BY 4.0) by `data-raw/lifeexp.R` from the dated snapshot
+`data-raw/lifeexp-wdi.csv`, keeping its columns, labels, region coding and
+missing values. The bundled `starwars` and `inst/THIRD-PARTY-NOTICES.md` are
+removed; examples, tests, vignettes and demos use `dplyr::starwars`, and
+Imports require `dplyr (>= 1.1.4)`. NEWS, MIGRATION and
+`inst/DATA-PROVENANCE.md` record both changes. The package rename to tidystata
+is commit `2598ddc`; the GitHub repository is renamed and `origin` points to
+`socimh/tidystata`. A separate session re-audited the 2024 CRAN review items;
+its open items, the unquoted 'tidyverse' in Description and the shipped
+`devtools::install()` call in `inst/examples/00_install.R`, are fixed, and
+`cran-comments.md` is drafted. Older dated entries are in Git history.
 
-Verification: pinned style/parse/lint **145 sources, 0 findings** (six files
-re-wrapped by Air for the longer name); `cpp11::cpp_register()` and help
-regenerated; README re-rendered (wrapping only); migration copies current;
-45 workflow Python tests pass. `--release`: fresh build, `R CMD check
---as-cran` **0 errors, 0 warnings, 1 NOTE** (new submission; ten
-`socimh/tidystata` GitHub and pkgdown URLs return 404 until the repository is
-renamed and the site deployed), tests inside check **18,477 passing,
-0 failures/warnings** (21 snapshot blocks skipped there), installed resources
-pass, and the workflow's `snapshots` stage now passes against the bundle
-(21 blocks, 0 failures). All 24 demos pass; report diffs are the package name,
-column widths, timings and the unseeded `cut` example.
+Verification: pinned style/parse/lint **143 sources, 0 findings**; help
+regenerated (`starwars.Rd` removed); README re-rendered (lifeexp codebook
+counts and the dplyr 1.1.4 `starwars` colour table changed); migration copies
+current. Full suite **18,501 passing, 0 failures/warnings** (3,187 blocks).
+`--release`: fresh build, `R CMD check --as-cran` **0 errors, 0 warnings,
+1 NOTE** (new submission; five pkgdown article URLs return 404 until the site
+is deployed), tests inside check **18,477 passing, 0 failures/warnings**
+(21 snapshot blocks skipped there), `snapshots` stage 21 blocks with
+0 failures, installed resources pass. All 24 demos pass; the readiness demo
+now checks that `lifeexp` is the only shipped dataset.
 
 ## Package map
 
@@ -35,7 +39,8 @@ Twelve are quiet aliases (`xtab`, `na_if_value`, `value_if_na`, `as_numeric`,
 `as_character`, `pct`, `s_tag`, `tab_gen`, `cut_quantile`, `s_try`,
 `ds_as_column`, `names_as_column`) documented on their primary's help page, and
 three are deprecated (`s_match`, `s_type`, `s_unit`). The package has 16
-required Imports, two bundled datasets (`lifeexp`, `starwars`), and cpp11
+required Imports, one bundled dataset (`lifeexp`; examples also use
+`dplyr::starwars`), and cpp11
 native row kernels. R >= 4.1 is required; sources, tests and examples use `|>`.
 
 | Area | Public functions |
@@ -103,8 +108,7 @@ The user-approved follow-up decisions remain binding:
   older readiness triage dispositions deferring them are superseded.
 
 Mixed calendar/numeric location columns in table mode remain character; choose
-list mode to retain separate numeric tables. `starwars` attachment masking is
-normal namespace lookup; use qualified dataset names. Existing container,
+list mode to retain separate numeric tables. Existing container,
 missingness, grouping, class and locale boundaries are documented in migration
 and help. The old long-duration summary formatter was replaced by duration
 columns; its historical wording checks are not current formatter coverage.
@@ -172,16 +176,15 @@ show generated console output.
   against StataNow 19. Round 7 added `assert()`, `is_first()` (Stata's
   `egen tag()`; renamed by the maintainer because `tag` clashes with
   htmltools/shiny) and `print_all()`. The ranked gap list is complete.
-- **Dataset distribution:** keep both datasets and notices unchanged and hold
-  public distribution pending dataset-specific evidence. For `lifeexp`, establish
-  terms for the historical World Bank Learning Modules selection and Stata-derived
-  file. For `starwars`, establish the compiled-data permission/notice chain across
-  pinned dplyr 1.1.3, SWAPI and additional research; dplyr's MIT software notice
-  alone does not resolve it. Supply evidence or separately authorize clarification
-  requests; replacement or relicensing requires another decision.
+- **Dataset distribution (decided 2026-10-22):** the maintainer chose to
+  rebuild `lifeexp` from World Bank WDI (CC BY 4.0; `data-raw/lifeexp.R` and
+  its dated snapshot) and to drop the bundled `starwars` for `dplyr::starwars`
+  with `dplyr (>= 1.1.4)`, whose `starwars.rda` is byte-identical from 1.1.4
+  to the current main branch. `inst/DATA-PROVENANCE.md` records the source,
+  indicators and changes; the distribution gate is closed.
 - **Remote compatibility:** six OS/R jobs and eleven exact dependency-floor cases
   are configured but actual hosted execution remains pending. Run only after
-  distribution evidence and separate upload/dispatch authorization, recording
+  separate upload/dispatch authorization, recording
   candidate identity, exact versions, logs, skips and native exits. Local Windows
   R 4.6 checks do not establish R 4.1, dependency floors or other platforms.
 - **Interactive viewers:** obtain actual selected/all/grouped observations in
@@ -194,9 +197,9 @@ show generated console output.
   cycle, the 0.3.0 deprecations removed or moved to `deprecate_stop()`, the
   remote platform and dependency-floor checks run, and README no longer calls
   the package experimental.
-- **Publication:** rename the GitHub repository to `socimh/tidystata` and
-  update the local `origin` remote, then deploy the site so the ten URLs in
-  the incoming NOTE resolve. Review release version/metadata.
+- **Publication:** push and deploy the site so the five article URLs in the
+  incoming NOTE resolve; review release version/metadata and
+  `cran-comments.md`.
   Existing incoming-check notes require a recorded publication decision. Local
   verification does not authorize push, deployment, release or submission.
 - **Remaining follow-up:** duration display rounding at unit boundaries still

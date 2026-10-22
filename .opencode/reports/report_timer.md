@@ -1,6 +1,6 @@
 # Function: timer()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:22 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:10 | **Status:** PASS
 
 ## Example 1: Basic timing
 
@@ -11,7 +11,7 @@ timer(Sys.sleep(0.5))
 **Output:**
 
 ```
-Time spent: 0.516s
+Time spent: 0.513s
 ```
 
 ## Example 2: Timing with return value
@@ -24,7 +24,7 @@ result
 **Output:**
 
 ```
-Time spent: 0.003s
+Time spent: 0.004s
 ```
 
 **Return value:**

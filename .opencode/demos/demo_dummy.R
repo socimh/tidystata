@@ -15,7 +15,7 @@ totals <- tapply(scaled$share, vctrs::vec_data(scaled$region), sum)
 stopifnot(all(abs(totals - 100) < 1e-8))
 
 cat("```\n\n## Example 2: indicator columns after their source\n\n```\n")
-dummies <- as_dummy(starwars, sex)
+dummies <- as_dummy(dplyr::starwars, sex)
 print(dplyr::select(dummies, name, dplyr::starts_with("sex")))
 print(attr(dummies$sex_male, "label"))
 

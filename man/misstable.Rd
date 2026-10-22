@@ -51,10 +51,10 @@ observed values, unlike Stata's missing string; convert them first with
 columns.
 }
 \examples{
-misstable(starwars)
-misstable(starwars, .all = TRUE)
-misstable(starwars, height, mass, birth_year, .patterns = TRUE)
-misstable(starwars, height, mass, .by = sex)
+misstable(dplyr::starwars)
+misstable(dplyr::starwars, .all = TRUE)
+misstable(dplyr::starwars, height, mass, birth_year, .patterns = TRUE)
+misstable(dplyr::starwars, height, mass, .by = sex)
 }
 \seealso{
 Other inspection functions:

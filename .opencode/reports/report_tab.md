@@ -1,6 +1,6 @@
 # Function: tab()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:21 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:09 | **Status:** PASS
 
 ## Example 1: Basic frequency table
 
@@ -66,10 +66,10 @@ tab(df, x, .by = g)
 6 y <NA> 1 33.33333 100.00000    NA        NA
 ```
 
-## Example 5: With starwars data
+## Example 5: With dplyr::starwars data
 
 ```r
-tab(starwars, sex)
+tab(dplyr::starwars, sex)
 ```
 
 **Output:**
@@ -88,7 +88,7 @@ tab(starwars, sex)
 ## Example 6: Multiple variables
 
 ```r
-tab(starwars, sex, gender)
+tab(dplyr::starwars, sex, gender)
 ```
 
 **Output:**
@@ -108,7 +108,7 @@ tab(starwars, sex, gender)
 ## Example 7: With boolean expression
 
 ```r
-tab(starwars, tall = height > 180)
+tab(dplyr::starwars, tall = height > 180)
 ```
 
 **Output:**
@@ -125,7 +125,7 @@ tab(starwars, tall = height > 180)
 ## Example 8: Cross-tabulation (tab2)
 
 ```r
-tab2(starwars, sex, gender)
+tab2(dplyr::starwars, sex, gender)
 ```
 
 **Output:**

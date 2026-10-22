@@ -176,14 +176,14 @@ numeric statistic types in the numeric summary.
 Tabulate a single variable:
 
 ```{r}
-tab(tidystata::starwars, sex)
+tab(dplyr::starwars, sex)
 ```
 
 `tab1()` tabulates variables one by one as a list, and `varlist()` can select variables in a Stata style.
 
 
 ```{r}
-tab1(tidystata::starwars, varlist("*color"))
+tab1(dplyr::starwars, varlist("*color"))
 ```
 
 One-way tabulation also counts list-column values. Selecting no variables
@@ -193,7 +193,7 @@ Matrix columns are unsupported.
 `tab2()` cross-tabulates two variables.
 
 ```{r}
-tab2(tidystata::starwars, sex, gender)
+tab2(dplyr::starwars, sex, gender)
 ```
 
 
@@ -206,13 +206,13 @@ tab2(tidystata::starwars, sex, gender)
 `.type = "tibble"` explicitly when a tibble is required.
 
 ```{r}
-fre(tidystata::starwars, sex)
+fre(dplyr::starwars, sex)
 ```
 
 For optional rich formatting, install `flextable` and request it explicitly:
 
 ```r
-fre(tidystata::starwars, sex, .type = "flextable")
+fre(dplyr::starwars, sex, .type = "flextable")
 ```
 
 ### Row calculations and binning

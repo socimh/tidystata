@@ -50,8 +50,8 @@ print(tryCatch(
 cat(
   "```\n\n## Example 6: tab2() cross-tabulates, optionally with totals\n\n```\n"
 )
-print(tab2(starwars, sex, gender))
-print(tab2(starwars, sex, gender, .total = TRUE))
+print(tab2(dplyr::starwars, sex, gender))
+print(tab2(dplyr::starwars, sex, gender, .total = TRUE))
 cat("```\n\n## Example 7: duplicate metadata is safe for grouped data\n\n```\n")
 grouped <- dplyr::group_by(panel, id)
 listed <- duplicates_list(grouped, id, wave)

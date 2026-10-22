@@ -1,6 +1,6 @@
 # Function: readiness()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:21 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:09 | **Status:** PASS
 
 ## Example 1: Calendar spreads as comparable difftime columns
 
@@ -72,12 +72,13 @@ $date
 3 Total     3   100    NA    NA        NA
 ```
 
-## Example 6: Namespace-qualified datasets
+## Example 6: Shipped and referenced datasets
 
 ```
-tidystata     dplyr
-       87        87
-[1] "package:dplyr"     "package:tidystata"
+     Item
+"lifeexp"
+ lifeexp starwars
+      68       87
 ```
 
 ## Example 7: Missing argument diagnostic
@@ -115,6 +116,6 @@ Levels: [11,12.5] < (12.5,14]
 
 ```
 Time spent: 0.000s
-Time spent: 0.004s
+Time spent: 0.005s
 No duration threshold is asserted. Each timer measures its own expression.
 ```

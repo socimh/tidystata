@@ -1,6 +1,6 @@
 # Function: fre()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:20 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:08 | **Status:** PASS
 
 ## Example 1: Basic frequency with Total
 
@@ -61,10 +61,10 @@ fre(mtcars, gear, .by = cyl, .type = 'tibble')
 11     8 Total    14  100     NA    NA        NA
 ```
 
-## Example 4: With starwars data
+## Example 4: With dplyr::starwars data
 
 ```r
-fre(starwars, sex, .type = 'tibble')
+fre(dplyr::starwars, sex, .type = 'tibble')
 ```
 
 **Output:**
@@ -105,7 +105,7 @@ fre(df, x, .type = 'tibble')
 ## Example 6: fre1() for multiple variables
 
 ```r
-fre1(starwars, sex, gender, .type = 'tibble')
+fre1(dplyr::starwars, sex, gender, .type = 'tibble')
 ```
 
 **Output:**

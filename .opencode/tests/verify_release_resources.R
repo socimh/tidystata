@@ -116,7 +116,6 @@ stopifnot(
 for (name in c(
   "MIGRATION.md",
   "DATA-PROVENANCE.md",
-  "THIRD-PARTY-NOTICES.md",
   "examples/README.md"
 )) {
   path <- system.file(name, package = "tidystata", mustWork = TRUE)

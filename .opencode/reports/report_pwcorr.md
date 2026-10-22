@@ -1,6 +1,6 @@
 # Function: pwcorr()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:21 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:09 | **Status:** PASS
 
 ## Example 1: pairwise correlations with n and p
 
@@ -8,9 +8,9 @@
 # A tibble: 3 x 5
   var1  var2          r     n        p
   <chr> <chr>     <dbl> <int>    <dbl>
-1 lexp  gnppc     0.718    63 3.45e-11
-2 lexp  safewater 0.830    40 3.65e-11
-3 gnppc safewater 0.706    37 1.04e- 6
+1 lexp  gnppc     0.733    67 1.79e-12
+2 lexp  safewater 0.760    54 2.74e-11
+3 gnppc safewater 0.657    53 8.95e- 8
 ```
 
 ## Example 2: the matrix as Stata prints it
@@ -20,8 +20,8 @@
   variable   lexp  gnppc safewater
   <chr>     <dbl>  <dbl>     <dbl>
 1 lexp      1     NA            NA
-2 gnppc     0.718  1            NA
-3 safewater 0.830  0.706         1
+2 gnppc     0.733  1            NA
+3 safewater 0.760  0.657         1
 ```
 
 ## Example 3: by group and with Spearman correlations
@@ -30,13 +30,13 @@
 # A tibble: 3 x 6
   region               var1  var2      r     n        p
   <dbl+lbl>            <chr> <chr> <dbl> <int>    <dbl>
-1 1 [Europe & C. Asia] lexp  gnppc 0.819    41 5.77e-11
-2 2 [North America]    lexp  gnppc 0.568    12 5.39e- 2
-3 3 [South America]    lexp  gnppc 0.625    10 5.35e- 2
+1 1 [Europe & C. Asia] lexp  gnppc 0.792    43 2.57e-10
+2 2 [North America]    lexp  gnppc 0.658    14 1.05e- 2
+3 3 [South America]    lexp  gnppc 0.640    10 4.60e- 2
 # A tibble: 1 x 5
   var1  var2      r     n        p
   <chr> <chr> <dbl> <int>    <dbl>
-1 lexp  gnppc 0.802    63 2.94e-15
+1 lexp  gnppc 0.861    67 9.53e-21
 ```
 
 ## Example 4: chi-square test with Cramer's V

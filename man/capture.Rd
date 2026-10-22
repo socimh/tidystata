@@ -37,7 +37,7 @@ capture(mean(letters[1:10]))
 capture(means(1:10))
 
 # Check a key without stopping the script
-capture(isid(starwars, name))
+capture(isid(dplyr::starwars, name))
 }
 \seealso{
 Other utility functions:

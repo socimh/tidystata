@@ -9,24 +9,29 @@ A tibble with 68 rows and 6 variables:
 \describe{
 \item{region}{Region (with value labels)}
 \item{country}{Country}
-\item{popgrowth}{Average annual population growth rate (\%)}
+\item{popgrowth}{Annual population growth rate (\%)}
 \item{lexp}{Life expectancy at birth (years)}
-\item{gnppc}{GNP per capita}
-\item{safewater}{Safe water (\%)}
+\item{gnppc}{GNI per capita, Atlas method (current US$)}
+\item{safewater}{People using safely managed drinking water services
+(\% of population) in 2000}
 }
 }
 \source{
-Embedded notes identify historical World Bank data. A verified
-reconstruction uses \url{https://www.stata-press.com/data/r17/lifeexp.dta}
-and preserves the historical note ordering. The original import release
-is unknown. See the installed \code{DATA-PROVENANCE.md} for details.
+World Bank, World Development Indicators,
+\url{https://datacatalog.worldbank.org/search/dataset/0037712}, licensed under
+CC BY 4.0 (\url{https://creativecommons.org/licenses/by/4.0/}). Indicators
+\code{SP.POP.GROW}, \code{SP.DYN.LE00.IN} and \code{NY.GNP.PCAP.CD} for 1998 and
+\code{SH.H2O.SMDW.ZS} for 2000; values are rounded. Country names follow WDI,
+and Serbia stands in for the Federal Republic of Yugoslavia. See the
+installed \code{DATA-PROVENANCE.md} for the retrieval date and build script.
 }
 \usage{
 lifeexp
 }
 \description{
-Imported from the example dataset \code{lifeexp.dta} in Stata.
-This dataset contains variable labels and value labels.
+Country indicators for 1998 from the World Bank's World Development
+Indicators, arranged like Stata's \code{lifeexp.dta} example. This dataset
+contains variable labels, value labels and missing values.
 }
 \examples{
 lifeexp

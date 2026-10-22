@@ -27,9 +27,11 @@ print(tab(c(1, 1, 2)))
 print(fre(c(1, 1, 2)))
 stopifnot(identical(fre(c(1, 1, 2)), fre(tibble::tibble(value = c(1, 1, 2)))))
 
-cat("```\n\n## Example 6: Namespace-qualified datasets\n\n```\n")
-print(c(tidystata = nrow(tidystata::starwars), dplyr = nrow(dplyr::starwars)))
-print(find("starwars"))
+cat("```\n\n## Example 6: Shipped and referenced datasets\n\n```\n")
+shipped <- utils::data(package = "tidystata")$results[, "Item"]
+print(shipped)
+print(c(lifeexp = nrow(lifeexp), starwars = nrow(dplyr::starwars)))
+stopifnot(identical(unname(shipped), "lifeexp"))
 
 cat("```\n\n## Example 7: Missing argument diagnostic\n\n```\n")
 diagnostic <- tryCatch(na_if_value(4), error = conditionMessage)

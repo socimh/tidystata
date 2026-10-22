@@ -1,14 +1,9 @@
 # Function: browse()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:19 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:07 | **Status:** PASS
 
 
 Attaching package: 'dplyr'
-
-
-The following object is masked from 'package:tidystata':
-
-    starwars
 
 
 The following objects are masked from 'package:stats':
@@ -197,10 +192,10 @@ Maserati Bora          FALSE 15.0 335
 Volvo 142E              TRUE 21.4 109
 ```
 
-## Example 5: Browse starwars
+## Example 5: Browse dplyr::starwars
 
 ```r
-browse(starwars, species == 'Human', name, height, mass)
+browse(dplyr::starwars, species == 'Human', name, height, mass)
 ```
 
 **Output:**

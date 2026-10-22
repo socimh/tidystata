@@ -46,15 +46,15 @@ column appears only when at least one selected variable has a usable label;
 unlabelled variables then have \code{NA} labels.
 }
 \examples{
-starwars
+dplyr::starwars
 
-codebook(starwars)
+codebook(dplyr::starwars)
 
-codebook(starwars, 1:4)
+codebook(dplyr::starwars, 1:4)
 
-codebook(starwars, ends_with("color"))
+codebook(dplyr::starwars, ends_with("color"))
 
-codebook(starwars, where(is.numeric))
+codebook(dplyr::starwars, where(is.numeric))
 
 codebook(lifeexp)
 

@@ -256,28 +256,28 @@ If the output tibble has many rows, consider using
 }
 \examples{
 # tabulate the 8th column
-tab(starwars, 8)
+tab(dplyr::starwars, 8)
 
 # tabulate the "sex" column
-tab(starwars, sex)
+tab(dplyr::starwars, sex)
 
-tab(starwars, sex, .desc = TRUE)
+tab(dplyr::starwars, sex, .desc = TRUE)
 
-fre(starwars, sex)
+fre(dplyr::starwars, sex)
 
-fre(starwars, sex, .desc = TRUE)
+fre(dplyr::starwars, sex, .desc = TRUE)
 
-tab(starwars, sex, gender)
+tab(dplyr::starwars, sex, gender)
 
-tab(starwars, sex == "male")
+tab(dplyr::starwars, sex == "male")
 
-tab(starwars, male = sex == "male")
+tab(dplyr::starwars, male = sex == "male")
 
-tab(starwars, ends_with("color"))
+tab(dplyr::starwars, ends_with("color"))
 
-tab(starwars, varlist("s*e"))
+tab(dplyr::starwars, varlist("s*e"))
 
-tab(starwars)
+tab(dplyr::starwars)
 
 tab(c(1, 1, 2, NA))
 
@@ -288,34 +288,34 @@ survey <- tibble::tibble(edu = c("low", "high", "high"), w = c(2, 1, 1.5))
 tab(survey, edu, .wt = w)
 tab(survey, edu, .wt = w, .wt_type = "analytic")
 
-tab(starwars, sex, .by = species, .group_order = "frequency")
+tab(dplyr::starwars, sex, .by = species, .group_order = "frequency")
 
-tab1(starwars, 1:3)
+tab1(dplyr::starwars, 1:3)
 
-tab1(starwars, ends_with("color"))
+tab1(dplyr::starwars, ends_with("color"))
 
-tab1(starwars, ends_with("color"), .type = "tibble")
+tab1(dplyr::starwars, ends_with("color"), .type = "tibble")
 
-fre1(starwars, ends_with("color"))
+fre1(dplyr::starwars, ends_with("color"))
 
-fre1(starwars, ends_with("color"), .type = "list")
+fre1(dplyr::starwars, ends_with("color"), .type = "list")
 
-tab(starwars, sex, .total = TRUE)
+tab(dplyr::starwars, sex, .total = TRUE)
 
-tab2(starwars, sex, gender)
+tab2(dplyr::starwars, sex, gender)
 
-tab2(starwars, height, gender)
+tab2(dplyr::starwars, height, gender)
 
-fre2(starwars, height, gender)
+fre2(dplyr::starwars, height, gender)
 
 # Every pairwise table, like Stata's tab2 sex gender eye_color
-tab2(starwars, sex, gender, eye_color)
+tab2(dplyr::starwars, sex, gender, eye_color)
 
 # One cross-table per group, like Stata's by species: tab sex gender
-tab2(starwars, sex, gender, .by = species) |> head(2)
+tab2(dplyr::starwars, sex, gender, .by = species) |> head(2)
 
 # Chi-square test of independence, like Stata's tab x y, chi2 V
-chi2 <- tab2(starwars, sex, gender, .chi2 = TRUE)
+chi2 <- tab2(dplyr::starwars, sex, gender, .chi2 = TRUE)
 attr(chi2, "chi2")
 }
 \seealso{

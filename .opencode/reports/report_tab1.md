@@ -1,11 +1,11 @@
 # Function: tab1()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:21 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:09 | **Status:** PASS
 
 ## Example 1: Basic one-way table
 
 ```r
-tab1(starwars, sex)
+tab1(dplyr::starwars, sex)
 ```
 
 **Output:**
@@ -26,7 +26,7 @@ $sex
 ## Example 2: Multiple variables
 
 ```r
-tab1(starwars, sex, gender)
+tab1(dplyr::starwars, sex, gender)
 ```
 
 **Output:**
@@ -55,7 +55,7 @@ $gender
 ## Example 3: With boolean expression
 
 ```r
-tab1(starwars, tall = height > 180)
+tab1(dplyr::starwars, tall = height > 180)
 ```
 
 **Output:**
@@ -74,7 +74,7 @@ $tall
 ## Example 4: With tibble output
 
 ```r
-tab1(starwars, sex, gender, .type = 'tibble')
+tab1(dplyr::starwars, sex, gender, .type = 'tibble')
 ```
 
 **Output:**
@@ -96,7 +96,7 @@ tab1(starwars, sex, gender, .type = 'tibble')
 ## Example 5: With tidyselect
 
 ```r
-tab1(starwars, ends_with('color'))
+tab1(dplyr::starwars, ends_with('color'))
 ```
 
 **Output:**
@@ -160,7 +160,7 @@ $eye_color
 ## Example 6: Named expression
 
 ```r
-tab1(starwars, human = species == 'Human')
+tab1(dplyr::starwars, human = species == 'Human')
 ```
 
 **Output:**

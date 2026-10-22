@@ -5,6 +5,13 @@
 * The package is renamed from statart to tidystata. Use `library(tidystata)`
   and `tidystata::` in place of `library(statart)` and `statart::`.
 
+* The bundled `starwars` dataset is removed; use `dplyr::starwars`. dplyr
+  1.1.4 or later is now required, so every supported dplyr ships the same
+  data. `lifeexp` is rebuilt from World Bank World Development Indicators
+  (CC BY 4.0) with the same columns, labels and countries; its values are the
+  World Bank's current 1998 figures, and `safewater` is now the 2000 share
+  using safely managed drinking water. See the installed `DATA-PROVENANCE.md`.
+
 * tidystata now focuses on exploring and preparing data. `read_data()`,
   `write_data()`, `esttab()`, `codebook_detail()`, `tidy_coef()`, the
   regression wrappers (`regress()`, `regress_data()`, `regress_coef()`,

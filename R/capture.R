@@ -23,7 +23,7 @@
 #' capture(means(1:10))
 #'
 #' # Check a key without stopping the script
-#' capture(isid(starwars, name))
+#' capture(isid(dplyr::starwars, name))
 #' @family utility functions
 NULL
 

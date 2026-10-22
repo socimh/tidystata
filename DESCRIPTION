@@ -2,11 +2,7 @@ Package: tidystata
 Title: Tidy Tools Inspired by 'Stata'
 Version: 0.3.0
 Authors@R: 
-    c(
-      person("Minghong", "Shen", , "mhshenaa@connect.ust.hk", role = c("aut", "cre", "cph")),
-      person("dplyr authors", role = "cph",
-             comment = "starwars data and documentation derived from dplyr 1.1.3; see inst/THIRD-PARTY-NOTICES.md")
-    )
+    person("Minghong", "Shen", , "mhshenaa@connect.ust.hk", role = c("aut", "cre", "cph"))
 Description: Tools inspired by 'Stata' for exploring and preparing data in R.
     Provides frequency tables, summary statistics, variable inspection,
     column selection, row calculations, and binning with tidyverse-style
@@ -18,7 +14,7 @@ Depends:
     R (>= 4.1.0)
 Imports: 
     cli,
-    dplyr (>= 1.1.0),
+    dplyr (>= 1.1.4),
     haven (>= 2.5.3),
     lifecycle,
     magrittr,

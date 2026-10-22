@@ -1,6 +1,6 @@
 # Function: codebook()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:19 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:42:07 | **Status:** PASS
 
 ## Example 1: Basic codebook
 
@@ -25,10 +25,10 @@ codebook(mtcars)
 11     carb double 32      6
 ```
 
-## Example 2: With starwars data
+## Example 2: With dplyr::starwars data
 
 ```r
-codebook(starwars)
+codebook(dplyr::starwars)
 ```
 
 **Output:**
@@ -71,7 +71,7 @@ codebook(mtcars, mpg, hp, wt)
 ## Example 4: With tidyselect
 
 ```r
-codebook(starwars, ends_with('color'))
+codebook(dplyr::starwars, ends_with('color'))
 ```
 
 **Output:**
@@ -88,7 +88,7 @@ codebook(starwars, ends_with('color'))
 ## Example 5: Numeric variables only
 
 ```r
-codebook(starwars, where(is.numeric))
+codebook(dplyr::starwars, where(is.numeric))
 ```
 
 **Output:**
@@ -105,7 +105,7 @@ codebook(starwars, where(is.numeric))
 ## Example 6: With expressions
 
 ```r
-codebook(starwars, height > 0)
+codebook(dplyr::starwars, height > 0)
 ```
 
 **Output:**

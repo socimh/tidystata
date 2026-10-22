@@ -40,13 +40,13 @@
 #' @export
 #'
 #' @examples
-#' starwars |>
+#' dplyr::starwars |>
 #'   s_select()
-#' starwars |>
+#' dplyr::starwars |>
 #'   s_select(name, height)
 #' # Ordinary select() rejects this computed expression.
-#' try(dplyr::select(starwars, height > 50))
-#' starwars |>
+#' try(dplyr::select(dplyr::starwars, height > 50))
+#' dplyr::starwars |>
 #'   s_select(height > 50)
 s_select <- function(.data, ...) {
   if (missing(...)) {

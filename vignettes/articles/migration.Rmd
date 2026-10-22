@@ -54,6 +54,13 @@ row subset contains the full data. Retired implementations are unsupported and
 are not distributed in the package. The restored printing and slicing helpers
 were reworked and may differ from their 0.2.0 versions.
 
+The package itself is renamed from statart to tidystata: replace
+`library(statart)` and `statart::` with `library(tidystata)` and
+`tidystata::`. The bundled `starwars` dataset is removed; use
+`dplyr::starwars` (dplyr 1.1.4 or later). `lifeexp` keeps its columns and
+labels but is rebuilt from World Bank World Development Indicators, so its
+values differ slightly from Stata's `lifeexp.dta`.
+
 ## Renamed arguments
 
 Argument names now follow one rule: options after a `...` that takes columns
