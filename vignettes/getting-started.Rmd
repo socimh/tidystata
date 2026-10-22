@@ -129,13 +129,9 @@ input is messy. Quantile bins keep tied values together and may contain fewer
 intervals when cutpoints coincide. These conventions do not promise exact
 equivalence with every Stata command.
 
-## Continue with plain scripts
+## Next steps
 
-The source repository's
-[`examples/`](https://github.com/socimh/tidystata/tree/master/examples) folder
-has scripts for inspection, tabulation, summaries, preparation and edge cases.
-Open one in your editor and run its lines individually. If results appear to use
-an older package, inspect `packageVersion("tidystata")` and `find.package("tidystata")`.
+If results appear to use an older package, inspect `packageVersion("tidystata")` and `find.package("tidystata")`.
 For local source changes, install from the project and restart R before testing.
 
 The full

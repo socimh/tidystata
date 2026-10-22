@@ -51,8 +51,9 @@ pak::pak("socimh/tidystata")
 R 4.1.0 or later and a suitable build toolchain are required to install
 from source. Rich table formatting is optional and requires `flextable`.
 
-If you already have this source repository on your computer, open
-`tidystata.Rproj` and restart R before installing the local changes:
+If you already have this source repository on your computer, set the
+working directory to its folder and restart R before installing the
+local changes:
 
 ``` r
 devtools::install(".", upgrade = "never", build_vignettes = FALSE)
@@ -99,12 +100,7 @@ article lists every entry by topic, in English and
 [Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html),
 including the packages to use beyond tidystata.
 
-Plain manual scripts are in the source repository’s
-[`examples/`](https://github.com/socimh/tidystata/tree/master/examples)
-folder. Open a script in your editor and run its lines individually;
-from a source checkout,
-`source("examples/02_frequency_tables.R", echo = TRUE)` runs a complete
-example. The full [migration
+The full [migration
 guide](https://socimh.github.io/tidystata/articles/migration.html) is on
 the website.
 
