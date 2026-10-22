@@ -529,7 +529,9 @@ stopifnot(length(inspect_metadata_cases) == 100L)
 for (i in seq_along(inspect_metadata_cases)) {
   local({
     case <- inspect_metadata_cases[[i]]
-    test_that(sprintf("variables coverage %03d: %s", i, case$title), case$run())
+    test_that(sprintf("variables coverage %03d: %s", i, case$title), {
+      case$run()
+    })
   })
 }
 
@@ -1012,7 +1014,9 @@ for (i in seq_along(inspect_search_cases)) {
     case <- inspect_search_cases[[i]]
     test_that(
       sprintf("variables_search coverage %03d: %s", i, case$title),
-      case$run()
+      {
+        case$run()
+      }
     )
   })
 }

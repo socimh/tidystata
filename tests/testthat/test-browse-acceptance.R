@@ -3,7 +3,9 @@
 # Keep the public return value, selection and pipeline behavior under test.
 
 browse_case <- function(id, title, code) {
-  test_that(sprintf("browse coverage %03d: %s", id, title), code())
+  test_that(sprintf("browse coverage %03d: %s", id, title), {
+    code()
+  })
 }
 browse_frame <- function() {
   tibble::tibble(

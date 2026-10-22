@@ -512,7 +512,10 @@ test_that("row sums and means equal rowSums() and rowMeans() exactly", {
   means[rowSums(!is.na(df)) == 0L] <- NA_real_
   expect_identical(row_sum(df), sums)
   expect_identical(row_mean(df), means)
-  expect_identical(row_sum(df)[[1]], 1)
+  # 1e16 + 1 - 1e16 survives only with an extended long double accumulator.
+  if (isTRUE(.Machine$sizeof.longdouble > 8)) {
+    expect_identical(row_sum(df)[[1]], 1)
+  }
 })
 
 test_that("native extrema, spread and distinct counts keep their rules", {

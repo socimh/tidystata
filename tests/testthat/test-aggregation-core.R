@@ -232,7 +232,15 @@ test_that("native group sums follow sum() and cumsum() for missing values", {
   for (loc in locs) {
     cumulative[loc] <- cumsum(x[loc])
   }
-  expect_identical(group_cumsum_dbl(x, locs), cumulative)
+  # Base cumsum() also changed which of NA or NaN wins between R versions.
+  running <- group_cumsum_dbl(x, locs)
+  mixed_rows <- unlist(locs[mixed])
+  expect_identical(running[-mixed_rows], cumulative[-mixed_rows])
+  expect_identical(is.na(running[mixed_rows]), is.na(cumulative[mixed_rows]))
+  expect_identical(
+    running[mixed_rows][!is.na(running[mixed_rows])],
+    cumulative[mixed_rows][!is.na(cumulative[mixed_rows])]
+  )
   expect_identical(
     group_mean_dbl(c(1e308, 1e308, 0.1, 0.2, Inf, -Inf), list(1:2, 3:4, 5:6)),
     c(mean(c(1e308, 1e308)), mean(c(0.1, 0.2)), NaN)
