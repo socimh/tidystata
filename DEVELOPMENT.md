@@ -7,6 +7,14 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**Attribution cleanup, 2026-10-21:** the maintainer-approved history rewrite
+removes AI co-author trailers from all local refs and both GitHub code branches.
+All 210 mapped commit trees, author/committer identities and dates are unchanged;
+104 commits per GitHub code branch are verified, and GitHub lists only `socimh`
+as a contributor. Release tags and `gh-pages` are unchanged; a verified rollback
+bundle is retained outside the repository. Package checks were not rerun because
+package source is unchanged. The release backlog below remains unchanged.
+
 **Dataset distribution resolved, 2026-10-22 (branch
 `refactor/tidyverse-conventions`):** `lifeexp` is rebuilt from World Bank WDI
 (CC BY 4.0) by `data-raw/lifeexp.R` from the dated snapshot

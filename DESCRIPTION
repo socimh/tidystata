@@ -20,7 +20,7 @@ Imports:
     magrittr,
     pillar (>= 1.9.0),
     purrr (>= 1.0.0),
-    readr (>= 1.0.0),
+    readr (>= 1.4.0),
     rlang,
     stats,
     stringr (>= 1.5.0),
@@ -38,7 +38,7 @@ Suggests:
     knitr,
     rmarkdown,
     sf,
-    testthat (>= 3.1.7),
+    testthat (>= 3.2.0),
     units (>= 1.0.0),
     withr
 LinkingTo: 

@@ -73,6 +73,9 @@ installations to hide failures. Read and write text explicitly as UTF-8 and use
 
 ## Autonomy and Git
 
+Do not credit AI tools as authors, contributors or co-authors in package metadata,
+documentation or Git commit trailers.
+
 Continue safe in-scope work without repeated confirmation. Ask only for material
 ambiguity, required credentials, unusually destructive operations or unapproved
 API/project-direction changes. Give a brief factual notice before deletion,

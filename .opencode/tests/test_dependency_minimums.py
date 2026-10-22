@@ -32,7 +32,7 @@ class FloorMatrixTests(unittest.TestCase):
             MODULE.matrix(description, self.config)
 
     def test_changed_bound_requires_review(self):
-        description = self.description.replace("testthat (>= 3.1.7)", "testthat (>= 3.2.0)")
+        description = self.description.replace("testthat (>= 3.2.0)", "testthat (>= 3.2.1)")
         with self.assertRaisesRegex(ValueError, "Changed declared floor"):
             MODULE.matrix(description, self.config)
 

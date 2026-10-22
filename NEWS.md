@@ -21,7 +21,9 @@
   lists direct alternatives.
 
 * R 4.1.0 or later is now required. Persistent preview formatting requires
-  tibble >= 3.2.0 and pillar >= 1.9.0, as dplyr >= 1.1.4 does.
+  tibble >= 3.2.0 and pillar >= 1.9.0, as dplyr >= 1.1.4 does. readr >= 1.4.0 is
+  required for scientific notation and parsing diagnostics in `as_numeric()`
+  and `destring()`.
 
 * Required dependencies fall from 33 to 16 packages. Rich table output now
   needs the optional flextable package, and `Rfast` is no longer used.
