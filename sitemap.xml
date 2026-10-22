@@ -1,105 +1,49 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/browse.html</loc>
-  </url>
-  <url>
-    <loc>/reference/codebook.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cut.html</loc>
-  </url>
-  <url>
-    <loc>/reference/import-export.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/lifeexp.html</loc>
-  </url>
-  <url>
-    <loc>/reference/na_conversion.html</loc>
-  </url>
-  <url>
-    <loc>/reference/names.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>/reference/regress.html</loc>
-  </url>
-  <url>
-    <loc>/reference/row_egen.html</loc>
-  </url>
-  <url>
-    <loc>/reference/s_ggsave.html</loc>
-  </url>
-  <url>
-    <loc>/reference/s_match.html</loc>
-  </url>
-  <url>
-    <loc>/reference/s_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/s_select.html</loc>
-  </url>
-  <url>
-    <loc>/reference/s_time.html</loc>
-  </url>
-  <url>
-    <loc>/reference/s_try.html</loc>
-  </url>
-  <url>
-    <loc>/reference/s_type.html</loc>
-  </url>
-  <url>
-    <loc>/reference/set_seed.html</loc>
-  </url>
-  <url>
-    <loc>/reference/special-print.html</loc>
-  </url>
-  <url>
-    <loc>/reference/starwars.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stat.html</loc>
-  </url>
-  <url>
-    <loc>/reference/statart-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/summ.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tab.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tidy_coef.html</loc>
-  </url>
-  <url>
-    <loc>/reference/type_conversion.html</loc>
-  </url>
-  <url>
-    <loc>/reference/variables.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://socimh.github.io/tidystata/404.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/LICENSE-text.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/LICENSE.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/MIGRATION.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/articles/coming-from-stata.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/articles/containers-and-missing-values.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/articles/getting-started.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/articles/index.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/articles/migration.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/authors.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/index.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/news/index.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/as_dummy.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/assert.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/browse.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/capture.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/codebook.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/cut.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/findit.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/index.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/is_first.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/keys.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/lifeexp.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/misstable.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/na_conversion.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/names.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/panel.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/pipe.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/pwcorr.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/row_egen.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/s_merge.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/s_select.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/set_seed.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/special-print.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/std.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/summ.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/tab.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/tidystata-deprecated.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/tidystata-package.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/tidystata_args.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/timer.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/type_conversion.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/var_type.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/variables.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/varlist.html</loc></url>
 </urlset>
+
