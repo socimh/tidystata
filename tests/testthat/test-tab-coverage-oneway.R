@@ -1,5 +1,5 @@
 # Independent one-way acceptance: each numbered case runs for both exports.
-# The oracle counts original values with base match/tabulate, not statart helpers.
+# The oracle counts original values with base match/tabulate, not tidystata helpers.
 oneway_cases <- list()
 oneway_add <- function(title, check) {
   oneway_cases[[length(oneway_cases) + 1L]] <<- list(

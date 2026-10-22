@@ -1,24 +1,24 @@
-# Moving to the smaller statart core
+# Moving to the smaller tidystata core
 
-statart `0.3.0` is a breaking release focused on data exploration and
+tidystata `0.3.0` is a breaking release focused on data exploration and
 preparation. Four wrappers have been retired:
 `read_data()`, `write_data()`, `esttab()`, and `codebook_detail()`.
 
-These functions are no longer part of statart and are unsupported; the
+These functions are no longer part of tidystata and are unsupported; the
 sections below name the packages to use instead.
 The retained exploration and preparation helpers remain available. The upstream
 comparison below also records earlier retirements.
 
 This file is the authoritative migration guide in the source repository. The
 same guide is included with installed packages at
-`system.file("MIGRATION.md", package = "statart")` and published as the website's
+`system.file("MIGRATION.md", package = "tidystata")` and published as the website's
 Migration guide article. Code blocks are recipes to run deliberately; examples
 that read or write files require your own paths and any named optional packages.
 
 To try local changes, open the source project and restart R, run
 `devtools::install(".", upgrade = "never", build_vignettes = FALSE)`, then
-restart R again. After `library(statart)`, inspect `packageVersion("statart")`
-and `find.package("statart")`. Opening a repository does not itself replace an
+restart R again. After `library(tidystata)`, inspect `packageVersion("tidystata")`
+and `find.package("tidystata")`. Opening a repository does not itself replace an
 older installed package.
 
 ## Changes from the GitHub 0.2.0 baseline
@@ -44,7 +44,7 @@ before the four-wrapper milestone and the restored printing/slicing helpers.
 | `print_headtail()`, `print_interval()`, `slice_headtail()`, `slice_interval()` | Restored as reviewed active functions; original tracked implementations remain in Git history. Use `preview_table()` for a persistent display style that retains every row. |
 
 The original printing classes and their S3 registrations remain retired. The
-new `statart_preview` class operates on full tables; it does not pretend that a
+new `tidystata_preview` class operates on full tables; it does not pretend that a
 row subset contains the full data. Retired implementations are unsupported and
 are not distributed in the package. The restored printing and slicing helpers
 were reworked and may differ from their 0.2.0 versions.
@@ -102,7 +102,7 @@ One behaviour changed: several codes in `na_if_value(x, c(-98, -99))` now
 mean "any of these", as in Stata, instead of an elementwise comparison as in
 `dplyr::na_if()`. A single code works as before.
 
-statart does not define `search()`, `describe()` or `lookfor()`, which would
+tidystata does not define `search()`, `describe()` or `lookfor()`, which would
 mask base R, Hmisc/psych and labelled. Use `findit()`, `variables()` and
 `variables_search()`.
 
@@ -110,7 +110,7 @@ mask base R, Hmisc/psych and labelled. Use `findit()`, `variables()` and
 
 Stata's weight clauses map to `.wt` and `.wt_type`:
 
-| Stata | statart |
+| Stata | tidystata |
 | --- | --- |
 | `tab x [fw = w]` | `tab(d, x, .wt = w)` |
 | `tab x [aw = w]` | `tab(d, x, .wt = w, .wt_type = "analytic")` |
@@ -120,12 +120,12 @@ Stata's weight clauses map to `.wt` and `.wt_type`:
 
 Frequency weights may be non-integer, unlike Stata's `[fw]`, matching
 `dplyr::count(wt =)`. For survey designs that need design-based standard
-errors, use srvyr or survey; statart's weighted standard errors treat the
+errors, use srvyr or survey; tidystata's weighted standard errors treat the
 weights as frequency or analytic weights only.
 
 ## Correlations, missing values and chi-square
 
-| Stata | statart |
+| Stata | tidystata |
 | --- | --- |
 | `pwcorr x y z, sig obs` | `pwcorr(d, x, y, z)` |
 | `pwcorr x y z` (matrix) | `pwcorr(d, x, y, z, .wide = TRUE)` |
@@ -140,7 +140,7 @@ observed, unlike Stata; convert them with `mvdecode()` first.
 
 ## Standardising, percentages and dummies
 
-| Stata | statart |
+| Stata | tidystata |
 | --- | --- |
 | `egen z = std(x)` | `mutate(d, z = std(x))` |
 | `by g: egen z = std(x)` | `mutate(d, z = std(x), .by = g)` |
@@ -152,7 +152,7 @@ For model formulas, factors already expand to dummies.
 
 ## Panel lags and leads
 
-| Stata | statart |
+| Stata | tidystata |
 | --- | --- |
 | `xtset id year` then `gen l = L.x` | `mutate(d, l = s_lag(x, time = year), .by = id)` |
 | `L2.x`, `F.x`, `D.x`, `D2.x` | `s_lag(x, 2, ...)`, `s_lead(x, ...)`, `s_diff(x, ...)`, `s_diff(x, 2, ...)` |
@@ -169,7 +169,7 @@ zoo period classes and ordered factors (such as survey waves) all work as
 
 ## Assertions, tags and listings
 
-| Stata | statart |
+| Stata | tidystata |
 | --- | --- |
 | `assert x > 0` | `assert(d, x > 0)` |
 | `by g: assert _N == 1` | `assert(d, n() == 1, .by = g)` |
@@ -182,7 +182,7 @@ behaviour. `is_first()` returns `TRUE`/`FALSE` rather than 1/0.
 
 ## Coming from Stata: where to find the rest
 
-statart covers the everyday Stata data loop: inspecting, selecting, tabulating,
+tidystata covers the everyday Stata data loop: inspecting, selecting, tabulating,
 summarising, preparing and checking. For other Stata commands, these packages
 are the recommended R tools:
 
@@ -196,9 +196,9 @@ are the recommended R tools:
 | `svyset`, `svy:` | srvyr, survey |
 | `use`, `save`, `import` | haven, readr, readxl |
 
-statar can be attached alongside statart. Only `tab()` and `xtile()` share
-names; attach statart last, or call `statart::tab()`. statar's
-`tlag()`/`tlead()` correspond to statart's `s_lag()`/`s_lead()`.
+statar can be attached alongside tidystata. Only `tab()` and `xtile()` share
+names; attach tidystata last, or call `tidystata::tab()`. statar's
+`tlag()`/`tlead()` correspond to tidystata's `s_lag()`/`s_lead()`.
 
 `findit()` looks up the R equivalent of a Stata command from the console, such
 as `findit(reg)` or `findit("merge 1:1 id, keep(match)")`; Stata's
@@ -248,7 +248,7 @@ significance stars.
 
 ## Detailed codebooks
 
-Use `statart::codebook()` for the retained compact variable overview. For the
+Use `tidystata::codebook()` for the retained compact variable overview. For the
 previous detailed codebook capability, call the underlying package directly:
 
 ```r
@@ -280,10 +280,10 @@ unchanged.
 To request rich formatting, install `flextable` and specify the type:
 
 ```r
-statart::fre(mtcars, cyl)
-statart::fre1(mtcars, cyl, gear)
-statart::fre(mtcars, cyl, .type = "tibble")
-statart::fre(mtcars, cyl, .type = "flextable")
+tidystata::fre(mtcars, cyl)
+tidystata::fre1(mtcars, cyl, gear)
+tidystata::fre(mtcars, cyl, .type = "tibble")
+tidystata::fre(mtcars, cyl, .type = "flextable")
 ```
 
 The default return type is independent of whether `flextable` is installed.
@@ -322,13 +322,13 @@ all rows remain available to subsequent research steps:
 ```r
 prepared <- survey |>
   dplyr::arrange(respondent_id) |>
-  statart::preview_table(style = "headtail", n = 10) |>
+  tidystata::preview_table(style = "headtail", n = 10) |>
   dplyr::mutate(income_log = log(income))
 
 prepared # Prints selected rows; calculations still use the complete table.
 ```
 
-The wrapper adds class `statart_preview` to the full table, preserving its
+The wrapper adds class `tidystata_preview` to the full table, preserving its
 underlying data.frame, tibble, or data.table container and supported grouped and
 rowwise metadata. Printing uses a temporary tibble. Its style persists through supported
 selection, filtering, arrangement, mutation, grouping, summaries/reframing, and
@@ -336,7 +336,7 @@ pivots. Joins inherit the left table's settings; `bind_rows()` inherits the
 first input's settings. External dplyr and tidyr verbs follow their own container
 and grouping rules; for example, `dplyr::group_by()` creates a grouped tibble.
 Other containers and lazy tables require explicit conversion or collection first.
-Statart table-producing helpers carry supported preview settings to their results,
+tidystata table-producing helpers carry supported preview settings to their results,
 including tables inside list outputs.
 
 `style = "headtail"` displays the first `ceiling(n / 2)` and final
@@ -351,9 +351,9 @@ current table, including grouped tables, rather than sampling within each group.
 ```r
 survey |>
   dplyr::arrange(income) |>
-  statart::preview_table(style = "interval", n = 6)
+  tidystata::preview_table(style = "interval", n = 6)
 
-ordinary <- statart::unpreview_table(prepared)
+ordinary <- tidystata::unpreview_table(prepared)
 # tibble::as_tibble(prepared) and as.data.frame(prepared) also remove the preview.
 ```
 
@@ -432,7 +432,7 @@ Select statistics through `.stat`. The aliases `missing`, `p25`, `p50`, and
 and order are retained, and aliases can coexist with canonical names:
 
 ```r
-statart::summ(mtcars, mpg, .stat = c("missing", "miss_n", "p50", "median", "sum"))
+tidystata::summ(mtcars, mpg, .stat = c("missing", "miss_n", "p50", "median", "sum"))
 ```
 
 Unknown statistics produce an error. `sum` is supported for numeric summaries;
@@ -698,14 +698,14 @@ For example, logical extrema retain their meaning and dates retain their class:
 
 ```r
 flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
-statart::row_max(flags) # TRUE, FALSE, NA, with logical type
+tidystata::row_max(flags) # TRUE, FALSE, NA, with logical type
 
 dates <- tibble::tibble(
   start = as.Date(c("2024-01-01", NA)),
   end = as.Date(c("2024-01-03", "2024-01-05"))
 )
-statart::row_min(dates)
-statart::row_mean(dates)
+tidystata::row_min(dates)
+tidystata::row_mean(dates)
 ```
 
 `row_unique()` returns integer counts using compatible common types, preserving

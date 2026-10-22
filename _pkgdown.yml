@@ -1,9 +1,9 @@
-url: https://socimh.github.io/statart/
+url: https://socimh.github.io/tidystata/
 template:
   bootstrap: 5
 
 articles:
-- title: "Learn statart"
+- title: "Learn tidystata"
   navbar: ~
   contents:
   - getting-started

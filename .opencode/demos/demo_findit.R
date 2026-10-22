@@ -1,6 +1,6 @@
 # Demo: findit() looks up the R equivalent of Stata commands.
 # Runs against the fresh installation selected by the demo workflow.
-library(statart)
+library(tidystata)
 
 cat("## Example 1: a bare Stata word, with Stata's abbreviations\n\n```\n")
 regress <- findit(reg)
@@ -16,7 +16,7 @@ print(merged, n = 3)
 stopifnot(identical(merged$r[1], "inner_join(data1, data2, by = \"id\")"))
 print(findit("bysort g: egen m = mean(x)"), n = 2)
 
-cat("```\n\n## Example 3: packages beyond statart\n\n```\n")
+cat("```\n\n## Example 3: packages beyond tidystata\n\n```\n")
 print(findit(binscatter))
 print(findit(winsor))
 print(findit(svy))
@@ -40,5 +40,5 @@ stopifnot(nrow(none) == 0L)
 
 cat("```\n\n## Example 6: the whole list\n\n```\n")
 all_entries <- findit()
-print(table(all_entries$package)[c("statart", "dplyr", "tidyr", "fixest")])
+print(table(all_entries$package)[c("tidystata", "dplyr", "tidyr", "fixest")])
 cat("Entries:", nrow(all_entries), "\n```\n")

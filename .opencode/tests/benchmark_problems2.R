@@ -1,7 +1,7 @@
 # Compare installed packages using identical fixed inputs and visible timings.
 args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) == 2L)
-library(statart, lib.loc = args[[1L]])
+library(tidystata, lib.loc = args[[1L]])
 prefix <- args[[2L]]
 company <- paste0("\u9999\u6e2f-company-", seq_len(21))
 large <- data.frame(
@@ -132,10 +132,10 @@ records <- lapply(jobs, function(job) {
 # Flextable embeds generated ids; existing rich-output tests cover its contract.
 records$fre_rich <- NULL
 saveRDS(records, paste0(prefix, "-outputs.rds"))
-exports <- getNamespaceExports("statart")
+exports <- getNamespaceExports("tidystata")
 saveRDS(
   lapply(stats::setNames(exports, exports), function(name) {
-    object <- getExportedValue("statart", name)
+    object <- getExportedValue("tidystata", name)
     if (is.function(object)) formals(object) else class(object)
   }),
   paste0(prefix, "-interfaces.rds")
@@ -158,7 +158,7 @@ results <- lapply(names(jobs), function(name) {
   # Allocation profiling includes preparation and output construction.
   allocated <- NA_real_
   if (isTRUE(capabilities("profmem"))) {
-    profile <- tempfile("statart-allocation-")
+    profile <- tempfile("tidystata-allocation-")
     utils::Rprofmem(profile)
     invisible(job())
     utils::Rprofmem(NULL)

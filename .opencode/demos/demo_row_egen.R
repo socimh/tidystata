@@ -4,7 +4,7 @@
 library(dplyr)
 library(tibble)
 
-library(statart)
+library(tidystata)
 
 cat("## Example 1: row_min\n\n")
 cat("```r\n")

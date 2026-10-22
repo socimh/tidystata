@@ -3,7 +3,7 @@
 
 library(dplyr)
 
-library(statart)
+library(tidystata)
 
 cat("## Example 1: Select columns by name\n\n")
 cat("```r\n")

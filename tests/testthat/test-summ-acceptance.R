@@ -1,9 +1,9 @@
 # These contracts apply to both public entry points. Calculated references use
-# ordinary R arithmetic rather than statart's implementation helpers.
+# ordinary R arithmetic rather than tidystata's implementation helpers.
 for (function_name in c("summ", "tabstat")) {
   local({
     api <- summary_legacy_layout(
-      getExportedValue("statart", function_name)
+      getExportedValue("tidystata", function_name)
     )
     for (key in c("name", "value", "type", "n", "mean", "p50")) {
       local({
@@ -254,7 +254,7 @@ for (function_name in c("summ", "tabstat")) {
 for (function_name in c("summ", "tabstat")) {
   local({
     api <- summary_legacy_layout(
-      getExportedValue("statart", function_name)
+      getExportedValue("tidystata", function_name)
     )
     test_that(
       paste(
@@ -323,7 +323,7 @@ for (function_name in c("summ", "tabstat")) {
 for (function_name in c("summ", "tabstat")) {
   local({
     api <- summary_legacy_layout(
-      getExportedValue("statart", function_name)
+      getExportedValue("tidystata", function_name)
     )
     test_that(
       paste(function_name, "warns when integer64 conversion loses precision"),
@@ -347,7 +347,7 @@ for (function_name in c("summ", "tabstat")) {
 for (function_name in c("summ", "tabstat")) {
   local({
     api <- summary_legacy_layout(
-      getExportedValue("statart", function_name)
+      getExportedValue("tidystata", function_name)
     )
     test_that(
       paste(function_name, "mixed-type notice has no spurious suffix"),

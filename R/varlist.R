@@ -8,7 +8,7 @@
 #' Use `varlist()` within a *selecting* function, such as `ds()`, `tab()` or
 #' `dplyr::across()`. Alternatively, provide `vars` explicitly to return
 #' matching positions in a standalone call. `varlist()` was called `s_match()`
-#' before statart 0.3.0; the old name still works with a deprecation
+#' before tidystata 0.3.0; the old name still works with a deprecation
 #' warning.
 #'
 #' @param string A single character string containing patterns, separated by

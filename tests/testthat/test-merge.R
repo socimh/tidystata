@@ -140,7 +140,7 @@ test_that("composite renamed keys keep master order and user marker columns", {
     tibble::tibble(
       hh = c(2L, 1L, 2L, 1L),
       wave = c(2L, 1L, 2L, 2L),
-      .statart_in_master = c("m1", "m2", "m3", "m4")
+      .tidystata_in_master = c("m1", "m2", "m3", "m4")
     ),
     hh
   )
@@ -148,7 +148,7 @@ test_that("composite renamed keys keep master order and user marker columns", {
     household = c(1L, 2L, 3L),
     period = c(1L, 2L, 1L),
     value = c(10, 20, 30),
-    .statart_in_using = c("u1", "u2", "u3")
+    .tidystata_in_using = c("u1", "u2", "u3")
   )
   before_master <- master
   before_using <- using
@@ -165,9 +165,9 @@ test_that("composite renamed keys keep master order and user marker columns", {
   expected <- tibble::tibble(
     hh = c(2L, 1L, 2L, 1L, 3L),
     wave = c(2L, 1L, 2L, 2L, 1L),
-    .statart_in_master = c("m1", "m2", "m3", "m4", NA),
+    .tidystata_in_master = c("m1", "m2", "m3", "m4", NA),
     value = c(20, 10, 20, NA, 30),
-    .statart_in_using = c("u2", "u1", "u2", NA, "u3"),
+    .tidystata_in_using = c("u2", "u1", "u2", NA, "u3"),
     .merge = factor(
       c("matched", "matched", "matched", "master only", "using only"),
       levels = match_levels
@@ -179,9 +179,9 @@ test_that("composite renamed keys keep master order and user marker columns", {
     tibble::tibble(
       hh = master$hh,
       wave = master$wave,
-      .statart_in_master = master$.statart_in_master,
+      .tidystata_in_master = master$.tidystata_in_master,
       value = rep(NA_real_, 4),
-      .statart_in_using = rep(NA_character_, 4),
+      .tidystata_in_using = rep(NA_character_, 4),
       .merge = factor(rep("master only", 4), levels = match_levels)
     )
   )
@@ -190,9 +190,9 @@ test_that("composite renamed keys keep master order and user marker columns", {
     tibble::tibble(
       hh = using$household,
       wave = using$period,
-      .statart_in_master = rep(NA_character_, 3),
+      .tidystata_in_master = rep(NA_character_, 3),
       value = using$value,
-      .statart_in_using = using$.statart_in_using,
+      .tidystata_in_using = using$.tidystata_in_using,
       .merge = factor(rep("using only", 3), levels = match_levels)
     )
   )

@@ -1,7 +1,7 @@
 # Called by check_style.py; on Windows the protected launcher is mandatory.
 args <- commandArgs(trailingOnly = TRUE)
 local_library <- Sys.getenv(
-  "STATART_STYLE_LIBRARY",
+  "TIDYSTATA_STYLE_LIBRARY",
   ".opencode/tools/style-tools/library"
 )
 if (dir.exists(local_library)) {

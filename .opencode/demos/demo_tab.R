@@ -4,7 +4,7 @@
 library(dplyr)
 library(tibble)
 
-library(statart)
+library(tidystata)
 
 cat("## Example 1: Basic frequency table\n\n")
 cat("```r\n")

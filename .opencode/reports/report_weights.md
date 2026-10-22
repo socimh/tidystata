@@ -1,6 +1,6 @@
 # Function: weights()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:11 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:22 | **Status:** PASS
 
 ## Example 1: frequency weights count each row w times
 

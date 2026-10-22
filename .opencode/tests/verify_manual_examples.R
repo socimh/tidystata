@@ -6,15 +6,15 @@ if (!length(args) || !dir.exists(args[[1L]])) {
   )
 }
 .libPaths(c(normalizePath(args[[1L]]), .libPaths()))
-library(statart, lib.loc = args[[1L]])
-output_dir <- if (nzchar(Sys.getenv("STATART_EXAMPLE_OUTPUT"))) {
-  Sys.getenv("STATART_EXAMPLE_OUTPUT")
+library(tidystata, lib.loc = args[[1L]])
+output_dir <- if (nzchar(Sys.getenv("TIDYSTATA_EXAMPLE_OUTPUT"))) {
+  Sys.getenv("TIDYSTATA_EXAMPLE_OUTPUT")
 } else if (length(args) >= 2L) {
   args[[2L]]
 } else {
   ".opencode/results/manual-examples"
 }
-example_dir <- system.file("examples", package = "statart", mustWork = TRUE)
+example_dir <- system.file("examples", package = "tidystata", mustWork = TRUE)
 parse(file.path(example_dir, "00_install.R"), encoding = "UTF-8")
 scripts <- c(
   "01_inspect_and_select.R",

@@ -15,7 +15,7 @@
 #' * `duplicates_drop()` keeps the first row of each duplicated set, like
 #'   `duplicates drop`.
 #'
-#' @inheritParams statart_args
+#' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The identifying columns.
 #' Omit to use all columns, as Stata does.
 #' @param .missok A single `TRUE` or `FALSE`. If `FALSE` (default), `isid()`

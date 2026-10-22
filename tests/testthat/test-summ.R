@@ -725,7 +725,7 @@ test_that("summary requests avoid unrequested expensive statistics", {
   testthat::local_mocked_bindings(
     skew = function(...) stop("Unrequested skew calculation"),
     kurtosis = function(...) stop("Unrequested kurtosis calculation"),
-    .package = "statart"
+    .package = "tidystata"
   )
   expect_equal(summ(1:100, .stat = "mean")$mean, 50.5)
   expect_equal(summ(1:100, .stat = "n")$n, 100)

@@ -1,5 +1,5 @@
 # Numbered joint-tabulation acceptance cases, independently run for tab and fre.
-# The oracle uses base R row identities and arithmetic, never statart internals.
+# The oracle uses base R row identities and arithmetic, never tidystata internals.
 joint_cases <- list()
 joint_add <- function(title, run) {
   joint_cases[[length(joint_cases) + 1L]] <<- list(title = title, run = run)
@@ -898,7 +898,7 @@ for (joint_function_name in c("tab", "fre")) {
         sprintf("%s coverage %03d: %s", fun_name, id, case$title),
         {
           case$run(
-            getExportedValue("statart", fun_name),
+            getExportedValue("tidystata", fun_name),
             identical(fun_name, "fre")
           )
         }

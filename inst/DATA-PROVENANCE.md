@@ -12,7 +12,7 @@ https://raw.githubusercontent.com/tidyverse/dplyr/v1.1.3/data/starwars.rda
 
 - MD5: `a1c7281e62ffbd808fda4e3496ca5387`.
 - SHA-256: `f6cb50b862aba1487772c18d4405a40b335c9ee29ba2d7137db7fef870a61d8b`.
-- Original statart Git commit: `5d0b2566ee16fa4c5625b00464cf8bf57efaaa42`.
+- Original statart (now tidystata) Git commit: `5d0b2566ee16fa4c5625b00464cf8bf57efaaa42`.
 - Upstream preparation: https://github.com/tidyverse/dplyr/blob/v1.1.3/data-raw/starwars.R
 - Intermediary: dplyr authors; upstream preparation acknowledges Megan Beckett's
   additional research on gender. Original source: SWAPI.
@@ -38,7 +38,7 @@ https://www.stata-press.com/data/r17/lifeexp.dta
 Reproducibility and redistribution authorization are separate questions. Before
 publishing, record the applicable redistribution terms and any required notices
 for both datasets. The reviewed Stata Press terms do not by themselves resolve
-redistribution of this transformed dataset under statart's MIT declaration:
+redistribution of this transformed dataset under tidystata's MIT declaration:
 https://www.stata-press.com/terms-of-use/
 
 The SWAPI description also acknowledges underlying Lucasfilm rights:

@@ -1,6 +1,6 @@
 # Demo: missing-value summaries and patterns, like Stata's misstable.
 # Runs against the fresh installation selected by the demo workflow.
-library(statart)
+library(tidystata)
 
 cat("## Example 1: missing values by variable\n\n```\n")
 summary <- misstable(starwars)

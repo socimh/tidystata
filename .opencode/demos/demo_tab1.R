@@ -3,7 +3,7 @@
 
 library(dplyr)
 
-library(statart)
+library(tidystata)
 
 cat("## Example 1: Basic one-way table\n\n")
 cat("```r\n")

@@ -1,6 +1,6 @@
-# Plain scripts for trying statart
+# Plain scripts for trying tidystata
 
-For a source checkout, open `statart.Rproj` in RStudio and restart R before
+For a source checkout, open `tidystata.Rproj` in RStudio and restart R before
 installing. Start with `00_install.R`:
 
 ```r
@@ -8,16 +8,16 @@ devtools::install(".", upgrade = "never", build_vignettes = FALSE)
 ```
 
 Restart R, open any numbered script, and run its lines with Ctrl+Enter. Each
-script starts with `library(statart)`, creates its own small dataset, and calls
+script starts with `library(tidystata)`, creates its own small dataset, and calls
 the package functions directly. Objects stay in your workspace for inspection.
 There are no custom setup functions, test wrappers, or PASS/FAIL machinery.
 
-After loading, run `packageVersion("statart")` and `find.package("statart")` to
+After loading, run `packageVersion("tidystata")` and `find.package("tidystata")` to
 confirm the version and location. Opening the source folder does not update an
 older installed copy. Install again after changing package source.
 
 `devtools::install()` installs the package from a local project directory.
-Here `"."` means the current statart project. This follows the
+Here `"."` means the current tidystata project. This follows the
 [installation and plain usage workflow in R Packages](https://r-pkgs.org/whole-game.html#install).
 
 If you already installed the version you want to try, skip `00_install.R`.
@@ -25,15 +25,15 @@ The scripts are also included in the installed package. Locate a script with
 `system.file()` and open it in your editor, or run it directly:
 
 ```r
-system.file("examples", "01_inspect_and_select.R", package = "statart")
-source(system.file("examples", "02_frequency_tables.R", package = "statart"),
+system.file("examples", "01_inspect_and_select.R", package = "tidystata")
+source(system.file("examples", "02_frequency_tables.R", package = "tidystata"),
        echo = TRUE)
 ```
 
 Run individual installed scripts this way from any working directory.
 `run_all.R` is a convenience for the source checkout and assumes its project
 root. The complete migration guide is at
-`system.file("MIGRATION.md", package = "statart")`.
+`system.file("MIGRATION.md", package = "tidystata")`.
 
 | Script | Contents |
 | --- | --- |
@@ -57,5 +57,5 @@ source("inst/examples/run_all.R", echo = TRUE)
 ```
 
 This does not install anything. Script 06 is separate because data.table is
-optional. The scripts use whichever installed statart your R session loads;
-use `find.package("statart")` if the results appear to come from an older version.
+optional. The scripts use whichever installed tidystata your R session loads;
+use `find.package("tidystata")` if the results appear to come from an older version.

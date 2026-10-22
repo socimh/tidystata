@@ -1,11 +1,11 @@
 # Function: special_print()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:10 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:21 | **Status:** PASS
 
 ## Shared input
 
 ```r
-library(statart)
+library(tidystata)
 survey <- tibble::tibble(
   respondent_id = seq_len(36),
   region = rep(c("North", "South", "West"), each = 12),

@@ -18,17 +18,19 @@ run_viewer_check <- function(
   }
   candidate_library <- normalizePath(candidate_library, mustWork = TRUE)
   candidate_path <- normalizePath(
-    file.path(candidate_library, "statart"),
+    file.path(candidate_library, "tidystata"),
     mustWork = TRUE
   )
   .libPaths(c(candidate_library, .libPaths()))
-  loadNamespace("statart", lib.loc = candidate_library)
+  loadNamespace("tidystata", lib.loc = candidate_library)
   loaded_path <- normalizePath(
-    getNamespaceInfo(asNamespace("statart"), "path"),
+    getNamespaceInfo(asNamespace("tidystata"), "path"),
     mustWork = TRUE
   )
   if (!identical(candidate_path, loaded_path)) {
-    stop("Another statart is loaded. Restart R and select this library first.")
+    stop(
+      "Another tidystata is loaded. Restart R and select this library first."
+    )
   }
 
   survey <- tibble::tibble(
@@ -40,15 +42,15 @@ run_viewer_check <- function(
   original <- survey
 
   if (case == "selected") {
-    result <- withVisible(statart::browse(survey, id, score))
+    result <- withVisible(tidystata::browse(survey, id, score))
     expected <- survey[c("id", "score")]
   } else if (case == "all") {
-    result <- withVisible(statart::browse(survey))
+    result <- withVisible(tidystata::browse(survey))
     expected <- survey
   } else {
     grouped <- dplyr::group_by(survey, group)
     original_grouped <- grouped
-    result <- withVisible(statart::browse(grouped, score))
+    result <- withVisible(tidystata::browse(grouped, score))
     expected <- dplyr::group_by(survey[c("group", "score")], group)
     stopifnot(
       identical(grouped, original_grouped),
@@ -65,7 +67,7 @@ run_viewer_check <- function(
   observation <- list(
     observed_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
     candidate_id = candidate_id,
-    package_version = as.character(utils::packageVersion("statart")),
+    package_version = as.character(utils::packageVersion("tidystata")),
     package_path = loaded_path,
     r_version = R.version.string,
     platform = R.version$platform,

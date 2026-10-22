@@ -27,9 +27,9 @@ returned invisibly.
 }
 \description{
 \code{findit()} looks up a Stata command and returns the R code that does the
-same job, whether a statart function or one from another package. It
+same job, whether a tidystata function or one from another package. It
 covers everyday data work (browsing, tabulating, generating, merging,
-reshaping) and points to the packages statart leaves to others, such as
+reshaping) and points to the packages tidystata leaves to others, such as
 fixest for \code{reghdfe}, modelsummary for \code{esttab}, binsreg for \code{binscatter}
 and srvyr for \code{svy}.
 
@@ -75,8 +75,8 @@ The list is curated rather than exhaustive. Longer explanations, in English
 and Chinese, are in the "Coming from Stata" articles on the package
 website.
 
-statart and statar can be attached together; only \code{tab()} and \code{xtile()}
-share names. Attach statart last, or write \code{statart::tab()}.
+tidystata and statar can be attached together; only \code{tab()} and \code{xtile()}
+share names. Attach tidystata last, or write \code{tidystata::tab()}.
 }
 \examples{
 findit(reg)

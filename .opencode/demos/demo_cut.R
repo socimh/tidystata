@@ -3,7 +3,7 @@
 
 library(dplyr)
 
-library(statart)
+library(tidystata)
 
 cat("## Example 1: Quartiles\n\n")
 cat("```r\n")

@@ -1,7 +1,7 @@
 test_that("weighted requests do not evaluate unrequested quantiles", {
   testthat::local_mocked_bindings(
     weighted_quantile = function(...) stop("Unrequested weighted quantile"),
-    .package = "statart"
+    .package = "tidystata"
   )
   data <- data.frame(g = c(2, 1, 2, 1), x = c(1, 3, 5, NA), w = c(1, 2, 3, 4))
   expect_equal(summ(data, x, .wt = w, .stat = "mean")$mean, 22 / 6)
@@ -48,7 +48,7 @@ test_that("cross tabulation fills native counts and preserves identity", {
 test_that("weighted counts skip numeric conversion and preserve row counts", {
   testthat::local_mocked_bindings(
     as_numeric = function(...) stop("Unrequested numeric conversion"),
-    .package = "statart"
+    .package = "tidystata"
   )
   data <- data.frame(
     g = c(1, 1, 2, 2),
@@ -120,14 +120,14 @@ test_that("excluded custom columns do not evaluate missingness methods", {
   registry <- get(".__S3MethodsTable__.", envir = asNamespace("base"))
   registerS3method(
     "is.na",
-    "statart_aggregation_opaque",
+    "tidystata_aggregation_opaque",
     function(x) stop("Excluded missingness evaluated"),
     envir = asNamespace("base")
   )
-  withr::defer(rm("is.na.statart_aggregation_opaque", envir = registry))
+  withr::defer(rm("is.na.tidystata_aggregation_opaque", envir = registry))
   data <- tibble::tibble(
     x = 1:3,
-    opaque = structure(letters[1:3], class = "statart_aggregation_opaque")
+    opaque = structure(letters[1:3], class = "tidystata_aggregation_opaque")
   )
   expect_warning(
     out <- summ(data, .stat = "mean"),

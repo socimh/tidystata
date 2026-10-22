@@ -1,11 +1,11 @@
 # Function: containers()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:08 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:19 | **Status:** PASS
 
 ## Example: container preservation and downstream operations
 
 ```text
-Installed statart: 0.3.0
+Installed tidystata: 0.3.0
 Container checks (list functions show their first table):
 data.frame tab data.frame PASS
 data.frame tab1 data.frame PASS
@@ -69,7 +69,7 @@ Explicit tibble override:
 [1] "tbl_df"     "tbl"        "data.frame"
 
 Base-frame preview and unchanged round trip:
-[1] "statart_preview" "data.frame"
+[1] "tidystata_preview" "data.frame"
 # Description: df [3 x 2]
   g         x
   <chr> <dbl>

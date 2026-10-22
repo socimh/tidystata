@@ -28,7 +28,7 @@ summary_reference <- function(x) {
 for (function_name in c("summ", "tabstat")) {
   local({
     fn_name <- function_name
-    fn <- summary_legacy_layout(get(fn_name, envir = asNamespace("statart")))
+    fn <- summary_legacy_layout(get(fn_name, envir = asNamespace("tidystata")))
 
     test_that(paste(fn_name, "matches independent numerical references"), {
       cases <- list(

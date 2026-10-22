@@ -1,6 +1,6 @@
 # Function: timer()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:11 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:22 | **Status:** PASS
 
 ## Example 1: Basic timing
 
@@ -24,7 +24,7 @@ result
 **Output:**
 
 ```
-Time spent: 0.004s
+Time spent: 0.003s
 ```
 
 **Return value:**
@@ -77,16 +77,16 @@ timer({
 **Output:**
 
 ```
-Time spent: 0.000s
+Time spent: 0.001s
 ```
 
 ## Example 6: Internal duration formatting helper
 
 ```r
-statart:::duration_to_chr(0.05)   # Sub-second
-statart:::duration_to_chr(5.23)   # Seconds
-statart:::duration_to_chr(75)     # Minutes
-statart:::duration_to_chr(3700)   # Hours
+tidystata:::duration_to_chr(0.05)   # Sub-second
+tidystata:::duration_to_chr(5.23)   # Seconds
+tidystata:::duration_to_chr(75)     # Minutes
+tidystata:::duration_to_chr(3700)   # Hours
 ```
 
 **Output:**

@@ -51,7 +51,7 @@
 #' preview settings follow the result.
 #'
 #' @returns `preview_table()` returns the complete input container with an additional
-#' `statart_preview` class. `unpreview_table()` returns the table without that
+#' `tidystata_preview` class. `unpreview_table()` returns the table without that
 #' class or its settings, preserving grouping. The print helpers invisibly
 #' return their original input. The slice helpers return the selected rows in
 #' the input container, retaining valid grouping and existing preview settings.
@@ -83,11 +83,11 @@ preview_table <- function(.data, style = c("headtail", "interval"), n = 10) {
   preview_check_n(n)
   out <- unpreview_table(.data)
   if (inherits(out, "data.table")) {
-    data.table::setattr(out, "statart_preview", list(style = style, n = n))
-    data.table::setattr(out, "class", c("statart_preview", class(out)))
+    data.table::setattr(out, "tidystata_preview", list(style = style, n = n))
+    data.table::setattr(out, "class", c("tidystata_preview", class(out)))
   } else {
-    attr(out, "statart_preview") <- list(style = style, n = n)
-    class(out) <- c("statart_preview", class(out))
+    attr(out, "tidystata_preview") <- list(style = style, n = n)
+    class(out) <- c("tidystata_preview", class(out))
   }
   out
 }
@@ -98,22 +98,22 @@ unpreview_table <- function(.data) {
   preview_check_data(.data)
   if (inherits(.data, "data.table")) {
     .data <- data.table::copy(.data)
-    data.table::setattr(.data, "statart_preview", NULL)
+    data.table::setattr(.data, "tidystata_preview", NULL)
     data.table::setattr(
       .data,
       "class",
-      setdiff(class(.data), "statart_preview")
+      setdiff(class(.data), "tidystata_preview")
     )
   } else {
-    attr(.data, "statart_preview") <- NULL
-    class(.data) <- setdiff(class(.data), "statart_preview")
+    attr(.data, "tidystata_preview") <- NULL
+    class(.data) <- setdiff(class(.data), "tidystata_preview")
   }
   .data
 }
 
 preview_check_data <- function(x, call = rlang::caller_env()) {
   supported <- c(
-    "statart_preview",
+    "tidystata_preview",
     "grouped_df",
     "rowwise_df",
     "sf",
@@ -167,30 +167,30 @@ preview_rows <- function(size, n, style, call = rlang::caller_env()) {
 
 preview_restore <- function(out, template) {
   if (is.data.frame(out)) {
-    classes <- c("statart_preview", setdiff(class(out), "statart_preview"))
-    settings <- attr(template, "statart_preview", exact = TRUE)
+    classes <- c("tidystata_preview", setdiff(class(out), "tidystata_preview"))
+    settings <- attr(template, "tidystata_preview", exact = TRUE)
     if (inherits(out, "data.table")) {
       table_check_data_table()
       # Native := returns the original reference, which must remain an alias.
       if (
         identical(class(out), classes) &&
-          identical(attr(out, "statart_preview", exact = TRUE), settings)
+          identical(attr(out, "tidystata_preview", exact = TRUE), settings)
       ) {
         return(out)
       }
       out <- data.table::copy(out)
       data.table::setattr(out, "class", classes)
-      data.table::setattr(out, "statart_preview", settings)
+      data.table::setattr(out, "tidystata_preview", settings)
     } else {
       class(out) <- classes
-      attr(out, "statart_preview") <- settings
+      attr(out, "tidystata_preview") <- settings
     }
   }
   out
 }
 
 #' @export
-format.statart_preview <- function(
+format.tidystata_preview <- function(
   x,
   width = NULL,
   ...,
@@ -198,7 +198,7 @@ format.statart_preview <- function(
   max_extra_cols = NULL,
   max_footer_lines = NULL
 ) {
-  settings <- attr(x, "statart_preview", exact = TRUE)
+  settings <- attr(x, "tidystata_preview", exact = TRUE)
   if (is.null(n)) {
     n <- settings$n
   }
@@ -213,7 +213,7 @@ format.statart_preview <- function(
   attr(view, "preview_rows") <- rows
   attr(view, "preview_omitted") <- nrow(x) - length(rows)
   attr(view, "preview_style") <- settings$style
-  class(view) <- c("statart_preview_view", class(view))
+  class(view) <- c("tidystata_preview_view", class(view))
   format(
     view,
     width = width,
@@ -225,7 +225,7 @@ format.statart_preview <- function(
 }
 
 #' @export
-print.statart_preview <- function(
+print.tidystata_preview <- function(
   x,
   width = NULL,
   ...,
@@ -248,12 +248,12 @@ print.statart_preview <- function(
 }
 
 #' @exportS3Method pillar::tbl_sum
-tbl_sum.statart_preview_view <- function(x, ...) {
+tbl_sum.tidystata_preview_view <- function(x, ...) {
   attr(x, "preview_header", exact = TRUE)
 }
 
 #' @exportS3Method pillar::ctl_new_rowid_pillar
-ctl_new_rowid_pillar.statart_preview_view <- function(
+ctl_new_rowid_pillar.tidystata_preview_view <- function(
   controller,
   x,
   width,
@@ -281,7 +281,7 @@ ctl_new_rowid_pillar.statart_preview_view <- function(
 }
 
 #' @exportS3Method pillar::tbl_format_footer
-tbl_format_footer.statart_preview_view <- function(x, setup, ...) {
+tbl_format_footer.tidystata_preview_view <- function(x, setup, ...) {
   footer <- NextMethod()
   if (setup$max_footer_lines == 0) {
     return(character())
@@ -395,7 +395,7 @@ preview_slice <- function(.data, n, style, call = rlang::caller_env()) {
   rows <- preview_rows(nrow(.data), n, style, call)
   if (inherits(.data, "data.table")) {
     out <- unpreview_table(.data)[rows]
-    if (inherits(.data, "statart_preview")) {
+    if (inherits(.data, "tidystata_preview")) {
       out <- preview_restore(out, .data)
     }
     return(out)
@@ -404,82 +404,82 @@ preview_slice <- function(.data, n, style, call = rlang::caller_env()) {
 }
 
 #' @export
-`[.statart_preview` <- function(x, ...) {
+`[.tidystata_preview` <- function(x, ...) {
   preview_restore(NextMethod(), x)
 }
 
 #' @export
-`[<-.statart_preview` <- function(x, ..., value) {
+`[<-.tidystata_preview` <- function(x, ..., value) {
   preview_restore(NextMethod(), x)
 }
 
 #' @export
-`[[<-.statart_preview` <- function(x, ..., value) {
+`[[<-.tidystata_preview` <- function(x, ..., value) {
   preview_restore(NextMethod(), x)
 }
 
 #' @export
-`$<-.statart_preview` <- function(x, name, value) {
+`$<-.tidystata_preview` <- function(x, name, value) {
   preview_restore(NextMethod(), x)
 }
 
 #' @export
-`names<-.statart_preview` <- function(x, value) {
+`names<-.tidystata_preview` <- function(x, value) {
   preview_restore(NextMethod(), x)
 }
 
 #' @exportS3Method tibble::as_tibble
-as_tibble.statart_preview <- function(x, ...) {
+as_tibble.tidystata_preview <- function(x, ...) {
   tibble::as_tibble(unpreview_table(x), ...)
 }
 
 #' @export
-as.data.frame.statart_preview <- function(x, ...) {
+as.data.frame.tidystata_preview <- function(x, ...) {
   as.data.frame(unpreview_table(x), ...)
 }
 
 #' @exportS3Method dplyr::dplyr_reconstruct
-dplyr_reconstruct.statart_preview <- function(data, template) {
+dplyr_reconstruct.tidystata_preview <- function(data, template) {
   preview_restore(NextMethod(), template)
 }
 
 #' @exportS3Method dplyr::dplyr_row_slice
-dplyr_row_slice.statart_preview <- function(data, i, ...) {
+dplyr_row_slice.tidystata_preview <- function(data, i, ...) {
   preview_restore(NextMethod(), data)
 }
 
 #' @exportS3Method dplyr::dplyr_col_modify
-dplyr_col_modify.statart_preview <- function(data, cols) {
+dplyr_col_modify.tidystata_preview <- function(data, cols) {
   preview_restore(NextMethod(), data)
 }
 
 #' @exportS3Method dplyr::group_by
-group_by.statart_preview <- function(.data, ...) {
+group_by.tidystata_preview <- function(.data, ...) {
   preview_restore(NextMethod(), .data)
 }
 
 #' @exportS3Method dplyr::ungroup
-ungroup.statart_preview <- function(x, ...) {
+ungroup.tidystata_preview <- function(x, ...) {
   preview_restore(NextMethod(), x)
 }
 
 #' @exportS3Method dplyr::rowwise
-rowwise.statart_preview <- function(data, ...) {
+rowwise.tidystata_preview <- function(data, ...) {
   preview_restore(NextMethod(), data)
 }
 
 #' @exportS3Method dplyr::summarise
-summarise.statart_preview <- function(.data, ...) {
+summarise.tidystata_preview <- function(.data, ...) {
   preview_restore(NextMethod(), .data)
 }
 
 #' @exportS3Method dplyr::reframe
-reframe.statart_preview <- function(.data, ...) {
+reframe.tidystata_preview <- function(.data, ...) {
   preview_restore(NextMethod(), .data)
 }
 
 #' @exportS3Method tidyr::pivot_longer
-pivot_longer.statart_preview <- function(data, cols, ...) {
+pivot_longer.tidystata_preview <- function(data, cols, ...) {
   # Inject the selector in its original environment instead of forwarding the
   # method's promise through NextMethod(), which can lose tidy selection scope.
   out <- tidyr::pivot_longer(unpreview_table(data), cols = {{ cols }}, ...)
@@ -487,6 +487,6 @@ pivot_longer.statart_preview <- function(data, cols, ...) {
 }
 
 #' @exportS3Method tidyr::pivot_wider
-pivot_wider.statart_preview <- function(data, ...) {
+pivot_wider.tidystata_preview <- function(data, ...) {
   preview_restore(NextMethod(), data)
 }

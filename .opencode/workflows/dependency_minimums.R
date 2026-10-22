@@ -35,7 +35,7 @@ floor_satisfies <- function(actual, operator, expected) {
   )
 }
 
-floor_audit <- function(case, include_statart = TRUE) {
+floor_audit <- function(case, include_tidystata = TRUE) {
   pending <- unique(c(
     names(case$pins),
     "rcmdcheck",
@@ -44,7 +44,7 @@ floor_audit <- function(case, include_statart = TRUE) {
     "withr",
     "bit64",
     "data.table",
-    if (include_statart) "statart"
+    if (include_tidystata) "tidystata"
   ))
   records <- list()
   while (length(pending)) {
@@ -131,11 +131,11 @@ dependency_floor_receipt <- function(
       }
     }
   }
-  destination <- Sys.getenv("STATART_FLOOR_RESULTS")
+  destination <- Sys.getenv("TIDYSTATA_FLOOR_RESULTS")
   dir.create(destination, recursive = TRUE, showWarnings = FALSE)
   receipt <- list(
     candidate = case,
-    run_id = Sys.getenv("STATART_FLOOR_RUN_ID"),
+    run_id = Sys.getenv("TIDYSTATA_FLOOR_RUN_ID"),
     phase = phase,
     R = R.version.string,
     libraries = .libPaths(),
@@ -254,7 +254,10 @@ dependency_floor_main <- function(args) {
   stopifnot(length(args) == 2, args[[1]] %in% c("install", "check"))
   case_file <- normalizePath(args[[2]], winslash = "/", mustWork = TRUE)
   case <- jsonlite::read_json(case_file, simplifyVector = FALSE)
-  library <- normalizePath(Sys.getenv("STATART_FLOOR_LIBRARY"), winslash = "/")
+  library <- normalizePath(
+    Sys.getenv("TIDYSTATA_FLOOR_LIBRARY"),
+    winslash = "/"
+  )
   .libPaths(c(library, .libPaths()))
   if (args[[1]] == "install") {
     for (package in unlist(case$install_order)) {
@@ -271,24 +274,24 @@ dependency_floor_main <- function(args) {
         case$pins[[package]]
       ))
     }
-    floor_audit(case, include_statart = FALSE)
+    floor_audit(case, include_tidystata = FALSE)
   } else {
     root <- normalizePath(".", winslash = "/")
     script <- normalizePath(
       ".opencode/workflows/dependency_minimums.R",
       winslash = "/"
     )
-    destination <- floor_run_directory(Sys.getenv("STATART_FLOOR_RESULTS"))
+    destination <- floor_run_directory(Sys.getenv("TIDYSTATA_FLOOR_RESULTS"))
     run_id <- basename(destination)
     Sys.setenv(
-      STATART_FLOOR_RESULTS = destination,
-      STATART_FLOOR_RUN_ID = run_id,
-      STATART_FLOOR_CASE = case_file,
-      STATART_FLOOR_SCRIPT = script,
+      TIDYSTATA_FLOOR_RESULTS = destination,
+      TIDYSTATA_FLOOR_RUN_ID = run_id,
+      TIDYSTATA_FLOOR_CASE = case_file,
+      TIDYSTATA_FLOOR_SCRIPT = script,
       `_R_CHECK_FORCE_SUGGESTS_` = "false",
       R_LIBS = paste(.libPaths(), collapse = .Platform$path.sep)
     )
-    scratch <- tempfile("statart-floor-")
+    scratch <- tempfile("tidystata-floor-")
     dir.create(scratch)
     bundle <- pkgbuild::build(
       root,
@@ -298,20 +301,20 @@ dependency_floor_main <- function(args) {
       quiet = FALSE
     )
     utils::untar(bundle, exdir = scratch)
-    source <- file.path(scratch, "statart")
+    source <- file.path(scratch, "tidystata")
     entrypoint <- file.path(source, "tests", "testthat.R")
     original <- readLines(entrypoint, encoding = "UTF-8")
     # The receipt runs inside R CMD check's installed-package test process.
     # This instrumentation affects only the temporary floor-check source.
     writeLines(
       c(
-        "source(Sys.getenv('STATART_FLOOR_SCRIPT'))",
-        "library(statart)",
-        "dependency_floor_receipt(Sys.getenv('STATART_FLOOR_CASE'))",
+        "source(Sys.getenv('TIDYSTATA_FLOOR_SCRIPT'))",
+        "library(tidystata)",
+        "dependency_floor_receipt(Sys.getenv('TIDYSTATA_FLOOR_CASE'))",
         "floor_results <- local({",
         original,
         "})",
-        "dependency_floor_receipt(Sys.getenv('STATART_FLOOR_CASE'), floor_results, 'after')"
+        "dependency_floor_receipt(Sys.getenv('TIDYSTATA_FLOOR_CASE'), floor_results, 'after')"
       ),
       entrypoint,
       useBytes = TRUE
@@ -327,7 +330,7 @@ dependency_floor_main <- function(args) {
     saveRDS(result, file.path(destination, "check-result.rds"))
     floor_check_complete(
       result,
-      file.path(destination, "check", "statart.Rcheck", "00check.log"),
+      file.path(destination, "check", "tidystata.Rcheck", "00check.log"),
       destination,
       run_id
     )

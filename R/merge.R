@@ -302,7 +302,7 @@ merge_check_unique <- function(data, keys, label, call = rlang::caller_env()) {
 }
 
 merge_marker <- function(taken, stem) {
-  name <- paste0(".statart_in_", stem)
+  name <- paste0(".tidystata_in_", stem)
   while (name %in% taken) {
     name <- paste0(".", name)
   }

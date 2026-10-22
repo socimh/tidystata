@@ -65,7 +65,7 @@
     "R/s_select.R",
     "R/set_seed.R",
     "R/stat.R",
-    "R/statart-package.R",
+    "R/tidystata-package.R",
     "R/std.R",
     "R/summ-helpers.R",
     "R/summ.R",

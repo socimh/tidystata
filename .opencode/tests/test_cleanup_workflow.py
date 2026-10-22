@@ -36,9 +36,9 @@ class SourceStagingTests(unittest.TestCase):
             ".opencode/tools/library/pkg/DESCRIPTION",
             ".opencode/notes/screenshot.png", ".opencode/results/old.log",
             ".opencode/workflows/__pycache__/fixture.pyc", "src/fixture.o",
-            "src/statart.dll", ".Rd2pdf50804/Rd2.tex",
+            "src/tidystata.dll", ".Rd2pdf50804/Rd2.tex",
         }
-        with tempfile.TemporaryDirectory(prefix="statart-staging-fixture-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-staging-fixture-") as temporary:
             base = Path(temporary)
             root, workspace = base / "repository", base / "workspace"
             root.mkdir()
@@ -46,17 +46,17 @@ class SourceStagingTests(unittest.TestCase):
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("fixture", encoding="utf-8")
-            shutil.copytree(root, workspace / "statart", ignore=verifier.source_copy_ignore(root))
+            shutil.copytree(root, workspace / "tidystata", ignore=verifier.source_copy_ignore(root))
             actual = {
-                path.relative_to(workspace / "statart").as_posix()
-                for path in (workspace / "statart").rglob("*") if path.is_file()
+                path.relative_to(workspace / "tidystata").as_posix()
+                for path in (workspace / "tidystata").rglob("*") if path.is_file()
             }
             self.assertEqual(actual, retained)
 
 
 class CurrentReportTests(unittest.TestCase):
     def test_index_reads_stable_reports_and_ignores_history_and_reviews(self):
-        with tempfile.TemporaryDirectory(prefix="statart-report-fixture-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-report-fixture-") as temporary:
             root = Path(temporary)
             demos, reports = root / ".opencode/demos", root / ".opencode/reports"
             demos.mkdir(parents=True)
@@ -72,7 +72,7 @@ class CurrentReportTests(unittest.TestCase):
                 )
             (reports / "readiness-review.md").write_text("# Old review\n", encoding="utf-8")
             env = r_environment()
-            env["STATART_REPORT_DIR"] = str(reports)
+            env["TIDYSTATA_REPORT_DIR"] = str(reports)
             result = subprocess.run(
                 r_command(["Rscript", WORKFLOWS / "generate_demo_reports.R", "--index-only"]),
                 cwd=root, env=env, capture_output=True, text=True,

@@ -1,5 +1,5 @@
 # Public codebook acceptance: 100 numbered scenarios.
-# Expected counts are hand-calculated or derived with base R, never statart
+# Expected counts are hand-calculated or derived with base R, never tidystata
 # internals. Structured columns count complete observed rows; lists retain the
 # established element identity semantics (NULL and empty vectors are elements).
 

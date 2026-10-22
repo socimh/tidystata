@@ -30,8 +30,8 @@ def main():
     development_library = root / ".opencode/tools/library"
     if development_library.is_dir():
         libraries.append(development_library)
-    workspace = Path(tempfile.mkdtemp(prefix="statart-site-"))
-    source = workspace / "statart"
+    workspace = Path(tempfile.mkdtemp(prefix="tidystata-site-"))
+    source = workspace / "tidystata"
     candidate_library = workspace / "library"
     candidate_library.mkdir()
     libraries.insert(0, candidate_library)
@@ -58,13 +58,13 @@ def main():
     script.write_text(
         'args <- commandArgs(trailingOnly = TRUE)\n'
         'candidate_library <- normalizePath(args[[3L]], winslash = "/", mustWork = TRUE)\n'
-        'expected <- normalizePath(file.path(candidate_library, "statart"),\n'
+        'expected <- normalizePath(file.path(candidate_library, "tidystata"),\n'
         '  winslash = "/", mustWork = TRUE)\n'
         '.libPaths(c(candidate_library, .libPaths()))\n'
-        'ns <- loadNamespace("statart", lib.loc = candidate_library)\n'
+        'ns <- loadNamespace("tidystata", lib.loc = candidate_library)\n'
         'actual <- normalizePath(getNamespaceInfo(ns, "path"), winslash = "/", mustWork = TRUE)\n'
         'stopifnot(identical(actual, expected),\n'
-        '  identical(normalizePath(find.package("statart"), winslash = "/"), expected))\n'
+        '  identical(normalizePath(find.package("tidystata"), winslash = "/"), expected))\n'
         'source_desc <- read.dcf(file.path(args[[1L]], "DESCRIPTION"))\n'
         'installed_desc <- read.dcf(file.path(expected, "DESCRIPTION"))\n'
         'stopifnot(identical(source_desc[1L, c("Package", "Version")],\n'

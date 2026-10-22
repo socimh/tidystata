@@ -65,7 +65,7 @@ test_that("own table results and list children preserve preview settings", {
   fixture$day <- as.Date("2024-01-01") + 0:2
   for (input in edge_containers(fixture)) {
     wrapped <- preview_table(input, style = "interval", n = 2)
-    settings <- attr(wrapped, "statart_preview")
+    settings <- attr(wrapped, "tidystata_preview")
     results <- c(
       list(
         tab(wrapped, g),
@@ -79,8 +79,8 @@ test_that("own table results and list children preserve preview settings", {
       summ(wrapped, x, day)
     )
     for (result in results) {
-      expect_identical(class(result), c("statart_preview", class(input)))
-      expect_identical(attr(result, "statart_preview"), settings)
+      expect_identical(class(result), c("tidystata_preview", class(input)))
+      expect_identical(attr(result, "tidystata_preview"), settings)
     }
     expect_equal(summ(wrapped, x)$mean, 3)
     for (result in list(
@@ -94,7 +94,7 @@ test_that("own table results and list children preserve preview settings", {
       fre1(wrapped, g, .type = "tibble")
     )) {
       expect_identical(class(result), c("tbl_df", "tbl", "data.frame"))
-      expect_null(attr(result, "statart_preview"))
+      expect_null(attr(result, "tidystata_preview"))
     }
     expect_identical(unpreview_table(wrapped), input)
   }
@@ -123,8 +123,8 @@ test_that("data.table preview NSE and reference operations remain native", {
   plain <- unpreview_table(wrapped)
   plain[, x := 0]
   expect_equal(wrapped$x, c(11, 13, 15))
-  expect_null(attr(plain, "statart_preview"))
-  expect_s3_class(wrapped, "statart_preview")
+  expect_null(attr(plain, "tidystata_preview"))
+  expect_s3_class(wrapped, "tidystata_preview")
 })
 
 test_that("downstream joins and pivots retain upstream container semantics", {
@@ -148,8 +148,8 @@ test_that("downstream joins and pivots retain upstream container semantics", {
     ordinary <- tidyr::pivot_longer(counts, c(n, percent))
     expect_identical(unpreview_table(pivoted), ordinary)
     expect_identical(
-      attr(pivoted, "statart_preview"),
-      attr(wrapped, "statart_preview")
+      attr(pivoted, "tidystata_preview"),
+      attr(wrapped, "tidystata_preview")
     )
   }
 })

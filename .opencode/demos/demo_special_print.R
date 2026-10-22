@@ -1,7 +1,7 @@
 # Demo: Persistent table previews and explicit row subsets
-# Uses an installed statart package from a fresh verified build.
+# Uses an installed tidystata package from a fresh verified build.
 
-library(statart)
+library(tidystata)
 
 survey <- tibble::tibble(
   respondent_id = seq_len(36),
@@ -16,7 +16,7 @@ cat(
   "## Shared input\n",
   "\n",
   "```r\n",
-  "library(statart)\n",
+  "library(tidystata)\n",
   "survey <- tibble::tibble(\n",
   "  respondent_id = seq_len(36),\n",
   "  region = rep(c(\"North\", \"South\", \"West\"), each = 12),\n",
@@ -51,7 +51,7 @@ print(prepared)
 cat("```\n\n")
 stopifnot(
   nrow(prepared) == 36L,
-  inherits(prepared, "statart_preview"),
+  inherits(prepared, "tidystata_preview"),
   identical(prepared$respondent_id, survey$respondent_id)
 )
 
@@ -74,7 +74,7 @@ sorted <- prepared |>
   preview_table(style = "interval", n = 6)
 print(sorted)
 cat("```\n\n")
-stopifnot(nrow(sorted) == 36L, inherits(sorted, "statart_preview"))
+stopifnot(nrow(sorted) == 36L, inherits(sorted, "tidystata_preview"))
 
 cat("\n## Example 3: One-off print helpers retain the complete input\n\n")
 cat(
@@ -150,7 +150,7 @@ cat("```\n\n")
 stopifnot(
   nrow(frequencies) == 9L,
   sum(frequencies$n) == nrow(survey),
-  inherits(frequencies, "statart_preview")
+  inherits(frequencies, "tidystata_preview")
 )
 
 cat(
@@ -174,7 +174,7 @@ summary <- survey |>
   preview_table(n = 4)
 print(summary)
 cat("```\n\n")
-stopifnot(nrow(summary) == 6L, inherits(summary, "statart_preview"))
+stopifnot(nrow(summary) == 6L, inherits(summary, "tidystata_preview"))
 
 cat(
   "\n## Example 7: Grouped summaries and a long research table retain the style\n\n"
@@ -220,9 +220,9 @@ long_summary <- group_summary |>
 print(long_summary)
 cat("```\n\n")
 stopifnot(
-  inherits(grouped, "statart_preview"),
-  inherits(group_summary, "statart_preview"),
-  inherits(long_summary, "statart_preview"),
+  inherits(grouped, "tidystata_preview"),
+  inherits(group_summary, "tidystata_preview"),
+  inherits(long_summary, "tidystata_preview"),
   nrow(long_summary) == 6L
 )
 
@@ -243,8 +243,8 @@ print(dplyr::slice_head(ordinary, n = 3))
 cat("```\n")
 stopifnot(
   nrow(ordinary) == 36L,
-  !inherits(ordinary, "statart_preview"),
-  !inherits(tibble::as_tibble(prepared), "statart_preview"),
-  !inherits(as.data.frame(prepared), "statart_preview"),
+  !inherits(ordinary, "tidystata_preview"),
+  !inherits(tibble::as_tibble(prepared), "tidystata_preview"),
+  !inherits(as.data.frame(prepared), "tidystata_preview"),
   identical(ordinary$income_log, prepared$income_log)
 )

@@ -25,13 +25,13 @@ SPEC.loader.exec_module(SITE)
 class ReleaseIdentityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.workspace = Path(tempfile.mkdtemp(prefix="statart-identity-tests-"))
+        cls.workspace = Path(tempfile.mkdtemp(prefix="tidystata-identity-tests-"))
         cls.fallback = cls.workspace / "fallback-library"
         cls.fallback.mkdir()
         source = cls.workspace / "fallback-source"
         (source / "R").mkdir(parents=True)
         cls.description = (
-            "Package: statart\nVersion: 0.0.1\nTitle: Identity Test Fixture\n"
+            "Package: tidystata\nVersion: 0.0.1\nTitle: Identity Test Fixture\n"
             "Description: A temporary fixture for package identity tests.\n"
             "Author: Test Author\nMaintainer: Test Author <test@example.invalid>\n"
             "License: MIT\n"
@@ -51,13 +51,13 @@ class ReleaseIdentityTests(unittest.TestCase):
     def setUp(self):
         self.case = Path(tempfile.mkdtemp(prefix="case-", dir=self.workspace))
         self.library = self.case / "candidate-library"
-        (self.library / "statart").mkdir(parents=True)
-        (self.library / "statart/DESCRIPTION").write_text(
+        (self.library / "tidystata").mkdir(parents=True)
+        (self.library / "tidystata/DESCRIPTION").write_text(
             self.description, encoding="utf-8")
-        self.archive = self.case / "statart_0.0.1.tar.gz"
+        self.archive = self.case / "tidystata_0.0.1.tar.gz"
         with tarfile.open(self.archive, "w:gz") as tar:
             content = self.description.encode("utf-8")
-            entry = tarfile.TarInfo("statart/DESCRIPTION")
+            entry = tarfile.TarInfo("tidystata/DESCRIPTION")
             entry.size = len(content)
             tar.addfile(entry, io.BytesIO(content))
         payload = self.archive.read_bytes()
@@ -67,7 +67,7 @@ class ReleaseIdentityTests(unittest.TestCase):
             "tarball_sha256": hashlib.sha256(payload).hexdigest(),
             "tarball_md5": hashlib.md5(payload).hexdigest(),
             "bundle_library": str(self.library),
-            "package": "statart", "version": "0.0.1",
+            "package": "tidystata", "version": "0.0.1",
         }
         self.write_receipt()
 
@@ -116,13 +116,13 @@ class ReleaseIdentityTests(unittest.TestCase):
     def test_loaded_fallback_namespace_is_rejected(self):
         wrapper = self.case / "preload.R"
         wrapper.write_text(
-            'loadNamespace("statart", lib.loc = Sys.getenv("STATART_IDENTITY_FALLBACK"))\n'
-            'source(Sys.getenv("STATART_IDENTITY_VERIFIER"))\n', encoding="utf-8")
+            'loadNamespace("tidystata", lib.loc = Sys.getenv("TIDYSTATA_IDENTITY_FALLBACK"))\n'
+            'source(Sys.getenv("TIDYSTATA_IDENTITY_VERIFIER"))\n', encoding="utf-8")
         result = subprocess.run(
             r_command(["Rscript", wrapper, self.library, self.archive, self.receipt]),
             env=r_environment({
-                "STATART_IDENTITY_FALLBACK": str(self.fallback),
-                "STATART_IDENTITY_VERIFIER": str(ROOT / ".opencode/tests/verify_release_resources.R"),
+                "TIDYSTATA_IDENTITY_FALLBACK": str(self.fallback),
+                "TIDYSTATA_IDENTITY_VERIFIER": str(ROOT / ".opencode/tests/verify_release_resources.R"),
             }, libraries=[self.fallback]),
             capture_output=True, text=True, encoding="utf-8", errors="replace",
         )

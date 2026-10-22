@@ -1,6 +1,6 @@
 # Function: findit()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:08 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:20 | **Status:** PASS
 
 ## Example 1: a bare Stata word, with Stata's abbreviations
 
@@ -32,7 +32,7 @@ merge 1:1 id using data2, keep(match)                           # Keep matched r
   inner_join(data1, data2, by = "id")
 merge 1:1 id using data2, keep(match) keepusing(id) nogenerate  # Keep rows of data1 whose id is in data2 [dplyr]
   semi_join(data1, data2, by = "id")
-merge 1:1 id using data2                                        # Merge with a match report [statart]
+merge 1:1 id using data2                                        # Merge with a match report [tidystata]
   s_merge(data1, data2, "1:1", by = "id")
 
 ## R function: merge() [base]: Merge two data frames (base R)
@@ -49,7 +49,7 @@ egen x_avg = mean(x)                # Sample statistic as a new variable [dplyr]
 # ... and 27 more. Use `print(n = Inf)` to see all, or `View()`.
 ```
 
-## Example 3: packages beyond statart
+## Example 3: packages beyond tidystata
 
 ```
 # Stata to R: 1 entry
@@ -114,7 +114,7 @@ Use `findit()` for the whole list.
 
 ```
 
-statart   dplyr   tidyr  fixest
-     77      78       6      11
+tidystata     dplyr     tidyr    fixest
+       77        78         6        11
 Entries: 415
 ```

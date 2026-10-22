@@ -1,7 +1,7 @@
 # Demo: std(), pc() and as_dummy(), like Stata's egen std(), egen pc() and
 # tabulate, generate(). Runs against the fresh installation selected by the
 # demo workflow.
-library(statart)
+library(tidystata)
 
 cat("## Example 1: standardise and scale within groups\n\n```\n")
 scaled <- dplyr::mutate(

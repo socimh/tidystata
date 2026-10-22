@@ -1,8 +1,8 @@
 ---
-title: "Getting started with statart"
+title: "Getting started with tidystata"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting started with statart}
+  %\VignetteIndexEntry{Getting started with tidystata}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -11,14 +11,14 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-statart provides short commands for exploring and preparing data. Its tables
+tidystata provides short commands for exploring and preparing data. Its tables
 can be saved, filtered and joined in ordinary R workflows. This tutorial uses a
 small survey so that you can check the counts and calculations yourself.
 
 ## Load data and inspect variables
 
 ```{r data}
-library(statart)
+library(tidystata)
 library(dplyr)
 
 survey <- tibble(
@@ -94,7 +94,7 @@ summ(survey, score1, .by = group, .missing = FALSE, .stat = c("n", "mean"))
 
 Numeric-only summaries return a table. When numeric and calendar measurements
 are combined, the default can be a list of tables. The companion
-`vignette("containers-and-missing-values", package = "statart")` explains those
+`vignette("containers-and-missing-values", package = "tidystata")` explains those
 types and their missing-value conventions.
 
 ## Prepare new variables
@@ -135,12 +135,12 @@ The installed package includes scripts for inspection, tabulation, summaries,
 preparation and edge cases. Locate a script with:
 
 ```{r script-path}
-system.file("examples", "03_summary_statistics.R", package = "statart")
+system.file("examples", "03_summary_statistics.R", package = "tidystata")
 ```
 
 Open it in your editor and run its lines individually. If results appear to use
-an older package, inspect `packageVersion("statart")` and `find.package("statart")`.
+an older package, inspect `packageVersion("tidystata")` and `find.package("tidystata")`.
 For local source changes, install from the project and restart R before testing.
 
 The full migration guide is installed at
-`system.file("MIGRATION.md", package = "statart")`.
+`system.file("MIGRATION.md", package = "tidystata")`.

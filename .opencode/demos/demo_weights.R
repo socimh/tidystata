@@ -1,6 +1,6 @@
 # Demo: frequency and analytic weights, like Stata's [fw] and [aw].
 # Runs against the fresh installation selected by the demo workflow.
-library(statart)
+library(tidystata)
 
 survey <- tibble::tibble(
   region = c("north", "north", "north", "south", "south"),

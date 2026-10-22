@@ -12,7 +12,7 @@ stopifnot(
   requirements[[2]]$operator == ""
 )
 
-temporary <- tempfile("statart-floor-audit-")
+temporary <- tempfile("tidystata-floor-audit-")
 dir.create(temporary)
 packages <- c(
   "auditfixture",
@@ -39,7 +39,10 @@ for (package in packages) {
 }
 .libPaths(c(temporary, .libPaths()))
 case <- list(pins = list(auditfixture = "1.0"))
-error <- tryCatch(floor_audit(case, include_statart = FALSE), error = identity)
+error <- tryCatch(
+  floor_audit(case, include_tidystata = FALSE),
+  error = identity
+)
 stopifnot(
   inherits(error, "error"),
   grepl(
@@ -53,17 +56,20 @@ writeLines(
   file.path(temporary, "fixturedep", "DESCRIPTION"),
   useBytes = TRUE
 )
-records <- floor_audit(case, include_statart = FALSE)
+records <- floor_audit(case, include_tidystata = FALSE)
 stopifnot(
   length(records) == length(packages),
   identical(records$fixturedep$version, "2.0")
 )
 case$pins$auditfixture <- "1.1"
-error <- tryCatch(floor_audit(case, include_statart = FALSE), error = identity)
+error <- tryCatch(
+  floor_audit(case, include_tidystata = FALSE),
+  error = identity
+)
 stopifnot(inherits(error, "error"))
 cat("Dependency constraints and exact candidate auditing passed.\n")
 
-base <- tempfile("statart-floor-completion-")
+base <- tempfile("tidystata-floor-completion-")
 dir.create(base)
 run <- floor_run_directory(base)
 id <- basename(run)

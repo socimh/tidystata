@@ -1,6 +1,6 @@
 # One hundred independent selection scenarios are run through each public name
 # listing entry point. Expected names come from explicit fixtures, not ds(),
-# select(), or another statart function used as a reference implementation.
+# select(), or another tidystata function used as a reference implementation.
 inspect_names_columns <- c(
   "id",
   "alpha",
@@ -1077,7 +1077,7 @@ stopifnot(
 
 for (function_name in c("ds", "ds_as_column")) {
   local({
-    api <- getExportedValue("statart", function_name)
+    api <- getExportedValue("tidystata", function_name)
     check <- function(out, expected, container = "tibble") {
       if (identical(function_name, "ds")) {
         expect_identical(out, expected)

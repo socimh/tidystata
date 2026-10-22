@@ -1,5 +1,5 @@
 # Run these lines one at a time in RStudio.
-library(statart)
+library(tidystata)
 library(dplyr)
 
 # A small survey, including missing values and a variable label.

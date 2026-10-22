@@ -3,7 +3,7 @@
 
 library(dplyr)
 
-library(statart)
+library(tidystata)
 
 cat("## Example 1: Browse basic data frame\n\n")
 cat("```r\n")

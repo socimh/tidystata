@@ -1,11 +1,11 @@
-# Contributing to statart
+# Contributing to tidystata
 
 Start with [DEVELOPMENT.md](DEVELOPMENT.md) for the current package map, known
 limitations and open backlog. Read [AGENTS.md](AGENTS.md) before changing files.
 
 ## Scope and compatibility
 
-statart provides Stata-inspired R functions with tidyverse-compatible inputs and
+tidystata provides Stata-inspired R functions with tidyverse-compatible inputs and
 outputs. Preserve exported names and established behavior unless an API change
 has been agreed. New commands should serve a concrete Stata-style workflow.
 Prefer small direct changes and reuse the existing dependencies.
@@ -47,9 +47,9 @@ sources, tests and maintained examples. The reviewed file list is
 
 ### Package conventions
 
-statart follows the [tidyverse style guide](https://style.tidyverse.org/) and
+tidystata follows the [tidyverse style guide](https://style.tidyverse.org/) and
 the layout used by dplyr, tidyr, stringr and purrr. The points below are the
-statart-specific decisions; consult the guide for everything else.
+tidystata-specific decisions; consult the guide for everything else.
 
 - **Files.** A file holding one function is named after it (`is_first.R`); a
   family file gets a short hyphenated name (`row-stats.R`, `type-conversion.R`).
@@ -124,7 +124,7 @@ statart-specific decisions; consult the guide for everything else.
   unchanged.
 - **Documentation.** Titles are sentence case without a full stop; `@param`
   entries are sentences ending in a full stop. Shared arguments (`.data`,
-  `...`, `.by`, `.wt`) inherit from `@inheritParams statart_args` in
+  `...`, `.by`, `.wt`) inherit from `@inheritParams tidystata_args` in
   `R/doc-params.R`. Use `@returns`, `@family` (plural, matching the pkgdown
   section) and `[fn()]` cross-links.
 - **Tests.** `tests/testthat/test-<file>.R` mirrors `R/<file>.R`. Large topics
@@ -145,8 +145,8 @@ lintr 3.4.0 in a development library. The local Air fallback lives in ignored
 `.opencode/tools/style-tools/`; the pinned lintr library defaults to
 `.opencode/tools/style-tools/library/`. Other verification dependencies may use
 `.opencode/tools/library/`.
-`STATART_AIR` may name the Air executable;
-`STATART_STYLE_LIBRARY` may name the R library containing the pinned lintr.
+`TIDYSTATA_AIR` may name the Air executable;
+`TIDYSTATA_STYLE_LIBRARY` may name the R library containing the pinned lintr.
 The checker permits explicit `stats::`/`utils::` qualification of already
 imported functions; it still rejects missing namespaces and exports.
 
@@ -253,11 +253,11 @@ interactive development, `devtools::test()` for focused feedback, and
 `devtools::check()` for a complete package check. These commands do not require
 the maintainer's Python tooling. Install the current folder with
 `devtools::install(".", upgrade = "never")`, restart R, then inspect
-`packageVersion("statart")` and `find.package("statart")` before manual examples.
+`packageVersion("tidystata")` and `find.package("tidystata")` before manual examples.
 Opening the repository does not change which installation `library()` loads.
 
 Repository automation uses `.opencode/workflows/r_process.py`. On Windows,
-`STATART_R_LAUNCHER` can name a verified protected `run_r_safe.py`; this machine's
+`TIDYSTATA_R_LAUNCHER` can name a verified protected `run_r_safe.py`; this machine's
 existing launcher is the default. An unavailable protected launcher is an error,
 not a reason to run an unprotected probe. On other platforms R is invoked directly.
 
@@ -283,7 +283,7 @@ building and deployment are distinct actions.
 
 Repository automation needs pkgload, rcmdcheck and jsonlite in a development
 library, conventionally ignored `.opencode/tools/library/`. On Windows every R
-subprocess uses the protected launcher described above. These tooling dependencies are not runtime Imports of statart.
+subprocess uses the protected launcher described above. These tooling dependencies are not runtime Imports of tidystata.
 
 The check, release, minimal and demos modes are mutually exclusive. Filters and
 `--shuffle-seed` apply only to ordinary test runs. For reproducible order checks:
@@ -330,4 +330,4 @@ helpers execute from the same staged copy as the candidate source.
 Website builds always install their staged source into a fresh private library.
 The website helper's optional `--library` supplies dependencies only. Missing or
 wrong candidate installations are rejected by resource checks rather than falling
-back to another installed statart version.
+back to another installed tidystata version.

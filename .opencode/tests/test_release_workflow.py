@@ -14,7 +14,7 @@ import verify_package
 
 class ModeTests(unittest.TestCase):
     def test_cli_rejects_conflicts_without_creating_output(self):
-        with tempfile.TemporaryDirectory(prefix="statart-invalid-mode-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-invalid-mode-") as temporary:
             prefix = Path(temporary) / "untouched" / "result"
             result = subprocess.run(
                 [sys.executable, verify_package.__file__, "--release", "--minimal",

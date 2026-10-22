@@ -1,4 +1,4 @@
-library(statart)
+library(tidystata)
 library(dplyr)
 
 survey <- tibble(
@@ -42,7 +42,7 @@ survey |> group_by(group) |> tab(sex)
 fre(survey, sex, .by = group)
 
 # The package also includes a real example dataset.
-data("lifeexp", package = "statart")
+data("lifeexp", package = "tidystata")
 codebook(lifeexp)
 tab(lifeexp, region)
 fre(lifeexp, region) # Displays the value labels.

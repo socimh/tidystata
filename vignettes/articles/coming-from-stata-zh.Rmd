@@ -4,9 +4,9 @@ title: "从 Stata 到 R"
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(statart)
+library(tidystata)
 
-entries <- statart:::findit_entries()
+entries <- tidystata:::findit_entries()
 
 # Pandoc reads markdown inside HTML blocks, so encode ASCII punctuation as
 # entities to keep code such as `x*` and quotes exactly as written. Non-ASCII
@@ -53,7 +53,7 @@ section_tables <- function(section, task, detail, headers) {
 [English version](coming-from-stata.html)
 
 熟悉 Stata 的用户已经知道自己想做什么，需要的只是知道在 R 中怎么写。本页把 Stata
-命令和完成同样任务的 R 代码并列：statart 中有 Stata 风格函数的，使用 statart；其他情况使用常用的
+命令和完成同样任务的 R 代码并列：tidystata 中有 Stata 风格函数的，使用 tidystata；其他情况使用常用的
 R 包。
 
 ## 在 R 中直接查询
@@ -68,9 +68,9 @@ findit("merge 1:1 id, keep(match)")
 
 不带参数的 `findit()` 返回完整列表；输入 `??stata` 可以再次找到它的帮助文档。
 
-## statart 以外的功能
+## tidystata 以外的功能
 
-statart 覆盖日常的数据探索、制表、描述统计、数据准备和检查。其他任务通常使用以下 R 包：
+tidystata 覆盖日常的数据探索、制表、描述统计、数据准备和检查。其他任务通常使用以下 R 包：
 
 - **回归和固定效应**（`regress`、`reghdfe`、`xtreg`、`ivregress`）：`lm()`、`glm()`
   或 `fixest::feols()`。
@@ -83,8 +83,8 @@ statart 覆盖日常的数据探索、制表、描述统计、数据准备和检
 - **作图**（`twoway`、`histogram`）：ggplot2；`binscatter` 可用 binsreg 或
   `statar::stat_binmean()`。
 
-statart 和 [statar](https://github.com/matthieugomez/statar) 可以同时加载，只有 `tab()` 和
-`xtile()` 重名。请最后加载 statart，或写成 `statart::tab()`。
+tidystata 和 [statar](https://github.com/matthieugomez/statar) 可以同时加载，只有 `tab()` 和
+`xtile()` 重名。请最后加载 tidystata，或写成 `tidystata::tab()`。
 
 一些 RStudio 操作可以代替 Stata 的界面：Ctrl+Enter（Mac 上为 Cmd+Return）运行当前行或选中的代码，Tab
 键补全名称，Environment 和 Files 窗口相当于 Stata 的 Variables 窗口和 `dir`。
@@ -104,7 +104,7 @@ Stata 用户可能用到的 R 函数，包括上文用到的所有函数，及�
 Stata 命令。
 
 ```{r, echo = FALSE, results = "asis"}
-functions <- statart:::findit_functions()
+functions <- tidystata:::findit_functions()
 table <- data.frame(
   paste0("<code>", escape_html(functions$`function`), "()</code>"),
   escape_html(functions$package),

@@ -1,4 +1,4 @@
-# Statart Testing Workflow Makefile
+# tidystata Testing Workflow Makefile
 # Testing with testthat + Demo reports with actual function output
 
 .PHONY: test test-results demo-reports test-full clean help list-tests style-check
@@ -14,7 +14,7 @@ RED := \033[31m
 RESET := \033[0m
 
 help:
-	@echo "$(BLUE)Statart Testing Workflow$(RESET)"
+	@echo "$(BLUE)tidystata Testing Workflow$(RESET)"
 	@echo ""
 	@echo "$(GREEN)Testing:$(RESET)"
 	@echo "  $(YELLOW)make test$(RESET)          - Run all testthat tests (standard)"

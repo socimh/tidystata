@@ -1,12 +1,12 @@
 # Function: browse()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:08 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:19 | **Status:** PASS
 
 
 Attaching package: 'dplyr'
 
 
-The following object is masked from 'package:statart':
+The following object is masked from 'package:tidystata':
 
     starwars
 

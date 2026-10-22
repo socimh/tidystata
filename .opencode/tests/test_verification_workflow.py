@@ -25,16 +25,16 @@ class CommandTests(unittest.TestCase):
                          ["Rscript", "a.R"])
 
     def test_windows_requires_verified_launcher(self):
-        with self.assertRaisesRegex(RuntimeError, "STATART_R_LAUNCHER"):
+        with self.assertRaisesRegex(RuntimeError, "TIDYSTATA_R_LAUNCHER"):
             r_command(["Rscript", "a.R"], platform="nt",
-                      environ={"STATART_R_LAUNCHER": "/absent/launcher.py"})
+                      environ={"TIDYSTATA_R_LAUNCHER": "/absent/launcher.py"})
 
     def test_configured_launcher_preserves_argument_boundaries(self):
         with tempfile.TemporaryDirectory() as temporary:
             launcher = Path(temporary) / "protected launcher.py"
             launcher.write_text("# fixture", encoding="utf-8")
             command = r_command(["Rscript", "script with spaces.R"], platform="nt",
-                                environ={"STATART_R_LAUNCHER": str(launcher)})
+                                environ={"TIDYSTATA_R_LAUNCHER": str(launcher)})
             self.assertEqual(command[:2], [sys.executable, str(launcher)])
             self.assertEqual(command[-3:], ["--", "Rscript", "script with spaces.R"])
 
@@ -48,7 +48,7 @@ class RunnerTests(unittest.TestCase):
             "failure": ('testthat::expect_true(FALSE)', 1),
             "error": ('stop("fixture")', 1),
         }
-        with tempfile.TemporaryDirectory(prefix="statart-runner-test-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-runner-test-") as temporary:
             base = Path(temporary)
             package = base / "fixture"
             (package / "R").mkdir(parents=True)
@@ -72,7 +72,7 @@ class RunnerTests(unittest.TestCase):
                     command = ["Rscript", str(ROOT / ".opencode/workflows/run_suite.R"),
                                str(package), str(prefix)]
                     if os.name == "nt":
-                        launcher = os.environ.get("STATART_R_LAUNCHER", "C:/Users/socimh/.codex/scripts/run_r_safe.py")
+                        launcher = os.environ.get("TIDYSTATA_R_LAUNCHER", "C:/Users/socimh/.codex/scripts/run_r_safe.py")
                         command = [sys.executable, launcher, "--", *command]
                     env = os.environ.copy()
                     if os.name == "nt":

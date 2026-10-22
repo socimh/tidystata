@@ -388,7 +388,7 @@ test_that("var_type: ETL pipeline type checking", {
 
 
 test_that("type expansion preserves custom names and structured descriptions", {
-  x <- structure(1:3, class = "statart_type_probe")
+  x <- structure(1:3, class = "tidystata_type_probe")
   for (label in c(
     "interval",
     "price-usd",
@@ -406,21 +406,21 @@ test_that("type expansion preserves custom names and structured descriptions", {
 })
 
 test_that("missing custom type summaries fall back to the class", {
-  x <- structure(1:3, class = "statart_type_probe")
+  x <- structure(1:3, class = "tidystata_type_probe")
   for (label in list(NA_character_, "", character(), c("a", "b"), 1L)) {
     testthat::local_mocked_bindings(
       type_sum = function(x) label,
       .package = "pillar"
     )
-    expect_identical(var_type(x), "statart_type_probe")
-    expect_identical(var_type(x, abbr = TRUE), "statart_type_probe")
+    expect_identical(var_type(x), "tidystata_type_probe")
+    expect_identical(var_type(x, abbr = TRUE), "tidystata_type_probe")
   }
 })
 
 test_that("numeric-looking custom class names do not imply summability", {
   labels <- c("interval", "integerish", "dbl_extra", "timestamp", "date_custom")
-  expect_false(any(statart:::is_summable_chr(labels)))
-  expect_true(all(statart:::is_summable_chr(c(
+  expect_false(any(tidystata:::is_summable_chr(labels)))
+  expect_true(all(tidystata:::is_summable_chr(c(
     "int",
     "dbl+lbl",
     "int64",
@@ -547,7 +547,7 @@ test_that("type detection propagates extension method errors", {
     .package = "pillar"
   )
   expect_error(
-    var_type(structure(1, class = "statart_probe")),
+    var_type(structure(1, class = "tidystata_probe")),
     "extension failed"
   )
 })
@@ -639,7 +639,7 @@ test_that("classed matrices retain their scalar type and numeric conversion", {
 test_that("vctrs record types and complete element identities remain intact", {
   x <- vctrs::new_rcrd(
     list(a = c(1, 1, NA), b = c("x", "x", NA)),
-    class = "statart_record"
+    class = "tidystata_record"
   )
   label <- pillar::type_sum(x)
   expect_identical(var_type(x), label)
@@ -667,7 +667,7 @@ test_that("data.table metadata retains its container name", {
 
 
 test_that("missing extension abbreviations do not defeat the class fallback", {
-  x <- structure(1:3, class = "statart_type_probe")
+  x <- structure(1:3, class = "tidystata_type_probe")
   testthat::local_mocked_bindings(
     type_sum = function(x) NA_character_,
     .package = "pillar"
@@ -676,7 +676,7 @@ test_that("missing extension abbreviations do not defeat the class fallback", {
     vec_ptype_abbr = function(x) NA_character_,
     .package = "vctrs"
   )
-  expect_identical(var_type(x), "statart_type_probe")
+  expect_identical(var_type(x), "tidystata_type_probe")
 })
 
 
@@ -684,16 +684,20 @@ test_that("custom unit-bearing classes retain their units method", {
   registry <- get(".__S3MethodsTable__.", envir = asNamespace("base"))
   registerS3method(
     "units",
-    "statart_clock_probe",
+    "tidystata_clock_probe",
     function(x) attr(x, "clock_units"),
     envir = asNamespace("base")
   )
-  withr::defer(rm("units.statart_clock_probe", envir = registry))
+  withr::defer(rm("units.tidystata_clock_probe", envir = registry))
   testthat::local_mocked_bindings(
     type_sum = function(x) "time",
     .package = "pillar"
   )
-  x <- structure(c(1, NA), class = "statart_clock_probe", clock_units = "hours")
+  x <- structure(
+    c(1, NA),
+    class = "tidystata_clock_probe",
+    clock_units = "hours"
+  )
   expect_identical(var_type(x), "time")
   expect_identical(var_unit(x), "hours")
 })

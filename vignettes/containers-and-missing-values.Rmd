@@ -11,14 +11,14 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-statart separates tabular results from display choices. This tutorial shows how
+tidystata separates tabular results from display choices. This tutorial shows how
 to preserve data containers and interpret missing values before passing results
 to another calculation.
 
 ## Container types and lists
 
 ```{r containers}
-library(statart)
+library(tidystata)
 library(dplyr)
 
 df <- data.frame(

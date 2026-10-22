@@ -1,6 +1,6 @@
 # Function: misstable()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:09 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:20 | **Status:** PASS
 
 ## Example 1: missing values by variable
 

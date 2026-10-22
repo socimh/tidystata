@@ -1,11 +1,11 @@
 # Time the core function families on fixed inputs, optionally beside reference
 # implementations from other packages. References are diagnostic only; they are
-# not dependencies and need not match statart's missing-value or class rules.
+# not dependencies and need not match tidystata's missing-value or class rules.
 # Usage: Rscript benchmark_core.R <library> <prefix> [--references] [--profile]
 #   [--filter=regex]
 args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) >= 2L)
-library(statart, lib.loc = args[[1L]])
+library(tidystata, lib.loc = args[[1L]])
 prefix <- args[[2L]]
 references <- "--references" %in% args
 filter <- sub("^--filter=", "", grep("^--filter=", args, value = TRUE))
@@ -58,10 +58,10 @@ correlations <- wide[1:20]
 using <- data.frame(g10k = seq_len(10000L), z = stats::rnorm(10000L))
 
 jobs <- list()
-add <- function(name, family, statart, ...) {
+add <- function(name, family, tidystata, ...) {
   jobs[[name]] <<- list(
     family = family,
-    statart = statart,
+    tidystata = tidystata,
     references = Filter(Negate(is.null), list(...))
   )
 }
@@ -369,12 +369,12 @@ quiet <- function(job) {
   list(result = result, diagnostics = diagnostics)
 }
 
-# With --profile, report where each selected statart job spends its time.
+# With --profile, report where each selected tidystata job spends its time.
 if ("--profile" %in% args) {
   for (name in names(jobs)) {
-    profile <- tempfile("statart-profile-")
+    profile <- tempfile("tidystata-profile-")
     utils::Rprof(profile, interval = 0.005)
-    for (i in 1:3) invisible(quiet(jobs[[name]]$statart))
+    for (i in 1:3) invisible(quiet(jobs[[name]]$tidystata))
     utils::Rprof(NULL)
     summary <- utils::summaryRprof(profile)
     cat("\n==", name, "(", summary$sampling.time / 3, "s per call )\n")
@@ -386,7 +386,7 @@ if ("--profile" %in% args) {
 
 # Hashes of value, visibility and diagnostics compare installations exactly
 # without storing every large result.
-records <- lapply(jobs, function(job) rlang::hash(quiet(job$statart)))
+records <- lapply(jobs, function(job) rlang::hash(quiet(job$tidystata)))
 saveRDS(records, paste0(prefix, "-hashes.rds"))
 
 time_job <- function(job) {
@@ -405,7 +405,7 @@ time_job <- function(job) {
   })
   allocated <- NA_real_
   if (isTRUE(capabilities("profmem"))) {
-    profile <- tempfile("statart-allocation-")
+    profile <- tempfile("tidystata-allocation-")
     utils::Rprofmem(profile)
     invisible(quiet(job))
     utils::Rprofmem(NULL)
@@ -424,7 +424,7 @@ time_job <- function(job) {
 rows <- list()
 for (name in names(jobs)) {
   job <- jobs[[name]]
-  implementations <- c(list(statart = job$statart), job$references)
+  implementations <- c(list(tidystata = job$tidystata), job$references)
   for (impl in names(implementations)) {
     timing <- tryCatch(time_job(implementations[[impl]]), error = function(e) {
       cat("  ", name, impl, "failed:", conditionMessage(e), "\n")

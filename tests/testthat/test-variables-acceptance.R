@@ -1,5 +1,5 @@
 # Numbered public-contract cases. Expected names/labels are explicit fixtures;
-# no statart internal helper is used to compute expected metadata or matches.
+# no tidystata internal helper is used to compute expected metadata or matches.
 inspect_metadata_label <- function(x, label) {
   attr(x, "label") <- label
   x

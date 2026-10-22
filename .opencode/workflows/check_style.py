@@ -53,11 +53,11 @@ def main():
         if missing:
             raise ValueError("New R sources absent from style scope: " + ", ".join(sorted(missing)))
     local_air = root / ".opencode/tools/style-tools/air.exe"
-    air = args.air or os.environ.get("STATART_AIR") or shutil.which("air")
+    air = args.air or os.environ.get("TIDYSTATA_AIR") or shutil.which("air")
     if not air and local_air.is_file():
         air = str(local_air)
     if not air:
-        raise RuntimeError("Install Air " + manifest["air_version"] + " or set STATART_AIR")
+        raise RuntimeError("Install Air " + manifest["air_version"] + " or set TIDYSTATA_AIR")
     version = subprocess.check_output([air, "--version"], text=True, encoding="utf-8").strip()
     if version != "air " + manifest["air_version"]:
         raise RuntimeError("Expected Air " + manifest["air_version"] + "; found " + version)

@@ -1,35 +1,32 @@
-# Developing statart
+# Developing tidystata
 
-statart **0.3.0** provides Stata-inspired data exploration and preparation
+tidystata **0.3.0** provides Stata-inspired data exploration and preparation
 and is stabilizing toward a future 1.0.0 release. This is the single current
 package map, verification status and backlog. See [CONTRIBUTING.md](CONTRIBUTING.md)
 for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
-**R Packages conformance pass, 2026-10-21 (branch
-`refactor/tidyverse-conventions`, uncommitted):** sources, tests, examples,
-demos, MIGRATION and the `findit()` entries use `|>`; `%>%` stays exported
-and is used only in five magrittr-compatibility tests. `?tab` gains a Details
-section (its "See Details" reference previously dangled); long descriptions
-of `std()` and `mvdecode()` move to Details; function-level experimental
-badges are removed. NEWS 0.3.0 is regrouped into standard sections without
-internal history. `roxygen2` leaves Suggests; `run_tests.R` and the viewer
-checklist move under `.opencode/`. Older dated entries are in Git history.
+**Rename to tidystata, 2026-10-22 (branch `refactor/tidyverse-conventions`):**
+the package, its S3 classes, native symbols, help topics, `.Rproj`, workflow
+environment variables (`TIDYSTATA_*`) and GitHub/pkgdown/CRAN URLs move from
+statart to tidystata; NEWS records the rename. `.opencode/notes/` keeps the
+old name as read-only source material, and `inst/DATA-PROVENANCE.md` keeps the
+historical statart commit reference. The preceding R Packages conformance pass
+(native pipe throughout, `?tab` Details, regrouped NEWS) is commit `e76fb89`.
+Older dated entries are in Git history.
 
-Verification: pinned style/parse/lint **145 sources, 0 findings**; help
-regenerated (NAMESPACE unchanged); README re-rendered (only the NEWS link
-changed); migration copies current; `pkgdown::check_pkgdown()` clean.
-`--release`: fresh build, `R CMD check --as-cran` **0 errors, 0 warnings,
-1 NOTE** (new submission; unpublished site URLs), tests inside check
-**18,477 passing, 0 failures/warnings** (21 snapshot blocks skipped there),
-installed resources pass. The workflow's separate `snapshots` step again
-failed every file with `could not find function` (known harness issue, see
-backlog); run directly against the installed bundle with `NOT_CRAN=true`, all
-21 snapshot files pass (**5,912 expectations, 0 failures**), and the only
-accepted snapshot change is the `set_seed()` hint now showing `|>`. All 24
-demos pass; report diffs are the corrected version line, timings, the
-unseeded `cut` example, pipe text and the native-piped vector name.
+Verification: pinned style/parse/lint **145 sources, 0 findings** (six files
+re-wrapped by Air for the longer name); `cpp11::cpp_register()` and help
+regenerated; README re-rendered (wrapping only); migration copies current;
+45 workflow Python tests pass. `--release`: fresh build, `R CMD check
+--as-cran` **0 errors, 0 warnings, 1 NOTE** (new submission; ten
+`socimh/tidystata` GitHub and pkgdown URLs return 404 until the repository is
+renamed and the site deployed), tests inside check **18,477 passing,
+0 failures/warnings** (21 snapshot blocks skipped there), installed resources
+pass, and the workflow's `snapshots` stage now passes against the bundle
+(21 blocks, 0 failures). All 24 demos pass; report diffs are the package name,
+column widths, timings and the unseeded `cut` example.
 
 ## Package map
 
@@ -140,11 +137,11 @@ show generated console output.
 
 ## Open backlog and release gates
 
-- **Snapshot step harness:** the `--release` `snapshots` stage in
-  `verify_package.py`/`run_suite.R` does not attach statart, so every snapshot
-  file fails with `could not find function`. Until fixed, run the snapshot
-  files against the installed bundle with `NOT_CRAN=true` and
-  `library(statart)`.
+- **Snapshot step harness:** the earlier `could not find function` failure of
+  the `--release` `snapshots` stage did not recur on 2026-10-22, in the
+  workflow or in direct runs against a separate bundle library. No harness
+  change was made; if it returns, record the failing log before changing
+  `run_suite.R`.
 - **API naming (decided 2026-10-20):** the maintainer's decisions are written
   as the naming policy in CONTRIBUTING ("Package conventions"): `x` as the
   first argument of vector and expression functions; dots only on options
@@ -197,7 +194,9 @@ show generated console output.
   cycle, the 0.3.0 deprecations removed or moved to `deprecate_stop()`, the
   remote platform and dependency-floor checks run, and README no longer calls
   the package experimental.
-- **Publication:** review release version/metadata and six unpublished URLs.
+- **Publication:** rename the GitHub repository to `socimh/tidystata` and
+  update the local `origin` remote, then deploy the site so the ten URLs in
+  the incoming NOTE resolve. Review release version/metadata.
   Existing incoming-check notes require a recorded publication decision. Local
   verification does not authorize push, deployment, release or submission.
 - **Remaining follow-up:** duration display rounding at unit boundaries still

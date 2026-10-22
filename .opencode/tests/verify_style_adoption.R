@@ -4,7 +4,7 @@ library_path <- args[[1L]]
 mode <- args[[2L]]
 record_path <- args[[3L]]
 .libPaths(c(library_path, .libPaths()))
-suppressPackageStartupMessages(library(statart))
+suppressPackageStartupMessages(library(tidystata))
 
 data <- tibble::tibble(
   group = c("A", "A", "B", "B"),
@@ -66,9 +66,9 @@ capture <- function(call) {
     messages = messages
   )
 }
-exports <- sort(getNamespaceExports("statart"))
+exports <- sort(getNamespaceExports("tidystata"))
 interfaces <- lapply(exports, function(name) {
-  object <- getExportedValue("statart", name)
+  object <- getExportedValue("tidystata", name)
   if (is.function(object)) formals(object) else class(object)
 })
 names(interfaces) <- exports

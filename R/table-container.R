@@ -25,7 +25,7 @@ table_restore <- function(
     } else if (is.data.frame(template) && !inherits(template, "tbl_df")) {
       out <- as.data.frame(out)
     }
-    if (inherits(template, "statart_preview")) {
+    if (inherits(template, "tidystata_preview")) {
       out <- preview_restore(out, template)
     }
   }
@@ -34,7 +34,7 @@ table_restore <- function(
 
 # Avoid reference semantics and preview dispatch in internal calculations.
 table_working_data <- function(data, call = rlang::caller_env()) {
-  if (inherits(data, "statart_preview")) {
+  if (inherits(data, "tidystata_preview")) {
     data <- unpreview_table(data)
   }
   if (inherits(data, "data.table")) {

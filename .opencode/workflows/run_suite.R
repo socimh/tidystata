@@ -14,7 +14,7 @@ if (shuffle && (is.na(seed) || as.character(seed) != args[[4]])) {
 }
 dir.create(dirname(prefix), recursive = TRUE, showWarnings = FALSE)
 package_path <- normalizePath(package_path, winslash = "/")
-candidate_library <- Sys.getenv("STATART_TEST_LIBRARY")
+candidate_library <- Sys.getenv("TIDYSTATA_TEST_LIBRARY")
 installed <- nzchar(candidate_library)
 if (installed) {
   package <- read.dcf(file.path(package_path, "DESCRIPTION"))[1L, "Package"]
@@ -73,7 +73,7 @@ if (shuffle || mode == "snapshots") {
     }
     any(vapply(as.list(expression)[-1], contains_test, logical(1)))
   }
-  staged_path <- tempfile("statart-shuffled-tests-")
+  staged_path <- tempfile("tidystata-shuffled-tests-")
   dir.create(staged_path)
   stopifnot(file.copy(
     file.path(package_path, "tests"),
@@ -117,9 +117,13 @@ if (shuffle || mode == "snapshots") {
     writeLines(
       c(
         "local({",
-        paste0('  .statart_order_expressions <- readRDS("', escaped_path, '")'),
-        "  for (.statart_order_expression in .statart_order_expressions) {",
-        "    eval(.statart_order_expression, envir = environment())",
+        paste0(
+          '  .tidystata_order_expressions <- readRDS("',
+          escaped_path,
+          '")'
+        ),
+        "  for (.tidystata_order_expression in .tidystata_order_expressions) {",
+        "    eval(.tidystata_order_expression, envir = environment())",
         "  }",
         "})"
       ),
@@ -230,7 +234,7 @@ legacy_source_hashes <- stats::setNames(
   unname(tools::md5sum(file.path(package_path, source_files))),
   source_files
 )
-identity_path <- Sys.getenv("STATART_SOURCE_IDENTITY")
+identity_path <- Sys.getenv("TIDYSTATA_SOURCE_IDENTITY")
 source_identity <- if (nzchar(identity_path)) {
   jsonlite::read_json(identity_path)
 } else {
@@ -240,8 +244,8 @@ jsonlite::write_json(
   list(
     mode = mode,
     snapshot_selection = selection,
-    run_id = Sys.getenv("STATART_RUN_ID"),
-    source_sha256 = Sys.getenv("STATART_SOURCE_SHA256"),
+    run_id = Sys.getenv("TIDYSTATA_RUN_ID"),
+    source_sha256 = Sys.getenv("TIDYSTATA_SOURCE_SHA256"),
     candidate_library = candidate_library,
     shuffle = shuffle,
     seed = seed,

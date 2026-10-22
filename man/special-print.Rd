@@ -70,7 +70,7 @@ current console width; \code{Inf} shows all columns.}
 }
 \value{
 \code{preview_table()} returns the complete input container with an additional
-\code{statart_preview} class. \code{unpreview_table()} returns the table without that
+\code{tidystata_preview} class. \code{unpreview_table()} returns the table without that
 class or its settings, preserving grouping. The print helpers invisibly
 return their original input. The slice helpers return the selected rows in
 the input container, retaining valid grouping and existing preview settings.

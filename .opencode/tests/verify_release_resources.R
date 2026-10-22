@@ -6,7 +6,7 @@ if (!length(args) %in% c(3L, 4L)) {
 if (length(args) == 4L && !args[[4L]] %in% c("check", "release")) {
   stop("Resource mode must be check or release.")
 }
-if (!file.exists(file.path(args[[1L]], "statart", "DESCRIPTION"))) {
+if (!file.exists(file.path(args[[1L]], "tidystata", "DESCRIPTION"))) {
   stop("Candidate installation is missing from the supplied library.")
 }
 if (!file.exists(args[[3L]])) {
@@ -59,20 +59,20 @@ if (
 ) {
   stop("Archive checksum does not match the installation receipt.")
 }
-if (!identical(receipt$package, "statart")) {
+if (!identical(receipt$package, "tidystata")) {
   stop("Installation receipt is for a different package.")
 }
 contents <- utils::untar(tarball, list = TRUE)
-description_member <- "statart/DESCRIPTION"
+description_member <- "tidystata/DESCRIPTION"
 if (sum(contents == description_member) != 1L) {
-  stop("Source archive must contain exactly one statart DESCRIPTION.")
+  stop("Source archive must contain exactly one tidystata DESCRIPTION.")
 }
-bundle_directory <- tempfile("statart-bundle-description-")
+bundle_directory <- tempfile("tidystata-bundle-description-")
 dir.create(bundle_directory)
 utils::untar(tarball, files = description_member, exdir = bundle_directory)
 bundle_desc <- read.dcf(file.path(bundle_directory, description_member))
 expected_path <- normalizePath(
-  file.path(candidate_library, "statart"),
+  file.path(candidate_library, "tidystata"),
   winslash = "/",
   mustWork = TRUE
 )
@@ -85,7 +85,7 @@ if (
   stop("Bundle and candidate DESCRIPTION must match the installation receipt.")
 }
 .libPaths(c(candidate_library, .libPaths()))
-namespace <- loadNamespace("statart", lib.loc = candidate_library)
+namespace <- loadNamespace("tidystata", lib.loc = candidate_library)
 namespace_path <- normalizePath(
   getNamespaceInfo(namespace, "path"),
   winslash = "/",
@@ -97,20 +97,20 @@ if (
 ) {
   stop("Loaded namespace does not belong to the candidate installation.")
 }
-library(statart, lib.loc = candidate_library)
+library(tidystata, lib.loc = candidate_library)
 stopifnot(identical(
-  normalizePath(find.package("statart"), winslash = "/", mustWork = TRUE),
+  normalizePath(find.package("tidystata"), winslash = "/", mustWork = TRUE),
   expected_path
 ))
 cat("Archive SHA-256 recorded by installer:", receipt$tarball_sha256, "\n")
 cat("Verified archive MD5:", receipt$tarball_md5, "\n")
-cat("Version:", as.character(packageVersion("statart")), "\n")
-cat("Installation:", find.package("statart"), "\n")
+cat("Version:", as.character(packageVersion("tidystata")), "\n")
+cat("Installation:", find.package("tidystata"), "\n")
 stopifnot(
-  length(getNamespaceExports("statart")) == 80L,
+  length(getNamespaceExports("tidystata")) == 80L,
   !any(grepl(
     "(_fun|_df_to_mat)$",
-    names(getDLLRegisteredRoutines("statart")$.Call)
+    names(getDLLRegisteredRoutines("tidystata")$.Call)
   ))
 )
 for (name in c(
@@ -119,7 +119,7 @@ for (name in c(
   "THIRD-PARTY-NOTICES.md",
   "examples/README.md"
 )) {
-  path <- system.file(name, package = "statart", mustWork = TRUE)
+  path <- system.file(name, package = "tidystata", mustWork = TRUE)
   stopifnot(file.info(path)$size > 0)
 }
 release <- length(args) == 3L || args[[4L]] == "release"
@@ -128,12 +128,12 @@ if (release) {
     stopifnot(file.exists(system.file(
       "doc",
       paste0(name, ".html"),
-      package = "statart"
+      package = "tidystata"
     )))
   }
 }
 scripts <- list.files(
-  system.file("examples", package = "statart"),
+  system.file("examples", package = "tidystata"),
   "^[0-9].*R$",
   full.names = TRUE
 )
@@ -144,7 +144,7 @@ helper <- file.path(
   dirname(sub("^--file=", "", script_arg)),
   "verify_manual_examples.R"
 )
-Sys.setenv(STATART_EXAMPLE_OUTPUT = tempfile("statart-installed-examples-"))
+Sys.setenv(TIDYSTATA_EXAMPLE_OUTPUT = tempfile("tidystata-installed-examples-"))
 source(helper, local = new.env(parent = globalenv()))
 stopifnot(
   any(grepl("inst/examples/01_inspect_and_select.R$", contents)),

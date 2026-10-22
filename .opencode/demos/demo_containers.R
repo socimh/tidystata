@@ -1,6 +1,6 @@
 # Demo: table containers, pipelines and reference isolation.
 # Runs against the fresh installation selected by the demo workflow.
-library(statart)
+library(tidystata)
 
 fixture <- data.frame(g = c("a", "a", "b"), x = c(1, 3, 5))
 inputs <- list(data.frame = fixture, tibble = tibble::as_tibble(fixture))
@@ -29,8 +29,8 @@ calls <- list(
 cat("## Example: container preservation and downstream operations\n\n```text\n")
 local({
   cat(
-    "Installed statart:",
-    as.character(utils::packageVersion("statart")),
+    "Installed tidystata:",
+    as.character(utils::packageVersion("tidystata")),
     "\n"
   )
   cat("Container checks (list functions show their first table):\n")

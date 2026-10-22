@@ -1,6 +1,6 @@
 # Agent guidelines
 
-statart is an R package providing Stata-inspired exploration and preparation
+tidystata is an R package providing Stata-inspired exploration and preparation
 functions. Read [DEVELOPMENT.md](DEVELOPMENT.md) for the package map, latest
 verification and open backlog, and [CONTRIBUTING.md](CONTRIBUTING.md) for the
 authoritative R coding standard and contributor workflow.

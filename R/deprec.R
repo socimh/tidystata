@@ -1,7 +1,7 @@
 #' Renamed functions
 #'
 #' @description
-#' These functions were renamed in statart 0.3.0. The old names still
+#' These functions were renamed in tidystata 0.3.0. The old names still
 #' work and give identical results with a lifecycle deprecation warning.
 #' They will be removed in a future release.
 #'
@@ -17,25 +17,25 @@
 #'
 #' @param ... Arguments passed to the new function.
 #' @returns The result of the new function.
-#' @name statart-deprecated
+#' @name tidystata-deprecated
 #' @keywords internal
 NULL
 
-#' @rdname statart-deprecated
+#' @rdname tidystata-deprecated
 #' @export
 s_match <- function(...) {
   lifecycle::deprecate_soft("0.3.0", "s_match()", "varlist()")
   varlist(...)
 }
 
-#' @rdname statart-deprecated
+#' @rdname tidystata-deprecated
 #' @export
 s_type <- function(...) {
   lifecycle::deprecate_soft("0.3.0", "s_type()", "var_type()")
   var_type(...)
 }
 
-#' @rdname statart-deprecated
+#' @rdname tidystata-deprecated
 #' @export
 s_unit <- function(...) {
   lifecycle::deprecate_soft("0.3.0", "s_unit()", "var_unit()")

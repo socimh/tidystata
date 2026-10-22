@@ -1,7 +1,7 @@
 entries <- findit()
 
 test_that("findit() returns every entry when called without a command", {
-  expect_s3_class(entries, "statart_findit")
+  expect_s3_class(entries, "tidystata_findit")
   expect_s3_class(entries, "tbl_df")
   expect_named(entries, c("match", "stata", "r", "package", "task"))
   expect_true(all(entries$match == "all"))
@@ -215,18 +215,18 @@ test_that("every R function in the entries has a description", {
       !grepl("[^ -~]", x)
   }
   expect_true(all(one_line(described$description)))
-  ours <- described$`function`[described$package == "statart"]
-  expect_true(all(ours %in% getNamespaceExports("statart")))
+  ours <- described$`function`[described$package == "tidystata"]
+  expect_true(all(ours %in% getNamespaceExports("tidystata")))
 })
 
-test_that("statart entries call functions that statart exports", {
+test_that("tidystata entries call functions that tidystata exports", {
   data <- findit_entries()
-  exports <- getNamespaceExports("statart")
+  exports <- getNamespaceExports("tidystata")
   calls <- regmatches(
     data$r,
     gregexpr("[A-Za-z_][A-Za-z0-9._]*(?=\\()", data$r, perl = TRUE)
   )
-  ours <- data$package == "statart"
+  ours <- data$package == "tidystata"
   uses_export <- vapply(
     calls[ours],
     function(x) any(x %in% exports),

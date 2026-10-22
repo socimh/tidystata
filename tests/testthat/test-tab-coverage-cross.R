@@ -1,5 +1,5 @@
 # Independent public-contract cases: the oracle counts integer category codes
-# with base R table(), never statart's counting or margin helpers.
+# with base R table(), never tidystata's counting or margin helpers.
 cross_cases <- list()
 cross_add <- function(id, title, check) {
   cross_cases[[length(cross_cases) + 1L]] <<-
@@ -83,7 +83,7 @@ cross_run <- function(fn, x, y, flip = FALSE, row_name = "x", col_name = "y") {
       y,
       x,
       paste(col_name, row_name, sep = " \\ "),
-      identical(fn, statart::fre2)
+      identical(fn, tidystata::fre2)
     )
   } else {
     cross_assert(
@@ -91,7 +91,7 @@ cross_run <- function(fn, x, y, flip = FALSE, row_name = "x", col_name = "y") {
       x,
       y,
       paste(row_name, col_name, sep = " \\ "),
-      identical(fn, statart::fre2)
+      identical(fn, tidystata::fre2)
     )
   }
 }
@@ -311,12 +311,12 @@ cross_add(
   function(fn) {
     df <- tibble::tibble(x = c("a", NA, "b", "a"), y = c("x", "y", NA, "z"))
     df <- df[complete.cases(df), ]
-    cross_assert(fn(df), df$x, df$y, "x \\ y", identical(fn, statart::fre2))
+    cross_assert(fn(df), df$x, df$y, "x \\ y", identical(fn, tidystata::fre2))
   }
 )
 
 cross_select <- function(fn, df, out, x = df$x, y = df$y, header = "x \\ y") {
-  cross_assert(out, x, y, header, identical(fn, statart::fre2))
+  cross_assert(out, x, y, header, identical(fn, tidystata::fre2))
 }
 cross_fixture <- function() {
   tibble::tibble(x = c("a", "b", "a"), y = c("X", "Y", "Y"), z = 1:3)
@@ -425,12 +425,18 @@ cross_add(
 cross_add(63, "reserved count variable renamed with notice", function(fn) {
   df <- tibble::tibble(n = c("a", "b", "a"), y = c("X", "Y", "Y"))
   expect_message(out <- fn(df), "renamed")
-  cross_assert(out, df$n, df$y, ".n \\ y", identical(fn, statart::fre2))
+  cross_assert(out, df$n, df$y, ".n \\ y", identical(fn, tidystata::fre2))
 })
 cross_add(64, "reserved total variable renamed with notice", function(fn) {
   df <- tibble::tibble(x = c("a", "b", "a"), total = c("X", "Y", "Y"))
   expect_message(out <- fn(df), "renamed")
-  cross_assert(out, df$x, df$total, "x \\ .total", identical(fn, statart::fre2))
+  cross_assert(
+    out,
+    df$x,
+    df$total,
+    "x \\ .total",
+    identical(fn, tidystata::fre2)
+  )
 })
 cross_add(65, "two reserved names renamed together", function(fn) {
   df <- tibble::tibble(percent = c("a", "b", "a"), valid = c("X", "Y", "Y"))
@@ -440,7 +446,7 @@ cross_add(65, "two reserved names renamed together", function(fn) {
     df$percent,
     df$valid,
     ".percent \\ .valid",
-    identical(fn, statart::fre2)
+    identical(fn, tidystata::fre2)
   )
 })
 cross_add(66, "reserved rename target collision errors", function(fn) {
@@ -461,7 +467,7 @@ cross_add(
 )
 cross_add(69, "column total reserved only for frequency margins", function(fn) {
   df <- tibble::tibble(x = c("a", "b", "a"), y = c("total", "z", "total"))
-  if (identical(fn, statart::fre2)) {
+  if (identical(fn, tidystata::fre2)) {
     expect_error(fn(df), "reserved for totals")
   } else {
     cross_assert(fn(df), df$x, df$y, "x \\ y", FALSE)
@@ -483,7 +489,7 @@ cross_add(
     out <- cross_run(fn, c("total", "other", "total"), c("X", "X", "Y"))
     expect_equal(
       sum(out[[1]] == "total"),
-      if (identical(fn, statart::fre2)) 2 else 1
+      if (identical(fn, tidystata::fre2)) 2 else 1
     )
   }
 )
@@ -495,7 +501,7 @@ cross_add(74, "reserved names after flip use renamed header", function(fn) {
     df$percent,
     df$n,
     ".percent \\ .n",
-    identical(fn, statart::fre2)
+    identical(fn, tidystata::fre2)
   )
 })
 cross_add(
@@ -557,7 +563,7 @@ cross_add(
       df$x,
       rep(100, nrow(df)),
       "x \\ constant",
-      identical(fn, statart::fre2)
+      identical(fn, tidystata::fre2)
     )
   }
 )
@@ -585,7 +591,7 @@ cross_add(91, "base data frame input is preserved", function(fn) {
     df$x,
     df$y,
     "x \\ y",
-    identical(fn, statart::fre2),
+    identical(fn, tidystata::fre2),
     expected_class = "data.frame"
   )
   expect_identical(df, before)
@@ -598,7 +604,7 @@ cross_add(
     attr(df$x, "label") <- "Row label"
     attr(df, "source") <- "acceptance fixture"
     before <- unserialize(serialize(df, NULL))
-    cross_assert(fn(df), df$x, df$y, "x \\ y", identical(fn, statart::fre2))
+    cross_assert(fn(df), df$x, df$y, "x \\ y", identical(fn, tidystata::fre2))
     expect_identical(df, before)
   }
 )
@@ -606,14 +612,14 @@ cross_add(93, "pre-grouped input is ungrouped without mutation", function(fn) {
   df <- dplyr::group_by(cross_fixture()[1:2], x)
   before <- unserialize(serialize(df, NULL))
   expect_message(out <- fn(df), "Ungrouping")
-  cross_assert(out, df$x, df$y, "x \\ y", identical(fn, statart::fre2))
+  cross_assert(out, df$x, df$y, "x \\ y", identical(fn, tidystata::fre2))
   expect_identical(df, before)
 })
 cross_add(94, "rowwise input produces global cross counts", function(fn) {
   df <- dplyr::rowwise(cross_fixture()[1:2])
   before <- unserialize(serialize(df, NULL))
   out <- fn(df)
-  cross_assert(out, df$x, df$y, "x \\ y", identical(fn, statart::fre2))
+  cross_assert(out, df$x, df$y, "x \\ y", identical(fn, tidystata::fre2))
   expect_identical(df, before)
 })
 cross_add(95, "data.table input is not changed by reference", function(fn) {
@@ -625,7 +631,7 @@ cross_add(95, "data.table input is not changed by reference", function(fn) {
     df$x,
     df$y,
     "x \\ y",
-    identical(fn, statart::fre2),
+    identical(fn, tidystata::fre2),
     expected_class = c("data.table", "data.frame")
   )
   expect_identical(df, before)
@@ -689,7 +695,7 @@ for (cross_export in c("tab2", "fre2")) {
       export <- cross_export
       item <- cross_case
       test_that(sprintf("%s coverage %03d: %s", export, item$id, item$title), {
-        item$check(getExportedValue("statart", export))
+        item$check(getExportedValue("tidystata", export))
       })
     })
   }

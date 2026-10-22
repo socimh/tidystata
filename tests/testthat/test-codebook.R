@@ -418,7 +418,7 @@ for (.name in c("codebook", "browse", "s_select")) {
         "x"
       }
       d <- tibble::tibble(x = 1:3, y = 4:6)
-      fn <- getExportedValue("statart", fn_name)
+      fn <- getExportedValue("tidystata", fn_name)
       out <- fn(d, tidyselect::all_of(choose()))
       expect_identical(calls$n, 1L)
       expect_true(

@@ -1,4 +1,4 @@
-library(statart)
+library(tidystata)
 library(dplyr)
 
 # Compare a base data frame with an equivalent tibble.
@@ -77,7 +77,7 @@ unpreview_table(preview)
 preview |> filter(id > 5) |> mutate(twice = value * 2)
 class(preview_table(frame)) # Preview over a data.frame.
 
-# Compare statart results with independent base R calculations.
+# Compare tidystata results with independent base R calculations.
 checks <- tibble(group = c("A", "B", "A", NA), x = c(1, NA, 3, 8))
 tab(checks, group)
 table(checks$group, useNA = "ifany")

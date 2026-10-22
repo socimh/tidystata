@@ -1,7 +1,7 @@
 # Demo: Conversion helpers in survey preparation
-# Uses the installed statart package; run against a fresh verified installation.
+# Uses the installed tidystata package; run against a fresh verified installation.
 
-library(statart)
+library(tidystata)
 
 survey <- tibble::tibble(
   respondent = 1:4,

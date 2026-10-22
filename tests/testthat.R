@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(statart)
+library(tidystata)
 
-test_check("statart", stop_on_warning = TRUE)
+test_check("tidystata", stop_on_warning = TRUE)

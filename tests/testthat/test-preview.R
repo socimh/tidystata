@@ -18,7 +18,7 @@ preview_test_markers <- function(x, ...) {
 }
 
 expect_preview_matches <- function(actual, expected) {
-  expect_s3_class(actual, "statart_preview")
+  expect_s3_class(actual, "tidystata_preview")
   expect_identical(unpreview_table(actual), expected)
 }
 
@@ -26,7 +26,7 @@ test_that("preview constructor retains every row and every column", {
   data <- preview_test_data(100)
   original <- serialize(data, NULL)
   result <- preview_table(data)
-  expect_s3_class(result, c("statart_preview", "tbl_df", "tbl", "data.frame"))
+  expect_s3_class(result, c("tidystata_preview", "tbl_df", "tbl", "data.frame"))
   expect_identical(dim(result), c(100L, 4L))
   expect_identical(result$value, data$value)
   expect_identical(result$marker[50], "row050")
@@ -159,7 +159,7 @@ test_that("classed and list columns remain unchanged", {
 test_that("wrapping again changes settings without stacking classes", {
   data <- preview_test_data(21)
   result <- preview_table(preview_table(data), style = "interval", n = 3)
-  expect_identical(sum(class(result) == "statart_preview"), 1L)
+  expect_identical(sum(class(result) == "tidystata_preview"), 1L)
   expect_identical(preview_test_markers(result), data$marker[c(1, 11, 21)])
   expect_identical(unpreview_table(result), data)
   expect_identical(unpreview_table(data), data)
@@ -360,7 +360,7 @@ test_that("joins retain the left table policy and ordinary dplyr values", {
     }
     expect_false(inherits(
       join(left, preview_table(right), by = "id"),
-      "statart_preview"
+      "tidystata_preview"
     ))
   }
   grouped <- dplyr::group_by(left, group)
@@ -382,7 +382,7 @@ test_that("row binding uses first table settings and retains every row", {
   expect_identical(preview_test_markers(result), c("row001", "row030"))
   expect_false(inherits(
     dplyr::bind_rows(first, preview_table(second)),
-    "statart_preview"
+    "tidystata_preview"
   ))
   grouped <- dplyr::group_by(first, group)
   expect_preview_matches(
@@ -569,10 +569,10 @@ test_that("historical previews and repeated timers preserve complete values", {
   expect_identical(returned, d)
   preview <- preview_table(d, "interval", n = 5)
   changed <- dplyr::mutate(preview, id = id + 1L)
-  expect_s3_class(changed, "statart_preview")
+  expect_s3_class(changed, "tidystata_preview")
   expect_identical(unpreview_table(changed)$id, 2:26)
   expect_identical(
-    statart:::duration_to_chr(as.difftime(61, units = "secs")),
+    tidystata:::duration_to_chr(as.difftime(61, units = "secs")),
     "1m1s"
   )
   calls <- 0L

@@ -1,6 +1,6 @@
 # Demo: assert(), is_first() and print_all(), like Stata's assert, egen tag()
 # and list. Runs against the fresh installation selected by the demo workflow.
-library(statart)
+library(tidystata)
 
 cat("## Example 1: assertions inside a pipeline\n\n```\n")
 checked <- lifeexp |>

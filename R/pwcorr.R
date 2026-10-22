@@ -6,7 +6,7 @@
 #' deletion), and the table reports the correlation, the number of
 #' observations and the p-value.
 #'
-#' @inheritParams statart_args
+#' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Numeric or logical
 #' vector columns. Matrix columns are unsupported. Omit to use every numeric
 #' or logical vector column; other columns are then skipped. Selecting another

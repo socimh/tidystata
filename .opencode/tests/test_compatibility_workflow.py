@@ -50,7 +50,7 @@ class HostedCheckTests(unittest.TestCase):
             self.assertEqual(CI.main(), 17)
             self.assertEqual(run.call_count, 1)
             self.assertEqual(
-                Path(run.call_args.kwargs["env"]["STATART_R_LAUNCHER"]), LAUNCHER)
+                Path(run.call_args.kwargs["env"]["TIDYSTATA_R_LAUNCHER"]), LAUNCHER)
             if os.name == "nt":
                 self.assertIn("run_r_safe.py", run.call_args.args[0][1])
             receipt = json.loads((Path(temporary) / "source.json").read_text(encoding="utf-8"))
@@ -70,7 +70,7 @@ class HostedCheckTests(unittest.TestCase):
 
 class HostedLauncherTests(unittest.TestCase):
     def launch(self, code, expected):
-        with tempfile.TemporaryDirectory(prefix="statart-launcher-test-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-launcher-test-") as temporary:
             result = subprocess.run(
                 [sys.executable, str(LAUNCHER), "--log-directory", temporary,
                  "--", sys.executable, "-c", code],

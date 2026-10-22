@@ -49,7 +49,7 @@ class CheckResultTests(unittest.TestCase):
                          0, False, False, (0, 0, 0)),
             "missing": (None, 0, False, False, (0, 0, 0)),
         }
-        with tempfile.TemporaryDirectory(prefix="statart-check-parser-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-check-parser-") as temporary:
             base = Path(temporary)
             for name, (text, native, passed, ready, counts) in cases.items():
                 with self.subTest(name=name):
@@ -73,7 +73,7 @@ class CheckResultTests(unittest.TestCase):
                                            ("errors", "warnings", "notes")), counts)
 
     def test_real_native_check_warning_is_rejected_despite_exit_zero(self):
-        with tempfile.TemporaryDirectory(prefix="statart-check-native-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-check-native-") as temporary:
             base = Path(temporary)
             package = base / "warningprobe"
             (package / "R").mkdir(parents=True)
@@ -106,7 +106,7 @@ class CheckResultTests(unittest.TestCase):
 
 class EntryPointTests(unittest.TestCase):
     def test_package_entry_accepts_expected_and_rejects_unexpected_warnings(self):
-        with tempfile.TemporaryDirectory(prefix="statart-entry-warning-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-entry-warning-") as temporary:
             base = Path(temporary)
             (base / "testthat").mkdir()
             entry = ROOT / "tests/testthat.R"
@@ -127,7 +127,7 @@ class EntryPointTests(unittest.TestCase):
 
 class ShuffleEvidenceTests(unittest.TestCase):
     def test_utf8_literals_and_names_match_normal_execution(self):
-        with tempfile.TemporaryDirectory(prefix="statart-order-utf8-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-order-utf8-") as temporary:
             base = Path(temporary)
             package = base / "fixture"
             (package / "R").mkdir(parents=True)
@@ -170,7 +170,7 @@ class ShuffleEvidenceTests(unittest.TestCase):
             self.assertEqual(fingerprints[0], fingerprints[1])
 
     def test_shuffled_order_and_seed_are_retained_and_reproducible(self):
-        with tempfile.TemporaryDirectory(prefix="statart-order-evidence-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="tidystata-order-evidence-") as temporary:
             base = Path(temporary)
             package = base / "fixture"
             (package / "R").mkdir(parents=True)

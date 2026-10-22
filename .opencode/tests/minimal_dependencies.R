@@ -5,12 +5,12 @@ minimal_library <- args[[2L]]
 .libPaths(c(installed_library, .libPaths()))
 ip <- installed.packages()
 dependencies <- tools::package_dependencies(
-  "statart",
+  "tidystata",
   db = ip,
   which = c("Depends", "Imports", "LinkingTo"),
   recursive = TRUE
 )[[1L]]
-dependencies <- unique(c("statart", dependencies))
+dependencies <- unique(c("tidystata", dependencies))
 base_packages <- unique(rownames(ip)[!is.na(ip[, "Priority"])])
 required_count <- length(setdiff(dependencies, c("R", base_packages)))
 dependencies <- setdiff(unique(c(dependencies, base_packages)), "R")
@@ -32,16 +32,16 @@ assign(
   envir = library_environment
 )
 stopifnot(!requireNamespace("flextable", quietly = TRUE))
-library(statart)
-stopifnot(length(getNamespaceExports("statart")) == 80L)
+library(tidystata)
+stopifnot(length(getNamespaceExports("tidystata")) == 80L)
 preview <- preview_table(tibble::tibble(id = 1:30), n = 4)
 stopifnot(nrow(preview) == 30L, identical(preview$id, 1:30))
-stopifnot(inherits(dplyr::mutate(preview, twice = id * 2), "statart_preview"))
+stopifnot(inherits(dplyr::mutate(preview, twice = id * 2), "tidystata_preview"))
 stopifnot(length(capture.output(print(preview))) > 0L)
 stopifnot(
   !any(
     c("read_data", "write_data", "esttab", "codebook_detail") %in%
-      getNamespaceExports("statart")
+      getNamespaceExports("tidystata")
   )
 )
 d <- data.frame(g = c("A", "A", NA), x = c(1, NA, 2), y = c(3, NA, 4))
@@ -75,7 +75,7 @@ cat(
   "and actionable optional-formatting error with required dependencies only.\n"
 )
 cat(
-  "Required non-base/recommended packages including statart:",
+  "Required non-base/recommended packages including tidystata:",
   required_count,
   "\n"
 )

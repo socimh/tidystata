@@ -1,7 +1,7 @@
 # Demo: pairwise correlations and chi-square tests, like Stata's pwcorr and
 # tab x y, chi2 V. Runs against the fresh installation selected by the demo
 # workflow.
-library(statart)
+library(tidystata)
 
 cat("## Example 1: pairwise correlations with n and p\n\n```\n")
 pairs <- pwcorr(lifeexp, lexp, gnppc, safewater)

@@ -83,7 +83,7 @@ def matrix(description, config):
                     raise ValueError(f"Infeasible companion: {key} requires {dependency} {operator}{required}; pinned {pins[dependency]}")
         for name, (_, bound) in bounds.items():
             if not satisfies(pins[name], ">=", bound):
-                raise ValueError("Companion below statart floor: " + name)
+                raise ValueError("Companion below tidystata floor: " + name)
         pending, ordered = set(pins), []
         while pending:
             ready = sorted(name for name in pending if not any(

@@ -7,12 +7,12 @@
 #' such as `findit(reg)` or `findit("merge 1:1 id")`.
 #'
 #' @section Tutorials and migration:
-#' Read `vignette("getting-started", package = "statart")` for a short workflow
-#' and `vignette("containers-and-missing-values", package = "statart")` for
+#' Read `vignette("getting-started", package = "tidystata")` for a short workflow
+#' and `vignette("containers-and-missing-values", package = "tidystata")` for
 #' output containers, grouping and missing-value conventions.
 #' The full migration guide is installed at
-#' `system.file("MIGRATION.md", package = "statart")`.
-#' Plain scripts are installed in `system.file("examples", package = "statart")`.
+#' `system.file("MIGRATION.md", package = "tidystata")`.
+#' Plain scripts are installed in `system.file("examples", package = "tidystata")`.
 #'
 #' @keywords internal
 "_PACKAGE"
@@ -20,6 +20,6 @@
 ## usethis namespace: start
 #' @importFrom rlang := .data
 #' @importFrom stats IQR mad median quantile sd
-#' @useDynLib statart, .registration = TRUE
+#' @useDynLib tidystata, .registration = TRUE
 ## usethis namespace: end
 NULL

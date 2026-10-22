@@ -35,7 +35,7 @@ R invocations, including the compatibility wrapper, require it too:
 python C:/Users/socimh/.codex/scripts/run_r_safe.py -- Rscript .opencode/workflows/run_tests.R summ
 ```
 
-The default protected launcher is machine-specific; `STATART_R_LAUNCHER` may
+The default protected launcher is machine-specific; `TIDYSTATA_R_LAUNCHER` may
 select another verified protected launcher. An absent launcher is an error.
 Inspect native exit status and full logs. The release workflow parses the check
 result, fails for errors/warnings/incomplete checks, installs the actual built

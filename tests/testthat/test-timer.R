@@ -63,13 +63,13 @@ test_that("timer: duration formatting covers unit boundaries without waiting", {
   actual <- vapply(
     seconds,
     function(x) {
-      statart:::duration_to_chr(as.difftime(x, units = "secs"))
+      tidystata:::duration_to_chr(as.difftime(x, units = "secs"))
     },
     character(1)
   )
   expect_identical(actual, expected)
   expect_identical(
-    statart:::duration_to_chr(as.difftime(1.5, units = "hours")),
+    tidystata:::duration_to_chr(as.difftime(1.5, units = "hours")),
     "1h30m"
   )
 })
@@ -88,14 +88,14 @@ test_that("timer: displays sub-second timing", {
 
 test_that("timer: displays seconds format", {
   expect_identical(
-    statart:::duration_to_chr(as.difftime(5.23, units = "secs")),
+    tidystata:::duration_to_chr(as.difftime(5.23, units = "secs")),
     "5.23s"
   )
 })
 
 test_that("timer: displays minutes format for longer operations", {
   expect_identical(
-    statart:::duration_to_chr(as.difftime(2 + 5 / 60, units = "mins")),
+    tidystata:::duration_to_chr(as.difftime(2 + 5 / 60, units = "mins")),
     "2m5s"
   )
 })
@@ -371,7 +371,7 @@ test_that("PROBLEMS2 timer reports failures optionally and preserves the error",
     suppressMessages(withVisible(timer(42, on_error = TRUE)))$visible
   )
   expect_identical(
-    statart:::duration_to_chr(as.difftime(61, units = "secs")),
+    tidystata:::duration_to_chr(as.difftime(61, units = "secs")),
     "1m1s"
   )
   for (bad in list(NA, 1, logical(), c(TRUE, FALSE))) {

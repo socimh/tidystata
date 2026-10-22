@@ -8,7 +8,7 @@
 #' * With `.patterns = TRUE`, it counts the combinations of observed and
 #'   missing variables across rows, like `misstable patterns`.
 #'
-#' @inheritParams statart_args
+#' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Variables to check. Omit to
 #' check every column except grouping keys.
 #' @param .patterns A single `TRUE` or `FALSE`. If `TRUE`, tabulate missing

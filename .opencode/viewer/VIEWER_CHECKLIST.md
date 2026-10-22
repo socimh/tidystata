@@ -7,7 +7,7 @@ passing return-value assertions alone does not verify rendering.
 ## Select the candidate
 
 Use the candidate archive's installation receipt from the final verification,
-not whichever statart happens to be in the default library. The receipt records
+not whichever tidystata happens to be in the default library. The receipt records
 the archive SHA256 and the private `bundle_library` containing that archive's
 fresh installation. Opening this repository does not select that installation.
 
@@ -29,7 +29,7 @@ recorded in the receipt into a new empty private library. On this Windows machin
 $receipt = Get-Content -Raw -Encoding UTF8 .opencode/results/current-release-installation.json | ConvertFrom-Json
 $candidateHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $receipt.tarball).Hash.ToLowerInvariant()
 if ($candidateHash -ne $receipt.tarball_sha256) { throw 'Candidate archive checksum mismatch' }
-$viewerLibrary = Join-Path $env:TEMP ('statart-viewer-' + [guid]::NewGuid().ToString('N'))
+$viewerLibrary = Join-Path $env:TEMP ('tidystata-viewer-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $viewerLibrary | Out-Null
 python C:/Users/socimh/.codex/scripts/run_r_safe.py -- R CMD INSTALL "--library=$viewerLibrary" $receipt.tarball
 if ($LASTEXITCODE -ne 0) { throw 'Candidate installation failed; inspect the protected launcher logs' }
@@ -80,7 +80,7 @@ source(".opencode/viewer/viewer_check.R")
 ```
 
 The helper selects the private library, prints the loaded package path and R
-version, and rejects an already-loaded statart from a different library. Restart
+version, and rejects an already-loaded tidystata from a different library. Restart
 R if it reports a mismatch. Sourcing the file only defines the helper; it opens
 no viewer and installs no packages.
 

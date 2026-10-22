@@ -45,8 +45,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/floor-library" "$GITHUB_WORKSPACE/.opencode/results/dependency-minimums/$FLOOR_PACKAGE"
           python .opencode/workflows/dependency_minimums.py --case "$FLOOR_PACKAGE" > "$RUNNER_TEMP/floor-case.json"
           cp "$RUNNER_TEMP/floor-case.json" "$GITHUB_WORKSPACE/.opencode/results/dependency-minimums/$FLOOR_PACKAGE/case.json"
-          echo "STATART_FLOOR_LIBRARY=$RUNNER_TEMP/floor-library" >> "$GITHUB_ENV"
-          echo "STATART_FLOOR_RESULTS=$GITHUB_WORKSPACE/.opencode/results/dependency-minimums/$FLOOR_PACKAGE" >> "$GITHUB_ENV"
+          echo "TIDYSTATA_FLOOR_LIBRARY=$RUNNER_TEMP/floor-library" >> "$GITHUB_ENV"
+          echo "TIDYSTATA_FLOOR_RESULTS=$GITHUB_WORKSPACE/.opencode/results/dependency-minimums/$FLOOR_PACKAGE" >> "$GITHUB_ENV"
       - name: Install checking tools and deliberately limited optional dependencies
         shell: Rscript {0}
         run: |

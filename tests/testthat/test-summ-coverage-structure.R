@@ -4,7 +4,7 @@
 for (function_name in "summ") {
   local({
     api <- summary_legacy_layout(
-      getExportedValue("statart", function_name)
+      getExportedValue("tidystata", function_name)
     )
 
     test_that(

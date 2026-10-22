@@ -97,8 +97,8 @@ def main():
 
 
 def execute(options, root, prefix, paths, persist):
-    workspace = Path(tempfile.mkdtemp(prefix="statart-verify-"))
-    source = workspace / "statart"
+    workspace = Path(tempfile.mkdtemp(prefix="tidystata-verify-"))
+    source = workspace / "tidystata"
     library = workspace / "library"
     library.mkdir()
     logs = workspace / "logs"
@@ -145,7 +145,7 @@ def execute(options, root, prefix, paths, persist):
         if development_library.is_dir():
             library_paths.append(str(development_library))
         env = r_environment(extra_env, libraries=library_paths)
-        env["STATART_SOURCE_IDENTITY"] = str(identity_path)
+        env["TIDYSTATA_SOURCE_IDENTITY"] = str(identity_path)
         if name == "check":
             env.pop("NOT_CRAN", None)
         log = prefix.parent / (prefix.name + "-" + name + ".log")
@@ -181,9 +181,9 @@ def execute(options, root, prefix, paths, persist):
             return status
     if options.demos:
         return run("demos", ["Rscript", workflow / "generate_demo_reports.R"],
-                   cwd=source, extra_env={"STATART_DEMO_SOURCE": str(source),
-                                         "STATART_DEMO_LIBRARY": str(library),
-                                         "STATART_REPORT_DIR": str(root / ".opencode/reports")})
+                   cwd=source, extra_env={"TIDYSTATA_DEMO_SOURCE": str(source),
+                                         "TIDYSTATA_DEMO_LIBRARY": str(library),
+                                         "TIDYSTATA_REPORT_DIR": str(root / ".opencode/reports")})
     if options.minimal:
         return run("minimal", ["Rscript", helpers / "minimal_dependencies.R",
                                library, workspace / "minimal-library"])
@@ -192,15 +192,15 @@ def execute(options, root, prefix, paths, persist):
                         options.filter, str(options.shuffle_seed) if
                         options.shuffle_seed is not None else "", "all"]
         status = run("tests", test_command, extra_env={"NOT_CRAN": "true",
-                     "STATART_TEST_LIBRARY": str(library),
-                     "STATART_SOURCE_SHA256": digest, "STATART_RUN_ID": paths["run_id"]})
+                     "TIDYSTATA_TEST_LIBRARY": str(library),
+                     "TIDYSTATA_SOURCE_SHA256": digest, "TIDYSTATA_RUN_ID": paths["run_id"]})
         collect_suite()
     if options.check or options.release:
         build_options = [] if options.release else ["--no-build-vignettes", "--no-manual"]
         build = run("build", ["R", "CMD", "build", *build_options, source], cwd=workspace)
         if build:
             return build
-        tarballs = list(workspace.glob("statart_*.tar.gz"))
+        tarballs = list(workspace.glob("tidystata_*.tar.gz"))
         if len(tarballs) != 1:
             raise RuntimeError("Expected exactly one built package archive")
         paths["tarball"] = str(tarballs[0])
@@ -223,7 +223,7 @@ def execute(options, root, prefix, paths, persist):
         check_result = workspace / "check-result.json"
         parsed = run("check-result", [
             "Rscript", workflow / "parse_check_result.R",
-            workspace / "statart.Rcheck/00check.log", str(check), check_result
+            workspace / "tidystata.Rcheck/00check.log", str(check), check_result
         ])
         if parsed == 0 and not check_result.is_file():
             parsed = 1
@@ -255,7 +255,7 @@ def execute(options, root, prefix, paths, persist):
             status = status or installed
             if installed == 0:
                 with tarfile.open(archive) as bundle:
-                    description = bundle.extractfile("statart/DESCRIPTION").read().decode("utf-8")
+                    description = bundle.extractfile("tidystata/DESCRIPTION").read().decode("utf-8")
                 fields = dict(line.split(":", 1) for line in description.splitlines()
                               if line and not line[0].isspace() and ":" in line)
                 receipt = dict(
@@ -270,8 +270,8 @@ def execute(options, root, prefix, paths, persist):
                 receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
                 snapshots = run("snapshots", [
                     "Rscript", workflow / "run_suite.R", source, suite_prefix, "", "", "snapshots"
-                ], extra_env={"NOT_CRAN": "true", "STATART_TEST_LIBRARY": str(bundle_library),
-                              "STATART_SOURCE_SHA256": digest, "STATART_RUN_ID": paths["run_id"]})
+                ], extra_env={"NOT_CRAN": "true", "TIDYSTATA_TEST_LIBRARY": str(bundle_library),
+                              "TIDYSTATA_SOURCE_SHA256": digest, "TIDYSTATA_RUN_ID": paths["run_id"]})
                 collect_suite()
                 status = status or snapshots
                 resources = run("resources", [

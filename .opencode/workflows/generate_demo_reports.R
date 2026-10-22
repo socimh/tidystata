@@ -1,6 +1,6 @@
 # Generate one stable set of current actual-output reports.
 index_only <- "--index-only" %in% commandArgs(trailingOnly = TRUE)
-if (!index_only && !nzchar(Sys.getenv("STATART_DEMO_SOURCE"))) {
+if (!index_only && !nzchar(Sys.getenv("TIDYSTATA_DEMO_SOURCE"))) {
   status <- system2(
     "python",
     c(
@@ -12,15 +12,15 @@ if (!index_only && !nzchar(Sys.getenv("STATART_DEMO_SOURCE"))) {
   )
   quit(status = status)
 }
-reports_dir <- Sys.getenv("STATART_REPORT_DIR", ".opencode/reports")
+reports_dir <- Sys.getenv("TIDYSTATA_REPORT_DIR", ".opencode/reports")
 if (!index_only) {
-  library_path <- Sys.getenv("STATART_DEMO_LIBRARY")
+  library_path <- Sys.getenv("TIDYSTATA_DEMO_LIBRARY")
   if (!nzchar(library_path)) {
     stop(
       "Run demos through verify_package.py --demos to use a fresh installation."
     )
   }
-  library(statart, lib.loc = library_path)
+  library(tidystata, lib.loc = library_path)
 }
 dir.create(reports_dir, recursive = TRUE, showWarnings = FALSE)
 version <- read.dcf("DESCRIPTION")[1, "Version"]

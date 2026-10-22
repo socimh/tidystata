@@ -1,13 +1,16 @@
-# statart 0.3.0
+# tidystata 0.3.0
 
 ## Breaking changes
 
-* statart now focuses on exploring and preparing data. `read_data()`,
+* The package is renamed from statart to tidystata. Use `library(tidystata)`
+  and `tidystata::` in place of `library(statart)` and `statart::`.
+
+* tidystata now focuses on exploring and preparing data. `read_data()`,
   `write_data()`, `esttab()`, `codebook_detail()`, `tidy_coef()`, the
   regression wrappers (`regress()`, `regress_data()`, `regress_coef()`,
   `regress_stat()`) and the plotting helpers (`s_plot()`, `s_ggsave()`) are
   removed. `s_time()` is renamed to `timer()`. The migration guide,
-  `system.file("MIGRATION.md", package = "statart")`, lists direct
+  `system.file("MIGRATION.md", package = "tidystata")`, lists direct
   alternatives.
 
 * R 4.1.0 or later is now required. Persistent preview formatting requires
@@ -103,7 +106,7 @@
 
 ### Coming from Stata
 
-* New `findit()` gives the R equivalent of a Stata command: the statart
+* New `findit()` gives the R equivalent of a Stata command: the tidystata
   function where one exists, and the standard package otherwise. Type one
   word bare (`findit(reg)`) or quote longer code
   (`findit("merge 1:1 id, keep(match)")`). Stata's minimum abbreviations
@@ -305,6 +308,6 @@ Results are unchanged; only the time taken to compute them is shorter.
 * `s_merge()`, `destring()`, `pwcorr()`, grouped `xtile()` and `codebook()`
   also do less work.
 
-# statart 0.2.0
+# tidystata 0.2.0
 
 * Initial CRAN submission.

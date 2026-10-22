@@ -5,7 +5,7 @@
 #' number of contradictions when any fails. It returns the data invisibly
 #' when all hold, so it can sit inside a pipeline.
 #'
-#' @inheritParams statart_args
+#' @inheritParams tidystata_args
 #' @param ... Conditions evaluated like [dplyr::mutate()] expressions, each
 #' giving `TRUE` or `FALSE` per row (or a single value). Group functions such
 #' as `n()` and `mean()` use the groups of `.data` or `.by`.

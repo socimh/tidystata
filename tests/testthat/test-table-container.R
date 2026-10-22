@@ -119,7 +119,7 @@ test_that("empty branches preserve containers", {
 test_that("previews and slices preserve data frames and row names", {
   input <- data.frame(x = 1:6, row.names = letters[1:6])
   wrapped <- preview_table(input, n = 2)
-  expect_identical(class(wrapped), c("statart_preview", "data.frame"))
+  expect_identical(class(wrapped), c("tidystata_preview", "data.frame"))
   expect_identical(unpreview_table(wrapped), input)
   expect_identical(slice_headtail(input, n = 2), input[c(1, 6), , drop = FALSE])
   expect_identical(
@@ -141,7 +141,7 @@ test_that("data.table previews preserve native expressions and isolate inputs", 
   wrapped <- preview_table(input)
   expect_identical(
     class(wrapped),
-    c("statart_preview", "data.table", "data.frame")
+    c("tidystata_preview", "data.table", "data.frame")
   )
   threshold <- 1
   expect_equal(wrapped[x > threshold, sum(x)], 8)
@@ -151,8 +151,8 @@ test_that("data.table previews preserve native expressions and isolate inputs", 
   expect_equal(wrapped$x, c(2, 6, 10))
   expect_identical(input, before)
   plain <- unpreview_table(wrapped)
-  expect_false(inherits(plain, "statart_preview"))
-  expect_true(inherits(wrapped, "statart_preview"))
+  expect_false(inherits(plain, "tidystata_preview"))
+  expect_true(inherits(wrapped, "tidystata_preview"))
   expect_identical(data.table::key(plain), "g")
   expect_identical(
     class(slice_headtail(input, n = 2)),

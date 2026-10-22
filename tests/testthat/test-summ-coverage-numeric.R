@@ -1,6 +1,6 @@
 # Cases 001-050 cover the shared summary core once through summ().
 # tabstat forwarding and its distinct defaults are in test-summ-contracts.R.
-# The oracle uses the documented R conventions, never statart internals.
+# The oracle uses the documented R conventions, never tidystata internals.
 summ_cov_reference <- function(x) {
   observed <- as.numeric(x[!is.na(x)])
   n <- length(observed)
@@ -524,7 +524,7 @@ for (function_name in "summ") {
       ),
       {
         case$check(
-          summary_legacy_layout(getExportedValue("statart", function_name))
+          summary_legacy_layout(getExportedValue("tidystata", function_name))
         )
       }
     )

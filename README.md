@@ -1,20 +1,20 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# statart
+# tidystata
 
 <!-- badges: start -->
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN
-status](https://www.r-pkg.org/badges/version/statart)](https://CRAN.R-project.org/package=statart)
-[![R-CMD-check](https://github.com/socimh/statart/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/statart/actions/workflows/R-CMD-check.yaml)
+status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata)
+[![R-CMD-check](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml)
 
 <!-- badges: end -->
 
-[statart](https://socimh.github.io/statart/) is a set of functions that
-combines Stata-inspired features with tidyverse-style operations.
+[tidystata](https://socimh.github.io/tidystata/) is a set of functions
+that combines Stata-inspired features with tidyverse-style operations.
 
 The package focuses on exploring and preparing data:
 
@@ -31,28 +31,28 @@ The package focuses on exploring and preparing data:
   `as_dummy()`, panel lags (`s_lag()`, `s_lead()`, `s_diff()`), and
   binning for data preparation.
 
-statart `0.3.0` retires the import/export, regression-table, and
+tidystata `0.3.0` retires the import/export, regression-table, and
 detailed-codebook wrappers. See the [migration
-guide](https://socimh.github.io/statart/articles/migration.html) for
+guide](https://socimh.github.io/tidystata/articles/migration.html) for
 direct package alternatives and breaking changes. This experimental
 package is undergoing stabilization; see
-[NEWS](https://socimh.github.io/statart/news/index.html) for changes in
-each release.
+[NEWS](https://socimh.github.io/tidystata/news/index.html) for changes
+in each release.
 
 ## Installation
 
-You can install the development version of statart like so:
+You can install the development version of tidystata like so:
 
 ``` r
 # install.packages("pak")
-pak::pak("socimh/statart")
+pak::pak("socimh/tidystata")
 ```
 
 R 4.1.0 or later and a suitable build toolchain are required to install
 from source. Rich table formatting is optional and requires `flextable`.
 
 If you already have this source repository on your computer, open
-`statart.Rproj` and restart R before installing the local changes:
+`tidystata.Rproj` and restart R before installing the local changes:
 
 ``` r
 devtools::install(".", upgrade = "never", build_vignettes = FALSE)
@@ -61,27 +61,27 @@ devtools::install(".", upgrade = "never", build_vignettes = FALSE)
 Restart R again, then check the version and installed location:
 
 ``` r
-library(statart)
-packageVersion("statart")
-find.package("statart")
+library(tidystata)
+packageVersion("tidystata")
+find.package("tidystata")
 ```
 
-Opening the source folder alone does not change what `library(statart)`
-loads. Repeat the installation after editing source code. During package
-development, `devtools::load_all(".")` loads the working source into the
-current session; installation followed by a fresh R session tests the
-installed package.
+Opening the source folder alone does not change what
+`library(tidystata)` loads. Repeat the installation after editing source
+code. During package development, `devtools::load_all(".")` loads the
+working source into the current session; installation followed by a
+fresh R session tests the installed package.
 
 ## Learn the workflow
 
 Read [Getting
-started](https://socimh.github.io/statart/articles/getting-started.html)
+started](https://socimh.github.io/tidystata/articles/getting-started.html)
 for a small exploration and preparation workflow, and [Containers and
 missing
-values](https://socimh.github.io/statart/articles/containers-and-missing-values.html)
+values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)
 for return types, grouping, labels and previews. In an installation that
 includes vignettes, use
-`vignette("getting-started", package = "statart")`.
+`vignette("getting-started", package = "tidystata")`.
 
 Coming from Stata? `findit()` gives the R equivalent of a Stata command.
 Type one Stata word bare, or quote anything longer; the usual Stata
@@ -94,24 +94,25 @@ findit(left_join) # R functions work too
 ```
 
 The [Coming from
-Stata](https://socimh.github.io/statart/articles/coming-from-stata.html)
+Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html)
 article lists every entry by topic, in English and
-[Chinese](https://socimh.github.io/statart/articles/coming-from-stata-zh.html),
-including the packages to use beyond statart.
+[Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html),
+including the packages to use beyond tidystata.
 
 Plain manual scripts are included in the installed package. Open a
 script in your editor and run its lines individually, or run this
 complete example:
 
 ``` r
-source(system.file("examples", "02_frequency_tables.R", package = "statart"),
+source(system.file("examples", "02_frequency_tables.R", package = "tidystata"),
        echo = TRUE)
 ```
 
-Use `system.file("examples", "README.md", package = "statart")` for the
-script index and `system.file("MIGRATION.md", package = "statart")` for
-the full installed migration guide. The source repository also contains
-both guides.
+Use `system.file("examples", "README.md", package = "tidystata")` for
+the script index and
+`system.file("MIGRATION.md", package = "tidystata")` for the full
+installed migration guide. The source repository also contains both
+guides.
 
 ## Table return types
 
@@ -136,10 +137,11 @@ behavior, with preview settings preserved for supported operations.
 
 ### Load the package
 
-Load `statart` and the data-manipulation package used in these examples.
+Load `tidystata` and the data-manipulation package used in these
+examples.
 
 ``` r
-library(statart)
+library(tidystata)
 library(dplyr)
 ```
 
@@ -180,8 +182,8 @@ Select statistics with `.stat`. Aliases `missing`, `p25`, `p50`, and
 `p75` retain their requested names and order; `sum` is available for
 numeric summaries. Unsupported statistics produce an error. See the
 [migration
-guide](https://socimh.github.io/statart/articles/migration.html) for the
-date/datetime restrictions and cross-tabulation naming rules.
+guide](https://socimh.github.io/tidystata/articles/migration.html) for
+the date/datetime restrictions and cross-tabulation naming rules.
 
 ``` r
 summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
@@ -198,7 +200,7 @@ mode preserves numeric statistic types in the numeric summary.
 Tabulate a single variable:
 
 ``` r
-tab(statart::starwars, sex)
+tab(tidystata::starwars, sex)
 #> # A tibble: 5 x 6
 #>   sex                n percent   cum valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
@@ -213,7 +215,7 @@ tab(statart::starwars, sex)
 select variables in a Stata style.
 
 ``` r
-tab1(statart::starwars, varlist("*color"))
+tab1(tidystata::starwars, varlist("*color"))
 #> $hair_color
 #> # A tibble: 13 x 6
 #>    value             n percent    cum valid valid_cum
@@ -276,7 +278,7 @@ lists by default. Matrix columns are unsupported.
 `tab2()` cross-tabulates two variables.
 
 ``` r
-tab2(statart::starwars, sex, gender)
+tab2(tidystata::starwars, sex, gender)
 #> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
@@ -297,7 +299,7 @@ container. `fre1()` returns a list whose tables preserve that container.
 Request `.type = "tibble"` explicitly when a tibble is required.
 
 ``` r
-fre(statart::starwars, sex)
+fre(tidystata::starwars, sex)
 #> # A tibble: 7 x 6
 #>   sex                n percent   cum  valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
@@ -314,7 +316,7 @@ For optional rich formatting, install `flextable` and request it
 explicitly:
 
 ``` r
-fre(statart::starwars, sex, .type = "flextable")
+fre(tidystata::starwars, sex, .type = "flextable")
 ```
 
 ### Row calculations and binning
@@ -338,7 +340,7 @@ by row order.
 
 ## Code of Conduct
 
-Please note that the statart project is released with a [Contributor
+Please note that the tidystata project is released with a [Contributor
 Code of
 Conduct](https://www.contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.

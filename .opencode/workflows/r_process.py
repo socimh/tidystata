@@ -12,10 +12,10 @@ def r_command(command, *, log_directory=None, timeout=900, platform=None, enviro
         return command
     personal = Path("C:/Users/socimh/.codex/scripts/run_r_safe.py")
     default = personal if personal.is_file() else Path(__file__).with_name("run_r_safe.py")
-    launcher = Path(environ.get("STATART_R_LAUNCHER", str(default)))
+    launcher = Path(environ.get("TIDYSTATA_R_LAUNCHER", str(default)))
     if not launcher.is_file():
         raise RuntimeError(
-            "Protected Windows R launcher not found. Set STATART_R_LAUNCHER "
+            "Protected Windows R launcher not found. Set TIDYSTATA_R_LAUNCHER "
             "to a verified run_r_safe.py; see CONTRIBUTING.md."
         )
     prefix = [sys.executable, str(launcher)]

@@ -4,9 +4,9 @@ title: "Coming from Stata"
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(statart)
+library(tidystata)
 
-entries <- statart:::findit_entries()
+entries <- tidystata:::findit_entries()
 
 # Pandoc reads markdown inside HTML blocks, so encode ASCII punctuation as
 # entities to keep code such as `x*` and quotes exactly as written. Non-ASCII
@@ -54,7 +54,7 @@ section_tables <- function(section, task, detail, headers) {
 
 If you know Stata, you already know what you want to do; the question is how
 to say it in R. This page lists Stata commands next to the R code that does the
-same job, using statart where it has a Stata-style function and the standard
+same job, using tidystata where it has a Stata-style function and the standard
 package everywhere else.
 
 ## Look it up from the console
@@ -72,7 +72,7 @@ help again.
 
 ## Where to find the rest
 
-statart covers the everyday loop of inspecting, tabulating, summarising,
+tidystata covers the everyday loop of inspecting, tabulating, summarising,
 preparing and checking data. For everything else, these packages are the usual
 choices:
 
@@ -88,9 +88,9 @@ choices:
 - **Graphs** (`twoway`, `histogram`): ggplot2; for `binscatter`, binsreg or
   `statar::stat_binmean()`.
 
-statart and [statar](https://github.com/matthieugomez/statar) can be attached
-together; only `tab()` and `xtile()` share names. Attach statart last, or write
-`statart::tab()`.
+tidystata and [statar](https://github.com/matthieugomez/statar) can be attached
+together; only `tab()` and `xtile()` share names. Attach tidystata last, or write
+`tidystata::tab()`.
 
 A few RStudio habits replace Stata's interface: Ctrl+Enter (Cmd+Return on a
 Mac) runs the current line or selection, Tab completes names, and the
@@ -113,7 +113,7 @@ above, with its package, a related Stata command and what it does. Type
 replaces.
 
 ```{r, echo = FALSE, results = "asis"}
-functions <- statart:::findit_functions()
+functions <- tidystata:::findit_functions()
 table <- data.frame(
   paste0("<code>", escape_html(functions$`function`), "()</code>"),
   escape_html(functions$package),

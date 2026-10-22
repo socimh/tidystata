@@ -17,7 +17,7 @@ import verify_package as verify
 class ReceiptTests(unittest.TestCase):
     def fixture(self, root):
         (root / "R").mkdir()
-        (root / "DESCRIPTION").write_text("Package: statart\nVersion: 1.0\n", encoding="utf-8")
+        (root / "DESCRIPTION").write_text("Package: tidystata\nVersion: 1.0\n", encoding="utf-8")
         return root / ".opencode/workflows/verify_package.py"
 
     def test_full_staged_digest_covers_non_code_inputs(self):
@@ -73,7 +73,7 @@ class ReceiptTests(unittest.TestCase):
                 command = list(map(str, command))
                 if "build" in command:
                     self.assertIn("--no-build-vignettes", command)
-                    (Path(cwd) / "statart_1.0.tar.gz").write_bytes(b"fixture")
+                    (Path(cwd) / "tidystata_1.0.tar.gz").write_bytes(b"fixture")
                     return subprocess.CompletedProcess(command, 0)
                 if "check" in command:
                     self.assertIn("--ignore-vignettes", command)
@@ -99,10 +99,10 @@ class ReceiptTests(unittest.TestCase):
             def run(command, cwd, env, **kwargs):
                 command = list(map(str, command))
                 if "build" in command:
-                    archive = Path(cwd) / "statart_1.0.tar.gz"
+                    archive = Path(cwd) / "tidystata_1.0.tar.gz"
                     with tarfile.open(archive, "w:gz") as bundle:
                         content = (root / "DESCRIPTION").read_bytes()
-                        entry = tarfile.TarInfo("statart/DESCRIPTION")
+                        entry = tarfile.TarInfo("tidystata/DESCRIPTION")
                         entry.size = len(content)
                         bundle.addfile(entry, io.BytesIO(content))
                 if any(x.endswith("parse_check_result.R") for x in command):
@@ -115,7 +115,7 @@ class ReceiptTests(unittest.TestCase):
                     Path(command[-4] + ".csv").write_text(
                         'passed,failed,error,warning,skipped\n2,0,FALSE,0,0\n', encoding="utf-8")
                     self.assertEqual(command[-1], "snapshots")
-                    self.assertTrue(env["STATART_TEST_LIBRARY"].endswith("bundle-library"))
+                    self.assertTrue(env["TIDYSTATA_TEST_LIBRARY"].endswith("bundle-library"))
                 names.append(command)
                 return subprocess.CompletedProcess(command, 0)
             with patch.object(verify, "__file__", str(script)), \

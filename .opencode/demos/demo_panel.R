@@ -1,7 +1,7 @@
 # Demo: gap-aware panel lags, leads and differences, like Stata's L., F. and
 # D. after xtset. Runs against the fresh installation selected by the demo
 # workflow.
-library(statart)
+library(tidystata)
 
 panel <- tibble::tibble(
   id = c(1, 1, 1, 1, 2, 2, 2),

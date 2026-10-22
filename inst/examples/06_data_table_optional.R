@@ -1,6 +1,6 @@
 # Optional: run this script only if you want to test data.table inputs.
 # install.packages("data.table")
-library(statart)
+library(tidystata)
 library(data.table)
 
 dt <- data.table(group = c("A", "A", "B"), x = c(1, 3, 5))

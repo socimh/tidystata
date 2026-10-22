@@ -47,12 +47,12 @@ test_that("aliases are exported and identical to their primary functions", {
     s_tag = "is_first",
     tab_gen = "as_dummy"
   )
-  exports <- getNamespaceExports("statart")
+  exports <- getNamespaceExports("tidystata")
   for (alias in names(same)) {
     expect_true(alias %in% exports, info = alias)
     expect_identical(
-      getExportedValue("statart", alias),
-      getExportedValue("statart", same[[alias]]),
+      getExportedValue("tidystata", alias),
+      getExportedValue("tidystata", same[[alias]]),
       info = alias
     )
   }

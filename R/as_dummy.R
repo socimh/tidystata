@@ -5,7 +5,7 @@
 #' Stata's `tabulate x, generate(x_)`. The new columns are placed right after
 #' their source variable. `tab_gen()` is an alias of `as_dummy()`.
 #'
-#' @inheritParams statart_args
+#' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables
 #' to expand.
 #' @param .names How to name the new columns: `"value"` (default) appends the

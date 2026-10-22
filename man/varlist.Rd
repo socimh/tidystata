@@ -35,7 +35,7 @@ version of \code{matches()} in <\code{\link[dplyr:dplyr_tidy_select]{tidy-select
 Use \code{varlist()} within a \emph{selecting} function, such as \code{ds()}, \code{tab()} or
 \code{dplyr::across()}. Alternatively, provide \code{vars} explicitly to return
 matching positions in a standalone call. \code{varlist()} was called \code{s_match()}
-before statart 0.3.0; the old name still works with a deprecation
+before tidystata 0.3.0; the old name still works with a deprecation
 warning.
 }
 \details{

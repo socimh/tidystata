@@ -29,11 +29,11 @@ def main():
     (DESTINATION / "source.json").write_text(
         json.dumps(receipt, indent=2), encoding="utf-8")
     environment = r_environment({
-        "STATART_R_LAUNCHER": str(ROOT / ".opencode/workflows/run_r_safe.py"),
-        "STATART_CI_RESULTS": str(DESTINATION),
+        "TIDYSTATA_R_LAUNCHER": str(ROOT / ".opencode/workflows/run_r_safe.py"),
+        "TIDYSTATA_CI_RESULTS": str(DESTINATION),
     })
     expression = '''
-destination <- Sys.getenv("STATART_CI_RESULTS")
+destination <- Sys.getenv("TIDYSTATA_CI_RESULTS")
 cat(R.version.string, "\\nLibraries:", .libPaths(), "\\n")
 result <- rcmdcheck::rcmdcheck(
   args = c("--no-manual", "--as-cran"),
@@ -53,7 +53,7 @@ writeLines(as.character(result$status), file.path(destination, "native-status.tx
     parser = ROOT / ".opencode/workflows/parse_check_result.R"
     command = r_command([
         "Rscript", str(parser),
-        str(DESTINATION / "check/statart.Rcheck/00check.log"), native_status,
+        str(DESTINATION / "check/tidystata.Rcheck/00check.log"), native_status,
         str(DESTINATION / "check-result.json"),
     ], log_directory=DESTINATION / "launcher", environ=environment)
     return subprocess.run(command, cwd=ROOT, env=environment, check=False).returncode

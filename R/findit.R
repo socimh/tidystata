@@ -2,9 +2,9 @@
 #'
 #' @description
 #' `findit()` looks up a Stata command and returns the R code that does the
-#' same job, whether a statart function or one from another package. It
+#' same job, whether a tidystata function or one from another package. It
 #' covers everyday data work (browsing, tabulating, generating, merging,
-#' reshaping) and points to the packages statart leaves to others, such as
+#' reshaping) and points to the packages tidystata leaves to others, such as
 #' fixest for `reghdfe`, modelsummary for `esttab`, binsreg for `binscatter`
 #' and srvyr for `svy`.
 #'
@@ -66,8 +66,8 @@
 #' and Chinese, are in the "Coming from Stata" articles on the package
 #' website.
 #'
-#' statart and statar can be attached together; only `tab()` and `xtile()`
-#' share names. Attach statart last, or write `statart::tab()`.
+#' tidystata and statar can be attached together; only `tab()` and `xtile()`
+#' share names. Attach tidystata last, or write `tidystata::tab()`.
 #'
 #' @concept Stata
 #' @concept Stata to R
@@ -210,12 +210,12 @@ findit_result <- function(entries, match = NULL, functions = character()) {
   ]
   described$used <- described$`function` %in% unlist(findit_entries()$functions)
   attr(out, "r_functions") <- described
-  class(out) <- c("statart_findit", class(out))
+  class(out) <- c("tidystata_findit", class(out))
   out
 }
 
 #' @export
-print.statart_findit <- function(x, n = 20, ...) {
+print.tidystata_findit <- function(x, n = 20, ...) {
   functions <- attr(x, "r_functions")
   shown <- utils::head(as.data.frame(x), n)
   cat("# Stata to R:", nrow(x), if (nrow(x) == 1L) "entry\n" else "entries\n")
@@ -313,7 +313,7 @@ findit_functions <- function() {
 
 findit_read <- function(file) {
   readr::read_csv(
-    system.file("extdata", file, package = "statart"),
+    system.file("extdata", file, package = "tidystata"),
     col_types = readr::cols(.default = readr::col_character()),
     na = character(),
     locale = readr::locale(encoding = "UTF-8"),

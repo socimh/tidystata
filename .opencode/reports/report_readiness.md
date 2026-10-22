@@ -1,6 +1,6 @@
 # Function: readiness()
 
-**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:10 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 20:14:21 | **Status:** PASS
 
 ## Example 1: Calendar spreads as comparable difftime columns
 
@@ -75,9 +75,9 @@ $date
 ## Example 6: Namespace-qualified datasets
 
 ```
-statart   dplyr
-     87      87
-[1] "package:dplyr"   "package:statart"
+tidystata     dplyr
+       87        87
+[1] "package:dplyr"     "package:tidystata"
 ```
 
 ## Example 7: Missing argument diagnostic
