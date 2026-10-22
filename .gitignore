@@ -19,3 +19,12 @@
 /src/*.dll
 /src/*.so
 /src/*.a
+
+# Maintainer-only development files, kept locally and out of the repository.
+/.opencode/
+/AGENTS.md
+/DEVELOPMENT.md
+/CONTRIBUTING.md
+/Makefile
+/MIGRATION.md
+/paper/

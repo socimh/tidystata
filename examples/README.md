@@ -30,7 +30,7 @@ project root:
 source("examples/02_frequency_tables.R", echo = TRUE)
 ```
 
-The complete migration guide is `MIGRATION.md` in the repository and the
+The complete migration guide is the
 [Migration guide](https://socimh.github.io/tidystata/articles/migration.html)
 article on the website.
 

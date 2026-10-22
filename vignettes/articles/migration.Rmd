@@ -64,8 +64,7 @@ values differ slightly from Stata's `lifeexp.dta`.
 ## Renamed arguments
 
 Argument names now follow one rule: options after a `...` that takes columns
-or expressions are dotted, and functions without `...` use plain names (see
-CONTRIBUTING).
+or expressions are dotted, and functions without `...` use plain names.
 The old names still work with a lifecycle deprecation warning.
 
 | Old call | New call |
@@ -518,8 +517,7 @@ for empty and all-missing measured vectors; ordinary vectors return
 
 ## Historical problem repairs and explicit controls
 
-Original `PROBLEMS2.md` notes are retained under `.opencode/notes/`; active
-regression tests preserve the repaired cases. A follow-up review changed four
+Regression tests preserve the repaired cases. A follow-up review changed four
 defaults to match the original requests:
 `summ()`/`tabstat()` sort groups like `tab()` (`.sort = TRUE`) and hide the
 `name` column for a single variable (`.name = FALSE`); `timer()` reports time
