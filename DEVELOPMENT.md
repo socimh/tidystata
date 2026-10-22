@@ -7,6 +7,32 @@ for the coding standard and [MIGRATION.md](MIGRATION.md) for public contracts.
 
 ## Current verification
 
+**Minimums finalized and pushed, 2026-10-22:** `master` and
+`refactor/tidyverse-conventions` are on GitHub; before the push, the unpushed
+history dropped `.opencode/notes/` (now ignored, local only) and old
+`.opencode/results/` output, and commit emails moved to the GitHub noreply
+address. The first hosted CI runs found and fixed: `.desc` reaching `if()`
+unchecked (R 4.1 aborts), `row_var()` squaring a rounded square root (off by
+one ulp without extended long double, as on Apple Silicon), two tests that
+assumed an extended long double or R's NA-over-NaN `cumsum()` order, unbraced
+`test_that()` helpers (testthat 3.2.1 warns), and CI setup gaps (libcurl,
+decor, remotes, the package for the linter). Windows now uses the standard
+`check-r-package` action; R crashed at startup (0xC0000005) under the
+protected launcher on the hosted runner, so `ci_check.py` is removed and the
+launcher stays for local runs. The R 4.1 floor jobs raised two declared
+minimums: `readr (>= 1.4.0)` (1.0.0 cannot parse scientific notation and
+reports empty problem values) and `testthat (>= 3.2.0)` (the recorded snapshot
+display, #1856).
+
+Hosted verification at `563e7c0` (tree identical to the checked `4e9fc27`):
+R-CMD-check passes on macOS release, Windows release, Ubuntu devel, release,
+oldrel-1 and R 4.1; all eleven exact dependency-floor cases pass on R 4.1
+(dplyr 1.1.4, haven 2.5.3, pillar 1.9.0, purrr 1.0.0, readr 1.4.0,
+stringr 1.5.0, testthat 3.2.0, tibble 3.2.0, tidyr 1.2.0, units 1.0-0,
+vctrs 0.6.4); style, documentation freshness, test coverage and pkgdown pass.
+The site is deployed and every URL from the incoming NOTE resolves. Local:
+full suite **18,503 passing, 0 failures/warnings**.
+
 **Attribution cleanup, 2026-10-21:** the maintainer-approved history rewrite
 removes AI co-author trailers from all local refs and both GitHub code branches.
 All 210 mapped commit trees, author/committer identities and dates are unchanged;
@@ -23,7 +49,7 @@ missing values. The bundled `starwars` and `inst/THIRD-PARTY-NOTICES.md` are
 removed; examples, tests, vignettes and demos use `dplyr::starwars`, and
 Imports require `dplyr (>= 1.1.4)`. NEWS, MIGRATION and
 `inst/DATA-PROVENANCE.md` record both changes. The package rename to tidystata
-is commit `2598ddc`; the GitHub repository is renamed and `origin` points to
+is in Git history; the GitHub repository is renamed and `origin` points to
 `socimh/tidystata`. A separate session re-audited the 2024 CRAN review items;
 its open items, the unquoted 'tidyverse' in Description and the shipped
 `devtools::install()` call in `examples/00_install.R`, are fixed, and
@@ -203,11 +229,9 @@ show generated console output.
   with `dplyr (>= 1.1.4)`, whose `starwars.rda` is byte-identical from 1.1.4
   to the current main branch. `inst/DATA-PROVENANCE.md` records the source,
   indicators and changes; the distribution gate is closed.
-- **Remote compatibility:** six OS/R jobs and eleven exact dependency-floor cases
-  are configured but actual hosted execution remains pending. Run only after
-  separate upload/dispatch authorization, recording
-  candidate identity, exact versions, logs, skips and native exits. Local Windows
-  R 4.6 checks do not establish R 4.1, dependency floors or other platforms.
+- **Remote compatibility:** done 2026-10-22 (see Current verification). The
+  floor matrix runs on pull requests and manual dispatch; rerun it after any
+  change to DESCRIPTION bounds.
 - **Interactive viewers:** obtain actual selected/all/grouped observations in
   both RStudio and VS Code using the candidate-bound
   [viewer checklist](.opencode/viewer/VIEWER_CHECKLIST.md). Verify a protected
@@ -215,12 +239,11 @@ show generated console output.
   terminal. Record editor/extension versions and any watcher failure.
 - **Toward 1.0.0:** the version is named 0.3.0 (2026-10-21) and every lifecycle
   deprecation says `"0.3.0"`. Before 1.0.0: no public renames for a release
-  cycle, the 0.3.0 deprecations removed or moved to `deprecate_stop()`, the
-  remote platform and dependency-floor checks run, and README no longer calls
+  cycle, the 0.3.0 deprecations removed or moved to `deprecate_stop()`, and
+  README no longer calls
   the package experimental.
-- **Publication:** push and deploy the site so the five article URLs in the
-  incoming NOTE resolve; review release version/metadata and
-  `cran-comments.md`.
+- **Publication:** pushed and the site deployed 2026-10-22; review release
+  version/metadata and `cran-comments.md` before submitting.
   Existing incoming-check notes require a recorded publication decision. Local
   verification does not authorize push, deployment, release or submission.
 - **Remaining follow-up:** duration display rounding at unit boundaries still
