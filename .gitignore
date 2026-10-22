@@ -11,6 +11,7 @@
 /docs/
 /.opencode/results/
 /.opencode/tools/
+/.opencode/notes/
 /.Rd2pdf*/
 
 # Native build products; keep source and registration wrappers.

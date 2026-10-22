@@ -84,7 +84,7 @@ native row kernels. R >= 4.1 is required; sources, tests and examples use `|>`.
 | `inst/extdata/stata-to-r.csv` | Hand-curated `findit()` entries (English and Chinese); the source for the "Coming from Stata" articles |
 | `.opencode/demos/`, `.opencode/reports/` | Current actual-output demos and generated reports/index |
 | `.opencode/workflows/`, `.opencode/tests/` | Current verification tools and specialized checks/benchmarks |
-| `.opencode/notes/` | Unchanged original issue notes, screenshots and follow-up handover |
+| `.opencode/notes/` | Unchanged original issue notes, screenshots and follow-up handover (local only, ignored by Git) |
 | `.opencode/tools/`, `.opencode/results/` | Ignored local tool installations and disposable verification results |
 
 README content lives in `README.Rmd`; website organization lives in
