@@ -286,15 +286,15 @@ test_that("variables_search: combined with additional selection", {
 # ============================================================================
 
 test_that("names functions: work in dplyr pipeline", {
-  result <- mtcars %>%
-    dplyr::select(mpg, cyl, disp) %>%
+  result <- mtcars |>
+    dplyr::select(mpg, cyl, disp) |>
     ds()
 
   expect_equal(result, c("mpg", "cyl", "disp"))
 })
 
 test_that("names functions: chain multiple operations", {
-  result <- mtcars %>%
+  result <- mtcars |>
     ds(dplyr::starts_with("d"))
 
   expect_true("disp" %in% result)
@@ -302,8 +302,8 @@ test_that("names functions: chain multiple operations", {
 })
 
 test_that("variables: work in dplyr pipeline", {
-  result <- mtcars %>%
-    dplyr::select(dplyr::where(is.numeric)) %>%
+  result <- mtcars |>
+    dplyr::select(dplyr::where(is.numeric)) |>
     variables()
 
   expect_identical(class(result), "data.frame")

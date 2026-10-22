@@ -1,6 +1,6 @@
 # Function: readiness()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 16:23:08 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:10 | **Status:** PASS
 
 ## Example 1: Calendar spreads as comparable difftime columns
 
@@ -40,7 +40,7 @@ $date
 # A tibble: 1 x 3
   name  type   mean
   <chr> <chr> <dbl>
-1 value int       2
+1 1:3   int       2
 # A tibble: 1 x 3
   name  type   mean
   <chr> <chr> <dbl>
@@ -115,6 +115,6 @@ Levels: [11,12.5] < (12.5,14]
 
 ```
 Time spent: 0.000s
-Time spent: 0.007s
+Time spent: 0.004s
 No duration threshold is asserted. Each timer measures its own expression.
 ```

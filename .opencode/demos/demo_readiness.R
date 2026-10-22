@@ -13,8 +13,8 @@ print(summ(mixed, .type = "list", .stat = "mean"))
 cat(
   "```\n\n## Example 3: Piped vector expression name and explicit-name workaround\n\n```\n"
 )
-print(1:3 %>% summ(.name = TRUE, .stat = "mean"))
-print(tibble::tibble(value = 1:3) %>% summ(.name = TRUE, .stat = "mean"))
+print(1:3 |> summ(.name = TRUE, .stat = "mean"))
+print(tibble::tibble(value = 1:3) |> summ(.name = TRUE, .stat = "mean"))
 
 cat("```\n\n## Example 4: Infinite Date extrema\n\n```\n")
 day <- as.Date(c(-Inf, 0, Inf, NA), origin = "1970-01-01")
@@ -39,8 +39,8 @@ stopifnot(grepl("Missing `value`", diagnostic, fixed = TRUE))
 cat("```\n\n## Example 8: Grouped quantile cuts return integer codes\n\n```\n")
 grouped <- tibble::tibble(g = rep(c("a", "b"), each = 4), x = c(1:4, 11:14))
 print(lapply(split(grouped$x, grouped$g), xtile, n = 2))
-binned <- grouped %>%
-  dplyr::group_by(g) %>%
+binned <- grouped |>
+  dplyr::group_by(g) |>
   dplyr::mutate(bin = xtile(x, n = 2))
 print(binned)
 stopifnot(identical(binned$bin, rep(c(1L, 1L, 2L, 2L), 2)))

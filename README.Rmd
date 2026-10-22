@@ -40,7 +40,7 @@ statart `0.3.0` retires the import/export, regression-table, and
 detailed-codebook wrappers. See the
 [migration guide](https://socimh.github.io/statart/articles/migration.html) for direct package alternatives and breaking
 changes. This experimental package is undergoing stabilization; see
-[DEVELOPMENT.md](https://github.com/socimh/statart/blob/master/DEVELOPMENT.md) for the verified status and remaining work.
+[NEWS](https://socimh.github.io/statart/news/index.html) for changes in each release.
 
 ## Installation
 

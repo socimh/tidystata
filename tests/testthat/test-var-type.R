@@ -166,7 +166,7 @@ test_that("var_type: applied to each column with summarise", {
     logi_col = c(TRUE, FALSE, TRUE, FALSE, TRUE)
   )
 
-  result <- df %>%
+  result <- df |>
     dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_s3_class(result, "tbl_df")
@@ -183,7 +183,7 @@ test_that("var_type: within mutate for type checking", {
     y = letters[1:5]
   )
 
-  result <- df %>%
+  result <- df |>
     dplyr::mutate(x_type = var_type(x), y_type = var_type(y))
 
   expect_equal(result$x_type[1], "integer")
@@ -309,7 +309,7 @@ test_that("var_type: used in codebook workflow", {
   )
 
   # Simulate codebook variable summary
-  var_summary <- df %>%
+  var_summary <- df |>
     dplyr::summarise(dplyr::across(
       dplyr::everything(),
       list(
@@ -348,7 +348,7 @@ test_that("var_type: data audit workflow", {
   )
 
   # Get type summary for all columns
-  type_summary <- audit_data %>%
+  type_summary <- audit_data |>
     dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_equal(type_summary$transaction_id, "integer")
@@ -365,20 +365,20 @@ test_that("var_type: ETL pipeline type checking", {
   )
 
   # Check types before conversion
-  original_types <- raw_data %>%
+  original_types <- raw_data |>
     dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_equal(unique(unlist(original_types)), "character")
 
   # After conversion
-  clean_data <- raw_data %>%
+  clean_data <- raw_data |>
     dplyr::mutate(
       id = as.integer(id),
       value = as.numeric(value),
       date = as.Date(date)
     )
 
-  clean_types <- clean_data %>%
+  clean_types <- clean_data |>
     dplyr::summarise(dplyr::across(dplyr::everything(), var_type))
 
   expect_equal(clean_types$id, "integer")

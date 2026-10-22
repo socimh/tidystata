@@ -1,8 +1,6 @@
 #' Calculate summaries across columns within each row
 #'
 #' @description
-#' `r lifecycle::badge("experimental")`
-#'
 #' * `row_mean()`, `row_sum()`, and `row_median()` calculate row arithmetic.
 #' * `row_min()` and `row_max()` select the smallest and largest row values.
 #' * `row_var()` and `row_sd()` calculate sample variance and standard deviation.

@@ -1,7 +1,6 @@
 #' Tabulate columns
 #'
 #' @description
-#' `r lifecycle::badge("experimental")`
 #' Enhanced `count()`.
 #'
 #' * `tab()` - Tabulates variable(s) simultaneously, similar to `count()`.
@@ -19,12 +18,17 @@
 #' available from `fre()`, `fre1()` and `fre2()` with
 #' `.type = "flextable"` when the optional flextable package is installed.
 #'
+#' @details
+#' ## Counts and percentages
+#'
 #' For `tab()`, `tab1()`, `fre()` and `fre1()`, `n` counts observations.
 #' `percent` and `cum` are percentages from zero to 100 using all observations
 #' within each group; `cum` follows the displayed category order. `valid` and
 #' `valid_cum` use only observations with no missing measured values. Missing
 #' group keys are retained and do not make an otherwise observed value invalid.
 #' Missing measured categories have `NA` valid percentages and appear last.
+#'
+#' ## Totals
 #'
 #' `fre()` and `fre1()` append a `"Total"` row within each group and may add
 #' `"Valid Total"` and `"Missing Total"` subtotals. In tables with up to five
@@ -33,6 +37,8 @@
 #' Displayed value labels can coincide for distinct underlying values, or with
 #' an observed `"Total"` category. Counts remain separate; use `tab()` or
 #' `tab1()` when original category values and types are needed.
+#'
+#' ## List columns and empty selections
 #'
 #' `tab()` counts list-column values by their complete identities without
 #' flattening their contents. Selecting no measured variables returns no rows:
@@ -43,6 +49,8 @@
 #' returns a list of every pairwise table, named like `"x x y"`, each with the
 #' same options. With no selected variables, `tab2(..., .type = "flextable")`
 #' errors because rich cross-tabulation requires two selected variables.
+#'
+#' ## Cross-tabulation
 #'
 #' Cross-tabulation keeps category names unchanged. Categories may match the
 #' original variable names. Column categories follow their values: factor
@@ -57,6 +65,8 @@
 #' suffix when that header is already taken. Logical cross-tabulation axes
 #' follow `FALSE`, `TRUE`, then missing values.
 #'
+#' ## Chi-square test
+#'
 #' With `.chi2 = TRUE`, `tab2()` tests the categories shown in the table,
 #' including missing ones (filter them out first to exclude them), and drops
 #' rows or columns with no observations. It prints Pearson's chi-square, its
@@ -67,6 +77,8 @@
 #' matches `chisq.test(correct = FALSE)`. Frequency weights are treated as
 #' counts; analytic weights are an error, because a design-based test such as
 #' `survey::svychisq()` is needed for sampling weights.
+#'
+#' ## Combined output
 #'
 #' Combined `tab1()` output uses character values when factor types cannot be
 #' combined; each variable's category order is retained. List output preserves
@@ -260,8 +272,8 @@ tab <- function(
 
   # Prepare data
   .data_nogroup <- tab_prepare_data(.data, ..., group_vars = group_vars)
-  .data <- .data %>%
-    dplyr::select(dplyr::any_of(group_vars)) %>%
+  .data <- .data |>
+    dplyr::select(dplyr::any_of(group_vars)) |>
     dplyr::bind_cols(.data_nogroup)
 
   # Confirm names
@@ -280,7 +292,7 @@ tab <- function(
     weights = weights,
     group_order = .group_order,
     input_groups = groups
-  ) %>%
+  ) |>
     dplyr::select(-"...any_miss")
 
   # Output
@@ -359,7 +371,7 @@ tab1 <- function(
 
   error_call <- rlang::current_env()
   out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
-    dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
+    dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) |>
       tab_data(
         group_vars,
         .desc,
@@ -367,7 +379,7 @@ tab1 <- function(
         group_order = .group_order,
         input_groups = groups,
         call = error_call
-      ) %>%
+      ) |>
       dplyr::select(-"...any_miss")
   })
 
@@ -535,7 +547,7 @@ tab2_pair <- function(.data, weights, template, .flip, .total, .type, .chi2) {
   rlang::local_error_call(rlang::caller_env())
   # Flip variables
   if (.flip) {
-    .data <- .data %>%
+    .data <- .data |>
       dplyr::relocate(2, 1)
   }
 
@@ -609,8 +621,8 @@ fre <- function(
 
   # Prepare data
   .data_nogroup <- tab_prepare_data(.data, ..., group_vars = group_vars)
-  .data <- .data %>%
-    dplyr::select(dplyr::any_of(group_vars)) %>%
+  .data <- .data |>
+    dplyr::select(dplyr::any_of(group_vars)) |>
     dplyr::bind_cols(.data_nogroup)
 
   # Confirm names
@@ -623,7 +635,7 @@ fre <- function(
 
   error_call <- rlang::current_env()
   # Tabulate
-  out <- .data %>%
+  out <- .data |>
     tab_data(
       group_vars,
       .desc,
@@ -632,11 +644,11 @@ fre <- function(
       group_order = .group_order,
       input_groups = groups,
       call = error_call
-    ) %>%
+    ) |>
     dplyr::select(-"...any_miss")
 
   if (.type[1] == "flextable") {
-    out <- out %>%
+    out <- out |>
       result_to_flextable(group_vars, call = error_call)
   }
 
@@ -701,7 +713,7 @@ fre1 <- function(
 
   error_call <- rlang::current_env()
   out <- purrr::map(.data[setdiff(names(.data), group_vars)], function(value) {
-    dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) %>%
+    dplyr::bind_cols(.data[group_vars], tibble::tibble(value = value)) |>
       tab_data(
         group_vars,
         .desc,
@@ -710,7 +722,7 @@ fre1 <- function(
         group_order = .group_order,
         input_groups = groups,
         call = error_call
-      ) %>%
+      ) |>
       dplyr::select(-"...any_miss")
   })
 
@@ -726,9 +738,9 @@ fre1 <- function(
   }
 
   if (.type[1] == "flextable") {
-    out <- out %>%
-      append_tab_list(blank_row = TRUE) %>%
-      dplyr::slice(-dplyr::n()) %>%
+    out <- out |>
+      append_tab_list(blank_row = TRUE) |>
+      dplyr::slice(-dplyr::n()) |>
       result_to_flextable(group_vars, fre1 = TRUE, call = error_call)
   } else if (.type[1] == "tibble") {
     out <- append_tab_list(

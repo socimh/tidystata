@@ -117,7 +117,7 @@ for (name in c(
   "MIGRATION.md",
   "DATA-PROVENANCE.md",
   "THIRD-PARTY-NOTICES.md",
-  "examples/VIEWER_CHECKLIST.md"
+  "examples/README.md"
 )) {
   path <- system.file(name, package = "statart", mustWork = TRUE)
   stopifnot(file.info(path)$size > 0)

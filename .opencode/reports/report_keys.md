@@ -1,6 +1,6 @@
 # Function: keys()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 23:06:32 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:09 | **Status:** PASS
 
 ## Example 1: isid() asserts a key inside a pipeline
 

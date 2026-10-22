@@ -41,11 +41,11 @@ check_by_selection <- function(.data, by, call = rlang::caller_env()) {
 }
 
 has_group_vars <- function(.data, group_vars) {
-  contain <- .data %>%
-    dplyr::ungroup() %>%
+  contain <- .data |>
+    dplyr::ungroup() |>
     dplyr::select(
       tidyselect::all_of(group_vars)
-    ) %>%
+    ) |>
     capture()
   contain
 }
@@ -57,11 +57,11 @@ remove_group_vars <- function(.data, ..., group_vars) {
     check_group_selection(.data, ..., group_vars = group_vars)
     .data <- s_select(.data, ...)
   }
-  out <- .data %>%
-    dplyr::ungroup() %>%
+  out <- .data |>
+    dplyr::ungroup() |>
     dplyr::select(
       -tidyselect::any_of(group_vars)
-    ) %>%
+    ) |>
     # Suppress "adding missing grouping variables" message
     suppressMessages()
   out

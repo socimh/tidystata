@@ -4,10 +4,8 @@ statart `0.3.0` is a breaking release focused on data exploration and
 preparation. Four wrappers have been retired:
 `read_data()`, `write_data()`, `esttab()`, and `codebook_detail()`.
 
-The retired implementations, original help, dedicated tests and demos were
-removed from the checkout during repository cleanup. They remain in the
-maintainer's verified external backup and, for tracked versions, Git history.
-Retired functions are unsupported and may require dependencies outside statart.
+These functions are no longer part of statart and are unsupported; the
+sections below name the packages to use instead.
 The retained exploration and preparation helpers remain available. The upstream
 comparison below also records earlier retirements.
 
@@ -48,8 +46,8 @@ before the four-wrapper milestone and the restored printing/slicing helpers.
 The original printing classes and their S3 registrations remain retired. The
 new `statart_preview` class operates on full tables; it does not pretend that a
 row subset contains the full data. Retired implementations are unsupported and
-are not distributed in the package or checkout. Restored and reworked files are not byte-identical copies; the
-original upstream implementations remain in Git history.
+are not distributed in the package. The restored printing and slicing helpers
+were reworked and may differ from their 0.2.0 versions.
 
 ## Renamed arguments
 
@@ -94,7 +92,7 @@ quiet aliases, with no notice, and are documented on the same help pages.
 | `capture` | `capture()` | `s_try()` |
 | `ds` | `ds()`; `ds(.type = "table")` for a table | `ds_as_column()`, `names_as_column()` |
 | `list` | `s_print()` (new: `style = "headtail"`, `"interval"` or `"all"`) | |
-| `set seed 123` | `set_seed(123)`, now also alone; the pipe form `x %>% set_seed(123)` is unchanged | |
+| `set seed 123` | `set_seed(123)`, now also alone; the pipe form `x |> set_seed(123)` is unchanged | |
 
 `var_type()` and `var_unit()` are now the primary names; `s_type()` and
 `s_unit()` still work but are deprecated with a lifecycle warning.
@@ -731,5 +729,4 @@ empty vector for zero-row inputs. Inputs remain unchanged.
 R 4.1.0 or later is required. Extrema, distinct counts, medians, and stable
 sample variance/standard deviation use native C++ kernels registered through
 cpp11. Means and sums retain base R compiled row aggregations. `Rfast` is no
-longer required, reducing current Imports to 12. This development milestone is
-not a release-readiness claim.
+longer required.

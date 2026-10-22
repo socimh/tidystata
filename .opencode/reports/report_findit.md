@@ -1,6 +1,6 @@
 # Function: findit()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 00:14:01 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:08 | **Status:** PASS
 
 ## Example 1: a bare Stata word, with Stata's abbreviations
 
@@ -65,15 +65,15 @@ winsor2 x, cuts(1 99)  # Winsorise at the 1st and 99th percentiles [datawizard]
 svy: mean x                 # Survey-weighted mean [srvyr]
   summarise(design, x = srvyr::survey_mean(x, na.rm = TRUE))
 svy: tabulate x             # Survey-weighted proportions [srvyr]
-  design %>% group_by(x) %>% summarise(p = srvyr::survey_prop())
+  design |> group_by(x) |> summarise(p = srvyr::survey_prop())
 svy: regress y x            # Survey-weighted regression [survey]
   survey::svyglm(y ~ x, design = design)
 svy: mean x, over(g)        # Survey-weighted means by group [srvyr]
-  design %>% group_by(g) %>% summarise(x = srvyr::survey_mean(x, na.rm = TRUE))
+  design |> group_by(g) |> summarise(x = srvyr::survey_mean(x, na.rm = TRUE))
 svy, subpop(rural): mean x  # Subpopulation estimate [srvyr]
-  design %>% filter(rural == 1) %>% summarise(x = srvyr::survey_mean(x, na.rm = TRUE))
+  design |> filter(rural == 1) |> summarise(x = srvyr::survey_mean(x, na.rm = TRUE))
 svy: proportion x           # Survey-weighted proportions with intervals [srvyr]
-  design %>% group_by(x) %>% summarise(p = srvyr::survey_prop(vartype = "ci"))
+  design |> group_by(x) |> summarise(p = srvyr::survey_prop(vartype = "ci"))
 svy: logit y x              # Survey-weighted logit [survey]
   survey::svyglm(y ~ x, design = design, family = quasibinomial())
 # Stata to R: 1 entry

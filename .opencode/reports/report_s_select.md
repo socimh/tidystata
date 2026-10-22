@@ -1,6 +1,6 @@
 # Function: s_select()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:36 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:10 | **Status:** PASS
 
 ## Example 1: Select columns by name
 

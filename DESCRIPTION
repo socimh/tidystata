@@ -41,7 +41,6 @@ Suggests:
     hms,
     knitr,
     rmarkdown,
-    roxygen2,
     sf,
     testthat (>= 3.1.7),
     units (>= 1.0.0),

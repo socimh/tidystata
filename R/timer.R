@@ -24,7 +24,7 @@
 #'
 #' @examples
 #' x <- seq_len(1e6)
-#' mean(x) %>% timer()
+#' mean(x) |> timer()
 #' try(timer(stop("failure")))
 timer <- function(
   x,

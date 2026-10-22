@@ -49,9 +49,6 @@ Comments explain what to look for. Some ordinary calls deliberately emit
 warnings. The error-producing examples at the bottom of script 05 are commented
 out; uncomment and run them individually when you want to inspect their errors.
 The viewer and rich-formatting calls are also optional commented lines.
-For a separate interactive RStudio check, follow the
-[viewer checklist](VIEWER_CHECKLIST.md). It checks selected columns, retained
-labels and the invisible return value without adding another automatic script.
 
 If you prefer to run the ordinary examples together, from the project root:
 

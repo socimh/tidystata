@@ -32,8 +32,8 @@ a missing value is larger than every number, so \verb{assert x > 0} holds when
 \code{x} is missing; write \code{is.na(x) | x > 0} for that behaviour.
 }
 \examples{
-lifeexp \%>\%
-  assert(lexp > 0, popgrowth < 10) \%>\%
+lifeexp |>
+  assert(lexp > 0, popgrowth < 10) |>
   summ(lexp)
 
 # Each country appears once per region

@@ -38,8 +38,8 @@ browse <- function(.data, ...) {
   if (missing(...)) {
     tibble::view(.data)
   } else {
-    .data %>%
-      s_select(...) %>%
+    .data |>
+      s_select(...) |>
       tibble::view()
   }
 }

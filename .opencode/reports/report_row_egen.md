@@ -1,6 +1,6 @@
 # Function: row_egen()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:22 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:10 | **Status:** PASS
 
 ## Example 1: row_min
 
@@ -79,7 +79,7 @@ row_non_miss(df_na)
 ## Example 7: In mutate context
 
 ```r
-df %>%
+df |>
   mutate(
     min_val = row_min(a, b, c),
     max_val = row_max(a, b, c)
@@ -100,7 +100,7 @@ df %>%
 ## Example 8: With scalar values
 
 ```r
-df %>%
+df |>
   mutate(above_2 = row_min(a, 2))
 ```
 

@@ -22,11 +22,10 @@ sources, tests and maintained examples. The reviewed file list is
 - Keep functions focused. Extract helpers for meaningful shared operations,
   rather than creating a framework around small wrappers. Base R calls and
   loops are appropriate when they make the operation clear.
-- Prefer direct calls for single operations and `|>` for readable sequences in
-  new or deliberately revised code. `%>%` remains the dominant pipe in existing
-  sources and is not a review finding by itself. Do not mechanically
-  replace pipes: review promise forcing, warnings, side effects and visibility.
-  Use only native-pipe syntax supported by R 4.1 (no newer placeholders or
+- Prefer direct calls for single operations and the native pipe `|>` for
+  readable sequences in sources, tests, examples and vignettes. `%>%` is
+  re-exported for users and appears only in tests of magrittr compatibility.
+  Use only native-pipe syntax supported by R 4.1 (no `_` placeholder or
   extraction syntax). Use `function()` for named and multiline functions.
 - Prefer an implicit final return and explicit early returns. Keep intentional
   invisible returns for side-effect functions. Comments explain reasons and

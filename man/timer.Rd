@@ -39,7 +39,7 @@ so a later timer in a pipeline reports cumulative time from its own start.
 }
 \examples{
 x <- seq_len(1e6)
-mean(x) \%>\% timer()
+mean(x) |> timer()
 try(timer(stop("failure")))
 }
 \seealso{

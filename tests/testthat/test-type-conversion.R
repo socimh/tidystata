@@ -86,7 +86,7 @@ test_that("as_character: within mutate context", {
     num = 1:5,
     lbl = haven::labelled(c(1, 2, 1, 2, 1), labels = c(A = 1, B = 2))
   )
-  result <- df %>%
+  result <- df |>
     dplyr::mutate(num_chr = as_character(num), lbl_chr = as_character(lbl))
   expect_type(result$num_chr, "character")
   expect_type(result$lbl_chr, "character")
@@ -210,7 +210,7 @@ test_that("as_numeric: within mutate context", {
     fct = factor(c(10, 20, 30)),
     lbl = haven::labelled(c(100, 200, 100), labels = c(A = 100, B = 200))
   )
-  result <- df %>%
+  result <- df |>
     dplyr::mutate(
       chr_num = as_numeric(chr),
       fct_num = as_numeric(fct),
@@ -255,7 +255,7 @@ test_that("type conversion: data frame conversion workflow", {
     passed = factor(c("Yes", "Yes", "No"))
   )
 
-  result <- df %>%
+  result <- df |>
     dplyr::mutate(
       id_chr = as_character(id),
       score_num = as_numeric(score),
@@ -338,7 +338,7 @@ test_that("type conversion: survey data import workflow", {
   )
 
   # Convert for analysis
-  analysis_data <- survey_data %>%
+  analysis_data <- survey_data |>
     dplyr::mutate(
       gender_chr = as_character(gender),
       age_chr = as_character(age_group),
@@ -364,7 +364,7 @@ test_that("type conversion: financial data parsing", {
     currency = c("USD", "USD", "EUR", "GBP")
   )
 
-  result <- financial_data %>%
+  result <- financial_data |>
     dplyr::mutate(amount_num = as_numeric(amount_chr))
 
   expect_type(result$amount_num, "double")

@@ -47,7 +47,7 @@ test_that("row_mean: single column returns that column", {
 
 test_that("row_mean: within mutate context", {
   tb <- tibble::tibble(x = 1:5, y = 6:10)
-  result <- tb %>% dplyr::mutate(mean_xy = row_mean(x, y))
+  result <- tb |> dplyr::mutate(mean_xy = row_mean(x, y))
   expect_equal(result$mean_xy, c(3.5, 4.5, 5.5, 6.5, 7.5))
 })
 
@@ -83,7 +83,7 @@ test_that("row_sum: with missing values", {
 
 test_that("row_sum: within mutate context", {
   tb <- tibble::tibble(x = 1:5, y = 6:10)
-  result <- tb %>% dplyr::mutate(sum_xy = row_sum(x, y))
+  result <- tb |> dplyr::mutate(sum_xy = row_sum(x, y))
   expect_equal(result$sum_xy, c(7, 9, 11, 13, 15))
 })
 
@@ -121,7 +121,7 @@ test_that("row_max: all NA in a row returns NA", {
 
 test_that("row_max: within mutate returns plain vector", {
   tb <- tibble::tibble(x = 1:5, y = 5:1)
-  result <- tb %>% dplyr::mutate(max_val = row_max(x, y))
+  result <- tb |> dplyr::mutate(max_val = row_max(x, y))
   expect_type(result$max_val, "integer")
   expect_equal(result$max_val, c(5, 4, 3, 4, 5))
 })
@@ -158,7 +158,7 @@ test_that("row_min: handles NA values correctly", {
 
 test_that("row_min: within mutate returns plain vector", {
   tb <- tibble::tibble(x = 1:5, y = 5:1)
-  result <- tb %>% dplyr::mutate(min_val = row_min(x, y))
+  result <- tb |> dplyr::mutate(min_val = row_min(x, y))
   expect_type(result$min_val, "integer")
   expect_equal(result$min_val, c(1, 2, 3, 2, 1))
 })
@@ -195,7 +195,7 @@ test_that("row_median: with missing values", {
 
 test_that("row_median: within mutate context", {
   tb <- tibble::tibble(x = c(1, 10, 5), y = c(5, 2, 8), z = c(10, 5, 2))
-  result <- tb %>% dplyr::mutate(med = row_median(x, y, z))
+  result <- tb |> dplyr::mutate(med = row_median(x, y, z))
   expect_equal(result$med, c(5, 5, 5))
 })
 
@@ -254,7 +254,7 @@ test_that("row_sd: related to row_var", {
 
 test_that("row_sd: within mutate context", {
   tb <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- tb %>% dplyr::mutate(sd_val = row_sd(x, y, z))
+  result <- tb |> dplyr::mutate(sd_val = row_sd(x, y, z))
   expect_type(result$sd_val, "double")
   expect_true(all(result$sd_val > 0))
 })
@@ -285,7 +285,7 @@ test_that("row_unique: all identical returns 1", {
 
 test_that("row_unique: within mutate context", {
   tb <- tibble::tibble(x = c(1, 2, 3), y = c(1, 2, 4), z = c(1, 3, 5))
-  result <- tb %>% dplyr::mutate(unique_count = row_unique(x, y, z))
+  result <- tb |> dplyr::mutate(unique_count = row_unique(x, y, z))
   expect_equal(result$unique_count, c(1, 2, 3))
 })
 
@@ -313,7 +313,7 @@ test_that("row_miss: all missing returns number of columns", {
 
 test_that("row_miss: within mutate context", {
   tb <- tibble::tibble(x = c(1, NA, 3), y = c(NA, 2, NA))
-  result <- tb %>% dplyr::mutate(miss_count = row_miss(x, y))
+  result <- tb |> dplyr::mutate(miss_count = row_miss(x, y))
   expect_equal(result$miss_count, c(1, 1, 1))
 })
 
@@ -392,7 +392,7 @@ test_that("row functions: retain row order and exact totals", {
 
 test_that("row functions: combining multiple operations in mutate", {
   tb <- tibble::tibble(x = c(1, 2, NA), y = c(4, NA, 6), z = c(7, 8, 9))
-  result <- tb %>%
+  result <- tb |>
     dplyr::mutate(
       mean_val = row_mean(x, y, z),
       sum_val = row_sum(x, y, z),
@@ -458,7 +458,7 @@ test_that("row functions: survey scoring scenario", {
     q4 = sample(1:5, 100, replace = TRUE),
     q5 = sample(1:5, 100, replace = TRUE)
   )
-  result <- survey %>%
+  result <- survey |>
     dplyr::mutate(
       total_score = row_sum(q1:q5),
       mean_score = row_mean(q1:q5),
@@ -477,7 +477,7 @@ test_that("row functions: data quality check scenario", {
     check2 = sample(c(TRUE, FALSE), 50, replace = TRUE),
     check3 = sample(c(TRUE, FALSE), 50, replace = TRUE)
   )
-  result <- df %>%
+  result <- df |>
     dplyr::mutate(
       passed_checks = row_non_miss(check1, check2, check3),
       failed_checks = row_miss(check1, check2, check3)

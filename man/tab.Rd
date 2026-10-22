@@ -161,7 +161,6 @@ unless an explicit output type is requested. Other subclasses are not
 reconstructed on these newly shaped tables. Input data are not modified.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Enhanced \code{count()}.
 \itemize{
 \item \code{tab()} - Tabulates variable(s) simultaneously, similar to \code{count()}.
@@ -179,6 +178,9 @@ named after Stata's \code{fre}. \code{xtab()} is an alias of \code{tab2()}.
 The functions return data by default. With totals, rich output is
 available from \code{fre()}, \code{fre1()} and \code{fre2()} with
 \code{.type = "flextable"} when the optional flextable package is installed.
+}
+\details{
+\subsection{Counts and percentages}{
 
 For \code{tab()}, \code{tab1()}, \code{fre()} and \code{fre1()}, \code{n} counts observations.
 \code{percent} and \code{cum} are percentages from zero to 100 using all observations
@@ -186,6 +188,9 @@ within each group; \code{cum} follows the displayed category order. \code{valid}
 \code{valid_cum} use only observations with no missing measured values. Missing
 group keys are retained and do not make an otherwise observed value invalid.
 Missing measured categories have \code{NA} valid percentages and appear last.
+}
+
+\subsection{Totals}{
 
 \code{fre()} and \code{fre1()} append a \code{"Total"} row within each group and may add
 \code{"Valid Total"} and \code{"Missing Total"} subtotals. In tables with up to five
@@ -194,6 +199,9 @@ hold these labels; wider tables use a separate \code{total} label column.
 Displayed value labels can coincide for distinct underlying values, or with
 an observed \code{"Total"} category. Counts remain separate; use \code{tab()} or
 \code{tab1()} when original category values and types are needed.
+}
+
+\subsection{List columns and empty selections}{
 
 \code{tab()} counts list-column values by their complete identities without
 flattening their contents. Selecting no measured variables returns no rows:
@@ -204,6 +212,9 @@ variables are selected and errors when only one is. With three or more, it
 returns a list of every pairwise table, named like \code{"x x y"}, each with the
 same options. With no selected variables, \code{tab2(..., .type = "flextable")}
 errors because rich cross-tabulation requires two selected variables.
+}
+
+\subsection{Cross-tabulation}{
 
 Cross-tabulation keeps category names unchanged. Categories may match the
 original variable names. Column categories follow their values: factor
@@ -217,6 +228,9 @@ observed row category with the same label remains a separate row.
 Blank column categories use \code{"<empty>"}, with the smallest unused numeric
 suffix when that header is already taken. Logical cross-tabulation axes
 follow \code{FALSE}, \code{TRUE}, then missing values.
+}
+
+\subsection{Chi-square test}{
 
 With \code{.chi2 = TRUE}, \code{tab2()} tests the categories shown in the table,
 including missing ones (filter them out first to exclude them), and drops
@@ -228,6 +242,9 @@ them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The test
 matches \code{chisq.test(correct = FALSE)}. Frequency weights are treated as
 counts; analytic weights are an error, because a design-based test such as
 \code{survey::svychisq()} is needed for sampling weights.
+}
+
+\subsection{Combined output}{
 
 Combined \code{tab1()} output uses character values when factor types cannot be
 combined; each variable's category order is retained. List output preserves
@@ -235,6 +252,7 @@ the original category classes.
 
 If the output tibble has many rows, consider using
 \code{print()} to display the output.
+}
 }
 \examples{
 # tabulate the 8th column

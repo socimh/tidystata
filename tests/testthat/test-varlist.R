@@ -12,7 +12,7 @@
 
 test_that("varlist: exact match", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- df %>% dplyr::select(varlist("x"))
+  result <- df |> dplyr::select(varlist("x"))
   expect_equal(ncol(result), 1)
   expect_equal(names(result), "x")
 })
@@ -24,7 +24,7 @@ test_that("varlist: wildcard with * (zero or more characters)", {
     var_10 = 11:15,
     other = 16:20
   )
-  result <- df %>% dplyr::select(varlist("var*"))
+  result <- df |> dplyr::select(varlist("var*"))
   expect_equal(ncol(result), 3)
 })
 
@@ -34,7 +34,7 @@ test_that("varlist: wildcard at start", {
     item_2 = 6:10,
     temp_1 = 11:15
   )
-  result <- df %>% dplyr::select(varlist("*_1"))
+  result <- df |> dplyr::select(varlist("*_1"))
   expect_equal(ncol(result), 2)
 })
 
@@ -44,7 +44,7 @@ test_that("varlist: wildcard in middle", {
     temp_evening = 6:10,
     pressure_morning = 11:15
   )
-  result <- df %>% dplyr::select(varlist("temp*"))
+  result <- df |> dplyr::select(varlist("temp*"))
   expect_equal(ncol(result), 2)
 })
 
@@ -55,7 +55,7 @@ test_that("varlist: single character with ?", {
     x10 = 11:15,
     y1 = 16:20
   )
-  result <- df %>% dplyr::select(varlist("x?"))
+  result <- df |> dplyr::select(varlist("x?"))
   expect_equal(ncol(result), 2) # x1 and x2, not x10
 })
 
@@ -66,7 +66,7 @@ test_that("varlist: one or more characters with ~", {
     x = 11:15,
     y1 = 16:20
   )
-  result <- df %>% dplyr::select(varlist("x~"))
+  result <- df |> dplyr::select(varlist("x~"))
   expect_equal(ncol(result), 2) # x1 and x12, not x
 })
 
@@ -81,7 +81,7 @@ test_that("varlist: numeric range [1-3]", {
     item_3 = 11:15,
     item_10 = 16:20
   )
-  result <- df %>% dplyr::select(varlist("item_[1-3]"))
+  result <- df |> dplyr::select(varlist("item_[1-3]"))
   expect_equal(ncol(result), 3)
 })
 
@@ -92,7 +92,7 @@ test_that("varlist: letter range [a-c]", {
     var_c = 11:15,
     var_d = 16:20
   )
-  result <- df %>% dplyr::select(varlist("var_[a-c]"))
+  result <- df |> dplyr::select(varlist("var_[a-c]"))
   expect_equal(ncol(result), 3)
 })
 
@@ -103,7 +103,7 @@ test_that("varlist: combined pattern with range", {
     q3_score = 11:15,
     q10_score = 16:20
   )
-  result <- df %>% dplyr::select(varlist("q[1-3]_score"))
+  result <- df |> dplyr::select(varlist("q[1-3]_score"))
   expect_equal(ncol(result), 3)
 })
 
@@ -118,7 +118,7 @@ test_that("varlist: multiple patterns with space separation", {
     pressure_1 = 11:15,
     pressure_2 = 16:20
   )
-  result <- df %>% dplyr::select(varlist("temp_1 pressure_1"))
+  result <- df |> dplyr::select(varlist("temp_1 pressure_1"))
   expect_equal(ncol(result), 2)
 })
 
@@ -128,7 +128,7 @@ test_that("varlist: multiple wildcards", {
     var_2_temp = 6:10,
     var_1_press = 11:15
   )
-  result <- df %>% dplyr::select(varlist("var*_temp"))
+  result <- df |> dplyr::select(varlist("var*_temp"))
   expect_equal(ncol(result), 2)
 })
 
@@ -143,7 +143,7 @@ test_that("varlist: case insensitive by default", {
     temp = 11:15,
     other = 16:20
   )
-  result <- df %>% dplyr::select(varlist("temp"))
+  result <- df |> dplyr::select(varlist("temp"))
   expect_equal(ncol(result), 3)
 })
 
@@ -153,7 +153,7 @@ test_that("varlist: case sensitive when specified", {
     TEMP = 6:10,
     temp = 11:15
   )
-  result <- df %>% dplyr::select(varlist("temp", ignore_case = FALSE))
+  result <- df |> dplyr::select(varlist("temp", ignore_case = FALSE))
   expect_equal(ncol(result), 1)
 })
 
@@ -163,13 +163,13 @@ test_that("varlist: case sensitive when specified", {
 
 test_that("varlist: no matches returns empty selection", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- df %>% dplyr::select(varlist("nonexistent"))
+  result <- df |> dplyr::select(varlist("nonexistent"))
   expect_equal(ncol(result), 0)
 })
 
 test_that("varlist: matches all with * alone", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- df %>% dplyr::select(varlist("*"))
+  result <- df |> dplyr::select(varlist("*"))
   expect_equal(ncol(result), 3)
 })
 
@@ -179,13 +179,13 @@ test_that("varlist: special characters in names", {
     `var_2` = 6:10,
     `var.3` = 11:15
   )
-  result <- df %>% dplyr::select(varlist("var*"))
+  result <- df |> dplyr::select(varlist("var*"))
   expect_true(ncol(result) >= 1)
 })
 
 test_that("varlist: numeric column names", {
   df <- tibble::tibble(`1` = 1:5, `2` = 6:10, `10` = 11:15)
-  result <- df %>% dplyr::select(varlist("1"))
+  result <- df |> dplyr::select(varlist("1"))
   expect_true(ncol(result) >= 1)
 })
 
@@ -230,11 +230,11 @@ test_that("varlist: survey question selection", {
   )
 
   # Select questions 1-9 (excluding q10)
-  questions_1_9 <- survey %>% dplyr::select(varlist("q[1-9]_*"))
+  questions_1_9 <- survey |> dplyr::select(varlist("q[1-9]_*"))
   expect_true(ncol(questions_1_9) >= 3)
 
   # Select all questions
-  all_questions <- survey %>% dplyr::select(varlist("q*"))
+  all_questions <- survey |> dplyr::select(varlist("q*"))
   expect_equal(ncol(all_questions), 4)
 })
 
@@ -249,7 +249,7 @@ test_that("varlist: time series variable selection", {
   )
 
   # Select 2024 data
-  data_2024 <- ts_data %>% dplyr::select(varlist("*_2024"))
+  data_2024 <- ts_data |> dplyr::select(varlist("*_2024"))
   expect_equal(ncol(data_2024), 2)
   expect_true(all(grepl("2024", names(data_2024))))
 })
@@ -265,7 +265,7 @@ test_that("varlist: panel data variable selection", {
   )
 
   # Select all gdp variables
-  gdp_vars <- panel_data %>% dplyr::select(varlist("gdp*"))
+  gdp_vars <- panel_data |> dplyr::select(varlist("gdp*"))
   expect_equal(ncol(gdp_vars), 3)
 })
 
@@ -283,7 +283,7 @@ test_that("varlist: complex combined patterns", {
   )
 
   # Select temp variables from 2024
-  temp_2024 <- df %>% dplyr::select(varlist("temp*_2024"))
+  temp_2024 <- df |> dplyr::select(varlist("temp*_2024"))
   expect_equal(ncol(temp_2024), 2)
 })
 
@@ -296,7 +296,7 @@ test_that("varlist: pattern with multiple ranges", {
   )
 
   # Should error with multiple ranges
-  expect_error(df %>% dplyr::select(varlist("item_[a-b][1-2]")))
+  expect_error(df |> dplyr::select(varlist("item_[a-b][1-2]")))
 })
 
 # ============================================================================
@@ -307,14 +307,14 @@ test_that("varlist: invalid pattern errors", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
   # Invalid regex pattern should error
   expect_warning(
-    expect_error(df %>% dplyr::select(varlist("["))),
+    expect_error(df |> dplyr::select(varlist("["))),
     "TRE pattern compilation error"
   )
 })
 
 test_that("varlist: NULL pattern", {
   df <- tibble::tibble(x = 1:5)
-  expect_error(df %>% dplyr::select(varlist(NULL)))
+  expect_error(df |> dplyr::select(varlist(NULL)))
 })
 
 test_that("varlist diagnoses noncharacter patterns without changing selections", {

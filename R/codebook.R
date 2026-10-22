@@ -1,7 +1,6 @@
 #' View the codebook of a dataset or selected columns
 #'
 #' @description
-#' `r lifecycle::badge("experimental")`
 #' Inspect the types, observed counts, distinct observed values, and variable
 #' labels of a dataset or selected columns.
 #'

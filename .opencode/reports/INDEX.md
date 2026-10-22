@@ -1,6 +1,6 @@
 # Function Reports Index
 
-Current development version: 0.2.0.9000. Reports contain actual console output.
+Current development version: 0.3.0. Reports contain actual console output.
 A passing demo is not a passing full package test suite.
 
 | Function | Description | Examples | Status | Report |

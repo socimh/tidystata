@@ -1,6 +1,5 @@
 #' Summarise columns
 #'
-#' `r lifecycle::badge("experimental")`
 #' Compute one row of summary statistics per selected variable and group.
 #' `tabstat()` delegates to `summ()` with `.stat = "mean"` by default; with
 #' `.detail = TRUE` and no explicit `.stat`, it returns all detail statistics.
@@ -158,7 +157,7 @@
 #' summ(survey, income, .wt = w, .stat = c("n", "mean", "sd", "p50"))
 #' summ(survey, income, .wt = w, .wt_type = "analytic", .stat = c("n", "sd"))
 #'
-#' lifeexp %>%
+#' lifeexp |>
 #'   summ(
 #'     dplyr::where(is.numeric),
 #'     .by = region,
@@ -249,7 +248,7 @@ summ <- function(
 
   # Missing-key filtering does not change how measured missing values are handled.
   if (!.missing && length(group_vars) > 0) {
-    .data <- .data %>%
+    .data <- .data |>
       dplyr::filter(
         dplyr::if_all(
           tidyselect::all_of(group_vars),

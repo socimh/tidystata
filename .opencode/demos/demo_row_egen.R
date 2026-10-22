@@ -67,7 +67,7 @@ cat("```\n\n")
 
 cat("## Example 7: In mutate context\n\n")
 cat("```r\n")
-cat("df %>%\n")
+cat("df |>\n")
 cat("  mutate(\n")
 cat("    min_val = row_min(a, b, c),\n")
 cat("    max_val = row_max(a, b, c)\n")
@@ -76,7 +76,7 @@ cat("```\n\n")
 cat("**Output:**\n\n")
 cat("```\n")
 print(
-  df %>%
+  df |>
     mutate(
       min_val = row_min(a, b, c),
       max_val = row_max(a, b, c)
@@ -86,13 +86,13 @@ cat("```\n\n")
 
 cat("## Example 8: With scalar values\n\n")
 cat("```r\n")
-cat("df %>%\n")
+cat("df |>\n")
 cat("  mutate(above_2 = row_min(a, 2))\n")
 cat("```\n\n")
 cat("**Output:**\n\n")
 cat("```\n")
 print(
-  df %>%
+  df |>
     mutate(above_2 = row_min(a, 2))
 )
 cat("```\n\n")

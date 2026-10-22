@@ -53,7 +53,8 @@ using \code{\link[tidyr:replace_na]{tidyr::replace_na()}}.
 \code{na_if_value()} and \code{value_if_na()} are aliases of \code{mvdecode()} and
 \code{mvencode()}. Use \code{mutate(x = mvdecode(x, -99))} for one variable, or
 \verb{mutate(across(c(x, y), \\(v) mvdecode(v, -99)))} for a varlist.
-
+}
+\details{
 Casting and error behavior follow the underlying functions: codes are cast
 to the type of \code{x}, so a lossy cast such as \code{1.5} for an integer vector is
 an error. A call with only one argument is incomplete.

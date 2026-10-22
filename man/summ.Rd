@@ -140,7 +140,6 @@ the vector in a named tibble to choose a stable variable name. Input data are
 not modified.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Compute one row of summary statistics per selected variable and group.
 \code{tabstat()} delegates to \code{summ()} with \code{.stat = "mean"} by default; with
 \code{.detail = TRUE} and no explicit \code{.stat}, it returns all detail statistics.
@@ -215,7 +214,7 @@ survey <- tibble::tibble(income = c(10, 20, 40), w = c(3, 1, 1))
 summ(survey, income, .wt = w, .stat = c("n", "mean", "sd", "p50"))
 summ(survey, income, .wt = w, .wt_type = "analytic", .stat = c("n", "sd"))
 
-lifeexp \%>\%
+lifeexp |>
   summ(
     dplyr::where(is.numeric),
     .by = region,

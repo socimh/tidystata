@@ -12,15 +12,15 @@
 
 test_that("set_seed: different seeds produce different random numbers", {
   withr::local_preserve_seed()
-  result1 <- rnorm(5) %>% set_seed(123)
-  result2 <- rnorm(5) %>% set_seed(456)
+  result1 <- rnorm(5) |> set_seed(123)
+  result2 <- rnorm(5) |> set_seed(456)
 
   expect_false(identical(result1, result2))
 })
 
 test_that("set_seed: returns the function result", {
   withr::local_preserve_seed()
-  result <- mean(1:10) %>% set_seed(42)
+  result <- mean(1:10) |> set_seed(42)
   expect_equal(result, 5.5)
 })
 
@@ -30,32 +30,32 @@ test_that("set_seed: returns the function result", {
 
 test_that("set_seed: negative seed works", {
   withr::local_preserve_seed()
-  result1 <- rnorm(5) %>% set_seed(-123)
-  result2 <- rnorm(5) %>% set_seed(-123)
+  result1 <- rnorm(5) |> set_seed(-123)
+  result2 <- rnorm(5) |> set_seed(-123)
 
   expect_equal(result1, result2)
 })
 
 test_that("set_seed: zero seed works", {
   withr::local_preserve_seed()
-  result1 <- rnorm(5) %>% set_seed(0)
-  result2 <- rnorm(5) %>% set_seed(0)
+  result1 <- rnorm(5) |> set_seed(0)
+  result2 <- rnorm(5) |> set_seed(0)
 
   expect_equal(result1, result2)
 })
 
 test_that("set_seed: very large seed works", {
   withr::local_preserve_seed()
-  result1 <- rnorm(5) %>% set_seed(1e9)
-  result2 <- rnorm(5) %>% set_seed(1e9)
+  result1 <- rnorm(5) |> set_seed(1e9)
+  result2 <- rnorm(5) |> set_seed(1e9)
 
   expect_equal(result1, result2)
 })
 
 test_that("set_seed: non-integer seed (coerced)", {
   withr::local_preserve_seed()
-  result1 <- rnorm(5) %>% set_seed(123.7)
-  result2 <- rnorm(5) %>% set_seed(123)
+  result1 <- rnorm(5) |> set_seed(123.7)
+  result2 <- rnorm(5) |> set_seed(123)
 
   # Should be equivalent since seed is coerced to integer
   expect_equal(result1, result2)
@@ -63,7 +63,7 @@ test_that("set_seed: non-integer seed (coerced)", {
 
 test_that("set_seed: NULL function returns NULL", {
   withr::local_preserve_seed()
-  result <- NULL %>% set_seed(42)
+  result <- NULL |> set_seed(42)
   expect_null(result)
 })
 
@@ -73,9 +73,9 @@ test_that("set_seed: NULL function returns NULL", {
 
 test_that("set_seed: works in chained pipeline", {
   withr::local_preserve_seed()
-  result <- 1:100 %>%
-    sample(10) %>%
-    sort() %>%
+  result <- 1:100 |>
+    sample(10) |>
+    sort() |>
     set_seed(123)
 
   expect_type(result, "integer")
@@ -92,8 +92,8 @@ test_that("set_seed: multiple random operations with same seed", {
     )
   }
 
-  result1 <- operation() %>% set_seed(777)
-  result2 <- operation() %>% set_seed(777)
+  result1 <- operation() |> set_seed(777)
+  result2 <- operation() |> set_seed(777)
 
   expect_equal(result1, result2)
 })
@@ -117,6 +117,9 @@ test_that("set_seed() works in a pipeline and alone", {
   piped <- sample(1:10, 3) %>% set_seed(123)
   set.seed(123)
   expect_identical(piped, sample(1:10, 3))
+  native <- sample(1:10, 3) |> set_seed(123)
+  set.seed(123)
+  expect_identical(native, sample(1:10, 3))
   expect_error(set_seed(), "Supply a seed")
   expect_error(set_seed("a"), "needs one number as the seed")
   expect_error(set_seed(c(1, 2)), "needs one number as the seed")

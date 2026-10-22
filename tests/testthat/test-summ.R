@@ -679,9 +679,11 @@ test_that("table mode keeps numeric spreads and records their unit", {
   expect_identical(out$mean[[1L]], "2.041152")
 })
 
-test_that("a piped vector is named value", {
+test_that("a vector piped with magrittr is named value", {
   piped <- c(1, 2, 3) %>% summ(.name = TRUE, .stat = "mean")
   expect_identical(piped$name, "value")
+  native <- c(1, 2, 3) |> summ(.name = TRUE, .stat = "mean")
+  expect_identical(native$name, "c(1, 2, 3)")
   expect_identical(summ(c(1, 2), .name = TRUE)$name, "c(1, 2)")
 })
 

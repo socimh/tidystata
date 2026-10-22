@@ -78,10 +78,10 @@ variables <- function(.data, ...) {
 variables_search <- function(.data, string, ...) {
   check_string(string)
   if (is.character(string)) {
-    string <- string %>%
-      stringr::str_replace_all("\\*", ".*") %>%
-      stringr::str_replace_all("~", ".+") %>%
-      stringr::str_replace_all("\\?", ".") %>%
+    string <- string |>
+      stringr::str_replace_all("\\*", ".*") |>
+      stringr::str_replace_all("~", ".+") |>
+      stringr::str_replace_all("\\?", ".") |>
       purrr::map_chr(num_range_to_regex)
     string <- stringr::str_glue("(?i).*{string}.*")
   }

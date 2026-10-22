@@ -48,13 +48,13 @@ are evaluated once when selection succeeds. Grouping columns are retained
 according to dplyr's selection rules.
 }
 \examples{
-starwars \%>\%
+starwars |>
   s_select()
-starwars \%>\%
+starwars |>
   s_select(name, height)
 # Ordinary select() rejects this computed expression.
 try(dplyr::select(starwars, height > 50))
-starwars \%>\%
+starwars |>
   s_select(height > 50)
 }
 \seealso{

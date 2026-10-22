@@ -62,7 +62,6 @@ common type; arithmetic returns doubles or a supported class as described
 above; unique and missing-value counts return integers.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 \itemize{
 \item \code{row_mean()}, \code{row_sum()}, and \code{row_median()} calculate row arithmetic.
 \item \code{row_min()} and \code{row_max()} select the smallest and largest row values.

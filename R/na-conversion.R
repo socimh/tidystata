@@ -12,6 +12,7 @@
 #' `mvencode()`. Use `mutate(x = mvdecode(x, -99))` for one variable, or
 #' `mutate(across(c(x, y), \(v) mvdecode(v, -99)))` for a varlist.
 #'
+#' @details
 #' Casting and error behavior follow the underlying functions: codes are cast
 #' to the type of `x`, so a lossy cast such as `1.5` for an integer vector is
 #' an error. A call with only one argument is incomplete.

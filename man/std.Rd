@@ -36,7 +36,8 @@ Vector helpers for \code{\link[dplyr:mutate]{dplyr::mutate()}}, following Stata'
 \item \code{pc()} gives each value as a percentage of the total, like
 \verb{egen p = pc(x)}, or as a proportion with \code{prop = TRUE}.
 }
-
+}
+\details{
 \code{pct()} is an alias of \code{pc()}. The gt package also exports a \code{pct()} (for
 column widths), so prefer \code{pc()} when gt is attached.
 In grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}), the mean, standard deviation
@@ -47,7 +48,7 @@ std(c(1, 2, 3, NA))
 pc(c(2, 3, 5))
 pc(c(2, 3, 5), prop = TRUE)
 
-lifeexp \%>\%
+lifeexp |>
   dplyr::mutate(
     z = std(lexp),
     share = pc(popgrowth),

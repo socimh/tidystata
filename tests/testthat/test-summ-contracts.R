@@ -239,8 +239,10 @@ test_that("tabstat names vector symbols, expressions and piped values", {
   values <- c(1, 3)
   expect_identical(tabstat(values, .name = TRUE)$name, "values")
   expect_identical(tabstat(c(1, 3), .name = TRUE)$name, "c(1, 3)")
+  # magrittr passes the value as `.`, which is reported as `value`.
   piped <- values %>% tabstat(.name = TRUE)
   expect_identical(piped$name, "value")
+  expect_identical((values |> tabstat(.name = TRUE))$name, "values")
   table <- tabstat(values, .type = "table", .name = TRUE)
   expect_identical(class(table), "data.frame")
   expect_identical(table$mean, 2)

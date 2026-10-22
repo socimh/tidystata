@@ -218,20 +218,20 @@ test_that("browse: model diagnostics data", {
 # ============================================================================
 
 test_that("browse: works in dplyr pipeline", {
-  result <- mtcars %>%
-    dplyr::filter(mpg > 20) %>%
-    dplyr::select(mpg, wt, hp) %>%
+  result <- mtcars |>
+    dplyr::filter(mpg > 20) |>
+    dplyr::select(mpg, wt, hp) |>
     browse(mpg, wt, hp)
 
-  expected <- mtcars %>% dplyr::filter(mpg > 20) %>% dplyr::select(mpg, wt, hp)
+  expected <- mtcars |> dplyr::filter(mpg > 20) |> dplyr::select(mpg, wt, hp)
   expect_identical(result, expected)
   expect_true(all(result$mpg > 20))
 })
 
 test_that("browse: chain with other operations", {
-  result <- starwars %>%
-    dplyr::select(name:mass) %>%
-    dplyr::filter(!is.na(mass)) %>%
+  result <- starwars |>
+    dplyr::select(name:mass) |>
+    dplyr::filter(!is.na(mass)) |>
     browse(name, mass)
 
   expect_false(any(is.na(result$mass)))

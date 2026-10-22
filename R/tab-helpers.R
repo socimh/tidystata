@@ -37,8 +37,7 @@ tab_rename_reserved <- function(
     function_name %in%
       c("fre()", "fre1()", "tab2()")
   ) {
-    invalid_names <- invalid_names %>%
-      c("total")
+    invalid_names <- c(invalid_names, "total")
   } else {
     cli::cli_abort("Invalid function name.", .internal = TRUE)
   }
@@ -53,11 +52,11 @@ tab_rename_reserved <- function(
     function_name
   )
 
-  can_rename <- .data %>%
+  can_rename <- .data |>
     dplyr::rename_with(
       ~ paste0(".", .x),
       tidyselect::all_of(detected_names)
-    ) %>%
+    ) |>
     capture()
 
   if (can_rename) {
@@ -98,14 +97,14 @@ tab2_check_vars <- function(.data, call = rlang::caller_env()) {
 
 tab_prepare_data <- function(.data, ..., group_vars = character(0)) {
   .data <- dplyr::ungroup(.data)
-  if (group_vars %>% length() > 0) {
-    out <- .data %>%
+  if (length(group_vars) > 0) {
+    out <- .data |>
       remove_group_vars(..., group_vars = group_vars)
   } else {
     if (!missing(...)) {
       .data <- s_select(.data, ...)
     }
-    out <- .data %>%
+    out <- .data |>
       dplyr::ungroup()
   }
   out
@@ -168,14 +167,14 @@ tab_data <- function(
   # Issue 2.3: sort within each group - non-missing first, then missing
   # Issue 2.5: .desc sorts non-NA rows by -n descending, then NA rows after
   if (.desc) {
-    out <- out %>%
+    out <- out |>
       dplyr::arrange(
         dplyr::across(tidyselect::all_of(group_vars)),
         .data$...any_miss,
         dplyr::desc(.data$n)
       )
   } else {
-    out <- out %>%
+    out <- out |>
       dplyr::arrange(
         dplyr::across(tidyselect::all_of(group_vars)),
         .data$...any_miss
@@ -291,7 +290,7 @@ append_tab_list <- function(.data, blank_row = FALSE) {
       valid_cum = double()
     ))
   }
-  out <- .data %>%
+  out <- .data |>
     purrr::imap(
       ~ dplyr::mutate(
         .x,
@@ -299,19 +298,14 @@ append_tab_list <- function(.data, blank_row = FALSE) {
       )
     )
 
-  vec_types <- out %>%
-    purrr::map_chr(
-      ~ dplyr::pull(., value) %>%
-        var_type(abbr = TRUE) %>%
-        # Element descriptions refine a family; vctrs checks compatibility below.
-        sub("<.*$", "", .) %>%
-        dplyr::if_else(
-          . %in% c("int", "dbl"),
-          "num",
-          .
-        )
-    ) %>%
-    unique() %>%
+  vec_types <- out |>
+    purrr::map_chr(function(table) {
+      type <- var_type(table$value, abbr = TRUE)
+      # Element descriptions refine a family; vctrs checks compatibility below.
+      type <- sub("<.*$", "", type)
+      if (type %in% c("int", "dbl")) "num" else type
+    }) |>
+    unique() |>
     length()
 
   value_types <- lapply(out, function(table) table$value)
@@ -329,9 +323,9 @@ append_tab_list <- function(.data, blank_row = FALSE) {
     )
 
   if (vec_types > 1 || !compatible_types) {
-    out <- out %>%
+    out <- out |>
       purrr::map(
-        ~ .x %>%
+        ~ .x |>
           dplyr::mutate(
             value = as_character(value)
           )
@@ -339,17 +333,17 @@ append_tab_list <- function(.data, blank_row = FALSE) {
   }
 
   if (blank_row) {
-    out <- out %>%
+    out <- out |>
       purrr::map(
-        ~ .x %>%
+        ~ .x |>
           dplyr::add_row(
             variable = NA_character_
           )
       )
   }
 
-  out <- out %>%
-    purrr::list_rbind() %>%
+  out <- out |>
+    purrr::list_rbind() |>
     dplyr::relocate("variable")
 
   out
@@ -357,8 +351,8 @@ append_tab_list <- function(.data, blank_row = FALSE) {
 
 tab2_data <- function(.data, weights = NULL) {
   .data <- tibble::as_tibble(.data)
-  join_name <- .data %>%
-    names() %>%
+  join_name <- .data |>
+    names() |>
     stringr::str_flatten(" \\ ")
 
   .data <- dplyr::rename(.data, {{ join_name }} := 1)
@@ -410,11 +404,11 @@ tab2_data <- function(.data, weights = NULL) {
   }
   # Ambiguous display names and specialized classes keep pivot's diagnostics
   # and list-column behavior at the output boundary.
-  out <- counts %>%
+  out <- counts |>
     tidyr::pivot_wider(
       names_from = 2,
       values_from = "n"
-    ) %>%
+    ) |>
     dplyr::mutate(
       dplyr::across(-1, ~ tidyr::replace_na(.x, 0))
     )
@@ -466,7 +460,7 @@ tab2_add_total <- function(out, .data, call = rlang::caller_env()) {
     )
   }
 
-  out <- out %>%
+  out <- out |>
     dplyr::mutate(
       dplyr::across(
         -1,
@@ -513,7 +507,7 @@ result_to_flextable <- function(
     )
   }
   if (fre2) {
-    tb <- tb %>%
+    tb <- tb |>
       dplyr::mutate(
         dplyr::across(
           1,
@@ -521,7 +515,7 @@ result_to_flextable <- function(
         )
       )
   } else if (fre1) {
-    tb <- tb %>%
+    tb <- tb |>
       dplyr::mutate(
         dplyr::across(
           dplyr::all_of(
@@ -535,7 +529,7 @@ result_to_flextable <- function(
         )
       )
   } else {
-    tb <- tb %>%
+    tb <- tb |>
       dplyr::mutate(
         dplyr::across(
           -dplyr::any_of(
@@ -545,7 +539,7 @@ result_to_flextable <- function(
         )
       )
   }
-  ft <- tb %>%
+  ft <- tb |>
     flextable::as_flextable(
       max_row = 1e3
     )

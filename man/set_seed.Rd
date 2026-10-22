@@ -20,7 +20,7 @@ The expression's result, preserving its visibility. Used alone,
 }
 \description{
 Attach a seed to one expression at the end of a pipeline, as in
-\code{sample(x, 5) \%>\% set_seed(123)}, or set it alone like Stata's
+\code{sample(x, 5) |> set_seed(123)}, or set it alone like Stata's
 \verb{set seed 123} with \code{set_seed(123)}.
 }
 \details{
@@ -33,11 +33,11 @@ finite number. A pipeline that forgets the seed therefore errors, unless
 its result happens to be a single number, which is then used as the seed.
 }
 \examples{
-sample(1:10, 8) \%>\%
+sample(1:10, 8) |>
   set_seed(123)
 
 # When we re-run the code, we will get the same result.
-sample(1:10, 8) \%>\%
+sample(1:10, 8) |>
  set_seed(123)
 
 # Alone, like Stata's set seed 123

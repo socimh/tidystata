@@ -10,5 +10,5 @@
     Condition
       Error in `set_seed()`:
       ! Used alone, `set_seed()` needs one number as the seed, as in `set_seed(123)`.
-      i In a pipeline, give the seed: `x %>% set_seed(123)`.
+      i In a pipeline, give the seed: `x |> set_seed(123)`.
 

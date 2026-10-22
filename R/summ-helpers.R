@@ -1,16 +1,16 @@
 summ_keep_measured <- function(.data, .data_num, group_vars) {
-  out <- .data %>%
-    dplyr::ungroup() %>%
+  out <- .data |>
+    dplyr::ungroup() |>
     dplyr::select(
       tidyselect::all_of(group_vars)
-    ) %>%
+    ) |>
     dplyr::bind_cols(.data_num)
 
   out
 }
 
 is_summable_chr <- function(chr) {
-  chr %>%
+  chr |>
     stringr::str_detect(
       "^(lgl|int|dbl|int64|units|drtn|time|date|dttm|fct|ord)(\\+lbl)?( \\[.*\\])?$"
     )
@@ -34,11 +34,11 @@ summ_warn_vars <- function(vars, suffix) {
     )
     cli::cli_warn("{message}")
   } else if (length(vars) > 2) {
-    message <- paste(vars[1:2], collapse = ", ") %>%
+    message <- paste(vars[1:2], collapse = ", ") |>
       paste0(", ... are ", suffix)
     cli::cli_warn("{message}")
   } else {
-    message <- paste(vars, collapse = " and ") %>%
+    message <- paste(vars, collapse = " and ") |>
       paste0(" are ", suffix)
     cli::cli_warn("{message}")
   }
@@ -764,7 +764,7 @@ summ_list <- function(
   )
 
   if (!is.null(numeric) && nrow(numeric) > 0) {
-    numeric <- numeric %>%
+    numeric <- numeric |>
       dplyr::mutate(
         name = dplyr::case_when(
           !is_summable_chr(type) ~
@@ -774,7 +774,7 @@ summ_list <- function(
           stringr::str_detect(type, "lbl$") ~
             stringr::str_glue("*{name}"),
           TRUE ~ name
-        ) %>%
+        ) |>
           as.character()
       )
   }
@@ -824,7 +824,7 @@ summ_list <- function(
     date = date,
     datetime = datetime,
     time = time
-  ) %>%
+  ) |>
     purrr::discard(~ is.null(.))
 
   if (type == "table") {

@@ -165,8 +165,8 @@ test_that("s_select: mix of selection and computed columns", {
     pressure_2 = 16:20
   )
   # First select temp columns, then add computed column in separate step
-  result <- df %>%
-    s_select(dplyr::starts_with("temp")) %>%
+  result <- df |>
+    s_select(dplyr::starts_with("temp")) |>
     dplyr::mutate(total_pressure = df$pressure_1 + df$pressure_2)
   expect_equal(ncol(result), 3)
 })

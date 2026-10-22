@@ -9,14 +9,13 @@
 ^pkgdown$
 ^DEVELOPMENT\.md$
 ^CONTRIBUTING\.md$
-^extra_functions$
 ^\.opencode$
 ^AGENTS\.md$
 ^MIGRATION\.md$
 ^Makefile$
-^run_tests\.R$
 ^air\.toml$
 (^|/)\.Rhistory$
 ^\.quarto$
 ^\.Rd2pdf.*$
 ^vignettes/articles$
+^paper$

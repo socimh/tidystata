@@ -3,8 +3,8 @@
 library(statart)
 
 cat("## Example 1: assertions inside a pipeline\n\n```\n")
-checked <- lifeexp %>%
-  assert(lexp > 0, popgrowth < 10) %>%
+checked <- lifeexp |>
+  assert(lexp > 0, popgrowth < 10) |>
   summ(lexp)
 print(checked)
 message_text <- tryCatch(

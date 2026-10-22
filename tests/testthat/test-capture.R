@@ -23,7 +23,7 @@ test_that("capture: successful expression returns TRUE", {
 
 test_that("capture: successful data frame operation", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
-  result <- capture(df %>% dplyr::summarise(total = sum(x)))
+  result <- capture(df |> dplyr::summarise(total = sum(x)))
   expect_true(result)
 })
 
@@ -120,8 +120,8 @@ test_that("capture: multi-statement expression", {
 
 test_that("capture: pipe operations", {
   result <- capture(
-    mtcars %>%
-      dplyr::filter(mpg > 20) %>%
+    mtcars |>
+      dplyr::filter(mpg > 20) |>
       dplyr::summarise(avg_wt = mean(wt))
   )
   expect_true(result)
@@ -216,8 +216,8 @@ test_that("capture: safe model fitting", {
 
 test_that("capture: conditional workflow", {
   process_data <- function(df) {
-    if (capture(df %>% dplyr::group_by(x) %>% dplyr::summarise(y = mean(z)))) {
-      df %>% dplyr::group_by(x) %>% dplyr::summarise(y = mean(z))
+    if (capture(df |> dplyr::group_by(x) |> dplyr::summarise(y = mean(z)))) {
+      df |> dplyr::group_by(x) |> dplyr::summarise(y = mean(z))
     } else {
       df
     }
@@ -267,8 +267,8 @@ test_that("capture: used in filter expression", {
   )
 
   # Should work
-  if (capture(df %>% dplyr::filter(x > 5))) {
-    filtered <- df %>% dplyr::filter(x > 5)
+  if (capture(df |> dplyr::filter(x > 5))) {
+    filtered <- df |> dplyr::filter(x > 5)
     expect_equal(nrow(filtered), 5)
   }
 })

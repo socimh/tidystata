@@ -8,6 +8,7 @@
 #' * `pc()` gives each value as a percentage of the total, like
 #'   `egen p = pc(x)`, or as a proportion with `prop = TRUE`.
 #'
+#' @details
 #' `pct()` is an alias of `pc()`. The gt package also exports a `pct()` (for
 #' column widths), so prefer `pc()` when gt is attached.
 #' In grouped [dplyr::mutate()] (or with `.by`), the mean, standard deviation
@@ -30,7 +31,7 @@
 #' pc(c(2, 3, 5))
 #' pc(c(2, 3, 5), prop = TRUE)
 #'
-#' lifeexp %>%
+#' lifeexp |>
 #'   dplyr::mutate(
 #'     z = std(lexp),
 #'     share = pc(popgrowth),

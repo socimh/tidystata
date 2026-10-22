@@ -57,34 +57,34 @@ contain their own range.
 \examples{
 varlist("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
 
-tb <- paste0("x", 1:15) \%>\%
-  tibble::as_tibble() \%>\%
+tb <- paste0("x", 1:15) |>
+  tibble::as_tibble() |>
   tidyr::pivot_wider(names_from = value)
 tb
 
 # List variable names by ds()
 ds(tb)
 
-tb \%>\%
+tb |>
   ds(varlist("x1*"))
 
-tb \%>\%
+tb |>
   ds(varlist("x1~"))
 
-tb \%>\%
+tb |>
   ds(varlist("*5"))
 
-tb \%>\%
+tb |>
   ds(varlist("?5"))
 
-tb \%>\%
+tb |>
   ds(varlist("x[9-15]"))
 
 # A literal hyphen pattern selects no columns here; it is not a range.
-tb \%>\%
+tb |>
   ds(varlist("x1-x5"))
 
-tb \%>\%
+tb |>
   ds(x1:x5)
 
 }

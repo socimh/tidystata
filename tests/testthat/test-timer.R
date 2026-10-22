@@ -26,6 +26,8 @@ test_that("timer: returns the evaluated result invisibly", {
 test_that("timer: works with pipe operations", {
   result <- 1:100 %>% mean() %>% timer()
   expect_equal(result, 50.5)
+  result <- 1:100 |> mean() |> timer()
+  expect_equal(result, 50.5)
 })
 
 test_that("timer: handles complex expressions", {
@@ -105,7 +107,7 @@ test_that("timer: displays minutes format for longer operations", {
 test_that("timer: works with data frame operations", {
   withr::local_preserve_seed()
   df <- tibble::tibble(x = 1:4, y = c(-1, 2, 0, 3))
-  result <- timer(df %>% dplyr::summarise(mean_x = mean(x), sd_y = sd(y)))
+  result <- timer(df |> dplyr::summarise(mean_x = mean(x), sd_y = sd(y)))
   expect_s3_class(result, "tbl_df")
   expect_equal(result$mean_x, 2.5)
 })
@@ -129,7 +131,7 @@ test_that("timer: works with iterative operations", {
 
 test_that("timer: works with lapply/map operations", {
   result <- timer({
-    lapply(1:4, function(x) x^2) %>% unlist() %>% sum()
+    lapply(1:4, function(x) x^2) |> unlist() |> sum()
   })
   expect_equal(result, 30)
 })
@@ -181,13 +183,13 @@ test_that("timer: handles warnings in expression", {
 # ============================================================================
 
 test_that("timer: works with multiple pipes", {
-  result <- mtcars %>%
-    dplyr::filter(mpg > 20) %>%
-    dplyr::summarise(avg_wt = mean(wt)) %>%
+  result <- mtcars |>
+    dplyr::filter(mpg > 20) |>
+    dplyr::summarise(avg_wt = mean(wt)) |>
     timer()
 
-  expected <- mtcars %>%
-    dplyr::filter(mpg > 20) %>%
+  expected <- mtcars |>
+    dplyr::filter(mpg > 20) |>
     dplyr::summarise(avg_wt = mean(wt))
   expect_identical(result, expected)
   expect_equal(nrow(result), 1)
@@ -232,13 +234,13 @@ test_that("timer: data analysis workflow", {
       data <- mtcars
 
       # Data cleaning
-      clean_data <- data %>%
-        dplyr::filter(!is.na(mpg)) %>%
+      clean_data <- data |>
+        dplyr::filter(!is.na(mpg)) |>
         dplyr::mutate(hp_per_cyl = hp / cyl)
 
       # Summary statistics
-      stats <- clean_data %>%
-        dplyr::group_by(cyl) %>%
+      stats <- clean_data |>
+        dplyr::group_by(cyl) |>
         dplyr::summarise(
           avg_mpg = mean(mpg),
           avg_hp = mean(hp),

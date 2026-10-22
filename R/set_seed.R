@@ -1,7 +1,7 @@
 #' Set the random seed, in a pipeline or alone
 #'
 #' Attach a seed to one expression at the end of a pipeline, as in
-#' `sample(x, 5) %>% set_seed(123)`, or set it alone like Stata's
+#' `sample(x, 5) |> set_seed(123)`, or set it alone like Stata's
 #' `set seed 123` with `set_seed(123)`.
 #'
 #' @param x An expression evaluated after setting the seed. When `seed` is
@@ -22,11 +22,11 @@
 #' @family utility functions
 #' @export
 #' @examples
-#' sample(1:10, 8) %>%
+#' sample(1:10, 8) |>
 #'   set_seed(123)
 #'
 #' # When we re-run the code, we will get the same result.
-#' sample(1:10, 8) %>%
+#' sample(1:10, 8) |>
 #'  set_seed(123)
 #'
 #' # Alone, like Stata's set seed 123
@@ -49,7 +49,7 @@ set_seed <- function(x, seed, .fn = lifecycle::deprecated()) {
     if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed)) {
       cli::cli_abort(c(
         "Used alone, {.fn set_seed} needs one number as the seed, as in {.code set_seed(123)}.",
-        i = "In a pipeline, give the seed: {.code x %>% set_seed(123)}."
+        i = "In a pipeline, give the seed: {.code x |> set_seed(123)}."
       ))
     }
     set.seed(seed)

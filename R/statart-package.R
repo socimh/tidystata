@@ -18,7 +18,6 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @importFrom magrittr %>%
 #' @importFrom rlang := .data
 #' @importFrom stats IQR mad median quantile sd
 #' @useDynLib statart, .registration = TRUE

@@ -37,34 +37,34 @@
 #' @examples
 #' varlist("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
 #'
-#' tb <- paste0("x", 1:15) %>%
-#'   tibble::as_tibble() %>%
+#' tb <- paste0("x", 1:15) |>
+#'   tibble::as_tibble() |>
 #'   tidyr::pivot_wider(names_from = value)
 #' tb
 #'
 #' # List variable names by ds()
 #' ds(tb)
 #'
-#' tb %>%
+#' tb |>
 #'   ds(varlist("x1*"))
 #'
-#' tb %>%
+#' tb |>
 #'   ds(varlist("x1~"))
 #'
-#' tb %>%
+#' tb |>
 #'   ds(varlist("*5"))
 #'
-#' tb %>%
+#' tb |>
 #'   ds(varlist("?5"))
 #'
-#' tb %>%
+#' tb |>
 #'   ds(varlist("x[9-15]"))
 #'
 #' # A literal hyphen pattern selects no columns here; it is not a range.
-#' tb %>%
+#' tb |>
 #'   ds(varlist("x1-x5"))
 #'
-#' tb %>%
+#' tb |>
 #'   ds(x1:x5)
 #'
 #' @family selection and preview functions
@@ -89,18 +89,18 @@ varlist <- function(
   error_call <- rlang::current_env()
   # Expand complete raw patterns before attaching their boundary anchors.
   # paste0 also retains the existing literal-NA pattern behavior.
-  patterns <- paste0(string, "") %>%
-    stringr::str_split_1("\\s+") %>%
-    stringr::str_replace_all("\\*", ".*") %>%
-    stringr::str_replace_all("~", ".+") %>%
-    stringr::str_replace_all("\\?", ".") %>%
+  patterns <- paste0(string, "") |>
+    stringr::str_split_1("\\s+") |>
+    stringr::str_replace_all("\\*", ".*") |>
+    stringr::str_replace_all("~", ".+") |>
+    stringr::str_replace_all("\\?", ".") |>
     vapply(
       num_range_to_regex,
       character(1),
       call = error_call,
       USE.NAMES = FALSE
     )
-  out <- paste0("^(", patterns, ")$") %>%
+  out <- paste0("^(", patterns, ")$") |>
     stringr::str_flatten("|")
 
   tidyselect::matches(
@@ -118,9 +118,9 @@ num_range_to_regex <- function(string, call = rlang::caller_env()) {
     return(string)
   }
 
-  start_end <- string %>%
-    stringr::str_extract_all("\\[.*\\]") %>%
-    stringr::str_remove_all("\\[|\\]") %>%
+  start_end <- string |>
+    stringr::str_extract_all("\\[.*\\]") |>
+    stringr::str_remove_all("\\[|\\]") |>
     stringr::str_split_1("-")
 
   multiple_ranges <- length(start_end) > 2
@@ -133,8 +133,8 @@ num_range_to_regex <- function(string, call = rlang::caller_env()) {
     return(string)
   }
 
-  num_range <- start_end %>%
-    as.integer() %>%
+  num_range <- start_end |>
+    as.integer() |>
     capture()
 
   if (num_range) {
@@ -146,10 +146,10 @@ num_range_to_regex <- function(string, call = rlang::caller_env()) {
         call = call
       )
     } else {
-      string_parts <- string %>%
+      string_parts <- string |>
         stringr::str_split_1("\\[.*\\]")
       range <- seq(begin, end)
-      out <- paste0(string_parts[1], range, string_parts[2]) %>%
+      out <- paste0(string_parts[1], range, string_parts[2]) |>
         stringr::str_flatten("|")
       return(out)
     }

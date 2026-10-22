@@ -22,8 +22,8 @@
 #' `x` is missing; write `is.na(x) | x > 0` for that behaviour.
 #'
 #' @examples
-#' lifeexp %>%
-#'   assert(lexp > 0, popgrowth < 10) %>%
+#' lifeexp |>
+#'   assert(lexp > 0, popgrowth < 10) |>
 #'   summ(lexp)
 #'
 #' # Each country appears once per region

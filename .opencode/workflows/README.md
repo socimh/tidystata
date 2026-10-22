@@ -32,7 +32,7 @@ Windows automation calls the protected launcher through `r_process.py`. Direct
 R invocations, including the compatibility wrapper, require it too:
 
 ```powershell
-python C:/Users/socimh/.codex/scripts/run_r_safe.py -- Rscript run_tests.R summ
+python C:/Users/socimh/.codex/scripts/run_r_safe.py -- Rscript .opencode/workflows/run_tests.R summ
 ```
 
 The default protected launcher is machine-specific; `STATART_R_LAUNCHER` may

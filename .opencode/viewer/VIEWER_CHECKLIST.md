@@ -76,7 +76,7 @@ candidate_library <- receipt$bundle_library
 candidate_id <- receipt$tarball_sha256
 editor_version <- "REPLACE: editor version; VS Code also R extension version"
 stopifnot(!grepl("REPLACE", editor_version))
-source("inst/examples/viewer_check.R")
+source(".opencode/viewer/viewer_check.R")
 ```
 
 The helper selects the private library, prints the loaded package path and R

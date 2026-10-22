@@ -24,7 +24,6 @@ The input's data.frame, tibble, or data.table container and supported preview
 settings are preserved. Other subclasses are not reconstructed.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Inspect the types, observed counts, distinct observed values, and variable
 labels of a dataset or selected columns.
 }

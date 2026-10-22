@@ -1,6 +1,6 @@
 # Function: codebook()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-19 21:18:20 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:08 | **Status:** PASS
 
 ## Example 1: Basic codebook
 

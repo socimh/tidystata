@@ -1,6 +1,6 @@
 # Function: timer()
 
-**Version:** 0.2.0.9000 | **Generated:** 2026-10-20 15:18:37 | **Status:** PASS
+**Version:** 0.3.0 | **Generated:** 2026-10-21 00:58:11 | **Status:** PASS
 
 ## Example 1: Basic timing
 
@@ -11,7 +11,7 @@ timer(Sys.sleep(0.5))
 **Output:**
 
 ```
-Time spent: 0.504s
+Time spent: 0.516s
 ```
 
 ## Example 2: Timing with return value
@@ -24,7 +24,7 @@ result
 **Output:**
 
 ```
-Time spent: 0.003s
+Time spent: 0.004s
 ```
 
 **Return value:**
@@ -48,7 +48,7 @@ Time spent: 0.000s
 ## Example 4: With pipe operations
 
 ```r
-result <- mtcars %>% filter(cyl == 4) %>% timer()
+result <- mtcars |> filter(cyl == 4) |> timer()
 nrow(result)
 ```
 
@@ -77,7 +77,7 @@ timer({
 **Output:**
 
 ```
-Time spent: 0.001s
+Time spent: 0.000s
 ```
 
 ## Example 6: Internal duration formatting helper
