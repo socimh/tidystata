@@ -221,6 +221,11 @@
 
 ## Minor improvements and bug fixes
 
+* `tab()`, `tab1()`, `fre()` and `fre1()` check that `.desc` is `TRUE` or
+  `FALSE` before tabulating; a vector or `NA` previously failed inside the
+  sorting step, and aborted R 4.1. `row_var()` now matches `stats::var()`
+  exactly on platforms without extended precision, such as Apple Silicon.
+
 * The plain example scripts and the migration guide are no longer installed
   with the package. The scripts are in the repository's `examples/` folder
   and the guide is the website's

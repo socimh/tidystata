@@ -37,7 +37,7 @@ jobs:
           r-version: '4.1'
           use-public-rspm: true
       - name: Install units system dependency
-        run: sudo apt-get update && sudo apt-get install -y libudunits2-dev
+        run: sudo apt-get update && sudo apt-get install -y libudunits2-dev libcurl4-openssl-dev
       - name: Prepare isolated case and artifact directories
         env:
           FLOOR_PACKAGE: ${{ matrix.package }}

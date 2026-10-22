@@ -369,13 +369,13 @@ oneway_add("missing grouping column rejected", function(fn, frequency) {
 oneway_add("NA descending flag rejected", function(fn, frequency) {
   expect_error(
     fn(oneway_data(), x, .desc = NA),
-    "single.*logical|missing value"
+    "`TRUE` or `FALSE`"
   )
 })
 oneway_add("vector descending flag rejected", function(fn, frequency) {
   expect_error(
     fn(oneway_data(), x, .desc = c(TRUE, FALSE)),
-    "single.*logical|length"
+    "`TRUE` or `FALSE`"
   )
 })
 oneway_add("list values count complete identities", function(fn, frequency) {

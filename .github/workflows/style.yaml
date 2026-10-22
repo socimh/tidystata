@@ -23,7 +23,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::jsonlite, any::remotes, any::rcmdcheck, any::pkgload
+          extra-packages: any::jsonlite, any::remotes, any::rcmdcheck, any::pkgload, local::.
       - name: Install pinned style tools
         run: |
           python -m pip install air-formatter==0.12.0

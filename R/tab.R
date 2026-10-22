@@ -226,6 +226,7 @@ tab <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
+  check_bool(.desc)
   check_bool(.total)
   if (.total) {
     return(fre(
@@ -312,6 +313,7 @@ tab1 <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
+  check_bool(.desc)
   check_bool(.total)
   if (.total) {
     return(fre1(
@@ -586,6 +588,7 @@ fre <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
+  check_bool(.desc)
   .group_order <- rlang::arg_match(.group_order)
   if (!is.data.frame(.data)) {
     .data <- tab_vector_data(.data, ..., .by = {{ .by }})
@@ -668,6 +671,7 @@ fre1 <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
+  check_bool(.desc)
   .group_order <- rlang::arg_match(.group_order)
   if (!is.data.frame(.data)) {
     .data <- tab_vector_data(.data, ..., .by = {{ .by }})

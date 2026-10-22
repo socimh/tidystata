@@ -281,8 +281,11 @@ writable::doubles row_dispersion(list tb, bool standard_deviation, bool na_rm)
         }
         long double normalized = std::max(static_cast<long double>(0),
             (squares - correction * correction / values.size()) / (values.size() - 1));
-        long double sd = scale * std::sqrt(normalized) * factor;
-        result[i] = static_cast<double>(standard_deviation ? sd : sd * sd);
+        // Square the scale rather than the rounded square root, so variances
+        // stay exact where long double is no wider than double (arm64, noLD).
+        result[i] = static_cast<double>(standard_deviation
+            ? scale * std::sqrt(normalized) * factor
+            : scale * scale * normalized * factor * factor);
     }
     return out;
 }
