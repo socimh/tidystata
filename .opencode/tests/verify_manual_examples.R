@@ -14,7 +14,8 @@ output_dir <- if (nzchar(Sys.getenv("TIDYSTATA_EXAMPLE_OUTPUT"))) {
 } else {
   ".opencode/results/manual-examples"
 }
-example_dir <- system.file("examples", package = "tidystata", mustWork = TRUE)
+example_dir <- Sys.getenv("TIDYSTATA_EXAMPLE_DIR", unset = "examples")
+stopifnot(dir.exists(example_dir))
 parse(file.path(example_dir, "00_install.R"), encoding = "UTF-8")
 scripts <- c(
   "01_inspect_and_select.R",
@@ -120,7 +121,7 @@ report <- c(
   "",
   "[Actual expressions and console output](console.log)",
   "",
-  "User-facing guide: `inst/examples/README.md` in the repository.",
+  "User-facing guide: `examples/README.md` in the repository.",
   "",
   "No package implementation changed. Previous package-check evidence remains",
   "separate from this example-only verification."

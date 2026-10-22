@@ -16,12 +16,12 @@
   `write_data()`, `esttab()`, `codebook_detail()`, `tidy_coef()`, the
   regression wrappers (`regress()`, `regress_data()`, `regress_coef()`,
   `regress_stat()`) and the plotting helpers (`s_plot()`, `s_ggsave()`) are
-  removed. `s_time()` is renamed to `timer()`. The migration guide,
-  `system.file("MIGRATION.md", package = "tidystata")`, lists direct
-  alternatives.
+  removed. `s_time()` is renamed to `timer()`. The
+  [migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+  lists direct alternatives.
 
 * R 4.1.0 or later is now required. Persistent preview formatting requires
-  tibble >= 3.1.0 and pillar >= 1.8.0.
+  tibble >= 3.2.0 and pillar >= 1.9.0, as dplyr >= 1.1.4 does.
 
 * Required dependencies fall from 33 to 16 packages. Rich table output now
   needs the optional flextable package, and `Rfast` is no longer used.
@@ -220,6 +220,12 @@
 * `variables_search()` also searches variable labels.
 
 ## Minor improvements and bug fixes
+
+* The plain example scripts and the migration guide are no longer installed
+  with the package. The scripts are in the repository's `examples/` folder
+  and the guide is the website's
+  [Migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+  article.
 
 * SPSS user-defined missing codes and ranges (`haven::labelled_spss()`) are
   treated as missing throughout: in `pwcorr()`, `misstable()`, `std()`, `pc()`,

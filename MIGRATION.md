@@ -10,9 +10,9 @@ The retained exploration and preparation helpers remain available. The upstream
 comparison below also records earlier retirements.
 
 This file is the authoritative migration guide in the source repository. The
-same guide is included with installed packages at
-`system.file("MIGRATION.md", package = "tidystata")` and published as the website's
-Migration guide article. Code blocks are recipes to run deliberately; examples
+same guide is published as the website's
+[Migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+article. Code blocks are recipes to run deliberately; examples
 that read or write files require your own paths and any named optional packages.
 
 To try local changes, open the source project and restart R, run

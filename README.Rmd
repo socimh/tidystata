@@ -97,17 +97,13 @@ article lists every entry by topic, in English and
 [Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html),
 including the packages to use beyond tidystata.
 
-Plain manual scripts are included in the installed package. Open a script in
-your editor and run its lines individually, or run this complete example:
-
-```r
-source(system.file("examples", "02_frequency_tables.R", package = "tidystata"),
-       echo = TRUE)
-```
-
-Use `system.file("examples", "README.md", package = "tidystata")` for the script
-index and `system.file("MIGRATION.md", package = "tidystata")` for the full
-installed migration guide. The source repository also contains both guides.
+Plain manual scripts are in the source repository's
+[`examples/`](https://github.com/socimh/tidystata/tree/master/examples) folder.
+Open a script in your editor and run its lines individually; from a source
+checkout, `source("examples/02_frequency_tables.R", echo = TRUE)` runs a
+complete example. The full
+[migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+is on the website.
 
 ## Table return types
 

@@ -5,7 +5,7 @@ Authors@R:
     person("Minghong", "Shen", , "mhshenaa@connect.ust.hk", role = c("aut", "cre", "cph"))
 Description: Tools inspired by 'Stata' for exploring and preparing data in R.
     Provides frequency tables, summary statistics, variable inspection,
-    column selection, row calculations, and binning with tidyverse-style
+    column selection, row calculations, and binning with 'tidyverse'-style
     interfaces and support for labelled data.
 License: MIT + file LICENSE
 URL: https://github.com/socimh/tidystata, https://socimh.github.io/tidystata/
@@ -18,17 +18,17 @@ Imports:
     haven (>= 2.5.3),
     lifecycle,
     magrittr,
-    pillar (>= 1.8.0),
+    pillar (>= 1.9.0),
     purrr (>= 1.0.0),
     readr (>= 1.0.0),
     rlang,
     stats,
     stringr (>= 1.5.0),
-    tibble (>= 3.1.0),
+    tibble (>= 3.2.0),
     tidyr (>= 1.2.0),
     tidyselect,
     utils,
-    vctrs (>= 0.6.0)
+    vctrs (>= 0.6.4)
 Suggests: 
     bit64,
     data.table,

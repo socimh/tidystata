@@ -10,9 +10,9 @@
 #' Read `vignette("getting-started", package = "tidystata")` for a short workflow
 #' and `vignette("containers-and-missing-values", package = "tidystata")` for
 #' output containers, grouping and missing-value conventions.
-#' The full migration guide is installed at
-#' `system.file("MIGRATION.md", package = "tidystata")`.
-#' Plain scripts are installed in `system.file("examples", package = "tidystata")`.
+#' The full migration guide is the website's
+#' [Migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+#' article.
 #'
 #' @keywords internal
 "_PACKAGE"

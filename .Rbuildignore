@@ -19,3 +19,5 @@
 ^\.Rd2pdf.*$
 ^vignettes/articles$
 ^paper$
+^cran-comments\.md$
+^examples$

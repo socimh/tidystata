@@ -1,12 +1,12 @@
 {
   "cohort": {
-    "dplyr": "1.1.1",
+    "dplyr": "1.1.4",
     "tidyr": "1.2.1",
     "tibble": "3.2.1",
     "stringr": "1.5.1",
-    "vctrs": "0.6.1",
+    "vctrs": "0.6.4",
     "purrr": "1.0.1",
-    "pillar": "1.8.1",
+    "pillar": "1.9.0",
     "haven": "2.5.4",
     "readr": "2.1.4",
     "testthat": "3.2.1.1",
@@ -18,8 +18,8 @@
   },
   "cases": {
     "dplyr": {
-      "declared": "1.1.0",
-      "version": "1.1.0",
+      "declared": "1.1.4",
+      "version": "1.1.4",
       "classification": "exact",
       "companions": {}
     },
@@ -30,13 +30,10 @@
       "companions": {}
     },
     "tibble": {
-      "declared": "3.1.0",
-      "version": "3.1.0",
+      "declared": "3.2.0",
+      "version": "3.2.0",
       "classification": "exact",
-      "companions": {
-        "dplyr": "1.1.0"
-      },
-      "reason": "dplyr 1.1.1 requires tibble >=3.2.0; dplyr 1.1.0 requires only tibble >=2.1.3, permitting the declared boundary."
+      "companions": {}
     },
     "stringr": {
       "declared": "1.5.0",
@@ -45,8 +42,8 @@
       "companions": {}
     },
     "vctrs": {
-      "declared": "0.6.0",
-      "version": "0.6.0",
+      "declared": "0.6.4",
+      "version": "0.6.4",
       "classification": "exact",
       "companions": {}
     },
@@ -57,14 +54,10 @@
       "companions": {}
     },
     "pillar": {
-      "declared": "1.8.0",
-      "version": "1.8.0",
+      "declared": "1.9.0",
+      "version": "1.9.0",
       "classification": "exact",
-      "companions": {
-        "tibble": "3.1.8",
-        "dplyr": "1.1.0"
-      },
-      "reason": "tibble 3.2.1 requires pillar >=1.8.1; tibble 3.1.8 with dplyr 1.1.0 permits pillar 1.8.0."
+      "companions": {}
     },
     "haven": {
       "declared": "2.5.3",
@@ -108,20 +101,12 @@
       "Imports": "methods, utils",
       "LinkingTo": ""
     },
-    "dplyr@1.1.0": {
-      "source": "https://raw.githubusercontent.com/cran/dplyr/1.1.0/DESCRIPTION",
+    "dplyr@1.1.4": {
+      "source": "https://raw.githubusercontent.com/cran/dplyr/1.1.4/DESCRIPTION",
       "Package": "dplyr",
-      "Version": "1.1.0",
-      "Depends": "R (>= 3.4.0)",
-      "Imports": "cli (>= 3.4.0), generics, glue (>= 1.3.2), lifecycle (>= 1.0.3), magrittr (>= 1.5), methods, pillar (>= 1.5.1), R6, rlang (>= 1.0.6), tibble (>= 2.1.3), tidyselect (>= 1.2.0), utils, vctrs (>= 0.5.2)",
-      "LinkingTo": ""
-    },
-    "dplyr@1.1.1": {
-      "source": "https://raw.githubusercontent.com/cran/dplyr/1.1.1/DESCRIPTION",
-      "Package": "dplyr",
-      "Version": "1.1.1",
+      "Version": "1.1.4",
       "Depends": "R (>= 3.5.0)",
-      "Imports": "cli (>= 3.4.0), generics, glue (>= 1.3.2), lifecycle (>= 1.0.3), magrittr (>= 1.5), methods, pillar (>= 1.5.1), R6, rlang (>= 1.1.0), tibble (>= 3.2.0), tidyselect (>= 1.2.0), utils, vctrs (>= 0.6.0)",
+      "Imports": "cli (>= 3.4.0), generics, glue (>= 1.3.2), lifecycle (>= 1.0.3), magrittr (>= 1.5), methods, pillar (>= 1.9.0), R6, rlang (>= 1.1.0), tibble (>= 3.2.0), tidyselect (>= 1.2.0), utils, vctrs (>= 0.6.4)",
       "LinkingTo": ""
     },
     "haven@2.5.3": {
@@ -140,20 +125,12 @@
       "Imports": "cli (>= 3.0.0), forcats (>= 0.2.0), hms, lifecycle, methods, readr (>= 0.1.0), rlang (>= 0.4.0), tibble, tidyselect, vctrs (>= 0.3.0)",
       "LinkingTo": "cpp11"
     },
-    "pillar@1.8.0": {
-      "source": "https://raw.githubusercontent.com/cran/pillar/1.8.0/DESCRIPTION",
+    "pillar@1.9.0": {
+      "source": "https://raw.githubusercontent.com/cran/pillar/1.9.0/DESCRIPTION",
       "Package": "pillar",
-      "Version": "1.8.0",
+      "Version": "1.9.0",
       "Depends": "",
-      "Imports": "cli (>= 2.3.0), fansi, glue, lifecycle, rlang (>= 1.0.2), utf8 (>= 1.1.0), utils, vctrs (>= 0.3.8)",
-      "LinkingTo": ""
-    },
-    "pillar@1.8.1": {
-      "source": "https://raw.githubusercontent.com/cran/pillar/1.8.1/DESCRIPTION",
-      "Package": "pillar",
-      "Version": "1.8.1",
-      "Depends": "",
-      "Imports": "cli (>= 2.3.0), fansi, glue, lifecycle, rlang (>= 1.0.2), utf8 (>= 1.1.0), utils, vctrs (>= 0.3.8)",
+      "Imports": "cli (>= 2.3.0), fansi, glue, lifecycle, rlang (>= 1.0.2), utf8 (>= 1.1.0), utils, vctrs (>= 0.5.0)",
       "LinkingTo": ""
     },
     "purrr@1.0.0": {
@@ -220,20 +197,12 @@
       "Imports": "brio (>= 1.1.3), callr (>= 3.7.3), cli (>= 3.6.1), desc (>= 1.4.2), digest (>= 0.6.33), evaluate (>= 0.21), jsonlite (>= 1.8.7), lifecycle (>= 1.0.3), magrittr (>= 2.0.3), methods, pkgload (>= 1.3.2.1), praise (>= 1.0.0), processx (>= 3.8.2), ps (>= 1.7.5), R6 (>= 2.5.1), rlang (>= 1.1.1), utils, waldo (>= 0.5.1), withr (>= 2.5.0)",
       "LinkingTo": ""
     },
-    "tibble@3.1.0": {
-      "source": "https://raw.githubusercontent.com/cran/tibble/3.1.0/DESCRIPTION",
+    "tibble@3.2.0": {
+      "source": "https://raw.githubusercontent.com/cran/tibble/3.2.0/DESCRIPTION",
       "Package": "tibble",
-      "Version": "3.1.0",
-      "Depends": "R (>= 3.1.0)",
-      "Imports": "ellipsis (>= 0.2.0), fansi (>= 0.4.0), lifecycle (>= 0.2.0), magrittr, methods, pillar (>= 1.5.0), pkgconfig, rlang (>= 0.4.3), utils, vctrs (>= 0.3.2)",
-      "LinkingTo": ""
-    },
-    "tibble@3.1.8": {
-      "source": "https://raw.githubusercontent.com/cran/tibble/3.1.8/DESCRIPTION",
-      "Package": "tibble",
-      "Version": "3.1.8",
-      "Depends": "R (>= 3.1.0)",
-      "Imports": "fansi (>= 0.4.0), lifecycle (>= 1.0.0), magrittr, methods, pillar (>= 1.7.0), pkgconfig, rlang (>= 1.0.2), utils, vctrs (>= 0.3.8)",
+      "Version": "3.2.0",
+      "Depends": "R (>= 3.4.0)",
+      "Imports": "fansi (>= 0.4.0), lifecycle (>= 1.0.0), magrittr, methods, pillar (>= 1.8.1), pkgconfig, rlang (>= 1.0.2), utils, vctrs (>= 0.4.2)",
       "LinkingTo": ""
     },
     "tibble@3.2.1": {
@@ -276,18 +245,10 @@
       "Imports": "Rcpp",
       "LinkingTo": "Rcpp (>= 0.12.10)"
     },
-    "vctrs@0.6.0": {
-      "source": "https://raw.githubusercontent.com/cran/vctrs/0.6.0/DESCRIPTION",
+    "vctrs@0.6.4": {
+      "source": "https://raw.githubusercontent.com/cran/vctrs/0.6.4/DESCRIPTION",
       "Package": "vctrs",
-      "Version": "0.6.0",
-      "Depends": "R (>= 3.5.0)",
-      "Imports": "cli (>= 3.4.0), glue, lifecycle (>= 1.0.3), rlang (>= 1.1.0)",
-      "LinkingTo": ""
-    },
-    "vctrs@0.6.1": {
-      "source": "https://raw.githubusercontent.com/cran/vctrs/0.6.1/DESCRIPTION",
-      "Package": "vctrs",
-      "Version": "0.6.1",
+      "Version": "0.6.4",
       "Depends": "R (>= 3.5.0)",
       "Imports": "cli (>= 3.4.0), glue, lifecycle (>= 1.0.3), rlang (>= 1.1.0)",
       "LinkingTo": ""

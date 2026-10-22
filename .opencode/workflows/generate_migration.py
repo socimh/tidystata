@@ -1,4 +1,4 @@
-"""Publish the authoritative migration guide to installed and website locations."""
+"""Publish the authoritative migration guide as the website article."""
 
 import argparse
 from pathlib import Path
@@ -20,7 +20,6 @@ def main():
         '<!-- Generated from MIGRATION.md by generate_migration.py. -->\n\n'
     ).encode("utf-8")
     outputs = {
-        root / "inst/MIGRATION.md": source,
         root / "vignettes/articles/migration.Rmd": header + article.encode("utf-8"),
     }
     stale = []

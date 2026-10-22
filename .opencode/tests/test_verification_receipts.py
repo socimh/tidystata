@@ -26,7 +26,7 @@ class ReceiptTests(unittest.TestCase):
             self.fixture(root)
             previous = verify.source_identity(root)[0]
             for name in ["tests/testthat/_snaps/output.md", "data/example.rda",
-                         "inst/examples/example.R", ".opencode/workflows/run_suite.R"]:
+                         "examples/example.R", ".opencode/workflows/run_suite.R"]:
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(b"fixture")

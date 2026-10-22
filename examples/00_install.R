@@ -7,7 +7,8 @@
 # install.packages("devtools")
 
 # Install this local package, rather than an older online version.
-devtools::install(".", build_vignettes = FALSE)
+# Uncomment and run this line by hand; sourcing the script installs nothing.
+# devtools::install(".", build_vignettes = FALSE)
 
 # After restarting R:
 library(tidystata)

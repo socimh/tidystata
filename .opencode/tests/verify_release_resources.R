@@ -113,11 +113,7 @@ stopifnot(
     names(getDLLRegisteredRoutines("tidystata")$.Call)
   ))
 )
-for (name in c(
-  "MIGRATION.md",
-  "DATA-PROVENANCE.md",
-  "examples/README.md"
-)) {
+for (name in c("DATA-PROVENANCE.md", "extdata/stata-to-r.csv")) {
   path <- system.file(name, package = "tidystata", mustWork = TRUE)
   stopifnot(file.info(path)$size > 0)
 }
@@ -131,22 +127,24 @@ if (release) {
     )))
   }
 }
-scripts <- list.files(
-  system.file("examples", package = "tidystata"),
-  "^[0-9].*R$",
-  full.names = TRUE
-)
+# The plain scripts live in the repository, not the package; run them against
+# the installed candidate.
+script_arg <- grep("^--file=", commandArgs(), value = TRUE)[1L]
+helper_dir <- dirname(sub("^--file=", "", script_arg))
+example_dir <- normalizePath(file.path(helper_dir, "..", "..", "examples"))
+scripts <- list.files(example_dir, "^[0-9].*R$", full.names = TRUE)
 stopifnot(length(scripts) == 7L)
 # Share warning policy and semantic assertions with standalone example checks.
-script_arg <- grep("^--file=", commandArgs(), value = TRUE)[1L]
-helper <- file.path(
-  dirname(sub("^--file=", "", script_arg)),
-  "verify_manual_examples.R"
+helper <- file.path(helper_dir, "verify_manual_examples.R")
+Sys.setenv(
+  TIDYSTATA_EXAMPLE_DIR = example_dir,
+  TIDYSTATA_EXAMPLE_OUTPUT = tempfile("tidystata-installed-examples-")
 )
-Sys.setenv(TIDYSTATA_EXAMPLE_OUTPUT = tempfile("tidystata-installed-examples-"))
 source(helper, local = new.env(parent = globalenv()))
 stopifnot(
-  any(grepl("inst/examples/01_inspect_and_select.R$", contents)),
+  any(grepl("inst/extdata/stata-to-r.csv$", contents)),
+  !any(grepl("^tidystata/(inst/)?examples/", contents)),
+  !any(grepl("MIGRATION[.]md$", contents)),
   (!release || any(grepl("inst/doc/getting-started.html$", contents))),
   !any(grepl("/(extra_functions|[.]opencode|vignettes/articles)/", contents)),
   !any(grepl("[.](o|dll|so)$", contents))

@@ -131,16 +131,13 @@ equivalence with every Stata command.
 
 ## Continue with plain scripts
 
-The installed package includes scripts for inspection, tabulation, summaries,
-preparation and edge cases. Locate a script with:
-
-```{r script-path}
-system.file("examples", "03_summary_statistics.R", package = "tidystata")
-```
-
-Open it in your editor and run its lines individually. If results appear to use
+The source repository's
+[`examples/`](https://github.com/socimh/tidystata/tree/master/examples) folder
+has scripts for inspection, tabulation, summaries, preparation and edge cases.
+Open one in your editor and run its lines individually. If results appear to use
 an older package, inspect `packageVersion("tidystata")` and `find.package("tidystata")`.
 For local source changes, install from the project and restart R before testing.
 
-The full migration guide is installed at
-`system.file("MIGRATION.md", package = "tidystata")`.
+The full
+[migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+is on the package website.

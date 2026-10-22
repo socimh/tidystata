@@ -18,19 +18,31 @@ Imports require `dplyr (>= 1.1.4)`. NEWS, MIGRATION and
 is commit `2598ddc`; the GitHub repository is renamed and `origin` points to
 `socimh/tidystata`. A separate session re-audited the 2024 CRAN review items;
 its open items, the unquoted 'tidyverse' in Description and the shipped
-`devtools::install()` call in `inst/examples/00_install.R`, are fixed, and
+`devtools::install()` call in `examples/00_install.R`, are fixed, and
 `cran-comments.md` is drafted. Older dated entries are in Git history.
 
-Verification: pinned style/parse/lint **143 sources, 0 findings**; help
-regenerated (`starwars.Rd` removed); README re-rendered (lifeexp codebook
-counts and the dplyr 1.1.4 `starwars` colour table changed); migration copies
-current. Full suite **18,501 passing, 0 failures/warnings** (3,187 blocks).
-`--release`: fresh build, `R CMD check --as-cran` **0 errors, 0 warnings,
-1 NOTE** (new submission; five pkgdown article URLs return 404 until the site
-is deployed), tests inside check **18,477 passing, 0 failures/warnings**
-(21 snapshot blocks skipped there), `snapshots` stage 21 blocks with
-0 failures, installed resources pass. All 24 demos pass; the readiness demo
-now checks that `lifeexp` is the only shipped dataset.
+**Package contents trimmed, 2026-10-22:** following R Packages, the plain
+scripts move from `inst/examples/` to the repository-only `examples/`
+(`.Rbuildignore`), and `inst/MIGRATION.md` is no longer shipped;
+`generate_migration.py` writes only the website article. README, the
+getting-started vignette, package help and NEWS point to the website or
+repository. Because dplyr 1.1.4 itself requires `pillar (>= 1.9.0)`,
+`tibble (>= 3.2.0)` and `vctrs (>= 0.6.4)`, DESCRIPTION now declares those
+floors, and `.opencode/dependency-minimums.json` pins exact cases with
+upstream DESCRIPTION evidence for them. The built tarball's `inst/` holds only
+`DATA-PROVENANCE.md` (CC BY attribution), `extdata/` (read by `findit()`) and
+the built vignettes.
+
+Verification: pinned style/parse/lint **143 sources, 0 findings**; help and
+README regenerated; migration article current; `pkgdown::check_pkgdown()`
+clean; 45 workflow Python tests pass. Full suite before the trim
+**18,501 passing, 0 failures/warnings**. `--release` after the trim: fresh
+build, `R CMD check --as-cran` **0 errors, 0 warnings, 1 NOTE** (new
+submission; five pkgdown article URLs and the GitHub `examples/` link return
+404 until push and site deployment), tests inside check **18,477 passing,
+0 failures/warnings** (21 snapshot blocks skipped there), `snapshots` stage
+21 blocks with 0 failures, installed resources and the repository usage
+scripts pass. All 24 demos pass.
 
 ## Package map
 
@@ -66,7 +78,8 @@ native row kernels. R >= 4.1 is required; sources, tests and examples use `|>`.
 | `R/`, `src/`, `tests/testthat/` | Package source, native code and active regression coverage |
 | `man/`, `NAMESPACE` | Generated help and namespace; edit roxygen sources |
 | `data/`, `data-raw/`, `inst/DATA-PROVENANCE.md` | Preserved datasets, exact reconstruction and provenance |
-| `inst/examples/`, `vignettes/` | Plain manual examples and tutorials |
+| `vignettes/` | Tutorials shipped with the package |
+| `examples/` | Plain manual scripts (repository only, not shipped) |
 | `.opencode/viewer/` | Manual RStudio/VS Code viewer checklist and helper (not shipped) |
 | `inst/extdata/stata-to-r.csv` | Hand-curated `findit()` entries (English and Chinese); the source for the "Coming from Stata" articles |
 | `.opencode/demos/`, `.opencode/reports/` | Current actual-output demos and generated reports/index |
@@ -75,7 +88,7 @@ native row kernels. R >= 4.1 is required; sources, tests and examples use `|>`.
 | `.opencode/tools/`, `.opencode/results/` | Ignored local tool installations and disposable verification results |
 
 README content lives in `README.Rmd`; website organization lives in
-`_pkgdown.yml`. `MIGRATION.md` generates the installed guide and website article.
+`_pkgdown.yml`. `MIGRATION.md` generates the website migration article (not shipped).
 Website output is derived and is built independently from deployment. Retired
 wrappers and historical development archives are no longer shipped in the
 checkout; consult migration alternatives, Git history for tracked versions or
@@ -135,7 +148,7 @@ provide shortcuts. `--release` includes vignettes, PDF manual and `--as-cran`;
 `--check` is a faster development check. Check, release, minimal and demos are
 mutually exclusive modes. Compare reordered tests by source/test identity and
 outcome, excluding timings. The [workflow guide](.opencode/workflows/README.md)
-describes the maintained tools. [Plain examples](inst/examples/README.md) cover
+describes the maintained tools. [Plain examples](examples/README.md) cover
 installation and direct calls; [current reports](.opencode/reports/INDEX.md)
 show generated console output.
 

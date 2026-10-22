@@ -38,8 +38,10 @@ class FloorMatrixTests(unittest.TestCase):
 
     def test_infeasible_companions_fail_instead_of_upgrading_candidate(self):
         config = deepcopy(self.config)
-        config["cases"]["tibble"]["companions"] = {}
-        with self.assertRaisesRegex(ValueError, "Infeasible companion.*tibble"):
+        config["cases"]["dplyr"]["companions"] = {"pillar": "1.8.1"}
+        config["upstream"]["pillar@1.8.1"] = dict(
+            config["upstream"]["pillar@1.9.0"], Version="1.8.1")
+        with self.assertRaisesRegex(ValueError, "Infeasible companion.*pillar"):
             MODULE.matrix(self.description, config)
 
     def test_unreviewed_effective_boundary_is_rejected(self):
@@ -53,7 +55,7 @@ class FloorMatrixTests(unittest.TestCase):
 
     def test_upstream_evidence_matches_pins(self):
         config = deepcopy(self.config)
-        config["upstream"]["dplyr@1.1.1"]["Version"] = "1.1.4"
+        config["upstream"]["dplyr@1.1.4"]["Version"] = "1.1.5"
         with self.assertRaisesRegex(ValueError, "Upstream version mismatch"):
             MODULE.matrix(self.description, config)
 

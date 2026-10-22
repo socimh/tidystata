@@ -1,7 +1,8 @@
 # Plain scripts for trying tidystata
 
 For a source checkout, open `tidystata.Rproj` in RStudio and restart R before
-installing. Start with `00_install.R`:
+installing. Start with `00_install.R`, whose install line is commented out so
+that sourcing it never installs anything. Run it by hand:
 
 ```r
 devtools::install(".", upgrade = "never", build_vignettes = FALSE)
@@ -21,23 +22,21 @@ Here `"."` means the current tidystata project. This follows the
 [installation and plain usage workflow in R Packages](https://r-pkgs.org/whole-game.html#install).
 
 If you already installed the version you want to try, skip `00_install.R`.
-The scripts are also included in the installed package. Locate a script with
-`system.file()` and open it in your editor, or run it directly:
+The scripts live in the source repository's `examples/` folder and are not
+part of the installed package. Open one in your editor, or run it from the
+project root:
 
 ```r
-system.file("examples", "01_inspect_and_select.R", package = "tidystata")
-source(system.file("examples", "02_frequency_tables.R", package = "tidystata"),
-       echo = TRUE)
+source("examples/02_frequency_tables.R", echo = TRUE)
 ```
 
-Run individual installed scripts this way from any working directory.
-`run_all.R` is a convenience for the source checkout and assumes its project
-root. The complete migration guide is at
-`system.file("MIGRATION.md", package = "tidystata")`.
+The complete migration guide is `MIGRATION.md` in the repository and the
+[Migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+article on the website.
 
 | Script | Contents |
 | --- | --- |
-| `00_install.R` | Install the local package, then load it and inspect its version/path. |
+| `00_install.R` | Install the local package (commented-out line, run by hand), then load it and inspect its version/path. |
 | `01_inspect_and_select.R` | Codebook, variable names/labels, searching, wildcards, selection and computed columns. |
 | `02_frequency_tables.R` | Counts, valid percentages, cross-tabs, totals, grouped tables and labelled categories. |
 | `03_summary_statistics.R` | Custom statistics, grouping, missing keys, dates, list/table output and factor cautions. |
@@ -53,7 +52,7 @@ The viewer and rich-formatting calls are also optional commented lines.
 If you prefer to run the ordinary examples together, from the project root:
 
 ```r
-source("inst/examples/run_all.R", echo = TRUE)
+source("examples/run_all.R", echo = TRUE)
 ```
 
 This does not install anything. Script 06 is separate because data.table is

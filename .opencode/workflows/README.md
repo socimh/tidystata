@@ -64,7 +64,7 @@ that candidate. Building a site does not authorize deployment.
   for `.opencode/style-scope.json`; use `make style-check`. Local pinned tools
   live in `.opencode/tools/style-tools/`, and the development R library in
   `.opencode/tools/library/`. See CONTRIBUTING.md for environment overrides.
-- `generate_migration.py` owns the installed migration guide and website article;
+- `generate_migration.py` owns the website migration article;
   run it after editing root `MIGRATION.md`, then use `--check` for freshness.
 - Python `test_*.py` files under `.opencode/tests/` exercise failure propagation,
   staging, launcher policy, dependency constraints and receipts. Run them with
