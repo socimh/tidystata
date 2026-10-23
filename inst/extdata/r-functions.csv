@@ -358,7 +358,7 @@
 "pull","dplyr","Extract one column as a vector","把一列提取为向量",""
 "pwcorr","tidystata","Pairwise correlations with counts and p-values","两两相关系数，附样本数和 p 值",""
 "qnorm","stats","Normal quantile","正态分布分位数","invnormal()"
-"quantile","stats","Quantiles","分位数",""
+"quantile","stats","Quantiles","分位数","pctile"
 "quarter","lubridate","Quarter of a date","日期所在的季度","quarter()"
 "quasibinomial","stats","Binomial family that allows survey weights","适用于抽样权重的二项分布族",""
 "ranef","lme4","Predicted random effects","随机效应的预测值","predict, reffects"

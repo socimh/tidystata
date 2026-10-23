@@ -51,12 +51,32 @@
   and numeric values in shared text columns are rounded to seven significant
   digits.
 
+* Computations follow Stata's rules and are tested against Stata's own output
+  (StataNow 19.5); the do-files that produce the reference values are in
+  `data-raw/stata-parity/`. This changes some results:
+  * Percentiles in `summ()`, `tabstat()` and `xtile()` use Stata's rule rather
+    than R's default `quantile()` type 7: the value at position
+    `floor(n * p) + 1`, or the mean of two values when `n * p` is whole. The
+    quartiles of `1:4` are 1.5 and 3.5 (type 7 gave 1.75 and 3.25), and
+    weights of 1 now give the unweighted values.
+  * `skew` and `kurtosis` use population moments, as `summarize, detail` does;
+    `kurtosis` is no longer excess kurtosis, so a normal distribution gives 3.
+  * With analytic weights, `sum` uses the weights as given, as Stata's
+    `r(sum)`.
+  * `cut_breaks()` and `cut_length()` use left-closed intervals `[a, b)` by
+    default, like `egen cut()`; set `right = TRUE` for the old intervals.
+    `cut_breaks()` adds the observed minimum and maximum only when values lie
+    beyond the breaks, and rejects non-numeric breaks.
+  * `stata_lag()`, `stata_lead()` and `stata_diff()` count weeks of a `Date`
+    like Stata's `%tw` (52 weeks a year from 1 January) rather than from
+    Monday; tsibble's `yearweek()` keeps its ISO weeks.
+
 * `xtile()` (formerly `cut_quantile()`) follows Stata's `xtile` rule: equal
   values stay in the same group and distinct values are never merged, so a 0/1
-  dummy gives two groups. When ties leave fewer than `n` groups, occupied
-  groups are numbered consecutively with a warning. Untied data give the same
-  results as before. Inside a grouped data mask without `labels`, it returns
-  integer codes, because group-specific interval labels cannot be combined.
+  dummy gives two groups. When ties leave groups empty, their codes are
+  skipped, as in Stata, with a warning. Inside a grouped data mask without
+  `labels`, it returns integer codes, because group-specific interval labels
+  cannot be combined.
 
 * Names no longer start with `s_`, which stood for statart. Functions that
   follow a Stata command take a `stata_` prefix where the plain name would

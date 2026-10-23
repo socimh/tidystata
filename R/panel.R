@@ -40,8 +40,10 @@
 #' date-times also `"second"` (their default), `"minute"` and `"hour"`. Times
 #' are compared by whole periods, as with Stata's `%tw`, `%tm`, `%tq` and
 #' `%ty` dates, so any day in March is one month after any day in February.
-#' Weeks start on Monday, and date-times use the local clock of their time
-#' zone. Must be `NULL` for numbers and period classes.
+#' Weeks follow Stata's `%tw`: each year has 52 weeks starting on 1 January,
+#' so the last week has 8 or 9 days (tsibble's `yearweek()` keeps its ISO
+#' weeks). Date-times use the local clock of their time zone. Must be `NULL`
+#' for numbers and period classes.
 #'
 #' @returns A vector like `x`, with `NA` where the required period is absent
 #' from the panel. `stata_diff()` returns a double vector, or a `difftime` for
@@ -207,6 +209,10 @@ time_period <- function(time, unit, call = rlang::caller_env()) {
       # zoo stores the year plus the fraction of the year elapsed.
       return(round(as.numeric(time) * if (natural == "month") 12 else 4))
     }
+    if (natural == "week") {
+      # tsibble's ISO weeks start on Monday; 1970-01-01 was a Thursday.
+      return(floor((as.numeric(as.Date(time)) + 3) / 7))
+    }
     return(date_period(as.Date(time), natural))
   }
   if (inherits(time, "POSIXt")) {
@@ -289,12 +295,12 @@ date_period <- function(time, unit) {
   if (unit == "day") {
     return(days)
   }
-  if (unit == "week") {
-    # 1970-01-01 was a Thursday; shifting by three days starts weeks on Monday.
-    return(floor((days + 3) / 7))
-  }
   parts <- as.POSIXlt(time)
   year <- parts$year + 1900
+  if (unit == "week") {
+    # Stata's %tw: 52 weeks a year from 1 January, so week 52 has 8 or 9 days.
+    return(year * 52 + pmin(parts$yday %/% 7, 51))
+  }
   switch(
     unit,
     month = year * 12 + parts$mon,

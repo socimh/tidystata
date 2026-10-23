@@ -317,7 +317,7 @@ summ_variable <- function(
   } else {
     lapply(observed_list(), function(x) {
       if (length(x)) {
-        stats::quantile(x, probabilities, type = 7, names = FALSE)
+        stata_quantile(x, probabilities)
       } else {
         rep(NA_real_, length(probabilities))
       }
@@ -343,16 +343,25 @@ summ_variable <- function(
       summ_sorted_mad(sorted, nonempty)
     }
   }
+  # Stata's moments: m_k / m_2^(k/2), with the population SD sqrt(m_2).
   moment <- function(power) {
+    population <- summ_population_sd(spread, n_val)
     if (many_small) {
-      return(summ_group_moment(numeric, kept, nonempty, center, spread, power))
+      return(summ_group_moment(
+        numeric,
+        kept,
+        nonempty,
+        center,
+        population,
+        power
+      ))
     }
     result <- rep(NA_real_, length(locs))
     result[nonempty] <- vapply(
       nonempty,
       function(i) {
         sum((observed_list()[[i]] - center[[i]])^power) /
-          (n_val[[i]] * spread[[i]]^power)
+          (n_val[[i]] * population[[i]]^power)
       },
       numeric(1)
     )
@@ -377,7 +386,7 @@ summ_variable <- function(
         max = apply_segments(group_max_dbl),
         iqr = quantile_column("q3") - quantile_column("q1"),
         skew = moment(3),
-        kurtosis = moment(4) - 3,
+        kurtosis = moment(4),
         se = spread / sqrt(n_val),
         sum = apply_native(group_sum_dbl)
       )
@@ -451,6 +460,18 @@ summ_sorted_mad <- function(sorted, nonempty) {
   result
 }
 
+# The population SD, sqrt(m_2), from the sample SD of `n` values (or a
+# summed weight `n`). It is NA when m_2 is zero, where Stata's skewness and
+# kurtosis are missing.
+summ_population_sd <- function(spread, n) {
+  population <- rep(NA_real_, length(spread))
+  ok <- !is.na(spread) & n > 1
+  n <- rep_len(n, length(spread))[ok]
+  population[ok] <- spread[ok] * sqrt((n - 1) / n)
+  population[ok & population == 0] <- NA_real_
+  population
+}
+
 # Standardized central moment of every group at once, for many small groups.
 summ_group_moment <- function(numeric, kept, nonempty, center, spread, power) {
   n_val <- lengths(kept)
@@ -478,19 +499,31 @@ summ_sorted_groups <- function(values, group, n) {
   )
 }
 
-# quantile(x, p, type = 7) for every group, with its arithmetic.
+# stata_quantile(x, p) for every group: the value after position n * p, or the
+# mean of the values at and after it when n * p is a whole number.
 summ_sorted_quantile <- function(sorted, p) {
   result <- rep(NA_real_, length(sorted$n))
   ok <- sorted$n > 0L
-  index <- 1 + (sorted$n[ok] - 1) * p
-  lo <- floor(index)
-  hi <- ceiling(index)
+  n <- sorted$n[ok]
   start <- sorted$start[ok]
-  qs <- sorted$values[start + lo]
-  upper <- sorted$values[start + hi]
-  i <- which(index > lo & upper != qs)
-  h <- (index - lo)[i]
-  qs[i] <- (1 - h) * qs[i] + h * upper[i]
+  if (p <= 0) {
+    result[ok] <- sorted$values[start + 1L]
+    return(result)
+  }
+  if (p >= 1) {
+    result[ok] <- sorted$values[start + n]
+    return(result)
+  }
+  target <- n * p
+  whole <- round(target)
+  # The same tolerance as weighted_quantile().
+  exact <- abs(target - whole) <= sqrt(.Machine$double.eps) * n &
+    whole >= 1 &
+    whole < n
+  position <- ifelse(exact, whole, floor(target) + 1)
+  qs <- sorted$values[start + position]
+  i <- which(exact)
+  qs[i] <- (qs[i] + sorted$values[start[i] + whole[i] + 1L]) / 2
   result[ok] <- qs
   result
 }
@@ -918,6 +951,8 @@ summ_weighted <- function(
   one_group <- function(loc) {
     kept <- loc[!missing[loc]]
     w <- weights[kept]
+    # Stata's r(sum) uses the weights as given, even analytic ones.
+    raw <- w
     if (weight_type == "analytic" && sum(w) > 0) {
       w <- w * length(w) / sum(w)
     }
@@ -962,17 +997,19 @@ summ_weighted <- function(
           max = if (has) max(positive) else NA_real_,
           iqr = unname(quantiles[["q3"]] - quantiles[["q1"]]),
           skew = if (has) {
-            sum(w * (x - center)^3) / (total * spread^3)
+            sum(w * (x - center)^3) /
+              (total * summ_population_sd(spread, total)^3)
           } else {
             NA_real_
           },
           kurtosis = if (has) {
-            sum(w * (x - center)^4) / (total * spread^4) - 3
+            sum(w * (x - center)^4) /
+              (total * summ_population_sd(spread, total)^4)
           } else {
             NA_real_
           },
           se = spread / sqrt(total),
-          sum = if (has) sum(w * x) else NA_real_
+          sum = if (has) sum(raw * x) else NA_real_
         )
       },
       numeric(1)
@@ -1069,7 +1106,8 @@ summ_weighted_groups <- function(
     positive <- w[rows] > 0
     sizes <- tabulate(group[positive], nbins = groups)
     moment <- function(power) {
-      group_sum_dbl(w * deviation^power, kept) / (total * spread^power)
+      population <- summ_population_sd(spread, total)
+      group_sum_dbl(w * deviation^power, kept) / (total * population^power)
     }
   }
   # Without numeric values, these are missing in every group.
@@ -1110,9 +1148,9 @@ summ_weighted_groups <- function(
         max = only_has(group_max_dbl(x[rows[positive]], sizes)),
         iqr = quantiles[, "q3"] - quantiles[, "q1"],
         skew = only_has(moment(3)),
-        kurtosis = only_has(moment(4) - 3),
+        kurtosis = only_has(moment(4)),
         se = spread / sqrt(total),
-        sum = only_has(group_sum_dbl(w * x, kept))
+        sum = only_has(group_sum_dbl(weights * x, kept))
       )
     }
   }

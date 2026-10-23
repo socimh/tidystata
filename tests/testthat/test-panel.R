@@ -119,7 +119,8 @@ test_that("delta and Date units match Stata's delta(), %tm and %tq", {
 test_that("Date days, weeks and years compare whole periods", {
   days <- as.Date(c("2024-03-01", "2024-02-29", "2024-03-03"))
   expect_identical(stata_lag(1:3, time = days), c(2L, NA, NA))
-  # Monday 2024-03-04 starts a new week; Sunday 2024-03-03 ends the last.
+  # Stata's %tw: 2024-03-04 (day 64) starts week 10; 2024-02-26 and 2024-03-03
+  # (days 57 and 63) share week 9.
   weeks <- as.Date(c("2024-02-26", "2024-03-03", "2024-03-04"))
   expect_error(stata_lag(1:3, time = weeks, unit = "week"), "Repeated time")
   expect_identical(

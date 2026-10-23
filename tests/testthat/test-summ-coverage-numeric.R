@@ -35,19 +35,21 @@ summ_cov_reference <- function(x) {
   }
   center <- mean(observed)
   spread <- stats::sd(observed)
+  # Stata's moments use the population SD.
+  population <- sqrt(mean((observed - center)^2))
   c(
     counts,
     min = min(observed),
-    p25 = unname(stats::quantile(observed, .25)),
+    p25 = unname(stats::quantile(observed, .25, type = 2)),
     p50 = stats::median(observed),
     mean = center,
     mad = stats::mad(observed),
     sd = spread,
-    p75 = unname(stats::quantile(observed, .75)),
+    p75 = unname(stats::quantile(observed, .75, type = 2)),
     max = max(observed),
-    iqr = diff(unname(stats::quantile(observed, c(.25, .75)))),
-    skew = mean((observed - center)^3) / spread^3,
-    kurtosis = mean((observed - center)^4) / spread^4 - 3,
+    iqr = diff(unname(stats::quantile(observed, c(.25, .75), type = 2))),
+    skew = mean((observed - center)^3) / population^3,
+    kurtosis = mean((observed - center)^4) / population^4,
     se = spread / sqrt(n),
     sum = sum(observed)
   )
@@ -196,12 +198,12 @@ summ_cov_register(
 summ_cov_register(
   30,
   "numeric",
-  "two-point percentiles interpolate with type seven",
+  "two-point percentiles follow Stata, averaging only at whole positions",
   function(api) {
     out <- api(tibble::tibble(x = c(0, 10)), .stat = c("p25", "p50", "p75"))
     expect_equal(
       unlist(out[c("p25", "p50", "p75")], use.names = FALSE),
-      c(2.5, 5, 7.5)
+      c(0, 5, 10)
     )
   }
 )

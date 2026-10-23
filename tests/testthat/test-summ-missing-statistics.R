@@ -10,16 +10,19 @@ summary_reference <- function(x) {
     miss_n = sum(is.na(x)),
     valid_pct = n / length(x),
     min = min(values),
-    q1 = unname(stats::quantile(values, 0.25)),
+    q1 = unname(stats::quantile(values, 0.25, type = 2)),
     median = stats::median(values),
     mean = mean(values),
     mad = stats::mad(values),
     sd = spread,
-    q3 = unname(stats::quantile(values, 0.75)),
+    q3 = unname(stats::quantile(values, 0.75, type = 2)),
     max = max(values),
-    iqr = stats::IQR(values),
-    skew = sum((values - mean(values))^3) / (n * spread^3),
-    kurtosis = sum((values - mean(values))^4) / (n * spread^4) - 3,
+    iqr = stats::IQR(values, type = 2),
+    # Stata's moments use the population SD.
+    skew = mean((values - mean(values))^3) /
+      mean((values - mean(values))^2)^1.5,
+    kurtosis = mean((values - mean(values))^4) /
+      mean((values - mean(values))^2)^2,
     se = spread / sqrt(n),
     sum = sum(values)
   )

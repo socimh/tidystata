@@ -175,6 +175,8 @@ within each group; \code{cum} follows the displayed category order. \code{valid}
 \code{valid_cum} use only observations with no missing measured values. Missing
 group keys are retained and do not make an otherwise observed value invalid.
 Missing measured categories have \code{NA} valid percentages and appear last.
+So \code{percent} matches the user-written \code{fre} and \verb{tabulate, missing}, and
+\code{valid} matches plain \code{tabulate}, which leaves missing values out.
 }
 
 \subsection{Totals}{
@@ -220,13 +222,14 @@ follow \code{FALSE}, \code{TRUE}, then missing values.
 \subsection{Chi-square test}{
 
 With \code{.chi2 = TRUE}, \code{tab2()} tests the categories shown in the table,
-including missing ones (filter them out first to exclude them), and drops
+including missing ones (filter them out first to exclude them, as Stata's
+\verb{tabulate, chi2} does without \code{missing}), and drops
 rows or columns with no observations. It prints Pearson's chi-square, its
 degrees of freedom, the p-value and Cramer's V as a message, and stores
 them as a one-row tibble in \code{attr(result, "chi2")} with columns
 \code{statistic}, \code{df}, \code{p_value}, \code{cramers_v} and \code{n}. Flextable output adds
-them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The test
-matches \code{chisq.test(correct = FALSE)}. Frequency weights are treated as
+them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The
+statistic, p-value and V are tested against Stata's \verb{tabulate, chi2 V}. Frequency weights are treated as
 counts; analytic weights are an error, because a design-based test such as
 \code{survey::svychisq()} is needed for sampling weights.
 }

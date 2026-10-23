@@ -73,8 +73,8 @@ may coexist. \code{sum} applies to numeric summaries, not calendar dates or
 datetimes. Calendar summaries do not support \code{skew} or \code{kurtosis} either;
 when such a statistic is requested alongside numeric variables, calendar
 variables are skipped with a warning.
-Percentiles \code{p0} through \code{p100}, including decimals such as \code{p2.5}, use
-type-7 quantiles. Only requested statistics and their prerequisites are
+Percentiles \code{p0} through \code{p100}, including decimals such as \code{p2.5}, follow
+Stata's rule (see Details). Only requested statistics and their prerequisites are
 calculated when \code{.stat} is nonempty.}
 
 \item{.missing}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), rows with
@@ -118,8 +118,8 @@ When \code{...} is omitted, the weight column is not summarised itself.}
 weights, \code{n} is the sum of the weights (non-integer weights are allowed).
 Analytic weights (Stata's \verb{[aweight]}, suitable for sampling weights) are
 rescaled within each group and variable to sum to the number of observed
-values, so \code{n} is the number of observations. Means and percentiles are the
-same under both types; \code{sd}, \code{se} and \code{sum} differ.}
+values, so \code{n} is the number of observations. Means, percentiles and \code{sum}
+are the same under both types; \code{sd} and \code{se} differ.}
 }
 \value{
 A table, or a list of tables with \code{.type = "list"} when multiple
@@ -161,23 +161,36 @@ with a warning. Measured vectors and \code{difftime} use their original units.
 In variable names, \code{*} marks labelled vectors, \verb{**} marks factors and \verb{***}
 marks retained nonnumeric columns.
 
-SD uses the sample denominator (\code{n - 1}); \code{se} is SD divided by \code{sqrt(n)}.
-Quantiles use R's default type 7, \code{mad} uses \code{\link[stats:mad]{stats::mad()}} with its default
-scaling, and \code{iqr} uses \code{\link[stats:IQR]{stats::IQR()}}. \code{skew} is the mean cubed deviation
-divided by the sample SD cubed. \code{kurtosis} is the mean fourth-power deviation
-divided by the sample SD to the fourth power, minus three (excess kurtosis).
-These conventions are not promised to match Stata. For singleton or constant
-inputs, undefined spread or moment statistics may be \code{NA} or \code{NaN}.
+Statistics follow Stata's \verb{summarize, detail} and are tested against
+Stata's own output:
+\itemize{
+\item SD uses the sample denominator (\code{n - 1}); \code{se} is SD divided by \code{sqrt(n)}.
+\item Percentiles use Stata's rule, not R's default \code{\link[stats:quantile]{stats::quantile()}} type 7:
+with \code{n} sorted values, the \code{p}th percentile is the value at position
+\code{floor(n * p) + 1}, or the mean of the values at positions \code{n * p} and
+\code{n * p + 1} when \code{n * p} is whole. So \code{q1} of \code{1:4} is 1.5 (type 7 gives
+1.75). \code{median},
+\code{q1}, \code{q3} and \code{iqr} (\code{q3 - q1}) use the same rule.
+\item \code{skew} and \code{kurtosis} use population moments, \code{m3 / m2^1.5} and
+\code{m4 / m2^2}, so \code{kurtosis} is 3 for a normal distribution (not excess
+kurtosis). They are \code{NA} when the values are constant or fewer than two.
+\item \code{mad} has no Stata counterpart; it uses \code{\link[stats:mad]{stats::mad()}} with its default
+scaling.
+}
+
+For singleton or constant inputs, undefined spread statistics are \code{NA}.
 
 Weighted statistics:
 
 With \code{.wt}, the mean is \code{sum(w * x) / W} and the variance is
 \code{sum(w * (x - mean)^2) / (W - 1)}, where \code{W} is the summed weight (after
 rescaling for analytic weights); \code{se} is \code{sd / sqrt(W)}, and \code{sum} is
-\code{sum(w * x)}. Percentiles, \code{median}, \code{q1}, \code{q3}, \code{iqr} and \code{mad} use Stata's
-weighted percentile rule, so they can differ from the unweighted type-7
-quantiles even when all weights are 1. \code{min} and \code{max} ignore rows with zero
-weight. \code{unique}, \code{miss_n} and \code{valid_pct} remain unweighted row counts.
+\code{sum(w * x)} with the weights as given, as Stata's \code{r(sum)}, even for
+analytic weights. Percentiles, \code{median}, \code{q1}, \code{q3}, \code{iqr} and \code{mad} use
+Stata's weighted percentile rule, the unweighted rule with cumulative
+weights in place of positions, so weights of 1 give the unweighted values.
+\code{min} and \code{max} ignore rows with zero weight. \code{unique}, \code{miss_n} and
+\code{valid_pct} remain unweighted row counts.
 
 Calendar output and grouping names:
 

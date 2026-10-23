@@ -63,7 +63,7 @@ test_that("xtile: with custom labels", {
 test_that("xtile: ties handling - collapsed cutpoints", {
   # Many ties that would collapse quantiles
   x <- c(rep(1, 50), rep(2, 50))
-  expect_warning(result <- xtile(x, n = 4), "collapsed")
+  expect_warning(result <- xtile(x, n = 4), "occupied")
   # With heavy ties, may create fewer unique groups
   expect_true(nlevels(result) >= 2)
   freq_table <- table(result)
@@ -73,7 +73,7 @@ test_that("xtile: ties handling - collapsed cutpoints", {
 
 test_that("xtile: heavy ties preserve equal values", {
   x <- c(rep(1, 33), rep(2, 33), rep(3, 34))
-  expect_warning(result <- xtile(x, n = 3), "collapsed")
+  expect_warning(result <- xtile(x, n = 3), "occupied")
   expect_identical(as.integer(result), c(rep(1L, 66), rep(2L, 34)))
 })
 
@@ -121,11 +121,12 @@ test_that("cut_length: creates equal-length intervals", {
 test_that("cut_length: interval ranges are equal", {
   # Probe both sides of the actual width-2 boundaries and each boundary itself.
   x <- c(0, 1.9, 2, 2.1, 3.9, 4, 4.1, 5.9, 6, 6.1, 8)
+  # Left-closed like cut_breaks(), with the maximum in the last interval.
   result <- cut_length(x, n = 4, labels = FALSE)
-  expect_identical(result, c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L, 4L, 4L))
+  expect_identical(result, c(1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L, 4L, 4L, 4L))
   expect_identical(
     levels(cut_length(x, n = 4)),
-    c("[0,2]", "(2,4]", "(4,6]", "(6,8]")
+    c("[0,2)", "[2,4)", "[4,6)", "[6,8]")
   )
 })
 
@@ -181,7 +182,7 @@ test_that("cut_breaks: includes lowest value by default", {
   expect_equal(sum(freq_table), 100)
 })
 
-test_that("cut_breaks: right=TRUE (default) - intervals closed on right", {
+test_that("cut_breaks: right=TRUE - intervals closed on right", {
   x <- c(1, 25, 50, 75, 100)
   result <- cut_breaks(x, breaks = c(25, 50, 75), right = TRUE)
   # With right=TRUE: (min,25], (25,50], (50,75], (75,max]
@@ -189,7 +190,7 @@ test_that("cut_breaks: right=TRUE (default) - intervals closed on right", {
   expect_equal(as.character(result[2]), levels(result)[1]) # 25 in first interval
 })
 
-test_that("cut_breaks: right=FALSE - intervals closed on left", {
+test_that("cut_breaks: right=FALSE (default) - intervals closed on left", {
   x <- c(1, 25, 50, 75, 100)
   result <- cut_breaks(x, breaks = c(25, 50, 75), right = FALSE)
   # With right=FALSE: [min,25), [25,50), [50,75), [75,max)
@@ -270,7 +271,7 @@ test_that("all cut functions: handle two elements", {
 
 test_that("all cut functions: handle Inf values", {
   x <- c(1, 50, 100, Inf)
-  expect_warning(result_q <- xtile(x, n = 4), "collapsed")
+  expect_warning(result_q <- xtile(x, n = 4), "occupied")
   result_b <- cut_breaks(x, breaks = 50)
 
   # Inf should be placed in the highest interval
@@ -391,13 +392,8 @@ test_that("all cut functions: all NA errors", {
   )
 })
 
-test_that("cut_breaks: non-numeric breaks errors or converts", {
-  x <- 1:100
-  expect_warning(
-    result <- cut_breaks(x, breaks = "invalid"),
-    "NAs introduced by coercion"
-  )
-  expect_identical(as.integer(result), rep(1L, 100))
+test_that("cut_breaks: non-numeric breaks error", {
+  expect_error(cut_breaks(1:100, breaks = "invalid"), "must be a numeric")
 })
 
 # ============================================================================
@@ -417,7 +413,7 @@ test_that("cut functions: retain size and interval counts for large inputs", {
   expect_identical(nlevels(result_l), 10L)
 })
 
-test_that("xtile cutpoints reproduce quantile(type = 7)", {
+test_that("xtile cutpoints reproduce Stata's rule, quantile(type = 2)", {
   withr::local_seed(20261020)
   for (x in list(
     rnorm(97),
@@ -427,8 +423,8 @@ test_that("xtile cutpoints reproduce quantile(type = 7)", {
     for (n in c(2, 3, 7)) {
       probs <- seq_len(n - 1L) / n
       expect_identical(
-        quantile7(x, probs),
-        stats::quantile(x, probs, type = 7, names = FALSE)
+        stata_quantile(x, probs),
+        stats::quantile(x, probs, type = 2, names = FALSE)
       )
     }
   }
@@ -443,7 +439,7 @@ test_that("milestone quantile ties stay together after row permutation", {
     logical(1)
   )))
   p <- rev(seq_along(x))
-  expect_warning(other <- xtile(x[p], n = 4), "Tied values collapsed")
+  expect_warning(other <- xtile(x[p], n = 4), "Tied values leave")
   expect_identical(as.integer(other)[order(p)], as.integer(out))
 })
 
@@ -487,19 +483,22 @@ for (.scenario in names(.milestone_quantile_cases)) {
     {
       case <- .milestone_quantile_cases[[.scenario]]
       before <- case$x
-      # Stata xtile reference: x joins the first group whose cutpoint >= x;
-      # occupied groups are numbered consecutively.
+      # Stata xtile reference: x joins the first group whose cutpoint >= x,
+      # and the codes of empty groups are skipped. Factor levels are the
+      # occupied groups.
+      # stata_quantile() is checked against Stata in
+      # test-stata-parity-summ.R; quantile(type = 2) differs where n * p is
+      # whole only in Stata's arithmetic, such as 100 * 0.3.
       observed <- case$x[!is.na(case$x)]
-      cutpoints <- stats::quantile(
-        observed,
-        probs = seq_len(case$n - 1L) / case$n,
-        type = 7
-      )
-      cutpoints <- unique(cutpoints[cutpoints < max(observed)])
+      cutpoints <- stata_quantile(observed, seq_len(case$n - 1L) / case$n)
       raw <- findInterval(case$x, cutpoints, left.open = TRUE) + 1L
       raw[is.na(case$x)] <- NA_integer_
-      expected_codes <- match(raw, sort(unique(raw[!is.na(raw)])))
-      groups <- max(expected_codes, na.rm = TRUE)
+      groups <- length(unique(raw[!is.na(raw)]))
+      expected_codes <- if (identical(case$labels, FALSE)) {
+        raw
+      } else {
+        match(raw, sort(unique(raw[!is.na(raw)])))
+      }
       collapsed <- groups < case$n
       if (collapsed) {
         expect_warning(
@@ -512,10 +511,9 @@ for (.scenario in names(.milestone_quantile_cases)) {
       expect_identical(as.integer(out), expected_codes)
       if (!collapsed && is.null(case$labels)) {
         # Without ties or empty intervals, results equal base::cut().
-        breaks <- stats::quantile(
-          case$x,
-          probs = seq(0, 1, length.out = case$n + 1L),
-          na.rm = TRUE
+        breaks <- stata_quantile(
+          observed,
+          seq(0, 1, length.out = case$n + 1L)
         )
         expect_equal(
           out,
@@ -538,7 +536,7 @@ for (.scenario in names(.milestone_quantile_cases)) {
       shuffled$x <- case$x[p]
       expect_warning(
         other <- do.call(xtile, shuffled),
-        if (collapsed) "Tied values collapsed" else NA
+        if (collapsed) "Tied values leave" else NA
       )
       expect_identical(as.integer(other)[order(p)], codes)
       if (identical(case$labels, FALSE)) {
@@ -661,27 +659,29 @@ test_that("default quantile cuts never merge distinct values", {
   expect_no_warning(two <- xtile(dummy, 2))
   expect_identical(as.integer(two), as.integer(dummy) + 1L)
   expect_identical(levels(two), c("[0,0]", "(0,1]"))
+  # Codes skip the empty groups, as Stata's xtile does: the 30th
+  # percentile of three 0s and eight 1s is already 1.
   expect_warning(
     codes <- xtile(rep(0:1, c(3, 8)), 10, labels = FALSE),
-    "2 groups"
+    "2 of 10"
   )
-  expect_identical(codes, rep(1:2, c(3, 8)))
+  expect_identical(codes, rep(c(1L, 3L), c(3, 8)))
   expect_warning(
     three <- xtile(rep(1:3, c(500, 300, 200)), 10, labels = FALSE),
-    "3 groups"
+    "3 of 10"
   )
-  expect_identical(sort(unique(three)), 1:3)
+  expect_identical(sort(unique(three)), c(1L, 6L, 9L))
   expect_identical(as.integer(table(three)), c(500L, 300L, 200L))
   expect_warning(
     labelled <- xtile(dummy, 10, labels = c("no", "yes")),
-    "2 groups"
+    "2 of 10"
   )
   expect_identical(as.character(labelled), ifelse(dummy == 1, "yes", "no"))
   expect_no_warning(even <- xtile(1:8, 4, labels = FALSE))
   expect_identical(even, rep(1:4, each = 2))
   expect_identical(
     levels(xtile(1:8, 4)),
-    c("[1,2.75]", "(2.75,4.5]", "(4.5,6.25]", "(6.25,8]")
+    c("[1,2.5]", "(2.5,4.5]", "(4.5,6.5]", "(6.5,8]")
   )
   expect_identical(
     xtile(c(NA, 1:4), 2, labels = FALSE),
@@ -716,13 +716,13 @@ test_that("cut_length rejects interval counts outside its integer contract", {
 test_that("cut_length preserves valid intervals, labels and missing values", {
   x <- c(-4, -2, 0, 2, 4, NA_real_)
   expected <- ordered(
-    c("low", "low", "low", "high", "high", NA),
+    c("low", "low", "high", "high", "high", NA),
     levels = c("low", "high")
   )
   expect_identical(cut_length(x, n = 2, labels = c("low", "high")), expected)
   expect_identical(
     cut_length(x, n = 2L, labels = FALSE),
-    c(1L, 1L, 1L, 2L, 2L, NA_integer_)
+    c(1L, 1L, 2L, 2L, 2L, NA_integer_)
   )
   expect_identical(
     cut_length(x, n = 1, labels = FALSE),
@@ -730,9 +730,9 @@ test_that("cut_length preserves valid intervals, labels and missing values", {
   )
 })
 
-test_that("binning contracts: quantile codes use type-7 boundaries", {
+test_that("binning contracts: quantile codes use Stata's boundaries", {
   x <- c(10, 0, 4, 1, 7, NA, 2, 9)
-  breaks <- stats::quantile(x, c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE, type = 7)
+  breaks <- stats::quantile(x, c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE, type = 2)
   expected <- cut(x, breaks, include.lowest = TRUE, ordered_result = TRUE)
   expect_identical(xtile(x), expected)
   expect_identical(xtile(x, labels = FALSE), as.integer(expected))
@@ -740,14 +740,15 @@ test_that("binning contracts: quantile codes use type-7 boundaries", {
 
 test_that("binning contracts: collapsed quantile boundaries preserve all ties", {
   x <- c(rep(1, 4), rep(2, 4), NA)
+  # Stata cutpoints are 1, 1.5 and 2, so the 2s take code 3.
   expect_warning(
     out <- xtile(x, n = 4, labels = FALSE),
-    "collapsed quantile cutpoints to 2 groups"
+    "leave 2 of 4 quantile groups"
   )
-  expect_identical(out, c(rep(1L, 4), rep(2L, 4), NA_integer_))
+  expect_identical(out, c(rep(1L, 4), rep(3L, 4), NA_integer_))
   expect_warning(
     labelled <- xtile(x, n = 4, labels = c("Low", "High")),
-    "collapsed quantile cutpoints to 2 groups"
+    "leave 2 of 4 quantile groups"
   )
   expect_identical(levels(labelled), c("Low", "High"))
 })
@@ -761,26 +762,27 @@ test_that("binning contracts: quantile permutation preserves value assignments",
   )
 })
 
-test_that("binning contracts: equal-width edges use right-closed intervals", {
+test_that("binning contracts: equal-width edges use left-closed intervals", {
   x <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, NA)
   expect_identical(
     cut_length(x, n = 4, labels = FALSE),
-    c(1L, 1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, NA_integer_)
+    c(1L, 1L, 2L, 2L, 3L, 3L, 4L, 4L, 4L, NA_integer_)
   )
   expect_identical(
     levels(cut_length(x, n = 4)),
-    c("[0,2]", "(2,4]", "(4,6]", "(6,8]")
+    c("[0,2)", "[2,4)", "[4,6)", "[6,8]")
   )
 })
 
 test_that("binning contracts: explicit boundaries respect either closure", {
   x <- c(0, 2, 4, 6, 8, NA)
   expect_identical(
-    cut_breaks(x, breaks = c(2, 4, 6), labels = FALSE),
+    cut_breaks(x, breaks = c(2, 4, 6), labels = FALSE, right = TRUE),
     c(1L, 1L, 2L, 3L, 4L, NA_integer_)
   )
+  # The default follows egen cut(): left-closed intervals.
   expect_identical(
-    cut_breaks(x, breaks = c(2, 4, 6), labels = FALSE, right = FALSE),
+    cut_breaks(x, breaks = c(2, 4, 6), labels = FALSE),
     c(1L, 2L, 3L, 4L, 4L, NA_integer_)
   )
 })
@@ -789,7 +791,7 @@ test_that("binning contracts: supplied breaks sort and deduplicate with endpoint
   x <- c(0, 2, 4, 8, NA)
   expect_identical(
     cut_breaks(x, breaks = c(6, 2, 2, 8), labels = FALSE),
-    c(1L, 1L, 2L, 3L, NA_integer_)
+    c(1L, 2L, 2L, 3L, NA_integer_)
   )
 })
 

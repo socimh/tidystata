@@ -27,6 +27,8 @@
 #' `valid_cum` use only observations with no missing measured values. Missing
 #' group keys are retained and do not make an otherwise observed value invalid.
 #' Missing measured categories have `NA` valid percentages and appear last.
+#' So `percent` matches the user-written `fre` and `tabulate, missing`, and
+#' `valid` matches plain `tabulate`, which leaves missing values out.
 #'
 #' ## Totals
 #'
@@ -68,13 +70,14 @@
 #' ## Chi-square test
 #'
 #' With `.chi2 = TRUE`, `tab2()` tests the categories shown in the table,
-#' including missing ones (filter them out first to exclude them), and drops
+#' including missing ones (filter them out first to exclude them, as Stata's
+#' `tabulate, chi2` does without `missing`), and drops
 #' rows or columns with no observations. It prints Pearson's chi-square, its
 #' degrees of freedom, the p-value and Cramer's V as a message, and stores
 #' them as a one-row tibble in `attr(result, "chi2")` with columns
 #' `statistic`, `df`, `p_value`, `cramers_v` and `n`. Flextable output adds
-#' them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The test
-#' matches `chisq.test(correct = FALSE)`. Frequency weights are treated as
+#' them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The
+#' statistic, p-value and V are tested against Stata's `tabulate, chi2 V`. Frequency weights are treated as
 #' counts; analytic weights are an error, because a design-based test such as
 #' `survey::svychisq()` is needed for sampling weights.
 #'

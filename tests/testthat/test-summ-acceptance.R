@@ -141,7 +141,8 @@ for (function_name in c("summ", "tabstat")) {
         # Sub-second spreads keep their exact values in seconds.
         expect_equal(out$sd, as.difftime(sd(0:1), units = "secs"))
         expect_equal(out$mad, as.difftime(stats::mad(0:1), units = "secs"))
-        expect_equal(out$iqr, as.difftime(0.5, units = "secs"))
+        # Stata percentiles of 0, 1: p25 = 0 and p75 = 1.
+        expect_equal(out$iqr, as.difftime(1, units = "secs"))
         expect_equal(out$se, as.difftime(sd(0:1) / sqrt(2), units = "secs"))
       }
     )

@@ -289,11 +289,11 @@ test_that("many small groups summarise like per-group base statistics", {
   expect_identical(out$mad, per_group(mad))
   expect_identical(
     out$q1,
-    per_group(function(x) quantile(x, 0.25, names = FALSE))
+    per_group(function(x) quantile(x, 0.25, type = 2, names = FALSE))
   )
   expect_identical(
     out$p37,
-    per_group(function(x) quantile(x, 0.37, names = FALSE))
+    per_group(function(x) quantile(x, 0.37, type = 2, names = FALSE))
   )
   expect_identical(out$mean, per_group(mean))
   expect_identical(out$sum, per_group(sum))
@@ -433,14 +433,14 @@ test_that("summary statistics agree across the observed group-size boundary", {
       center <- mean(x)
       spread <- stats::sd(x)
       c(
-        q1 = stats::quantile(x, 0.25, names = FALSE),
-        p37 = stats::quantile(x, 0.37, names = FALSE),
+        q1 = stats::quantile(x, 0.25, type = 2, names = FALSE),
+        p37 = stats::quantile(x, 0.37, type = 2, names = FALSE),
         median = stats::median(x),
         mad = stats::mad(x),
         mean = center,
         sd = spread,
-        skew = mean((x - center)^3) / spread^3,
-        kurtosis = mean((x - center)^4) / spread^4 - 3
+        skew = mean((x - center)^3) / mean((x - center)^2)^1.5,
+        kurtosis = mean((x - center)^4) / mean((x - center)^2)^2
       )
     })
     for (statistic in setdiff(statistics, "n")) {

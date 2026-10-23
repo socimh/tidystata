@@ -418,7 +418,8 @@ for (function_name in "summ") {
           .stat = c("sd", "iqr", "mad")
         )
         expect_equal(out$sd, as.difftime(2, units = "days"))
-        expect_equal(out$iqr, as.difftime(2, units = "days"))
+        # Stata percentiles of 0, 2, 4: p25 = 0 and p75 = 4.
+        expect_equal(out$iqr, as.difftime(4, units = "days"))
         expect_equal(
           out$mad,
           as.difftime(stats::mad(c(0, 2, 4)), units = "days")
@@ -442,7 +443,8 @@ for (function_name in "summ") {
           .duration_format = "compact"
         )
         expect_equal(out$sd, as.difftime(2, units = "days"))
-        expect_equal(out$iqr, as.difftime(2, units = "days"))
+        # Stata percentiles of 0, 2, 4: p25 = 0 and p75 = 4.
+        expect_equal(out$iqr, as.difftime(4, units = "days"))
         expect_equal(
           out$mad,
           as.difftime(stats::mad(c(0, 2, 4)), units = "days")
@@ -500,7 +502,7 @@ for (function_name in "summ") {
         x <- as.POSIXct("2024-01-01", tz = "UTC") + c(0, 120, 240)
         out <- api(tibble::tibble(x = x), .stat = c("sd", "iqr", "se"))
         expect_equal(out$sd, as.difftime(2, units = "mins"))
-        expect_equal(out$iqr, as.difftime(2, units = "mins"))
+        expect_equal(out$iqr, as.difftime(4, units = "mins"))
         expect_equal(out$se, as.difftime(2 / sqrt(3), units = "mins"))
       }
     )
@@ -518,7 +520,7 @@ for (function_name in "summ") {
         out <- api(tibble::tibble(x = x), .stat = c("mean", "sd", "iqr"))
         expect_equal(out$mean, "2024-01-01 01:00")
         expect_equal(out$sd, as.difftime(1, units = "hours"))
-        expect_equal(out$iqr, as.difftime(1, units = "hours"))
+        expect_equal(out$iqr, as.difftime(2, units = "hours"))
       }
     )
 

@@ -45,8 +45,10 @@ default for dates), \code{"week"}, \code{"month"}, \code{"quarter"} or \code{"ye
 date-times also \code{"second"} (their default), \code{"minute"} and \code{"hour"}. Times
 are compared by whole periods, as with Stata's \verb{\%tw}, \verb{\%tm}, \verb{\%tq} and
 \verb{\%ty} dates, so any day in March is one month after any day in February.
-Weeks start on Monday, and date-times use the local clock of their time
-zone. Must be \code{NULL} for numbers and period classes.}
+Weeks follow Stata's \verb{\%tw}: each year has 52 weeks starting on 1 January,
+so the last week has 8 or 9 days (tsibble's \code{yearweek()} keeps its ISO
+weeks). Date-times use the local clock of their time zone. Must be \code{NULL}
+for numbers and period classes.}
 }
 \value{
 A vector like \code{x}, with \code{NA} where the required period is absent

@@ -32,3 +32,6 @@
 /cran-comments.md
 /air.toml
 /examples/
+
+# Stata batch logs from data-raw/stata-parity
+data-raw/stata-parity/*.log

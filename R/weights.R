@@ -92,9 +92,10 @@ weights_scale <- function(weights, data, group_vars, type, groups = NULL) {
   weights * scale[id]
 }
 
-# Stata's weighted percentile rule (as in `summarize, detail` and `xtile`):
+# Stata's percentile rule (as in `summarize, detail`, `_pctile` and `xtile`):
 # with cumulative weight W_i and target P = p * W, take the first x_i with
-# W_i > P; when W_i equals P exactly, average x_i and x_(i+1).
+# W_i > P; when W_i equals P, average x_i and x_(i+1). P is compared within
+# a relative sqrt(eps), so 10 * 0.3 counts as 3, as Stata's 10 * 30 / 100.
 weighted_quantile <- function(x, w, probs) {
   keep <- w > 0
   x <- x[keep]
@@ -126,4 +127,9 @@ weighted_quantile <- function(x, w, probs) {
     },
     numeric(1)
   )
+}
+
+# Unweighted percentiles use the same rule with every weight 1.
+stata_quantile <- function(x, probs) {
+  weighted_quantile(x, rep.int(1, length(x)), probs)
 }
