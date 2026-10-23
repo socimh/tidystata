@@ -151,7 +151,7 @@ View the codebook of `lifeexp`.
 
 ``` r
 codebook(lifeexp)
-#> # A tibble: 6 × 5
+#> # A tibble: 6 x 5
 #>   variable  label                    type             n unique
 #>   <chr>     <chr>                    <chr>        <int>  <int>
 #> 1 region    Region                   double+label    68      3
@@ -168,7 +168,7 @@ Summarise selected numeric variables in `lifeexp`.
 
 ``` r
 summ(lifeexp, lexp, gnppc, safewater)
-#> # A tibble: 3 × 8
+#> # A tibble: 3 x 8
 #>   name      type      n unique   min   mean       sd   max
 #>   <chr>     <chr> <int>  <int> <dbl>  <dbl>    <dbl> <dbl>
 #> 1 lexp      dbl      68     20    57   71.7     5.16    79
@@ -190,7 +190,7 @@ the date/datetime restrictions and cross-tabulation naming rules.
 
 ``` r
 summ(lifeexp, safewater, .stat = c("missing", "p50", "sum"))
-#> # A tibble: 1 × 4
+#> # A tibble: 1 x 4
 #>   type  missing   p50   sum
 #>   <chr>   <int> <dbl> <dbl>
 #> 1 dbl        14  82.5  4167
@@ -206,7 +206,7 @@ Tabulate a single variable:
 
 ``` r
 tab(starwars, sex)
-#> # A tibble: 5 × 6
+#> # A tibble: 5 x 6
 #>   sex                n percent   cum valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 female            16   18.4   18.4 19.3       19.3
@@ -223,7 +223,7 @@ tidyselect helpers such as `starts_with()`, `ends_with()` and
 ``` r
 tab1(starwars, ends_with("color"))
 #> $hair_color
-#> # A tibble: 12 × 6
+#> # A tibble: 12 x 6
 #>    value             n percent    cum valid valid_cum
 #>    <chr>         <int>   <dbl>  <dbl> <dbl>     <dbl>
 #>  1 auburn            1    1.15   1.15  1.22      1.22
@@ -240,7 +240,7 @@ tab1(starwars, ends_with("color"))
 #> 12 <NA>              5    5.75 100    NA        NA   
 #> 
 #> $skin_color
-#> # A tibble: 31 × 6
+#> # A tibble: 31 x 6
 #>    value                   n percent   cum valid valid_cum
 #>    <chr>               <int>   <dbl> <dbl> <dbl>     <dbl>
 #>  1 blue                    2    2.30  2.30  2.30      2.30
@@ -253,10 +253,10 @@ tab1(starwars, ends_with("color"))
 #>  8 fair, green, yellow     1    1.15 39.1   1.15     39.1 
 #>  9 gold                    1    1.15 40.2   1.15     40.2 
 #> 10 green                   6    6.90 47.1   6.90     47.1 
-#> # ℹ 21 more rows
+#> # i 21 more rows
 #> 
 #> $eye_color
-#> # A tibble: 15 × 6
+#> # A tibble: 15 x 6
 #>    value             n percent   cum valid valid_cum
 #>    <chr>         <int>   <dbl> <dbl> <dbl>     <dbl>
 #>  1 black            10   11.5   11.5 11.5       11.5
@@ -285,7 +285,7 @@ lists by default. Matrix columns are unsupported.
 
 ``` r
 tab2(starwars, sex, gender)
-#> # A tibble: 5 × 4
+#> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
 #> 1 female                16         0     0
@@ -306,7 +306,7 @@ Request `.type = "tibble"` explicitly when a tibble is required.
 
 ``` r
 fre(lifeexp, region)
-#> # A tibble: 4 × 6
+#> # A tibble: 4 x 6
 #>   region               n percent   cum valid valid_cum
 #>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
@@ -329,7 +329,7 @@ Row helpers return vectors that can be used in `mutate()`:
 ``` r
 tibble(a = c(1, NA, 3), b = c(3, NA, 5)) |>
   mutate(row_average = row_mean(a, b))
-#> # A tibble: 3 × 3
+#> # A tibble: 3 x 3
 #>       a     b row_average
 #>   <dbl> <dbl>       <dbl>
 #> 1     1     3           2
