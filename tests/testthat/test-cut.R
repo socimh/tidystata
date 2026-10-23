@@ -424,7 +424,8 @@ test_that("xtile cutpoints reproduce Stata's rule, quantile(type = 2)", {
       probs <- seq_len(n - 1L) / n
       expect_identical(
         stata_quantile(x, probs),
-        stats::quantile(x, probs, type = 2, names = FALSE)
+        # Older R (such as 4.1) returns integers for integer x; ours are doubles.
+        as.double(stats::quantile(x, probs, type = 2, names = FALSE))
       )
     }
   }
