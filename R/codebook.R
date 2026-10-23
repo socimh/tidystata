@@ -8,7 +8,7 @@
 #' @param ...  <[`tidy-select`][dplyr_tidy_select]> or
 #' <[`data-masking`][args_data_masking]> Variables to include in the codebook.
 #' Omit to include all columns. Selection is attempted first; expressions that
-#' are not valid selections are evaluated as computed columns by [s_select()].
+#' are not valid selections are evaluated as computed columns by [select_or_mutate()].
 #'
 #' @returns An ungrouped table with one row per selected variable, in selection
 #' order. Columns are `variable`, optional `label`, `type`, `n`, and `unique`.
@@ -39,17 +39,17 @@
 #' @seealso [ds()], [variables()], [browse()]
 #'
 #' @examples
-#' dplyr::starwars
-#'
-#' codebook(dplyr::starwars)
-#'
-#' codebook(dplyr::starwars, 1:4)
-#'
-#' codebook(dplyr::starwars, ends_with("color"))
-#'
-#' codebook(dplyr::starwars, where(is.numeric))
-#'
 #' codebook(lifeexp)
+#'
+#' codebook(lifeexp, 1:4)
+#'
+#' codebook(lifeexp, where(is.numeric))
+#'
+#' starwars <- dplyr::starwars
+#'
+#' codebook(starwars)
+#'
+#' codebook(starwars, ends_with("color"))
 #'
 #' # Save a compact inventory before preparing an analysis sample.
 #' survey <- tibble::tibble(age = c(30, NA, 45), income = c(2000, 3000, 4000))
@@ -67,7 +67,7 @@ codebook <- function(.data, ...) {
   .data <- table_working_data(.data)
   .data <- dplyr::ungroup(.data)
   if (!missing(...)) {
-    .data <- s_select(.data, ...)
+    .data <- select_or_mutate(.data, ...)
   }
   vctrs::vec_as_names(names(.data), repair = "check_unique")
   if (ncol(.data) == 0L) {

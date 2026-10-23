@@ -4,12 +4,7 @@
 \alias{timer}
 \title{Time spent on a function}
 \usage{
-timer(
-  x,
-  on_error = TRUE,
-  .x = lifecycle::deprecated(),
-  .on_error = lifecycle::deprecated()
-)
+timer(x, on_error = TRUE)
 }
 \arguments{
 \item{x}{An expression to evaluate and time.}
@@ -17,9 +12,6 @@ timer(
 \item{on_error}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (the default), also
 report elapsed time when the expression fails, then let the original error
 propagate. Use \code{FALSE} to report elapsed time only on success.}
-
-\item{.x, .on_error}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} and
-\code{on_error} instead.}
 }
 \value{
 The evaluated result, invisibly.

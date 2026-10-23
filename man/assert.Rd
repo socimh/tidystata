@@ -45,6 +45,6 @@ try(assert(lifeexp, safewater > 50))
 Other data checking functions:
 \code{\link[=is_first]{is_first()}},
 \code{\link{keys}},
-\code{\link[=s_merge]{s_merge()}}
+\code{\link[=stata_merge]{stata_merge()}}
 }
 \concept{data checking functions}

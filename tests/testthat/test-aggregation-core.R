@@ -37,12 +37,12 @@ test_that("cross tabulation fills native counts and preserves identity", {
     b = factor(c("b", "c", "b", "b"), levels = c("c", "b")),
     w = c(0.5, 2, 1, 3)
   )
-  out <- xtab(data, a, b, .wt = w)
+  out <- tab2(data, a, b, .wt = w)
   expect_named(out, c("a \\ b", "c", "b"))
   expect_identical(out[[1]], c("a", "z"))
   expect_equal(out$c, c(2, 0))
   expect_equal(out$b, c(3, 1.5))
-  expect_type(xtab(data, a, b)$b, "integer")
+  expect_type(tab2(data, a, b)$b, "integer")
 })
 
 test_that("weighted counts skip numeric conversion and preserve row counts", {
@@ -196,7 +196,7 @@ test_that("weighted empty and missing inputs retain their established shape", {
   out <- summ(data, x, .by = g, .wt = w, .stat = c("n", "mean", "median"))
   expect_equal(nrow(out), 0L)
   expect_type(out$n, "double")
-  expect_equal(nrow(xtab(data, g, x, .wt = w)), 0L)
+  expect_equal(nrow(tab2(data, g, x, .wt = w)), 0L)
   missing <- data.frame(x = c(NA_real_, NA_real_), w = c(0, 2))
   expect_warning(
     out <- summ(missing, x, .wt = w, .stat = c("n", "mean", "sd", "median")),
@@ -206,9 +206,9 @@ test_that("weighted empty and missing inputs retain their established shape", {
   expect_true(all(is.na(unlist(out[c("mean", "sd", "median")]))))
 })
 
-test_that("matrix column headers retain the pivot boundary diagnostic", {
+test_that("matrix columns can't give column headers", {
   data <- tibble::tibble(a = 1:3, b = matrix(1:6, 3))
-  expect_error(xtab(data, a, b), "Can't recycle")
+  expect_error(tab2(data, a, b), "`b` has several columns")
 })
 
 test_that("native group sums follow sum() and cumsum() for missing values", {

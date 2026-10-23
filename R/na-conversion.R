@@ -5,8 +5,8 @@
 #'
 #' * `mvdecode()` replaces every value in `mv` with `NA`, like
 #'   `mvdecode x, mv(-98 -99)`. Each code is matched with [dplyr::na_if()].
-#' * `mvencode()` replaces missing values with `mv`, like `mvencode x, mv(0)`,
-#'   using [tidyr::replace_na()].
+#' * `mvencode()` replaces missing values with `mv`, like `mvencode x, mv(0)`.
+#'   The replacement is cast to the type of `x`, as in [tidyr::replace_na()].
 #'
 #' `na_if_value()` and `value_if_na()` are aliases of `mvdecode()` and
 #' `mvencode()`. Use `mutate(x = mvdecode(x, -99))` for one variable, or
@@ -27,8 +27,6 @@
 #'   with `NA`; any value equal to one of them becomes missing. For
 #'   `mvencode()` and `value_if_na()`, a single replacement value for missing
 #'   elements, cast to the type of `x`.
-#' @param .x,.value `r lifecycle::badge("deprecated")` Use `x` and `value`
-#'   instead.
 #' @returns A vector with the same type and size as `x`, with matching values
 #'   replaced or missing values filled.
 #'
@@ -60,28 +58,7 @@ mvencode <- function(x, mv) {
 
 #' @rdname na_conversion
 #' @export
-na_if_value <- function(
-  x,
-  value,
-  .x = lifecycle::deprecated(),
-  .value = lifecycle::deprecated()
-) {
-  if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.3.0", "na_if_value(.x)", "na_if_value(x)")
-    # In old calls such as na_if_value(.x = v, 9), the positional value fills `x`.
-    if (!missing(x) && missing(value)) {
-      value <- x
-    }
-    x <- .x
-  }
-  if (lifecycle::is_present(.value)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "na_if_value(.value)",
-      "na_if_value(value)"
-    )
-    value <- .value
-  }
+na_if_value <- function(x, value) {
   if (missing(x) || missing(value)) {
     na_conversion_missing(
       if (missing(x)) "x" else "value",
@@ -94,28 +71,7 @@ na_if_value <- function(
 
 #' @rdname na_conversion
 #' @export
-value_if_na <- function(
-  x,
-  value,
-  .x = lifecycle::deprecated(),
-  .value = lifecycle::deprecated()
-) {
-  if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.3.0", "value_if_na(.x)", "value_if_na(x)")
-    # In old calls such as value_if_na(.x = v, 9), the positional value fills `x`.
-    if (!missing(x) && missing(value)) {
-      value <- x
-    }
-    x <- .x
-  }
-  if (lifecycle::is_present(.value)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "value_if_na(.value)",
-      "value_if_na(value)"
-    )
-    value <- .value
-  }
+value_if_na <- function(x, value) {
   if (missing(x) || missing(value)) {
     na_conversion_missing(
       if (missing(x)) "x" else "value",
@@ -159,5 +115,33 @@ na_encode <- function(x, mv, argument, call = rlang::caller_env()) {
     x[is.na(x)] <- replacement
     return(x)
   }
-  tidyr::replace_na(x, mv)
+  replace_missing(x, mv, argument, call = call)
+}
+
+# Missing values (including NaN) replaced by one value cast to the type of
+# `x`, as tidyr::replace_na() does; a lossy cast is an error.
+replace_missing <- function(
+  x,
+  replace,
+  replace_arg = "replace",
+  call = rlang::caller_env()
+) {
+  if (vctrs::vec_size(replace) != 1L) {
+    cli::cli_abort(
+      "{.arg {replace_arg}} must be a single replacement value.",
+      call = call
+    )
+  }
+  missing <- vctrs::vec_detect_missing(x)
+  if (!any(missing)) {
+    return(x)
+  }
+  vctrs::vec_assign(
+    x,
+    missing,
+    replace,
+    x_arg = "x",
+    value_arg = replace_arg,
+    call = call
+  )
 }

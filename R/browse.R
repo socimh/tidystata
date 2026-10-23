@@ -8,15 +8,15 @@
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> or
 #' <[`data-masking`][args_data_masking]> Variables to browse.
 #' Omit to browse all columns. Selection and computed expressions follow
-#' [s_select()].
+#' [select_or_mutate()].
 #'
 #' @returns The viewed data, invisibly, with its data-frame class preserved.
 #' With no selection this is the input data; otherwise it is the result of
-#' [s_select()]. The input is not modified.
+#' [select_or_mutate()]. The input is not modified.
 #'
 #' @details
 #' Viewing uses [tibble::view()]. Existing grouping and grouping-key retention
-#' follow [s_select()]. Assign the invisible return value to keep the viewed
+#' follow [select_or_mutate()]. Assign the invisible return value to keep the viewed
 #' columns for subsequent analysis. Precompute expressions with side effects
 #' before passing them to the selection interface.
 #' @family inspection functions
@@ -26,12 +26,13 @@
 #'
 #' @examples
 #' if (interactive()) {
-#'   browse(dplyr::starwars)
-#'   browse(dplyr::starwars, name:mass)
-#'   browse(dplyr::starwars, varlist("*color"))
+#'   starwars <- dplyr::starwars
+#'   browse(starwars)
+#'   browse(starwars, name:mass)
+#'   browse(starwars, varlist("*color"))
 #'
 #'   # Retain the viewed columns for the next pipeline stage.
-#'   selected <- browse(dplyr::starwars, name, height, mass)
+#'   selected <- browse(starwars, name, height, mass)
 #'   summ(selected, height, mass)
 #' }
 browse <- function(.data, ...) {
@@ -39,7 +40,7 @@ browse <- function(.data, ...) {
     tibble::view(.data)
   } else {
     .data |>
-      s_select(...) |>
+      select_or_mutate(...) |>
       tibble::view()
   }
 }

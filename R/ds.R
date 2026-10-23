@@ -11,8 +11,7 @@
 #'   vector, like Stata's `ds`; `"table"` returns them as a one-column table.
 #'
 #' @returns `ds()` returns a character vector. `ds(.type = "table")` returns a
-#' table with one character column, `name`; `ds_as_column()` and
-#' `names_as_column()` are aliases for it. On ungrouped data, an empty
+#' table with one character column, `name`. On ungrouped data, an empty
 #' selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
 #' data.frame, tibble, or data.table container and supported preview settings,
 #' but do not recreate grouping or arbitrary subclasses on the new rows.
@@ -30,10 +29,12 @@
 #' @seealso [variables()], [codebook()], [browse()]
 #'
 #' @examples
-#' ds(dplyr::starwars) # equivalent to names(dplyr::starwars)
-#' ds(dplyr::starwars, homeworld:starships)
-#' ds(dplyr::starwars, ends_with("color"), .type = "table")
-#' ds_as_column(dplyr::starwars, where(is.character))
+#' starwars <- dplyr::starwars
+#'
+#' ds(starwars) # equivalent to names(starwars)
+#' ds(starwars, homeworld:starships)
+#' ds(starwars, ends_with("color"), .type = "table")
+#' ds(starwars, where(is.character), .type = "table")
 #'
 #' # Save a programmatic selection for later stages of a pipeline.
 #' numeric_names <- ds(lifeexp, where(is.numeric))
@@ -71,13 +72,3 @@ ds <- function(.data, ..., .type = c("vector", "table")) {
   }
   names(dplyr::select(.data, ...))
 }
-
-#' @rdname names
-#' @export
-ds_as_column <- function(.data, ...) {
-  ds(.data, ..., .type = "table")
-}
-
-#' @rdname names
-#' @export
-names_as_column <- ds_as_column

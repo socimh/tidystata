@@ -4,8 +4,6 @@
 #' @param x An object.
 #' @param abbr A single `TRUE` or `FALSE`. If `TRUE`, the abbreviation of the
 #'   type is returned.
-#' @param .x,.abbr `r lifecycle::badge("deprecated")` Use `x` and `abbr`
-#'   instead.
 #' @returns A character. `var_type()` returns `"units"` for measured vectors
 #' in either abbreviation mode. `var_unit()` returns the unit string for measured
 #' or duration vectors, including empty or all-missing measured vectors, and
@@ -37,24 +35,7 @@
 
 #' @export
 #' @rdname var_type
-var_type <- function(
-  x,
-  abbr = FALSE,
-  .x = lifecycle::deprecated(),
-  .abbr = lifecycle::deprecated()
-) {
-  if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.3.0", "var_type(.x)", "var_type(x)")
-    # In old calls such as var_type(.x = v, TRUE), the positional value fills `x`.
-    if (!missing(x) && missing(abbr)) {
-      abbr <- x
-    }
-    x <- .x
-  }
-  if (lifecycle::is_present(.abbr)) {
-    lifecycle::deprecate_soft("0.3.0", "var_type(.abbr)", "var_type(abbr)")
-    abbr <- .abbr
-  }
+var_type <- function(x, abbr = FALSE) {
   # Plain storage types need no formatting or S3 dispatch. Matrix/array input
   # retains the established element-type description.
   type <- if (!is.object(x)) {
@@ -127,11 +108,7 @@ var_type <- function(
 
 #' @export
 #' @rdname var_type
-var_unit <- function(x, .x = lifecycle::deprecated()) {
-  if (lifecycle::is_present(.x)) {
-    lifecycle::deprecate_soft("0.3.0", "var_unit(.x)", "var_unit(x)")
-    x <- .x
-  }
+var_unit <- function(x) {
   if (inherits(x, c("units", "difftime"))) {
     return(as.character(units(x)))
   }

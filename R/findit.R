@@ -25,8 +25,8 @@
 #'
 #' @returns A tibble with one row per Stata idiom and the columns `match`
 #' (`"stata"` when the word is a Stata command, `"r"` when it is an R function
-#' used in the entry, `"keyword"` for a text match, `"all"` for the whole
-#' list), `stata` (the Stata code), `r` (equivalent R code), `package` (where
+#' used in the entry, `"keyword"` for a text match, `"nearest"` for the
+#' closest entries to a plain question, `"all"` for the whole list), `stata` (the Stata code), `r` (equivalent R code), `package` (where
 #' the R function lives) and `task` (what it does). It prints each entry as
 #' the Stata code and task on one line, followed by the R code, so the code is
 #' never cut off; the first `n` entries are shown (`print(findit(), n = Inf)`
@@ -57,10 +57,26 @@
 #'   many that use `mutate()`. All matching entries are still returned.
 #' * If neither matches, the text is searched for in the Stata code, the R
 #'   code and the task, so `findit(winsor)` and `findit(dummy)` also work.
+#' * Otherwise the text is read as a plain question, in English or Chinese,
+#'   and the closest entries are listed under their own heading:
+#'   `findit("how do I remove duplicate rows")`. The closest entries are
+#'   the ones sharing the most informative words with the question, after
+#'   common words are dropped and a short built-in list of synonyms is
+#'   applied ("average" also means "mean"). A question of three or more
+#'   words that happens to start with a command, such as
+#'   `findit("count how many people in each category")`, lists the closest
+#'   entries first. No language model is involved, so the same question
+#'   always gives the same answer.
 #'
 #' R reads a call before `findit()` runs, so anything that is not a single R
 #' name must be quoted: several words (`"merge 1:1 id"`), reserved words
 #' (`"if"`), and names starting with an underscore (`"_n"`).
+#'
+#' When R runs in Chinese (the `LANGUAGE` environment variable or, if it is
+#' unset, the locale), the task and function descriptions are shown in
+#' Chinese, and Chinese keywords are searched in any language.
+#' `Sys.setenv(LANGUAGE = "en")` switches back to English, as it does for R's
+#' own messages.
 #'
 #' The list is curated rather than exhaustive. Longer explanations, in English
 #' and Chinese, are in the "Coming from Stata" articles on the package
@@ -81,6 +97,9 @@
 #' findit("merge 1:1 id, keep(match)")
 #' findit("bys g: egen m = mean(x)")
 #' findit(winsor)
+#'
+#' # Plain questions
+#' findit("how do I remove duplicate rows")
 #'
 #' # R functions work too, and words with both meanings show both
 #' findit(left_join)
@@ -116,19 +135,213 @@ findit <- function(command = NULL) {
       findit_rank(entries[stata_hit, ], terms, "stata"),
       findit_rank(entries[r_hit, ], terms, "r")
     )
-    return(findit_result(found, functions = functions))
+    # A plain question that starts with a command word, such as "count how
+    # many people in each group", gets the closest entries first.
+    if (findit_plain(original, words, found)) {
+      nearest <- findit_nearest(original, entries)
+      found <- rbind(nearest, found[!found$stata %in% nearest$stata, ])
+    }
+    return(findit_result(found, functions = functions, query = original))
   }
 
   text <- tolower(original)
-  haystack <- tolower(paste(entries$stata, entries$r, entries$task, sep = "\r"))
+  haystack <- tolower(
+    paste(entries$stata, entries$r, entries$task, entries$task_zh, sep = "\r")
+  )
   keyword <- grepl(text, haystack, fixed = TRUE)
   if (any(keyword)) {
     return(findit_result(entries[keyword, ], "keyword"))
   }
 
+  nearest <- findit_nearest(original, entries)
+  if (nrow(nearest)) {
+    return(findit_result(nearest, query = original))
+  }
+
   candidates <- unique(c(entries$command, findit_functions()$`function`))
   rlang::inform(findit_no_match(query, first, candidates))
   invisible(findit_result(entries[0L, ], "keyword"))
+}
+
+# A question in plain words: three or more words, no Stata syntax, and none of
+# the words after the first appear in the Stata code of the entries found.
+findit_plain <- function(original, words, found) {
+  if (length(words) < 3L || grepl("[=,:()\"]", original)) {
+    return(FALSE)
+  }
+  rest <- unlist(findit_tokens(paste(words[-1], collapse = " ")))
+  code <- unlist(findit_tokens(found$stata))
+  length(rest) > 0L && !any(rest %in% code)
+}
+
+# The closest entries to a question in plain English or Chinese, scored with
+# BM25 over the task, section, detail and code. Entries scoring at least 40%
+# of the best are kept, at most ten.
+findit_nearest <- function(query, entries) {
+  index <- findit_index()
+  words <- findit_expand(query)
+  words <- words[words %in% names(index$idf)]
+  if (!length(words)) {
+    return(entries[0L, ])
+  }
+  idf <- index$idf[words]
+  score <- vapply(
+    index$tf,
+    function(tf) {
+      n <- tf[words]
+      n[is.na(n)] <- 0
+      sum(idf * n * 2.2 / (n + 1.2 * (0.25 + 0.75 * sum(tf) / index$length)))
+    },
+    numeric(1)
+  )
+  keep <- order(-score)[seq_len(min(10L, sum(score >= 0.4 * max(score))))]
+  keep <- keep[score[keep] > 0]
+  found <- entries[keep, ]
+  found$match <- rep("nearest", nrow(found))
+  found
+}
+
+# Word counts per entry, with the task counted three times, and the inverse
+# document frequency of each word. Built once per session.
+findit_index <- function() {
+  if (is.null(findit_cache$index)) {
+    entries <- findit_entries()
+    described <- findit_functions()
+    about <- vapply(
+      entries$functions,
+      function(f) {
+        rows <- match(f, described$`function`)
+        rows <- rows[!is.na(rows)]
+        paste(
+          described$description[rows],
+          described$description_zh[rows],
+          collapse = " "
+        )
+      },
+      character(1)
+    )
+    text <- paste(
+      strrep(paste(entries$task, entries$task_zh, ""), 3L),
+      entries$section,
+      entries$section_zh,
+      entries$detail,
+      entries$detail_zh,
+      entries$stata,
+      vapply(entries$functions, paste, character(1), collapse = " "),
+      about
+    )
+    tf <- lapply(findit_tokens(text), function(w) c(table(w)))
+    n <- length(tf)
+    df <- table(unlist(lapply(tf, names)))
+    findit_cache$index <- list(
+      tf = tf,
+      idf = c(log(1 + (n - df + 0.5) / (df + 0.5))),
+      length = mean(vapply(tf, sum, numeric(1)))
+    )
+  }
+  findit_cache$index
+}
+
+findit_stop_words <- c(
+  "a",
+  "about",
+  "all",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "by",
+  "can",
+  "do",
+  "does",
+  "for",
+  "from",
+  "get",
+  "have",
+  "how",
+  "i",
+  "if",
+  "in",
+  "into",
+  "is",
+  "it",
+  "its",
+  "me",
+  "my",
+  "need",
+  "of",
+  "on",
+  "or",
+  "our",
+  "so",
+  "some",
+  "that",
+  "the",
+  "their",
+  "them",
+  "then",
+  "there",
+  "these",
+  "this",
+  "to",
+  "use",
+  "using",
+  "want",
+  "way",
+  "we",
+  "what",
+  "when",
+  "where",
+  "which",
+  "who",
+  "with",
+  "would",
+  "you",
+  "your"
+)
+
+# English words, lower case and lightly stemmed so that "values", "valued"
+# and "value" agree; runs of Chinese characters become overlapping pairs.
+findit_tokens <- function(text) {
+  text <- tolower(text)
+  lapply(text, function(t) {
+    english <- strsplit(t, "[^a-z]+")[[1]]
+    english <- english[nchar(english) > 1L & !english %in% findit_stop_words]
+    english <- sub("ies$", "y", english)
+    english <- sub("^(.{3,})(ing|ed)$", "\\1", english)
+    english <- sub("^(.{3,}[^s])s$", "\\1", english)
+    english <- sub("^(.{3,})e$", "\\1", english)
+    runs <- regmatches(
+      t,
+      gregexpr("(*UTF)[\\x{4e00}-\\x{9fff}]+", t, perl = TRUE)
+    )[[1]]
+    chinese <- unlist(lapply(runs, function(r) {
+      n <- nchar(r)
+      if (n == 1L) r else substring(r, seq_len(n - 1L), seq_len(n - 1L) + 1L)
+    }))
+    c(english, chinese)
+  })
+}
+
+# Question words plus the words they stand for in the entries, from the
+# curated synonym list: English words match whole words, while phrases and
+# Chinese match anywhere in the question.
+findit_expand <- function(query) {
+  if (is.null(findit_cache$synonyms)) {
+    findit_cache$synonyms <- findit_read("findit-synonyms.csv")
+  }
+  synonyms <- findit_cache$synonyms
+  text <- tolower(query)
+  words <- strsplit(text, "[^a-z]+")[[1]]
+  single <- grepl("^[a-z]+$", synonyms$word)
+  hit <- ifelse(
+    single,
+    synonyms$word %in% words,
+    vapply(synonyms$word, grepl, logical(1), text, fixed = TRUE)
+  )
+  findit_tokens(paste(c(text, synonyms$means[hit]), collapse = " "))[[1]]
 }
 
 # Stata's rule: a prefix of the command at least as long as its minimum
@@ -198,18 +411,38 @@ findit_no_match <- function(query, word, candidates) {
   )
 }
 
-findit_result <- function(entries, match = NULL, functions = character()) {
+findit_result <- function(
+  entries,
+  match = NULL,
+  functions = character(),
+  query = NULL
+) {
   if (!is.null(match)) {
     entries$match <- rep(match, nrow(entries))
   }
-  out <- tibble::as_tibble(entries[c("match", "stata", "r", "package", "task")])
   described <- findit_functions()
+  if (findit_chinese()) {
+    entries$task <- ifelse(
+      nzchar(entries$task_zh),
+      entries$task_zh,
+      entries$task
+    )
+    described$description <- ifelse(
+      nzchar(described$description_zh),
+      described$description_zh,
+      described$description
+    )
+  }
+  out <- tibble::as_tibble(entries[c("match", "stata", "r", "package", "task")])
   described <- described[
     match(functions, described$`function`),
     c("function", "package", "description", "stata")
   ]
   described$used <- described$`function` %in% unlist(findit_entries()$functions)
   attr(out, "r_functions") <- described
+  if (any(out$match == "nearest")) {
+    attr(out, "query") <- query
+  }
   class(out) <- c("tidystata_findit", class(out))
   out
 }
@@ -247,6 +480,17 @@ print.tidystata_findit <- function(x, n = 20, ...) {
     )
     is_stata <- shown$match == "stata"
   }
+  # The closest entries to a plain question get their own heading, before
+  # or after the exact matches as in the table.
+  nearest <- shown$match == "nearest"
+  close <- lines[nearest]
+  is_stata <- is_stata[!nearest]
+  lines <- lines[!nearest]
+  if (length(close) && nearest[1]) {
+    cat("\n## Closest entries for \"", attr(x, "query"), "\"", sep = "")
+    cat(close, if (length(lines) || headed) "\n", sep = "")
+    close <- character()
+  }
   if (headed && any(is_stata)) {
     cat("\n## Stata command")
   }
@@ -275,7 +519,17 @@ print.tidystata_findit <- function(x, n = 20, ...) {
     }
     cat(lines[!is_stata], sep = "")
   }
-  if (length(lines) || headed) {
+  if (length(close)) {
+    cat(
+      if (length(lines) || headed) "\n",
+      "\n## Closest entries for \"",
+      attr(x, "query"),
+      "\"",
+      sep = ""
+    )
+    cat(close, sep = "")
+  }
+  if (length(lines) || headed || any(nearest)) {
     cat("\n")
   }
   if (nrow(x) > nrow(shown)) {
@@ -309,6 +563,16 @@ findit_functions <- function() {
     findit_cache$functions <- findit_read("r-functions.csv")
   }
   findit_cache$functions
+}
+
+# Chinese text follows R's own rule for translated messages: the first entry
+# of `LANGUAGE` if it is set, otherwise the character locale.
+findit_chinese <- function() {
+  language <- strsplit(Sys.getenv("LANGUAGE"), ":", fixed = TRUE)[[1]]
+  if (length(language) && nzchar(language[1])) {
+    return(startsWith(tolower(language[1]), "zh"))
+  }
+  grepl("^zh|chinese", Sys.getlocale("LC_CTYPE"), ignore.case = TRUE)
 }
 
 findit_read <- function(file) {

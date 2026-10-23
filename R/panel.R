@@ -4,10 +4,10 @@
 #' Time-aware versions of [dplyr::lag()] and [dplyr::lead()], following
 #' Stata's time-series operators after `xtset`:
 #'
-#' * `s_lag(x, n, time = t)` is `Ln.x`: the value of `x` at time `t - n`.
-#' * `s_lead(x, n, time = t)` is `Fn.x`: the value of `x` at time `t + n`.
-#' * `s_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
-#'   `s_diff(x, time = t)` is `x - L.x` and `s_diff(x, 2, time = t)` is
+#' * `stata_lag(x, n, time = t)` is `Ln.x`: the value of `x` at time `t - n`.
+#' * `stata_lead(x, n, time = t)` is `Fn.x`: the value of `x` at time `t + n`.
+#' * `stata_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
+#'   `stata_diff(x, time = t)` is `x - L.x` and `stata_diff(x, 2, time = t)` is
 #'   `D.(D.x)`.
 #'
 #' Values are found by time, not by row position, so gaps in time give
@@ -15,10 +15,10 @@
 #' [dplyr::mutate()] with the panel identifier in `.by` or [dplyr::group_by()],
 #' as `xtset id year` would declare it.
 #'
-#' @param x A vector. `s_diff()` needs a numeric, logical, `Date`, date-time
+#' @param x A vector. `stata_diff()` needs a numeric, logical, `Date`, date-time
 #' or `difftime` vector.
 #' @param n A single non-negative whole number: the number of periods
-#' (`s_lag()`, `s_lead()`) or the order of the difference (`s_diff()`).
+#' (`stata_lag()`, `stata_lead()`) or the order of the difference (`stata_diff()`).
 #' @param time The time variable, unique within each panel. Supported types:
 #' * numbers, including labelled numbers and Stata `%tm`, `%tq` or `%ty`
 #'   variables read by haven, which arrive as plain numbers;
@@ -44,14 +44,14 @@
 #' zone. Must be `NULL` for numbers and period classes.
 #'
 #' @returns A vector like `x`, with `NA` where the required period is absent
-#' from the panel. `s_diff()` returns a double vector, or a `difftime` for
+#' from the panel. `stata_diff()` returns a double vector, or a `difftime` for
 #' dates, date-times and `difftime` input.
 #'
 #' @details
 #' Compared with [dplyr::lag()]: `lag(x, order_by = year)` takes the previous
 #' *row* after sorting, so after a gap (2002, then 2004) it returns the 2002
 #' value as the lag of 2004, and it silently accepts repeated years or a
-#' forgotten `.by`. `s_lag(x, time = year)` takes the value at `year - 1`,
+#' forgotten `.by`. `stata_lag(x, time = year)` takes the value at `year - 1`,
 #' returns `NA` across the gap, and errors on repeated times, as Stata's
 #' `L.x` does. The two agree on sorted, gap-free panels. For irregular event
 #' sequences, where the previous record is wanted however long ago it was,
@@ -73,9 +73,9 @@
 #' # 2004 has no 2003, so its lag is missing, unlike dplyr::lag()
 #' dplyr::mutate(
 #'   panel,
-#'   lag_x = s_lag(x, time = year),
-#'   lead_x = s_lead(x, time = year),
-#'   d_x = s_diff(x, time = year),
+#'   lag_x = stata_lag(x, time = year),
+#'   lead_x = stata_lead(x, time = year),
+#'   d_x = stata_diff(x, time = year),
 #'   .by = id
 #' )
 #'
@@ -84,13 +84,13 @@
 #'   month = as.Date(c("2024-01-31", "2024-02-29", "2024-04-30")),
 #'   amount = c(5, 7, 4)
 #' )
-#' dplyr::mutate(sales, previous = s_lag(amount, time = month, unit = "month"))
+#' dplyr::mutate(sales, previous = stata_lag(amount, time = month, unit = "month"))
 #' @family variable generation functions
 NULL
 
 #' @rdname panel
 #' @export
-s_lag <- function(x, n = 1L, time, delta = 1, unit = NULL) {
+stata_lag <- function(x, n = 1L, time, delta = 1, unit = NULL) {
   check_number_whole(n, min = 0)
   period <- panel_period(time, x, delta, unit)
   vctrs::vec_slice(x, panel_rows(period, n * delta, time))
@@ -98,7 +98,7 @@ s_lag <- function(x, n = 1L, time, delta = 1, unit = NULL) {
 
 #' @rdname panel
 #' @export
-s_lead <- function(x, n = 1L, time, delta = 1, unit = NULL) {
+stata_lead <- function(x, n = 1L, time, delta = 1, unit = NULL) {
   check_number_whole(n, min = 0)
   period <- panel_period(time, x, delta, unit)
   vctrs::vec_slice(x, panel_rows(period, -n * delta, time))
@@ -106,7 +106,7 @@ s_lead <- function(x, n = 1L, time, delta = 1, unit = NULL) {
 
 #' @rdname panel
 #' @export
-s_diff <- function(x, n = 1L, time, delta = 1, unit = NULL) {
+stata_diff <- function(x, n = 1L, time, delta = 1, unit = NULL) {
   check_number_whole(n, min = 0)
   calendar <- inherits(x, c("Date", "POSIXt"))
   out <- if (calendar || inherits(x, "difftime")) x else egen_numeric(x)

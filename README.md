@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata)
 [![R-CMD-check](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml)
@@ -25,17 +25,18 @@ The package focuses on exploring and preparing data:
   missing values, and tests of independence.
 - `codebook()` and `variables()` for variable inspection.
 - `isid()`, `duplicates_report()`, `assert()`, `is_first()`, and
-  `s_merge()` for checking keys and merging, and `print_all()` for
+  `stata_merge()` for checking keys and merging, and `print_all()` for
   listing every row.
-- `s_select()`, row calculations, conversion helpers, `std()`, `pc()`,
-  `as_dummy()`, panel lags (`s_lag()`, `s_lead()`, `s_diff()`), and
-  binning for data preparation.
+- `select_or_mutate()`, row calculations, conversion helpers, `std()`,
+  `pc()`, `as_dummy()`, panel lags (`stata_lag()`, `stata_lead()`,
+  `stata_diff()`), and binning for data preparation.
 
 tidystata `0.3.0` retires the import/export, regression-table, and
 detailed-codebook wrappers. See the [migration
 guide](https://socimh.github.io/tidystata/articles/migration.html) for
-direct package alternatives and breaking changes. This experimental
-package is undergoing stabilization; see
+direct package alternatives and breaking changes. From 0.3.0 the
+interface is stable: a released name or argument changes only after a
+deprecation period. See
 [NEWS](https://socimh.github.io/tidystata/news/index.html) for changes
 in each release.
 
@@ -123,6 +124,15 @@ console display. `unpreview_table()` removes that display setting.
 External dplyr and tidyr verbs retain their own container and grouping
 behavior, with preview settings preserved for supported operations.
 
+## Performance
+
+tidystata is built for large datasets. Its core summaries, row
+calculations and panel helpers run in compiled C++ code, and speed
+improvements never change results. Vector helpers such as `std()` and
+`stata_lag()` inside a grouped `mutate()` are called once per group, so
+with many thousands of groups they are slower than collapse or
+data.table; use those packages for the heaviest grouped workloads.
+
 ## Example
 
 ### Load the package
@@ -154,13 +164,16 @@ codebook(lifeexp)
 
 ### summ()
 
-Summarise selected numeric variables in `mtcars`.
+Summarise selected numeric variables in `lifeexp`.
 
 ``` r
-summ(mtcars, mpg, wt)
-#>   name type  n unique    min     mean        sd    max
-#> 1  mpg  dbl 32     25 10.400 20.09062 6.0269481 33.900
-#> 2   wt  dbl 32     29  1.513  3.21725 0.9784574  5.424
+summ(lifeexp, lexp, gnppc, safewater)
+#> # A tibble: 3 x 8
+#>   name      type      n unique   min   mean       sd   max
+#>   <chr>     <chr> <int>  <int> <dbl>  <dbl>    <dbl> <dbl>
+#> 1 lexp      dbl      68     20    57   71.7     5.16    79
+#> 2 gnppc     dbl      67     64   170 9137.  11497.   46650
+#> 3 safewater dbl      54     32    36   77.2    20.6    100
 ```
 
 Choose numeric variables deliberately: means and standard deviations of
@@ -176,9 +189,11 @@ guide](https://socimh.github.io/tidystata/articles/migration.html) for
 the date/datetime restrictions and cross-tabulation naming rules.
 
 ``` r
-summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
-#>   type missing  p50   sum
-#> 1  dbl       0 19.2 642.9
+summ(lifeexp, safewater, .stat = c("missing", "p50", "sum"))
+#> # A tibble: 1 x 4
+#>   type  missing   p50   sum
+#>   <chr>   <int> <dbl> <dbl>
+#> 1 dbl        14  82.5  4167
 ```
 
 With `.type = "table"`, numeric and calendar summaries share character
@@ -190,7 +205,7 @@ mode preserves numeric statistic types in the numeric summary.
 Tabulate a single variable:
 
 ``` r
-tab(dplyr::starwars, sex)
+tab(starwars, sex)
 #> # A tibble: 5 x 6
 #>   sex                n percent   cum valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
@@ -201,11 +216,12 @@ tab(dplyr::starwars, sex)
 #> 5 <NA>               4    4.60 100   NA         NA
 ```
 
-`tab1()` tabulates variables one by one as a list, and `varlist()` can
-select variables in a Stata style.
+`tab1()` tabulates variables one by one as a list. Select variables with
+tidyselect helpers such as `starts_with()`, `ends_with()` and
+`matches()`, or in a Stata style with `varlist()`.
 
 ``` r
-tab1(dplyr::starwars, varlist("*color"))
+tab1(starwars, ends_with("color"))
 #> $hair_color
 #> # A tibble: 12 x 6
 #>    value             n percent    cum valid valid_cum
@@ -258,6 +274,7 @@ tab1(dplyr::starwars, varlist("*color"))
 #> 13 unknown           3    3.45  86.2  3.45      86.2
 #> 14 white             1    1.15  87.4  1.15      87.4
 #> 15 yellow           11   12.6  100   12.6      100
+# Equivalent: matches("color$") or varlist("*color")
 ```
 
 One-way tabulation also counts list-column values. Selecting no
@@ -267,7 +284,7 @@ lists by default. Matrix columns are unsupported.
 `tab2()` cross-tabulates two variables.
 
 ``` r
-tab2(dplyr::starwars, sex, gender)
+tab2(starwars, sex, gender)
 #> # A tibble: 5 x 4
 #>   `sex \\ gender` feminine masculine  `NA`
 #>   <chr>              <int>     <int> <int>
@@ -288,24 +305,21 @@ container. `fre1()` returns a list whose tables preserve that container.
 Request `.type = "tibble"` explicitly when a tibble is required.
 
 ``` r
-fre(dplyr::starwars, sex)
-#> # A tibble: 7 x 6
-#>   sex                n percent   cum  valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
-#> 1 female            16   18.4   18.4  19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5   1.20      20.5
-#> 3 male              60   69.0   88.5  72.3       92.8
-#> 4 none               6    6.90  95.4   7.23     100  
-#> 5 Valid Total       83   95.4   NA   100         NA  
-#> 6 <NA>               4    4.60 100    NA         NA  
-#> 7 Total             87  100     NA    NA         NA
+fre(lifeexp, region)
+#> # A tibble: 4 x 6
+#>   region               n percent   cum valid valid_cum
+#>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
+#> 2 North America       14    20.6  85.3  20.6      85.3
+#> 3 South America       10    14.7 100    14.7     100  
+#> 4 Total               68   100    NA    NA        NA
 ```
 
 For optional rich formatting, install `flextable` and request it
 explicitly:
 
 ``` r
-fre(dplyr::starwars, sex, .type = "flextable")
+fre(lifeexp, region, .type = "flextable")
 ```
 
 ### Row calculations and binning

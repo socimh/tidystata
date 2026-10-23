@@ -53,12 +53,12 @@ test_that("number parsing retains exact diagnostic rows and positions", {
   x <- c("$12.50", "bad", NA, "NaN", "4 kg", "invalid")
   original <- x
 
-  expect_warning(result <- as_numeric(x), "parsing failure")
-  expect_identical(as.vector(result), c(12.5, NA, NA, NaN, 4, NA))
+  expect_warning(result <- as_numeric(x), "3 values are not numbers")
+  expect_identical(as.vector(result), c(12.5, NA, NA, NaN, NA, NA))
   problems <- readr::problems(result)
-  expect_identical(problems$row, c(2L, 6L))
-  expect_identical(problems$actual, c("bad", "invalid"))
-  expect_identical(problems$expected, rep("a number", 2))
+  expect_identical(problems$row, c(2L, 5L, 6L))
+  expect_identical(problems$actual, c("bad", "4 kg", "invalid"))
+  expect_identical(problems$expected, rep("a number", 3))
   expect_identical(x, original)
 })
 
@@ -66,7 +66,10 @@ test_that("factor conversion uses level text and level codes", {
   x <- ordered(c("20", "10", NA, "20"), levels = c("20", "10", "unused"))
 
   expect_identical(as_character(x), c("20", "10", NA_character_, "20"))
+  # A text level, even unused, keeps level codes.
   expect_identical(as_numeric(x), c(1, 2, NA_real_, 1))
+  numeric_levels <- ordered(c("20", "10", NA), levels = c("20", "10"))
+  expect_identical(as_numeric(numeric_levels), c(20, 10, NA_real_))
 })
 
 test_that("labelled conversion preserves raw values and partial labels", {

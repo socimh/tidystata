@@ -120,7 +120,7 @@ test_that("survey preparation, key checks, joins and panel summaries compose", {
     score = haven::labelled_spss(destring(score), na_values = 99)
   )
   expect_invisible(isid(prepared, id, wave))
-  joined <- s_merge(
+  joined <- stata_merge(
     prepared,
     tibble::tibble(id = c("a", "b"), region = c("north", "south")),
     "m:1",
@@ -128,7 +128,11 @@ test_that("survey preparation, key checks, joins and panel summaries compose", {
     assert = "match",
     report = FALSE
   )
-  out <- dplyr::mutate(joined, change = s_diff(score, time = wave), .by = id)
+  out <- dplyr::mutate(
+    joined,
+    change = stata_diff(score, time = wave),
+    .by = id
+  )
   expect_identical(out$change, c(2, NA, NA, NA, 5, NA))
   expect_warning(
     summary <- summ(out, score, .by = region, .stat = c("n", "mean", "miss_n")),

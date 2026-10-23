@@ -617,7 +617,7 @@ test_that("milestone frequency defaults remain usable as data", {
   d <- tibble::tibble(x = c("a", "a", "b"), y = c("u", "v", "u"))
   expect_s3_class(fre(d, x), "tbl_df")
   expect_named(fre1(d, x), "x")
-  out <- xtab(d, x, y, .total = TRUE)
+  out <- tab2(d, x, y, .total = TRUE)
   expect_s3_class(out, "tbl_df")
   expect_equal(tail(out$total, 1), 3)
 })
@@ -895,7 +895,7 @@ for (.function_name in c("fre", "fre1", "fre2")) {
           }
           expect_equal(out, fre1(d, x, y, .type = "list"))
         } else {
-          out <- xtab(d, x, y, .total = TRUE)
+          out <- tab2(d, x, y, .total = TRUE)
           expect_identical(class(out), class(d))
           expect_equal(tail(out$total, 1), nrow(d))
           expect_equal(sum(head(out$total, -1)), nrow(d))
@@ -910,7 +910,7 @@ for (.function_name in c("fre", "fre1", "fre2")) {
           )
           expect_equal(
             tibble::as_tibble(out),
-            xtab(d, x, y, .type = "tibble", .total = TRUE)
+            tab2(d, x, y, .type = "tibble", .total = TRUE)
           )
         }
         expect_identical(d, before)
@@ -925,7 +925,7 @@ test_that("milestone optional frequency formatting remains explicit", {
   expect_s3_class(fre(d, x, .type = "flextable"), "flextable")
   expect_s3_class(fre1(d, x, y, .type = "flextable"), "flextable")
   expect_s3_class(
-    xtab(d, x, y, .type = "flextable", .total = TRUE),
+    tab2(d, x, y, .type = "flextable", .total = TRUE),
     "flextable"
   )
   expect_s3_class(fre1(d, x, y, .type = "tibble"), "tbl_df")
@@ -958,7 +958,7 @@ for (.scenario in names(.milestone_frequency_cases)) {
           .format_function,
           fre = fre(d, x, .type = "flextable"),
           fre1 = fre1(d, x, y, .type = "flextable"),
-          fre2 = xtab(d, x, y, .type = "flextable", .total = TRUE)
+          fre2 = tab2(d, x, y, .type = "flextable", .total = TRUE)
         )
         expect_s3_class(out, "flextable")
         displayed <- out$body$dataset
@@ -1024,10 +1024,10 @@ test_that("spatial aggregation counts attributes without sticky geometry", {
   calls <- list(
     tab = function(x) tab(x, x),
     tab1 = function(x) tab1(x, x),
-    tab2 = function(x) xtab(x, g, x),
+    tab2 = function(x) tab2(x, g, x),
     fre = function(x) fre(x, x),
     fre1 = function(x) fre1(x, x),
-    fre2 = function(x) xtab(x, g, x, .total = TRUE),
+    fre2 = function(x) tab2(x, g, x, .total = TRUE),
     summ = function(x) summ(x, x),
     tabstat = function(x) tabstat(x, x)
   )
@@ -1099,16 +1099,16 @@ test_that("blank cross-tab categories have collision-safe headers", {
     x = c("a", "a", "b", "b"),
     y = c("", "b", "<empty>", "<empty>1")
   )
-  out <- xtab(data, x, y)
+  out <- tab2(data, x, y)
   expect_equal(out[["<empty>2"]], c(1L, 0L))
   expect_equal(out[["<empty>"]], c(0L, 1L))
   expect_equal(out[["<empty>1"]], c(0L, 1L))
   expect_equal(rowSums(as.data.frame(out[-1])), c(2, 2))
-  expect_equal(tail(xtab(data, x, y, .total = TRUE)$total, 1), 4)
-  expect_equal(xtab(data, y, x, .flip = TRUE), out)
+  expect_equal(tail(tab2(data, x, y, .total = TRUE)$total, 1), 4)
+  expect_equal(tab2(data, y, x, .flip = TRUE), out)
 
   missing <- tibble::tibble(x = c("a", "a", "b"), y = c("", NA, ""))
-  out <- xtab(missing, x, y)
+  out <- tab2(missing, x, y)
   expect_equal(out[["<empty>"]], c(1L, 1L))
   expect_equal(out[["NA"]], c(1L, 0L))
   expect_identical(missing$y, c("", NA_character_, ""))
@@ -1133,15 +1133,15 @@ test_that("logical cross-tabulation axes have consistent ordering", {
     x = c(FALSE, FALSE, TRUE, NA),
     y = c(TRUE, FALSE, NA, FALSE)
   )
-  out <- xtab(data, x, y)
+  out <- tab2(data, x, y)
   expect_identical(names(out)[-1], c("FALSE", "TRUE", "NA"))
   expect_identical(out[[1]], c(FALSE, TRUE, NA))
   expect_identical(
-    names(xtab(data, x, y, .total = TRUE))[-1],
+    names(tab2(data, x, y, .total = TRUE))[-1],
     c("FALSE", "TRUE", "NA", "total")
   )
   expect_identical(
-    names(xtab(data, x, y, .flip = TRUE))[-1],
+    names(tab2(data, x, y, .flip = TRUE))[-1],
     c("FALSE", "TRUE", "NA")
   )
 })
@@ -1217,30 +1217,30 @@ test_that("frequency group ties respect factors and multiple keys", {
 
 test_that("cross-tab columns follow value and level order with missing last", {
   numbers <- tibble::tibble(x = c("a", "b", "b", "c"), y = c(3, 1, 2, 10))
-  expect_identical(names(xtab(numbers, x, y))[-1], c("1", "2", "3", "10"))
+  expect_identical(names(tab2(numbers, x, y))[-1], c("1", "2", "3", "10"))
   text <- tibble::tibble(x = c("a", "b", "b"), y = c("z", NA, "m"))
-  expect_identical(names(xtab(text, x, y))[-1], c("m", "z", "NA"))
+  expect_identical(names(tab2(text, x, y))[-1], c("m", "z", "NA"))
   expect_identical(
-    names(xtab(text, x, y, .total = TRUE))[-1],
+    names(tab2(text, x, y, .total = TRUE))[-1],
     c("m", "z", "NA", "total")
   )
   levels <- tibble::tibble(
     x = c("a", "b"),
     y = factor(c("lo", "hi"), levels = c("hi", "lo"))
   )
-  expect_identical(names(xtab(levels, x, y))[-1], c("hi", "lo"))
+  expect_identical(names(tab2(levels, x, y))[-1], c("hi", "lo"))
   blank <- tibble::tibble(x = c("a", "b", "b"), y = c("z", "", "a"))
-  expect_identical(names(xtab(blank, x, y))[-1], c("<empty>", "a", "z"))
-  out <- xtab(numbers, x, y)
+  expect_identical(names(tab2(blank, x, y))[-1], c("<empty>", "a", "z"))
+  out <- tab2(numbers, x, y)
   expect_equal(out[["10"]], c(0L, 0L, 1L))
   expect_equal(out[["1"]], c(0L, 1L, 0L))
 })
 
 test_that("cross-tabs reject one-way sorting controls", {
   d <- tibble::tibble(g = c("a", "b", "b"), x = c("p", "q", "q"))
-  expect_error(xtab(d, x, g, .desc = TRUE), "`.desc`.*tab2")
+  expect_error(tab2(d, x, g, .desc = TRUE), "`.desc`.*tab2")
   expect_error(
-    xtab(d, x, g, .group_order = "frequency", .total = TRUE),
+    tab2(d, x, g, .group_order = "frequency", .total = TRUE),
     "`.group_order`.*tab2"
   )
 })

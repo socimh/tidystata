@@ -28,18 +28,19 @@ older installed package.
 
 ## Changes from the GitHub 0.2.0 baseline
 
-Compared with upstream commit `12709f6`, 54 exported objects become 46:
-11 exports are removed, while `timer()`, `preview_table()`, and
-`unpreview_table()` are added. This comparison includes local changes made
-before the four-wrapper milestone and the restored printing/slicing helpers.
+The table lists every export of statart 0.2.0 (upstream commit `12709f6`)
+that is renamed, retired or reworked. Functions new in 0.3.0 are listed in
+NEWS.
 
 | Previous upstream exports | Current destination or replacement |
 | --- | --- |
 | `s_time()` | Renamed to `timer()`; timing messages use compact duration text. |
-| `cut_quantile()` | Now `xtile()`, the Stata command it follows; `cut_quantile()` stays as a quiet alias. |
-| `s_match()` | Renamed to `varlist()`, since it parses a Stata varlist string; the old name works with a deprecation warning. |
-| `s_try()` | Now `capture()`, after Stata's `capture`; `s_try()` stays as a quiet alias. |
-| `names_as_column()` | Now `ds(.type = "table")`; `names_as_column()` and `ds_as_column()` stay as quiet aliases. |
+| `cut_quantile()` | Now `xtile()`, the Stata command it follows; `cut_quantile()` stays as an alias beside `cut_breaks()` and `cut_length()`. |
+| `s_match()` | Renamed to `varlist()`, since it parses a Stata varlist string. |
+| `s_type()`, `s_unit()` | Renamed to `var_type()` and `var_unit()`. |
+| `s_try()` | Renamed to `capture()`, after Stata's `capture`. |
+| `names_as_column()`, `ds_as_column()` | Use `ds(.type = "table")`. |
+| `s_select()` | Renamed to `select_or_mutate()`: each argument selects a column or computes one. |
 | `tab2()`, `fre2()` | Kept as the cross-tabulation functions; `tab2()` with three or more variables now returns every pairwise table, as Stata's `tab2` does. |
 | `read_data()`, `write_data()` | Retired; use format-specific packages directly. |
 | `codebook_detail()` | Retired; use `codebook()` or `datawizard::data_codebook()`. |
@@ -61,18 +62,25 @@ The package itself is renamed from statart to tidystata: replace
 labels but is rebuilt from World Bank World Development Indicators, so its
 values differ slightly from Stata's `lifeexp.dta`.
 
+Names no longer start with `s_`, which stood for statart. Functions added
+during 0.3.0 development under that prefix are renamed too: `s_merge()`,
+`s_lag()`, `s_lead()` and `s_diff()` are now `stata_merge()`, `stata_lag()`,
+`stata_lead()` and `stata_diff()`; `s_print()` is replaced by
+`print_headtail()`, `print_interval()` and `print_all()`; and `s_tag()` by
+`is_first()`. None of the old names remain.
+
 ## Renamed arguments
 
 Argument names now follow one rule: options after a `...` that takes columns
 or expressions are dotted, and functions without `...` use plain names.
-The old names still work with a lifecycle deprecation warning.
+The old names are removed.
 
 | Old call | New call |
 | --- | --- |
 | `destring(.x)`, `decode(.x)`, `var_type(.x, .abbr)`, `var_unit(.x)` | `x`, `abbr` |
 | `na_if_value(.x, .value)`, `value_if_na(.x, .value)` | `x`, `value` |
 | `timer(.x, .on_error)`, `capture(.fn)`, `set_seed(.fn)` | `x`, `on_error` |
-| `s_merge(.keep, .assert, .generate, .report)` | `keep`, `assert`, `generate`, `report` |
+| `stata_merge(.keep, .assert, .generate, .report)` | `keep`, `assert`, `generate`, `report` |
 | `varlist(ignore.case)` | `ignore_case` |
 | `summ(.na.rm = TRUE)`, `tabstat(.na.rm = TRUE)` | `.missing = FALSE` |
 | `summ(.mode)`, `tabstat(.mode)` | `.type` (same values) |
@@ -84,29 +92,35 @@ gain `.by`, which returns one cross-table per group in a named list.
 
 ## Stata names and aliases
 
-Several functions now carry their Stata names. The earlier names still work as
-quiet aliases, with no notice, and are documented on the same help pages.
+Several functions now carry their Stata names. Earlier names that read
+naturally in R still work as aliases, with no notice, and are documented on the
+same help pages.
 
 | Stata | Function | Aliases |
 | --- | --- | --- |
-| `tab2 x y` | `tab2()`; `fre2()` adds totals | `xtab()` |
+| `tab2 x y` | `tab2()`; `fre2()` adds totals | |
 | `mvdecode x, mv(-98 -99)` | `mvdecode(x, c(-98, -99))` | `na_if_value()` |
 | `mvencode x, mv(0)` | `mvencode(x, 0)` | `value_if_na()` |
 | `destring` | `destring()` | `as_numeric()` |
 | `decode` | `decode()` | `as_character()` |
 | `tostring` | `tostring()` (new: codes as text, ignoring value labels) | |
 | `egen pc()` | `pc()` | `pct()` |
-| `egen tag()` | `is_first()` | `s_tag()` |
+| `egen tag()` | `is_first()` | |
 | `egen rownvals()` (egenmore) | `row_nvals()` (new: ignores missing values unless `.missing = TRUE`) | |
 | `tab x, gen(x_)` | `as_dummy()` | `tab_gen()` |
 | `xtile` | `xtile()` | `cut_quantile()` |
-| `capture` | `capture()` | `s_try()` |
-| `ds` | `ds()`; `ds(.type = "table")` for a table | `ds_as_column()`, `names_as_column()` |
-| `list` | `s_print()` (new: `style = "headtail"`, `"interval"` or `"all"`) | |
+| `capture` | `capture()` | |
+| `ds` | `ds()`; `ds(.type = "table")` for a table | |
+| `list` | `print_all()` (new); `print_headtail()` or `print_interval()` for part | |
 | `set seed 123` | `set_seed(123)`, now also alone; the pipe form `x |> set_seed(123)` is unchanged | |
 
-`var_type()` and `var_unit()` are now the primary names; `s_type()` and
-`s_unit()` still work but are deprecated with a lifecycle warning.
+`destring()` now reads text as Stata does: `"12abc"`, `"10 kg"` and dates
+become `NA` with a warning rather than the first number found, and
+`ignore = "kg"` removes characters first, like Stata's `ignore()`. A factor
+whose levels are all numbers gives those numbers rather than level codes.
+sjlabelled also exports `as_numeric()` and `as_character()`, with different
+results for non-numeric text and unlabelled values; `destring()` and
+`decode()` avoid the clash.
 `pct()` shares its name with `gt::pct()`, so prefer `pc()` when gt is attached.
 
 One behaviour changed: several codes in `na_if_value(x, c(-98, -99))` now
@@ -165,11 +179,11 @@ For model formulas, factors already expand to dummies.
 
 | Stata | tidystata |
 | --- | --- |
-| `xtset id year` then `gen l = L.x` | `mutate(d, l = s_lag(x, time = year), .by = id)` |
-| `L2.x`, `F.x`, `D.x`, `D2.x` | `s_lag(x, 2, ...)`, `s_lead(x, ...)`, `s_diff(x, ...)`, `s_diff(x, 2, ...)` |
-| `xtset id year, delta(5)` | `s_lag(x, time = year, delta = 5)` |
-| `xtset id month` (`%tm`) | `s_lag(x, time = date, unit = "month")` |
-| `xtset id t` with `%tc` clock times | `s_lag(x, time = datetime, unit = "hour")` |
+| `xtset id year` then `gen l = L.x` | `mutate(d, l = stata_lag(x, time = year), .by = id)` |
+| `L2.x`, `F.x`, `D.x`, `D2.x` | `stata_lag(x, 2, ...)`, `stata_lead(x, ...)`, `stata_diff(x, ...)`, `stata_diff(x, 2, ...)` |
+| `xtset id year, delta(5)` | `stata_lag(x, time = year, delta = 5)` |
+| `xtset id month` (`%tm`) | `stata_lag(x, time = date, unit = "month")` |
+| `xtset id t` with `%tc` clock times | `stata_lag(x, time = datetime, unit = "hour")` |
 
 There is no `xtset` state to declare: give `time =` in each call and the panel
 with `.by`. Unlike `dplyr::lag()`, which shifts rows, gaps in time give missing
@@ -209,7 +223,7 @@ are the recommended R tools:
 
 statar can be attached alongside tidystata. Only `tab()` and `xtile()` share
 names; attach tidystata last, or call `tidystata::tab()`. statar's
-`tlag()`/`tlead()` correspond to tidystata's `s_lag()`/`s_lead()`.
+`tlag()`/`tlead()` correspond to tidystata's `stata_lag()`/`stata_lead()`.
 
 `findit()` looks up the R equivalent of a Stata command from the console, such
 as `findit(reg)` or `findit("merge 1:1 id, keep(match)")`; Stata's
@@ -291,10 +305,10 @@ unchanged.
 To request rich formatting, install `flextable` and specify the type:
 
 ```r
-tidystata::fre(mtcars, cyl)
-tidystata::fre1(mtcars, cyl, gear)
-tidystata::fre(mtcars, cyl, .type = "tibble")
-tidystata::fre(mtcars, cyl, .type = "flextable")
+tidystata::fre(lifeexp, region)
+tidystata::fre1(lifeexp, region, safewater > 50)
+tidystata::fre(lifeexp, region, .type = "tibble")
+tidystata::fre(lifeexp, region, .type = "flextable")
 ```
 
 The default return type is independent of whether `flextable` is installed.
@@ -386,9 +400,8 @@ replace the archived implementation's duplicate-row and odd-budget behavior.
 
 ## Variable names and metadata
 
-`ds()` returns a character vector of selected names. `ds_as_column()` and
-`names_as_column()` are equivalent and return a one-column table named `name`
-in the input container.
+`ds()` returns a character vector of selected names. `ds(.type = "table")`
+returns a one-column table named `name` in the input container.
 Use tidyselect in `...` to select or rename existing columns; it does not create
 computed columns. Selection on grouped data retains grouping keys, following
 `dplyr::select()`; ungroup first when these keys should not be included.
@@ -423,13 +436,13 @@ a zero-column selection returns an empty inventory.
 `browse()` opens the selected data through `tibble::view()` interactively and
 returns those data invisibly. In a noninteractive script it returns the data
 without opening a viewer. It returns data, rather than a vector of column names;
-use `ds()` for names. Existing grouping follows `s_select()`.
+use `ds()` for names. Existing grouping follows `select_or_mutate()`.
 
-`s_select()` first tries `dplyr::select()` and uses `dplyr::transmute()` only
-when selection fails. A successful operation is no longer repeated, and its
-warnings are visible. A failed selection can still evaluate user code before
-fallback, so compute random draws and expressions with side effects in a prior
-`mutate()` step, then select the resulting column names.
+`select_or_mutate()` (formerly `s_select()`) classifies each argument before
+evaluating anything. Names, positions and selection helpers select existing
+columns; expressions that use columns, such as `bmi = mass / height^2`, are
+computed once and then selected, so `half = y / x` no longer selects `y`.
+Misspelled names are an error listing every unmatched name.
 
 ## Column summary statistics
 
@@ -443,7 +456,7 @@ Select statistics through `.stat`. The aliases `missing`, `p25`, `p50`, and
 and order are retained, and aliases can coexist with canonical names:
 
 ```r
-tidystata::summ(mtcars, mpg, .stat = c("missing", "miss_n", "p50", "median", "sum"))
+tidystata::summ(lifeexp, safewater, .stat = c("missing", "miss_n", "p50", "median", "sum"))
 ```
 
 Unknown statistics produce an error. `sum` is supported for numeric summaries;

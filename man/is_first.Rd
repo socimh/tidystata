@@ -2,12 +2,9 @@
 % Please edit documentation in R/is_first.R
 \name{is_first}
 \alias{is_first}
-\alias{s_tag}
 \title{Flag the first row of each group}
 \usage{
 is_first(..., .missing = FALSE)
-
-s_tag(..., .missing = FALSE)
 }
 \arguments{
 \item{...}{Vectors of equal length that define the groups. Omit them in
@@ -30,8 +27,7 @@ its arguments and \code{FALSE} for the others, like Stata's
 for example to count or summarise each group once.
 
 Unlike \code{\link[=duplicates_tag]{duplicates_tag()}}, which counts the other rows sharing the same
-values, \code{is_first()} marks one row per group. \code{s_tag()} is an alias of
-\code{is_first()}.
+values, \code{is_first()} marks one row per group.
 }
 \examples{
 panel <- tibble::tibble(
@@ -50,6 +46,6 @@ dplyr::mutate(panel, first = is_first(), .by = id)
 Other data checking functions:
 \code{\link[=assert]{assert()}},
 \code{\link{keys}},
-\code{\link[=s_merge]{s_merge()}}
+\code{\link[=stata_merge]{stata_merge()}}
 }
 \concept{data checking functions}

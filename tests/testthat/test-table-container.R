@@ -35,7 +35,7 @@ test_that("data.table preview assignment returns the native alias", {
 
 test_that("empty cross-tabs cannot silently override explicit rich output", {
   expect_error(
-    xtab(
+    tab2(
       data.frame(x = 1),
       tidyselect::starts_with("absent"),
       .type = "flextable",
@@ -48,15 +48,15 @@ test_that("empty cross-tabs cannot silently override explicit rich output", {
 test_that("table APIs preserve supported containers and usable values", {
   calls <- list(
     tab = function(x) tab(x, g),
-    tab2 = function(x) xtab(x, g, x),
+    tab2 = function(x) tab2(x, g, x),
     fre = function(x) fre(x, g),
-    fre2 = function(x) xtab(x, g, x, .total = TRUE),
+    fre2 = function(x) tab2(x, g, x, .total = TRUE),
     summ = function(x) summ(x, x),
     tabstat = function(x) tabstat(x, x),
     codebook = function(x) codebook(x),
     variables = function(x) variables(x),
     variables_search = function(x) variables_search(x, "g"),
-    ds_as_column = function(x) ds_as_column(x)
+    ds_table = function(x) ds(x, .type = "table")
   )
   for (kind in names(container_inputs())) {
     input <- container_inputs()[[kind]]
@@ -87,7 +87,7 @@ test_that("list members preserve containers and explicit output wins", {
     expect_s3_class(fre1(input, g, .type = "tibble"), "tbl_df")
     expect_s3_class(fre(input, g, .type = "tibble"), "tbl_df")
     expect_s3_class(
-      xtab(input, g, x, .type = "tibble", .total = TRUE),
+      tab2(input, g, x, .type = "tibble", .total = TRUE),
       "tbl_df"
     )
     expect_identical(
@@ -103,10 +103,10 @@ test_that("empty branches preserve containers", {
     outputs <- list(
       tab(input, tidyselect::starts_with("absent")),
       fre(input, tidyselect::starts_with("absent")),
-      xtab(input, tidyselect::starts_with("absent")),
-      xtab(input, tidyselect::starts_with("absent"), .total = TRUE),
+      tab2(input, tidyselect::starts_with("absent")),
+      tab2(input, tidyselect::starts_with("absent"), .total = TRUE),
       codebook(input, tidyselect::starts_with("absent")),
-      ds_as_column(input, tidyselect::starts_with("absent")),
+      ds(input, tidyselect::starts_with("absent"), .type = "table"),
       variables_search(input, "absent")
     )
     for (output in outputs) {

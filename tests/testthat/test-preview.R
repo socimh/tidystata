@@ -392,6 +392,7 @@ test_that("row binding uses first table settings and retains every row", {
 })
 
 test_that("pivots preserve settings while respecting their changed table structure", {
+  skip_if_not_installed("tidyr")
   data <- tibble::tibble(
     id = 1:20,
     marker = sprintf("row%03d", 1:20),
@@ -417,6 +418,7 @@ test_that("pivots preserve settings while respecting their changed table structu
 })
 
 test_that("pivot selectors retain caller context without extra evaluations", {
+  skip_if_not_installed("tidyr")
   data <- tibble::tibble(id = 1:3, a = 1:3, b = 4:6)
   calls <- 0L
   choose <- function() {
@@ -624,25 +626,6 @@ test_that("slicing retains explicit row names and regenerates automatic ones", {
     rownames(slice_interval(explicit, n = 3)),
     letters[c(1, 4, 8)]
   )
-})
-
-test_that("s_print() matches the print helpers for each style", {
-  data <- tibble::tibble(i = 1:30, sq = (1:30)^2)
-  expect_identical(
-    capture.output(s_print(data)),
-    capture.output(print_headtail(data))
-  )
-  expect_identical(
-    capture.output(s_print(data, "interval", n = 4)),
-    capture.output(print_interval(data, n = 4))
-  )
-  expect_identical(
-    capture.output(s_print(data, "all")),
-    capture.output(print_all(data))
-  )
-  expect_invisible(s_print(data, "interval"))
-  expect_identical(withVisible(s_print(data))$value, data)
-  expect_error(s_print(data, "middle"))
 })
 
 test_that("previews report invalid input", {

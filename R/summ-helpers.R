@@ -10,10 +10,11 @@ summ_keep_measured <- function(.data, .data_num, group_vars) {
 }
 
 is_summable_chr <- function(chr) {
-  chr |>
-    stringr::str_detect(
-      "^(lgl|int|dbl|int64|units|drtn|time|date|dttm|fct|ord)(\\+lbl)?( \\[.*\\])?$"
-    )
+  grepl(
+    "^(lgl|int|dbl|int64|units|drtn|time|date|dttm|fct|ord)(\\+lbl)?( \\[.*\\])?$",
+    chr,
+    perl = TRUE
+  )
 }
 
 summ_warn_vars <- function(vars, suffix) {
@@ -22,11 +23,7 @@ summ_warn_vars <- function(vars, suffix) {
   } else if (length(vars) == 1) {
     message <- paste0(vars, " is ", suffix)
     cli::cli_warn("{message}")
-  } else if (
-    stringr::str_length(vars[1]) +
-      stringr::str_length(vars[2]) >
-      40
-  ) {
+  } else if (nchar(vars[1]) + nchar(vars[2]) > 40) {
     message <- paste0(
       vars[1],
       ", ... are ",
@@ -767,12 +764,9 @@ summ_list <- function(
     numeric <- numeric |>
       dplyr::mutate(
         name = dplyr::case_when(
-          !is_summable_chr(type) ~
-            stringr::str_glue("***{name}"),
-          type %in% c("fct", "ord") ~
-            stringr::str_glue("**{name}"),
-          stringr::str_detect(type, "lbl$") ~
-            stringr::str_glue("*{name}"),
+          !is_summable_chr(type) ~ paste0("***", name),
+          type %in% c("fct", "ord") ~ paste0("**", name),
+          grepl("lbl$", type) ~ paste0("*", name),
           TRUE ~ name
         ) |>
           as.character()
@@ -825,7 +819,7 @@ summ_list <- function(
     datetime = datetime,
     time = time
   ) |>
-    purrr::discard(~ is.null(.))
+    Filter(f = Negate(is.null))
 
   if (type == "table") {
     if (length(out) > 0) {

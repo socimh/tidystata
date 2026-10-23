@@ -78,23 +78,20 @@ variables <- function(.data, ...) {
 variables_search <- function(.data, string, ...) {
   check_string(string)
   if (is.character(string)) {
-    string <- string |>
-      stringr::str_replace_all("\\*", ".*") |>
-      stringr::str_replace_all("~", ".+") |>
-      stringr::str_replace_all("\\?", ".") |>
-      purrr::map_chr(num_range_to_regex)
-    string <- stringr::str_glue("(?i).*{string}.*")
+    string <- varlist_wildcards(string) |>
+      vapply(num_range_to_regex, character(1), USE.NAMES = FALSE)
+    string <- paste0("(?i).*", string, ".*")
   }
 
   out <- variables(.data, ...)
   if ("label" %in% colnames(out)) {
     dplyr::filter(
       out,
-      stringr::str_detect(.data$name, string) |
-        stringr::str_detect(.data$label, string)
+      grepl(string, .data$name, perl = TRUE) |
+        grepl(string, .data$label, perl = TRUE)
     )
   } else {
-    dplyr::filter(out, stringr::str_detect(.data$name, string))
+    dplyr::filter(out, grepl(string, .data$name, perl = TRUE))
   }
 }
 

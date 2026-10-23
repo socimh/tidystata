@@ -4,15 +4,13 @@
 \alias{set_seed}
 \title{Set the random seed, in a pipeline or alone}
 \usage{
-set_seed(x, seed, .fn = lifecycle::deprecated())
+set_seed(x, seed)
 }
 \arguments{
 \item{x}{An expression evaluated after setting the seed. When \code{seed} is
 omitted, \code{x} is the seed itself, as in \code{set_seed(123)}.}
 
 \item{seed}{An integer for reproducibility.}
-
-\item{.fn}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} instead.}
 }
 \value{
 The expression's result, preserving its visibility. Used alone,

@@ -3,15 +3,9 @@
 \name{names}
 \alias{names}
 \alias{ds}
-\alias{ds_as_column}
-\alias{names_as_column}
 \title{List column names by tidyselect}
 \usage{
 ds(.data, ..., .type = c("vector", "table"))
-
-ds_as_column(.data, ...)
-
-names_as_column(.data, ...)
 }
 \arguments{
 \item{.data}{A data frame, tibble, or data.table. \code{ds()} also accepts a
@@ -28,8 +22,7 @@ vector, like Stata's \code{ds}; \code{"table"} returns them as a one-column tabl
 }
 \value{
 \code{ds()} returns a character vector. \code{ds(.type = "table")} returns a
-table with one character column, \code{name}; \code{ds_as_column()} and
-\code{names_as_column()} are aliases for it. On ungrouped data, an empty
+table with one character column, \code{name}. On ungrouped data, an empty
 selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
 data.frame, tibble, or data.table container and supported preview settings,
 but do not recreate grouping or arbitrary subclasses on the new rows.
@@ -47,10 +40,12 @@ rename as usual. Data-type predicates such as \code{where(is.numeric)} are not
 available because an inventory contains no column data.
 }
 \examples{
-ds(dplyr::starwars) # equivalent to names(dplyr::starwars)
-ds(dplyr::starwars, homeworld:starships)
-ds(dplyr::starwars, ends_with("color"), .type = "table")
-ds_as_column(dplyr::starwars, where(is.character))
+starwars <- dplyr::starwars
+
+ds(starwars) # equivalent to names(starwars)
+ds(starwars, homeworld:starships)
+ds(starwars, ends_with("color"), .type = "table")
+ds(starwars, where(is.character), .type = "table")
 
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))

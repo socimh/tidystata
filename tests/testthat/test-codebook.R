@@ -407,7 +407,7 @@ test_that("codebook structured columns count complete rows rather than cells", {
   expect_identical(d, before)
 })
 
-for (.name in c("codebook", "browse", "s_select")) {
+for (.name in c("codebook", "browse", "select_or_mutate")) {
   local({
     fn_name <- .name
     test_that(paste(fn_name, "does not evaluate an unused transmute branch"), {

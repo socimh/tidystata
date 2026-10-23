@@ -136,7 +136,7 @@ test_that("summ: group with NA in grouping variable", {
   expect_true(any(is.na(result$group)))
 })
 
-test_that("summ: .na.rm=TRUE removes NA groups", {
+test_that("summ: .missing = FALSE removes NA groups", {
   withr::local_preserve_seed()
   df <- tibble::tibble(
     group = c(rep("A", 50), rep(NA, 50)),
@@ -616,8 +616,8 @@ test_that("named constants are computed and grouping keys are never measured", {
   expect_identical(out$n, rep(1L, 4))
   expect_identical(nrow(tab(tb, constant = "x")), 1L)
   expect_identical(tab(tb, constant = "x")$n, 4L)
-  expect_identical(names(s_select(tb, one = 1)), "one")
-  expect_identical(s_select(tb, one = 1)$one, rep(1, 4))
+  expect_identical(names(select_or_mutate(tb, one = 1)), "one")
+  expect_identical(select_or_mutate(tb, one = 1)$one, rep(1, 4))
   expect_error(summ(tb, other = girl, .by = girl), "Grouping column `girl`")
   expect_error(tab(tb, other = girl, .by = girl), "Grouping column `girl`")
   kept <- summ(tb, tidyselect::where(is.numeric), .by = girl, .name = TRUE)

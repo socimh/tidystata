@@ -12,12 +12,12 @@ browse(.data, ...)
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to browse.
 Omit to browse all columns. Selection and computed expressions follow
-\code{\link[=s_select]{s_select()}}.}
+\code{\link[=select_or_mutate]{select_or_mutate()}}.}
 }
 \value{
 The viewed data, invisibly, with its data-frame class preserved.
 With no selection this is the input data; otherwise it is the result of
-\code{\link[=s_select]{s_select()}}. The input is not modified.
+\code{\link[=select_or_mutate]{select_or_mutate()}}. The input is not modified.
 }
 \description{
 Open all or selected columns in an interactive data viewer. Outside an
@@ -25,18 +25,19 @@ interactive session, no viewer is opened.
 }
 \details{
 Viewing uses \code{\link[tibble:view]{tibble::view()}}. Existing grouping and grouping-key retention
-follow \code{\link[=s_select]{s_select()}}. Assign the invisible return value to keep the viewed
+follow \code{\link[=select_or_mutate]{select_or_mutate()}}. Assign the invisible return value to keep the viewed
 columns for subsequent analysis. Precompute expressions with side effects
 before passing them to the selection interface.
 }
 \examples{
 if (interactive()) {
-  browse(dplyr::starwars)
-  browse(dplyr::starwars, name:mass)
-  browse(dplyr::starwars, varlist("*color"))
+  starwars <- dplyr::starwars
+  browse(starwars)
+  browse(starwars, name:mass)
+  browse(starwars, varlist("*color"))
 
   # Retain the viewed columns for the next pipeline stage.
-  selected <- browse(dplyr::starwars, name, height, mass)
+  selected <- browse(starwars, name, height, mass)
   summ(selected, height, mass)
 }
 }

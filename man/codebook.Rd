@@ -12,7 +12,7 @@ codebook(.data, ...)
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to include in the codebook.
 Omit to include all columns. Selection is attempted first; expressions that
-are not valid selections are evaluated as computed columns by \code{\link[=s_select]{s_select()}}.}
+are not valid selections are evaluated as computed columns by \code{\link[=select_or_mutate]{select_or_mutate()}}.}
 }
 \value{
 An ungrouped table with one row per selected variable, in selection
@@ -46,17 +46,17 @@ column appears only when at least one selected variable has a usable label;
 unlabelled variables then have \code{NA} labels.
 }
 \examples{
-dplyr::starwars
-
-codebook(dplyr::starwars)
-
-codebook(dplyr::starwars, 1:4)
-
-codebook(dplyr::starwars, ends_with("color"))
-
-codebook(dplyr::starwars, where(is.numeric))
-
 codebook(lifeexp)
+
+codebook(lifeexp, 1:4)
+
+codebook(lifeexp, where(is.numeric))
+
+starwars <- dplyr::starwars
+
+codebook(starwars)
+
+codebook(starwars, ends_with("color"))
 
 # Save a compact inventory before preparing an analysis sample.
 survey <- tibble::tibble(age = c(30, NA, 45), income = c(2000, 3000, 4000))

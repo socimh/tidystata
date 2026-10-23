@@ -7,8 +7,7 @@
 #'
 #' `print_headtail()` and `print_interval()` print once and invisibly return
 #' the unchanged input. `print_all()` prints every row and every column, like
-#' Stata's `list`, and also returns the input invisibly. `s_print()` does all
-#' three through one `style` argument. `slice_headtail()` and
+#' Stata's `list`, and also returns the input invisibly. `slice_headtail()` and
 #' `slice_interval()` actually select rows, so use them only when a smaller
 #' data set is wanted.
 #'
@@ -16,8 +15,7 @@
 #' tibble, rowwise tibble, or `sf` data frame (geometry is kept when slicing and
 #' printed as a column). Convert other subclasses explicitly before wrapping;
 #' collect lazy tables first. Apply the wrapper separately to lists of tables.
-#' @param style Either `"headtail"` or `"interval"`. `s_print()` also accepts
-#' `"all"`, which prints every row and column like `print_all()`.
+#' @param style Either `"headtail"` or `"interval"`.
 #' @param n Total number of rows to display or select: a positive whole number
 #' or `Inf` for all rows. An odd head/tail budget gives the head the extra row.
 #' With `n = 1`, both styles select the first row. Short tables never repeat rows.
@@ -65,12 +63,11 @@
 #' preview_table(x, style = "interval", n = 5)
 #' print(x, n = Inf)
 #' unpreview_table(x)
-#' print_headtail(mtcars, n = 6)
-#' print_interval(mtcars, n = 6)
-#' print_all(head(mtcars, 12))
-#' s_print(mtcars, "interval", n = 6)
-#' slice_headtail(mtcars, n = 6)
-#' slice_interval(mtcars, n = 6)
+#' print_headtail(lifeexp, n = 6)
+#' print_interval(lifeexp, n = 6)
+#' print_all(head(lifeexp, 12))
+#' slice_headtail(lifeexp, n = 6)
+#' slice_interval(lifeexp, n = 6)
 #' @name special-print
 #' @family selection and preview functions
 NULL
@@ -331,24 +328,6 @@ print_headtail <- function(
     max_footer_lines = max_footer_lines
   )
   invisible(.data)
-}
-
-#' @rdname special-print
-#' @export
-s_print <- function(
-  .data,
-  style = c("headtail", "interval", "all"),
-  n = 10,
-  width = NULL,
-  ...
-) {
-  style <- rlang::arg_match(style)
-  switch(
-    style,
-    headtail = print_headtail(.data, n = n, width = width, ...),
-    interval = print_interval(.data, n = n, width = width, ...),
-    all = print_all(.data, ...)
-  )
 }
 
 #' @rdname special-print

@@ -53,8 +53,6 @@
 #' values rounded to seven significant digits; counts remain numeric. Calendar
 #' spreads become plain numbers in days (Dates) or seconds (datetimes and
 #' times), and the unit is appended to `type`, for example `"date [days]"`.
-#' @param .na.rm,.mode `r lifecycle::badge("deprecated")` Use `.missing`
-#' (with the opposite value) and `.type` instead.
 #' @param .duration_format Retained for compatibility and no longer affects the
 #' output: calendar spreads are always `difftime` columns (see Details).
 #' @param .sort A single `TRUE` or `FALSE`. If `TRUE` (default), sort grouping
@@ -188,28 +186,9 @@ summ <- function(
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic"),
-  .na.rm = lifecycle::deprecated(),
-  .mode = lifecycle::deprecated()
+  .wt_type = c("frequency", "analytic")
 ) {
   local_wrapper_error_call()
-  if (lifecycle::is_present(.na.rm)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "summ(.na.rm)",
-      "summ(.missing)",
-      details = "`.missing = FALSE` drops rows with missing grouping keys."
-    )
-    .missing <- !.na.rm
-  }
-  if (lifecycle::is_present(.mode)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "summ(.mode)",
-      "summ(.type)"
-    )
-    .type <- .mode
-  }
   # Validate controls before data-dependent branching.
   summ_check_flags(list(
     .keep_all = .keep_all,
@@ -334,27 +313,8 @@ tabstat <- function(
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic"),
-  .na.rm = lifecycle::deprecated(),
-  .mode = lifecycle::deprecated()
+  .wt_type = c("frequency", "analytic")
 ) {
-  if (lifecycle::is_present(.na.rm)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "tabstat(.na.rm)",
-      "tabstat(.missing)",
-      details = "`.missing = FALSE` drops rows with missing grouping keys."
-    )
-    .missing <- !.na.rm
-  }
-  if (lifecycle::is_present(.mode)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "tabstat(.mode)",
-      "tabstat(.type)"
-    )
-    .type <- .mode
-  }
   .type <- rlang::arg_match(.type)
   # Detailed output replaces the default mean-only request.
   if (isTRUE(.detail) && missing(.stat)) {
@@ -476,7 +436,7 @@ summ_finalize <- function(
     ifelse(
       data$type %in% c("fct", "ord"),
       2L,
-      ifelse(stringr::str_detect(data$type, "lbl$"), 1L, 0L)
+      ifelse(grepl("lbl$", data$type), 1L, 0L)
     )
   )
   variable_positions <- match(

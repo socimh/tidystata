@@ -22,10 +22,10 @@
 
 * R 4.1.0 or later is now required. Persistent preview formatting requires
   tibble >= 3.2.0 and pillar >= 1.9.0, as dplyr >= 1.1.4 does. readr >= 1.4.0 is
-  required for scientific notation and parsing diagnostics in `as_numeric()`
-  and `destring()`.
+  required.
 
-* Required dependencies fall from 33 to 16 packages. Rich table output now
+* Required dependencies fall from 33 to 12 packages; purrr, stringr and tidyr
+  are no longer needed (tidyr is suggested for the preview pivot methods). Rich table output now
   needs the optional flextable package, and `Rfast` is no longer used.
 
 * Table-producing helpers preserve a base data.frame, tibble or data.table
@@ -58,8 +58,24 @@
   results as before. Inside a grouped data mask without `labels`, it returns
   integer codes, because group-specific interval labels cannot be combined.
 
-* `s_select()`, and therefore `tab()`, `summ()` and related functions,
-  computes expressions that use columns instead of first trying them as
+* Names no longer start with `s_`, which stood for statart. Functions that
+  follow a Stata command take a `stata_` prefix where the plain name would
+  clash with base R or the tidyverse: `s_merge()` is now `stata_merge()`, and
+  `s_lag()`, `s_lead()` and `s_diff()` are now `stata_lag()`, `stata_lead()`
+  and `stata_diff()`. `s_select()` is now `select_or_mutate()`, which says
+  what it does: each argument selects a column or computes one. The old names
+  are removed rather than kept as aliases.
+
+* Earlier statart names are removed: `s_match()`, `s_type()` and `s_unit()`
+  (use `varlist()`, `var_type()` and `var_unit()`), `s_try()` (use
+  `capture()`), `ds_as_column()` and `names_as_column()` (use
+  `ds(.type = "table")`) and `s_print()` (use `print_headtail()`,
+  `print_interval()` or `print_all()`). The
+  [migration guide](https://socimh.github.io/tidystata/articles/migration.html)
+  maps every old name to its replacement.
+
+* `select_or_mutate()` (formerly `s_select()`), and therefore `tab()`,
+  `summ()` and related functions, computes expressions that use columns instead of first trying them as
   selections: `half = y / x` previously selected column `y`. Named constants
   (`one = 1`) create constant columns, and misspelled or out-of-range
   selections are an error listing every unmatched name. Computed expressions
@@ -75,6 +91,16 @@
   Numeric constants behave as in `pmin()` and `pmax()`: `row_min(x, 0.5)` caps
   `x`, and constants never fill all-missing rows.
 
+* `destring()` (and its alias `as_numeric()`) reads text like Stata's
+  `destring`. A value must be a number, optionally with a sign, a currency
+  symbol, thousands separators and a trailing percent sign; other text, such as
+  `"12abc"`, `"10 kg"` or a date, becomes `NA` with a warning instead of
+  yielding the first number it contains. The new `ignore` argument removes
+  characters first, like Stata's `ignore()`: `destring(x, ignore = "kg")`.
+  Stata's `"."` is read as missing. A factor whose levels are all numbers now
+  gives those numbers (`factor(c("1990", "2000"))` gives 1990 and 2000)
+  instead of its level codes.
+
 * `mvdecode()` (formerly `na_if_value()`) treats several codes as a set, like
   Stata's `mv(-98 -99)`, instead of comparing them elementwise as
   `dplyr::na_if()` does. A single code works as before.
@@ -85,17 +111,12 @@
 
 ## Lifecycle changes
 
-* Functions carry their Stata names, and the earlier names stay as quiet
-  aliases on the same help pages: `xtile()` (`cut_quantile()`), `capture()`
-  (`s_try()`), `ds(.type = "table")` (`ds_as_column()`, `names_as_column()`),
-  `mvdecode()` and `mvencode()` (`na_if_value()`, `value_if_na()`), and
-  `destring()` and `decode()` (`as_numeric()`, `as_character()`). New aliases
-  are `pct()` for `pc()`, `xtab()` for `tab2()`, `s_tag()` for `is_first()`
-  and `tab_gen()` for `as_dummy()`.
-
-* `s_match()`, `s_type()` and `s_unit()` are deprecated in favour of
-  `varlist()`, `var_type()` and `var_unit()`. They still work, with a
-  lifecycle warning.
+* Functions carry their Stata names. Earlier names that read naturally in R
+  stay as aliases on the same help pages: `xtile()` (`cut_quantile()`, which
+  completes the `cut_*()` family), `mvdecode()` and `mvencode()`
+  (`na_if_value()`, `value_if_na()`), and `destring()` and `decode()`
+  (`as_numeric()`, `as_character()`). New aliases are `pct()` for `pc()` and
+  `tab_gen()` for `as_dummy()`.
 
 * Arguments follow one naming rule: options after a `...` that takes columns
   or expressions are dotted, and functions without `...` use plain names.
@@ -103,13 +124,13 @@
   `value_if_na()` and `timer()` take `x` (not `.x`); `capture()` and
   `set_seed()` take `x` (not `.fn`); `var_type(abbr)`, `timer(on_error)`,
   `na_if_value(value)` and `value_if_na(value)` drop their dots;
-  `s_merge()` takes `keep`, `assert`, `generate` and `report`; and
-  `varlist()` takes `ignore_case`. The old names keep working with a
-  deprecation warning.
+  `stata_merge()` takes `keep`, `assert`, `generate` and `report`; and
+  `varlist()` takes `ignore_case`. The old argument names are removed.
 
 * `summ()` and `tabstat()` replace `.na.rm` with `.missing` (with the opposite
   value, default `TRUE`), matching `is_first()` and `row_nvals()`, and replace
-  `.mode` with `.type` (same `"list"` and `"table"` values).
+  `.mode` with `.type` (same `"list"` and `"table"` values). The old arguments
+  are removed.
 
 ## New features
 
@@ -121,7 +142,13 @@
   (`findit("merge 1:1 id, keep(match)")`). Stata's minimum abbreviations
   work, and unmatched text falls back to a keyword search. R function names
   work too (`findit(left_join)`), listing the Stata idioms they replace.
-  `findit()` alone lists all of about 410 idioms. New "Coming from Stata"
+  Plain questions, in English or Chinese, list the closest entries
+  (`findit("how do I remove duplicate rows")`), using word overlap and a
+  short synonym list rather than a language model.
+  `findit()` alone lists all of about 410 idioms. When R runs in Chinese, the
+  task and function descriptions are shown in Chinese
+  (`Sys.setenv(LANGUAGE = "en")` switches back), and Chinese keywords such
+  as `findit("合并")` work in any language. New "Coming from Stata"
   articles, in English and Chinese, show the entries by topic.
 
 ### Tabulation
@@ -175,7 +202,7 @@
 * New `assert()`, like Stata's `assert`, checks conditions on every row and
   returns the data invisibly, so it fits in a pipe.
 
-* New `s_merge()` joins like Stata's `merge`: it checks the key relationship
+* New `stata_merge()` joins like Stata's `merge`: it checks the key relationship
   (`"1:1"`, `"m:1"`, `"1:m"`), prints a matched/unmatched report and adds a
   `.merge` factor, with `keep`, `assert` and `generate` options.
 
@@ -189,7 +216,7 @@
 
 * New `is_first()`, like `egen tag()`, flags the first row of each group.
 
-* New `s_lag()`, `s_lead()` and `s_diff()`, like Stata's `L.x`, `F.x` and
+* New `stata_lag()`, `stata_lead()` and `stata_diff()`, like Stata's `L.x`, `F.x` and
   `D.x` after `xtset`, find values by time rather than row position, so gaps
   give missing values. They support `Date`s by period (`unit`), date-times,
   tsibble and zoo period classes and ordered factors.
@@ -209,8 +236,6 @@
   operations. `unpreview_table()` removes it.
 
 * New `print_all()`, like Stata's `list`, prints every row and column.
-  New `s_print()` prints the first and last rows, evenly spaced rows or every
-  row through one `style` argument.
 
 * `print_headtail()`, `print_interval()`, `slice_headtail()` and
   `slice_interval()` are restored and accept `sf` data.
@@ -297,7 +322,7 @@
 * `cut_length()` rejects invalid interval counts before calculating breaks.
   Help clarifies that a scalar `cut_breaks()` value is an interior cutpoint.
 
-* `s_select()` returns the first successful operation without rerunning it
+* `select_or_mutate()` returns the first successful operation without rerunning it
   and keeps its warnings.
 
 * `na_if_value()` and `value_if_na()` give actionable messages when required
@@ -324,7 +349,7 @@ Results are unchanged; only the time taken to compute them is shorter.
 * `tab()`, `fre()` and `tab2()` with many groups are faster, especially with
   weights (weighted `tab()` over 10,000 groups: 200 ms to 80 ms).
 
-* `s_merge()`, `destring()`, `pwcorr()`, grouped `xtile()` and `codebook()`
+* `stata_merge()`, `destring()`, `pwcorr()`, grouped `xtile()` and `codebook()`
   also do less work.
 
 # tidystata 0.2.0

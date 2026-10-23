@@ -9,27 +9,31 @@
 \alias{as_numeric}
 \title{Convert vectors for data preparation}
 \usage{
-destring(x, .x = lifecycle::deprecated())
+destring(x, ignore = NULL)
 
-decode(x, .x = lifecycle::deprecated())
+decode(x)
 
 tostring(x)
 
-as_character(x, .x = lifecycle::deprecated())
+as_character(x)
 
-as_numeric(x, .x = lifecycle::deprecated())
+as_numeric(x, ignore = NULL)
 }
 \arguments{
 \item{x}{A vector or matrix; a vector for \code{tostring()}.}
 
-\item{.x}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} instead.}
+\item{ignore}{\code{NULL} (default) or a single string of characters to remove
+from text before reading numbers, like Stata's \code{ignore()}. Each character
+is removed wherever it appears: \code{ignore = "kg "} removes \code{k}, \code{g} and
+spaces.}
 }
 \value{
 \code{as_character()} and \code{tostring()} return a character vector. \code{as_numeric()} returns
 a double vector; unsupported types such as lists, raw vectors, and complex
 vectors return missing values of the same length. Empty inputs return
 typed empty vectors. Names, dimensions, labels, and units are dropped.
-Parsing failures retain \code{\link[readr:problems]{readr::problems()}} diagnostics on the result.
+Text that is not a number gives a warning and keeps its row and value in
+\code{\link[readr:problems]{readr::problems()}} on the result.
 Conversion of large \code{integer64} values to double may lose precision and
 emits the underlying conversion warning.
 }
@@ -48,9 +52,20 @@ character input is returned unchanged. Missing values stay \code{NA}. Dates use
 \code{\link[=as.character]{as.character()}}, so they become \code{"2024-01-31"} rather than day numbers.
 }
 
-Character input to \code{as_numeric()} is parsed with \code{\link[readr:parse_number]{readr::parse_number()}},
-preserving its length. Invalid numbers generate parsing warnings. Factors
-return their level codes; labelled numeric variables return their values.
+\code{destring()} reads text the way Stata's \code{destring} does. A value must be a
+number, optionally with a sign, a currency symbol (dollar, euro, pound, yen),
+thousands separators (\verb{1,234}), a trailing percent sign (\verb{50\%} gives 50)
+and surrounding spaces. Anything else, such as \code{"12abc"}, \code{"10 kg"} or a
+date, becomes \code{NA} with a warning, like Stata's \code{force} option; the
+positions are kept in \code{\link[readr:problems]{readr::problems()}}. Use \code{ignore} to remove other
+characters first, like Stata's \code{ignore()}: \code{destring(x, ignore = "kg")}
+reads \code{"10 kg"} as 10. Empty strings, \code{"NA"} and Stata's \code{"."} are missing
+without a warning. Dates stay \code{NA}; convert them with \code{\link[=as.Date]{as.Date()}} or
+\code{lubridate::ymd()} instead.
+
+A factor whose levels are all numbers, such as \code{factor(c("1990", "2000"))},
+gives those numbers (1990, 2000). Other factors give their level codes.
+Labelled numeric variables return their values.
 \code{as_character()} uses value labels when a labelled vector has a nonempty
 \code{labels} attribute. Without value labels, it uses ordinary character
 conversion, including for tagged missing values.
@@ -59,6 +74,13 @@ SPSS user-missing codes remain values in both conversions. Numeric conversion
 preserves tagged missing values. Dates become days since 1970-01-01;
 date-times become seconds since the Unix epoch. Durations and measured
 vectors retain their numeric values in their existing units.
+
+The sjlabelled package also exports \code{as_numeric()} and \code{as_character()}.
+They differ: sjlabelled's \code{as_numeric()} turns non-numeric text into factor
+codes, and its \code{as_character()} gives \code{NA} for unlabelled values.
+Whichever package is attached last masks the other; write
+\code{tidystata::as_numeric()} to be explicit, or use \code{destring()} and
+\code{decode()}, which do not clash.
 }
 \examples{
 lifeexp |>

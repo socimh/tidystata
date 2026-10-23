@@ -1,7 +1,7 @@
 #' Merge two tables with a Stata-style match report
 #'
 #' @description
-#' `s_merge()` joins `using` onto `.data` like Stata's `merge`. It checks the
+#' `stata_merge()` joins `using` onto `.data` like Stata's `merge`. It checks the
 #' stated key relationship first, keeps master, using and matched rows by
 #' default, reports how many rows fell into each group, and records the result
 #' in a `.merge` column (Stata's `_merge`).
@@ -20,13 +20,11 @@
 #' Stata does.
 #' @param assert `NULL` (default) or any of `"master"`, `"using"` and
 #' `"match"`. If given, every row must be in one of these groups, otherwise
-#' `s_merge()` errors, like Stata's `assert()` option.
+#' `stata_merge()` errors, like Stata's `assert()` option.
 #' @param generate Name of the result column, `".merge"` by default. Use
 #' `NULL` to omit it (Stata's `nogenerate`).
 #' @param report A single `TRUE` or `FALSE`. If `TRUE` (default), print the
 #' match report as a message.
-#' @param .keep,.assert,.generate,.report `r lifecycle::badge("deprecated")`
-#'   Use `keep`, `assert`, `generate` and `report` instead.
 #'
 #' @returns The merged table, in the container of `.data`. Rows from `.data`
 #' come first in their original order, followed by rows found only in
@@ -44,17 +42,17 @@
 #' @examples
 #' people <- tibble::tibble(id = 1:3, age = c(30, 41, 25))
 #' income <- tibble::tibble(id = c(2, 3, 4), income = c(10, 20, 30))
-#' s_merge(people, income, "1:1", by = "id")
+#' stata_merge(people, income, "1:1", by = "id")
 #'
 #' # Keep matched rows only, and insist that every person is matched
-#' try(s_merge(people, income, "1:1", by = "id", assert = "match"))
-#' s_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
+#' try(stata_merge(people, income, "1:1", by = "id", assert = "match"))
+#' stata_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
 #'
 #' # Many people per household
 #' members <- tibble::tibble(hh = c(1, 1, 2), person = 1:3)
 #' households <- tibble::tibble(hh = 1:2, region = c("north", "south"))
-#' s_merge(members, households, "m:1", by = "hh")
-s_merge <- function(
+#' stata_merge(members, households, "m:1", by = "hh")
+stata_merge <- function(
   .data,
   using,
   relationship,
@@ -62,16 +60,8 @@ s_merge <- function(
   keep = c("master", "using", "match"),
   assert = NULL,
   generate = ".merge",
-  report = TRUE,
-  .keep = lifecycle::deprecated(),
-  .assert = lifecycle::deprecated(),
-  .generate = lifecycle::deprecated(),
-  .report = lifecycle::deprecated()
+  report = TRUE
 ) {
-  keep <- merge_renamed(.keep, keep, "keep")
-  assert <- merge_renamed(.assert, assert, "assert")
-  generate <- merge_renamed(.generate, generate, "generate")
-  report <- merge_renamed(.report, report, "report")
   if (!is.data.frame(.data) || !is.data.frame(using)) {
     cli::cli_abort("{.arg .data} and {.arg using} must be data frames.")
   }
@@ -134,28 +124,6 @@ s_merge <- function(
 }
 
 merge_group_names <- c("master", "using", "match")
-
-# Old dotted arguments keep working with a deprecation warning. `env` and
-# `user_env` point lifecycle at s_merge() and its caller, not this helper.
-merge_renamed <- function(
-  old,
-  new,
-  arg,
-  env = rlang::caller_env(),
-  user_env = rlang::caller_env(2)
-) {
-  if (!lifecycle::is_present(old)) {
-    return(new)
-  }
-  lifecycle::deprecate_soft(
-    "0.3.0",
-    paste0("s_merge(.", arg, ")"),
-    paste0("s_merge(", arg, ")"),
-    env = env,
-    user_env = user_env
-  )
-  old
-}
 
 # Key columns must exist, and the side(s) the relationship names as "1" must
 # be unique on them.

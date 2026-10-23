@@ -23,10 +23,10 @@ test_that("frequency-weighted tabulations equal replicated data", {
     stacked$n,
     as.double(tab1(replicated, g, x, .type = "tibble")$n)
   )
-  cross <- xtab(weighted, g, x, .wt = w, .total = TRUE)
+  cross <- tab2(weighted, g, x, .wt = w, .total = TRUE)
   expect_equal(
     as.matrix(cross[-1]),
-    as.matrix(xtab(replicated, g, x, .total = TRUE)[-1]) * 1
+    as.matrix(tab2(replicated, g, x, .total = TRUE)[-1]) * 1
   )
 })
 
