@@ -92,17 +92,17 @@ codebook(lifeexp)
 ``` r
 summ(lifeexp, lexp, gnppc, safewater, .by = region)
 #> # A tibble: 9 x 9
-#>       region name      type      n unique   min    mean       sd   max
-#>   <hvn_lbll> <chr>     <chr> <int>  <int> <dbl>   <dbl>    <dbl> <dbl>
-#> 1          1 lexp      dbl      44     17    62    72.5     4.95    79
-#> 2          1 gnppc     dbl      43     42   170 11284.  12920.   46650
-#> 3          1 safewater dbl      42     25    36    81.6    18.6    100
-#> 4          2 lexp      dbl      14     13    57    69.7     6.14    79
-#> 5          2 gnppc     dbl      14     14   410  6294.   9080.   32040
-#> 6          2 safewater dbl       6      5    40    58      24.0     99
-#> 7          3 lexp      dbl      10      8    61    70.7     4.06    76
-#> 8          3 gnppc     dbl      10      9   960  3881    2432.    7960
-#> 9          3 safewater dbl       6      6    45    65.3    17.0     91
+#>   region               name      type      n unique   min    mean       sd   max
+#>   <dbl+lbl>            <chr>     <chr> <int>  <int> <dbl>   <dbl>    <dbl> <dbl>
+#> 1 1 [Europe & C. Asia] lexp      dbl      44     17    62    72.5     4.95    79
+#> 2 1 [Europe & C. Asia] gnppc     dbl      43     42   170 11284.  12920.   46650
+#> 3 1 [Europe & C. Asia] safewater dbl      42     25    36    81.6    18.6    100
+#> 4 2 [North America]    lexp      dbl      14     13    57    69.7     6.14    79
+#> 5 2 [North America]    gnppc     dbl      14     14   410  6294.   9080.   32040
+#> 6 2 [North America]    safewater dbl       6      5    40    58      24.0     99
+#> 7 3 [South America]    lexp      dbl      10      8    61    70.7     4.06    76
+#> 8 3 [South America]    gnppc     dbl      10      9   960  3881    2432.    7960
+#> 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91
 ```
 
 ### tab(): frequency tables
