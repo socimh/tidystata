@@ -9,7 +9,7 @@
 
 <!-- badges: end -->
 
-You have just opened a dataset in R. What variables does it hold, how are they distributed, and how do they differ across groups? Stata answers these questions in seconds with `codebook`, `summarize` and `tabulate`, while in R the answers are spread across several packages, each with its own interface. [tidystata](https://socimh.github.io/tidystata/) brings those commands to R and takes them further: select variables with tidyselect helpers, summarise and tabulate by any groups with `.by`, and get every result back as a data frame, ready to filter, join, reshape or plot.
+[tidystata](https://socimh.github.io/tidystata/) brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with `.by`. The resulting tables work with ordinary R tools for filtering, joining and plotting.
 
 ## Installation
 
@@ -90,19 +90,25 @@ codebook(lifeexp)
 ### summ(): summary statistics
 
 ``` r
-summ(lifeexp, lexp, gnppc, safewater)
-#> # A tibble: 3 x 8
-#>   name      type      n unique   min   mean       sd   max
-#>   <chr>     <chr> <int>  <int> <dbl>  <dbl>    <dbl> <dbl>
-#> 1 lexp      dbl      68     20    57   71.7     5.16    79
-#> 2 gnppc     dbl      67     64   170 9137.  11497.   46650
-#> 3 safewater dbl      54     32    36   77.2    20.6    100
+summ(lifeexp, lexp, gnppc, safewater, .by = region)
+#> # A tibble: 9 x 9
+#>       region name      type      n unique   min    mean       sd   max
+#>   <hvn_lbll> <chr>     <chr> <int>  <int> <dbl>   <dbl>    <dbl> <dbl>
+#> 1          1 lexp      dbl      44     17    62    72.5     4.95    79
+#> 2          1 gnppc     dbl      43     42   170 11284.  12920.   46650
+#> 3          1 safewater dbl      42     25    36    81.6    18.6    100
+#> 4          2 lexp      dbl      14     13    57    69.7     6.14    79
+#> 5          2 gnppc     dbl      14     14   410  6294.   9080.   32040
+#> 6          2 safewater dbl       6      5    40    58      24.0     99
+#> 7          3 lexp      dbl      10      8    61    70.7     4.06    76
+#> 8          3 gnppc     dbl      10      9   960  3881    2432.    7960
+#> 9          3 safewater dbl       6      6    45    65.3    17.0     91
 ```
 
 ### tab(): frequency tables
 
 ``` r
-tab(starwars, sex)
+tab(dplyr::starwars, sex)
 #> # A tibble: 5 x 6
 #>   sex                n percent   cum valid valid_cum
 #>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
@@ -130,7 +136,7 @@ fre(lifeexp, region)
 
 ## Learn more
 
-tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. Its core computations run in compiled C++ for large data; for heavy grouped `mutate()` work, collapse or data.table are faster.
+tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.

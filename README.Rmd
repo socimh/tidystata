@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
-You have just opened a dataset in R. What variables does it hold, how are they distributed, and how do they differ across groups? Stata answers these questions in seconds with `codebook`, `summarize` and `tabulate`, while in R the answers are spread across several packages, each with its own interface. [tidystata](https://socimh.github.io/tidystata/) brings those commands to R and takes them further: select variables with tidyselect helpers, summarise and tabulate by any groups with `.by`, and get every result back as a data frame, ready to filter, join, reshape or plot.
+[tidystata](https://socimh.github.io/tidystata/) brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with `.by`. The resulting tables work with ordinary R tools for filtering, joining and plotting.
 
 ## Installation
 
@@ -59,13 +59,13 @@ codebook(lifeexp)
 ### summ(): summary statistics
 
 ```{r}
-summ(lifeexp, lexp, gnppc, safewater)
+summ(lifeexp, lexp, gnppc, safewater, .by = region)
 ```
 
 ### tab(): frequency tables
 
 ```{r}
-tab(starwars, sex)
+tab(dplyr::starwars, sex)
 ```
 
 `tab1()` tabulates several variables, selected with tidyselect helpers such as `ends_with()` and `matches()` or a Stata `varlist()`; `tab2()` cross-tabulates two.
@@ -78,7 +78,7 @@ fre(lifeexp, region)
 
 ## Learn more
 
-tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. Its core computations run in compiled C++ for large data; for heavy grouped `mutate()` work, collapse or data.table are faster.
+tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.

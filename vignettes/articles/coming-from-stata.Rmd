@@ -67,35 +67,17 @@ findit(reg)
 findit("merge 1:1 id, keep(match)")
 ```
 
-Call `findit()` with no argument for the whole list, or `??stata` to find this
-help again.
+You can also look up an R function (`findit(left_join)`) or ask a question
+(`findit("how do I remove duplicate rows")`). The console shows the best matches;
+the returned table contains all matches. Call `findit()` for the whole list.
+Descriptions follow R's language setting; English and Chinese queries both work.
 
-## Where to find the rest
+## Use the command tables
 
-tidystata covers the everyday loop of inspecting, tabulating, summarising,
-preparing and checking data. For everything else, these packages are the usual
-choices:
-
-- **Regression and fixed effects** (`regress`, `reghdfe`, `xtreg`,
-  `ivregress`): `lm()` and `glm()`, or `fixest::feols()`.
-- **Regression tables** (`esttab`, `outreg2`): `modelsummary::modelsummary()`.
-- **Marginal effects** (`margins`): marginaleffects.
-- **Reshaping** (`reshape`): `tidyr::pivot_longer()` and `pivot_wider()`.
-- **Winsorising** (`winsor2`): `datawizard::winsorize()`.
-- **Panels and calendar periods** (`tsset`, `xtset`, `L.`, `mofd()`): tsibble
-  and lubridate.
-- **Survey data** (`svyset`, `svy:`): srvyr and survey.
-- **Graphs** (`twoway`, `histogram`): ggplot2; for `binscatter`, binsreg or
-  `statar::stat_binmean()`.
-
-tidystata and [statar](https://github.com/matthieugomez/statar) can be attached
-together; only `tab()` and `xtile()` share names. Attach tidystata last, or write
-`tidystata::tab()`.
-
-A few RStudio habits replace Stata's interface: Ctrl+Enter (Cmd+Return on a
-Mac) runs the current line or selection, Tab completes names, and the
-Environment and Files panes play the roles of Stata's Variables window and
-`dir`.
+The tables cover tidystata and other R packages, including modelling, reshaping,
+survey analysis and graphics. For panel lags and leads, tidystata provides
+`stata_lag()`, `stata_lead()` and `stata_diff()`; specify the time column and
+use `.by` to identify panels.
 
 In the tables below, `data` is your dataset, `data1` and `data2` are the master
 and using data of a merge, and `fit` is a fitted model. Most entries use dplyr,
@@ -107,10 +89,8 @@ section_tables("section", "task", "detail", c("Stata", "R", "Notes"))
 
 ## R functions in this guide
 
-R functions a Stata user is likely to meet, including every function used
-above, with its package, a related Stata command and what it does. Type
-`findit(name)`, such as `findit(left_join)`, to see the Stata commands it
-replaces.
+Look up common R functions by package, related Stata command and purpose.
+Use `findit(left_join)` to look up an individual function from the console.
 
 ```{r, echo = FALSE, results = "asis"}
 functions <- tidystata:::findit_functions()
