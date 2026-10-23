@@ -12,19 +12,9 @@ mvdecode(x, mv)
 
 mvencode(x, mv)
 
-na_if_value(
-  x,
-  value,
-  .x = lifecycle::deprecated(),
-  .value = lifecycle::deprecated()
-)
+na_if_value(x, value)
 
-value_if_na(
-  x,
-  value,
-  .x = lifecycle::deprecated(),
-  .value = lifecycle::deprecated()
-)
+value_if_na(x, value)
 }
 \arguments{
 \item{x}{A vector.}
@@ -33,9 +23,6 @@ value_if_na(
 with \code{NA}; any value equal to one of them becomes missing. For
 \code{mvencode()} and \code{value_if_na()}, a single replacement value for missing
 elements, cast to the type of \code{x}.}
-
-\item{.x, .value}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} and \code{value}
-instead.}
 }
 \value{
 A vector with the same type and size as \code{x}, with matching values
@@ -46,8 +33,8 @@ Vector helpers named after Stata's missing-value commands:
 \itemize{
 \item \code{mvdecode()} replaces every value in \code{mv} with \code{NA}, like
 \verb{mvdecode x, mv(-98 -99)}. Each code is matched with \code{\link[dplyr:na_if]{dplyr::na_if()}}.
-\item \code{mvencode()} replaces missing values with \code{mv}, like \verb{mvencode x, mv(0)},
-using \code{\link[tidyr:replace_na]{tidyr::replace_na()}}.
+\item \code{mvencode()} replaces missing values with \code{mv}, like \verb{mvencode x, mv(0)}.
+The replacement is cast to the type of \code{x}, as in \code{\link[tidyr:replace_na]{tidyr::replace_na()}}.
 }
 
 \code{na_if_value()} and \code{value_if_na()} are aliases of \code{mvdecode()} and

@@ -120,23 +120,30 @@ test_that("as_numeric: character numeric to numeric", {
 
 test_that("as_numeric: character with non-numeric returns NA", {
   x <- c("a", "b", "c")
-  expect_warning(result <- as_numeric(x), "parsing failure")
+  expect_warning(result <- as_numeric(x), "not (a number|numbers)")
   expect_type(result, "double")
   expect_true(all(is.na(result)))
 })
 
 test_that("as_numeric: mixed character numeric", {
   x <- c("1", "abc", "3.14", "xyz")
-  expect_warning(result <- as_numeric(x), "parsing failure")
+  expect_warning(result <- as_numeric(x), "not (a number|numbers)")
   # readr preserves parsing diagnostics as an attribute on the numeric vector.
   expect_equal(as.vector(result), c(1, NA, 3.14, NA), tolerance = 0.001)
 })
 
-test_that("as_numeric: factor to numeric (level values)", {
+test_that("as_numeric: factor with numeric levels gives the level values", {
   x <- factor(c(10, 20, 30, 20))
   result <- as_numeric(x)
   expect_type(result, "double")
-  expect_equal(result, c(1, 2, 3, 2)) # Factor level indices
+  expect_identical(result, c(10, 20, 30, 20))
+  expect_identical(destring(factor(c("1990", NA, "2000"))), c(1990, NA, 2000))
+})
+
+test_that("as_numeric: factor with text levels gives the level codes", {
+  expect_identical(destring(factor(c("b", "a", "b"))), c(2, 1, 2))
+  # One text level among numbers keeps codes for the whole factor.
+  expect_identical(destring(factor(c("10", "x", "20"))), c(1, 3, 2))
 })
 
 test_that("as_numeric: ordered factor to numeric", {
@@ -401,8 +408,10 @@ test_that("milestone as_numeric parses character values without losing positions
   spaces = list(c(" 1 ", "\t2.5", "3\n"), c(1, 2.5, 3)),
   negative_currency = list(c("$-12.50", "-1,000.25"), c(-12.5, -1000.25)),
   grouped_thousands = list(c("1,234,567", "12,345"), c(1234567, 12345)),
-  embedded_units = list(c("10 kg", "20.5 km"), c(10, 20.5)),
-  prefixes = list(c("USD 100.5", "EUR 20"), c(100.5, 20)),
+  embedded_units = list(c("10 kg", "20.5 km"), c(NA_real_, NA_real_)),
+  prefixes = list(c("USD 100.5", "EUR 20"), c(NA_real_, NA_real_)),
+  percent = list(c("50%", "12.5 %"), c(50, 12.5)),
+  stata_missing = list(c(".", " . ", "7"), c(NA, NA, 7)),
   missing_middle = list(c("1", NA, "3"), c(1, NA, 3)),
   missing_edges = list(c(NA, "2", NA), c(NA, 2, NA)),
   entirely_missing = list(rep(NA_character_, 3), rep(NA_real_, 3)),
@@ -421,8 +430,9 @@ for (.scenario in names(.milestone_parse_cases)) {
   test_that(paste("milestone as_numeric imported character", .scenario), {
     case <- .milestone_parse_cases[[.scenario]]
     before <- case[[1]]
-    parsing_warning <- if (.scenario %in% c("nonnumeric", "mixed_nonnumeric")) {
-      "parsing failure"
+    invalid <- c("nonnumeric", "mixed_nonnumeric", "embedded_units", "prefixes")
+    parsing_warning <- if (.scenario %in% invalid) {
+      "not (a number|numbers)"
     } else {
       NA
     }
@@ -433,6 +443,27 @@ for (.scenario in names(.milestone_parse_cases)) {
     expect_identical(case[[1]], before)
   })
 }
+
+test_that("destring() rejects text around numbers unless it is ignored", {
+  x <- c("12abc", "abc12", "1,2", "+-5", "$")
+  expect_warning(out <- destring(x), "5 values are not numbers")
+  expect_identical(as.vector(out), rep(NA_real_, 5))
+  expect_identical(readr::problems(out)$row, 1:5)
+  expect_identical(destring(c("10 kg", "20.5 kg"), ignore = "kg"), c(10, 20.5))
+  expect_identical(destring("USD 100", ignore = "USD"), 100)
+  expect_identical(as_numeric("1-000", ignore = "-"), 1000)
+  expect_error(destring("1", ignore = 1), "single string")
+  expect_error(destring("1", ignore = c("a", "b")), "single string")
+})
+
+test_that("destring() points dates to date functions", {
+  expect_warning(
+    out <- destring(c("2020-01-05", "1/31/2024")),
+    class = "warning"
+  )
+  expect_identical(as.vector(out), c(NA_real_, NA_real_))
+  expect_snapshot(out <- destring(c("2020-01-05", "bad", "x", "y")))
+})
 
 test_that("tostring() gives codes as text, ignoring value labels", {
   labelled <- haven::labelled(c(1, 2, NA), c(Low = 1, High = 2))
@@ -489,7 +520,7 @@ test_that("as_numeric imported columns retain positions in mutate", {
   )
   expect_warning(
     out <- dplyr::mutate(data, value = as_numeric(raw)),
-    "parsing failure"
+    "not (a number|numbers)"
   )
   expect_identical(as.vector(out$value), c(1234.5, NA, 0.03, NA))
   expect_identical(out[c("raw", "id")], data)

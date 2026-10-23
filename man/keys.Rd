@@ -94,6 +94,6 @@ duplicates_drop(panel)
 Other data checking functions:
 \code{\link[=assert]{assert()}},
 \code{\link[=is_first]{is_first()}},
-\code{\link[=s_merge]{s_merge()}}
+\code{\link[=stata_merge]{stata_merge()}}
 }
 \concept{data checking functions}

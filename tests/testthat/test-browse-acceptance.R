@@ -523,6 +523,7 @@ browse_case(92, "browse feeds joins without changing keys", function() {
   expect_identical(result$weight, c(4, 2))
 })
 browse_case(93, "browse feeds long reshaping", function() {
+  skip_if_not_installed("tidyr")
   x <- tibble::tibble(id = 1:2, wave1 = c(2, 4), wave2 = c(3, 5), junk = 0)
   result <- x |>
     browse(id, dplyr::starts_with("wave")) |>

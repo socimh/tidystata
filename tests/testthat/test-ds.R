@@ -1,8 +1,8 @@
 # Comprehensive Test Suite for Names and Variables Functions
-# ds, ds_as_column, ds_as_column, variables, variables_search
+# ds, ds(.type = "table"), variables, variables_search
 
-# CHALLENGE: Comprehensive testing for ds, ds_as_column, ds_as_column, variables
-# FUNCTIONS: ds, ds_as_column, ds_as_column, variables
+# CHALLENGE: Comprehensive testing for ds, ds(.type = "table"), variables
+# FUNCTIONS: ds, ds(.type = "table"), variables
 # KEY BEHAVIORS: variable listing, name manipulation
 # EDGE CASES: special characters, long names
 
@@ -105,42 +105,35 @@ test_that("ds: non-existent selection returns empty", {
 })
 
 # ============================================================================
-# CHALLENGING TESTS - ds_as_column()
+# CHALLENGING TESTS - ds(.type = "table")
 # ============================================================================
 
-test_that("ds_as_column: basic functionality", {
+test_that("ds(.type = \"table\"): basic functionality", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- ds_as_column(df)
+  result <- ds(df, .type = "table")
   expect_s3_class(result, "tbl_df")
   expect_equal(names(result), "name")
   expect_equal(result$name, c("x", "y", "z"))
 })
 
-test_that("ds_as_column: empty data frame", {
+test_that("ds(.type = \"table\"): empty data frame", {
   df <- tibble::tibble(.rows = 5)
-  result <- ds_as_column(df)
+  result <- ds(df, .type = "table")
   expect_equal(nrow(result), 0)
 })
 
-test_that("ds_as_column: with selection", {
+test_that("ds(.type = \"table\"): with selection", {
   df <- tibble::tibble(temp_1 = 1:5, temp_2 = 6:10, pressure = 11:15)
-  result <- ds_as_column(df, dplyr::starts_with("temp"))
+  result <- ds(df, dplyr::starts_with("temp"), .type = "table")
   expect_equal(nrow(result), 2)
   expect_equal(result$name, c("temp_1", "temp_2"))
 })
 
-test_that("ds_as_column: returns tibble with one column", {
+test_that("ds(.type = \"table\"): returns tibble with one column", {
   df <- tibble::tibble(a = 1:3, b = 4:6, c = 7:9)
-  result <- ds_as_column(df)
+  result <- ds(df, .type = "table")
   expect_equal(ncol(result), 1)
   expect_equal(nrow(result), 3)
-})
-
-test_that("ds_as_column: alias works correctly", {
-  df <- tibble::tibble(x = 1:5, y = 6:10)
-  result_ds <- ds_as_column(df)
-  result_names <- ds_as_column(df)
-  expect_equal(result_ds, result_names)
 })
 
 # ============================================================================
@@ -350,7 +343,7 @@ test_that("names functions: time series variable selection", {
   expect_equal(length(price_vars), 4)
 
   # Get column names as column for documentation
-  var_list <- ds_as_column(ts_data, dplyr::starts_with("price"))
+  var_list <- ds(ts_data, dplyr::starts_with("price"), .type = "table")
   expect_equal(nrow(var_list), 4)
 })
 

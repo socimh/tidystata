@@ -1,8 +1,8 @@
-# Comprehensive Test Suite for s_select() Function
+# Comprehensive Test Suite for select_or_mutate() Function
 # Enhanced select with data-masking support
 
-# CHALLENGE: Comprehensive testing for s_select
-# FUNCTIONS: s_select
+# CHALLENGE: Comprehensive testing for select_or_mutate
+# FUNCTIONS: select_or_mutate
 # KEY BEHAVIORS: enhanced select, data-masking
 # EDGE CASES: complex expressions, tidyselect integration
 
@@ -10,27 +10,27 @@
 # CHALLENGING TESTS - Basic Select Operations
 # ============================================================================
 
-test_that("s_select: basic column selection", {
+test_that("select_or_mutate: basic column selection", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- s_select(df, x, y)
+  result <- select_or_mutate(df, x, y)
   expect_identical(result, df[c("x", "y")])
 })
 
-test_that("s_select: select all columns with empty call", {
+test_that("select_or_mutate: select all columns with empty call", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- s_select(df)
+  result <- select_or_mutate(df)
   expect_identical(result, df)
 })
 
-test_that("s_select: single column selection", {
+test_that("select_or_mutate: single column selection", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
-  result <- s_select(df, x)
+  result <- select_or_mutate(df, x)
   expect_identical(result, df["x"])
 })
 
-test_that("s_select: column reordering", {
+test_that("select_or_mutate: column reordering", {
   df <- tibble::tibble(a = 1:5, b = 6:10, c = 11:15)
-  result <- s_select(df, c, a, b)
+  result <- select_or_mutate(df, c, a, b)
   expect_identical(result, df[c("c", "a", "b")])
 })
 
@@ -38,32 +38,32 @@ test_that("s_select: column reordering", {
 # CHALLENGING TESTS - Data-Masking (Expression Selection)
 # ============================================================================
 
-test_that("s_select: select with boolean expression", {
+test_that("select_or_mutate: select with boolean expression", {
   df <- tibble::tibble(x = c(1, 2, 3, 4, 5), y = c(10, 20, 30, 40, 50))
-  result <- s_select(df, x > 3)
+  result <- select_or_mutate(df, x > 3)
   expect_equal(ncol(result), 1)
   expect_equal(names(result), "x > 3")
   expect_equal(result[[1]], c(FALSE, FALSE, FALSE, TRUE, TRUE))
 })
 
-test_that("s_select: select with arithmetic expression", {
+test_that("select_or_mutate: select with arithmetic expression", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
-  result <- s_select(df, x + y)
+  result <- select_or_mutate(df, x + y)
   expect_equal(ncol(result), 1)
   expect_equal(result[[1]], c(7, 9, 11, 13, 15))
 })
 
-test_that("s_select: multiple computed columns", {
+test_that("select_or_mutate: multiple computed columns", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
-  result <- s_select(df, sum_xy = x + y, diff_xy = y - x)
+  result <- select_or_mutate(df, sum_xy = x + y, diff_xy = y - x)
   expect_equal(ncol(result), 2)
   expect_equal(result$sum_xy, c(7, 9, 11, 13, 15))
   expect_equal(result$diff_xy, c(5, 5, 5, 5, 5))
 })
 
-test_that("s_select: complex expressions", {
+test_that("select_or_mutate: complex expressions", {
   df <- tibble::tibble(a = 1:10, b = 11:20, c = 21:30)
-  result <- s_select(
+  result <- select_or_mutate(
     df,
     weighted = a * 0.5 + b * 0.3 + c * 0.2,
     ratio = (b - a) / c
@@ -73,9 +73,9 @@ test_that("s_select: complex expressions", {
   expect_type(result$ratio, "double")
 })
 
-test_that("s_select: expression using functions", {
+test_that("select_or_mutate: expression using functions", {
   df <- tibble::tibble(x = c(1, 4, 9, 16, 25))
-  result <- s_select(df, sqrt_x = sqrt(x))
+  result <- select_or_mutate(df, sqrt_x = sqrt(x))
   expect_equal(result$sqrt_x, c(1, 2, 3, 4, 5))
 })
 
@@ -83,65 +83,68 @@ test_that("s_select: expression using functions", {
 # CHALLENGING TESTS - Tidyselect Helpers
 # ============================================================================
 
-test_that("s_select: starts_with selection", {
+test_that("select_or_mutate: starts_with selection", {
   df <- tibble::tibble(temp_1 = 1:5, temp_2 = 6:10, pressure = 11:15)
-  result <- s_select(df, dplyr::starts_with("temp"))
+  result <- select_or_mutate(df, dplyr::starts_with("temp"))
   expect_identical(result, df[c("temp_1", "temp_2")])
 })
 
-test_that("s_select: ends_with selection", {
+test_that("select_or_mutate: ends_with selection", {
   df <- tibble::tibble(var_a_test = 1:5, var_b_test = 6:10, var_c_prod = 11:15)
-  result <- s_select(df, dplyr::ends_with("_test"))
+  result <- select_or_mutate(df, dplyr::ends_with("_test"))
   expect_identical(result, df[c("var_a_test", "var_b_test")])
 })
 
-test_that("s_select: contains selection", {
+test_that("select_or_mutate: contains selection", {
   df <- tibble::tibble(
     temp_morning = 1:5,
     temp_evening = 6:10,
     pressure_temp = 11:15
   )
-  result <- s_select(df, dplyr::contains("temp"))
+  result <- select_or_mutate(df, dplyr::contains("temp"))
   expect_identical(result, df)
 })
 
-test_that("s_select: where() with is.numeric", {
+test_that("select_or_mutate: where() with is.numeric", {
   df <- tibble::tibble(
     num1 = 1:5,
     num2 = 6:10,
     char = letters[1:5],
     logi = c(TRUE, FALSE, TRUE, FALSE, TRUE)
   )
-  result <- s_select(df, dplyr::where(is.numeric))
+  result <- select_or_mutate(df, dplyr::where(is.numeric))
   expect_identical(result, df[c("num1", "num2")])
 })
 
-test_that("s_select: where() with complex predicate", {
+test_that("select_or_mutate: where() with complex predicate", {
   df <- tibble::tibble(
     a = 1:5,
     b = c("x", "y", "z", "x", "y"),
     c = c(TRUE, FALSE, TRUE, FALSE, TRUE),
     d = 6:10
   )
-  result <- s_select(df, dplyr::where(~ is.numeric(.x) | is.logical(.x)))
+  result <- select_or_mutate(
+    df,
+    dplyr::where(~ is.numeric(.x) | is.logical(.x))
+  )
   expect_identical(result, df[c("a", "c", "d")])
 })
 
-test_that("s_select: numeric column indices", {
+test_that("select_or_mutate: numeric column indices", {
   df <- tibble::tibble(a = 1:5, b = 6:10, c = 11:15, d = 16:20, e = 21:25)
-  result <- s_select(df, 1, 3, 5)
+  result <- select_or_mutate(df, 1, 3, 5)
   expect_identical(result, df[c("a", "c", "e")])
 })
 
-test_that("s_select: column range with :", {
+test_that("select_or_mutate: column range with :", {
   df <- tibble::tibble(a = 1:5, b = 6:10, c = 11:15, d = 16:20)
-  result <- s_select(df, b:d)
+  result <- select_or_mutate(df, b:d)
   expect_identical(result, df[c("b", "c", "d")])
 })
 
-test_that("s_select: everything()", {
+test_that("select_or_mutate: everything()", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- s_select(df, dplyr::everything())
+  result <- select_or_mutate(df, dplyr::everything())
   expect_identical(result, df)
 })
 
@@ -149,15 +152,15 @@ test_that("s_select: everything()", {
 # CHALLENGING TESTS - Mixed Selection Types
 # ============================================================================
 
-test_that("s_select: mix of named columns and expressions", {
+test_that("select_or_mutate: mix of named columns and expressions", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- s_select(df, x, doubled_y = y * 2)
+  result <- select_or_mutate(df, x, doubled_y = y * 2)
   expect_equal(ncol(result), 2)
   expect_equal(names(result), c("x", "doubled_y"))
   expect_equal(result$doubled_y, c(12, 14, 16, 18, 20))
 })
 
-test_that("s_select: mix of selection and computed columns", {
+test_that("select_or_mutate: mix of selection and computed columns", {
   df <- tibble::tibble(
     temp_1 = 1:5,
     temp_2 = 6:10,
@@ -166,7 +169,7 @@ test_that("s_select: mix of selection and computed columns", {
   )
   # First select temp columns, then add computed column in separate step
   result <- df |>
-    s_select(dplyr::starts_with("temp")) |>
+    select_or_mutate(dplyr::starts_with("temp")) |>
     dplyr::mutate(total_pressure = df$pressure_1 + df$pressure_2)
   expect_equal(ncol(result), 3)
 })
@@ -175,23 +178,26 @@ test_that("s_select: mix of selection and computed columns", {
 # CHALLENGING TESTS - Error Handling
 # ============================================================================
 
-test_that("s_select: non-existent column gives informative error", {
+test_that("select_or_mutate: non-existent column gives informative error", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
-  expect_error(s_select(df, z), "don't exist: `z`")
+  expect_error(select_or_mutate(df, z), "don't exist: `z`")
 })
 
-test_that("s_select: invalid expression gives informative error", {
+test_that("select_or_mutate: invalid expression gives informative error", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
-  expect_error(s_select(df, nonexistent_func(x)), "Neither.*select.*mutate")
+  expect_error(
+    select_or_mutate(df, nonexistent_func(x)),
+    "Neither.*select.*mutate"
+  )
 })
 
-test_that("s_select: NULL data frame errors", {
-  expect_error(s_select(NULL, x))
+test_that("select_or_mutate: NULL data frame errors", {
+  expect_error(select_or_mutate(NULL, x))
 })
 
-test_that("s_select: empty selection after filtering gives empty result", {
+test_that("select_or_mutate: empty selection after filtering gives empty result", {
   df <- tibble::tibble(x = 1:5, y = 6:10, z = 11:15)
-  result <- s_select(df, dplyr::starts_with("nonexistent"))
+  result <- select_or_mutate(df, dplyr::starts_with("nonexistent"))
   expect_equal(ncol(result), 0)
   expect_equal(nrow(result), 5)
 })
@@ -200,40 +206,40 @@ test_that("s_select: empty selection after filtering gives empty result", {
 # CHALLENGING TESTS - Edge Cases
 # ============================================================================
 
-test_that("s_select: single row data frame", {
+test_that("select_or_mutate: single row data frame", {
   df <- tibble::tibble(x = 1, y = 2, z = 3)
-  result <- s_select(df, x, z)
+  result <- select_or_mutate(df, x, z)
   expect_equal(nrow(result), 1)
   expect_equal(ncol(result), 2)
 })
 
-test_that("s_select: zero row data frame", {
+test_that("select_or_mutate: zero row data frame", {
   df <- tibble::tibble(x = numeric(0), y = numeric(0))
-  result <- s_select(df, x)
+  result <- select_or_mutate(df, x)
   expect_equal(nrow(result), 0)
   expect_equal(ncol(result), 1)
 })
 
-test_that("s_select: many columns", {
+test_that("select_or_mutate: many columns", {
   df <- tibble::as_tibble(replicate(100, 1:10), .name_repair = "minimal")
   names(df) <- paste0("var", 1:100)
-  result <- s_select(df, var1, var50, var100)
+  result <- select_or_mutate(df, var1, var50, var100)
   expect_equal(ncol(result), 3)
 })
 
-test_that("s_select: special characters in column names", {
+test_that("select_or_mutate: special characters in column names", {
   df <- tibble::tibble(
     `var with spaces` = 1:5,
     `var.with.dots` = 6:10,
     `var_with_underscores` = 11:15
   )
-  result <- s_select(df, `var with spaces`)
+  result <- select_or_mutate(df, `var with spaces`)
   expect_equal(ncol(result), 1)
 })
 
-test_that("s_select: selecting same column multiple times", {
+test_that("select_or_mutate: selecting same column multiple times", {
   df <- tibble::tibble(x = 1:5, y = 6:10)
-  result <- s_select(df, x, x, y)
+  result <- select_or_mutate(df, x, x, y)
   # dplyr allows duplicate selections
   expect_true(ncol(result) >= 2)
 })
@@ -242,7 +248,7 @@ test_that("s_select: selecting same column multiple times", {
 # CHALLENGING TESTS - Data Type Handling
 # ============================================================================
 
-test_that("s_select: preserves data types", {
+test_that("select_or_mutate: preserves data types", {
   df <- tibble::tibble(
     int_col = 1:5,
     dbl_col = c(1.5, 2.5, 3.5, 4.5, 5.5),
@@ -251,7 +257,7 @@ test_that("s_select: preserves data types", {
     logi_col = c(TRUE, FALSE, TRUE, FALSE, TRUE),
     date_col = seq(as.Date("2024-01-01"), by = "day", length.out = 5)
   )
-  result <- s_select(df, dplyr::everything())
+  result <- select_or_mutate(df, dplyr::everything())
   expect_type(result$int_col, "integer")
   expect_type(result$dbl_col, "double")
   expect_type(result$chr_col, "character")
@@ -260,20 +266,20 @@ test_that("s_select: preserves data types", {
   expect_s3_class(result$date_col, "Date")
 })
 
-test_that("s_select: handles list columns", {
+test_that("select_or_mutate: handles list columns", {
   df <- tibble::tibble(
     x = 1:3,
     y = I(list(1:2, 3:4, 5:6))
   )
-  result <- s_select(df, y)
+  result <- select_or_mutate(df, y)
   expect_equal(ncol(result), 1)
   expect_type(result$y, "list")
 })
 
-test_that("s_select: handles matrix columns", {
+test_that("select_or_mutate: handles matrix columns", {
   df <- tibble::tibble(x = 1:3)
   df$y <- matrix(1:6, nrow = 3)
-  result <- s_select(df, y)
+  result <- select_or_mutate(df, y)
   expect_equal(ncol(result), 1)
   expect_true(is.matrix(result$y))
 })
@@ -282,7 +288,7 @@ test_that("s_select: handles matrix columns", {
 # CHALLENGING TESTS - Real-world Scenarios
 # ============================================================================
 
-test_that("s_select: survey data variable selection", {
+test_that("select_or_mutate: survey data variable selection", {
   withr::local_preserve_seed()
   survey <- tibble::tibble(
     respondent_id = 1:100,
@@ -297,11 +303,11 @@ test_that("s_select: survey data variable selection", {
   )
 
   # Select only question columns
-  questions <- s_select(survey, dplyr::starts_with("q"))
+  questions <- select_or_mutate(survey, dplyr::starts_with("q"))
   expect_equal(ncol(questions), 3)
 
   # Calculate satisfaction score
-  satisfaction_with_id <- s_select(
+  satisfaction_with_id <- select_or_mutate(
     survey,
     respondent_id,
     is_satisfied = q1_satisfaction >= 4
@@ -310,7 +316,7 @@ test_that("s_select: survey data variable selection", {
   expect_type(satisfaction_with_id$is_satisfied, "logical")
 })
 
-test_that("s_select: financial data analysis", {
+test_that("select_or_mutate: financial data analysis", {
   withr::local_preserve_seed()
   financial <- tibble::tibble(
     date = seq(as.Date("2024-01-01"), by = "day", length.out = 30),
@@ -319,7 +325,7 @@ test_that("s_select: financial data analysis", {
     volume = sample(1000000:10000000, 30)
   )
 
-  result <- s_select(
+  result <- select_or_mutate(
     financial,
     date,
     price_range = close_price - open_price,
@@ -330,7 +336,7 @@ test_that("s_select: financial data analysis", {
   expect_equal(result$price_range, financial$close_price - financial$open_price)
 })
 
-test_that("s_select: feature engineering for modeling", {
+test_that("select_or_mutate: feature engineering for modeling", {
   withr::local_preserve_seed()
   data <- tibble::tibble(
     x1 = rnorm(100),
@@ -339,7 +345,7 @@ test_that("s_select: feature engineering for modeling", {
     target = rnorm(100)
   )
 
-  features <- s_select(
+  features <- select_or_mutate(
     data,
     x1,
     x2,
@@ -359,10 +365,10 @@ test_that("s_select: feature engineering for modeling", {
 # CHALLENGING TESTS - data.table Compatibility
 # ============================================================================
 
-test_that("s_select: works with data.table input", {
+test_that("select_or_mutate: works with data.table input", {
   skip_if_not_installed("data.table")
   dt <- data.table::data.table(x = 1:5, y = 6:10, z = 11:15)
-  result <- s_select(dt, x, z)
+  result <- select_or_mutate(dt, x, z)
   expect_s3_class(result, "data.table")
   expect_equal(ncol(result), 2)
 })
@@ -371,12 +377,12 @@ test_that("s_select: works with data.table input", {
 # CHALLENGING TESTS - Wide inputs
 # ============================================================================
 
-test_that("s_select: selects the expected columns of a wide data frame", {
+test_that("select_or_mutate: selects the expected columns of a wide data frame", {
   withr::local_preserve_seed()
   df <- tibble::as_tibble(replicate(1000, rnorm(100)), .name_repair = "minimal")
   names(df) <- paste0("var", 1:1000)
 
-  result <- s_select(df, dplyr::where(~ mean(.x) > 0))
+  result <- select_or_mutate(df, dplyr::where(~ mean(.x) > 0))
 
   expect_s3_class(result, "tbl_df")
   expected <- names(df)[colMeans(as.matrix(df)) > 0]
@@ -390,14 +396,17 @@ test_that("misspelled selections are reported instead of evaluated", {
   expect_error(summ(d, mas), "`mas`")
   expect_error(tab(d, "heigth"), "`heigth`")
   expect_error(summ(d, 4), "position 4")
-  expect_error(s_select(d, a1, a2, a3), "`a1`, `a2`, `a3`")
+  expect_error(select_or_mutate(d, a1, a2, a3), "`a1`, `a2`, `a3`")
   expect_identical(names(tab(d, height > 1))[1], "height > 1")
-  expect_identical(s_select(d, ratio = mass / height)$ratio, d$mass / d$height)
+  expect_identical(
+    select_or_mutate(d, ratio = mass / height)$ratio,
+    d$mass / d$height
+  )
   expect_identical(
     tab(d, half = mass / height)$half,
     sort(unique(d$mass / d$height))
   )
-  mixed <- s_select(d, tidyselect::starts_with("h"), heavy = mass > 3)
+  mixed <- select_or_mutate(d, tidyselect::starts_with("h"), heavy = mass > 3)
   expect_named(mixed, c("height", "heavy"))
 })
 
@@ -408,15 +417,15 @@ test_that("spatial inspection and selection keep their geometry", {
     coords = c("lon", "lat")
   )
   expect_true("geometry" %in% ds(d))
-  expect_s3_class(s_select(d, x), "sf")
-  expect_identical(sf::st_geometry(d), sf::st_geometry(s_select(d, x)))
+  expect_s3_class(select_or_mutate(d, x), "sf")
+  expect_identical(sf::st_geometry(d), sf::st_geometry(select_or_mutate(d, x)))
 })
 
-test_that("s_select forces its data promise once and preserves selected attributes", {
+test_that("select_or_mutate forces its data promise once and preserves selected attributes", {
   calls <- 0L
   x <- structure(1:3, label = "Observed score")
   data <- tibble::tibble(x = x, y = 4:6)
-  out <- s_select(
+  out <- select_or_mutate(
     {
       calls <- calls + 1L
       data
@@ -428,26 +437,29 @@ test_that("s_select forces its data promise once and preserves selected attribut
   expect_identical(data, tibble::tibble(x = x, y = 4:6))
 })
 
-test_that("s_select no-argument return preserves grouping and object identity", {
+test_that("select_or_mutate no-argument return preserves grouping and object identity", {
   data <- dplyr::group_by(tibble::tibble(g = c("a", "b"), x = 1:2), g)
-  out <- withVisible(s_select(data))
+  out <- withVisible(select_or_mutate(data))
   expect_identical(out$value, data)
   expect_true(out$visible)
-  expect_identical(s_select(data, tidyselect::everything()), data)
+  expect_identical(select_or_mutate(data, tidyselect::everything()), data)
 })
 
-test_that("s_select evaluates selection predicates once per column", {
+test_that("select_or_mutate evaluates selection predicates once per column", {
   calls <- 0L
   predicate <- function(x) {
     calls <<- calls + 1L
     is.numeric(x)
   }
   data <- tibble::tibble(x = 1:2, y = c("a", "b"), z = c(TRUE, FALSE))
-  expect_identical(s_select(data, tidyselect::where(predicate)), data["x"])
+  expect_identical(
+    select_or_mutate(data, tidyselect::where(predicate)),
+    data["x"]
+  )
   expect_identical(calls, 3L)
 })
 
-test_that("s_select preserves successful warning conditions and their order", {
+test_that("select_or_mutate preserves successful warning conditions and their order", {
   first <- structure(
     list(message = "first selector warning", call = NULL),
     class = c("selector_warning", "warning", "condition")
@@ -460,7 +472,7 @@ test_that("s_select preserves successful warning conditions and their order", {
   }
   observed <- list()
   out <- withCallingHandlers(
-    s_select(tibble::tibble(x = 1:2), tidyselect::all_of(choose())),
+    select_or_mutate(tibble::tibble(x = 1:2), tidyselect::all_of(choose())),
     warning = function(w) {
       observed[[length(observed) + 1L]] <<- w
       invokeRestart("muffleWarning")
@@ -470,14 +482,17 @@ test_that("s_select preserves successful warning conditions and their order", {
   expect_identical(out, tibble::tibble(x = 1:2))
 })
 
-test_that("s_select reports both failed branches without replaying their warnings", {
+test_that("select_or_mutate reports both failed branches without replaying their warnings", {
   compute <- function() {
     warning("discarded branch warning")
     stop("branch failure")
   }
   observed <- character()
   err <- withCallingHandlers(
-    tryCatch(s_select(tibble::tibble(x = 1:2), compute()), error = identity),
+    tryCatch(
+      select_or_mutate(tibble::tibble(x = 1:2), compute()),
+      error = identity
+    ),
     warning = function(w) {
       observed <<- c(observed, conditionMessage(w))
       invokeRestart("muffleWarning")
@@ -490,7 +505,7 @@ test_that("s_select reports both failed branches without replaying their warning
   expect_match(conditionMessage(err), "branch failure", fixed = TRUE)
 })
 
-test_that("s_select evaluates computed expressions exactly once", {
+test_that("select_or_mutate evaluates computed expressions exactly once", {
   local({
     old <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     on.exit(
@@ -511,14 +526,14 @@ test_that("s_select evaluates computed expressions exactly once", {
       force(x)
       x * 2
     }
-    out <- s_select(tibble::tibble(x = 1:3), z = compute(x))
+    out <- select_or_mutate(tibble::tibble(x = 1:3), z = compute(x))
     expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
     expect_identical(calls, 1L)
     expect_identical(.Random.seed, expected_state)
   })
 })
 
-test_that("s_select emits successful selector warnings exactly once", {
+test_that("select_or_mutate emits successful selector warnings exactly once", {
   d <- tibble::tibble(x = 1:3, y = 4:6)
   choose <- function() {
     warning("successful-selector-warning")
@@ -526,7 +541,7 @@ test_that("s_select emits successful selector warnings exactly once", {
   }
   warnings <- character()
   out <- withCallingHandlers(
-    s_select(d, tidyselect::all_of(choose())),
+    select_or_mutate(d, tidyselect::all_of(choose())),
     warning = function(w) {
       warnings <<- c(warnings, conditionMessage(w))
       invokeRestart("muffleWarning")
@@ -536,7 +551,7 @@ test_that("s_select emits successful selector warnings exactly once", {
   expect_identical(out, d["x"])
 })
 
-test_that("s_select discards failed-probe warnings and retains successful fallback warning", {
+test_that("select_or_mutate discards failed-probe warnings and retains successful fallback warning", {
   d <- tibble::tibble(x = 1:3)
   compute <- function(x) {
     warning("branch-warning")
@@ -545,7 +560,7 @@ test_that("s_select discards failed-probe warnings and retains successful fallba
   }
   warnings <- character()
   out <- withCallingHandlers(
-    s_select(d, z = compute(x)),
+    select_or_mutate(d, z = compute(x)),
     warning = function(w) {
       warnings <<- c(warnings, conditionMessage(w))
       invokeRestart("muffleWarning")
@@ -556,11 +571,11 @@ test_that("s_select discards failed-probe warnings and retains successful fallba
   expect_identical(out, tibble::tibble(z = c(2, 4, 6)))
 })
 
-test_that("s_select() reports unmatched and unrecognised input", {
+test_that("select_or_mutate() reports unmatched and unrecognised input", {
   d <- tibble::tibble(height = c(1, 2), mass = c(3, 4))
   expect_snapshot(error = TRUE, {
-    s_select(d, heigth, mas)
-    s_select(d, 4)
-    s_select(d, ratio = mass / missing_column)
+    select_or_mutate(d, heigth, mas)
+    select_or_mutate(d, 4)
+    select_or_mutate(d, ratio = mass / missing_column)
   })
 })

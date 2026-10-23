@@ -78,12 +78,9 @@ test_that("fre1: list output structure with Total", {
     var2 = sample(letters[1:5], 100, replace = TRUE)
   )
   result <- fre1(df, var1, var2, .type = "list")
-  purrr::walk(
-    result,
-    ~ {
-      expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
-    }
-  )
+  for (.x in result) {
+    expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
+  }
 })
 
 # ============================================================================
@@ -159,12 +156,9 @@ test_that("fre1: variables with varying NA percentages", {
   )
   result <- fre1(df, no_na:fifty_pct, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(
-    result,
-    ~ {
-      expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
-    }
-  )
+  for (.x in result) {
+    expect_true(any(grepl("Total", .x$value, ignore.case = TRUE)))
+  }
 })
 
 test_that("fre1: all NA variable with Total", {
@@ -351,12 +345,9 @@ test_that("fre1: single row dataset", {
   df <- tibble::tibble(x = "only", y = 1, z = TRUE)
   result <- fre1(df, x:z, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(
-    result,
-    ~ {
-      expect_equal(nrow(.x), 2) # value + Total
-    }
-  )
+  for (.x in result) {
+    expect_equal(nrow(.x), 2) # value + Total
+  }
 })
 
 test_that("fre1: all identical values in each variable", {
@@ -366,14 +357,11 @@ test_that("fre1: all identical values in each variable", {
     z = rep(TRUE, 100)
   )
   result <- fre1(df, x:z, .type = "list")
-  purrr::walk(
-    result,
-    ~ {
-      expect_equal(nrow(.x), 2) # same + Total
-      total_row <- .x[grepl("Total", .x$value, ignore.case = TRUE), ]
-      expect_equal(total_row$n, 100)
-    }
-  )
+  for (.x in result) {
+    expect_equal(nrow(.x), 2) # same + Total
+    total_row <- .x[grepl("Total", .x$value, ignore.case = TRUE), ]
+    expect_equal(total_row$n, 100)
+  }
 })
 
 test_that("fre1: extreme cardinality differences", {
@@ -390,7 +378,9 @@ test_that("fre1: empty data frame", {
   df <- tibble::tibble(x = numeric(0), y = character(0))
   result <- fre1(df, x, y, .type = "list")
   expect_equal(length(result), 2)
-  purrr::walk(result, ~ expect_equal(nrow(.x), 0))
+  for (.x in result) {
+    expect_equal(nrow(.x), 0)
+  }
 })
 
 # ============================================================================
@@ -405,7 +395,9 @@ test_that("fre1: unicode in multiple variables", {
   )
   result <- fre1(df, cjk, arabic, emoji, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(result, ~ expect_equal(nrow(.x), 3)) # 2 unique + Total
+  for (.x in result) {
+    expect_equal(nrow(.x), 3)
+  } # 2 unique + Total
 })
 
 # ============================================================================
@@ -436,7 +428,9 @@ test_that("fre1: moderate size dataset with list output", {
   )
   result <- fre1(df, a:c, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(result, ~ expect_true(any(grepl("Total", .x$value))))
+  for (.x in result) {
+    expect_true(any(grepl("Total", .x$value)))
+  }
 })
 
 test_that("fre1: fifteen variables stack into one tibble", {
@@ -483,7 +477,9 @@ test_that("fre1: survey data with multiple questions", {
   )
   result <- fre1(df, q1_satisfaction:q4_gender, .type = "list")
   expect_equal(length(result), 4)
-  purrr::walk(result, ~ expect_true(any(grepl("Total", .x$value))))
+  for (.x in result) {
+    expect_true(any(grepl("Total", .x$value)))
+  }
 })
 
 test_that("fre1: demographic frequencies with grouping", {

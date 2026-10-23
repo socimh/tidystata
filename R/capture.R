@@ -2,10 +2,9 @@
 #'
 #' `capture()` works like Stata's `capture`: it evaluates an expression,
 #' suppresses any error, and returns `TRUE` if the expression succeeded and
-#' `FALSE` if it failed. `s_try()` is an alias of `capture()`.
+#' `FALSE` if it failed.
 #'
 #' @param x An expression to evaluate once.
-#' @param .fn `r lifecycle::badge("deprecated")` Use `x` instead.
 #' @returns A single logical value.
 #' @details
 #' Errors are caught without printing their messages; warnings and messages
@@ -29,15 +28,7 @@ NULL
 
 #' @rdname capture
 #' @export
-capture <- function(x, .fn = lifecycle::deprecated()) {
-  if (!missing(.fn)) {
-    lifecycle::deprecate_soft("0.3.0", "capture(.fn)", "capture(x)")
-    return(capture(.fn))
-  }
+capture <- function(x) {
   try_result <- try(x, silent = TRUE)
   !inherits(try_result, "try-error")
 }
-
-#' @rdname capture
-#' @export
-s_try <- capture

@@ -2,17 +2,12 @@
 % Please edit documentation in R/capture.R
 \name{capture}
 \alias{capture}
-\alias{s_try}
 \title{Capture an error and report success}
 \usage{
-capture(x, .fn = lifecycle::deprecated())
-
-s_try(x, .fn = lifecycle::deprecated())
+capture(x)
 }
 \arguments{
 \item{x}{An expression to evaluate once.}
-
-\item{.fn}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} instead.}
 }
 \value{
 A single logical value.
@@ -20,7 +15,7 @@ A single logical value.
 \description{
 \code{capture()} works like Stata's \code{capture}: it evaluates an expression,
 suppresses any error, and returns \code{TRUE} if the expression succeeded and
-\code{FALSE} if it failed. \code{s_try()} is an alias of \code{capture()}.
+\code{FALSE} if it failed.
 }
 \details{
 Errors are caught without printing their messages; warnings and messages

@@ -102,7 +102,7 @@ tab_prepare_data <- function(.data, ..., group_vars = character(0)) {
       remove_group_vars(..., group_vars = group_vars)
   } else {
     if (!missing(...)) {
-      .data <- s_select(.data, ...)
+      .data <- select_or_mutate(.data, ...)
     }
     out <- .data |>
       dplyr::ungroup()
@@ -290,21 +290,23 @@ append_tab_list <- function(.data, blank_row = FALSE) {
       valid_cum = double()
     ))
   }
-  out <- .data |>
-    purrr::imap(
-      ~ dplyr::mutate(
-        .x,
-        variable = .y
-      )
-    )
+  ids <- if (is.null(names(.data))) seq_along(.data) else names(.data)
+  out <- Map(
+    function(table, id) dplyr::mutate(table, variable = id),
+    .data,
+    ids
+  )
 
   vec_types <- out |>
-    purrr::map_chr(function(table) {
-      type <- var_type(table$value, abbr = TRUE)
-      # Element descriptions refine a family; vctrs checks compatibility below.
-      type <- sub("<.*$", "", type)
-      if (type %in% c("int", "dbl")) "num" else type
-    }) |>
+    vapply(
+      function(table) {
+        type <- var_type(table$value, abbr = TRUE)
+        # Element descriptions refine a family; vctrs checks compatibility below.
+        type <- sub("<.*$", "", type)
+        if (type %in% c("int", "dbl")) "num" else type
+      },
+      character(1)
+    ) |>
     unique() |>
     length()
 
@@ -323,37 +325,32 @@ append_tab_list <- function(.data, blank_row = FALSE) {
     )
 
   if (vec_types > 1 || !compatible_types) {
-    out <- out |>
-      purrr::map(
-        ~ .x |>
-          dplyr::mutate(
-            value = as_character(value)
-          )
-      )
+    out <- lapply(out, function(table) {
+      dplyr::mutate(table, value = as_character(.data$value))
+    })
   }
 
   if (blank_row) {
-    out <- out |>
-      purrr::map(
-        ~ .x |>
-          dplyr::add_row(
-            variable = NA_character_
-          )
-      )
+    out <- lapply(out, function(table) {
+      dplyr::add_row(table, variable = NA_character_)
+    })
   }
 
-  out <- out |>
-    purrr::list_rbind() |>
+  out <- vctrs::vec_rbind(!!!unname(out)) |>
     dplyr::relocate("variable")
 
   out
 }
 
-tab2_data <- function(.data, weights = NULL) {
+tab2_data <- function(.data, weights = NULL, call = rlang::caller_env()) {
   .data <- tibble::as_tibble(.data)
-  join_name <- .data |>
-    names() |>
-    stringr::str_flatten(" \\ ")
+  join_name <- paste(names(.data), collapse = " \\ ")
+  if (!is.null(dim(.data[[2L]]))) {
+    cli::cli_abort(
+      "{.var {names(.data)[2L]}} has several columns, so its values can't be column headers.",
+      call = call
+    )
+  }
 
   .data <- dplyr::rename(.data, {{ join_name }} := 1)
   counts <- tab_counts(.data, weights)
@@ -380,40 +377,29 @@ tab2_data <- function(.data, weights = NULL) {
   columns <- vctrs::vec_group_loc(counts[[2L]])
   column_headers <- as.character(columns$key)
   column_headers[is.na(column_headers)] <- "NA"
-  simple <- is.atomic(counts[[2L]]) &&
-    is.null(dim(counts[[2L]])) &&
-    (!is.object(counts[[2L]]) || is.factor(counts[[2L]])) &&
-    !anyDuplicated(column_headers) &&
-    !any(column_headers == join_name | grepl("^\\.\\.[0-9.]*$", column_headers))
-  if (simple && nrow(counts)) {
-    rows <- vctrs::vec_group_loc(counts[[1L]])
-    row_id <- vctrs::vec_match(counts[[1L]], rows$key)
-    display <- as.character(column_values)
-    display[is.na(display)] <- "NA"
-    column_id <- match(display, unique(headers))
-    cells <- aggregation_cells(
-      counts$n,
-      row_id,
-      column_id,
-      length(rows$loc),
-      length(columns$loc)
-    )
-    out <- tibble::as_tibble_col(rows$key, column_name = join_name)
-    out[unique(headers)] <- cells
+  # Distinct values that print alike, or clash with the row header, would give
+  # ambiguous columns.
+  vctrs::vec_as_names(
+    c(join_name, column_headers),
+    repair = "check_unique",
+    call = call
+  )
+  rows <- vctrs::vec_group_loc(counts[[1L]])
+  out <- tibble::as_tibble_col(rows$key, column_name = join_name)
+  if (!nrow(counts)) {
     return(out)
   }
-  # Ambiguous display names and specialized classes keep pivot's diagnostics
-  # and list-column behavior at the output boundary.
-  out <- counts |>
-    tidyr::pivot_wider(
-      names_from = 2,
-      values_from = "n"
-    ) |>
-    dplyr::mutate(
-      dplyr::across(-1, ~ tidyr::replace_na(.x, 0))
-    )
-  out <- out[c(names(out)[1L], unique(headers))]
-
+  row_id <- vctrs::vec_match(counts[[1L]], rows$key)
+  display <- as.character(column_values)
+  display[is.na(display)] <- "NA"
+  column_id <- match(display, unique(headers))
+  out[unique(headers)] <- aggregation_cells(
+    counts$n,
+    row_id,
+    column_id,
+    length(rows$loc),
+    length(columns$loc)
+  )
   out
 }
 
@@ -464,7 +450,7 @@ tab2_add_total <- function(out, .data, call = rlang::caller_env()) {
     dplyr::mutate(
       dplyr::across(
         -1,
-        ~ tidyr::replace_na(.x, 0)
+        ~ replace_missing(.x, 0)
       )
     )
   out[[1L]] <- as_character(out[[1L]])
@@ -511,7 +497,7 @@ result_to_flextable <- function(
       dplyr::mutate(
         dplyr::across(
           1,
-          ~ tidyr::replace_na(as_character(.x), "NA")
+          ~ replace_missing(as_character(.x), "NA")
         )
       )
   } else if (fre1) {
@@ -524,7 +510,7 @@ result_to_flextable <- function(
           ~ ifelse(
             is.na(variable),
             NA,
-            tidyr::replace_na(as_character(.x), "NA")
+            replace_missing(as_character(.x), "NA")
           )
         )
       )
@@ -535,7 +521,7 @@ result_to_flextable <- function(
           -dplyr::any_of(
             c("n", "percent", "cum", "valid", "valid_cum")
           ),
-          ~ tidyr::replace_na(as_character(.x), "NA")
+          ~ replace_missing(as_character(.x), "NA")
         )
       )
   }

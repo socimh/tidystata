@@ -19,9 +19,7 @@ summ(
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic"),
-  .na.rm = lifecycle::deprecated(),
-  .mode = lifecycle::deprecated()
+  .wt_type = c("frequency", "analytic")
 )
 
 tabstat(
@@ -38,9 +36,7 @@ tabstat(
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic"),
-  .na.rm = lifecycle::deprecated(),
-  .mode = lifecycle::deprecated()
+  .wt_type = c("frequency", "analytic")
 )
 }
 \arguments{
@@ -124,9 +120,6 @@ Analytic weights (Stata's \verb{[aweight]}, suitable for sampling weights) are
 rescaled within each group and variable to sum to the number of observed
 values, so \code{n} is the number of observations. Means and percentiles are the
 same under both types; \code{sd}, \code{se} and \code{sum} differ.}
-
-\item{.na.rm, .mode}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{.missing}
-(with the opposite value) and \code{.type} instead.}
 }
 \value{
 A table, or a list of tables with \code{.type = "list"} when multiple

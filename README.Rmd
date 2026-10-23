@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![CRAN status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![CRAN status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata)
 [![R-CMD-check](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml)
 
 <!-- badges: end -->
@@ -33,13 +33,14 @@ The package focuses on exploring and preparing data:
 - `summ()` and `tabstat()` for summary statistics.
 - `pwcorr()`, `misstable()`, and `tab2(.chi2 = TRUE)` for correlations, missing values, and tests of independence.
 - `codebook()` and `variables()` for variable inspection.
-- `isid()`, `duplicates_report()`, `assert()`, `is_first()`, and `s_merge()` for checking keys and merging, and `print_all()` for listing every row.
-- `s_select()`, row calculations, conversion helpers, `std()`, `pc()`, `as_dummy()`, panel lags (`s_lag()`, `s_lead()`, `s_diff()`), and binning for data preparation.
+- `isid()`, `duplicates_report()`, `assert()`, `is_first()`, and `stata_merge()` for checking keys and merging, and `print_all()` for listing every row.
+- `select_or_mutate()`, row calculations, conversion helpers, `std()`, `pc()`, `as_dummy()`, panel lags (`stata_lag()`, `stata_lead()`, `stata_diff()`), and binning for data preparation.
 
 tidystata `0.3.0` retires the import/export, regression-table, and
 detailed-codebook wrappers. See the
 [migration guide](https://socimh.github.io/tidystata/articles/migration.html) for direct package alternatives and breaking
-changes. This experimental package is undergoing stabilization; see
+changes. From 0.3.0 the interface is stable: a released name or argument
+changes only after a deprecation period. See
 [NEWS](https://socimh.github.io/tidystata/news/index.html) for changes in each release.
 
 ## Installation
@@ -118,6 +119,15 @@ display. `unpreview_table()` removes that display setting. External dplyr and
 tidyr verbs retain their own container and grouping behavior, with preview
 settings preserved for supported operations.
 
+## Performance
+
+tidystata is built for large datasets. Its core summaries, row calculations and
+panel helpers run in compiled C++ code, and speed improvements never change
+results. Vector helpers such as `std()` and `stata_lag()` inside a grouped
+`mutate()` are called once per group, so with many thousands of groups they are
+slower than collapse or data.table; use those packages for the heaviest grouped
+workloads.
+
 ## Example
 
 ### Load the package
@@ -139,10 +149,10 @@ codebook(lifeexp)
 
 ### summ()
 
-Summarise selected numeric variables in `mtcars`.
+Summarise selected numeric variables in `lifeexp`.
 
 ```{r}
-summ(mtcars, mpg, wt)
+summ(lifeexp, lexp, gnppc, safewater)
 ```
 
 Choose numeric variables deliberately: means and standard deviations of factor
@@ -156,7 +166,7 @@ Unsupported statistics produce an error. See the [migration guide](https://socim
 for the date/datetime restrictions and cross-tabulation naming rules.
 
 ```{r}
-summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
+summ(lifeexp, safewater, .stat = c("missing", "p50", "sum"))
 ```
 
 With `.type = "table"`, numeric and calendar summaries share character columns
@@ -168,14 +178,16 @@ numeric statistic types in the numeric summary.
 Tabulate a single variable:
 
 ```{r}
-tab(dplyr::starwars, sex)
+tab(starwars, sex)
 ```
 
-`tab1()` tabulates variables one by one as a list, and `varlist()` can select variables in a Stata style.
-
+`tab1()` tabulates variables one by one as a list. Select variables with
+tidyselect helpers such as `starts_with()`, `ends_with()` and `matches()`, or
+in a Stata style with `varlist()`.
 
 ```{r}
-tab1(dplyr::starwars, varlist("*color"))
+tab1(starwars, ends_with("color"))
+# Equivalent: matches("color$") or varlist("*color")
 ```
 
 One-way tabulation also counts list-column values. Selecting no variables
@@ -185,7 +197,7 @@ Matrix columns are unsupported.
 `tab2()` cross-tabulates two variables.
 
 ```{r}
-tab2(dplyr::starwars, sex, gender)
+tab2(starwars, sex, gender)
 ```
 
 
@@ -198,13 +210,13 @@ tab2(dplyr::starwars, sex, gender)
 `.type = "tibble"` explicitly when a tibble is required.
 
 ```{r}
-fre(dplyr::starwars, sex)
+fre(lifeexp, region)
 ```
 
 For optional rich formatting, install `flextable` and request it explicitly:
 
 ```r
-fre(dplyr::starwars, sex, .type = "flextable")
+fre(lifeexp, region, .type = "flextable")
 ```
 
 ### Row calculations and binning

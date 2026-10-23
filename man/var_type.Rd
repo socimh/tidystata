@@ -5,23 +5,15 @@
 \alias{var_unit}
 \title{Report an object's type or unit}
 \usage{
-var_type(
-  x,
-  abbr = FALSE,
-  .x = lifecycle::deprecated(),
-  .abbr = lifecycle::deprecated()
-)
+var_type(x, abbr = FALSE)
 
-var_unit(x, .x = lifecycle::deprecated())
+var_unit(x)
 }
 \arguments{
 \item{x}{An object.}
 
 \item{abbr}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, the abbreviation of the
 type is returned.}
-
-\item{.x, .abbr}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{x} and \code{abbr}
-instead.}
 }
 \value{
 A character. \code{var_type()} returns \code{"units"} for measured vectors

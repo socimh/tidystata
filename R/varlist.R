@@ -7,15 +7,11 @@
 #'
 #' Use `varlist()` within a *selecting* function, such as `ds()`, `tab()` or
 #' `dplyr::across()`. Alternatively, provide `vars` explicitly to return
-#' matching positions in a standalone call. `varlist()` was called `s_match()`
-#' before tidystata 0.3.0; the old name still works with a deprecation
-#' warning.
+#' matching positions in a standalone call.
 #'
 #' @param string A single character string containing patterns, separated by
 #' spaces, like selecting a varlist in Stata's `keep` command.
 #' @param ignore_case If `TRUE` (the default), matching ignores case.
-#' @param ignore.case `r lifecycle::badge("deprecated")` Use `ignore_case`
-#'   instead.
 #' @returns An integer vector of positions in the available column names.
 #' @inheritParams tidyselect::starts_with
 #'
@@ -72,17 +68,8 @@
 varlist <- function(
   string,
   ignore_case = TRUE,
-  vars = NULL,
-  ignore.case = lifecycle::deprecated()
+  vars = NULL
 ) {
-  if (lifecycle::is_present(ignore.case)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "varlist(ignore.case)",
-      "varlist(ignore_case)"
-    )
-    ignore_case <- ignore.case
-  }
   if (!is.character(string)) {
     stop_input_type(string, "a character vector")
   }
@@ -90,18 +77,15 @@ varlist <- function(
   # Expand complete raw patterns before attaching their boundary anchors.
   # paste0 also retains the existing literal-NA pattern behavior.
   patterns <- paste0(string, "") |>
-    stringr::str_split_1("\\s+") |>
-    stringr::str_replace_all("\\*", ".*") |>
-    stringr::str_replace_all("~", ".+") |>
-    stringr::str_replace_all("\\?", ".") |>
+    split_one("\\s+", arg = "string", call = error_call) |>
+    varlist_wildcards() |>
     vapply(
       num_range_to_regex,
       character(1),
       call = error_call,
       USE.NAMES = FALSE
     )
-  out <- paste0("^(", patterns, ")$") |>
-    stringr::str_flatten("|")
+  out <- paste(paste0("^(", patterns, ")$"), collapse = "|")
 
   tidyselect::matches(
     out,
@@ -110,18 +94,37 @@ varlist <- function(
   )
 }
 
-# Helper function
+# Stata wildcards as regular expressions: `*` is any text, `~` at least one
+# character and `?` exactly one.
+varlist_wildcards <- function(string) {
+  string <- gsub("*", ".*", string, fixed = TRUE)
+  string <- gsub("~", ".+", string, fixed = TRUE)
+  gsub("?", ".", string, fixed = TRUE)
+}
+
+# Splits one string, keeping the empty piece after a trailing separator (as
+# stringr does), so "x[1-5]" splits into "x" and "".
+split_one <- function(
+  string,
+  pattern,
+  arg = rlang::caller_arg(string),
+  call = rlang::caller_env()
+) {
+  check_string(string, arg = arg, call = call)
+  out <- strsplit(string, pattern, perl = TRUE)[[1L]]
+  ends <- grepl(paste0("(?:", pattern, ")$"), string, perl = TRUE)
+  if (!nzchar(string) || ends) c(out, "") else out
+}
+
 num_range_to_regex <- function(string, call = rlang::caller_env()) {
-  any_range <- stringr::str_detect(string, "\\[.*\\]")
+  any_range <- grepl("\\[.*\\]", string, perl = TRUE)
 
   if (!any_range) {
     return(string)
   }
 
-  start_end <- string |>
-    stringr::str_extract_all("\\[.*\\]") |>
-    stringr::str_remove_all("\\[|\\]") |>
-    stringr::str_split_1("-")
+  range <- regmatches(string, regexpr("\\[.*\\]", string, perl = TRUE))
+  start_end <- split_one(gsub("\\[|\\]", "", range, perl = TRUE), "-")
 
   multiple_ranges <- length(start_end) > 2
   if (multiple_ranges) {
@@ -146,12 +149,12 @@ num_range_to_regex <- function(string, call = rlang::caller_env()) {
         call = call
       )
     } else {
-      string_parts <- string |>
-        stringr::str_split_1("\\[.*\\]")
+      string_parts <- split_one(string, "\\[.*\\]")
       range <- seq(begin, end)
-      out <- paste0(string_parts[1], range, string_parts[2]) |>
-        stringr::str_flatten("|")
-      return(out)
+      return(paste(
+        paste0(string_parts[1], range, string_parts[2]),
+        collapse = "|"
+      ))
     }
   } else {
     cli::cli_abort(

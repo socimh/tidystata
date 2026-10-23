@@ -36,7 +36,7 @@ test_that("bare words and strings give the same result without evaluation", {
   cmd <- "merge"
   expect_identical(findit(!!cmd), findit("merge"))
   expect_identical(findit(L.x)$r[1], findit("L.x")$r[1])
-  expect_match(findit(L.x)$r[1], "s_lag(x, time = year)", fixed = TRUE)
+  expect_match(findit(L.x)$r[1], "stata_lag(x, time = year)", fixed = TRUE)
 })
 
 test_that("findit() rejects inputs that are not one word or one string", {
@@ -238,16 +238,10 @@ test_that("tidystata entries call functions that tidystata exports", {
   )
   # Entries use primary names, not aliases or deprecated names.
   aliases <- c(
-    "xtab",
     "cut_quantile",
-    "s_match",
-    "s_try",
-    "names_as_column",
-    "ds_as_column",
     "na_if_value",
     "value_if_na",
     "pct",
-    "s_tag",
     "tab_gen",
     "as_numeric",
     "as_character",
@@ -265,4 +259,87 @@ test_that("findit() reports an invalid query", {
   expect_snapshot(error = TRUE, {
     findit(1 + 1)
   })
+})
+
+test_that("findit() shows Chinese text when R runs in Chinese", {
+  data <- findit_entries()
+  described <- findit_functions()
+  withr::local_envvar(LANGUAGE = "zh_CN:en")
+  expect_true(findit_chinese())
+  merge <- findit(merge)
+  expect_identical(merge$task, data$task_zh[match(merge$stata, data$stata)])
+  expect_identical(
+    attr(findit(left_join), "r_functions")$description,
+    described$description_zh[described$`function` == "left_join"]
+  )
+  expect_named(merge, c("match", "stata", "r", "package", "task"))
+
+  withr::local_envvar(LANGUAGE = "en")
+  expect_false(findit_chinese())
+  merge <- findit(merge)
+  expect_identical(merge$task, data$task[match(merge$stata, data$stata)])
+})
+
+test_that("Chinese keywords are searched in any language", {
+  withr::local_envvar(LANGUAGE = "en")
+  found <- findit("\u5408\u5e76")
+  expect_true(all(found$match == "keyword"))
+  expect_true(any(startsWith(found$stata, "merge")))
+})
+
+test_that("plain questions find the closest entries", {
+  withr::local_envvar(LANGUAGE = "en")
+  zh <- function(...) intToUtf8(c(...))
+  questions <- list(
+    "how do I remove duplicate rows" = "duplicates drop",
+    "average income by group" = "egen",
+    "combine two datasets" = "merge|append",
+    "count how many people in each category" = "tabulate",
+    "make a bar chart" = "graph bar",
+    "keep only rows where age is over 30" = "keep if",
+    "replace missing values with zero" = "mvencode|replace",
+    "change a text column to numbers" = "destring|real",
+    "run a regression with fixed effects" = "reghdfe|xtreg|areg",
+    "sort the data by date" = "sort",
+    "delete a column" = "drop",
+    "open an excel spreadsheet" = "import excel",
+    "turn wide data into long" = "reshape long",
+    "summary statistics of all variables" = "summarize",
+    "split data into quartiles" = "xtile|cut",
+    "check if id is unique" = "isid"
+  )
+  questions[[zh(0x5220, 0x9664, 0x91cd, 0x590d, 0x7684, 0x89c2, 0x6d4b)]] <-
+    "duplicates drop"
+  questions[[zh(0x6309, 0x7ec4, 0x8ba1, 0x7b97, 0x5e73, 0x5747, 0x503c)]] <-
+    "egen|mean"
+  questions[[zh(0x753b, 0x4e00, 0x4e2a, 0x67f1, 0x72b6, 0x56fe)]] <- "graph bar"
+  questions[[zh(0x53d8, 0x91cf, 0x6539, 0x540d)]] <- "rename"
+  for (question in names(questions)) {
+    found <- findit(!!question)
+    expect_true(
+      any(grepl(questions[[question]], utils::head(found$stata, 3))),
+      info = question
+    )
+    expect_identical(found$match[1], "nearest", info = question)
+    expect_lte(nrow(found), 22L)
+  }
+})
+
+test_that("plain questions leave exact lookups unchanged", {
+  withr::local_envvar(LANGUAGE = "en")
+  expect_false("nearest" %in% findit(reg)$match)
+  expect_false("nearest" %in% findit("merge keep(match)")$match)
+  expect_false("nearest" %in% findit("mutate egen")$match)
+  expect_false("nearest" %in% findit(winsor)$match)
+  expect_message(none <- findit("qwzx"), "No Stata command")
+  expect_identical(nrow(none), 0L)
+})
+
+test_that("closest entries print under their own heading", {
+  withr::local_envvar(LANGUAGE = "en")
+  expect_snapshot(print(findit("how do I remove duplicate rows"), n = 2))
+  expect_snapshot(print(
+    findit("count how many people in each category"),
+    n = 2
+  ))
 })

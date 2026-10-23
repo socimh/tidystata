@@ -40,15 +40,17 @@
 #' @export
 #'
 #' @examples
-#' dplyr::starwars |>
-#'   s_select()
-#' dplyr::starwars |>
-#'   s_select(name, height)
+#' starwars <- dplyr::starwars
+#'
+#' starwars |>
+#'   select_or_mutate()
+#' starwars |>
+#'   select_or_mutate(name, height)
 #' # Ordinary select() rejects this computed expression.
-#' try(dplyr::select(dplyr::starwars, height > 50))
-#' dplyr::starwars |>
-#'   s_select(height > 50)
-s_select <- function(.data, ...) {
+#' try(dplyr::select(starwars, height > 50))
+#' starwars |>
+#'   select_or_mutate(height > 50)
+select_or_mutate <- function(.data, ...) {
   if (missing(...)) {
     return(.data)
   }
@@ -145,8 +147,7 @@ selection_helpers <- c(
   "last_col",
   "where",
   "one_of",
-  "varlist",
-  "s_match"
+  "varlist"
 )
 
 # Selection syntax goes to select(). Named constants and expressions that use

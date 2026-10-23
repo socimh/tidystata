@@ -28,7 +28,7 @@ test_that("tab1: list output with 10 variables", {
   result <- tab1(df, v1:v10, .type = "list")
   expect_type(result, "list")
   expect_equal(length(result), 10)
-  expect_true(all(purrr::map_lgl(result, is.data.frame)))
+  expect_true(all(vapply(result, is.data.frame, logical(1))))
 })
 
 test_that("tab1: tibble output with many variables", {
@@ -111,7 +111,11 @@ test_that("tab1: group by with list output", {
   )
   result <- tab1(df, x, y, .by = group, .type = "list")
   expect_equal(length(result), 2)
-  expect_true(all(purrr::map_lgl(result, ~ "group" %in% names(.x))))
+  expect_true(all(vapply(
+    result,
+    function(.x) "group" %in% names(.x),
+    logical(1)
+  )))
 })
 
 test_that("tab1: group by with tibble output", {
@@ -191,7 +195,9 @@ test_that("tab1: single row dataset", {
   df <- tibble::tibble(x = "only", y = 1, z = TRUE)
   result <- tab1(df, x:z, .type = "list")
   expect_equal(length(result), 3)
-  purrr::walk(result, ~ expect_equal(.x$n, 1))
+  for (.x in result) {
+    expect_equal(.x$n, 1)
+  }
 })
 
 test_that("tab1: all unique values in each variable", {
@@ -213,13 +219,10 @@ test_that("tab1: all identical values in each variable", {
     c = rep(TRUE, 1000)
   )
   result <- tab1(df, a:c, .type = "list")
-  purrr::walk(
-    result,
-    ~ {
-      expect_equal(nrow(.x), 1)
-      expect_equal(.x$n, 1000)
-    }
-  )
+  for (.x in result) {
+    expect_equal(nrow(.x), 1)
+    expect_equal(.x$n, 1000)
+  }
 })
 
 test_that("tab1: extreme cardinality differences", {
@@ -551,7 +554,7 @@ test_that("tab1: quality control flags", {
     )
   )
   result <- tab1(df, valid_id:valid_amount, .type = "list")
-  expect_true(all(purrr::map_lgl(result, ~ nrow(.x) <= 2)))
+  expect_true(all(vapply(result, function(.x) nrow(.x) <= 2, logical(1))))
 })
 
 
@@ -580,5 +583,5 @@ test_that("historical tab1 selections and expressions stay supported", {
   expect_named(result, c("t1", "t2"))
   expect_equal(result$t1$n, c(1L, 1L, 1L))
   expect_equal(result$t2$n, c(1L, 1L, 1L))
-  expect_error(s_select(d, wrong_column), "wrong_column")
+  expect_error(select_or_mutate(d, wrong_column), "wrong_column")
 })

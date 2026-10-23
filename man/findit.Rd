@@ -16,8 +16,8 @@ variable: \code{findit(!!cmd)}. \code{NULL} (default) returns every entry.}
 \value{
 A tibble with one row per Stata idiom and the columns \code{match}
 (\code{"stata"} when the word is a Stata command, \code{"r"} when it is an R function
-used in the entry, \code{"keyword"} for a text match, \code{"all"} for the whole
-list), \code{stata} (the Stata code), \code{r} (equivalent R code), \code{package} (where
+used in the entry, \code{"keyword"} for a text match, \code{"nearest"} for the
+closest entries to a plain question, \code{"all"} for the whole list), \code{stata} (the Stata code), \code{r} (equivalent R code), \code{package} (where
 the R function lives) and \code{task} (what it does). It prints each entry as
 the Stata code and task on one line, followed by the R code, so the code is
 never cut off; the first \code{n} entries are shown (\code{print(findit(), n = Inf)}
@@ -65,11 +65,27 @@ entries, and \code{findit("mutate egen")} lists the \code{egen} entries among th
 many that use \code{mutate()}. All matching entries are still returned.
 \item If neither matches, the text is searched for in the Stata code, the R
 code and the task, so \code{findit(winsor)} and \code{findit(dummy)} also work.
+\item Otherwise the text is read as a plain question, in English or Chinese,
+and the closest entries are listed under their own heading:
+\code{findit("how do I remove duplicate rows")}. The closest entries are
+the ones sharing the most informative words with the question, after
+common words are dropped and a short built-in list of synonyms is
+applied ("average" also means "mean"). A question of three or more
+words that happens to start with a command, such as
+\code{findit("count how many people in each category")}, lists the closest
+entries first. No language model is involved, so the same question
+always gives the same answer.
 }
 
 R reads a call before \code{findit()} runs, so anything that is not a single R
 name must be quoted: several words (\code{"merge 1:1 id"}), reserved words
 (\code{"if"}), and names starting with an underscore (\code{"_n"}).
+
+When R runs in Chinese (the \code{LANGUAGE} environment variable or, if it is
+unset, the locale), the task and function descriptions are shown in
+Chinese, and Chinese keywords are searched in any language.
+\code{Sys.setenv(LANGUAGE = "en")} switches back to English, as it does for R's
+own messages.
 
 The list is curated rather than exhaustive. Longer explanations, in English
 and Chinese, are in the "Coming from Stata" articles on the package
@@ -84,6 +100,9 @@ findit(su)
 findit("merge 1:1 id, keep(match)")
 findit("bys g: egen m = mean(x)")
 findit(winsor)
+
+# Plain questions
+findit("how do I remove duplicate rows")
 
 # R functions work too, and words with both meanings show both
 findit(left_join)

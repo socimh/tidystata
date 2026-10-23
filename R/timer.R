@@ -7,8 +7,6 @@
 #' @param on_error A single `TRUE` or `FALSE`. If `TRUE` (the default), also
 #'   report elapsed time when the expression fails, then let the original error
 #'   propagate. Use `FALSE` to report elapsed time only on success.
-#' @param .x,.on_error `r lifecycle::badge("deprecated")` Use `x` and
-#'   `on_error` instead.
 #' @returns The evaluated result, invisibly.
 #' @details
 #' The expression is evaluated once. On success, elapsed time is emitted as a
@@ -26,28 +24,7 @@
 #' x <- seq_len(1e6)
 #' mean(x) |> timer()
 #' try(timer(stop("failure")))
-timer <- function(
-  x,
-  on_error = TRUE,
-  .x = lifecycle::deprecated(),
-  .on_error = lifecycle::deprecated()
-) {
-  if (lifecycle::is_present(.on_error)) {
-    lifecycle::deprecate_soft(
-      "0.3.0",
-      "timer(.on_error)",
-      "timer(on_error)"
-    )
-    on_error <- .on_error
-  }
-  if (!missing(.x)) {
-    lifecycle::deprecate_soft("0.3.0", "timer(.x)", "timer(x)")
-    # In old calls such as timer(.x = f(), FALSE), the positional value fills `x`.
-    if (!missing(x) && missing(on_error)) {
-      on_error <- x
-    }
-    return(timer(.x, on_error = on_error))
-  }
+timer <- function(x, on_error = TRUE) {
   check_bool(on_error)
   begin_time <- Sys.time()
   completed <- FALSE

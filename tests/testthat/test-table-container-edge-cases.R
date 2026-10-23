@@ -89,7 +89,7 @@ test_that("own table results and list children preserve preview settings", {
       tab1(input, tidyselect::starts_with("absent"), .type = "tibble"),
       fre1(input, tidyselect::starts_with("absent"), .type = "tibble"),
       fre(wrapped, g, .type = "tibble"),
-      xtab(wrapped, g, x, .type = "tibble", .total = TRUE),
+      tab2(wrapped, g, x, .type = "tibble", .total = TRUE),
       tab1(wrapped, g, .type = "tibble"),
       fre1(wrapped, g, .type = "tibble")
     )) {
@@ -128,6 +128,7 @@ test_that("data.table preview NSE and reference operations remain native", {
 })
 
 test_that("downstream joins and pivots retain upstream container semantics", {
+  skip_if_not_installed("tidyr")
   fixture <- data.frame(g = c("a", "a", "b"), x = c(1, 3, 5))
   lookup <- data.frame(g = c("a", "b"), label = c("First", "Second"))
   for (input in edge_containers(fixture)) {

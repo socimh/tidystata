@@ -301,15 +301,3 @@ test_that("tabstat forwards grouped selections, weights and output controls", {
   expect_true(is.na(out$mean))
   expect_identical(data, before)
 })
-
-test_that("tabstat forwards deprecated grouping and output aliases", {
-  withr::local_options(lifecycle_verbosity = "warning")
-  data <- data.frame(g = c("a", NA), x = 1:2)
-  expect_warning(
-    old_missing <- tabstat(data, x, .by = g, .na.rm = TRUE),
-    "deprecated"
-  )
-  expect_identical(old_missing, tabstat(data, x, .by = g, .missing = FALSE))
-  expect_warning(old_type <- tabstat(data, x, .mode = "table"), "deprecated")
-  expect_identical(old_type, tabstat(data, x, .type = "table"))
-})

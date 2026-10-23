@@ -16,16 +16,12 @@ Imports:
     cli,
     dplyr (>= 1.1.4),
     haven (>= 2.5.3),
-    lifecycle,
     magrittr,
     pillar (>= 1.9.0),
-    purrr (>= 1.0.0),
     readr (>= 1.4.0),
     rlang,
     stats,
-    stringr (>= 1.5.0),
     tibble (>= 3.2.0),
-    tidyr (>= 1.2.0),
     tidyselect,
     utils,
     vctrs (>= 0.6.4)
@@ -39,6 +35,7 @@ Suggests:
     rmarkdown,
     sf,
     testthat (>= 3.2.0),
+    tidyr (>= 1.2.0),
     units (>= 1.0.0),
     withr
 LinkingTo: 

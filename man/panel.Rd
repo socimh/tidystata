@@ -2,23 +2,23 @@
 % Please edit documentation in R/panel.R
 \name{panel}
 \alias{panel}
-\alias{s_lag}
-\alias{s_lead}
-\alias{s_diff}
+\alias{stata_lag}
+\alias{stata_lead}
+\alias{stata_diff}
 \title{Panel lags, leads and differences}
 \usage{
-s_lag(x, n = 1L, time, delta = 1, unit = NULL)
+stata_lag(x, n = 1L, time, delta = 1, unit = NULL)
 
-s_lead(x, n = 1L, time, delta = 1, unit = NULL)
+stata_lead(x, n = 1L, time, delta = 1, unit = NULL)
 
-s_diff(x, n = 1L, time, delta = 1, unit = NULL)
+stata_diff(x, n = 1L, time, delta = 1, unit = NULL)
 }
 \arguments{
-\item{x}{A vector. \code{s_diff()} needs a numeric, logical, \code{Date}, date-time
+\item{x}{A vector. \code{stata_diff()} needs a numeric, logical, \code{Date}, date-time
 or \code{difftime} vector.}
 
 \item{n}{A single non-negative whole number: the number of periods
-(\code{s_lag()}, \code{s_lead()}) or the order of the difference (\code{s_diff()}).}
+(\code{stata_lag()}, \code{stata_lead()}) or the order of the difference (\code{stata_diff()}).}
 
 \item{time}{The time variable, unique within each panel. Supported types:
 \itemize{
@@ -50,17 +50,17 @@ zone. Must be \code{NULL} for numbers and period classes.}
 }
 \value{
 A vector like \code{x}, with \code{NA} where the required period is absent
-from the panel. \code{s_diff()} returns a double vector, or a \code{difftime} for
+from the panel. \code{stata_diff()} returns a double vector, or a \code{difftime} for
 dates, date-times and \code{difftime} input.
 }
 \description{
 Time-aware versions of \code{\link[dplyr:lag]{dplyr::lag()}} and \code{\link[dplyr:lead]{dplyr::lead()}}, following
 Stata's time-series operators after \code{xtset}:
 \itemize{
-\item \code{s_lag(x, n, time = t)} is \code{Ln.x}: the value of \code{x} at time \code{t - n}.
-\item \code{s_lead(x, n, time = t)} is \code{Fn.x}: the value of \code{x} at time \code{t + n}.
-\item \code{s_diff(x, n, time = t)} is \code{Dn.x}: the \code{n}th difference, so
-\code{s_diff(x, time = t)} is \code{x - L.x} and \code{s_diff(x, 2, time = t)} is
+\item \code{stata_lag(x, n, time = t)} is \code{Ln.x}: the value of \code{x} at time \code{t - n}.
+\item \code{stata_lead(x, n, time = t)} is \code{Fn.x}: the value of \code{x} at time \code{t + n}.
+\item \code{stata_diff(x, n, time = t)} is \code{Dn.x}: the \code{n}th difference, so
+\code{stata_diff(x, time = t)} is \code{x - L.x} and \code{stata_diff(x, 2, time = t)} is
 \code{D.(D.x)}.
 }
 
@@ -73,7 +73,7 @@ as \verb{xtset id year} would declare it.
 Compared with \code{\link[dplyr:lag]{dplyr::lag()}}: \code{lag(x, order_by = year)} takes the previous
 \emph{row} after sorting, so after a gap (2002, then 2004) it returns the 2002
 value as the lag of 2004, and it silently accepts repeated years or a
-forgotten \code{.by}. \code{s_lag(x, time = year)} takes the value at \code{year - 1},
+forgotten \code{.by}. \code{stata_lag(x, time = year)} takes the value at \code{year - 1},
 returns \code{NA} across the gap, and errors on repeated times, as Stata's
 \code{L.x} does. The two agree on sorted, gap-free panels. For irregular event
 sequences, where the previous record is wanted however long ago it was,
@@ -94,9 +94,9 @@ panel <- tibble::tibble(
 # 2004 has no 2003, so its lag is missing, unlike dplyr::lag()
 dplyr::mutate(
   panel,
-  lag_x = s_lag(x, time = year),
-  lead_x = s_lead(x, time = year),
-  d_x = s_diff(x, time = year),
+  lag_x = stata_lag(x, time = year),
+  lead_x = stata_lead(x, time = year),
+  d_x = stata_diff(x, time = year),
   .by = id
 )
 
@@ -105,7 +105,7 @@ sales <- tibble::tibble(
   month = as.Date(c("2024-01-31", "2024-02-29", "2024-04-30")),
   amount = c(5, 7, 4)
 )
-dplyr::mutate(sales, previous = s_lag(amount, time = month, unit = "month"))
+dplyr::mutate(sales, previous = stata_lag(amount, time = month, unit = "month"))
 }
 \seealso{
 Other variable generation functions:

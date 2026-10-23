@@ -1075,9 +1075,14 @@ stopifnot(
   identical(vapply(inspect_names_cases, `[[`, integer(1), "id"), seq_len(100L))
 )
 
-for (function_name in c("ds", "ds_as_column")) {
+# Each case runs against ds() and its one-column table form.
+for (function_name in c("ds", "ds_table")) {
   local({
-    api <- getExportedValue("tidystata", function_name)
+    api <- if (identical(function_name, "ds")) {
+      ds
+    } else {
+      function(.data, ...) ds(.data, ..., .type = "table")
+    }
     check <- function(out, expected, container = "tibble") {
       if (identical(function_name, "ds")) {
         expect_identical(out, expected)

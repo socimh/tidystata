@@ -7,7 +7,6 @@
 #' @param x An expression evaluated after setting the seed. When `seed` is
 #'   omitted, `x` is the seed itself, as in `set_seed(123)`.
 #' @param seed An integer for reproducibility.
-#' @param .fn `r lifecycle::badge("deprecated")` Use `x` instead.
 #' @returns The expression's result, preserving its visibility. Used alone,
 #'   `set_seed()` returns `NULL` invisibly.
 #' @details
@@ -32,15 +31,7 @@
 #' # Alone, like Stata's set seed 123
 #' set_seed(123)
 #' sample(1:10, 8)
-set_seed <- function(x, seed, .fn = lifecycle::deprecated()) {
-  if (!missing(.fn)) {
-    lifecycle::deprecate_soft("0.3.0", "set_seed(.fn)", "set_seed(x)")
-    # In old calls such as set_seed(.fn = f(), 1), the positional seed fills `x`.
-    if (!missing(x) && missing(seed)) {
-      seed <- x
-    }
-    return(set_seed(.fn, seed))
-  }
+set_seed <- function(x, seed) {
   if (missing(seed)) {
     if (missing(x)) {
       cli::cli_abort("Supply a seed, as in {.code set_seed(123)}.")

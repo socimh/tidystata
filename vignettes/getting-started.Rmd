@@ -41,7 +41,7 @@ searches names and labels, so it can find a variable from its description:
 
 ```{r select}
 variables_search(survey, "assessment")
-s_select(survey, id, starts_with("score"))
+select_or_mutate(survey, id, starts_with("score"))
 ```
 
 ## Count categories
@@ -124,8 +124,9 @@ mvdecode(c(1, -99, 3), -99)
 xtile(1:8, 4)
 ```
 
-`destring()` uses a flexible number parser; check parsing warnings when the
-input is messy. Quantile bins keep tied values together and may contain fewer
+`destring()` reads numbers with currency symbols, thousands separators and
+percent signs; other text, such as `"10 kg"`, becomes `NA` with a warning
+unless you remove it with `ignore = "kg"`, as Stata's `ignore()` does. Quantile bins keep tied values together and may contain fewer
 intervals when cutpoints coincide. These conventions do not promise exact
 equivalence with every Stata command.
 
