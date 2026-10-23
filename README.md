@@ -5,149 +5,74 @@
 
 <!-- badges: start -->
 
-[![Lifecycle:
-stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![CRAN
-status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata)
-[![R-CMD-check](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![CRAN status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata) [![R-CMD-check](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml)
 
 <!-- badges: end -->
 
-[tidystata](https://socimh.github.io/tidystata/) is a set of functions
-that combines Stata-inspired features with tidyverse-style operations.
-
-The package focuses on exploring and preparing data:
-
-- `tab()`, `tab1()`, and `tab2()` for frequency tables.
-- `fre()`, `fre1()`, and `fre2()` for frequency tables with totals.
-- `summ()` and `tabstat()` for summary statistics.
-- `pwcorr()`, `misstable()`, and `tab2(.chi2 = TRUE)` for correlations,
-  missing values, and tests of independence.
-- `codebook()` and `variables()` for variable inspection.
-- `isid()`, `duplicates_report()`, `assert()`, `is_first()`, and
-  `stata_merge()` for checking keys and merging, and `print_all()` for
-  listing every row.
-- `select_or_mutate()`, row calculations, conversion helpers, `std()`,
-  `pc()`, `as_dummy()`, panel lags (`stata_lag()`, `stata_lead()`,
-  `stata_diff()`), and binning for data preparation.
-
-tidystata `0.3.0` retires the import/export, regression-table, and
-detailed-codebook wrappers. See the [migration
-guide](https://socimh.github.io/tidystata/articles/migration.html) for
-direct package alternatives and breaking changes. From 0.3.0 the
-interface is stable: a released name or argument changes only after a
-deprecation period. See
-[NEWS](https://socimh.github.io/tidystata/news/index.html) for changes
-in each release.
+You have just opened a dataset in R. What variables does it hold, how are they distributed, and how do they differ across groups? Stata answers these questions in seconds with `codebook`, `summarize` and `tabulate`, while in R the answers are spread across several packages, each with its own interface. [tidystata](https://socimh.github.io/tidystata/) brings those commands to R and takes them further: select variables with tidyselect helpers, summarise and tabulate by any groups with `.by`, and get every result back as a data frame, ready to filter, join, reshape or plot.
 
 ## Installation
-
-You can install the development version of tidystata like so:
 
 ``` r
 # install.packages("pak")
 pak::pak("socimh/tidystata")
 ```
 
-R 4.1.0 or later and a suitable build toolchain are required to install
-from source. Rich table formatting is optional and requires `flextable`.
-
-If you already have this source repository on your computer, set the
-working directory to its folder and restart R before installing the
-local changes:
-
-``` r
-devtools::install(".", upgrade = "never", build_vignettes = FALSE)
-```
-
-Restart R again, then check the version and installed location:
-
-``` r
-library(tidystata)
-packageVersion("tidystata")
-find.package("tidystata")
-```
-
-Opening the source folder alone does not change what
-`library(tidystata)` loads. Repeat the installation after editing source
-code. During package development, `devtools::load_all(".")` loads the
-working source into the current session; installation followed by a
-fresh R session tests the installed package.
-
-## Learn the workflow
-
-Read [Getting
-started](https://socimh.github.io/tidystata/articles/getting-started.html)
-for a small exploration and preparation workflow, and [Containers and
-missing
-values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)
-for return types, grouping, labels and previews. In an installation that
-includes vignettes, use
-`vignette("getting-started", package = "tidystata")`.
-
-Coming from Stata? `findit()` gives the R equivalent of a Stata command.
-Type one Stata word bare, or quote anything longer; the usual Stata
-abbreviations work:
-
-``` r
-findit(reg)
-findit("merge 1:1 id, keep(match)")
-findit(left_join) # R functions work too
-```
-
-The [Coming from
-Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html)
-article lists every entry by topic, in English and
-[Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html),
-including the packages to use beyond tidystata.
-
-The full [migration
-guide](https://socimh.github.io/tidystata/articles/migration.html) is on
-the website.
-
-## Table return types
-
-Most table-producing helpers, including the `tab`, `summ`, `codebook`
-and `variables` families, preserve the input container by default: a
-tibble returns a tibble, a base data frame returns a base data frame,
-and a data.table returns a data.table. List outputs remain lists, with
-each table following the same rule. Explicit output options override
-this default. `pwcorr()`, `misstable()` and `duplicates_report()` always
-return tibbles, as their help pages state. Summaries and variable
-inventories are ungrouped; grouping columns are retained where the
-function normally reports them. Arbitrary data-frame subclass metadata
-is not guaranteed on newly constructed tables. Vector and scalar helpers
-retain their usual outputs.
-
-`preview_table()` preserves the underlying container while changing its
-console display. `unpreview_table()` removes that display setting.
-External dplyr and tidyr verbs retain their own container and grouping
-behavior, with preview settings preserved for supported operations.
-
-## Performance
-
-tidystata is built for large datasets. Its core summaries, row
-calculations and panel helpers run in compiled C++ code, and speed
-improvements never change results. Vector helpers such as `std()` and
-`stata_lag()` inside a grouped `mutate()` are called once per group, so
-with many thousands of groups they are slower than collapse or
-data.table; use those packages for the heaviest grouped workloads.
-
-## Example
-
-### Load the package
-
-Load `tidystata` and the data-manipulation package used in these
-examples.
+## Core functions
 
 ``` r
 library(tidystata)
 library(dplyr)
 ```
 
-### codebook()
+### findit(): find the R equivalent of a Stata command
 
-View the codebook of `lifeexp`.
+``` r
+findit(reg)
+#> # Stata to R: 6 entries
+#> 
+#> # Linear regression [stats]
+#> Stata: regress y x1 x2
+#> R:     fit <- lm(y ~ x1 + x2, data = data)
+#> 
+#> # Heteroskedasticity-robust standard errors [fixest]
+#> Stata: regress y x1 x2, robust
+#> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
+#> 
+#> # Clustered standard errors [fixest]
+#> Stata: regress y x1 x2, vce(cluster id)
+#> R:     fixest::feols(y ~ x1 + x2, data = data, cluster = ~id)
+#> 
+#> # Factor variables and interactions [stats]
+#> Stata: regress y i.group c.x1##c.x2
+#> R:     lm(y ~ factor(group) + x1 * x2, data = data)
+#> 
+#> # Regression with sampling weights [fixest]
+#> Stata: regress y x [pweight = wt]
+#> R:     fixest::feols(y ~ x, data = data, weights = ~wt, vcov = "hetero")
+#> 
+#> # Choose the base category [stats]
+#> Stata: regress y ib3.group
+#> R:     lm(y ~ relevel(factor(group), ref = "3"), data = data)
+findit("merge 1:1 id, keep(match)")
+#> # Stata to R: 10 entries
+#> # "merge" is a Stata command and an R function.
+#> 
+#> ## Stata command
+#> 
+#> # Keep matched rows only [dplyr]
+#> Stata: merge 1:1 id using data2, keep(match)
+#> R:     inner_join(data1, data2, by = "id")
+#> 
+#> ## R function: merge() [base]: Merge two data frames (base R)
+#>   Related Stata: merge
+#> 
+#> # ... and 9 more. Use `print(n = Inf)` to see all, or `View()`.
+```
+
+Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html) ([Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)).
+
+### codebook(): describe every variable
 
 ``` r
 codebook(lifeexp)
@@ -162,9 +87,7 @@ codebook(lifeexp)
 #> 6 safewater Safe water               double          54     32
 ```
 
-### summ()
-
-Summarise selected numeric variables in `lifeexp`.
+### summ(): summary statistics
 
 ``` r
 summ(lifeexp, lexp, gnppc, safewater)
@@ -176,33 +99,7 @@ summ(lifeexp, lexp, gnppc, safewater)
 #> 3 safewater dbl      54     32    36   77.2    20.6    100
 ```
 
-Choose numeric variables deliberately: means and standard deviations of
-factor codes may have no substantive interpretation. Numeric and logical
-columns with no observed values are retained: `n` and `unique` are zero
-and summary statistics are `NA`, including `sum`.
-
-Select statistics with `.stat`. Aliases `missing`, `p25`, `p50`, and
-`p75` retain their requested names and order; `sum` is available for
-numeric summaries. Unsupported statistics produce an error. See the
-[migration
-guide](https://socimh.github.io/tidystata/articles/migration.html) for
-the date/datetime restrictions and cross-tabulation naming rules.
-
-``` r
-summ(lifeexp, safewater, .stat = c("missing", "p50", "sum"))
-#> # A tibble: 1 x 4
-#>   type  missing   p50   sum
-#>   <chr>   <int> <dbl> <dbl>
-#> 1 dbl        14  82.5  4167
-```
-
-With `.type = "table"`, numeric and calendar summaries share character
-columns for formatted statistics; counts remain numeric. Default list
-mode preserves numeric statistic types in the numeric summary.
-
-### tab()
-
-Tabulate a single variable:
+### tab(): frequency tables
 
 ``` r
 tab(starwars, sex)
@@ -216,93 +113,9 @@ tab(starwars, sex)
 #> 5 <NA>               4    4.60 100   NA         NA
 ```
 
-`tab1()` tabulates variables one by one as a list. Select variables with
-tidyselect helpers such as `starts_with()`, `ends_with()` and
-`matches()`, or in a Stata style with `varlist()`.
+`tab1()` tabulates several variables, selected with tidyselect helpers such as `ends_with()` and `matches()` or a Stata `varlist()`; `tab2()` cross-tabulates two.
 
-``` r
-tab1(starwars, ends_with("color"))
-#> $hair_color
-#> # A tibble: 12 x 6
-#>    value             n percent    cum valid valid_cum
-#>    <chr>         <int>   <dbl>  <dbl> <dbl>     <dbl>
-#>  1 auburn            1    1.15   1.15  1.22      1.22
-#>  2 auburn, grey      1    1.15   2.30  1.22      2.44
-#>  3 auburn, white     1    1.15   3.45  1.22      3.66
-#>  4 black            13   14.9   18.4  15.9      19.5 
-#>  5 blond             3    3.45  21.8   3.66     23.2 
-#>  6 blonde            1    1.15  23.0   1.22     24.4 
-#>  7 brown            18   20.7   43.7  22.0      46.3 
-#>  8 brown, grey       1    1.15  44.8   1.22     47.6 
-#>  9 grey              1    1.15  46.0   1.22     48.8 
-#> 10 none             38   43.7   89.7  46.3      95.1 
-#> 11 white             4    4.60  94.3   4.88    100   
-#> 12 <NA>              5    5.75 100    NA        NA   
-#> 
-#> $skin_color
-#> # A tibble: 31 x 6
-#>    value                   n percent   cum valid valid_cum
-#>    <chr>               <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 blue                    2    2.30  2.30  2.30      2.30
-#>  2 blue, grey              2    2.30  4.60  2.30      4.60
-#>  3 brown                   4    4.60  9.20  4.60      9.20
-#>  4 brown mottle            1    1.15 10.3   1.15     10.3 
-#>  5 brown, white            1    1.15 11.5   1.15     11.5 
-#>  6 dark                    6    6.90 18.4   6.90     18.4 
-#>  7 fair                   17   19.5  37.9  19.5      37.9 
-#>  8 fair, green, yellow     1    1.15 39.1   1.15     39.1 
-#>  9 gold                    1    1.15 40.2   1.15     40.2 
-#> 10 green                   6    6.90 47.1   6.90     47.1 
-#> # i 21 more rows
-#> 
-#> $eye_color
-#> # A tibble: 15 x 6
-#>    value             n percent   cum valid valid_cum
-#>    <chr>         <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 black            10   11.5   11.5 11.5       11.5
-#>  2 blue             19   21.8   33.3 21.8       33.3
-#>  3 blue-gray         1    1.15  34.5  1.15      34.5
-#>  4 brown            21   24.1   58.6 24.1       58.6
-#>  5 dark              1    1.15  59.8  1.15      59.8
-#>  6 gold              1    1.15  60.9  1.15      60.9
-#>  7 green, yellow     1    1.15  62.1  1.15      62.1
-#>  8 hazel             3    3.45  65.5  3.45      65.5
-#>  9 orange            8    9.20  74.7  9.20      74.7
-#> 10 pink              1    1.15  75.9  1.15      75.9
-#> 11 red               5    5.75  81.6  5.75      81.6
-#> 12 red, blue         1    1.15  82.8  1.15      82.8
-#> 13 unknown           3    3.45  86.2  3.45      86.2
-#> 14 white             1    1.15  87.4  1.15      87.4
-#> 15 yellow           11   12.6  100   12.6      100
-# Equivalent: matches("color$") or varlist("*color")
-```
-
-One-way tabulation also counts list-column values. Selecting no
-variables returns an empty result; `tab1()` and `fre1()` return empty
-lists by default. Matrix columns are unsupported.
-
-`tab2()` cross-tabulates two variables.
-
-``` r
-tab2(starwars, sex, gender)
-#> # A tibble: 5 x 4
-#>   `sex \\ gender` feminine masculine  `NA`
-#>   <chr>              <int>     <int> <int>
-#> 1 female                16         0     0
-#> 2 hermaphroditic         0         1     0
-#> 3 male                   0        60     0
-#> 4 none                   1         5     0
-#> 5 <NA>                   0         0     4
-```
-
-### fre()
-
-`fre()` family functions simply add total rows (and total columns in
-`fre2()`) to their `tab()` counterparts.
-
-`fre()` and `fre2()` default to `.type = "auto"`, preserving the input
-container. `fre1()` returns a list whose tables preserve that container.
-Request `.type = "tibble"` explicitly when a tibble is required.
+### fre(): frequency tables with totals and value labels
 
 ``` r
 fre(lifeexp, region)
@@ -315,35 +128,15 @@ fre(lifeexp, region)
 #> 4 Total               68   100    NA    NA        NA
 ```
 
-For optional rich formatting, install `flextable` and request it
-explicitly:
+## Learn more
 
-``` r
-fre(lifeexp, region, .type = "flextable")
-```
+tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. Its core computations run in compiled C++ for large data; for heavy grouped `mutate()` work, collapse or data.table are faster.
 
-### Row calculations and binning
-
-Row helpers return vectors that can be used in `mutate()`:
-
-``` r
-tibble(a = c(1, NA, 3), b = c(3, NA, 5)) |>
-  mutate(row_average = row_mean(a, b))
-#> # A tibble: 3 x 3
-#>       a     b row_average
-#>   <dbl> <dbl>       <dbl>
-#> 1     1     3           2
-#> 2    NA    NA          NA
-#> 3     3     5           4
-```
-
-`xtile()` keeps equal values in the same group. Ties can reduce the
-number of intervals, with a warning, rather than splitting equal values
-by row order.
+- [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
+- [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.
+- [NEWS](https://socimh.github.io/tidystata/news/index.html): release notes.
+- [Reference](https://socimh.github.io/tidystata/reference/index.html): every function.
 
 ## Code of Conduct
 
-Please note that the tidystata project is released with a [Contributor
-Code of
-Conduct](https://www.contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
-By contributing to this project, you agree to abide by its terms.
+Please note that the tidystata project is released with a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.

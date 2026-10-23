@@ -151,7 +151,7 @@ test_that("findit() falls back to a text search, then to suggestions", {
 test_that("printing shows whole code lines and limits long results", {
   out <- capture.output(print(findit(merge)))
   expect_identical(out[1], "# Stata to R: 10 entries")
-  expect_true(any(out == "  inner_join(data1, data2, by = \"id\")"))
+  expect_true(any(out == "R:     inner_join(data1, data2, by = \"id\")"))
   long <- capture.output(print(entries, n = 2))
   expect_match(long[length(long)], "more. Use `print(n = Inf)`", fixed = TRUE)
   expect_identical(
@@ -333,6 +333,35 @@ test_that("plain questions leave exact lookups unchanged", {
   expect_false("nearest" %in% findit(winsor)$match)
   expect_message(none <- findit("qwzx"), "No Stata command")
   expect_identical(nrow(none), 0L)
+})
+
+test_that("printing shows the single best entry or the first five", {
+  withr::local_envvar(LANGUAGE = "en")
+  # One entry answers the query: it alone is printed, all are returned.
+  best <- findit("merge 1:1 id, keep(match)")
+  expect_identical(nrow(best), 10L)
+  expect_identical(best$r[1], "inner_join(data1, data2, by = \"id\")")
+  expect_identical(attr(best, "show"), 1L)
+  out <- capture.output(print(best))
+  expect_identical(sum(startsWith(out, "Stata: ")), 1L)
+  expect_match(out[length(out)], "and 9 more", fixed = TRUE)
+  # Among entries with every extra word, fewer further options rank first.
+  expect_match(best$stata[2], "keepusing(id) nogenerate", fixed = TRUE)
+  # Several equally good entries: the first five, or all of up to six.
+  expect_identical(
+    sum(startsWith(capture.output(print(findit(tab))), "R: ")),
+    5L
+  )
+  expect_identical(
+    sum(startsWith(capture.output(print(findit(reg))), "R: ")),
+    6L
+  )
+  expect_identical(
+    sum(startsWith(capture.output(print(findit(tab), n = Inf)), "R: ")),
+    nrow(findit(tab))
+  )
+  expect_snapshot(print(best))
+  expect_snapshot(print(findit(reshape)))
 })
 
 test_that("closest entries print under their own heading", {

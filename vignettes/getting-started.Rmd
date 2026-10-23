@@ -135,6 +135,6 @@ equivalence with every Stata command.
 If results appear to use an older package, inspect `packageVersion("tidystata")` and `find.package("tidystata")`.
 For local source changes, install from the project and restart R before testing.
 
-The full
-[migration guide](https://socimh.github.io/tidystata/articles/migration.html)
-is on the package website.
+Read [Containers and missing values](containers-and-missing-values.html) for
+output conventions, or [Coming from Stata](coming-from-stata.html) to find
+the R equivalent of a Stata command.

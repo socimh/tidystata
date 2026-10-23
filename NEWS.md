@@ -16,9 +16,7 @@
   `write_data()`, `esttab()`, `codebook_detail()`, `tidy_coef()`, the
   regression wrappers (`regress()`, `regress_data()`, `regress_coef()`,
   `regress_stat()`) and the plotting helpers (`s_plot()`, `s_ggsave()`) are
-  removed. `s_time()` is renamed to `timer()`. The
-  [migration guide](https://socimh.github.io/tidystata/articles/migration.html)
-  lists direct alternatives.
+  removed. `s_time()` is renamed to `timer()`.
 
 * R 4.1.0 or later is now required. Persistent preview formatting requires
   tibble >= 3.2.0 and pillar >= 1.9.0, as dplyr >= 1.1.4 does. readr >= 1.4.0 is
@@ -90,9 +88,7 @@
   (use `varlist()`, `var_type()` and `var_unit()`), `s_try()` (use
   `capture()`), `ds_as_column()` and `names_as_column()` (use
   `ds(.type = "table")`) and `s_print()` (use `print_headtail()`,
-  `print_interval()` or `print_all()`). The
-  [migration guide](https://socimh.github.io/tidystata/articles/migration.html)
-  maps every old name to its replacement.
+  `print_interval()` or `print_all()`).
 
 * `select_or_mutate()` (formerly `s_select()`), and therefore `tab()`,
   `summ()` and related functions, computes expressions that use columns instead of first trying them as
@@ -165,6 +161,9 @@
   Plain questions, in English or Chinese, list the closest entries
   (`findit("how do I remove duplicate rows")`), using word overlap and a
   short synonym list rather than a language model.
+  Each entry prints as a short block, what it does above labelled `Stata:`
+  and `R:` lines; only the best entry is printed when one answers the query,
+  and otherwise the first five, while the result keeps every match.
   `findit()` alone lists all of about 410 idioms. When R runs in Chinese, the
   task and function descriptions are shown in Chinese
   (`Sys.setenv(LANGUAGE = "en")` switches back), and Chinese keywords such
@@ -273,10 +272,9 @@
   sorting step, and aborted R 4.1. `row_var()` now matches `stats::var()`
   exactly on platforms without extended precision, such as Apple Silicon.
 
-* The plain example scripts and the migration guide are no longer installed
-  with the package. The guide is the website's
-  [Migration guide](https://socimh.github.io/tidystata/articles/migration.html)
-  article.
+* The plain example scripts and compatibility notes are repository-only.
+  Website tutorials focus on current usage; the old migration URL points to
+  the current guides.
 
 * SPSS user-defined missing codes and ranges (`haven::labelled_spss()`) are
   treated as missing throughout: in `pwcorr()`, `misstable()`, `std()`, `pc()`,
