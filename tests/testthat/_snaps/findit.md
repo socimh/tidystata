@@ -11,7 +11,6 @@
     Code
       print(best)
     Output
-      # Stata to R: 10 entries
       # "merge" is a Stata command and an R function.
       
       ## Stata command
@@ -22,16 +21,12 @@
       
       ## R function: merge() [base]: Merge two data frames (base R)
         Related Stata: merge
-      
-      # ... and 9 more. Use `print(n = Inf)` to see all, or `View()`.
 
 ---
 
     Code
       print(findit(reshape))
     Output
-      # Stata to R: 2 entries
-      
       # Wide to long [tidyr]
       Stata: reshape long var, i(id) j(year)
       R:     pivot_longer(data, starts_with("var"), names_to = "year", names_prefix = "var", values_to = "var")
@@ -45,8 +40,6 @@
     Code
       print(findit("how do I remove duplicate rows"), n = 2)
     Output
-      # Stata to R: 10 entries
-      
       ## Closest entries for "how do I remove duplicate rows"
       
       # Drop rows that duplicate an earlier row [tidystata]
@@ -57,14 +50,13 @@
       Stata: duplicates drop x1 x2, force
       R:     duplicates_drop(data, x1, x2, .force = TRUE)
       
-      # ... and 8 more. Use `print(n = Inf)` to see all, or `View()`.
+      # 8 more. To see them all: findit("how do I remove duplicate rows") |> print(n = Inf)
 
 ---
 
     Code
       print(findit("count how many people in each category"), n = 2)
     Output
-      # Stata to R: 12 entries
       # "count" is a Stata command and an R function.
       
       ## Closest entries for "count how many people in each category"
@@ -80,5 +72,21 @@
       ## R function: count() [dplyr]: Count rows in each group
         Used in the entries above.
       
-      # ... and 10 more. Use `print(n = Inf)` to see all, or `View()`.
+      # 10 more. To see them all: findit("count how many people in each category") |> print(n = Inf)
+
+# printing colours headings, Stata code and R code
+
+    Code
+      print(findit("merge 1:1 id, keep(match)"))
+    Output
+      # "merge" is a Stata command and an R function.
+      
+      [36m[1m## Stata command[22m[39m
+      
+      [1m# Keep matched rows only[22m[90m [dplyr][39m
+      [34m[1mStata: [22mmerge 1:1 id using data2, keep(match)[39m
+      [32m[1mR:     [22minner_join(data1, data2, by = "id")[39m
+      
+      [36m[1m## R function: merge() [base]: Merge two data frames (base R)[22m[39m
+        Related Stata: merge
 

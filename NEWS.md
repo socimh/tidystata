@@ -3,7 +3,8 @@
 * Renamed from statart to tidystata, with a focus on data exploration and
   preparation. Legacy import/export, regression and plotting wrappers are removed.
 * `findit()` translates Stata commands, R function names and plain questions
-  into working examples, with English and Chinese guides.
+  into working examples, with English and Chinese guides. In consoles with
+  colour, the Stata and R code print in different colours.
 * Expanded tabulation and summaries include cross-tables, weights, correlations,
   missing-value reports and grouped calculations.
 * Added key checks, duplicate handling, Stata-style merges, panel operators,

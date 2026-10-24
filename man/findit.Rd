@@ -22,8 +22,10 @@ the R function lives) and \code{task} (what it does). It prints each entry as
 a short block: what it does, then the Stata code and the R code on lines
 labelled \verb{Stata:} and \verb{R:}, so the code is never cut off. When one entry
 answers the query, as for \code{findit("merge 1:1 id, keep(match)")}, only that
-entry is printed; otherwise the first five are (\code{print(x, n = Inf)} for
-all). The returned tibble always has every match. A matched R function is
+entry is printed. Otherwise the first five are, followed by a line to run
+for the rest, such as \code{findit(tab) |> print(n = Inf)}. The returned tibble
+always has every match, so it can be stored, filtered or opened with
+\code{View()}. A matched R function is
 printed with a one-line description. If
 nothing matches, a message suggests similar names and an empty tibble is
 returned invisibly.

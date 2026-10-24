@@ -12,8 +12,8 @@ test_that("findit() returns every entry when called without a command", {
 test_that("findit() follows Stata's minimum abbreviations", {
   regress <- findit(reg)
   expect_true(all(startsWith(regress$stata, "regress")))
-  expect_identical(findit(regr), regress)
-  expect_identical(findit(regress), regress)
+  expect_identical(findit(regr), regress, ignore_attr = "input")
+  expect_identical(findit(regress), regress, ignore_attr = "input")
   expect_identical(findit(su)$r, findit(summarize)$r)
   expect_true("tab(data, x)" %in% findit(ta)$r)
   expect_true("browse(data)" %in% findit(br)$r)
@@ -31,10 +31,11 @@ test_that("findit() follows Stata's minimum abbreviations", {
 })
 
 test_that("bare words and strings give the same result without evaluation", {
+  # Only the call as typed, kept for the printed hint, differs.
   tab <- "not a command"
-  expect_identical(findit(tab), findit("tab"))
+  expect_identical(findit(tab), findit("tab"), ignore_attr = "input")
   cmd <- "merge"
-  expect_identical(findit(!!cmd), findit("merge"))
+  expect_identical(findit(!!cmd), findit("merge"), ignore_attr = "input")
   expect_identical(findit(L.x)$r[1], findit("L.x")$r[1])
   expect_match(findit(L.x)$r[1], "stata_lag(x, time = year)", fixed = TRUE)
 })
@@ -85,9 +86,9 @@ test_that("R function names find the Stata idioms they replace", {
   expect_match(joined$stata, "keep(master match)", fixed = TRUE)
   expect_identical(attr(joined, "r_functions")$package, "dplyr")
   # Written as code, or with its package, it is the same lookup.
-  expect_identical(findit(left_join()), joined)
-  expect_identical(findit(dplyr::left_join), joined)
-  expect_identical(findit("dplyr::left_join()"), joined)
+  expect_identical(findit(left_join()), joined, ignore_attr = "input")
+  expect_identical(findit(dplyr::left_join), joined, ignore_attr = "input")
+  expect_identical(findit("dplyr::left_join()"), joined, ignore_attr = "input")
   # Whole names only: lm finds lm(), not glm() or lmer().
   calls <- findit_calls(findit(lm)$r)
   expect_true(all(vapply(calls, function(x) "lm" %in% x, logical(1))))
@@ -150,14 +151,32 @@ test_that("findit() falls back to a text search, then to suggestions", {
 
 test_that("printing shows whole code lines and limits long results", {
   out <- capture.output(print(findit(merge)))
-  expect_identical(out[1], "# Stata to R: 10 entries")
+  expect_identical(out[1], "# \"merge\" is a Stata command and an R function.")
   expect_true(any(out == "R:     inner_join(data1, data2, by = \"id\")"))
+  # The hint repeats the call as typed, ready to run.
   long <- capture.output(print(entries, n = 2))
-  expect_match(long[length(long)], "more. Use `print(n = Inf)`", fixed = TRUE)
-  expect_identical(
-    capture.output(print(findit(winsor)))[1],
-    "# Stata to R: 1 entry"
+  expect_match(
+    long[length(long)],
+    "more. To see them all: findit() |> print(n = Inf)",
+    fixed = TRUE
   )
+  tab_out <- capture.output(print(findit(tab)))
+  expect_match(
+    tab_out,
+    "findit(tab) |> print(n = Inf)",
+    fixed = TRUE,
+    all = FALSE
+  )
+  quoted <- capture.output(print(findit("merge 1:1 id"), n = 1))
+  expect_match(
+    quoted,
+    "findit(\"merge 1:1 id\") |> print(n = Inf)",
+    fixed = TRUE,
+    all = FALSE
+  )
+  expect_match(capture.output(print(findit(winsor)))[1], "^# ")
+  none <- suppressMessages(findit(zzqqxx))
+  expect_identical(capture.output(print(none)), "# No matching entries.")
   capture.output(shown <- withVisible(print(findit(reg))))
   expect_false(shown$visible)
 })
@@ -344,7 +363,8 @@ test_that("printing shows the single best entry or the first five", {
   expect_identical(attr(best, "show"), 1L)
   out <- capture.output(print(best))
   expect_identical(sum(startsWith(out, "Stata: ")), 1L)
-  expect_match(out[length(out)], "and 9 more", fixed = TRUE)
+  # The other matches are not alternatives, so no hint points to them.
+  expect_false(any(grepl("more", out, fixed = TRUE)))
   # Among entries with every extra word, fewer further options rank first.
   expect_match(best$stata[2], "keepusing(id) nogenerate", fixed = TRUE)
   # Several equally good entries: the first five, or all of up to six.
@@ -371,4 +391,10 @@ test_that("closest entries print under their own heading", {
     findit("count how many people in each category"),
     n = 2
   ))
+})
+
+test_that("printing colours headings, Stata code and R code", {
+  withr::local_envvar(LANGUAGE = "en")
+  local_reproducible_output(crayon = TRUE)
+  expect_snapshot(print(findit("merge 1:1 id, keep(match)")))
 })

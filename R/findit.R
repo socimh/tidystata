@@ -31,8 +31,10 @@
 #' a short block: what it does, then the Stata code and the R code on lines
 #' labelled `Stata:` and `R:`, so the code is never cut off. When one entry
 #' answers the query, as for `findit("merge 1:1 id, keep(match)")`, only that
-#' entry is printed; otherwise the first five are (`print(x, n = Inf)` for
-#' all). The returned tibble always has every match. A matched R function is
+#' entry is printed. Otherwise the first five are, followed by a line to run
+#' for the rest, such as `findit(tab) |> print(n = Inf)`. The returned tibble
+#' always has every match, so it can be stored, filtered or opened with
+#' `View()`. A matched R function is
 #' printed with a one-line description. If
 #' nothing matches, a message suggests similar names and an empty tibble is
 #' returned invisibly.
@@ -113,7 +115,20 @@
 #' # The whole list
 #' findit()
 findit <- function(command = NULL) {
-  query <- findit_query(rlang::enexpr(command))
+  expr <- rlang::enexpr(command)
+  found <- withVisible(findit_lookup(findit_query(expr)))
+  # The call as typed, so the printed hint can be run as it stands.
+  attr(found$value, "input") <- paste0(
+    "findit(",
+    if (!is.null(expr)) {
+      paste(deparse(expr, width.cutoff = 500L), collapse = "")
+    },
+    ")"
+  )
+  if (found$visible) found$value else invisible(found$value)
+}
+
+findit_lookup <- function(query) {
   entries <- findit_entries()
   if (is.null(query)) {
     return(findit_result(entries, "all"))
@@ -497,13 +512,43 @@ findit_result <- function(
 
 #' @export
 print.tidystata_findit <- function(x, n = NULL, ...) {
+  # A single best entry is the answer; the other matches are not offered.
+  best <- is.null(n) && identical(attr(x, "show"), 1L)
   if (is.null(n)) {
     n <- attr(x, "show")
     if (is.null(n)) n <- 5L
   }
-  functions <- attr(x, "r_functions")
   shown <- utils::head(as.data.frame(x), n)
-  cat("# Stata to R:", nrow(x), if (nrow(x) == 1L) "entry\n" else "entries\n")
+  # Blocks start with blank lines, which are dropped from the top.
+  body <- utils::capture.output(findit_print_body(x, shown))
+  body <- body[cumsum(nzchar(body)) > 0L]
+  if (!length(body)) {
+    body <- "# No matching entries."
+  }
+  cat(body, sep = "\n")
+  hidden <- nrow(x) - nrow(shown)
+  if (hidden > 0L && !best) {
+    input <- attr(x, "input")
+    if (is.null(input)) {
+      input <- "x"
+    }
+    cat(
+      "\n# ",
+      hidden,
+      " more. To see them all: ",
+      input,
+      " |> print(n = Inf)\n",
+      if (any(x$match[-seq_len(nrow(shown))] == "r")) {
+        "# Or add a Stata word to narrow, as in findit(\"mutate egen\").\n"
+      },
+      sep = ""
+    )
+  }
+  invisible(x)
+}
+
+findit_print_body <- function(x, shown) {
+  functions <- attr(x, "r_functions")
   headed <- length(functions) && nrow(functions) > 0L
   if (headed && any(x$match == "stata")) {
     cat(
@@ -516,17 +561,17 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
   lines <- character()
   is_stata <- logical()
   # Each entry is a block: what it does, then the Stata and the R code on
-  # labelled lines, with a blank line before the next entry.
+  # labelled lines, with a blank line before the next entry. Basic ANSI
+  # colours read on light and dark themes; cli drops them where unsupported.
   if (nrow(shown) > 0L) {
     lines <- paste0(
       "\n\n",
-      cli::col_grey(paste0("# ", shown$task, " [", shown$package, "]")),
+      cli::style_bold(paste0("# ", shown$task)),
+      cli::col_grey(paste0(" [", shown$package, "]")),
       "\n",
-      cli::style_bold("Stata: "),
-      shown$stata,
+      cli::col_blue(paste0(cli::style_bold("Stata: "), shown$stata)),
       "\n",
-      cli::style_bold("R:     "),
-      shown$r
+      cli::col_green(paste0(cli::style_bold("R:     "), shown$r))
     )
     is_stata <- shown$match == "stata"
   }
@@ -537,16 +582,20 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
   is_stata <- is_stata[!nearest]
   lines <- lines[!nearest]
   if (length(close) && nearest[1]) {
-    cat("\n## Closest entries for \"", attr(x, "query"), "\"", sep = "")
+    cat(
+      "\n",
+      findit_heading("## Closest entries for", attr(x, "query")),
+      sep = ""
+    )
     cat(close, if (length(lines) || headed) "\n", sep = "")
     close <- character()
   }
   if (headed && any(is_stata)) {
-    cat("\n## Stata command")
+    cat("\n", findit_heading("## Stata command"), sep = "")
   }
   plain <- lines[is_stata | !headed]
-  # Without a heading, the first entry follows the title or the closest
-  # entries, which already end their line.
+  # Without a heading, the first entry follows the closest entries, which
+  # already end their line.
   if (!headed && length(plain)) {
     plain[1] <- substring(plain[1], 2L)
   }
@@ -560,12 +609,15 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
     cat(
       if (any(is_stata)) "\n",
       paste0(
-        "\n## R function: ",
-        functions$`function`,
-        "() [",
-        functions$package,
-        "]: ",
-        functions$description,
+        "\n",
+        findit_heading(paste0(
+          "## R function: ",
+          functions$`function`,
+          "() [",
+          functions$package,
+          "]: ",
+          functions$description
+        )),
         related
       ),
       sep = ""
@@ -578,9 +630,8 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
   if (length(close)) {
     cat(
       if (length(lines) || headed) "\n",
-      "\n## Closest entries for \"",
-      attr(x, "query"),
-      "\"",
+      "\n",
+      findit_heading("## Closest entries for", attr(x, "query")),
       sep = ""
     )
     cat(close, sep = "")
@@ -588,19 +639,15 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
   if (length(lines) || headed || any(nearest)) {
     cat("\n")
   }
-  if (nrow(x) > nrow(shown)) {
-    cat(
-      "\n# ... and ",
-      nrow(x) - nrow(shown),
-      " more. Use `print(n = Inf)` to see all, or `View()`.",
-      if (any(x$match[-seq_len(nrow(shown))] == "r")) {
-        " Add a Stata word to narrow, as in findit(\"mutate egen\")."
-      },
-      "\n",
-      sep = ""
-    )
+}
+
+# Section headings stand out in cyan where the console has colour. A query,
+# if given, is quoted after the heading.
+findit_heading <- function(text, query = NULL) {
+  if (!is.null(query)) {
+    text <- paste0(text, " \"", query, "\"")
   }
-  invisible(x)
+  cli::col_cyan(cli::style_bold(text))
 }
 
 findit_cache <- new.env(parent = emptyenv())
