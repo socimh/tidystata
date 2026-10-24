@@ -1,10 +1,19 @@
+# tidystata 0.3.1
+
+* `findit()` shows a single clear default, retaining alternatives for ambiguous
+  inputs. Comma-separated variable names and hints customize catalogue examples,
+  as in `findit(tab, sex, region)` and `findit(tab, gen)`; all matches remain
+  available through `print(n = Inf)`.
+
 # tidystata 0.3.0
 
 * Renamed from statart to tidystata, with a focus on data exploration and
   preparation. Legacy import/export, regression and plotting wrappers are removed.
 * `findit()` translates Stata commands, R function names and plain questions
   into working examples, with English and Chinese guides. In consoles with
-  colour, the Stata and R code print in different colours.
+  colour, the Stata and R code retain automatic console colours. Results start
+  with compact example blocks, omit redundant function notes and count remaining
+  examples explicitly.
 * Expanded tabulation and summaries include cross-tables, weights, correlations,
   missing-value reports and grouped calculations.
 * Added key checks, duplicate handling, Stata-style merges, panel operators,

@@ -4,7 +4,7 @@
 \alias{findit}
 \title{Find the R equivalent of a Stata command}
 \usage{
-findit(command = NULL)
+findit(command = NULL, ...)
 }
 \arguments{
 \item{command}{A Stata command or an R function name, either one bare word
@@ -12,6 +12,15 @@ findit(command = NULL)
 (\code{findit("bysort g: egen m = mean(x)")}). R functions may also be written
 as \code{lm()} or \code{dplyr::left_join}. Use \verb{!!} to look up a string stored in a
 variable: \code{findit(!!cmd)}. \code{NULL} (default) returns every entry.}
+
+\item{...}{Unnamed variable names and command hints, captured without
+evaluation. Names customize examples in Stata operand order, including new
+output variables: \code{findit(xtile, quartile, income)}. A bare hint such as \code{gen}
+selects the \code{generate()} option. Hints match exactly or by an unambiguous
+prefix of at least three letters. Quote a name to use it literally when it
+conflicts with a hint, as in \code{findit(tab, "gen")}. Use \verb{!!} for a name stored
+in a string. Calls, numbers, missing arguments and named arguments are not
+accepted here.}
 }
 \value{
 A tibble with one row per Stata idiom and the columns \code{match}
@@ -21,12 +30,19 @@ closest entries to a plain question, \code{"all"} for the whole list), \code{sta
 the R function lives) and \code{task} (what it does). It prints each entry as
 a short block: what it does, then the Stata code and the R code on lines
 labelled \verb{Stata:} and \verb{R:}, so the code is never cut off. When one entry
-answers the query, as for \code{findit("merge 1:1 id, keep(match)")}, only that
-entry is printed. Otherwise the first five are, followed by a line to run
-for the rest, such as \code{findit(tab) |> print(n = Inf)}. The returned tibble
+answers the query, only that entry is printed. Routine commands have a
+canonical default, such as \verb{tabulate x} for \code{findit(tab)}. Up to five examples
+are printed when different meanings or structural choices remain unresolved,
+such as the direction of \code{reshape}. Hidden examples are always counted, with
+a line to run for the rest, such as \code{findit(tab) |> print(n = Inf)}.
+The returned tibble
 always has every match, so it can be stored, filtered or opened with
-\code{View()}. A matched R function is
-printed with a one-line description. If
+\code{View()}. Headings use a single \verb{#}, without an introductory summary.
+R-function notes already demonstrated or resolved by comma-separated inputs
+are omitted. Supplied names customize compatible
+examples; examples requiring different variables retain all their original
+placeholders. No matches are removed. A note identifies retained placeholders
+when those examples are displayed, or explains when no example fits. If
 nothing matches, a message suggests similar names and an empty tibble is
 returned invisibly.
 }
@@ -43,9 +59,10 @@ It also works the other way round: give it an R function, such as
 commands it replaces. Beginners need not know which is which; a word that
 is both, such as \code{log} or \code{round}, shows both meanings.
 
-Type a single word bare, as in \code{findit(reg)}, or quote anything longer, as
-in \code{findit("merge 1:1 id, keep(match)")}. Call \code{findit()} with no argument
-for the whole list.
+Type a single word bare, as in \code{findit(reg)}, add names and hints with commas,
+as in \code{findit(tab, sex, region)} or \code{findit(tab, gen)}, or quote full Stata
+syntax, as in \code{findit("merge 1:1 id, keep(match)")}. Call \code{findit()} with no
+argument for the whole list.
 }
 \details{
 Matching follows fixed rules, without any guessing:
@@ -57,7 +74,8 @@ Stata's minimum abbreviations work: \code{reg}, \code{regr} and \code{regress} a
 \code{glm()}); upper and lower case are ignored only when no exact name
 matches.
 \item Entries found as a Stata command come first. Entries found only through
-the R function follow, under a description of that function. About 600
+the R function follow. A description is added only when the function does
+not appear in a displayed example. About 600
 R functions are described, including many that no entry uses yet, such
 as \code{n_distinct()} or \code{fct_relevel()}; for those, \code{findit()} prints the
 description and the related Stata command.
@@ -70,6 +88,17 @@ entries, and \code{findit("mutate egen")} lists the \code{egen} entries among th
 many that use \code{mutate()}. Among equally good entries, the one with the
 fewest further words comes first. All matching entries are still
 returned.
+\item Comma-separated names and hints select among these examples and fill their
+recorded variable roles. Variable lists can accept several names, while
+fixed roles must all be supplied. Dataset names, function names and unrelated
+constants are unchanged. Strings that represent column names or formulas
+are customized too. R names are quoted as needed; non-Stata names are shown
+with backticks in the reference Stata line. This is a lookup over existing
+examples, not a parser or executor for arbitrary Stata programs.
+\item If a hint prefix has several interpretations, competing examples are shown.
+If no example satisfies every hint, the closest alternatives are shown with
+an explanation. For plain questions a uniquely highest-ranked meaning is
+shown alone; tied meanings retain up to five representative examples.
 \item If neither matches, the text is searched for in the Stata code, the R
 code and the task, so \code{findit(winsor)} and \code{findit(dummy)} also work.
 \item Otherwise the text is read as a plain question, in English or Chinese,
@@ -104,6 +133,9 @@ share names. Attach tidystata last, or write \code{tidystata::tab()}.
 \examples{
 findit(reg)
 findit(su)
+findit(tab, sex, region)
+findit(tab, gen)
+findit(xtile, quartile, income)
 findit("merge 1:1 id, keep(match)")
 findit("bys g: egen m = mean(x)")
 findit(winsor)

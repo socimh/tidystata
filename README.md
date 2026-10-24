@@ -34,13 +34,17 @@ findit("reg, robust")
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
+#> 
+#> # 5 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
 findit("egen rowmean")
 #> # Row mean [tidystata]
 #> Stata: egen x_avg = rowmean(x1-x5)
 #> R:     mutate(data, x_avg = row_mean(x1:x5))
+#> 
+#> # 28 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
 ```
 
-A bare command such as `findit(reg)` lists every entry for it. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
+A bare command such as `findit(reg)` shows one clear example; `findit(reg) |> print(n = Inf)` shows every match. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
 

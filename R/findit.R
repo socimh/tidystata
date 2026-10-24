@@ -13,15 +13,24 @@
 #' commands it replaces. Beginners need not know which is which; a word that
 #' is both, such as `log` or `round`, shows both meanings.
 #'
-#' Type a single word bare, as in `findit(reg)`, or quote anything longer, as
-#' in `findit("merge 1:1 id, keep(match)")`. Call `findit()` with no argument
-#' for the whole list.
+#' Type a single word bare, as in `findit(reg)`, add names and hints with commas,
+#' as in `findit(tab, sex, region)` or `findit(tab, gen)`, or quote full Stata
+#' syntax, as in `findit("merge 1:1 id, keep(match)")`. Call `findit()` with no
+#' argument for the whole list.
 #'
 #' @param command A Stata command or an R function name, either one bare word
 #' (`findit(tab)`, `findit(left_join)`) or a quoted string
 #' (`findit("bysort g: egen m = mean(x)")`). R functions may also be written
 #' as `lm()` or `dplyr::left_join`. Use `!!` to look up a string stored in a
 #' variable: `findit(!!cmd)`. `NULL` (default) returns every entry.
+#' @param ... Unnamed variable names and command hints, captured without
+#' evaluation. Names customize examples in Stata operand order, including new
+#' output variables: `findit(xtile, quartile, income)`. A bare hint such as `gen`
+#' selects the `generate()` option. Hints match exactly or by an unambiguous
+#' prefix of at least three letters. Quote a name to use it literally when it
+#' conflicts with a hint, as in `findit(tab, "gen")`. Use `!!` for a name stored
+#' in a string. Calls, numbers, missing arguments and named arguments are not
+#' accepted here.
 #'
 #' @returns A tibble with one row per Stata idiom and the columns `match`
 #' (`"stata"` when the word is a Stata command, `"r"` when it is an R function
@@ -30,12 +39,19 @@
 #' the R function lives) and `task` (what it does). It prints each entry as
 #' a short block: what it does, then the Stata code and the R code on lines
 #' labelled `Stata:` and `R:`, so the code is never cut off. When one entry
-#' answers the query, as for `findit("merge 1:1 id, keep(match)")`, only that
-#' entry is printed. Otherwise the first five are, followed by a line to run
-#' for the rest, such as `findit(tab) |> print(n = Inf)`. The returned tibble
+#' answers the query, only that entry is printed. Routine commands have a
+#' canonical default, such as `tabulate x` for `findit(tab)`. Up to five examples
+#' are printed when different meanings or structural choices remain unresolved,
+#' such as the direction of `reshape`. Hidden examples are always counted, with
+#' a line to run for the rest, such as `findit(tab) |> print(n = Inf)`.
+#' The returned tibble
 #' always has every match, so it can be stored, filtered or opened with
-#' `View()`. A matched R function is
-#' printed with a one-line description. If
+#' `View()`. Headings use a single `#`, without an introductory summary.
+#' R-function notes already demonstrated or resolved by comma-separated inputs
+#' are omitted. Supplied names customize compatible
+#' examples; examples requiring different variables retain all their original
+#' placeholders. No matches are removed. A note identifies retained placeholders
+#' when those examples are displayed, or explains when no example fits. If
 #' nothing matches, a message suggests similar names and an empty tibble is
 #' returned invisibly.
 #'
@@ -49,7 +65,8 @@
 #'   `glm()`); upper and lower case are ignored only when no exact name
 #'   matches.
 #' * Entries found as a Stata command come first. Entries found only through
-#'   the R function follow, under a description of that function. About 600
+#'   the R function follow. A description is added only when the function does
+#'   not appear in a displayed example. About 600
 #'   R functions are described, including many that no entry uses yet, such
 #'   as `n_distinct()` or `fct_relevel()`; for those, `findit()` prints the
 #'   description and the related Stata command.
@@ -62,6 +79,17 @@
 #'   many that use `mutate()`. Among equally good entries, the one with the
 #'   fewest further words comes first. All matching entries are still
 #'   returned.
+#' * Comma-separated names and hints select among these examples and fill their
+#'   recorded variable roles. Variable lists can accept several names, while
+#'   fixed roles must all be supplied. Dataset names, function names and unrelated
+#'   constants are unchanged. Strings that represent column names or formulas
+#'   are customized too. R names are quoted as needed; non-Stata names are shown
+#'   with backticks in the reference Stata line. This is a lookup over existing
+#'   examples, not a parser or executor for arbitrary Stata programs.
+#' * If a hint prefix has several interpretations, competing examples are shown.
+#'   If no example satisfies every hint, the closest alternatives are shown with
+#'   an explanation. For plain questions a uniquely highest-ranked meaning is
+#'   shown alone; tied meanings retain up to five representative examples.
 #' * If neither matches, the text is searched for in the Stata code, the R
 #'   code and the task, so `findit(winsor)` and `findit(dummy)` also work.
 #' * Otherwise the text is read as a plain question, in English or Chinese,
@@ -101,6 +129,9 @@
 #' @examples
 #' findit(reg)
 #' findit(su)
+#' findit(tab, sex, region)
+#' findit(tab, gen)
+#' findit(xtile, quartile, income)
 #' findit("merge 1:1 id, keep(match)")
 #' findit("bys g: egen m = mean(x)")
 #' findit(winsor)
@@ -114,14 +145,31 @@
 #'
 #' # The whole list
 #' findit()
-findit <- function(command = NULL) {
+findit <- function(command = NULL, ...) {
   expr <- rlang::enexpr(command)
+  extra <- rlang::enexprs(..., .ignore_empty = "none")
+  findit_check_arguments(expr, extra)
   found <- withVisible(findit_lookup(findit_query(expr)))
+  if (length(extra)) {
+    found$value <- findit_customize(found$value, extra)
+  }
   # The call as typed, so the printed hint can be run as it stands.
   attr(found$value, "input") <- paste0(
     "findit(",
     if (!is.null(expr)) {
-      paste(deparse(expr, width.cutoff = 500L), collapse = "")
+      paste(
+        vapply(
+          c(list(expr), extra),
+          function(x) {
+            paste(
+              deparse(x, width.cutoff = 500L, backtick = TRUE),
+              collapse = ""
+            )
+          },
+          character(1)
+        ),
+        collapse = ", "
+      )
     },
     ")"
   )
@@ -157,14 +205,20 @@ findit_lookup <- function(query) {
       make.row.names = FALSE
     )
     show <- if (findit_single_best(found, terms)) 1L
+    leaders <- if (length(terms) && nrow(found)) {
+      which(found$.score == found$.score[1] & found$.extra == found$.extra[1])
+    }
     found <- found[setdiff(names(found), c(".score", ".extra"))]
     # A plain question that starts with a command word, such as "count how
     # many people in each group", gets the closest entries first.
     if (findit_plain(original, words, found)) {
       nearest <- findit_nearest(original, entries)
       found <- rbind(nearest, found[!found$stata %in% nearest$stata, ])
+      attr(found, "relevance") <- attr(nearest, "relevance")
       show <- NULL
+      leaders <- NULL
     }
+    attr(found, "leaders") <- leaders
     return(findit_result(
       found,
       functions = functions,
@@ -227,6 +281,7 @@ findit_nearest <- function(query, entries) {
   keep <- keep[score[keep] > 0]
   found <- entries[keep, ]
   found$match <- rep("nearest", nrow(found))
+  attr(found, "relevance") <- score[keep]
   found
 }
 
@@ -497,28 +552,43 @@ findit_result <- function(
   ]
   described$used <- described$`function` %in% unlist(findit_entries()$functions)
   attr(out, "r_functions") <- described
+  query_rows <- if (!is.null(show)) seq_len(show) else attr(entries, "leaders")
+  relevance <- attr(entries, "relevance")
+  if (length(relevance)) {
+    query_rows <- which(relevance == max(relevance))
+  }
+  attr(out, "query_rows") <- query_rows
   if (any(out$match == "nearest")) {
     attr(out, "query") <- query
   }
-  # Printed by default: the single best entry, else the first five (or six,
-  # rather than hiding just one).
-  if (is.null(show)) {
-    show <- if (nrow(out) <= 6L) nrow(out) else 5L
+  defaults <- if (all(out$match == "all")) {
+    seq_len(if (nrow(out) <= 6L) nrow(out) else 5L)
+  } else if (!is.null(show)) {
+    seq_len(show)
+  } else {
+    findit_defaults(entries, functions)
   }
-  attr(out, "show") <- show
+  attr(out, "default_rows") <- defaults
+  attr(out, "show") <- length(defaults)
   class(out) <- c("tidystata_findit", class(out))
   out
 }
 
 #' @export
 print.tidystata_findit <- function(x, n = NULL, ...) {
-  # A single best entry is the answer; the other matches are not offered.
-  best <- is.null(n) && identical(attr(x, "show"), 1L)
+  defaults <- if (is.null(n)) attr(x, "default_rows")
   if (is.null(n)) {
     n <- attr(x, "show")
     if (is.null(n)) n <- 5L
   }
-  shown <- utils::head(as.data.frame(x), n)
+  shown <- if (!is.null(defaults)) {
+    as.data.frame(x)[defaults[defaults <= nrow(x)], , drop = FALSE]
+  } else {
+    utils::head(as.data.frame(x), n)
+  }
+  # Detect the real output stream before the internal capture opens a sink.
+  old_options <- options(cli.num_colors = cli::num_ansi_colors())
+  on.exit(options(old_options), add = TRUE)
   # Blocks start with blank lines, which are dropped from the top.
   body <- utils::capture.output(findit_print_body(x, shown))
   body <- body[cumsum(nzchar(body)) > 0L]
@@ -527,7 +597,7 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
   }
   cat(body, sep = "\n")
   hidden <- nrow(x) - nrow(shown)
-  if (hidden > 0L && !best) {
+  if (hidden > 0L) {
     input <- attr(x, "input")
     if (is.null(input)) {
       input <- "x"
@@ -535,13 +605,36 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
     cat(
       "\n# ",
       hidden,
-      " more. To see them all: ",
+      if (hidden == 1L) {
+        " more example. To see them all: "
+      } else {
+        " more examples. To see them all: "
+      },
       input,
       " |> print(n = Inf)\n",
-      if (any(x$match[-seq_len(nrow(shown))] == "r")) {
-        "# Or add a Stata word to narrow, as in findit(\"mutate egen\").\n"
-      },
       sep = ""
+    )
+  }
+  customized <- attr(x, "customized")
+  if (!is.null(customized)) {
+    shown_rows <- if (!is.null(defaults)) {
+      defaults[defaults <= nrow(x)]
+    } else {
+      utils::head(seq_len(nrow(x)), n)
+    }
+    if (!any(customized)) {
+      cat(
+        "\n# Supplied names do not fit an example; original placeholders are retained.\n"
+      )
+    } else if (any(!customized[shown_rows])) {
+      cat(
+        "\n# Examples with different variable requirements retain their original placeholders.\n"
+      )
+    }
+  }
+  if (isTRUE(attr(x, "unmatched_hints"))) {
+    cat(
+      "\n# No example matches all supplied hints; showing the closest alternatives.\n"
     )
   }
   invisible(x)
@@ -549,15 +642,16 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
 
 findit_print_body <- function(x, shown) {
   functions <- attr(x, "r_functions")
-  headed <- length(functions) && nrow(functions) > 0L
-  if (headed && any(x$match == "stata")) {
-    cat(
-      "# \"",
-      functions$`function`[1],
-      "\" is a Stata command and an R function.\n",
-      sep = ""
-    )
+  if (length(functions) && nrow(functions) > 0L) {
+    # Describe distinct R meanings, but not a function already demonstrated.
+    displayed <- unlist(findit_calls(shown$r))
+    functions <- functions[
+      !functions$`function` %in% c(displayed, attr(x, "resolved_functions")),
+      ,
+      drop = FALSE
+    ]
   }
+  headed <- length(functions) && nrow(functions) > 0L
   lines <- character()
   is_stata <- logical()
   # Each entry is a block: what it does, then the Stata and the R code on
@@ -584,19 +678,15 @@ findit_print_body <- function(x, shown) {
   if (length(close) && nearest[1]) {
     cat(
       "\n",
-      findit_heading("## Closest entries for", attr(x, "query")),
+      findit_heading("# Closest entries for", attr(x, "query")),
       sep = ""
     )
     cat(close, if (length(lines) || headed) "\n", sep = "")
     close <- character()
   }
-  if (headed && any(is_stata)) {
-    cat("\n", findit_heading("## Stata command"), sep = "")
-  }
   plain <- lines[is_stata | !headed]
-  # Without a heading, the first entry follows the closest entries, which
-  # already end their line.
-  if (!headed && length(plain)) {
+  # The first entry follows the closest entries, which already end their line.
+  if (length(plain)) {
     plain[1] <- substring(plain[1], 2L)
   }
   cat(plain, sep = "")
@@ -611,7 +701,7 @@ findit_print_body <- function(x, shown) {
       paste0(
         "\n",
         findit_heading(paste0(
-          "## R function: ",
+          "# ",
           functions$`function`,
           "() [",
           functions$package,
@@ -622,16 +712,13 @@ findit_print_body <- function(x, shown) {
       ),
       sep = ""
     )
-    if (!any(x$match == "r") && any(functions$used)) {
-      cat("\n  Used in the entries above.")
-    }
     cat(lines[!is_stata], sep = "")
   }
   if (length(close)) {
     cat(
       if (length(lines) || headed) "\n",
       "\n",
-      findit_heading("## Closest entries for", attr(x, "query")),
+      findit_heading("# Closest entries for", attr(x, "query")),
       sep = ""
     )
     cat(close, sep = "")

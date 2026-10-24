@@ -52,7 +52,7 @@ findit("reg, robust")
 findit("egen rowmean")
 ```
 
-A bare command such as `findit(reg)` lists every entry for it. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
+A bare command such as `findit(reg)` shows one clear example; `findit(reg) |> print(n = Inf)` shows every match. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
 

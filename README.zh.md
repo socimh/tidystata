@@ -34,13 +34,17 @@ findit("reg, robust")
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
+#> 
+#> # 5 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
 findit("egen rowmean")
 #> # Row mean [tidystata]
 #> Stata: egen x_avg = rowmean(x1-x5)
 #> R:     mutate(data, x_avg = row_mean(x1:x5))
+#> 
+#> # 28 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
 ```
 
-只写一个命令，例如 `findit(reg)`，会列出该命令的所有条目。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到 R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
+只写一个命令，例如 `findit(reg)`，默认显示一个明确的例子；`findit(reg) |> print(n = Inf)` 显示所有匹配项。可以用逗号添加变量名或提示，例如 `findit(tab, sex, region)` 或 `findit(tab, gen)`。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到 R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
 
 ### codebook()：描述每个变量
 

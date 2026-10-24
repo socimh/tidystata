@@ -107,9 +107,9 @@ test_that("words that are both Stata commands and R functions show both", {
     c("sink(\"results.log\")", "mutate(data, y = log(x))")
   )
   out <- capture.output(print(logs))
-  expect_true("# \"log\" is a Stata command and an R function." %in% out)
-  expect_true("## Stata command" %in% out)
-  expect_true(any(startsWith(out, "## R function: log() [base]: ")))
+  expect_false(any(grepl("is a Stata command|^##|^# Stata command", out)))
+  expect_false(any(grepl("R function:|^# log\\(\\)", out)))
+  expect_identical(sum(startsWith(out, "Stata: ")), 2L)
   # An entry is listed once, under the Stata command, even when it also uses
   # the R function of the same name.
   sums <- findit(summ)
@@ -124,7 +124,7 @@ test_that("R functions without entries show their description", {
   expect_identical(nrow(distinct), 0L)
   expect_identical(attr(distinct, "r_functions")$stata, "distinct")
   out <- capture.output(print(distinct))
-  expect_true(any(startsWith(out, "## R function: n_distinct() [dplyr]: ")))
+  expect_true(any(startsWith(out, "# n_distinct() [dplyr]: ")))
   expect_true("  Related Stata: distinct" %in% out)
   # A base R function with a Stata name shows both meanings.
   merged <- findit(merge)
@@ -151,13 +151,13 @@ test_that("findit() falls back to a text search, then to suggestions", {
 
 test_that("printing shows whole code lines and limits long results", {
   out <- capture.output(print(findit(merge)))
-  expect_identical(out[1], "# \"merge\" is a Stata command and an R function.")
-  expect_true(any(out == "R:     inner_join(data1, data2, by = \"id\")"))
+  expect_identical(out[1], "# Merge with a match report [tidystata]")
+  expect_true(any(out == 'R:     stata_merge(data1, data2, "1:1", by = "id")'))
   # The hint repeats the call as typed, ready to run.
   long <- capture.output(print(entries, n = 2))
   expect_match(
     long[length(long)],
-    "more. To see them all: findit() |> print(n = Inf)",
+    "more examples. To see them all: findit() |> print(n = Inf)",
     fixed = TRUE
   )
   tab_out <- capture.output(print(findit(tab)))
@@ -354,7 +354,7 @@ test_that("plain questions leave exact lookups unchanged", {
   expect_identical(nrow(none), 0L)
 })
 
-test_that("printing shows the single best entry or the first five", {
+test_that("printing shows clear defaults and offers remaining entries", {
   withr::local_envvar(LANGUAGE = "en")
   # One entry answers the query: it alone is printed, all are returned.
   best <- findit("merge 1:1 id, keep(match)")
@@ -363,18 +363,17 @@ test_that("printing shows the single best entry or the first five", {
   expect_identical(attr(best, "show"), 1L)
   out <- capture.output(print(best))
   expect_identical(sum(startsWith(out, "Stata: ")), 1L)
-  # The other matches are not alternatives, so no hint points to them.
-  expect_false(any(grepl("more", out, fixed = TRUE)))
+  expect_true(any(grepl("9 more examples", out, fixed = TRUE)))
   # Among entries with every extra word, fewer further options rank first.
   expect_match(best$stata[2], "keepusing(id) nogenerate", fixed = TRUE)
-  # Several equally good entries: the first five, or all of up to six.
+  # Routine variations remain available through explicit expansion.
   expect_identical(
     sum(startsWith(capture.output(print(findit(tab))), "R: ")),
-    5L
+    1L
   )
   expect_identical(
     sum(startsWith(capture.output(print(findit(reg))), "R: ")),
-    6L
+    1L
   )
   expect_identical(
     sum(startsWith(capture.output(print(findit(tab), n = Inf)), "R: ")),
@@ -397,4 +396,158 @@ test_that("printing colours headings, Stata code and R code", {
   withr::local_envvar(LANGUAGE = "en")
   local_reproducible_output(crayon = TRUE)
   expect_snapshot(print(findit("merge 1:1 id, keep(match)")))
+})
+
+test_that("printing preserves automatic console colours through internal capture", {
+  withr::local_options(cli.num_colors = NULL)
+  # The outer capture stands in for a colour-capable console. An additional
+  # sink, opened by the printer, would normally disable automatic colours.
+  console_sink <- sink.number() + 1L
+  local_mocked_bindings(
+    num_ansi_colors = function(stream = "auto") {
+      configured <- getOption("cli.num_colors")
+      if (!is.null(configured)) {
+        return(as.integer(configured))
+      }
+      if (sink.number() > console_sink) 1L else 8L
+    },
+    .package = "cli"
+  )
+  out <- capture.output(print(findit(codebook)))
+  expect_true(any(grepl("\033[34m", out, fixed = TRUE)))
+  expect_true(any(grepl("\033[32m", out, fixed = TRUE)))
+  expect_null(getOption("cli.num_colors"))
+  withr::local_options(cli.num_colors = 1L)
+  out <- capture.output(print(findit(codebook)))
+  expect_false(any(grepl("\033[", out, fixed = TRUE)))
+  expect_identical(getOption("cli.num_colors"), 1L)
+})
+
+test_that("codebook prints compact blocks without redundant function notes", {
+  withr::local_envvar(LANGUAGE = "en")
+  book <- findit("codebook")
+  expect_identical(
+    capture.output(print(book)),
+    c(
+      "# Describe every variable [tidystata]",
+      "Stata: codebook",
+      "R:     codebook(data)",
+      "",
+      '# 1 more example. To see them all: findit("codebook") |> print(n = Inf)'
+    )
+  )
+  withr::local_envvar(LANGUAGE = "zh_CN")
+  expect_identical(
+    capture.output(print(findit("codebook"))),
+    capture.output(cat(
+      c(
+        "# \u8be6\u7ec6\u63cf\u8ff0\u6bcf\u4e2a\u53d8\u91cf [tidystata]",
+        "Stata: codebook",
+        "R:     codebook(data)",
+        "",
+        '# 1 more example. To see them all: findit("codebook") |> print(n = Inf)'
+      ),
+      sep = "\n"
+    ))
+  )
+})
+
+test_that("tab omits a redundant function note and counts hidden examples", {
+  for (language in c("en", "zh_CN")) {
+    withr::local_envvar(LANGUAGE = language)
+    found <- findit("tab")
+    out <- capture.output(print(found))
+    expect_identical(sum(startsWith(out, "Stata: ")), 1L)
+    expect_false(any(grepl("R function:|^# tab\\(\\)", out)))
+    expect_true(
+      '# 10 more examples. To see them all: findit("tab") |> print(n = Inf)' %in%
+        out
+    )
+    out <- capture.output(print(found, n = 10))
+    expect_true(
+      '# 1 more example. To see them all: findit("tab") |> print(n = Inf)' %in%
+        out
+    )
+  }
+})
+
+test_that("remaining counts agree with the examples omitted across query types", {
+  withr::local_envvar(LANGUAGE = "en")
+  for (query in c(
+    "tab",
+    "summ",
+    "mutate",
+    "reg",
+    "merge",
+    "dummy",
+    "log",
+    "how do I remove duplicate rows",
+    "n_distinct"
+  )) {
+    found <- findit(!!query)
+    full <- capture.output(print(found, n = Inf))
+    total <- sum(startsWith(full, "Stata: "))
+    expect_identical(total, nrow(found), info = query)
+    expect_false(any(grepl("more examples?\\.", full)), info = query)
+    for (n in c(0, 1, 5, -1)) {
+      out <- capture.output(print(found, n = n))
+      displayed <- sum(startsWith(out, "Stata: "))
+      hidden <- total - displayed
+      footer <- grep("^# [0-9]+ more examples?\\.", out, value = TRUE)
+      if (hidden > 0L) {
+        expect_identical(length(footer), 1L, info = query)
+        expect_identical(
+          as.integer(sub("^# ([0-9]+).*", "\\1", footer)),
+          hidden,
+          info = query
+        )
+      } else {
+        expect_identical(length(footer), 0L, info = query)
+      }
+    }
+  }
+})
+
+test_that("function notes depend on displayed uses and retain distinct meanings", {
+  withr::local_envvar(LANGUAGE = "en")
+  book <- findit(codebook)
+  expect_false(any(grepl(
+    "R function:|Used in",
+    capture.output(print(book, n = 1))
+  )))
+  # A hidden use must not suppress the description.
+  out <- capture.output(print(book[2:1, ], n = 1))
+  expect_true(any(startsWith(out, "# codebook() [tidystata]: ")))
+  expect_false(any(grepl("Used in", out)))
+  out <- capture.output(print(book, n = 0))
+  expect_true(any(startsWith(out, "# codebook() [tidystata]: ")))
+  expect_false(any(startsWith(out, "Stata: ")))
+  for (query in c("merge", "n_distinct")) {
+    out <- capture.output(print(findit(!!query)))
+    expect_true(any(startsWith(out, paste0("# ", query, "()"))))
+  }
+  for (query in c("log", "left_join", "summ", "tab")) {
+    out <- capture.output(print(findit(!!query)))
+    expect_false(any(startsWith(out, paste0("# ", query, "()"))))
+  }
+  for (query in c(
+    "codebook",
+    "log",
+    "merge",
+    "left_join",
+    "n_distinct",
+    "how do I remove duplicate rows",
+    "count how many people in each category"
+  )) {
+    out <- capture.output(print(findit(!!query), n = 2))
+    expect_false(any(grepl(
+      "^##|^# Stata to R:|is a Stata command|R function:|Used in",
+      out
+    )))
+    expect_true(nzchar(out[1]))
+    expect_true(nzchar(out[length(out)]))
+    expect_false(any(!nzchar(out[-1]) & !nzchar(out[-length(out)])))
+  }
+  out <- capture.output(print(findit("merge how to combine datasets"), n = Inf))
+  expect_false(any(!nzchar(out[-1]) & !nzchar(out[-length(out)])))
 })

@@ -1,6 +1,6 @@
 Package: tidystata
 Title: Tidy Tools Inspired by 'Stata'
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: 
     person("Minghong", "Shen", , "mhshenaa@connect.ust.hk", role = c("aut", "cre", "cph"))
 Description: Tools inspired by 'Stata' for exploring and preparing data in R.
