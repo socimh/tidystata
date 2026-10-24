@@ -2,6 +2,8 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
+^README\.zh\.Rmd$
+^README\.zh\.md$
 ^data-raw$
 ^\.github$
 ^_pkgdown\.yml$

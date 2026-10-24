@@ -1,0 +1,130 @@
+---
+output:
+  github_document:
+    html_preview: false
+    pandoc_args: ["--wrap=none"]
+---
+
+<!-- README.zh.md is generated from README.zh.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-zh-",
+  out.width = "100%"
+)
+# Print labelled columns with their labels in every rendering environment.
+invisible(loadNamespace("haven"))
+```
+
+# tidystata
+
+<!-- badges: start -->
+
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![CRAN status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata)
+[![R-CMD-check](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml)
+
+<!-- badges: end -->
+
+[English](https://github.com/socimh/tidystata/blob/master/README.md)
+
+[tidystata](https://socimh.github.io/tidystata/) 把 Stata 风格的数据探索和整理带到 R 中：查看变量、汇总统计、列频数表、生成新变量。变量可以用 tidyselect 方式选择，分组计算用 `.by`。结果都是普通的数据表，可以继续用 R 的常用工具筛选、合并和作图。
+
+## 安装
+
+```r
+# install.packages("pak")
+pak::pak("socimh/tidystata")
+```
+
+## 核心函数
+
+```{r, warning=FALSE, message=FALSE}
+library(tidystata)
+library(dplyr)
+```
+
+### findit()：查找 Stata 命令对应的 R 代码
+
+```{r}
+findit("reg, robust")
+findit("egen rowmean")
+```
+
+只写一个命令，例如 `findit(reg)`，会列出该命令的所有条目。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到 R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
+
+### codebook()：描述每个变量
+
+```{r}
+codebook(lifeexp)
+```
+
+### summ()：汇总统计
+
+```{r}
+summ(lifeexp, lexp, gnppc, safewater, .by = region)
+```
+
+### tab()：频数表
+
+```{r}
+tab(dplyr::starwars, sex)
+```
+
+`tab1()` 对多个变量分别列频数表，变量可以用 `ends_with()`、`matches()` 等 tidyselect 函数或 Stata 风格的 `varlist()` 选择；`tab2()` 生成两个变量的交叉表。
+
+### fre()：带合计和值标签的频数表
+
+```{r}
+fre(lifeexp, region)
+```
+
+### row_mean() 等：按行计算
+
+与 Stata 的 `egen rowmean()`、`rowtotal()` 和 `rownonmiss()` 一样，按行计算的函数接受一组连续的列，并跳过缺失值。
+
+```{r}
+scores <- tibble(
+  id = 1:4,
+  math = c(80, 92, NA, 75),
+  read = c(70, 88, 95, NA),
+  art = c(90, NA, 85, 60)
+)
+scores |>
+  mutate(
+    mean = row_mean(math:art),
+    total = row_sum(math:art),
+    answered = row_non_miss(math:art)
+  )
+```
+
+### stata_lag()：面板数据的滞后、超前和差分
+
+`stata_lag()`、`stata_lead()` 和 `stata_diff()` 相当于 `xtset id year` 之后的 `L.`、`F.` 和 `D.`：它们按时间变量取值，所以年份不连续时得到缺失值，而不是上一行的值。
+
+```{r}
+panel <- tibble(
+  id = c(1, 1, 1, 2, 2),
+  year = c(2001, 2002, 2004, 2001, 2002),
+  x = c(10, 12, 15, 20, 21)
+)
+panel |>
+  mutate(
+    lag_x = stata_lag(x, time = year),
+    d_x = stata_diff(x, time = year),
+    .by = id
+  )
+```
+
+## 了解更多
+
+tidystata 还提供相关系数（`pwcorr()`）、缺失值报告（`misstable()`）、主键检查与合并（`isid()`、`stata_merge()`）以及分组（`xtile()`）等函数。示例和输出约定见以下指南（英文）。
+
+- [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html)：简短的工作流程。
+- [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)：返回类型、分组和标签。
+- [Reference](https://socimh.github.io/tidystata/reference/index.html)：全部函数。
+
+## 行为准则
+
+tidystata 项目遵循[贡献者行为准则](https://www.contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html)。参与本项目即表示你同意遵守其中的条款。

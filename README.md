@@ -9,6 +9,8 @@
 
 <!-- badges: end -->
 
+[中文版](https://github.com/socimh/tidystata/blob/master/README.zh.md)
+
 [tidystata](https://socimh.github.io/tidystata/) brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with `.by`. The resulting tables work with ordinary R tools for filtering, joining and plotting.
 
 ## Installation
@@ -28,49 +30,17 @@ library(dplyr)
 ### findit(): find the R equivalent of a Stata command
 
 ``` r
-findit(reg)
-#> # Stata to R: 6 entries
-#> 
-#> # Linear regression [stats]
-#> Stata: regress y x1 x2
-#> R:     fit <- lm(y ~ x1 + x2, data = data)
-#> 
+findit("reg, robust")
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
-#> 
-#> # Clustered standard errors [fixest]
-#> Stata: regress y x1 x2, vce(cluster id)
-#> R:     fixest::feols(y ~ x1 + x2, data = data, cluster = ~id)
-#> 
-#> # Factor variables and interactions [stats]
-#> Stata: regress y i.group c.x1##c.x2
-#> R:     lm(y ~ factor(group) + x1 * x2, data = data)
-#> 
-#> # Regression with sampling weights [fixest]
-#> Stata: regress y x [pweight = wt]
-#> R:     fixest::feols(y ~ x, data = data, weights = ~wt, vcov = "hetero")
-#> 
-#> # Choose the base category [stats]
-#> Stata: regress y ib3.group
-#> R:     lm(y ~ relevel(factor(group), ref = "3"), data = data)
-findit("merge 1:1 id, keep(match)")
-#> # Stata to R: 10 entries
-#> # "merge" is a Stata command and an R function.
-#> 
-#> ## Stata command
-#> 
-#> # Keep matched rows only [dplyr]
-#> Stata: merge 1:1 id using data2, keep(match)
-#> R:     inner_join(data1, data2, by = "id")
-#> 
-#> ## R function: merge() [base]: Merge two data frames (base R)
-#>   Related Stata: merge
-#> 
-#> # ... and 9 more. Use `print(n = Inf)` to see all, or `View()`.
+findit("egen rowmean")
+#> # Row mean [tidystata]
+#> Stata: egen x_avg = rowmean(x1-x5)
+#> R:     mutate(data, x_avg = row_mean(x1:x5))
 ```
 
-Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html) ([Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)).
+A bare command such as `findit(reg)` lists every entry for it. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
 
@@ -134,13 +104,64 @@ fre(lifeexp, region)
 #> 4 Total               68   100    NA    NA        NA
 ```
 
+### row_mean() and friends: row calculations
+
+Like Stata’s `egen rowmean()`, `rowtotal()` and `rownonmiss()`, row functions take a range of columns and skip missing values.
+
+``` r
+scores <- tibble(
+  id = 1:4,
+  math = c(80, 92, NA, 75),
+  read = c(70, 88, 95, NA),
+  art = c(90, NA, 85, 60)
+)
+scores |>
+  mutate(
+    mean = row_mean(math:art),
+    total = row_sum(math:art),
+    answered = row_non_miss(math:art)
+  )
+#> # A tibble: 4 x 7
+#>      id  math  read   art  mean total answered
+#>   <int> <dbl> <dbl> <dbl> <dbl> <dbl>    <int>
+#> 1     1    80    70    90  80     240        3
+#> 2     2    92    88    NA  90     180        2
+#> 3     3    NA    95    85  90     180        2
+#> 4     4    75    NA    60  67.5   135        2
+```
+
+### stata_lag(): panel lags, leads and differences
+
+`stata_lag()`, `stata_lead()` and `stata_diff()` work like `L.`, `F.` and `D.` after `xtset id year`: they follow the time variable, so a gap in the years gives a missing value instead of the previous row.
+
+``` r
+panel <- tibble(
+  id = c(1, 1, 1, 2, 2),
+  year = c(2001, 2002, 2004, 2001, 2002),
+  x = c(10, 12, 15, 20, 21)
+)
+panel |>
+  mutate(
+    lag_x = stata_lag(x, time = year),
+    d_x = stata_diff(x, time = year),
+    .by = id
+  )
+#> # A tibble: 5 x 5
+#>      id  year     x lag_x   d_x
+#>   <dbl> <dbl> <dbl> <dbl> <dbl>
+#> 1     1  2001    10    NA    NA
+#> 2     1  2002    12    10     2
+#> 3     1  2004    15    NA    NA
+#> 4     2  2001    20    NA    NA
+#> 5     2  2002    21    20     1
+```
+
 ## Learn more
 
-tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. See the guides below for examples and output conventions.
+tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.
-- [NEWS](https://socimh.github.io/tidystata/news/index.html): release notes.
 - [Reference](https://socimh.github.io/tidystata/reference/index.html): every function.
 
 ## Code of Conduct

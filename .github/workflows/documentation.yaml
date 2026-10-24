@@ -30,15 +30,17 @@ jobs:
           Sys.setenv(LC_ALL = "C", LANG = "C", TZ = "UTC", COLUMNS = "80",
                      R_CLI_NUM_COLORS = "0", NO_COLOR = "1")
           Sys.setlocale("LC_ALL", "C")
-          rmarkdown::render("README.Rmd", quiet = TRUE, encoding = "UTF-8",
-                            envir = new.env(parent = globalenv()))
+          for (readme in c("README.Rmd", "README.zh.Rmd")) {
+            rmarkdown::render(readme, quiet = TRUE, encoding = "UTF-8",
+                              envir = new.env(parent = globalenv()))
+          }
       - name: Fail on stale help, namespace or README
         run: |
-          git status --porcelain --untracked-files=all -- man NAMESPACE README.md
-          test -z "$(git status --porcelain --untracked-files=all -- man NAMESPACE README.md)"
+          git status --porcelain --untracked-files=all -- man NAMESPACE README.md README.zh.md
+          test -z "$(git status --porcelain --untracked-files=all -- man NAMESPACE README.md README.zh.md)"
       - name: Record README rendering differences
         if: always()
-        run: git diff -- README.md > readme-render.diff
+        run: git diff -- README.md README.zh.md > readme-render.diff
       - uses: actions/upload-artifact@v4
         if: always()
         with:
