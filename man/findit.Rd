@@ -19,9 +19,12 @@ A tibble with one row per Stata idiom and the columns \code{match}
 used in the entry, \code{"keyword"} for a text match, \code{"nearest"} for the
 closest entries to a plain question, \code{"all"} for the whole list), \code{stata} (the Stata code), \code{r} (equivalent R code), \code{package} (where
 the R function lives) and \code{task} (what it does). It prints each entry as
-the Stata code and task on one line, followed by the R code, so the code is
-never cut off; the first \code{n} entries are shown (\code{print(findit(), n = Inf)}
-for all). A matched R function is printed with a one-line description. If
+a short block: what it does, then the Stata code and the R code on lines
+labelled \verb{Stata:} and \verb{R:}, so the code is never cut off. When one entry
+answers the query, as for \code{findit("merge 1:1 id, keep(match)")}, only that
+entry is printed; otherwise the first five are (\code{print(x, n = Inf)} for
+all). The returned tibble always has every match. A matched R function is
+printed with a one-line description. If
 nothing matches, a message suggests similar names and an empty tibble is
 returned invisibly.
 }
@@ -62,7 +65,9 @@ entries first.
 \item The remaining words put the best-matching entries first. For example,
 \code{findit("merge keep(match)")} lists \code{inner_join()} before the other merge
 entries, and \code{findit("mutate egen")} lists the \code{egen} entries among the
-many that use \code{mutate()}. All matching entries are still returned.
+many that use \code{mutate()}. Among equally good entries, the one with the
+fewest further words comes first. All matching entries are still
+returned.
 \item If neither matches, the text is searched for in the Stata code, the R
 code and the task, so \code{findit(winsor)} and \code{findit(dummy)} also work.
 \item Otherwise the text is read as a plain question, in English or Chinese,

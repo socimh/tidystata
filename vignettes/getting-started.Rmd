@@ -11,9 +11,10 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-tidystata provides short commands for exploring and preparing data. Its tables
-can be saved, filtered and joined in ordinary R workflows. This tutorial uses a
-small survey so that you can check the counts and calculations yourself.
+This tutorial follows a small survey from inspection to tabulation, grouped
+summaries and new variables. Results are ordinary R objects that you can save,
+filter and join. Install tidystata as shown on the
+[package homepage](https://socimh.github.io/tidystata/) before starting.
 
 ## Load data and inspect variables
 
@@ -126,15 +127,11 @@ xtile(1:8, 4)
 
 `destring()` reads numbers with currency symbols, thousands separators and
 percent signs; other text, such as `"10 kg"`, becomes `NA` with a warning
-unless you remove it with `ignore = "kg"`, as Stata's `ignore()` does. Quantile bins keep tied values together and may contain fewer
-intervals when cutpoints coincide. These conventions do not promise exact
-equivalence with every Stata command.
+unless you remove it with `ignore = "kg"`. `xtile()` uses Stata's percentile
+cutpoints and keeps tied values together; ties can leave some groups empty.
 
 ## Next steps
 
-If results appear to use an older package, inspect `packageVersion("tidystata")` and `find.package("tidystata")`.
-For local source changes, install from the project and restart R before testing.
-
-The full
-[migration guide](https://socimh.github.io/tidystata/articles/migration.html)
-is on the package website.
+Read [Containers and missing values](containers-and-missing-values.html) for
+output conventions, or [Coming from Stata](coming-from-stata.html) to find
+the R equivalent of a Stata command.

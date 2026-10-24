@@ -10,6 +10,8 @@ articles:
   - containers-and-missing-values
   - articles/coming-from-stata
   - articles/coming-from-stata-zh
+- title: internal
+  contents:
   - articles/migration
 
 reference:

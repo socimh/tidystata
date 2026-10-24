@@ -20,7 +20,7 @@ cut_quantile(
 
 cut_length(x, n = 4, labels = NULL)
 
-cut_breaks(x, breaks = NULL, labels = NULL, right = TRUE)
+cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 }
 \arguments{
 \item{x}{A numeric vector. \code{xtile()} also accepts a logical vector,
@@ -34,8 +34,9 @@ treated as 0/1.}
     a factor.}
 
 \item{method}{Quantile boundaries (\code{"quantile"}, the default), or balanced
-rank groups (\code{"rank"}). Rank groups may split ties, breaking them by original
-position. They differ in size by at most one; earlier groups get extra rows.}
+rank groups (\code{"rank"}, which has no Stata counterpart). Rank groups may
+split ties, breaking them by original position. They differ in size by at
+most one; earlier groups get extra rows.}
 
 \item{wt}{Optional weights for \code{xtile()}, one per element of \code{x}, like
 Stata's \verb{xtile ... [aweight = w]}. Cutpoints then follow Stata's weighted
@@ -43,12 +44,17 @@ percentile rule; elements with a missing weight get a missing code. Not
 available with \code{method = "rank"}.}
 
 \item{breaks}{Numeric cutpoints for \code{cut_breaks()}. The observed minimum and
-maximum are included automatically. \code{NULL} uses the observed median as an
-interior cutpoint. A single number supplies one interior cutpoint, rather
-than the number of intervals.}
+maximum are added when values lie beyond the breaks. \code{NULL} uses the
+observed median as an interior cutpoint. A single number supplies one
+interior cutpoint, rather than the number of intervals.}
 
-\item{right}{logical, indicating if the intervals should be closed on
-    the right (and open on the left) or vice versa.}
+\item{right}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), intervals are
+closed on the left, \verb{[a, b)}, as in Stata's \verb{egen cut()}; the last interval
+also includes its upper end. If \code{TRUE}, they are closed on the right,
+\verb{(a, b]}, as in [base::cut()].
+
+[a, b)\verb{, as in Stata's }egen cut()\verb{; the last interval also includes its upper end. If }TRUE\verb{, they are closed on the right, }(a, b]: R:a,\%20b)\%60,\%20as\%20in\%20Stata's\%20\%60egen\%20cut()\%60;\%20the\%20last\%20interval\%0Aalso\%20includes\%20its\%20upper\%20end.\%20If\%20\%60TRUE\%60,\%20they\%20are\%20closed\%20on\%20the\%20right,\%0A\%60(a,\%20b
+[base::cut()]: R:base::cut()}
 }
 \value{
 An ordered factor, or integer interval codes when \code{labels = FALSE}
@@ -57,24 +63,30 @@ or when \code{xtile()} runs in a grouped data mask with default labels.
 \description{
 \itemize{
 \item \code{xtile()} creates \code{n} quantile groups, following Stata's \code{xtile}.
-\item \code{cut_length()} creates \code{n} intervals of equal length.
-\item \code{cut_breaks()} cuts at given cutpoints.
+\item \code{cut_length()} creates \code{n} intervals of equal length. Stata has no
+equal-width command (\verb{egen cut(), group()} is not equal-width).
+\item \code{cut_breaks()} cuts at given cutpoints, like \verb{egen cut(), at()}.
 }
 
 \code{cut_quantile()} is an alias of \code{xtile()}.
 }
 \details{
-\code{xtile()} follows Stata's \code{xtile} rule with type-7
-quantile cutpoints at \verb{1/n, 2/n, ...}: each value joins the first group
+\code{xtile()} follows Stata's \code{xtile}, and its codes are tested against
+Stata's output. Cutpoints are the percentiles at \verb{1/n, 2/n, ...}, using
+Stata's percentile rule (see \code{\link[=summ]{summ()}}), and each value joins the first group
 whose cutpoint is at least that value. Equal values stay in the same group
 and distinct values are never merged, so a 0/1 dummy always gives two
-groups. Ties can leave fewer than \code{n} groups; occupied groups are then
-numbered consecutively and a warning is given. Default labels are the
+groups. Ties can leave groups empty; as in Stata, their codes are skipped
+(codes 1, 3 and 4, say) and a warning is given. Factor levels are the
+occupied groups. Default labels are the
 contiguous intervals covered by each group, for example \code{"[0,0]"} and
 \code{"(0,1]"}. Custom labels must match the effective number of groups.
 Empty and all-missing vectors are rejected. Constant vectors are rejected
-only by the default quantile method. Cutpoints are not promised to match
-Stata's percentile definition exactly.
+only by the default quantile method.
+
+\code{cut_breaks()} differs from \verb{egen cut(), at()} at the ends: Stata leaves
+values outside the breaks (and at the last break) missing, while
+\code{cut_breaks()} extends the end intervals to the observed range.
 
 \code{labels = NULL} (the default) or \code{TRUE} gives interval labels; \code{FALSE}
 gives integer codes. Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its

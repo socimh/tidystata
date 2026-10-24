@@ -13,14 +13,11 @@ Use \code{\link[=tab]{tab()}}, \code{\link[=summ]{summ()}}, and \code{\link[=cod
 Coming from Stata? \code{\link[=findit]{findit()}} gives the R equivalent of a Stata command,
 such as \code{findit(reg)} or \code{findit("merge 1:1 id")}.
 }
-\section{Tutorials and migration}{
+\section{Tutorials}{
 
 Read \code{vignette("getting-started", package = "tidystata")} for a short workflow
 and \code{vignette("containers-and-missing-values", package = "tidystata")} for
 output containers, grouping and missing-value conventions.
-The full migration guide is the website's
-\href{https://socimh.github.io/tidystata/articles/migration.html}{Migration guide}
-article.
 }
 
 \seealso{

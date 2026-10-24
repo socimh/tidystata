@@ -718,13 +718,13 @@ test_that("aggregation excludes alternate and additional geometry columns", {
 
 test_that("summary requests avoid unrequested expensive statistics", {
   testthat::local_mocked_bindings(
-    quantile = function(...) stop("Unrequested quantile calculation"),
     sd = function(...) stop("Unrequested SD calculation"),
     .package = "stats"
   )
   testthat::local_mocked_bindings(
-    skew = function(...) stop("Unrequested skew calculation"),
-    kurtosis = function(...) stop("Unrequested kurtosis calculation"),
+    stata_quantile = function(...) stop("Unrequested quantile calculation"),
+    weighted_quantile = function(...) stop("Unrequested quantile calculation"),
+    summ_population_sd = function(...) stop("Unrequested moment calculation"),
     .package = "tidystata"
   )
   expect_equal(summ(1:100, .stat = "mean")$mean, 50.5)
@@ -735,26 +735,31 @@ test_that("summary requests avoid unrequested expensive statistics", {
   expect_equal(summ(moment, .stat = "mean")$mean, "2024-01-01 00:01")
 })
 
-test_that("summary percentile names retain requested order and type-7 values", {
+test_that("summary percentile names retain requested order and Stata values", {
   x <- c(-9, 0, 3, 8, 24, NA_real_)
   requested <- c("p97.5", "p0", "p2.5", "q1", "p25", "p100", "p97.5")
   out <- summ(x, .stat = requested, .name = TRUE)
   expect_named(out, c("name", "type", unique(requested)))
   expect_equal(
     unlist(out[unique(requested)], use.names = FALSE),
-    unname(stats::quantile(x, c(.975, 0, .025, .25, .25, 1), na.rm = TRUE))
+    unname(stats::quantile(
+      x,
+      c(.975, 0, .025, .25, .25, 1),
+      na.rm = TRUE,
+      type = 2
+    ))
   )
   day <- as.Date("2024-01-01") + c(0, 10)
   expect_equal(summ(day, .stat = "p2.5")$p2.5, "2024-01-01")
   moment <- as.POSIXct("2024-01-01", tz = "UTC") + c(0, 3600)
-  expect_equal(summ(moment, .stat = "p2.5")$p2.5, "2024-01-01 00:01")
+  expect_equal(summ(moment, .stat = "p2.5")$p2.5, "2024-01-01 00:00")
   labelled <- haven::labelled_spss(c(0, 100, 999), na_values = 999)
   expect_warning(
     observed <- summ(labelled, .stat = c("p2.5", "p97.5")),
     "labelled"
   )
-  expect_equal(observed$p2.5, 2.5)
-  expect_equal(observed$p97.5, 97.5)
+  expect_equal(observed$p2.5, 0)
+  expect_equal(observed$p97.5, 100)
   collision <- tibble::tibble(p2.5 = c("b", "a"), x = c(0, 10))
   expect_message(
     by_percentile <- summ(

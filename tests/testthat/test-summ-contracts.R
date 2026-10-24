@@ -48,7 +48,8 @@ for (alias in c("missing", "p25", "p50", "p75")) {
     requested <- alias
     test_that(paste("summary alias", requested), {
       x <- c(1, 3, 5, 7, NA)
-      expected <- switch(requested, missing = 1, p25 = 2.5, p50 = 4, p75 = 5.5)
+      # Stata percentiles: 4 * 0.25 is whole, so p25 averages 1 and 3.
+      expected <- switch(requested, missing = 1, p25 = 2, p50 = 4, p75 = 6)
       out <- summ(tibble::tibble(x = x), .stat = requested, .name = TRUE)
       expect_named(out, c("name", "type", requested))
       expect_equal(out[[requested]], expected)

@@ -28,9 +28,12 @@
 #' used in the entry, `"keyword"` for a text match, `"nearest"` for the
 #' closest entries to a plain question, `"all"` for the whole list), `stata` (the Stata code), `r` (equivalent R code), `package` (where
 #' the R function lives) and `task` (what it does). It prints each entry as
-#' the Stata code and task on one line, followed by the R code, so the code is
-#' never cut off; the first `n` entries are shown (`print(findit(), n = Inf)`
-#' for all). A matched R function is printed with a one-line description. If
+#' a short block: what it does, then the Stata code and the R code on lines
+#' labelled `Stata:` and `R:`, so the code is never cut off. When one entry
+#' answers the query, as for `findit("merge 1:1 id, keep(match)")`, only that
+#' entry is printed; otherwise the first five are (`print(x, n = Inf)` for
+#' all). The returned tibble always has every match. A matched R function is
+#' printed with a one-line description. If
 #' nothing matches, a message suggests similar names and an empty tibble is
 #' returned invisibly.
 #'
@@ -54,7 +57,9 @@
 #' * The remaining words put the best-matching entries first. For example,
 #'   `findit("merge keep(match)")` lists `inner_join()` before the other merge
 #'   entries, and `findit("mutate egen")` lists the `egen` entries among the
-#'   many that use `mutate()`. All matching entries are still returned.
+#'   many that use `mutate()`. Among equally good entries, the one with the
+#'   fewest further words comes first. All matching entries are still
+#'   returned.
 #' * If neither matches, the text is searched for in the Stata code, the R
 #'   code and the task, so `findit(winsor)` and `findit(dummy)` also work.
 #' * Otherwise the text is read as a plain question, in English or Chinese,
@@ -133,15 +138,24 @@ findit <- function(command = NULL) {
   if (any(stata_hit) || length(functions)) {
     found <- rbind(
       findit_rank(entries[stata_hit, ], terms, "stata"),
-      findit_rank(entries[r_hit, ], terms, "r")
+      findit_rank(entries[r_hit, ], terms, "r"),
+      make.row.names = FALSE
     )
+    show <- if (findit_single_best(found, terms)) 1L
+    found <- found[setdiff(names(found), c(".score", ".extra"))]
     # A plain question that starts with a command word, such as "count how
     # many people in each group", gets the closest entries first.
     if (findit_plain(original, words, found)) {
       nearest <- findit_nearest(original, entries)
       found <- rbind(nearest, found[!found$stata %in% nearest$stata, ])
+      show <- NULL
     }
-    return(findit_result(found, functions = functions, query = original))
+    return(findit_result(
+      found,
+      functions = functions,
+      query = original,
+      show = show
+    ))
   }
 
   text <- tolower(original)
@@ -360,17 +374,44 @@ findit_function_hit <- function(name, entries) {
 }
 
 # Extra words rank the entries; the R code counts too, so that
-# `findit("mutate egen")` can narrow a widely used R function.
+# `findit("mutate egen")` can narrow a widely used R function. Among entries
+# with the same score, the one with the fewest Stata words beyond the query
+# comes first, so "merge 1:1 id, keep(match)" prefers the entry without
+# further options.
 findit_rank <- function(found, terms, match) {
   text <- tolower(paste(found$stata, if (match == "r") found$r))
   score <- vapply(
     text,
     function(t) sum(vapply(terms, grepl, logical(1), t, fixed = TRUE)),
-    numeric(1)
+    numeric(1),
+    USE.NAMES = FALSE
   )
-  found <- found[order(-score, seq_along(score)), ]
+  extra <- if (length(terms)) {
+    vapply(
+      strsplit(tolower(found$stata), "[ ,]+"),
+      function(w) sum(!w %in% terms),
+      numeric(1)
+    )
+  } else {
+    numeric(nrow(found))
+  }
+  ordered <- order(-score, extra, seq_along(score))
+  found <- found[ordered, ]
   found$match <- rep(match, nrow(found))
+  found$.score <- score[ordered]
+  found$.extra <- extra[ordered]
   found
+}
+
+# One entry answers the query when it contains every extra word and is closer
+# than any other entry, as `inner_join()` is for "merge 1:1 id, keep(match)".
+findit_single_best <- function(found, terms) {
+  if (!length(terms) || !nrow(found) || found$.score[1] < length(terms)) {
+    return(FALSE)
+  }
+  nrow(found) == 1L ||
+    found$.score[2] < found$.score[1] ||
+    found$.extra[2] > found$.extra[1]
 }
 
 findit_query <- function(expr, call = rlang::caller_env()) {
@@ -415,7 +456,8 @@ findit_result <- function(
   entries,
   match = NULL,
   functions = character(),
-  query = NULL
+  query = NULL,
+  show = NULL
 ) {
   if (!is.null(match)) {
     entries$match <- rep(match, nrow(entries))
@@ -443,12 +485,22 @@ findit_result <- function(
   if (any(out$match == "nearest")) {
     attr(out, "query") <- query
   }
+  # Printed by default: the single best entry, else the first five (or six,
+  # rather than hiding just one).
+  if (is.null(show)) {
+    show <- if (nrow(out) <= 6L) nrow(out) else 5L
+  }
+  attr(out, "show") <- show
   class(out) <- c("tidystata_findit", class(out))
   out
 }
 
 #' @export
-print.tidystata_findit <- function(x, n = 20, ...) {
+print.tidystata_findit <- function(x, n = NULL, ...) {
+  if (is.null(n)) {
+    n <- attr(x, "show")
+    if (is.null(n)) n <- 5L
+  }
   functions <- attr(x, "r_functions")
   shown <- utils::head(as.data.frame(x), n)
   cat("# Stata to R:", nrow(x), if (nrow(x) == 1L) "entry\n" else "entries\n")
@@ -463,19 +515,17 @@ print.tidystata_findit <- function(x, n = 20, ...) {
   }
   lines <- character()
   is_stata <- logical()
+  # Each entry is a block: what it does, then the Stata and the R code on
+  # labelled lines, with a blank line before the next entry.
   if (nrow(shown) > 0L) {
-    width <- nchar(shown$stata, type = "width")
-    pad <- strrep(" ", pmax(min(max(width), 64L) - width, 0L))
     lines <- paste0(
+      "\n\n",
+      cli::col_grey(paste0("# ", shown$task, " [", shown$package, "]")),
       "\n",
+      cli::style_bold("Stata: "),
       shown$stata,
-      pad,
-      "  # ",
-      shown$task,
-      " [",
-      shown$package,
-      "]",
-      "\n  ",
+      "\n",
+      cli::style_bold("R:     "),
       shown$r
     )
     is_stata <- shown$match == "stata"
@@ -494,7 +544,13 @@ print.tidystata_findit <- function(x, n = 20, ...) {
   if (headed && any(is_stata)) {
     cat("\n## Stata command")
   }
-  cat(lines[is_stata | !headed], sep = "")
+  plain <- lines[is_stata | !headed]
+  # Without a heading, the first entry follows the title or the closest
+  # entries, which already end their line.
+  if (!headed && length(plain)) {
+    plain[1] <- substring(plain[1], 2L)
+  }
+  cat(plain, sep = "")
   if (headed) {
     related <- ifelse(
       nzchar(functions$stata),

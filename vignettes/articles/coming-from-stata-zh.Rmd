@@ -59,35 +59,21 @@ R 包。
 ## 在 R 中直接查询
 
 `findit()` 在 R 中查询同一份列表。单个 Stata 命令可以不加引号，更长的内容需要加引号；支持
-Stata 的标准缩写。控制台输出为英文。
+Stata 的标准缩写。说明文字随 R 的语言设置显示为中文或英文，两种语言的查询都可使用。
 
 ```{r}
 findit(reg)
 findit("merge 1:1 id, keep(match)")
 ```
 
-不带参数的 `findit()` 返回完整列表；输入 `??stata` 可以再次找到它的帮助文档。
+也可以查询 R 函数（`findit(left_join)`），或直接提问（`findit("如何删除重复行")`）。
+控制台显示最相关的结果，返回的表保留全部匹配项；不带参数的 `findit()` 返回完整列表。
 
-## tidystata 以外的功能
+## 使用命令对照表
 
-tidystata 覆盖日常的数据探索、制表、描述统计、数据准备和检查。其他任务通常使用以下 R 包：
-
-- **回归和固定效应**（`regress`、`reghdfe`、`xtreg`、`ivregress`）：`lm()`、`glm()`
-  或 `fixest::feols()`。
-- **回归结果表**（`esttab`、`outreg2`）：`modelsummary::modelsummary()`。
-- **边际效应**（`margins`）：marginaleffects。
-- **长宽数据转换**（`reshape`）：`tidyr::pivot_longer()` 和 `pivot_wider()`。
-- **缩尾**（`winsor2`）：`datawizard::winsorize()`。
-- **面板和日历时期**（`tsset`、`xtset`、`L.`、`mofd()`）：tsibble 和 lubridate。
-- **调查数据**（`svyset`、`svy:`）：srvyr 和 survey。
-- **作图**（`twoway`、`histogram`）：ggplot2；`binscatter` 可用 binsreg 或
-  `statar::stat_binmean()`。
-
-tidystata 和 [statar](https://github.com/matthieugomez/statar) 可以同时加载，只有 `tab()` 和
-`xtile()` 重名。请最后加载 tidystata，或写成 `tidystata::tab()`。
-
-一些 RStudio 操作可以代替 Stata 的界面：Ctrl+Enter（Mac 上为 Cmd+Return）运行当前行或选中的代码，Tab
-键补全名称，Environment 和 Files 窗口相当于 Stata 的 Variables 窗口和 `dir`。
+下表涵盖 tidystata 和其他常用 R 包，包括建模、长宽转换、调查分析和作图。
+面板滞后、超前和差分可使用 tidystata 的 `stata_lag()`、`stata_lead()` 和
+`stata_diff()`；指定时间列，并用 `.by` 区分面板。
 
 下表中，`data` 是你的数据，`data1` 和 `data2` 是合并时的主数据和被合并数据，`fit`
 是已估计的模型。大部分条目使用 dplyr，请先用 `library(dplyr)` 或 `library(tidyverse)` 加载。
@@ -100,8 +86,8 @@ section_tables("section_zh", "task_zh", "detail_zh", c("Stata", "R", "\u8bf4\u66
 
 ## 本指南中的 R 函数
 
-Stata 用户可能用到的 R 函数，包括上文用到的所有函数，及其所属的包、相关的 Stata 命令和用途。输入 `findit(函数名)`，例如 `findit(left_join)`，可以查看它对应的
-Stata 命令。
+按所属包、相关 Stata 命令和用途查阅常用 R 函数。也可以在控制台用
+`findit(left_join)` 单独查询。
 
 ```{r, echo = FALSE, results = "asis"}
 functions <- tidystata:::findit_functions()

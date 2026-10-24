@@ -2,8 +2,9 @@
 #'
 #' @description
 #' * `xtile()` creates `n` quantile groups, following Stata's `xtile`.
-#' * `cut_length()` creates `n` intervals of equal length.
-#' * `cut_breaks()` cuts at given cutpoints.
+#' * `cut_length()` creates `n` intervals of equal length. Stata has no
+#'   equal-width command (`egen cut(), group()` is not equal-width).
+#' * `cut_breaks()` cuts at given cutpoints, like `egen cut(), at()`.
 #'
 #' `cut_quantile()` is an alias of `xtile()`.
 #'
@@ -11,29 +12,39 @@
 #' treated as 0/1.
 #' @param n A positive integer. The number of intervals.
 #' @param method Quantile boundaries (`"quantile"`, the default), or balanced
-#' rank groups (`"rank"`). Rank groups may split ties, breaking them by original
-#' position. They differ in size by at most one; earlier groups get extra rows.
+#' rank groups (`"rank"`, which has no Stata counterpart). Rank groups may
+#' split ties, breaking them by original position. They differ in size by at
+#' most one; earlier groups get extra rows.
 #' @param wt Optional weights for `xtile()`, one per element of `x`, like
 #' Stata's `xtile ... [aweight = w]`. Cutpoints then follow Stata's weighted
 #' percentile rule; elements with a missing weight get a missing code. Not
 #' available with `method = "rank"`.
 #' @param breaks Numeric cutpoints for `cut_breaks()`. The observed minimum and
-#' maximum are included automatically. `NULL` uses the observed median as an
-#' interior cutpoint. A single number supplies one interior cutpoint, rather
-#' than the number of intervals.
+#' maximum are added when values lie beyond the breaks. `NULL` uses the
+#' observed median as an interior cutpoint. A single number supplies one
+#' interior cutpoint, rather than the number of intervals.
+#' @param right A single `TRUE` or `FALSE`. If `FALSE` (default), intervals are
+#' closed on the left, `[a, b)`, as in Stata's `egen cut()`; the last interval
+#' also includes its upper end. If `TRUE`, they are closed on the right,
+#' `(a, b]`, as in [base::cut()].
 #' @inheritParams base::cut
 #'
-#' @details `xtile()` follows Stata's `xtile` rule with type-7
-#' quantile cutpoints at `1/n, 2/n, ...`: each value joins the first group
+#' @details `xtile()` follows Stata's `xtile`, and its codes are tested against
+#' Stata's output. Cutpoints are the percentiles at `1/n, 2/n, ...`, using
+#' Stata's percentile rule (see [summ()]), and each value joins the first group
 #' whose cutpoint is at least that value. Equal values stay in the same group
 #' and distinct values are never merged, so a 0/1 dummy always gives two
-#' groups. Ties can leave fewer than `n` groups; occupied groups are then
-#' numbered consecutively and a warning is given. Default labels are the
+#' groups. Ties can leave groups empty; as in Stata, their codes are skipped
+#' (codes 1, 3 and 4, say) and a warning is given. Factor levels are the
+#' occupied groups. Default labels are the
 #' contiguous intervals covered by each group, for example `"[0,0]"` and
 #' `"(0,1]"`. Custom labels must match the effective number of groups.
 #' Empty and all-missing vectors are rejected. Constant vectors are rejected
-#' only by the default quantile method. Cutpoints are not promised to match
-#' Stata's percentile definition exactly.
+#' only by the default quantile method.
+#'
+#' `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
+#' values outside the breaks (and at the last break) missing, while
+#' `cut_breaks()` extends the end intervals to the observed range.
 #'
 #' `labels = NULL` (the default) or `TRUE` gives interval labels; `FALSE`
 #' gives integer codes. Inside grouped [dplyr::mutate()], each group has its
@@ -149,7 +160,7 @@ xtile_quantile <- function(
   # Stata xtile rule: a value joins the first group whose cutpoint is at least
   # the value, so distinct values are never merged into one group.
   cutpoints <- if (is.null(wt)) {
-    quantile7(observed, seq_len(n - 1L) / n)
+    stata_quantile(observed, seq_len(n - 1L) / n)
   } else {
     weighted_quantile(observed, wt[!is.na(x)], seq_len(n - 1L) / n)
   }
@@ -159,25 +170,27 @@ xtile_quantile <- function(
       call = call
     )
   }
-  maximum <- limits[[2L]]
-  cutpoints <- unique(cutpoints[cutpoints < maximum])
+  # Stata codes each value by the number of cutpoints below it, plus one.
+  # Tied cutpoints leave groups empty, and their codes are skipped.
   raw <- findInterval(x, cutpoints, left.open = TRUE) + 1L
   raw[is.na(x)] <- NA_integer_
-  # Raw codes run 1..k, so occupancy and renumbering need no sorting.
-  present <- tabulate(raw, nbins = length(cutpoints) + 1L) > 0L
-  occupied <- which(present)
+  # Raw codes run 1..n, so occupancy needs no sorting.
+  occupied <- which(tabulate(raw, nbins = n) > 0L)
   intervals <- length(occupied)
   xtile_check_labels(labels, intervals, call = call)
   if (intervals < n) {
     cli::cli_warn(
-      "Tied values collapsed quantile cutpoints to {intervals} groups (requested {n})."
+      "Tied values leave {intervals} of {n} quantile groups occupied; codes skip the empty ones, as in Stata."
     )
   }
+  if (identical(labels, FALSE)) {
+    return(raw)
+  }
   if (is.null(labels)) {
-    upper <- c(cutpoints, maximum)[occupied]
+    upper <- c(cutpoints, limits[[2L]])[occupied]
     labels <- quantile_interval_labels(c(limits[[1L]], upper))
   }
-  xtile_codes(cumsum(present)[raw], intervals, labels)
+  factor(raw, levels = occupied, labels = labels, ordered = TRUE)
 }
 
 xtile_check_labels <- function(labels, intervals, call = rlang::caller_env()) {
@@ -197,23 +210,6 @@ xtile_codes <- function(codes, intervals, labels) {
     return(codes)
   }
   factor(codes, levels = seq_len(intervals), labels = labels, ordered = TRUE)
-}
-
-# stats::quantile(x, probs, type = 7, names = FALSE) for x without missing
-# values and probs in [0, 1], with the same partial sort and arithmetic but
-# without its argument handling, which dominates per-group calls.
-quantile7 <- function(x, probs) {
-  n <- length(x)
-  index <- 1 + max(n - 1, 0) * probs
-  lo <- floor(index)
-  hi <- ceiling(index)
-  x <- sort(x, partial = if (n == 0) numeric() else unique(c(lo, hi)))
-  qs <- x[lo]
-  i <- which(index > lo & x[hi] != qs)
-  h <- (index - lo)[i]
-  qs[i] <- (1 - h) * qs[i] + h * x[hi[i]]
-  # quantile() always returns doubles, even for integer x.
-  as.double(qs)
 }
 
 # TRUE inside a grouped dplyr verb such as group_by() |> mutate().
@@ -257,9 +253,12 @@ cut_length <- function(x, n = 4, labels = NULL) {
 
 #' @rdname cut
 #' @export
-cut_breaks <- function(x, breaks = NULL, labels = NULL, right = TRUE) {
+cut_breaks <- function(x, breaks = NULL, labels = NULL, right = FALSE) {
   if (is.null(breaks)) {
     breaks <- stats::median(x, na.rm = TRUE)
+  }
+  if (!is.numeric(breaks)) {
+    stop_input_type(breaks, "a numeric vector")
   }
   x_min <- min(x, na.rm = TRUE)
   x_max <- max(x, na.rm = TRUE)
@@ -267,7 +266,13 @@ cut_breaks <- function(x, breaks = NULL, labels = NULL, right = TRUE) {
     cli::cli_abort("Can't cut a vector with only one unique value.")
   }
 
-  breaks <- unique(c(x_min, breaks, x_max))
+  # The observed range extends the breaks only where values lie beyond them;
+  # cut() sorts the breaks.
+  breaks <- unique(c(
+    if (!is.finite(x_min) || x_min < min(breaks)) x_min,
+    breaks,
+    if (!is.finite(x_max) || x_max > max(breaks)) x_max
+  ))
 
   cut(
     x,
