@@ -31,14 +31,13 @@ before passing them to the selection interface.
 }
 \examples{
 if (interactive()) {
-  starwars <- dplyr::starwars
-  browse(starwars)
-  browse(starwars, name:mass)
-  browse(starwars, varlist("*color"))
+  browse(lifeexp)
+  browse(lifeexp, country:lexp)
+  browse(lifeexp, varlist("*p*"))
 
   # Retain the viewed columns for the next pipeline stage.
-  selected <- browse(starwars, name, height, mass)
-  summ(selected, height, mass)
+  selected <- browse(lifeexp, country, lexp, gnppc)
+  summ(selected, lexp, gnppc)
 }
 }
 \seealso{

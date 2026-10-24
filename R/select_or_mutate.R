@@ -16,7 +16,7 @@
 #' and tidyselect helpers such as `starts_with()`, `where()`, `all_of()` or
 #' [varlist()] select existing columns, as do calls that use no column names
 #' (for example `all_of(vars)` or `seq_len(2)`). Any other expression that
-#' uses columns, such as `height > 50` or `bmi = mass / height^2`, is computed
+#' uses columns, such as `lexp >= 70` or `gnp_thousands = gnppc / 1000`, is computed
 #' with [dplyr::mutate()] and then selected, so arithmetic on columns is never
 #' misread as column positions. Selections and computed values can be mixed;
 #' output follows argument order. Unnamed computed columns are named by their
@@ -40,16 +40,14 @@
 #' @export
 #'
 #' @examples
-#' starwars <- dplyr::starwars
-#'
-#' starwars |>
+#' lifeexp |>
 #'   select_or_mutate()
-#' starwars |>
-#'   select_or_mutate(name, height)
+#' lifeexp |>
+#'   select_or_mutate(country, lexp)
 #' # Ordinary select() rejects this computed expression.
-#' try(dplyr::select(starwars, height > 50))
-#' starwars |>
-#'   select_or_mutate(height > 50)
+#' try(dplyr::select(lifeexp, lexp >= 70))
+#' lifeexp |>
+#'   select_or_mutate(lexp >= 70)
 select_or_mutate <- function(.data, ...) {
   if (missing(...)) {
     return(.data)

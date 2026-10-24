@@ -26,7 +26,7 @@ numeric positions, selection syntax (\code{c()}, \code{:}, \code{!}, \code{&}, \
 and tidyselect helpers such as \code{starts_with()}, \code{where()}, \code{all_of()} or
 \code{\link[=varlist]{varlist()}} select existing columns, as do calls that use no column names
 (for example \code{all_of(vars)} or \code{seq_len(2)}). Any other expression that
-uses columns, such as \code{height > 50} or \code{bmi = mass / height^2}, is computed
+uses columns, such as \code{lexp >= 70} or \code{gnp_thousands = gnppc / 1000}, is computed
 with \code{\link[dplyr:mutate]{dplyr::mutate()}} and then selected, so arithmetic on columns is never
 misread as column positions. Selections and computed values can be mixed;
 output follows argument order. Unnamed computed columns are named by their
@@ -48,16 +48,14 @@ are evaluated once when selection succeeds. Grouping columns are retained
 according to dplyr's selection rules.
 }
 \examples{
-starwars <- dplyr::starwars
-
-starwars |>
+lifeexp |>
   select_or_mutate()
-starwars |>
-  select_or_mutate(name, height)
+lifeexp |>
+  select_or_mutate(country, lexp)
 # Ordinary select() rejects this computed expression.
-try(dplyr::select(starwars, height > 50))
-starwars |>
-  select_or_mutate(height > 50)
+try(dplyr::select(lifeexp, lexp >= 70))
+lifeexp |>
+  select_or_mutate(lexp >= 70)
 }
 \seealso{
 Other selection and preview functions:

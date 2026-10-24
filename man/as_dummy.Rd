@@ -44,11 +44,8 @@ removed. For model formulas, R's factors already expand to dummies; use
 \code{as_dummy()} when the indicator columns themselves are needed.
 }
 \examples{
-starwars <- dplyr::starwars
-
-as_dummy(starwars, sex)
-as_dummy(starwars, sex, .names = "index", .remove = TRUE)
 as_dummy(lifeexp, region)
+as_dummy(lifeexp, region, .names = "index", .remove = TRUE)
 }
 \seealso{
 Other variable generation functions:

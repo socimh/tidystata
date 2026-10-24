@@ -54,7 +54,7 @@ codebook(lifeexp, where(is.numeric))
 
 starwars <- dplyr::starwars
 
-codebook(starwars)
+codebook(starwars, films:starships)
 
 codebook(starwars, ends_with("color"))
 
