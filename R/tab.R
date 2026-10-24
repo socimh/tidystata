@@ -450,7 +450,7 @@ tab2 <- function(
   .data <- if (grouped) {
     remove_group_vars(.data, ..., group_vars = group_vars)
   } else {
-    tab_ungroup(select_or_mutate(.data, ...))
+    tab_ungroup(select_or_transmute(.data, ...))
   }
   if (ncol(.data) == 0L) {
     if (.type == "flextable") {

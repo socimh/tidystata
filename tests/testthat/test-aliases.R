@@ -12,7 +12,7 @@ test_that("aliases are quiet", {
 test_that("varlist() is recognised as a selection inside computed selections", {
   data <- tibble::tibble(x1 = 1:2, x2 = 3:4, y = 5:6)
   expect_identical(
-    names(select_or_mutate(data, varlist("x*"), z = y * 2)),
+    names(select_or_transmute(data, varlist("x*"), z = y * 2)),
     c("x1", "x2", "z")
   )
 })

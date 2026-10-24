@@ -179,7 +179,7 @@
 "Construct and modify variables","构造和修改变量","rename","ren","rename (a b) (c d)","rename(data, c = a, d = b)","dplyr","Rename several variables","同时重命名多个变量","",""
 "Construct and modify variables","构造和修改变量","rename","ren","rename x*, upper","rename_with(data, toupper, starts_with(""x""))","dplyr","Upper-case some names","把部分变量名改为大写","",""
 "Construct and modify variables","构造和修改变量","rename","ren","rename * *_old","rename_with(data, ~ paste0(.x, ""_old""))","dplyr","Add a suffix to every name","给所有变量名加后缀","",""
-"Select variables and rows","筛选变量或个案","keep","keep","keep x1 x3-x5","select(data, x1, x3:x5)","dplyr","Keep some variables","保留多个变量","Numbers select by position: select(data, 1, 3:5). select_or_mutate() also computes new columns.","也可以按位置选择：select(data, 1, 3:5)。select_or_mutate() 还可以同时计算新变量。"
+"Select variables and rows","筛选变量或个案","keep","keep","keep x1 x3-x5","select(data, x1, x3:x5)","dplyr","Keep some variables","保留多个变量","Numbers select by position: select(data, 1, 3:5). select_or_transmute() also computes new columns.","也可以按位置选择：select(data, 1, 3:5)。select_or_transmute() 还可以同时计算新变量。"
 "Select variables and rows","筛选变量或个案","keep","keep","keep x*","select(data, varlist(""x*""))","tidystata","Keep variables matching Stata wildcards","按通配符保留变量","",""
 "Select variables and rows","筛选变量或个案","drop","drop","drop x","select(data, -x)","dplyr","Drop a variable","删除单个变量","",""
 "Select variables and rows","筛选变量或个案","drop","drop","drop x1 x3-x5","select(data, -c(x1, x3:x5))","dplyr","Drop several variables","删除多个变量","Positions work too: select(data, -c(1, 3:5)).","也可以按位置删除：select(data, -c(1, 3:5))。"

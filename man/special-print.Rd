@@ -118,7 +118,7 @@ slice_interval(lifeexp, n = 6)
 }
 \seealso{
 Other selection and preview functions:
-\code{\link[=select_or_mutate]{select_or_mutate()}},
+\code{\link[=select_or_transmute]{select_or_transmute()}},
 \code{\link[=varlist]{varlist()}}
 }
 \concept{selection and preview functions}

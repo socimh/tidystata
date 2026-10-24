@@ -8,16 +8,16 @@
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> or
 #' <[`data-masking`][args_data_masking]> Variables to browse.
 #' Omit to browse all columns. Selection and computed expressions follow
-#' [select_or_mutate()].
+#' [select_or_transmute()].
 #'
 #' @returns The viewed data, invisibly, with its data-frame class preserved.
 #' With no selection this is the input data; otherwise it is the result of
-#' [select_or_mutate()]. The input is not modified.
+#' [select_or_transmute()]. The input is not modified.
 #'
 #' @details
 #' Viewing uses [tibble::view()]. Existing grouping and grouping-key retention
-#' follow [select_or_mutate()]. Assign the invisible return value to keep the viewed
-#' columns for subsequent analysis. Precompute expressions with side effects
+#' follow [select_or_transmute()]. Assign the invisible return value to keep the
+#' viewed columns for subsequent analysis. Precompute expressions with side effects
 #' before passing them to the selection interface.
 #' @family inspection functions
 #' @export
@@ -39,7 +39,7 @@ browse <- function(.data, ...) {
     tibble::view(.data)
   } else {
     .data |>
-      select_or_mutate(...) |>
+      select_or_transmute(...) |>
       tibble::view()
   }
 }

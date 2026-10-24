@@ -1,6 +1,8 @@
 #' Select and compute columns
 #'
 #' An enhanced [dplyr::select()] that also accepts data-masking expressions.
+#' As with [dplyr::transmute()], only the selected and computed columns are
+#' returned.
 #'
 #' @param .data A data frame or tibble.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> selections or
@@ -41,14 +43,14 @@
 #'
 #' @examples
 #' lifeexp |>
-#'   select_or_mutate()
+#'   select_or_transmute()
 #' lifeexp |>
-#'   select_or_mutate(country, lexp)
+#'   select_or_transmute(country, lexp)
 #' # Ordinary select() rejects this computed expression.
 #' try(dplyr::select(lifeexp, lexp >= 70))
 #' lifeexp |>
-#'   select_or_mutate(lexp >= 70)
-select_or_mutate <- function(.data, ...) {
+#'   select_or_transmute(lexp >= 70)
+select_or_transmute <- function(.data, ...) {
   if (missing(...)) {
     return(.data)
   }

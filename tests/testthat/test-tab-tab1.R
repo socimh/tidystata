@@ -583,5 +583,5 @@ test_that("historical tab1 selections and expressions stay supported", {
   expect_named(result, c("t1", "t2"))
   expect_equal(result$t1$n, c(1L, 1L, 1L))
   expect_equal(result$t2$n, c(1L, 1L, 1L))
-  expect_error(select_or_mutate(d, wrong_column), "wrong_column")
+  expect_error(select_or_transmute(d, wrong_column), "wrong_column")
 })
