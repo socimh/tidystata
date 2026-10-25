@@ -218,7 +218,7 @@ findit_reference_html <- function(chinese = FALSE) {
       rows$equivalence == "qualified",
       paste0(
         "<strong>",
-        tr("Differs from Stata:", "与 Stata 有差异："),
+        tr("Differs from Stata:", "\u4e0e Stata \u6709\u5dee\u5f02\uff1a"),
         "</strong> "
       ),
       ""
