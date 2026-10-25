@@ -19,7 +19,7 @@ missing variables across rows, like misstable patterns.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -110,11 +110,16 @@ complete cases.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>A value is missing when <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code> is <code>TRUE</code> for it, which includes <code>NaN</code>
-and haven's tagged missing values such as Stata's <code>.a</code>. Empty strings are
+and haven's tagged missing values such as Stata's <code>.a</code>. In a list column,
+<code>NA</code> elements are missing and <code>NULL</code> elements are values, as in <code><a href="summ.html">summ()</a></code> and
+<code><a href="tab.html">fre()</a></code>. Matrix and data-frame columns follow vctrs row missingness: a row
+is missing only when every component is missing. Empty strings are
 observed values, unlike Stata's missing string; convert them first with
 <code><a href="na_conversion.html">na_if_value()</a></code>. When no checked variable has missing values and
 <code>.all = FALSE</code>, a message says so and the result has no variable rows or
-columns.</p>
+columns.
+Grouping names must not collide with result columns; rename those keys
+before calling <code>misstable()</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

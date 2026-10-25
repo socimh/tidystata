@@ -13,7 +13,7 @@ in a .merge column (Stata's _merge)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,9 +85,9 @@ in a <code>.merge</code> column (Stata's <code>_merge</code>).</p>
 <dt id="arg-relationship">relationship<a class="anchor" aria-label="anchor" href="#arg-relationship"></a></dt>
 <dd><p>The key relationship, as in Stata: <code>"1:1"</code> (keys unique
 in both tables), <code>"m:1"</code> (unique in <code>using</code>) or <code>"1:m"</code> (unique in <code>.data</code>).
-It is required and checked before joining. Many-to-many merges are not
-supported, as in Stata; use <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">dplyr::inner_join()</a></code> with
-<code>relationship = "many-to-many"</code> if you really need all pairings.</p></dd>
+It is required and checked before joining. Stata's many-to-many (<code>m:m</code>)
+merge is not supported. Use <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">dplyr::inner_join()</a></code> with
+<code>relationship = "many-to-many"</code> if you need all pairings.</p></dd>
 
 
 <dt id="arg-by">by<a class="anchor" aria-label="anchor" href="#arg-by"></a></dt>
@@ -127,9 +127,11 @@ come first in their original order, followed by rows found only in
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Missing key values match each other, as in Stata. When a non-key column
-exists in both tables, the values from <code>.data</code> are kept and the <code>using</code>
-column is dropped with a message, as Stata does without <code>update</code>; rename
-the column first to keep both. Grouping is not retained.</p>
+exists in both tables, matched rows keep the values from <code>.data</code>, including
+missing values, as Stata does without <code>update</code>. Rows found only in <code>using</code>
+keep its values. Shared columns use a compatible common type when using-only
+values are needed; incompatible types cause an error. A message identifies
+shared columns; rename them first to keep both. Grouping is not retained.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

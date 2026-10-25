@@ -42,13 +42,13 @@ A tibble with 68 rows and 6 variables:
 ## Source
 
 World Bank, World Development Indicators,
-<https://datacatalog.worldbank.org/search/dataset/0037712>, licensed
-under CC BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>).
-Indicators `SP.POP.GROW`, `SP.DYN.LE00.IN` and `NY.GNP.PCAP.CD` for 1998
-and `SH.H2O.SMDW.ZS` for 2000; values are rounded. Country names follow
-WDI, and Serbia stands in for the Federal Republic of Yugoslavia. See
-the installed `DATA-PROVENANCE.md` for the retrieval date and build
-script.
+<https://datatopics.worldbank.org/world-development-indicators/>,
+licensed under CC BY 4.0
+(<https://creativecommons.org/licenses/by/4.0/>). Indicators
+`SP.POP.GROW`, `SP.DYN.LE00.IN` and `NY.GNP.PCAP.CD` for 1998 and
+`SH.H2O.SMDW.ZS` for 2000; values are rounded. Country names follow WDI,
+and Serbia stands in for the Federal Republic of Yugoslavia. See the
+installed `DATA-PROVENANCE.md` for the retrieval date and build script.
 
 ## Examples
 

@@ -56,7 +56,7 @@ row_non_miss(...)
   For arithmetic and extrema helpers, a single logical value. If `TRUE`
   (the default), omit missing values; if `FALSE`, any missing input
   makes that row's result missing. Count helpers (`row_unique()`,
-  `row_miss()`, `row_non_miss()`) reject `na.rm`.
+  `row_nvals()`, `row_miss()`, `row_non_miss()`) reject `na.rm`.
 
 - .values:
 
@@ -114,7 +114,9 @@ environment is also used as values. Select columns by position with
 example `row_min(c(1, 2))`. Length-one constants (including those in
 `.values`) never fill a row whose other inputs are all missing; such
 rows stay `NA`, as with
-[`pmin()`](https://rdrr.io/r/base/Extremes.html).
+[`pmin()`](https://rdrr.io/r/base/Extremes.html). Direct column
+references remain columns in one-row groups; computed length-one values
+are constants.
 
 ## Arithmetic
 
@@ -162,10 +164,12 @@ helpers return integer vectors.
 
 All row summaries and counts use native C++ kernels registered through
 cpp11, which read logical, integer and double columns directly and count
-missing values in the same pass. Means and sums give the same results as
+missing values in the same pass. Means and sums of observed values match
 [`base::rowMeans()`](https://rdrr.io/r/base/colSums.html) and
 [`base::rowSums()`](https://rdrr.io/r/base/colSums.html) without first
-copying the columns into a matrix. Rfast is no longer required.
+copying the columns into a matrix; unlike those, an all-missing row's
+mean is `NA`, not `NaN`. Undefined arithmetic on observed infinities can
+produce `NaN`, as in base R.
 
 ## See also
 

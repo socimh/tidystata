@@ -138,8 +138,9 @@ tabstat(
   ascending like
   [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) (factor
   levels in their defined order, character keys in C-locale order), with
-  missing keys last. Within each group, preserve the selected variable
-  order. If `FALSE`, groups follow first appearance.
+  ordinary missing keys last. SPSS user-missing codes retain their
+  stored-value ordering. Within each group, preserve the selected
+  variable order. If `FALSE`, groups follow first appearance.
 
 - .drop_empty:
 
@@ -159,11 +160,10 @@ tabstat(
 
   `"frequency"` (default) or `"analytic"`. With frequency weights, `n`
   is the sum of the weights (non-integer weights are allowed). Analytic
-  weights (Stata's `[aweight]`, suitable for sampling weights) are
-  rescaled within each group and variable to sum to the number of
-  observed values, so `n` is the number of observations. Means,
-  percentiles and `sum` are the same under both types; `sd` and `se`
-  differ.
+  weights (Stata's `[aweight]`) are rescaled within each group and
+  variable to sum to the number of observed values, so `n` is the number
+  of observations. Means, percentiles and `sum` are the same under both
+  types; `sd` and `se` differ.
 
 ## Value
 
@@ -172,7 +172,7 @@ variable-type families are present. Each table preserves the input's
 data.frame, tibble, or data.table container in both modes. Results are
 ungrouped, retaining grouping keys as columns and supported preview
 settings. Other subclasses are not reconstructed. Vector input returns a
-tibble in with `.type = "list"` or a data.frame with `.type = "table"`,
+tibble with `.type = "list"` or a data.frame with `.type = "table"`,
 using its expression as the variable name, or `value` for a multiline
 expression or a magrittr pipe (`.`). Wrap the vector in a named tibble
 to choose a stable variable name. Input data are not modified.
@@ -238,7 +238,9 @@ analytic weights. Percentiles, `median`, `q1`, `q3`, `iqr` and `mad` use
 Stata's weighted percentile rule, the unweighted rule with cumulative
 weights in place of positions, so weights of 1 give the unweighted
 values. `min` and `max` ignore rows with zero weight. `unique`, `miss_n`
-and `valid_pct` remain unweighted row counts.
+and `valid_pct` remain unweighted row counts. These standard errors do
+not account for a survey design. Use `survey::svymean()` for inference
+with sampling weights, clusters or strata.
 
 Calendar output and grouping names:
 

@@ -58,11 +58,18 @@ is usually the complete cases.
 
 A value is missing when [`is.na()`](https://rdrr.io/r/base/NA.html) is
 `TRUE` for it, which includes `NaN` and haven's tagged missing values
-such as Stata's `.a`. Empty strings are observed values, unlike Stata's
-missing string; convert them first with
+such as Stata's `.a`. In a list column, `NA` elements are missing and
+`NULL` elements are values, as in
+[`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and
+[`fre()`](https://socimh.github.io/tidystata/reference/tab.md). Matrix
+and data-frame columns follow vctrs row missingness: a row is missing
+only when every component is missing. Empty strings are observed values,
+unlike Stata's missing string; convert them first with
 [`na_if_value()`](https://socimh.github.io/tidystata/reference/na_conversion.md).
 When no checked variable has missing values and `.all = FALSE`, a
-message says so and the result has no variable rows or columns.
+message says so and the result has no variable rows or columns. Grouping
+names must not collide with result columns; rename those keys before
+calling `misstable()`.
 
 ## See also
 

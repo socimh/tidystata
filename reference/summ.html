@@ -11,7 +11,7 @@ tabstat() delegates to summ() with .stat = "mean" by default; with
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -177,7 +177,8 @@ output: calendar spreads are always <code>difftime</code> columns (see Details).
 <dt id="arg--sort">.sort<a class="anchor" aria-label="anchor" href="#arg--sort"></a></dt>
 <dd><p>A single <code>TRUE</code> or <code>FALSE</code>. If <code>TRUE</code> (default), sort grouping
 keys ascending like <code><a href="tab.html">tab()</a></code> (factor levels in their defined order, character
-keys in C-locale order), with missing keys last. Within each group, preserve
+keys in C-locale order), with ordinary missing keys last. SPSS user-missing
+codes retain their stored-value ordering. Within each group, preserve
 the selected variable order. If <code>FALSE</code>, groups follow first appearance.</p></dd>
 
 
@@ -197,7 +198,7 @@ When <code>...</code> is omitted, the weight column is not summarised itself.</p
 <dt id="arg--wt-type">.wt_type<a class="anchor" aria-label="anchor" href="#arg--wt-type"></a></dt>
 <dd><p><code>"frequency"</code> (default) or <code>"analytic"</code>. With frequency
 weights, <code>n</code> is the sum of the weights (non-integer weights are allowed).
-Analytic weights (Stata's <code>[aweight]</code>, suitable for sampling weights) are
+Analytic weights (Stata's <code>[aweight]</code>) are
 rescaled within each group and variable to sum to the number of observed
 values, so <code>n</code> is the number of observations. Means, percentiles and <code>sum</code>
 are the same under both types; <code>sd</code> and <code>se</code> differ.</p></dd>
@@ -209,10 +210,11 @@ are the same under both types; <code>sd</code> and <code>se</code> differ.</p></
 variable-type families are present. Each table preserves the input's
 data.frame, tibble, or data.table container in both modes. Results are
 ungrouped, retaining grouping keys as columns and supported preview settings.
-Other subclasses are not reconstructed. Vector input returns a tibble in
-with <code>.type = "list"</code> or a data.frame with <code>.type = "table"</code>, using its expression as the variable
-name, or <code>value</code> for a multiline expression or a magrittr pipe (<code>.</code>). Wrap
-the vector in a named tibble to choose a stable variable name. Input data are
+Other subclasses are not reconstructed. Vector input returns a tibble with
+<code>.type = "list"</code> or a data.frame with <code>.type = "table"</code>, using its
+expression as the variable name, or <code>value</code> for a multiline expression or a
+magrittr pipe (<code>.</code>). Wrap the vector in a named tibble to choose a stable
+variable name. Input data are
 not modified.</p>
     </div>
     <div class="section level2">
@@ -258,7 +260,9 @@ analytic weights. Percentiles, <code>median</code>, <code>q1</code>, <code>q3</c
 Stata's weighted percentile rule, the unweighted rule with cumulative
 weights in place of positions, so weights of 1 give the unweighted values.
 <code>min</code> and <code>max</code> ignore rows with zero weight. <code>unique</code>, <code>miss_n</code> and
-<code>valid_pct</code> remain unweighted row counts.</p>
+<code>valid_pct</code> remain unweighted row counts.
+These standard errors do not account for a survey design. Use
+<code>survey::svymean()</code> for inference with sampling weights, clusters or strata.</p>
 <p>Calendar output and grouping names:</p>
 <p>Date locations are displayed as <code>YYYY-MM-DD</code>; fractional days are not shown.
 Infinite Date locations are displayed as <code>-Inf</code> or <code>Inf</code>; missing locations

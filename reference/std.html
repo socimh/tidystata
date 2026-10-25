@@ -19,7 +19,7 @@ egen p = pc(x), or as a proportion with prop = TRUE.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,7 +95,7 @@ proportions (summing to 1) instead of percentages (summing to 100).</p></dd>
     <p>A double vector the same length as <code>x</code>. Missing values stay
 missing. <code>std()</code> returns all <code>NA</code> when the standard deviation is zero or
 undefined (fewer than two observed values), and <code>pc()</code> when the total is
-zero, as Stata gives missing values there.</p>
+zero or infinite, as Stata gives missing values there.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

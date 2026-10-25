@@ -136,10 +136,10 @@ fre1(
 - .group_order:
 
   Group block order for one-way and joint tables. `"keys"` retains key
-  order; `"frequency"` orders by descending observation count, including
-  missing measured values. Missing grouping keys appear last and ties
-  follow key order. `.desc` controls categories within each group
-  independently.
+  order; `"frequency"` orders by descending observation count (summed
+  frequency weights when `.wt` is used), including missing measured
+  values. Missing grouping keys appear last and ties follow key order.
+  `.desc` controls categories within each group independently.
 
 - .total:
 
@@ -161,9 +161,9 @@ fre1(
   `"frequency"` (default) or `"analytic"`. Frequency weights count each
   row `w` times, so `n` is the sum of the weights, as in
   `dplyr::count(wt =)`; non-integer weights are allowed. Analytic
-  weights (Stata's `[aweight]`, suitable for sampling weights) are
-  rescaled within each `.by` group to sum to the number of rows, so `n`
-  stays on the sample scale. Percentages are the same under both types.
+  weights (Stata's `[aweight]`) are rescaled within each `.by` group to
+  sum to the number of rows, so `n` stays on the sample scale.
+  Percentages are the same under both types.
 
 - .type:
 

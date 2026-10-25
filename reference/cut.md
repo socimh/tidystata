@@ -32,7 +32,9 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 - x:
 
   A numeric vector. `xtile()` also accepts a logical vector, treated as
-  0/1.
+  0/1. SPSS user-missing codes and ranges are omitted. Convert
+  `integer64` inputs and cutpoints explicitly to ordinary numeric values
+  first.
 
 - n:
 
@@ -69,15 +71,10 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 - right:
 
   A single `TRUE` or `FALSE`. If `FALSE` (default), intervals are closed
-  on the left, `[a, b)`, as in Stata's `egen cut()`; the last interval
-  also includes its upper end. If `TRUE`, they are closed on the right,
-  `(a, b]`, as in \[base::cut()\].
-
-  \[a, b)`, as in Stata's `egen
-  cut()`; the last interval also includes its upper end. If `TRUE`, they are closed on the right, `(a,
-  b\]:
-  R:a,%20b)%60,%20as%20in%20Stata's%20%60egen%20cut()%60;%20the%20last%20interval%0Aalso%20includes%20its%20upper%20end.%20If%20%60TRUE%60,%20they%20are%20closed%20on%20the%20right,%0A%60(a,%20b
-  \[base::cut()\]: R:base::cut()
+  on the left (`a <= x < b`), as in Stata's `egen cut()`; the last
+  interval also includes its upper end. If `TRUE`, they are closed on
+  the right (`a < x <= b`), as in
+  [`base::cut()`](https://rdrr.io/r/base/cut.html).
 
 ## Value
 
@@ -91,14 +88,13 @@ Stata's output. Cutpoints are the percentiles at `1/n, 2/n, ...`, using
 Stata's percentile rule (see
 [`summ()`](https://socimh.github.io/tidystata/reference/summ.md)), and
 each value joins the first group whose cutpoint is at least that value.
-Equal values stay in the same group and distinct values are never
-merged, so a 0/1 dummy always gives two groups. Ties can leave groups
-empty; as in Stata, their codes are skipped (codes 1, 3 and 4, say) and
-a warning is given. Factor levels are the occupied groups. Default
-labels are the contiguous intervals covered by each group, for example
-`"[0,0]"` and `"(0,1]"`. Custom labels must match the effective number
-of groups. Empty and all-missing vectors are rejected. Constant vectors
-are rejected only by the default quantile method.
+Equal values stay in the same group; different values may share a group.
+Ties can leave groups empty; as in Stata, their codes are skipped (codes
+1, 3 and 4, say) and a warning is given. Factor levels are the occupied
+groups. Default labels are the contiguous intervals covered by each
+group, for example `"[0,0]"` and `"(0,1]"`. Custom labels must match the
+effective number of groups. Empty and all-missing vectors are rejected.
+Constant vectors are rejected only by the default quantile method.
 
 `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while

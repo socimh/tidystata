@@ -44,7 +44,7 @@ pct(x, prop = FALSE)
 A double vector the same length as `x`. Missing values stay missing.
 `std()` returns all `NA` when the standard deviation is zero or
 undefined (fewer than two observed values), and `pc()` when the total is
-zero, as Stata gives missing values there.
+zero or infinite, as Stata gives missing values there.
 
 ## Details
 

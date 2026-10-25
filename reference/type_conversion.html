@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,9 @@ spaces.</p></dd>
     <p><code>as_character()</code> and <code>tostring()</code> return a character vector. <code>as_numeric()</code> returns
 a double vector; unsupported types such as lists, raw vectors, and complex
 vectors return missing values of the same length. Empty inputs return
-typed empty vectors. Names, dimensions, labels, and units are dropped.
+typed empty vectors. Names, dimensions, labels, and units are dropped,
+except that <code>tostring()</code> returns character input with its attributes
+unchanged.
 Text that is not a number gives a warning and keeps its row and value in
 <code><a href="https://readr.tidyverse.org/reference/problems.html" class="external-link">readr::problems()</a></code> on the result.
 Conversion of large <code>integer64</code> values to double may lose precision and
@@ -95,8 +97,10 @@ Stata's <code>destring</code>. Use <code>mutate(x = destring(x))</code>.</p></li
 value labels, like Stata's <code>decode</code>.</p></li>
 <li><p><code>tostring()</code> converts values to text and ignores value labels, like
 Stata's <code>tostring</code>: a labelled vector or factor gives its codes, and
-character input is returned unchanged. Missing values stay <code>NA</code>. Dates use
-<code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>, so they become <code>"2024-01-31"</code> rather than day numbers.</p></li>
+character input is returned unchanged. Missing values stay <code>NA</code>. Numbers
+are written in full, as Stata does, so 100000 gives <code>"100000"</code>, not
+<code>"1e+05"</code>. Dates use <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>, so they become <code>"2024-01-31"</code>
+rather than day numbers.</p></li>
 </ul><p><code>destring()</code> reads text the way Stata's <code>destring</code> does. A value must be a
 number, optionally with a sign, a currency symbol (dollar, euro, pound, yen),
 thousands separators (<code>1,234</code>), a trailing percent sign (<code>50%</code> gives 50)
@@ -109,7 +113,8 @@ without a warning. Dates stay <code>NA</code>; convert them with <code><a href="
 <code>lubridate::ymd()</code> instead.</p>
 <p>A factor whose levels are all numbers, such as <code>factor(c("1990", "2000"))</code>,
 gives those numbers (1990, 2000). Other factors give their level codes.
-Labelled numeric variables return their values.
+Labelled numeric variables return their values; labelled text is read
+from its values like plain text.
 <code>as_character()</code> uses value labels when a labelled vector has a nonempty
 <code>labels</code> attribute. Without value labels, it uses ordinary character
 conversion, including for tagged missing values.</p>

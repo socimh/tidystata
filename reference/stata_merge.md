@@ -34,10 +34,10 @@ stata_merge(
 
   The key relationship, as in Stata: `"1:1"` (keys unique in both
   tables), `"m:1"` (unique in `using`) or `"1:m"` (unique in `.data`).
-  It is required and checked before joining. Many-to-many merges are not
-  supported, as in Stata; use
+  It is required and checked before joining. Stata's many-to-many
+  (`m:m`) merge is not supported. Use
   [`dplyr::inner_join()`](https://dplyr.tidyverse.org/reference/mutate-joins.html)
-  with `relationship = "many-to-many"` if you really need all pairings.
+  with `relationship = "many-to-many"` if you need all pairings.
 
 - by:
 
@@ -79,9 +79,12 @@ The `.merge` column is a factor with levels `"master only"`,
 ## Details
 
 Missing key values match each other, as in Stata. When a non-key column
-exists in both tables, the values from `.data` are kept and the `using`
-column is dropped with a message, as Stata does without `update`; rename
-the column first to keep both. Grouping is not retained.
+exists in both tables, matched rows keep the values from `.data`,
+including missing values, as Stata does without `update`. Rows found
+only in `using` keep its values. Shared columns use a compatible common
+type when using-only values are needed; incompatible types cause an
+error. A message identifies shared columns; rename them first to keep
+both. Grouping is not retained.
 
 ## See also
 

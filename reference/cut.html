@@ -23,7 +23,7 @@ cut_quantile() is an alias of xtile()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,8 @@ equal-width command (<code>egen cut(), group()</code> is not equal-width).</p></
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A numeric vector. <code>xtile()</code> also accepts a logical vector,
-treated as 0/1.</p></dd>
+treated as 0/1. SPSS user-missing codes and ranges are omitted. Convert
+<code>integer64</code> inputs and cutpoints explicitly to ordinary numeric values first.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -128,11 +129,9 @@ interior cutpoint, rather than the number of intervals.</p></dd>
 
 <dt id="arg-right">right<a class="anchor" aria-label="anchor" href="#arg-right"></a></dt>
 <dd><p>A single <code>TRUE</code> or <code>FALSE</code>. If <code>FALSE</code> (default), intervals are
-closed on the left, <code>[a, b)</code>, as in Stata's <code>egen cut()</code>; the last interval
-also includes its upper end. If <code>TRUE</code>, they are closed on the right,
-<code>(a, b]</code>, as in [base::cut()].</p>
-<p>[a, b)<code>, as in Stata's </code>egen cut()<code>; the last interval also includes its upper end. If </code>TRUE<code>, they are closed on the right, </code>(a, b]: R:a,%20b)%60,%20as%20in%20Stata's%20%60egen%20cut()%60;%20the%20last%20interval%0Aalso%20includes%20its%20upper%20end.%20If%20%60TRUE%60,%20they%20are%20closed%20on%20the%20right,%0A%60(a,%20b
-[base::cut()]: R:base::cut()</p></dd>
+closed on the left (<code>a &lt;= x &lt; b</code>), as in Stata's <code>egen cut()</code>; the last
+interval also includes its upper end. If <code>TRUE</code>, they are closed on the
+right (<code>a &lt; x &lt;= b</code>), as in <code><a href="https://rdrr.io/r/base/cut.html" class="external-link">base::cut()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -145,10 +144,10 @@ or when <code>xtile()</code> runs in a grouped data mask with default labels.</p
     <p><code>xtile()</code> follows Stata's <code>xtile</code>, and its codes are tested against
 Stata's output. Cutpoints are the percentiles at <code>1/n, 2/n, ...</code>, using
 Stata's percentile rule (see <code><a href="summ.html">summ()</a></code>), and each value joins the first group
-whose cutpoint is at least that value. Equal values stay in the same group
-and distinct values are never merged, so a 0/1 dummy always gives two
-groups. Ties can leave groups empty; as in Stata, their codes are skipped
-(codes 1, 3 and 4, say) and a warning is given. Factor levels are the
+whose cutpoint is at least that value. Equal values stay in the same group;
+different values may share a group. Ties can leave groups empty; as in
+Stata, their codes are skipped (codes 1, 3 and 4, say) and a warning is
+given. Factor levels are the
 occupied groups. Default labels are the
 contiguous intervals covered by each group, for example <code>"[0,0]"</code> and
 <code>"(0,1]"</code>. Custom labels must match the effective number of groups.

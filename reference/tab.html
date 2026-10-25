@@ -35,7 +35,7 @@ available from fre(), fre1() and fre2() with
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -197,8 +197,9 @@ size, use <code>.group_order = "frequency"</code>.</p></dd>
 
 <dt id="arg--group-order">.group_order<a class="anchor" aria-label="anchor" href="#arg--group-order"></a></dt>
 <dd><p>Group block order for one-way and joint tables. <code>"keys"</code>
-retains key order; <code>"frequency"</code> orders by descending observation count,
-including missing measured values. Missing grouping keys appear last and ties
+retains key order; <code>"frequency"</code> orders by descending observation count
+(summed frequency weights when <code>.wt</code> is used), including missing measured
+values. Missing grouping keys appear last and ties
 follow key order. <code>.desc</code> controls categories within each group independently.</p></dd>
 
 
@@ -220,7 +221,7 @@ When <code>...</code> is omitted, the weight column is not tabulated itself.</p>
 <dd><p><code>"frequency"</code> (default) or <code>"analytic"</code>. Frequency weights
 count each row <code>w</code> times, so <code>n</code> is the sum of the weights, as in
 <code>dplyr::count(wt =)</code>; non-integer weights are allowed. Analytic weights
-(Stata's <code>[aweight]</code>, suitable for sampling weights) are rescaled within
+(Stata's <code>[aweight]</code>) are rescaled within
 each <code>.by</code> group to sum to the number of rows, so <code>n</code> stays on the sample
 scale. Percentages are the same under both types.</p></dd>
 

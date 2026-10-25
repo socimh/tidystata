@@ -35,8 +35,9 @@ as_numeric(x, ignore = NULL)
 `as_numeric()` returns a double vector; unsupported types such as lists,
 raw vectors, and complex vectors return missing values of the same
 length. Empty inputs return typed empty vectors. Names, dimensions,
-labels, and units are dropped. Text that is not a number gives a warning
-and keeps its row and value in
+labels, and units are dropped, except that `tostring()` returns
+character input with its attributes unchanged. Text that is not a number
+gives a warning and keeps its row and value in
 [`readr::problems()`](https://readr.tidyverse.org/reference/problems.html)
 on the result. Conversion of large `integer64` values to double may lose
 precision and emits the underlying conversion warning.
@@ -51,8 +52,10 @@ precision and emits the underlying conversion warning.
 
 - `tostring()` converts values to text and ignores value labels, like
   Stata's `tostring`: a labelled vector or factor gives its codes, and
-  character input is returned unchanged. Missing values stay `NA`. Dates
-  use [`as.character()`](https://rdrr.io/r/base/character.html), so they
+  character input is returned unchanged. Missing values stay `NA`.
+  Numbers are written in full, as Stata does, so 100000 gives
+  `"100000"`, not `"1e+05"`. Dates use
+  [`as.character()`](https://rdrr.io/r/base/character.html), so they
   become `"2024-01-31"` rather than day numbers.
 
 `destring()` reads text the way Stata's `destring` does. A value must be
@@ -71,9 +74,10 @@ convert them with [`as.Date()`](https://rdrr.io/r/base/as.Date.html) or
 A factor whose levels are all numbers, such as
 `factor(c("1990", "2000"))`, gives those numbers (1990, 2000). Other
 factors give their level codes. Labelled numeric variables return their
-values. `as_character()` uses value labels when a labelled vector has a
-nonempty `labels` attribute. Without value labels, it uses ordinary
-character conversion, including for tagged missing values.
+values; labelled text is read from its values like plain text.
+`as_character()` uses value labels when a labelled vector has a nonempty
+`labels` attribute. Without value labels, it uses ordinary character
+conversion, including for tagged missing values.
 
 SPSS user-missing codes remain values in both conversions. Numeric
 conversion preserves tagged missing values. Dates become days since

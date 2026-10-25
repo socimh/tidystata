@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,20 @@
       <small>Source: <a href="https://github.com/socimh/tidystata/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.2" id="tidystata-032">tidystata 0.3.2<a class="anchor" aria-label="anchor" href="#tidystata-032"></a></h2>
+<ul><li><p><code><a href="../reference/assert.html">assert()</a></code> protects input columns from internal-name collisions and rejects matrix conditions instead of reporting nonexistent row numbers.</p></li>
+<li><p><code><a href="../reference/summ.html">summ()</a></code> excludes zero-weight observations from weighted arithmetic, scales large analytic weights safely, and avoids overflow when averaging percentile boundaries. Weighted percentiles retain their values for large finite weights. Datetimes with an empty timezone attribute are accepted. Summary and tabulation help distinguish analytic weights from survey-design inference.</p></li>
+<li><p><code><a href="../reference/summ.html">summ()</a></code>, the tabulation family and <code><a href="../reference/pwcorr.html">pwcorr()</a></code> retain a grouping column when it is also the weight column in an implicit all-column selection.</p></li>
+<li><p><code><a href="../reference/stata_merge.html">stata_merge()</a></code> retains shared non-key values on using-only rows while preserving master values, including missing values, on matched rows.</p></li>
+<li><p><code><a href="../reference/cut.html">cut_length()</a></code> and <code><a href="../reference/cut.html">cut_breaks()</a></code> omit SPSS user-missing values before computing intervals. Binning functions reject <code>integer64</code> inputs with an explicit-conversion message instead of reading their underlying payloads.</p></li>
+<li><p><code><a href="../reference/row_egen.html">row_min()</a></code> and <code><a href="../reference/row_egen.html">row_max()</a></code> recognize <code>.data[[column]]</code> inputs in one-row groups and keep <code>.env</code> scalars from filling otherwise all-missing rows.</p></li>
+<li><p><code><a href="../reference/type_conversion.html">tostring()</a></code> writes numbers in full, as Stata does: 100000 gives <code>"100000"</code>, not <code>"1e+05"</code>. <code><a href="../reference/type_conversion.html">destring()</a></code> reads labelled text like plain text, so <code>ignore</code>, its warning and <code><a href="https://readr.tidyverse.org/reference/problems.html" class="external-link">readr::problems()</a></code> apply, and rejects a doubled sign such as <code>"-$-5"</code>.</p></li>
+<li><p><code><a href="../reference/misstable.html">misstable()</a></code> counts SPSS user-missing codes and ranges. List columns use the established summary rule: scalar <code>NA</code> elements are missing and <code>NULL</code> elements are observed values. Grouping names that collide with its result columns give a clear error.</p></li>
+<li><p><code><a href="../reference/row_egen.html">row_min()</a></code>/<code><a href="../reference/row_egen.html">row_max()</a></code> treat <code>.values</code> columns as columns in one-row groups, and a missing constant makes rows missing when <code>na.rm = FALSE</code>, as in <code><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin()</a></code>.</p></li>
+<li><p><code><a href="../reference/stata_merge.html">stata_merge()</a></code> keeps the master key when <code>using</code> has a non-key column of the same name; <code><a href="../reference/cut.html">cut_breaks()</a></code> warns when the default median does not split the values and rejects missing breaks and all-missing input.</p></li>
+<li><p>Fixes: <code><a href="../reference/tab.html">tab2()</a></code> and <code><a href="../reference/tab.html">fre2()</a></code> no longer tabulate grouping or weight columns without <code>.by</code>, keep factor order around blank headers and compute Cramer’s V for large 2 x 2 tables; <code>summ(.missing = FALSE)</code> accepts weight vectors; <code><a href="../reference/as_dummy.html">as_dummy()</a></code> handles columns without observed values; <code><a href="../reference/is_first.html">is_first()</a></code> accepts <code><a href="https://dplyr.tidyverse.org/reference/pick.html" class="external-link">pick()</a></code>; <code><a href="../reference/special-print.html">print_all()</a></code> accepts <code>width</code>; malformed <code><a href="../reference/varlist.html">varlist()</a></code> ranges, <code>NA</code> positions and <code>var_type(abbr = NA)</code> give clear errors; <code><a href="../reference/std.html">pc()</a></code> is missing for an infinite total; the timer no longer prints <code>60.00s</code>.</p></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="tidystata-031">tidystata 0.3.1<a class="anchor" aria-label="anchor" href="#tidystata-031"></a></h2>
 <ul><li><p><code><a href="../reference/findit.html">findit()</a></code> corrects audited statistical mappings, missing-value handling and estimator defaults, with explicit bilingual qualifications and command-specific sources. Name substitution, documented abbreviations, row-number queries, by-prefix options and Chinese chart questions work while example anchors stay stable. Earlier curated examples show their notes in compact output too.</p></li>

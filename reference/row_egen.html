@@ -27,7 +27,7 @@ row_miss() and row_non_miss() count missing and observed values.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,7 +113,7 @@ values unless <code>.missing = TRUE</code>, when it equals <code>row_unique()</c
 <dd><p>For arithmetic and extrema helpers, a single logical value. If
 <code>TRUE</code> (the default), omit missing values; if <code>FALSE</code>, any missing input
 makes that row's result missing. Count helpers (<code>row_unique()</code>,
-<code>row_miss()</code>, <code>row_non_miss()</code>) reject <code>na.rm</code>.</p></dd>
+<code>row_nvals()</code>, <code>row_miss()</code>, <code>row_non_miss()</code>) reject <code>na.rm</code>.</p></dd>
 
 
 <dt id="arg--values">.values<a class="anchor" aria-label="anchor" href="#arg--values"></a></dt>
@@ -165,7 +165,9 @@ Like <code><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">
 vector in the calling environment is also used as values. Select columns by
 position with <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code> or a tidyselect helper, for example <code>row_min(c(1, 2))</code>.
 Length-one constants (including those in <code>.values</code>) never fill a row whose
-other inputs are all missing; such rows stay <code>NA</code>, as with <code><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin()</a></code>.</p>
+other inputs are all missing; such rows stay <code>NA</code>, as with <code><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin()</a></code>.
+Direct column references remain columns in one-row groups; computed
+length-one values are constants.</p>
     </div>
     <div class="section level2">
     <h2 id="arithmetic">Arithmetic<a class="anchor" aria-label="anchor" href="#arithmetic"></a></h2>
@@ -212,9 +214,10 @@ observed. Count helpers return integer vectors.</p>
 
 <p>All row summaries and counts use native C++ kernels registered through
 cpp11, which read logical, integer and double columns directly and count
-missing values in the same pass. Means and sums give the same results as
+missing values in the same pass. Means and sums of observed values match
 <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">base::rowMeans()</a></code> and <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">base::rowSums()</a></code> without first copying the columns
-into a matrix. Rfast is no longer required.</p>
+into a matrix; unlike those, an all-missing row's mean is <code>NA</code>, not <code>NaN</code>.
+Undefined arithmetic on observed infinities can produce <code>NaN</code>, as in base R.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

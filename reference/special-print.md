@@ -26,7 +26,7 @@ print_headtail(
   max_footer_lines = NULL
 )
 
-print_all(.data, ...)
+print_all(.data, ..., width = Inf)
 
 print_interval(
   .data,
@@ -66,7 +66,8 @@ slice_interval(.data, n = 10)
 - width:
 
   Console width, passed to tibble formatting. `NULL` uses the current
-  console width; `Inf` shows all columns.
+  console width; `Inf` (the default for `print_all()`) shows all
+  columns.
 
 - ...:
 
