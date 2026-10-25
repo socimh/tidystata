@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/socimh/tidystata/blob/fix/findit-reference-audit/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/socimh/tidystata/blob/master/DESCRIPTION)
 
 Shen M (2026). *tidystata: Tidy Tools Inspired by 'Stata'*. R package
 version 0.3.1, <https://github.com/socimh/tidystata>.
