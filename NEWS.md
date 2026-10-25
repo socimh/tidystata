@@ -1,4 +1,4 @@
-# tidystata 0.3.1
+# tidystata 0.3.2
 
 * `assert()` protects input columns from internal-name collisions and rejects
   matrix conditions instead of reporting nonexistent row numbers.
@@ -17,6 +17,29 @@
   explicit-conversion message instead of reading their underlying payloads.
 * `row_min()` and `row_max()` recognize `.data[[column]]` inputs in one-row
   groups and keep `.env` scalars from filling otherwise all-missing rows.
+
+* `tostring()` writes numbers in full, as Stata does: 100000 gives `"100000"`,
+  not `"1e+05"`. `destring()` reads labelled text like plain text, so `ignore`,
+  its warning and `readr::problems()` apply, and rejects a doubled sign such as
+  `"-$-5"`.
+* `misstable()` counts SPSS user-missing codes and ranges. List columns use
+  the established summary rule: scalar `NA` elements are missing and `NULL`
+  elements are observed values. Grouping names that collide with its result
+  columns give a clear error.
+* `row_min()`/`row_max()` treat `.values` columns as columns in one-row groups,
+  and a missing constant makes rows missing when `na.rm = FALSE`, as in `pmin()`.
+* `stata_merge()` keeps the master key when `using` has a non-key column of the
+  same name; `cut_breaks()` warns when the default median does not split the
+  values and rejects missing breaks and all-missing input.
+* Fixes: `tab2()` and `fre2()` no longer tabulate grouping or weight columns
+  without `.by`, keep factor order around blank headers and compute Cramer's V
+  for large 2 x 2 tables; `summ(.missing = FALSE)` accepts weight vectors;
+  `as_dummy()` handles columns without observed values; `is_first()` accepts
+  `pick()`; `print_all()` accepts `width`; malformed `varlist()` ranges, `NA`
+  positions and `var_type(abbr = NA)` give clear errors; `pc()` is missing for
+  an infinite total; the timer no longer prints `60.00s`.
+
+# tidystata 0.3.1
 
 - `findit()` corrects audited statistical mappings, missing-value handling and
   estimator defaults, with explicit bilingual qualifications and command-specific
@@ -38,26 +61,6 @@
   inputs. Comma-separated variable names and hints customize catalogue examples,
   as in `findit(tab, sex, region)` and `findit(tab, gen)`; all matches remain
   available through `print(n = Inf)`.
-* `tostring()` writes numbers in full, as Stata does: 100000 gives `"100000"`,
-  not `"1e+05"`. `destring()` reads labelled text like plain text, so `ignore`,
-  its warning and `readr::problems()` apply, and rejects a doubled sign such as
-  `"-$-5"`.
-* `misstable()` counts SPSS user-missing codes and ranges. List columns use
-  the established summary rule: scalar `NA` elements are missing and `NULL`
-  elements are observed values. Grouping names that collide with its result
-  columns give a clear error.
-* `row_min()`/`row_max()` treat `.values` columns as columns in one-row groups,
-  and a missing constant makes rows missing when `na.rm = FALSE`, as in `pmin()`.
-* `stata_merge()` keeps the master key when `using` has a non-key column of the
-  same name; `cut_breaks()` warns when the default median does not split the
-  values and rejects missing breaks and all-missing input.
-* Fixes: `tab2()` and `fre2()` no longer tabulate grouping or weight columns
-  without `.by`, keep factor order around blank headers and compute Cramer's V
-  for large 2 x 2 tables; `summ(.missing = FALSE)` accepts weight vectors;
-  `as_dummy()` handles columns without observed values; `is_first()` accepts
-  `pick()`; `print_all()` accepts `width`; malformed `varlist()` ranges, `NA`
-  positions and `var_type(abbr = NA)` give clear errors; `pc()` is missing for
-  an infinite total; the timer no longer prints `60.00s`.
 
 # tidystata 0.3.0
 
