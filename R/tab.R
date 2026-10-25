@@ -160,72 +160,55 @@
 #' # tabulate a condition
 #' tab(lifeexp, safewater > 50)
 #'
-#' starwars <- dplyr::starwars
-#'
-#' # tabulate the 8th column
-#' tab(starwars, 8)
-#'
-#' # tabulate the "sex" column
-#' tab(starwars, sex)
-#'
-#' tab(starwars, sex, .desc = TRUE)
-#'
-#' fre(starwars, sex)
-#'
-#' fre(starwars, sex, .desc = TRUE)
-#'
-#' tab(starwars, sex, gender)
-#'
-#' tab(starwars, sex == "male")
-#'
-#' tab(starwars, male = sex == "male")
-#'
-#' tab(starwars, ends_with("color"))
-#'
-#' tab(starwars, varlist("s*e"))
-#'
-#' tab(starwars)
+#' # Tabulate a column by position, a condition, or a named expression.
+#' tab(lifeexp, 1)
+#' tab(lifeexp, region, .desc = TRUE)
+#' fre(lifeexp, region, .desc = TRUE)
+#' tab(lifeexp, lexp >= 70)
+#' tab(lifeexp, lexp_70 = lexp >= 70)
+#' tab(lifeexp, varlist("*p*"))
+#' tab(lifeexp)
 #'
 #' tab(c(1, 1, 2, NA))
-#'
 #' fre(c(1, 1, 2, NA))
 #'
-#' # Weighted frequencies, like Stata's tab x [fw=w] or [aw=w]
+#' # Weighted frequencies, like Stata's tab x [fw=w] or [aw=w].
 #' survey <- tibble::tibble(edu = c("low", "high", "high"), w = c(2, 1, 1.5))
 #' tab(survey, edu, .wt = w)
 #' tab(survey, edu, .wt = w, .wt_type = "analytic")
 #'
-#' tab(starwars, sex, .by = species, .group_order = "frequency")
+#' # Illustrative indicators for cross-tabulation; keep lifeexp unchanged.
+#' countries <- dplyr::mutate(
+#'   lifeexp,
+#'   lexp_70 = lexp >= 70,
+#'   water_80 = safewater >= 80
+#' )
+#' tab(countries, region, lexp_70)
+#' tab(countries, lexp_70, .by = region, .group_order = "frequency")
+#' tab1(lifeexp, 1:3)
+#' tab1(countries, matches("^(region|lexp_70)$"))
+#' tab(lifeexp, region, .total = TRUE)
+#' tab2(countries, region, lexp_70)
+#' tab2(countries, lexp, lexp_70)
+#' fre2(countries, lexp, lexp_70)
 #'
-#' tab1(starwars, 1:3)
+#' # Every pairwise table, like Stata's tab2 region lexp_70 water_80.
+#' tab2(countries, region, lexp_70, water_80)
 #'
-#' tab1(starwars, ends_with("color"))
+#' # One cross-table per group, like Stata's by region: tab lexp_70 water_80.
+#' tab2(countries, lexp_70, water_80, .by = region) |> head(2)
 #'
-#' tab1(starwars, matches("^(sex|gender)$"))
-#'
-#' tab1(starwars, ends_with("color"), .type = "tibble")
-#'
-#' fre1(starwars, ends_with("color"))
-#'
-#' fre1(starwars, ends_with("color"), .type = "list")
-#'
-#' tab(starwars, sex, .total = TRUE)
-#'
-#' tab2(starwars, sex, gender)
-#'
-#' tab2(starwars, height, gender)
-#'
-#' fre2(starwars, height, gender)
-#'
-#' # Every pairwise table, like Stata's tab2 sex gender eye_color
-#' tab2(starwars, sex, gender, eye_color)
-#'
-#' # One cross-table per group, like Stata's by species: tab sex gender
-#' tab2(starwars, sex, gender, .by = species) |> head(2)
-#'
-#' # Chi-square test of independence, like Stata's tab x y, chi2 V
-#' chi2 <- tab2(starwars, sex, gender, .chi2 = TRUE)
+#' # Chi-square test of independence, like Stata's tab x y, chi2 V.
+#' chi2 <- tab2(countries, region, lexp_70, .chi2 = TRUE)
 #' attr(chi2, "chi2")
+#'
+#' # Several character columns share a suffix in this dataset.
+#' starwars <- dplyr::starwars
+#' tab(starwars, ends_with("color"))
+#' tab1(starwars, ends_with("color"))
+#' tab1(starwars, ends_with("color"), .type = "tibble")
+#' fre1(starwars, ends_with("color"))
+#' fre1(starwars, ends_with("color"), .type = "list")
 #' @family tabulation functions
 NULL
 
@@ -467,7 +450,7 @@ tab2 <- function(
   .data <- if (grouped) {
     remove_group_vars(.data, ..., group_vars = group_vars)
   } else {
-    tab_ungroup(select_or_mutate(.data, ...))
+    tab_ungroup(select_or_transmute(.data, ...))
   }
   if (ncol(.data) == 0L) {
     if (.type == "flextable") {

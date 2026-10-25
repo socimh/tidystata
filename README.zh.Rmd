@@ -1,0 +1,106 @@
+---
+output:
+  github_document:
+    html_preview: false
+    pandoc_args: ["--wrap=none"]
+---
+
+<!-- README.zh.md is generated from README.zh.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-zh-",
+  out.width = "100%"
+)
+# Print labelled columns with their labels in every rendering environment.
+invisible(loadNamespace("haven"))
+```
+
+# tidystata
+
+<!-- badges: start -->
+
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![CRAN status](https://www.r-pkg.org/badges/version/tidystata)](https://CRAN.R-project.org/package=tidystata)
+[![R-CMD-check](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml)
+
+<!-- badges: end -->
+
+[English](https://github.com/socimh/tidystata/blob/master/README.md)
+
+[tidystata](https://socimh.github.io/tidystata/) 把 Stata 风格的数据探索和整理带到 R 中：查看变量、汇总统计、列频数表、生成新变量。变量可以用 tidyselect 方式选择，分组计算用 `.by`。结果都是普通的数据表，可以继续用 R 的常用工具筛选、合并和作图。
+
+## 安装
+
+```r
+# install.packages("pak")
+pak::pak("socimh/tidystata")
+```
+
+## 核心函数
+
+```{r, warning=FALSE, message=FALSE}
+library(tidystata)
+library(dplyr)
+```
+
+### findit()：查找 Stata 命令对应的 R 代码
+
+```{r}
+findit("reg, robust")
+findit("egen rowmean")
+```
+
+只写一个命令，例如 `findit(reg)`，默认显示一个明确的例子；`findit(reg) |> print(n = Inf)` 显示所有匹配项。可以用逗号添加变量名或提示，例如 `findit(tab, sex, region)` 或 `findit(tab, gen)`。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到 R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
+
+### codebook()：描述每个变量
+
+```{r}
+codebook(lifeexp)
+```
+
+### summ()：汇总统计
+
+`lexp:safewater` 选择从 `lexp` 到 `safewater` 的三个连续变量，包括两端；也可以使用 `ends_with()`、`matches()` 等 tidyselect 函数或 Stata 风格的 `varlist()`。
+
+```{r}
+summ(lifeexp, lexp:safewater, .by = region)
+```
+
+### tab()、tab1() 和 tab2()：比较频数表
+
+用 `lifeexp` 中的地区和一个新类别作比较：预期寿命是否达到 70 岁。`region:lexp_70` 选择这两列。
+
+`tab()` 统计每种实际出现的组合的频数，并给出百分比。
+
+```{r}
+lifeexp_tab <- lifeexp |>
+  transmute(region, lexp_70 = lexp >= 70)
+
+tab(lifeexp_tab, region:lexp_70)
+```
+
+`tab1()` 返回一个命名列表，为每个变量分别生成频数表。
+
+```{r}
+tab1(lifeexp_tab, region:lexp_70)
+```
+
+`tab2()` 将联合频数排列成交叉表，地区为行，预期寿命类别为列。
+
+```{r}
+tab2(lifeexp_tab, region:lexp_70)
+```
+
+## 了解更多
+
+tidystata 还提供按行计算（`row_mean()` 等）、面板运算（`stata_lag()` 等）、相关系数（`pwcorr()`）、缺失值报告（`misstable()`）、主键检查与合并（`isid()`、`stata_merge()`）以及分组（`xtile()`）等函数。示例和输出约定见以下指南（英文）。
+
+- [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html)：简短的工作流程。
+- [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)：返回类型、分组和标签。
+- [Reference](https://socimh.github.io/tidystata/reference/index.html)：全部函数。
+
+## 行为准则
+
+tidystata 项目遵循[贡献者行为准则](https://www.contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html)。参与本项目即表示你同意遵守其中的条款。

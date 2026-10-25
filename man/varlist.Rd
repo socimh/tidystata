@@ -80,7 +80,7 @@ tb |>
 }
 \seealso{
 Other selection and preview functions:
-\code{\link[=select_or_mutate]{select_or_mutate()}},
+\code{\link[=select_or_transmute]{select_or_transmute()}},
 \code{\link{special-print}}
 }
 \concept{selection and preview functions}

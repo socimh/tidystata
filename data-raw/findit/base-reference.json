@@ -1,0 +1,62 @@
+[
+  {
+    "command": "reshape",
+    "kind": "command",
+    "abbrev": "reshape",
+    "stata": "reshape long var, i(id) j(year)",
+    "r": "stats::reshape(data, direction = \"long\", varying = list(c(\"var2000\", \"var2001\")), v.names = \"var\", timevar = \"year\", times = c(2000, 2001), idvar = \"id\")",
+    "package": "stats",
+    "section": "Reshape",
+    "section_zh": "长宽转换",
+    "task": "Reshape repeated measurements to long form with base R",
+    "task_zh": "使用基础 R 将重复测量转为长格式",
+    "detail": "Explicitly list the wide columns and time values. This fixed workflow uses var2000 and var2001; adapt those names to your data.",
+    "detail_zh": "需要明确列出宽格式列和时间取值。本固定工作流程使用 var2000 和 var2001，请按实际数据修改列名。",
+    "approach": "base",
+    "equivalence": "qualified",
+    "source": "https://www.stata.com/manuals/dreshape.pdf",
+    "r_source": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/reshape.html",
+    "setup": "data <- data.frame(id = 1:2, var2000 = c(10, 20), var2001 = c(11, 21))",
+    "check": "stopifnot(nrow(.result) == 4L, identical(sort(.result$var), c(10, 11, 20, 21)), identical(sort(unique(.result$year)), c(2000, 2001)))",
+    "variables": [],
+    "hints": [
+      "long"
+    ],
+    "priority": 1,
+    "meaning": "reshape-long",
+    "r_default": [
+      "reshape"
+    ],
+    "id": "ref-f749e910f30e4f2e"
+  },
+  {
+    "command": "reshape",
+    "kind": "command",
+    "abbrev": "reshape",
+    "stata": "reshape wide var, i(id) j(year)",
+    "r": "stats::reshape(data, direction = \"wide\", v.names = \"var\", timevar = \"year\", idvar = \"id\", sep = \"\")",
+    "package": "stats",
+    "section": "Reshape",
+    "section_zh": "长宽转换",
+    "task": "Reshape repeated measurements to wide form with base R",
+    "task_zh": "使用基础 R 将重复测量转为宽格式",
+    "detail": "Requires one row per id/year combination. R row ordering and attributes differ from Stata; compare keys and values explicitly.",
+    "detail_zh": "每个 id/year 组合需要恰有一行。R 的行顺序和属性可能与 Stata 不同，应按键和取值核对结果。",
+    "approach": "base",
+    "equivalence": "qualified",
+    "source": "https://www.stata.com/manuals/dreshape.pdf",
+    "r_source": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/reshape.html",
+    "setup": "data <- data.frame(id = c(1L, 2L, 1L, 2L), year = c(2000, 2000, 2001, 2001), var = c(10, 20, 11, 21))",
+    "check": "stopifnot(nrow(.result) == 2L, identical(.result$var2000, c(10, 20)), identical(.result$var2001, c(11, 21)))",
+    "variables": [],
+    "hints": [
+      "wide"
+    ],
+    "priority": 1,
+    "meaning": "reshape-wide",
+    "r_default": [
+      "reshape"
+    ],
+    "id": "ref-d0c9fa2fa407137e"
+  }
+]

@@ -1,0 +1,4 @@
+# Multiline CSV fields contain code; preserve LF inside examples on Windows.
+/inst/extdata/*.csv text eol=lf
+/data-raw/findit/*.csv text eol=lf
+/tests/testthat/fixtures/findit/*.csv text eol=lf

@@ -6,51 +6,15 @@ title: "Coming from Stata"
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(tidystata)
 
-entries <- tidystata:::findit_entries()
-
-# Pandoc reads markdown inside HTML blocks, so encode ASCII punctuation as
-# entities to keep code such as `x*` and quotes exactly as written. Non-ASCII
-# text is encoded too: pkgdown may render in a non-UTF-8 locale, where cat()
-# would print Chinese as <U+xxxx> escapes.
-escape_html <- function(x) {
-  vapply(
-    x,
-    function(text) {
-      codes <- utf8ToInt(text)
-      punct <- codes %in% c(33:47, 58:64, 91:96, 123:126) | codes > 127
-      chars <- vapply(codes, intToUtf8, character(1))
-      chars[punct] <- paste0("&#", codes[punct], ";")
-      paste(chars, collapse = "")
-    },
-    character(1),
-    USE.NAMES = FALSE
-  )
-}
-
-section_tables <- function(section, task, detail, headers) {
-  for (name in unique(entries[[section]])) {
-    rows <- entries[entries[[section]] == name, ]
-    notes <- ifelse(
-      nzchar(rows[[detail]]),
-      paste0(escape_html(rows[[task]]), "<br><small>", escape_html(rows[[detail]]), "</small>"),
-      escape_html(rows[[task]])
-    )
-    table <- data.frame(
-      paste0("<code>", escape_html(rows$stata), "</code>"),
-      paste0("<code>", escape_html(rows$r), "</code>"),
-      notes
-    )
-    names(table) <- escape_html(headers)
-    cat("\n\n## ", escape_html(name), "\n\n", sep = "")
-    cat(
-      knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
-      sep = "\n"
-    )
-  }
-}
+counts <- tidystata:::findit_reference_counts()
 ```
 
 [中文版](coming-from-stata-zh.html)
+
+For chapter navigation, search and expandable alternatives, open the
+**[Stata to R Reference](https://www.socimh.com/stata-to-r/)**.
+The book has English and Chinese editions with a language switch on each chapter.
+This page remains available as the single-page reference.
 
 If you know Stata, you already know what you want to do; the question is how
 to say it in R. This page lists Stata commands next to the R code that does the
@@ -72,6 +36,18 @@ You can also look up an R function (`findit(left_join)`) or ask a question
 the returned table contains all matches. Call `findit()` for the whole list.
 Descriptions follow R's language setting; English and Chinese queries both work.
 
+Comma-separated names customize compatible examples, such as
+`findit(tab, sex, region)`. The default shows one preferred answer when the task
+is clear; `findit(tab) |> print(n = Inf)` shows all variants, selected alternative
+R approaches, qualifications and source links. Package-qualified lookups such as
+`findit(dplyr::filter)` distinguish functions with the same name.
+
+This reference contains `r counts$commands` command families,
+`r counts$functions` Stata functions and `r counts$operators` operators, with
+`r counts$stata_examples` distinct Stata examples and `r counts$examples` paired
+R examples. Abbreviations and alternative R implementations do not increase the
+command count. The R index describes `r counts$r_functions` function/package pairs.
+
 ## Use the command tables
 
 The tables cover tidystata and other R packages, including modelling, reshaping,
@@ -79,30 +55,25 @@ survey analysis and graphics. For panel lags and leads, tidystata provides
 `stata_lag()`, `stata_lead()` and `stata_diff()`; specify the time column and
 use `.by` to identify panels.
 
+The index is alphabetical; tables are grouped by subject and sorted by command,
+preferred answer and example. A package named beside a snippet is needed to run
+that snippet, but `findit()` itself does not load or install reference packages.
+The label names the primary package, rather than every helper dependency;
+the R function index identifies additional functions and their packages.
+
+A note that begins **Differs from Stata** means the R code does the same job,
+but a default, the missing-value handling, an estimator or the output layout
+differs; the note says how. Other notes are practical tips. Most R snippets are
+run against controlled checks when the catalogue is built; this tests the R code
+itself, not numerical agreement with Stata. Missing-value comparisons, weights, factor
+reference levels, join rules and standard-error corrections need particular care.
+Known gaps are explained explicitly, and related search results are not a
+translation of unsupported syntax.
+
 In the tables below, `data` is your dataset, `data1` and `data2` are the master
 and using data of a merge, and `fit` is a fitted model. Most entries use dplyr,
 so attach it with `library(dplyr)` or `library(tidyverse)`.
 
 ```{r, echo = FALSE, results = "asis"}
-section_tables("section", "task", "detail", c("Stata", "R", "Notes"))
-```
-
-## R functions in this guide
-
-Look up common R functions by package, related Stata command and purpose.
-Use `findit(left_join)` to look up an individual function from the console.
-
-```{r, echo = FALSE, results = "asis"}
-functions <- tidystata:::findit_functions()
-table <- data.frame(
-  paste0("<code>", escape_html(functions$`function`), "()</code>"),
-  escape_html(functions$package),
-  escape_html(functions$stata),
-  escape_html(functions[["description"]])
-)
-names(table) <- escape_html(c("Function", "Package", "Related Stata", "Description"))
-cat(
-  knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
-  sep = "\n"
-)
+cat(tidystata:::findit_reference_html(FALSE), sep = "\n")
 ```

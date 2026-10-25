@@ -8,7 +8,8 @@
 #' @param ...  <[`tidy-select`][dplyr_tidy_select]> or
 #' <[`data-masking`][args_data_masking]> Variables to include in the codebook.
 #' Omit to include all columns. Selection is attempted first; expressions that
-#' are not valid selections are evaluated as computed columns by [select_or_mutate()].
+#' are not valid selections are evaluated as computed columns by
+#' [select_or_transmute()].
 #'
 #' @returns An ungrouped table with one row per selected variable, in selection
 #' order. Columns are `variable`, optional `label`, `type`, `n`, and `unique`.
@@ -47,7 +48,7 @@
 #'
 #' starwars <- dplyr::starwars
 #'
-#' codebook(starwars)
+#' codebook(starwars, films:starships)
 #'
 #' codebook(starwars, ends_with("color"))
 #'
@@ -67,7 +68,7 @@ codebook <- function(.data, ...) {
   .data <- table_working_data(.data)
   .data <- dplyr::ungroup(.data)
   if (!missing(...)) {
-    .data <- select_or_mutate(.data, ...)
+    .data <- select_or_transmute(.data, ...)
   }
   vctrs::vec_as_names(names(.data), repair = "check_unique")
   if (ncol(.data) == 0L) {

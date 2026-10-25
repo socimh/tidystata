@@ -12,7 +12,8 @@ codebook(.data, ...)
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to include in the codebook.
 Omit to include all columns. Selection is attempted first; expressions that
-are not valid selections are evaluated as computed columns by \code{\link[=select_or_mutate]{select_or_mutate()}}.}
+are not valid selections are evaluated as computed columns by
+\code{\link[=select_or_transmute]{select_or_transmute()}}.}
 }
 \value{
 An ungrouped table with one row per selected variable, in selection
@@ -54,7 +55,7 @@ codebook(lifeexp, where(is.numeric))
 
 starwars <- dplyr::starwars
 
-codebook(starwars)
+codebook(starwars, films:starships)
 
 codebook(starwars, ends_with("color"))
 

@@ -27,6 +27,8 @@ invisible(loadNamespace("haven"))
 
 <!-- badges: end -->
 
+[中文版](https://github.com/socimh/tidystata/blob/master/README.zh.md)
+
 [tidystata](https://socimh.github.io/tidystata/) brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with `.by`. The resulting tables work with ordinary R tools for filtering, joining and plotting.
 
 ## Installation
@@ -46,11 +48,11 @@ library(dplyr)
 ### findit(): find the R equivalent of a Stata command
 
 ```{r}
-findit(reg)
-findit("merge 1:1 id, keep(match)")
+findit("reg, robust")
+findit("egen rowmean")
 ```
 
-Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html) ([Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)).
+A bare command such as `findit(reg)` shows one clear example; `findit(reg) |> print(n = Inf)` shows every match. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
 
@@ -60,31 +62,43 @@ codebook(lifeexp)
 
 ### summ(): summary statistics
 
+`lexp:safewater` selects the three consecutive variables from `lexp` through `safewater`, including both endpoints. Other tidyselect helpers such as `ends_with()` and `matches()`, or a Stata-style `varlist()`, also work.
+
 ```{r}
-summ(lifeexp, lexp, gnppc, safewater, .by = region)
+summ(lifeexp, lexp:safewater, .by = region)
 ```
 
-### tab(): frequency tables
+### tab(), tab1() and tab2(): compare frequency tables
+
+Use region and a second category derived from `lifeexp`: whether life expectancy is at least 70 years. `region:lexp_70` selects these two columns.
+
+`tab()` counts each observed combination, with percentages.
 
 ```{r}
-tab(dplyr::starwars, sex)
+lifeexp_tab <- lifeexp |>
+  transmute(region, lexp_70 = lexp >= 70)
+
+tab(lifeexp_tab, region:lexp_70)
 ```
 
-`tab1()` tabulates several variables, selected with tidyselect helpers such as `ends_with()` and `matches()` or a Stata `varlist()`; `tab2()` cross-tabulates two.
-
-### fre(): frequency tables with totals and value labels
+`tab1()` returns a named list with a separate frequency table for each variable.
 
 ```{r}
-fre(lifeexp, region)
+tab1(lifeexp_tab, region:lexp_70)
+```
+
+`tab2()` displays the joint counts as a cross-table, with region in rows and life expectancy category in columns.
+
+```{r}
+tab2(lifeexp_tab, region:lexp_70)
 ```
 
 ## Learn more
 
-tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. See the guides below for examples and output conventions.
+tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.
-- [NEWS](https://socimh.github.io/tidystata/news/index.html): release notes.
 - [Reference](https://socimh.github.io/tidystata/reference/index.html): every function.
 
 ## Code of Conduct

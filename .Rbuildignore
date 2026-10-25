@@ -2,7 +2,10 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
+^README\.zh\.Rmd$
+^README\.zh\.md$
 ^data-raw$
+^book$
 ^\.github$
 ^_pkgdown\.yml$
 ^docs$

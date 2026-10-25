@@ -9,6 +9,8 @@
 
 <!-- badges: end -->
 
+[中文版](https://github.com/socimh/tidystata/blob/master/README.zh.md)
+
 [tidystata](https://socimh.github.io/tidystata/) brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with `.by`. The resulting tables work with ordinary R tools for filtering, joining and plotting.
 
 ## Installation
@@ -28,49 +30,22 @@ library(dplyr)
 ### findit(): find the R equivalent of a Stata command
 
 ``` r
-findit(reg)
-#> # Stata to R: 6 entries
-#> 
-#> # Linear regression [stats]
-#> Stata: regress y x1 x2
-#> R:     fit <- lm(y ~ x1 + x2, data = data)
-#> 
+findit("reg, robust")
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
+#> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
-#> # Clustered standard errors [fixest]
-#> Stata: regress y x1 x2, vce(cluster id)
-#> R:     fixest::feols(y ~ x1 + x2, data = data, cluster = ~id)
+#> # 17 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
+findit("egen rowmean")
+#> # Average available values across columns [base]
+#> Stata: egen z = rowmean(x y)
+#> R:     data$z <- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] <- NA_real_
 #> 
-#> # Factor variables and interactions [stats]
-#> Stata: regress y i.group c.x1##c.x2
-#> R:     lm(y ~ factor(group) + x1 * x2, data = data)
-#> 
-#> # Regression with sampling weights [fixest]
-#> Stata: regress y x [pweight = wt]
-#> R:     fixest::feols(y ~ x, data = data, weights = ~wt, vcov = "hetero")
-#> 
-#> # Choose the base category [stats]
-#> Stata: regress y ib3.group
-#> R:     lm(y ~ relevel(factor(group), ref = "3"), data = data)
-findit("merge 1:1 id, keep(match)")
-#> # Stata to R: 10 entries
-#> # "merge" is a Stata command and an R function.
-#> 
-#> ## Stata command
-#> 
-#> # Keep matched rows only [dplyr]
-#> Stata: merge 1:1 id using data2, keep(match)
-#> R:     inner_join(data1, data2, by = "id")
-#> 
-#> ## R function: merge() [base]: Merge two data frames (base R)
-#>   Related Stata: merge
-#> 
-#> # ... and 9 more. Use `print(n = Inf)` to see all, or `View()`.
+#> # 59 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
 ```
 
-Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html) ([Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)).
+A bare command such as `findit(reg)` shows one clear example; `findit(reg) |> print(n = Inf)` shows every match. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
 
@@ -89,8 +64,10 @@ codebook(lifeexp)
 
 ### summ(): summary statistics
 
+`lexp:safewater` selects the three consecutive variables from `lexp` through `safewater`, including both endpoints. Other tidyselect helpers such as `ends_with()` and `matches()`, or a Stata-style `varlist()`, also work.
+
 ``` r
-summ(lifeexp, lexp, gnppc, safewater, .by = region)
+summ(lifeexp, lexp:safewater, .by = region)
 #> # A tibble: 9 x 9
 #>   region               name      type      n unique   min    mean       sd   max
 #>   <dbl+lbl>            <chr>     <chr> <int>  <int> <dbl>   <dbl>    <dbl> <dbl>
@@ -105,42 +82,66 @@ summ(lifeexp, lexp, gnppc, safewater, .by = region)
 #> 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91
 ```
 
-### tab(): frequency tables
+### tab(), tab1() and tab2(): compare frequency tables
+
+Use region and a second category derived from `lifeexp`: whether life expectancy is at least 70 years. `region:lexp_70` selects these two columns.
+
+`tab()` counts each observed combination, with percentages.
 
 ``` r
-tab(dplyr::starwars, sex)
-#> # A tibble: 5 x 6
-#>   sex                n percent   cum valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 female            16   18.4   18.4 19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5  1.20      20.5
-#> 3 male              60   69.0   88.5 72.3       92.8
-#> 4 none               6    6.90  95.4  7.23     100  
-#> 5 <NA>               4    4.60 100   NA         NA
+lifeexp_tab <- lifeexp |>
+  transmute(region, lexp_70 = lexp >= 70)
+
+tab(lifeexp_tab, region:lexp_70)
+#> # A tibble: 6 x 7
+#>   region               lexp_70     n percent   cum valid valid_cum
+#>   <dbl+lbl>            <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] FALSE      12   17.6   17.6 17.6       17.6
+#> 2 1 [Europe & C. Asia] TRUE       32   47.1   64.7 47.1       64.7
+#> 3 2 [North America]    FALSE       6    8.82  73.5  8.82      73.5
+#> 4 2 [North America]    TRUE        8   11.8   85.3 11.8       85.3
+#> 5 3 [South America]    FALSE       3    4.41  89.7  4.41      89.7
+#> 6 3 [South America]    TRUE        7   10.3  100   10.3      100
 ```
 
-`tab1()` tabulates several variables, selected with tidyselect helpers such as `ends_with()` and `matches()` or a Stata `varlist()`; `tab2()` cross-tabulates two.
-
-### fre(): frequency tables with totals and value labels
+`tab1()` returns a named list with a separate frequency table for each variable.
 
 ``` r
-fre(lifeexp, region)
-#> # A tibble: 4 x 6
-#>   region               n percent   cum valid valid_cum
-#>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
-#> 2 North America       14    20.6  85.3  20.6      85.3
-#> 3 South America       10    14.7 100    14.7     100  
-#> 4 Total               68   100    NA    NA        NA
+tab1(lifeexp_tab, region:lexp_70)
+#> $region
+#> # A tibble: 3 x 6
+#>   value                    n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
+#> 
+#> $lexp_70
+#> # A tibble: 2 x 6
+#>   value     n percent   cum valid valid_cum
+#>   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 FALSE    21    30.9  30.9  30.9      30.9
+#> 2 TRUE     47    69.1 100    69.1     100
+```
+
+`tab2()` displays the joint counts as a cross-table, with region in rows and life expectancy category in columns.
+
+``` r
+tab2(lifeexp_tab, region:lexp_70)
+#> # A tibble: 3 x 3
+#>   `region \\ lexp_70`  `FALSE` `TRUE`
+#>   <dbl+lbl>              <int>  <int>
+#> 1 1 [Europe & C. Asia]      12     32
+#> 2 2 [North America]          6      8
+#> 3 3 [South America]          3      7
 ```
 
 ## Learn more
 
-tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`), row calculations, binning (`xtile()`) and panel lags. See the guides below for examples and output conventions.
+tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.
-- [NEWS](https://socimh.github.io/tidystata/news/index.html): release notes.
 - [Reference](https://socimh.github.io/tidystata/reference/index.html): every function.
 
 ## Code of Conduct

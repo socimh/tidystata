@@ -29,12 +29,12 @@
 #' @seealso [variables()], [codebook()], [browse()]
 #'
 #' @examples
-#' starwars <- dplyr::starwars
+#' ds(lifeexp) # equivalent to names(lifeexp)
+#' ds(lifeexp, country:lexp)
+#' ds(lifeexp, where(is.character), .type = "table")
 #'
-#' ds(starwars) # equivalent to names(starwars)
-#' ds(starwars, homeworld:starships)
+#' starwars <- dplyr::starwars
 #' ds(starwars, ends_with("color"), .type = "table")
-#' ds(starwars, where(is.character), .type = "table")
 #'
 #' # Save a programmatic selection for later stages of a pipeline.
 #' numeric_names <- ds(lifeexp, where(is.numeric))

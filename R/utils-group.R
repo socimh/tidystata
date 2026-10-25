@@ -55,7 +55,7 @@ remove_group_vars <- function(.data, ..., group_vars) {
   rlang::local_error_call(rlang::caller_env())
   if (!missing(...)) {
     check_group_selection(.data, ..., group_vars = group_vars)
-    .data <- select_or_mutate(.data, ...)
+    .data <- select_or_transmute(.data, ...)
   }
   out <- .data |>
     dplyr::ungroup() |>

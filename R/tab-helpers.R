@@ -102,7 +102,7 @@ tab_prepare_data <- function(.data, ..., group_vars = character(0)) {
       remove_group_vars(..., group_vars = group_vars)
   } else {
     if (!missing(...)) {
-      .data <- select_or_mutate(.data, ...)
+      .data <- select_or_transmute(.data, ...)
     }
     out <- .data |>
       dplyr::ungroup()
