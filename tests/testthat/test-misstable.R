@@ -68,10 +68,14 @@ test_that("misstable() handles special missing values and empty data", {
     nan = c(NaN, 1),
     tagged = c(haven::tagged_na("a"), 1),
     blank = c("", "a"),
-    list = list(NULL, 1)
+    list = list(NULL, NA)
   )
   out <- misstable(data, .all = TRUE)
   expect_identical(out$miss_n, c(1L, 1L, 0L, 1L))
+  expect_identical(
+    misstable(tibble::tibble(l = list(NULL, 1)), .all = TRUE)$miss_n,
+    0L
+  )
 
   empty <- misstable(missing_data[0, ], x, .all = TRUE)
   expect_identical(empty$miss_n, 0L)
@@ -111,4 +115,14 @@ test_that("misstable() counts SPSS user-missing codes and ranges", {
   patterns <- misstable(data, coded, ranged, .patterns = TRUE)
   expect_identical(sum(patterns$n), 4L)
   expect_identical(nrow(patterns), 2L)
+})
+
+test_that("misstable() rejects grouping names that collide with result columns", {
+  data <- tibble::tibble(variable = c("a", "a"), n = c("a", "a"), x = c(1, NA))
+  expect_error(misstable(data, x, .by = variable), "rename it first")
+  expect_error(misstable(data, x, .by = n, .patterns = TRUE), "rename it first")
+  expect_named(
+    misstable(data, x, .by = n),
+    c("n", "variable", "miss_n", "miss_pct", "valid_n")
+  )
 })

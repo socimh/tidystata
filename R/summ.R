@@ -57,7 +57,8 @@
 #' output: calendar spreads are always `difftime` columns (see Details).
 #' @param .sort A single `TRUE` or `FALSE`. If `TRUE` (default), sort grouping
 #' keys ascending like [tab()] (factor levels in their defined order, character
-#' keys in C-locale order), with missing keys last. Within each group, preserve
+#' keys in C-locale order), with ordinary missing keys last. SPSS user-missing
+#' codes retain their stored-value ordering. Within each group, preserve
 #' the selected variable order. If `FALSE`, groups follow first appearance.
 #' @param .drop_empty A single `TRUE` or `FALSE`. If `TRUE`, remove individual
 #' summary rows with no observed measured values (`n == 0`), even when `n` is
@@ -68,7 +69,7 @@
 #' When `...` is omitted, the weight column is not summarised itself.
 #' @param .wt_type `"frequency"` (default) or `"analytic"`. With frequency
 #' weights, `n` is the sum of the weights (non-integer weights are allowed).
-#' Analytic weights (Stata's `[aweight]`, suitable for sampling weights) are
+#' Analytic weights (Stata's `[aweight]`) are
 #' rescaled within each group and variable to sum to the number of observed
 #' values, so `n` is the number of observations. Means, percentiles and `sum`
 #' are the same under both types; `sd` and `se` differ.
@@ -125,6 +126,8 @@
 #' weights in place of positions, so weights of 1 give the unweighted values.
 #' `min` and `max` ignore rows with zero weight. `unique`, `miss_n` and
 #' `valid_pct` remain unweighted row counts.
+#' These standard errors do not account for a survey design. Use
+#' `survey::svymean()` for inference with sampling weights, clusters or strata.
 #'
 #' Calendar output and grouping names:
 #'
@@ -149,10 +152,11 @@
 #' variable-type families are present. Each table preserves the input's
 #' data.frame, tibble, or data.table container in both modes. Results are
 #' ungrouped, retaining grouping keys as columns and supported preview settings.
-#' Other subclasses are not reconstructed. Vector input returns a tibble in
-#' with `.type = "list"` or a data.frame with `.type = "table"`, using its expression as the variable
-#' name, or `value` for a multiline expression or a magrittr pipe (`.`). Wrap
-#' the vector in a named tibble to choose a stable variable name. Input data are
+#' Other subclasses are not reconstructed. Vector input returns a tibble with
+#' `.type = "list"` or a data.frame with `.type = "table"`, using its
+#' expression as the variable name, or `value` for a multiline expression or a
+#' magrittr pipe (`.`). Wrap the vector in a named tibble to choose a stable
+#' variable name. Input data are
 #' not modified.
 #' @family summary functions
 #' @export
@@ -237,21 +241,28 @@ summ <- function(
   .data <- dplyr::ungroup(.data)
   input_names <- names(.data)
 
+  # Weights are evaluated on every row, so a weight vector matches the input.
+  weighted <- weights_prepare(.data, rlang::enquo(.wt))
+  .data <- weights_drop_column(
+    weighted$data,
+    weighted$column,
+    !missing(...),
+    group_vars
+  )
+  weights <- weighted$weights
+
   # Missing-key filtering does not change how measured missing values are handled.
   if (!.missing && length(group_vars) > 0) {
-    .data <- .data |>
-      dplyr::filter(
-        dplyr::if_all(
-          tidyselect::all_of(group_vars),
-          ~ !is.na(.x)
-        )
-      )
+    complete <- !Reduce(
+      `|`,
+      lapply(.data[group_vars], is.na),
+      logical(nrow(.data))
+    )
+    .data <- dplyr::dplyr_row_slice(.data, which(complete))
+    if (!is.null(weights)) {
+      weights <- weights[complete]
+    }
   }
-
-  # Weights are evaluated after missing keys are removed.
-  weighted <- weights_prepare(.data, rlang::enquo(.wt))
-  .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
-  weights <- weighted$weights
 
   # Prepare data
   .data_summ <- remove_group_vars(

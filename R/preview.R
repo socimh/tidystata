@@ -20,7 +20,8 @@
 #' or `Inf` for all rows. An odd head/tail budget gives the head the extra row.
 #' With `n = 1`, both styles select the first row. Short tables never repeat rows.
 #' @param width Console width, passed to tibble formatting. `NULL` uses the
-#' current console width; `Inf` shows all columns.
+#' current console width; `Inf` (the default for `print_all()`) shows all
+#' columns.
 #' @param ... Additional arguments passed to tibble formatting.
 #' @param max_extra_cols,max_footer_lines Tibble formatting controls.
 #'
@@ -332,8 +333,8 @@ print_headtail <- function(
 
 #' @rdname special-print
 #' @export
-print_all <- function(.data, ...) {
-  print(preview_table(.data, "headtail", Inf), width = Inf, ...)
+print_all <- function(.data, ..., width = Inf) {
+  print(preview_table(.data, "headtail", Inf), width = width, ...)
   invisible(.data)
 }
 

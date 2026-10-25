@@ -102,7 +102,8 @@ output: calendar spreads are always \code{difftime} columns (see Details).}
 
 \item{.sort}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), sort grouping
 keys ascending like \code{\link[=tab]{tab()}} (factor levels in their defined order, character
-keys in C-locale order), with missing keys last. Within each group, preserve
+keys in C-locale order), with ordinary missing keys last. SPSS user-missing
+codes retain their stored-value ordering. Within each group, preserve
 the selected variable order. If \code{FALSE}, groups follow first appearance.}
 
 \item{.drop_empty}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, remove individual
@@ -116,7 +117,7 @@ When \code{...} is omitted, the weight column is not summarised itself.}
 
 \item{.wt_type}{\code{"frequency"} (default) or \code{"analytic"}. With frequency
 weights, \code{n} is the sum of the weights (non-integer weights are allowed).
-Analytic weights (Stata's \verb{[aweight]}, suitable for sampling weights) are
+Analytic weights (Stata's \verb{[aweight]}) are
 rescaled within each group and variable to sum to the number of observed
 values, so \code{n} is the number of observations. Means, percentiles and \code{sum}
 are the same under both types; \code{sd} and \code{se} differ.}
@@ -126,10 +127,11 @@ A table, or a list of tables with \code{.type = "list"} when multiple
 variable-type families are present. Each table preserves the input's
 data.frame, tibble, or data.table container in both modes. Results are
 ungrouped, retaining grouping keys as columns and supported preview settings.
-Other subclasses are not reconstructed. Vector input returns a tibble in
-with \code{.type = "list"} or a data.frame with \code{.type = "table"}, using its expression as the variable
-name, or \code{value} for a multiline expression or a magrittr pipe (\code{.}). Wrap
-the vector in a named tibble to choose a stable variable name. Input data are
+Other subclasses are not reconstructed. Vector input returns a tibble with
+\code{.type = "list"} or a data.frame with \code{.type = "table"}, using its
+expression as the variable name, or \code{value} for a multiline expression or a
+magrittr pipe (\code{.}). Wrap the vector in a named tibble to choose a stable
+variable name. Input data are
 not modified.
 }
 \description{
@@ -191,6 +193,8 @@ Stata's weighted percentile rule, the unweighted rule with cumulative
 weights in place of positions, so weights of 1 give the unweighted values.
 \code{min} and \code{max} ignore rows with zero weight. \code{unique}, \code{miss_n} and
 \code{valid_pct} remain unweighted row counts.
+These standard errors do not account for a survey design. Use
+\code{survey::svymean()} for inference with sampling weights, clusters or strata.
 
 Calendar output and grouping names:
 

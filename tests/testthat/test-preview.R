@@ -635,3 +635,9 @@ test_that("previews report invalid input", {
     slice_headtail(tibble::tibble(x = 1), n = 2.5)
   })
 })
+
+test_that("print_all() accepts a console width", {
+  data <- tibble::tibble(x = 1)
+  expect_output(out <- print_all(data, width = 80), "x")
+  expect_identical(out, data)
+})

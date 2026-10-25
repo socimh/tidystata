@@ -24,7 +24,8 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 }
 \arguments{
 \item{x}{A numeric vector. \code{xtile()} also accepts a logical vector,
-treated as 0/1.}
+treated as 0/1. SPSS user-missing codes and ranges are omitted. Convert
+\code{integer64} inputs and cutpoints explicitly to ordinary numeric values first.}
 
 \item{n}{A positive integer. The number of intervals.}
 
@@ -49,12 +50,9 @@ observed median as an interior cutpoint. A single number supplies one
 interior cutpoint, rather than the number of intervals.}
 
 \item{right}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), intervals are
-closed on the left, \verb{[a, b)}, as in Stata's \verb{egen cut()}; the last interval
-also includes its upper end. If \code{TRUE}, they are closed on the right,
-\verb{(a, b]}, as in [base::cut()].
-
-[a, b)\verb{, as in Stata's }egen cut()\verb{; the last interval also includes its upper end. If }TRUE\verb{, they are closed on the right, }(a, b]: R:a,\%20b)\%60,\%20as\%20in\%20Stata's\%20\%60egen\%20cut()\%60;\%20the\%20last\%20interval\%0Aalso\%20includes\%20its\%20upper\%20end.\%20If\%20\%60TRUE\%60,\%20they\%20are\%20closed\%20on\%20the\%20right,\%0A\%60(a,\%20b
-[base::cut()]: R:base::cut()}
+closed on the left (\verb{a <= x < b}), as in Stata's \verb{egen cut()}; the last
+interval also includes its upper end. If \code{TRUE}, they are closed on the
+right (\verb{a < x <= b}), as in \code{\link[base:cut]{base::cut()}}.}
 }
 \value{
 An ordered factor, or integer interval codes when \code{labels = FALSE}
@@ -74,10 +72,10 @@ equal-width command (\verb{egen cut(), group()} is not equal-width).
 \code{xtile()} follows Stata's \code{xtile}, and its codes are tested against
 Stata's output. Cutpoints are the percentiles at \verb{1/n, 2/n, ...}, using
 Stata's percentile rule (see \code{\link[=summ]{summ()}}), and each value joins the first group
-whose cutpoint is at least that value. Equal values stay in the same group
-and distinct values are never merged, so a 0/1 dummy always gives two
-groups. Ties can leave groups empty; as in Stata, their codes are skipped
-(codes 1, 3 and 4, say) and a warning is given. Factor levels are the
+whose cutpoint is at least that value. Equal values stay in the same group;
+different values may share a group. Ties can leave groups empty; as in
+Stata, their codes are skipped (codes 1, 3 and 4, say) and a warning is
+given. Factor levels are the
 occupied groups. Default labels are the
 contiguous intervals covered by each group, for example \code{"[0,0]"} and
 \code{"(0,1]"}. Custom labels must match the effective number of groups.

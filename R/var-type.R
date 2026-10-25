@@ -36,6 +36,7 @@
 #' @export
 #' @rdname var_type
 var_type <- function(x, abbr = FALSE) {
+  check_bool(abbr)
   # Plain storage types need no formatting or S3 dispatch. Matrix/array input
   # retains the established element-type description.
   type <- if (!is.object(x)) {

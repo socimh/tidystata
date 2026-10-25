@@ -56,7 +56,7 @@ test_that("relationships are checked before joining", {
   )
 })
 
-test_that(".keep, .assert and .generate follow Stata's options", {
+test_that("keep, assert and generate follow Stata's options", {
   matched <- stata_merge(
     people,
     income,
@@ -235,4 +235,112 @@ test_that("stata_merge() reports invalid input and failed assertions", {
     )
     stata_merge(people, income, "1:1", by = "id", assert = "match")
   })
+})
+
+test_that("a using column named like a renamed master key is dropped", {
+  master <- tibble::tibble(id = 1:2, v = 1)
+  using <- tibble::tibble(pid = 1:2, id = 9, w = 2)
+  expect_message(
+    out <- stata_merge(
+      master,
+      using,
+      "1:1",
+      by = c(id = "pid"),
+      report = FALSE
+    ),
+    "Kept the values from `.data`"
+  )
+  expect_named(out, c("id", "v", "w", ".merge"))
+  expect_identical(out$id, 1:2)
+})
+
+
+test_that("shared columns retain using-only values and matched master missingness", {
+  master <- tibble::tibble(
+    id = c(2L, 1L),
+    age = c(NA_integer_, 10L),
+    date = as.Date(c(NA, "2024-01-01")),
+    .tidystata_in_shared = c("first", "second")
+  )
+  using <- tibble::tibble(
+    pid = c(2L, 3L),
+    id = c(200L, 300L),
+    age = c(99L, 30L),
+    date = as.Date(c("2024-02-01", "2024-03-01")),
+    .tidystata_in_shared = c("ignored", "third")
+  )
+  expected <- tibble::tibble(
+    id = c(2L, 1L, 3L),
+    age = c(NA_integer_, 10L, 30L),
+    date = as.Date(c(NA, "2024-01-01", "2024-03-01")),
+    .tidystata_in_shared = c("first", "second", "third"),
+    .merge = factor(
+      c("matched", "master only", "using only"),
+      levels = c("master only", "using only", "matched")
+    )
+  )
+  before_master <- master
+  before_using <- using
+  for (frame in list(master, as.data.frame(master))) {
+    out <- suppressMessages(stata_merge(
+      frame,
+      using,
+      "1:1",
+      by = c(id = "pid"),
+      report = FALSE
+    ))
+    expect_identical(class(out), class(frame))
+    expect_identical(tibble::as_tibble(out), expected)
+  }
+  if (requireNamespace("data.table", quietly = TRUE)) {
+    table <- data.table::as.data.table(master)
+    out <- suppressMessages(stata_merge(
+      table,
+      using,
+      "1:1",
+      by = c(id = "pid"),
+      report = FALSE
+    ))
+    expect_s3_class(out, "data.table")
+    expect_identical(tibble::as_tibble(out), expected)
+    expect_identical(tibble::as_tibble(table), master)
+  }
+  expect_identical(master, before_master)
+  expect_identical(using, before_using)
+})
+
+test_that("shared columns use compatible types only when using-only rows need them", {
+  master <- tibble::tibble(id = 1L, score = 10L)
+  matched <- tibble::tibble(id = 1L, score = "ignored")
+  expect_identical(
+    suppressMessages(stata_merge(
+      master,
+      matched,
+      "1:1",
+      by = "id",
+      generate = NULL,
+      report = FALSE
+    )),
+    master
+  )
+  using <- tibble::tibble(id = 2L, score = 2.5)
+  out <- suppressMessages(stata_merge(
+    master,
+    using,
+    "1:1",
+    by = "id",
+    generate = NULL,
+    report = FALSE
+  ))
+  expect_identical(out$score, c(10, 2.5))
+  expect_error(
+    suppressMessages(stata_merge(
+      master,
+      tibble::tibble(id = 2L, score = "incompatible"),
+      "1:1",
+      by = "id",
+      report = FALSE
+    )),
+    class = "vctrs_error_incompatible_type"
+  )
 })

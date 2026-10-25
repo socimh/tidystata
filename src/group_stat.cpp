@@ -243,11 +243,23 @@ writable::doubles group_extreme(doubles values, integers sizes, bool maximum)
         kept.clear();
         cumulative.clear();
         long double running = 0.0L;
+        double maximum = 0.0;
         for (R_xlen_t k = start; k < start + n[g]; ++k) {
             if (!(w[k] > 0)) continue;
             kept.push_back(x[k]);
+            maximum = std::max(maximum, w[k]);
             running += w[k];
             cumulative.push_back(static_cast<double>(running));
+        }
+        // Only overflowing totals need a second pass with scaled weights.
+        if (running > DBL_MAX) {
+            cumulative.clear();
+            running = 0.0L;
+            for (R_xlen_t k = start; k < start + n[g]; ++k) {
+                if (!(w[k] > 0)) continue;
+                running += w[k] / maximum;
+                cumulative.push_back(static_cast<double>(running));
+            }
         }
         start += n[g];
         R_xlen_t size = kept.size();
@@ -276,7 +288,11 @@ writable::doubles group_extreme(doubles values, integers sizes, bool maximum)
                 }
             }
             if (exact >= 0 && exact < size - 1) {
-                q = (kept[exact] + kept[exact + 1]) / 2;
+                double a = kept[exact];
+                double b = kept[exact + 1];
+                double midpoint = (a + b) / 2;
+                q = std::isinf(midpoint) && std::isfinite(a) && std::isfinite(b) ?
+                    a / 2 + b / 2 : midpoint;
                 continue;
             }
             R_xlen_t above = -1;

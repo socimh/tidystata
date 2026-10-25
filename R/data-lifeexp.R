@@ -5,7 +5,7 @@
 #' contains variable labels, value labels and missing values.
 #'
 #' @source World Bank, World Development Indicators,
-#' <https://datacatalog.worldbank.org/search/dataset/0037712>, licensed under
+#' <https://datatopics.worldbank.org/world-development-indicators/>, licensed under
 #' CC BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>). Indicators
 #' `SP.POP.GROW`, `SP.DYN.LE00.IN` and `NY.GNP.PCAP.CD` for 1998 and
 #' `SH.H2O.SMDW.ZS` for 2000; values are rounded. Country names follow WDI,

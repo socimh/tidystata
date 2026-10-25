@@ -939,3 +939,56 @@ test_that("summ() and tabstat() report invalid input", {
   })
   expect_snapshot(out <- summ(d, x, when, .stat = c("mean", "skew")))
 })
+
+test_that("weight vectors match the input when missing keys are dropped", {
+  data <- tibble::tibble(g = c(1, NA, 2, 2), x = c(1, 2, 3, 5))
+  out <- summ(data, x, .by = g, .missing = FALSE, .wt = c(1, 9, 1, 3))
+  expect_identical(out$g, c(1, 2))
+  expect_equal(out$mean, c(1, (3 + 15) / 4))
+})
+
+test_that("list columns count missing values as misstable() does", {
+  data <- tibble::tibble(l = list(NULL, NA, NA, 1))
+  expect_identical(misstable(data)$miss_n, 2L)
+  expect_identical(suppressWarnings(summ(data, l, .keep_all = TRUE))$n, 2L)
+  fre_out <- fre(data, l)
+  expect_true(is.na(fre_out$valid[fre_out$l == "NA"]))
+  expect_false(is.na(fre_out$valid[fre_out$l == "NULL"]))
+})
+
+test_that("percentile midpoints preserve large finite and subnormal values", {
+  for (value in c(1e308, .Machine$double.xmin * .Machine$double.eps)) {
+    data <- data.frame(x = rep(value, 4), w = rep(1, 4))
+    grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+    for (weights in list(NULL, rlang::quo(w))) {
+      out <- summ(data, x, .wt = !!weights, .stat = c("q1", "median", "q3"))
+      expect_equal(
+        unlist(out[-1L], use.names = FALSE),
+        rep(value, 3),
+        tolerance = 0
+      )
+      out <- summ(
+        grouped,
+        x,
+        .by = g,
+        .wt = !!weights,
+        .stat = c("q1", "median", "q3")
+      )
+      expect_equal(
+        unlist(out[-c(1L, 2L)], use.names = FALSE),
+        rep(value, 6),
+        tolerance = 0
+      )
+    }
+  }
+})
+
+test_that("an empty datetime timezone uses the session timezone", {
+  x <- as.POSIXct(c(0, 3600), origin = "1970-01-01")
+  attr(x, "tzone") <- character()
+  out <- summ(data.frame(x = x))
+  expect_equal(
+    out$mean,
+    format(as.POSIXct(1800, origin = "1970-01-01"), "%Y-%m-%d %H:%M")
+  )
+})

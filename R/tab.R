@@ -126,7 +126,7 @@
 #' @param .wt_type `"frequency"` (default) or `"analytic"`. Frequency weights
 #' count each row `w` times, so `n` is the sum of the weights, as in
 #' `dplyr::count(wt =)`; non-integer weights are allowed. Analytic weights
-#' (Stata's `[aweight]`, suitable for sampling weights) are rescaled within
+#' (Stata's `[aweight]`) are rescaled within
 #' each `.by` group to sum to the number of rows, so `n` stays on the sample
 #' scale. Percentages are the same under both types.
 #' @param .total A single `TRUE` or `FALSE`. If `TRUE`, add "Total" rows:
@@ -137,8 +137,9 @@
 #' Pearson's chi-square test of independence and Cramer's V, like Stata's
 #' `tab x y, chi2 V`. See Details.
 #' @param .group_order Group block order for one-way and joint tables. `"keys"`
-#' retains key order; `"frequency"` orders by descending observation count,
-#' including missing measured values. Missing grouping keys appear last and ties
+#' retains key order; `"frequency"` orders by descending observation count
+#' (summed frequency weights when `.wt` is used), including missing measured
+#' values. Missing grouping keys appear last and ties
 #' follow key order. `.desc` controls categories within each group independently.
 #'
 #' @returns
@@ -255,7 +256,12 @@ tab <- function(
   .data <- dplyr::ungroup(.data)
   .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
-  .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
+  .data <- weights_drop_column(
+    weighted$data,
+    weighted$column,
+    !missing(...),
+    group_vars
+  )
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
     aggregation_groups(.data, group_vars)
   } else {
@@ -343,7 +349,12 @@ tab1 <- function(
   .data <- dplyr::ungroup(.data)
   .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
-  .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
+  .data <- weights_drop_column(
+    weighted$data,
+    weighted$column,
+    !missing(...),
+    group_vars
+  )
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
     aggregation_groups(.data, group_vars)
   } else {
@@ -438,7 +449,12 @@ tab2 <- function(
   }
   .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
-  .data <- weighted$data
+  .data <- weights_drop_column(
+    weighted$data,
+    weighted$column,
+    !missing(...),
+    group_vars
+  )
   if (.chi2 && !is.null(weighted$weights) && .wt_type == "analytic") {
     cli::cli_abort(c(
       "{.arg .chi2} is not available with analytic weights, whose counts are not observation counts.",
@@ -450,7 +466,7 @@ tab2 <- function(
   .data <- if (grouped) {
     remove_group_vars(.data, ..., group_vars = group_vars)
   } else {
-    tab_ungroup(select_or_transmute(.data, ...))
+    select_or_transmute(tab_ungroup(.data), ...)
   }
   if (ncol(.data) == 0L) {
     if (.type == "flextable") {
@@ -602,7 +618,12 @@ fre <- function(
   .data <- dplyr::ungroup(.data)
   .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
-  .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
+  .data <- weights_drop_column(
+    weighted$data,
+    weighted$column,
+    !missing(...),
+    group_vars
+  )
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
     aggregation_groups(.data, group_vars)
   } else {
@@ -684,7 +705,12 @@ fre1 <- function(
   .data <- dplyr::ungroup(.data)
   .wt_type <- rlang::arg_match(.wt_type)
   weighted <- weights_prepare(.data, rlang::enquo(.wt))
-  .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
+  .data <- weights_drop_column(
+    weighted$data,
+    weighted$column,
+    !missing(...),
+    group_vars
+  )
   groups <- if (.group_order == "frequency" || .wt_type == "analytic") {
     aggregation_groups(.data, group_vars)
   } else {

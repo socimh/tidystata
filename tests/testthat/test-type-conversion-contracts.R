@@ -117,16 +117,28 @@ test_that("SPSS user missing codes remain values during conversion", {
   expect_identical(x, original)
 })
 
-test_that("labelled character numeric values use ordinary numeric coercion", {
+test_that("labelled character values are read like plain text", {
   x <- haven::labelled(c("10", "20", NA), c(Ten = "10"))
 
   expect_identical(as_character(x), c("Ten", "20", NA_character_))
   expect_identical(as_numeric(x), c(10, 20, NA_real_))
+  expect_identical(
+    as_numeric(haven::labelled(c("1,234", "$5", " 7 "), c(a = "1,234"))),
+    c(1234, 5, 7)
+  )
+  expect_identical(
+    as_numeric(
+      haven::labelled(c("10 kg", "5"), c(Ten = "10 kg")),
+      ignore = "kg"
+    ),
+    c(10, 5)
+  )
   expect_warning(
     result <- as_numeric(haven::labelled(c("10 kg", "bad"), c(Ten = "10 kg"))),
-    "NAs introduced by coercion"
+    "are not numbers"
   )
-  expect_identical(result, c(NA_real_, NA_real_))
+  expect_equal(c(result), c(NA_real_, NA_real_))
+  expect_identical(readr::problems(result)$actual, c("10 kg", "bad"))
 })
 
 test_that("lists and unsupported numeric inputs retain element count", {

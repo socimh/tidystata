@@ -44,11 +44,16 @@ missing variables across rows, like \verb{misstable patterns}.
 }
 \details{
 A value is missing when \code{is.na()} is \code{TRUE} for it, which includes \code{NaN}
-and haven's tagged missing values such as Stata's \code{.a}. Empty strings are
+and haven's tagged missing values such as Stata's \code{.a}. In a list column,
+\code{NA} elements are missing and \code{NULL} elements are values, as in \code{\link[=summ]{summ()}} and
+\code{\link[=fre]{fre()}}. Matrix and data-frame columns follow vctrs row missingness: a row
+is missing only when every component is missing. Empty strings are
 observed values, unlike Stata's missing string; convert them first with
 \code{\link[=na_if_value]{na_if_value()}}. When no checked variable has missing values and
 \code{.all = FALSE}, a message says so and the result has no variable rows or
 columns.
+Grouping names must not collide with result columns; rename those keys
+before calling \code{misstable()}.
 }
 \examples{
 misstable(lifeexp)

@@ -453,3 +453,15 @@ test_that("timer() reports invalid input", {
     timer(1, on_error = NA)
   })
 })
+
+test_that("timer: rounding does not cross a unit boundary", {
+  seconds <- c(0.9996, 59.996, 59.9999)
+  actual <- vapply(
+    seconds,
+    function(x) {
+      tidystata:::duration_to_chr(as.difftime(x, units = "secs"))
+    },
+    character(1)
+  )
+  expect_identical(actual, c("1.00s", "1m0s", "1m0s"))
+})

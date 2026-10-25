@@ -223,6 +223,7 @@ test_that("categorical regression examples convert numeric category codes", {
 })
 
 test_that("axis-label customization preserves fixed ggplot argument names", {
+  skip_if_not_installed("ggplot2")
   entries <- findit_entries()
   templates <- findit_templates()
   row <- which(entries$stata == 'scatter y x, xtitle("Age")')

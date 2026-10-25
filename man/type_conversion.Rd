@@ -31,7 +31,9 @@ spaces.}
 \code{as_character()} and \code{tostring()} return a character vector. \code{as_numeric()} returns
 a double vector; unsupported types such as lists, raw vectors, and complex
 vectors return missing values of the same length. Empty inputs return
-typed empty vectors. Names, dimensions, labels, and units are dropped.
+typed empty vectors. Names, dimensions, labels, and units are dropped,
+except that \code{tostring()} returns character input with its attributes
+unchanged.
 Text that is not a number gives a warning and keeps its row and value in
 \code{\link[readr:problems]{readr::problems()}} on the result.
 Conversion of large \code{integer64} values to double may lose precision and
@@ -48,8 +50,10 @@ Stata's \code{destring}. Use \code{mutate(x = destring(x))}.
 value labels, like Stata's \code{decode}.
 \item \code{tostring()} converts values to text and ignores value labels, like
 Stata's \code{tostring}: a labelled vector or factor gives its codes, and
-character input is returned unchanged. Missing values stay \code{NA}. Dates use
-\code{\link[=as.character]{as.character()}}, so they become \code{"2024-01-31"} rather than day numbers.
+character input is returned unchanged. Missing values stay \code{NA}. Numbers
+are written in full, as Stata does, so 100000 gives \code{"100000"}, not
+\code{"1e+05"}. Dates use \code{\link[=as.character]{as.character()}}, so they become \code{"2024-01-31"}
+rather than day numbers.
 }
 
 \code{destring()} reads text the way Stata's \code{destring} does. A value must be a
@@ -65,7 +69,8 @@ without a warning. Dates stay \code{NA}; convert them with \code{\link[=as.Date]
 
 A factor whose levels are all numbers, such as \code{factor(c("1990", "2000"))},
 gives those numbers (1990, 2000). Other factors give their level codes.
-Labelled numeric variables return their values.
+Labelled numeric variables return their values; labelled text is read
+from its values like plain text.
 \code{as_character()} uses value labels when a labelled vector has a nonempty
 \code{labels} attribute. Without value labels, it uses ordinary character
 conversion, including for tagged missing values.

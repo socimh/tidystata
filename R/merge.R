@@ -10,9 +10,9 @@
 #' @param using The table to merge in.
 #' @param relationship The key relationship, as in Stata: `"1:1"` (keys unique
 #' in both tables), `"m:1"` (unique in `using`) or `"1:m"` (unique in `.data`).
-#' It is required and checked before joining. Many-to-many merges are not
-#' supported, as in Stata; use [dplyr::inner_join()] with
-#' `relationship = "many-to-many"` if you really need all pairings.
+#' It is required and checked before joining. Stata's many-to-many (`m:m`)
+#' merge is not supported. Use [dplyr::inner_join()] with
+#' `relationship = "many-to-many"` if you need all pairings.
 #' @param by A character vector of key columns. Use a named vector, such as
 #' `c(id = "person_id")`, when the names differ (`.data` name = `using` name).
 #' @param keep Which rows to keep: any of `"master"` (only in `.data`),
@@ -33,9 +33,11 @@
 #'
 #' @details
 #' Missing key values match each other, as in Stata. When a non-key column
-#' exists in both tables, the values from `.data` are kept and the `using`
-#' column is dropped with a message, as Stata does without `update`; rename
-#' the column first to keep both. Grouping is not retained.
+#' exists in both tables, matched rows keep the values from `.data`, including
+#' missing values, as Stata does without `update`. Rows found only in `using`
+#' keep its values. Shared columns use a compatible common type when using-only
+#' values are needed; incompatible types cause an error. A message identifies
+#' shared columns; rename them first to keep both. Grouping is not retained.
 #'
 #' @family data checking functions
 #' @export
@@ -150,12 +152,10 @@ merge_check_relationship <- function(
   }
 }
 
-# Stata keeps the master's values for shared non-key columns.
+# Report overlapping columns and discard using non-keys that collide with a
+# renamed master key; the join supplies those key values from the using key.
 merge_drop_shared <- function(master, other, master_keys, using_keys) {
-  shared <- intersect(
-    setdiff(names(master), master_keys),
-    setdiff(names(other), using_keys)
-  )
+  shared <- intersect(names(master), setdiff(names(other), using_keys))
   if (!length(shared)) {
     return(other)
   }
@@ -163,12 +163,18 @@ merge_drop_shared <- function(master, other, master_keys, using_keys) {
     "Kept the values from {.arg .data} for column{?s} also in {.arg using}: {.var {shared}}.",
     i = "Rename them in {.arg using} first to keep both."
   ))
-  other[setdiff(names(other), shared)]
+  other[setdiff(names(other), intersect(shared, master_keys))]
 }
 
 # Full join with a status code per row, indexing `merge_group_names`:
 # 1 master only, 2 using only, 3 matched.
 merge_join <- function(master, other, by, relationship) {
+  shared <- intersect(names(master), setdiff(names(other), unname(by)))
+  shared_names <- character(length(shared))
+  for (i in seq_along(shared)) {
+    shared_names[[i]] <- merge_marker(c(names(master), names(other)), "shared")
+    names(other)[match(shared[[i]], names(other))] <- shared_names[[i]]
+  }
   in_master <- merge_marker(c(names(master), names(other)), "master")
   in_using <- merge_marker(c(names(master), names(other), in_master), "using")
   master[[in_master]] <- TRUE
@@ -185,6 +191,25 @@ merge_join <- function(master, other, by, relationship) {
     )
   )
   status <- (!is.na(joined[[in_master]])) + 2L * (!is.na(joined[[in_using]]))
+  using_only <- which(status == 2L)
+  for (i in seq_along(shared)) {
+    column <- shared[[i]]
+    if (length(using_only)) {
+      values <- vctrs::vec_slice(joined[[shared_names[[i]]]], using_only)
+      type <- vctrs::vec_ptype2(
+        joined[[column]],
+        values,
+        x_arg = paste0(".data$", column),
+        y_arg = paste0("using$", column)
+      )
+      joined[[column]] <- vctrs::vec_assign(
+        vctrs::vec_cast(joined[[column]], type),
+        using_only,
+        values
+      )
+    }
+    joined[[shared_names[[i]]]] <- NULL
+  }
   joined[[in_master]] <- NULL
   joined[[in_using]] <- NULL
   list(

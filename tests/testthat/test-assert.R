@@ -68,3 +68,22 @@ test_that("assert() reports invalid input and failed conditions", {
     assert(d, x > 0, !is.na(x))
   })
 })
+
+test_that("assert() never shadows input columns with internal result names", {
+  data <- tibble::tibble(x = 1:2, ...assert1 = c(FALSE, FALSE))
+  expect_error(assert(data, x > 0, ...assert1), "2 contradictions")
+  expect_identical(data$...assert1, c(FALSE, FALSE))
+  grouped <- dplyr::group_by(data, ...assert1)
+  expect_error(assert(grouped, x > 0, ...assert1), "2 contradictions")
+  ...assert1 <- FALSE
+  expect_error(assert(data["x"], x > 0, ...assert1), "2 contradictions")
+})
+
+test_that("assert() requires one logical result per row", {
+  data <- tibble::tibble(x = 1:2)
+  expect_error(
+    assert(data, cbind(x > 0, x < 2)),
+    "logical vector"
+  )
+  expect_identical(assert(data, x > 0), data)
+})

@@ -45,7 +45,7 @@ row_non_miss(...)
 \item{na.rm}{For arithmetic and extrema helpers, a single logical value. If
 \code{TRUE} (the default), omit missing values; if \code{FALSE}, any missing input
 makes that row's result missing. Count helpers (\code{row_unique()},
-\code{row_miss()}, \code{row_non_miss()}) reject \code{na.rm}.}
+\code{row_nvals()}, \code{row_miss()}, \code{row_non_miss()}) reject \code{na.rm}.}
 
 \item{.values}{For \code{row_min()} and \code{row_max()}, additional values to compare
 with selected columns: a vector, or a list of vectors. Each must have
@@ -100,6 +100,8 @@ vector in the calling environment is also used as values. Select columns by
 position with \code{c()} or a tidyselect helper, for example \code{row_min(c(1, 2))}.
 Length-one constants (including those in \code{.values}) never fill a row whose
 other inputs are all missing; such rows stay \code{NA}, as with \code{pmin()}.
+Direct column references remain columns in one-row groups; computed
+length-one values are constants.
 }
 
 \section{Arithmetic}{
@@ -146,9 +148,10 @@ observed. Count helpers return integer vectors.
 
 All row summaries and counts use native C++ kernels registered through
 cpp11, which read logical, integer and double columns directly and count
-missing values in the same pass. Means and sums give the same results as
+missing values in the same pass. Means and sums of observed values match
 \code{\link[base:rowMeans]{base::rowMeans()}} and \code{\link[base:rowSums]{base::rowSums()}} without first copying the columns
-into a matrix. Rfast is no longer required.
+into a matrix; unlike those, an all-missing row's mean is \code{NA}, not \code{NaN}.
+Undefined arithmetic on observed infinities can produce \code{NaN}, as in base R.
 }
 
 \examples{

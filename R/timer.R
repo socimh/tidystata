@@ -49,6 +49,16 @@ timer <- function(x, on_error = TRUE) {
 duration_to_chr <- function(duration) {
   total_secs <- as.numeric(duration, units = "secs")
 
+  # Choose the unit after rounding, so 59.999s prints as "1m0s", not "60.00s".
+  if (round(total_secs, 3) < 1) {
+    # sub-second: "0.012s"
+    return(sprintf("%.3fs", total_secs))
+  }
+  if (round(total_secs, 2) < 60) {
+    # e.g. "5.23s"
+    return(sprintf("%.2fs", total_secs))
+  }
+  total_secs <- max(total_secs, 60)
   h <- floor(total_secs / 3600)
   m <- floor((total_secs %% 3600) / 60)
   s <- total_secs %% 60
@@ -56,14 +66,8 @@ duration_to_chr <- function(duration) {
   if (h > 0) {
     # e.g. "1h30m"
     sprintf("%dh%dm", h, m)
-  } else if (m > 0) {
+  } else {
     # e.g. "2m5s"
     sprintf("%dm%ds", m, floor(s))
-  } else if (s >= 1) {
-    # e.g. "5.23s"
-    sprintf("%.2fs", s)
-  } else {
-    # sub-second: "0.012s"
-    sprintf("%.3fs", s)
   }
 }

@@ -24,7 +24,7 @@
 #' @returns A double vector the same length as `x`. Missing values stay
 #' missing. `std()` returns all `NA` when the standard deviation is zero or
 #' undefined (fewer than two observed values), and `pc()` when the total is
-#' zero, as Stata gives missing values there.
+#' zero or infinite, as Stata gives missing values there.
 #'
 #' @examples
 #' std(c(1, 2, 3, NA))
@@ -57,7 +57,7 @@ pc <- function(x, prop = FALSE) {
   x <- egen_numeric(x)
   check_bool(prop)
   total <- sum(x, na.rm = TRUE)
-  if (total == 0) {
+  if (!is.finite(total) || total == 0) {
     return(rep(NA_real_, length(x)))
   }
   out <- x / total

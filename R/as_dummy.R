@@ -70,9 +70,17 @@ as_dummy <- function(
   names(dummies) <- selected
   new_names <- unlist(lapply(dummies, names), use.names = FALSE)
   clash <- intersect(new_names, setdiff(names(data), if (.remove) selected))
-  if (length(clash) || anyDuplicated(new_names)) {
-    column <- c(clash, new_names[duplicated(new_names)])[[1L]]
-    cli::cli_abort("Column {.var {column}} already exists; rename it first.")
+  if (length(clash)) {
+    cli::cli_abort(
+      "Column {.var {clash[[1L]]}} already exists; rename it first."
+    )
+  }
+  if (anyDuplicated(new_names)) {
+    column <- new_names[duplicated(new_names)][[1L]]
+    cli::cli_abort(c(
+      "Several values would create the same column {.var {column}}.",
+      i = "Use {.code .names = \"index\"} or recode the values first."
+    ))
   }
 
   order <- unlist(
@@ -139,7 +147,7 @@ dummy_columns <- function(x, var, names, call = rlang::caller_env()) {
     attr(hit, "label") <- paste0(var, "==", display[[i]])
     hit
   })
-  names(out) <- paste0(var, "_", suffix)
+  names(out) <- paste0(var, "_", suffix, recycle0 = TRUE)
   out
 }
 

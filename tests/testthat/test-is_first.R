@@ -54,3 +54,13 @@ test_that("is_first() reports invalid input", {
     is_first(1:2, 1:3)
   })
 })
+
+test_that("data-frame arguments contribute each of their columns", {
+  data <- tibble::tibble(id = c(1, 1, 2, 2), year = c(1, 1, 1, NA))
+  out <- dplyr::mutate(data, first = is_first(pick(id, year)))
+  expect_identical(out$first, c(TRUE, FALSE, TRUE, FALSE))
+  expect_identical(
+    is_first(data, .missing = TRUE),
+    is_first(data$id, data$year, .missing = TRUE)
+  )
+})

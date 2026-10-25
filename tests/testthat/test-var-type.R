@@ -727,3 +727,7 @@ test_that("var_type returns visible type names for empty and named vectors", {
     list(value = "integer", visible = TRUE)
   )
 })
+
+test_that("abbr must be TRUE or FALSE", {
+  expect_error(var_type(1, abbr = NA), "`abbr` must be `TRUE` or `FALSE`")
+})

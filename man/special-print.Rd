@@ -24,7 +24,7 @@ print_headtail(
   max_footer_lines = NULL
 )
 
-print_all(.data, ...)
+print_all(.data, ..., width = Inf)
 
 print_interval(
   .data,
@@ -52,7 +52,8 @@ or \code{Inf} for all rows. An odd head/tail budget gives the head the extra row
 With \code{n = 1}, both styles select the first row. Short tables never repeat rows.}
 
 \item{width}{Console width, passed to tibble formatting. \code{NULL} uses the
-current console width; \code{Inf} shows all columns.}
+current console width; \code{Inf} (the default for \code{print_all()}) shows all
+columns.}
 
 \item{...}{Additional arguments passed to tibble formatting.}
 

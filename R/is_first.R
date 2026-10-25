@@ -51,8 +51,15 @@ is_first <- function(..., .missing = FALSE) {
     })
     return(seq_len(size) == 1L)
   }
-  sizes <- lengths(keys)
-  if (any(sizes != sizes[[1L]])) {
+  # Data frames, such as `pick(id, year)`, contribute each of their columns.
+  keys <- unlist(
+    lapply(keys, function(key) {
+      if (is.data.frame(key)) as.list(key) else list(key)
+    }),
+    recursive = FALSE
+  )
+  sizes <- vapply(keys, vctrs::vec_size, integer(1))
+  if (!length(keys) || any(sizes != sizes[[1L]])) {
     cli::cli_abort("All arguments to {.fn is_first} must have the same length.")
   }
   names(keys) <- paste0("key", seq_along(keys))
