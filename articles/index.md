@@ -10,5 +10,3 @@
   Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.md):
 - [从 Stata 到
   R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.md):
-- [Migration
-  guide](https://socimh.github.io/tidystata/articles/migration.md):

@@ -6,13 +6,15 @@ and
 [`dplyr::lead()`](https://dplyr.tidyverse.org/reference/lead-lag.html),
 following Stata's time-series operators after `xtset`:
 
-- `s_lag(x, n, time = t)` is `Ln.x`: the value of `x` at time `t - n`.
+- `stata_lag(x, n, time = t)` is `Ln.x`: the value of `x` at time
+  `t - n`.
 
-- `s_lead(x, n, time = t)` is `Fn.x`: the value of `x` at time `t + n`.
+- `stata_lead(x, n, time = t)` is `Fn.x`: the value of `x` at time
+  `t + n`.
 
-- `s_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
-  `s_diff(x, time = t)` is `x - L.x` and `s_diff(x, 2, time = t)` is
-  `D.(D.x)`.
+- `stata_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
+  `stata_diff(x, time = t)` is `x - L.x` and
+  `stata_diff(x, 2, time = t)` is `D.(D.x)`.
 
 Values are found by time, not by row position, so gaps in time give
 missing values and the row order does not matter. Use them in
@@ -24,24 +26,25 @@ as `xtset id year` would declare it.
 ## Usage
 
 ``` r
-s_lag(x, n = 1L, time, delta = 1, unit = NULL)
+stata_lag(x, n = 1L, time, delta = 1, unit = NULL)
 
-s_lead(x, n = 1L, time, delta = 1, unit = NULL)
+stata_lead(x, n = 1L, time, delta = 1, unit = NULL)
 
-s_diff(x, n = 1L, time, delta = 1, unit = NULL)
+stata_diff(x, n = 1L, time, delta = 1, unit = NULL)
 ```
 
 ## Arguments
 
 - x:
 
-  A vector. `s_diff()` needs a numeric, logical, `Date`, date-time or
-  `difftime` vector.
+  A vector. `stata_diff()` needs a numeric, logical, `Date`, date-time
+  or `difftime` vector.
 
 - n:
 
-  A single non-negative whole number: the number of periods (`s_lag()`,
-  `s_lead()`) or the order of the difference (`s_diff()`).
+  A single non-negative whole number: the number of periods
+  (`stata_lag()`, `stata_lead()`) or the order of the difference
+  (`stata_diff()`).
 
 - time:
 
@@ -78,13 +81,15 @@ s_diff(x, n = 1L, time, delta = 1, unit = NULL)
   date-times also `"second"` (their default), `"minute"` and `"hour"`.
   Times are compared by whole periods, as with Stata's `%tw`, `%tm`,
   `%tq` and `%ty` dates, so any day in March is one month after any day
-  in February. Weeks start on Monday, and date-times use the local clock
-  of their time zone. Must be `NULL` for numbers and period classes.
+  in February. Weeks follow Stata's `%tw`: each year has 52 weeks
+  starting on 1 January, so the last week has 8 or 9 days (tsibble's
+  `yearweek()` keeps its ISO weeks). Date-times use the local clock of
+  their time zone. Must be `NULL` for numbers and period classes.
 
 ## Value
 
 A vector like `x`, with `NA` where the required period is absent from
-the panel. `s_diff()` returns a double vector, or a `difftime` for
+the panel. `stata_diff()` returns a double vector, or a `difftime` for
 dates, date-times and `difftime` input.
 
 ## Details
@@ -94,7 +99,7 @@ Compared with
 `lag(x, order_by = year)` takes the previous *row* after sorting, so
 after a gap (2002, then 2004) it returns the 2002 value as the lag of
 2004, and it silently accepts repeated years or a forgotten `.by`.
-`s_lag(x, time = year)` takes the value at `year - 1`, returns `NA`
+`stata_lag(x, time = year)` takes the value at `year - 1`, returns `NA`
 across the gap, and errors on repeated times, as Stata's `L.x` does. The
 two agree on sorted, gap-free panels. For irregular event sequences,
 where the previous record is wanted however long ago it was, use
@@ -126,9 +131,9 @@ panel <- tibble::tibble(
 # 2004 has no 2003, so its lag is missing, unlike dplyr::lag()
 dplyr::mutate(
   panel,
-  lag_x = s_lag(x, time = year),
-  lead_x = s_lead(x, time = year),
-  d_x = s_diff(x, time = year),
+  lag_x = stata_lag(x, time = year),
+  lead_x = stata_lead(x, time = year),
+  d_x = stata_diff(x, time = year),
   .by = id
 )
 #> # A tibble: 5 × 6
@@ -145,7 +150,7 @@ sales <- tibble::tibble(
   month = as.Date(c("2024-01-31", "2024-02-29", "2024-04-30")),
   amount = c(5, 7, 4)
 )
-dplyr::mutate(sales, previous = s_lag(amount, time = month, unit = "month"))
+dplyr::mutate(sales, previous = stata_lag(amount, time = month, unit = "month"))
 #> # A tibble: 3 × 3
 #>   month      amount previous
 #>   <date>      <dbl>    <dbl>

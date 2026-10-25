@@ -8,9 +8,12 @@
 <title>Tidy Tools Inspired by Stata • tidystata</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Tidy Tools Inspired by Stata">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Tidy Tools Inspired by Stata">
 <meta name="description" content="Tools inspired by Stata for exploring and preparing data in R. Provides frequency tables, summary statistics, variable inspection, column selection, row calculations, and binning with tidyverse-style interfaces and support for labelled data.">
 <meta property="og:description" content="Tools inspired by Stata for exploring and preparing data in R. Provides frequency tables, summary statistics, variable inspection, column selection, row calculations, and binning with tidyverse-style interfaces and support for labelled data.">
 </head>
@@ -22,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
@@ -39,7 +43,8 @@
     <li><a class="dropdown-item" href="articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><a class="dropdown-item" href="articles/migration.html">Migration guide</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="articles/index.html">More articles...</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -62,77 +67,44 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p><a href="https://socimh.github.io/tidystata/">tidystata</a> is a set of functions that combines Stata-inspired features with tidyverse-style operations.</p>
-<p>The package focuses on exploring and preparing data:</p>
-<ul>
-<li>
-<code><a href="reference/tab.html">tab()</a></code>, <code><a href="reference/tab.html">tab1()</a></code>, and <code><a href="reference/tab.html">tab2()</a></code> for frequency tables.</li>
-<li>
-<code><a href="reference/tab.html">fre()</a></code>, <code><a href="reference/tab.html">fre1()</a></code>, and <code><a href="reference/tab.html">fre2()</a></code> for frequency tables with totals.</li>
-<li>
-<code><a href="reference/summ.html">summ()</a></code> and <code><a href="reference/summ.html">tabstat()</a></code> for summary statistics.</li>
-<li>
-<code><a href="reference/pwcorr.html">pwcorr()</a></code>, <code><a href="reference/misstable.html">misstable()</a></code>, and <code>tab2(.chi2 = TRUE)</code> for correlations, missing values, and tests of independence.</li>
-<li>
-<code><a href="reference/codebook.html">codebook()</a></code> and <code><a href="reference/variables.html">variables()</a></code> for variable inspection.</li>
-<li>
-<code><a href="reference/keys.html">isid()</a></code>, <code><a href="reference/keys.html">duplicates_report()</a></code>, <code><a href="reference/assert.html">assert()</a></code>, <code><a href="reference/is_first.html">is_first()</a></code>, and <code><a href="reference/s_merge.html">s_merge()</a></code> for checking keys and merging, and <code><a href="reference/special-print.html">print_all()</a></code> for listing every row.</li>
-<li>
-<code><a href="reference/s_select.html">s_select()</a></code>, row calculations, conversion helpers, <code><a href="reference/std.html">std()</a></code>, <code><a href="reference/std.html">pc()</a></code>, <code><a href="reference/as_dummy.html">as_dummy()</a></code>, panel lags (<code><a href="reference/panel.html">s_lag()</a></code>, <code><a href="reference/panel.html">s_lead()</a></code>, <code><a href="reference/panel.html">s_diff()</a></code>), and binning for data preparation.</li>
-</ul>
-<p>tidystata <code>0.3.0</code> retires the import/export, regression-table, and detailed-codebook wrappers. See the <a href="https://socimh.github.io/tidystata/articles/migration.html">migration guide</a> for direct package alternatives and breaking changes. This experimental package is undergoing stabilization; see <a href="https://socimh.github.io/tidystata/news/index.html">NEWS</a> for changes in each release.</p>
+<p><a href="https://github.com/socimh/tidystata/blob/master/README.zh.md" class="external-link">中文版</a></p>
+<p><a href="https://socimh.github.io/tidystata/">tidystata</a> brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with <code>.by</code>. The resulting tables work with ordinary R tools for filtering, joining and plotting.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of tidystata like so:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"socimh/tidystata"</span><span class="op">)</span></span></code></pre></div>
-<p>R 4.1.0 or later and a suitable build toolchain are required to install from source. Rich table formatting is optional and requires <code>flextable</code>.</p>
-<p>If you already have this source repository on your computer, open <code>tidystata.Rproj</code> and restart R before installing the local changes:</p>
+</div>
+<div class="section level2">
+<h2 id="core-functions">Core functions<a class="anchor" aria-label="anchor" href="#core-functions"></a>
+</h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"."</span>, upgrade <span class="op">=</span> <span class="st">"never"</span>, build_vignettes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p>Restart R again, then check the version and installed location:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/socimh/tidystata" class="external-link">tidystata</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/packageDescription.html" class="external-link">packageVersion</a></span><span class="op">(</span><span class="st">"tidystata"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/find.package.html" class="external-link">find.package</a></span><span class="op">(</span><span class="st">"tidystata"</span><span class="op">)</span></span></code></pre></div>
-<p>Opening the source folder alone does not change what <code><a href="https://github.com/socimh/tidystata" class="external-link">library(tidystata)</a></code> loads. Repeat the installation after editing source code. During package development, <code>devtools::load_all(".")</code> loads the working source into the current session; installation followed by a fresh R session tests the installed package.</p>
-</div>
-<div class="section level2">
-<h2 id="learn-the-workflow">Learn the workflow<a class="anchor" aria-label="anchor" href="#learn-the-workflow"></a>
-</h2>
-<p>Read <a href="https://socimh.github.io/tidystata/articles/getting-started.html">Getting started</a> for a small exploration and preparation workflow, and <a href="https://socimh.github.io/tidystata/articles/containers-and-missing-values.html">Containers and missing values</a> for return types, grouping, labels and previews. In an installation that includes vignettes, use <code><a href="articles/getting-started.html">vignette("getting-started", package = "tidystata")</a></code>.</p>
-<p>Coming from Stata? <code><a href="reference/findit.html">findit()</a></code> gives the R equivalent of a Stata command. Type one Stata word bare, or quote anything longer; the usual Stata abbreviations work:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="va">reg</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"merge 1:1 id, keep(match)"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="va">left_join</span><span class="op">)</span> <span class="co"># R functions work too</span></span></code></pre></div>
-<p>The <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a> article lists every entry by topic, in English and <a href="https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html">Chinese</a>, including the packages to use beyond tidystata.</p>
-<p>Plain manual scripts are in the source repository’s <a href="https://github.com/socimh/tidystata/tree/master/examples" class="external-link"><code>examples/</code></a> folder. Open a script in your editor and run its lines individually; from a source checkout, <code>source("examples/02_frequency_tables.R", echo = TRUE)</code> runs a complete example. The full <a href="https://socimh.github.io/tidystata/articles/migration.html">migration guide</a> is on the website.</p>
-</div>
-<div class="section level2">
-<h2 id="table-return-types">Table return types<a class="anchor" aria-label="anchor" href="#table-return-types"></a>
-</h2>
-<p>Most table-producing helpers, including the <code>tab</code>, <code>summ</code>, <code>codebook</code> and <code>variables</code> families, preserve the input container by default: a tibble returns a tibble, a base data frame returns a base data frame, and a data.table returns a data.table. List outputs remain lists, with each table following the same rule. Explicit output options override this default. <code><a href="reference/pwcorr.html">pwcorr()</a></code>, <code><a href="reference/misstable.html">misstable()</a></code> and <code><a href="reference/keys.html">duplicates_report()</a></code> always return tibbles, as their help pages state. Summaries and variable inventories are ungrouped; grouping columns are retained where the function normally reports them. Arbitrary data-frame subclass metadata is not guaranteed on newly constructed tables. Vector and scalar helpers retain their usual outputs.</p>
-<p><code><a href="reference/special-print.html">preview_table()</a></code> preserves the underlying container while changing its console display. <code><a href="reference/special-print.html">unpreview_table()</a></code> removes that display setting. External dplyr and tidyr verbs retain their own container and grouping behavior, with preview settings preserved for supported operations.</p>
-</div>
-<div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
-</h2>
-<div class="section level3">
-<h3 id="load-the-package">Load the package<a class="anchor" aria-label="anchor" href="#load-the-package"></a>
-</h3>
-<p>Load <code>tidystata</code> and the data-manipulation package used in these examples.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/socimh/tidystata" class="external-link">tidystata</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="findit-find-the-r-equivalent-of-a-stata-command">findit(): find the R equivalent of a Stata command<a class="anchor" aria-label="anchor" href="#findit-find-the-r-equivalent-of-a-stata-command"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"reg, robust"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Heteroskedasticity-robust standard errors [fixest]</span></span>
+<span><span class="co">#&gt; Stata: regress y x1 x2, robust</span></span>
+<span><span class="co">#&gt; R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")</span></span>
+<span><span class="co">#&gt; # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; # 17 more examples. To see them all: findit("reg, robust") |&gt; print(n = Inf)</span></span>
+<span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"egen rowmean"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Average available values across columns [base]</span></span>
+<span><span class="co">#&gt; Stata: egen z = rowmean(x y)</span></span>
+<span><span class="co">#&gt; R:     data$z &lt;- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] &lt;- NA_real_</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; # 59 more examples. To see them all: findit("egen rowmean") |&gt; print(n = Inf)</span></span></code></pre></div>
+<p>A bare command such as <code>findit(reg)</code> shows one clear example; <code>findit(reg) |&gt; print(n = Inf)</code> shows every match. Add variable names or hints with commas, as in <code>findit(tab, sex, region)</code> or <code>findit(tab, gen)</code>. Every entry is listed by topic in <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a>.</p>
 </div>
 <div class="section level3">
-<h3 id="codebook">codebook()<a class="anchor" aria-label="anchor" href="#codebook"></a>
+<h3 id="codebook-describe-every-variable">codebook(): describe every variable<a class="anchor" aria-label="anchor" href="#codebook-describe-every-variable"></a>
 </h3>
-<p>View the codebook of <code>lifeexp</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/codebook.html">codebook</a></span><span class="op">(</span><span class="va">lifeexp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 x 5</span></span>
 <span><span class="co">#&gt;   variable  label                    type             n unique</span></span>
@@ -145,140 +117,83 @@
 <span><span class="co">#&gt; 6 safewater Safe water               double          54     32</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="summ">summ()<a class="anchor" aria-label="anchor" href="#summ"></a>
+<h3 id="summ-summary-statistics">summ(): summary statistics<a class="anchor" aria-label="anchor" href="#summ-summary-statistics"></a>
 </h3>
-<p>Summarise selected numeric variables in <code>mtcars</code>.</p>
+<p><code>lexp:safewater</code> selects the three consecutive variables from <code>lexp</code> through <code>safewater</code>, including both endpoints. Other tidyselect helpers such as <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">ends_with()</a></code> and <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches()</a></code>, or a Stata-style <code><a href="reference/varlist.html">varlist()</a></code>, also work.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/summ.html">summ</a></span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span><span class="op">:</span><span class="va">safewater</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 9 x 9</span></span>
+<span><span class="co">#&gt;   region               name      type      n unique   min    mean       sd   max</span></span>
+<span><span class="co">#&gt;   &lt;dbl+lbl&gt;            &lt;chr&gt;     &lt;chr&gt; &lt;int&gt;  &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 1 [Europe &amp; C. Asia] lexp      dbl      44     17    62    72.5     4.95    79</span></span>
+<span><span class="co">#&gt; 2 1 [Europe &amp; C. Asia] gnppc     dbl      43     42   170 11284.  12920.   46650</span></span>
+<span><span class="co">#&gt; 3 1 [Europe &amp; C. Asia] safewater dbl      42     25    36    81.6    18.6    100</span></span>
+<span><span class="co">#&gt; 4 2 [North America]    lexp      dbl      14     13    57    69.7     6.14    79</span></span>
+<span><span class="co">#&gt; 5 2 [North America]    gnppc     dbl      14     14   410  6294.   9080.   32040</span></span>
+<span><span class="co">#&gt; 6 2 [North America]    safewater dbl       6      5    40    58      24.0     99</span></span>
+<span><span class="co">#&gt; 7 3 [South America]    lexp      dbl      10      8    61    70.7     4.06    76</span></span>
+<span><span class="co">#&gt; 8 3 [South America]    gnppc     dbl      10      9   960  3881    2432.    7960</span></span>
+<span><span class="co">#&gt; 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="tab-tab1-and-tab2-compare-frequency-tables">tab(), tab1() and tab2(): compare frequency tables<a class="anchor" aria-label="anchor" href="#tab-tab1-and-tab2-compare-frequency-tables"></a>
+</h3>
+<p>Use region and a second category derived from <code>lifeexp</code>: whether life expectancy is at least 70 years. <code>region:lexp_70</code> selects these two columns.</p>
+<p><code><a href="reference/tab.html">tab()</a></code> counts each observed combination, with percentages.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lifeexp_tab</span> <span class="op">&lt;-</span> <span class="va">lifeexp</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span><span class="va">region</span>, lexp_70 <span class="op">=</span> <span class="va">lexp</span> <span class="op">&gt;=</span> <span class="fl">70</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tab.html">tab</a></span><span class="op">(</span><span class="va">lifeexp_tab</span>, <span class="va">region</span><span class="op">:</span><span class="va">lexp_70</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 x 7</span></span>
+<span><span class="co">#&gt;   region               lexp_70     n percent   cum valid valid_cum</span></span>
+<span><span class="co">#&gt;   &lt;dbl+lbl&gt;            &lt;lgl&gt;   &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 1 [Europe &amp; C. Asia] FALSE      12   17.6   17.6 17.6       17.6</span></span>
+<span><span class="co">#&gt; 2 1 [Europe &amp; C. Asia] TRUE       32   47.1   64.7 47.1       64.7</span></span>
+<span><span class="co">#&gt; 3 2 [North America]    FALSE       6    8.82  73.5  8.82      73.5</span></span>
+<span><span class="co">#&gt; 4 2 [North America]    TRUE        8   11.8   85.3 11.8       85.3</span></span>
+<span><span class="co">#&gt; 5 3 [South America]    FALSE       3    4.41  89.7  4.41      89.7</span></span>
+<span><span class="co">#&gt; 6 3 [South America]    TRUE        7   10.3  100   10.3      100</span></span></code></pre></div>
+<p><code><a href="reference/tab.html">tab1()</a></code> returns a named list with a separate frequency table for each variable.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/summ.html">summ</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="va">mpg</span>, <span class="va">wt</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   name type  n unique    min     mean        sd    max</span></span>
-<span><span class="co">#&gt; 1  mpg  dbl 32     25 10.400 20.09062 6.0269481 33.900</span></span>
-<span><span class="co">#&gt; 2   wt  dbl 32     29  1.513  3.21725 0.9784574  5.424</span></span></code></pre></div>
-<p>Choose numeric variables deliberately: means and standard deviations of factor codes may have no substantive interpretation. Numeric and logical columns with no observed values are retained: <code>n</code> and <code>unique</code> are zero and summary statistics are <code>NA</code>, including <code>sum</code>.</p>
-<p>Select statistics with <code>.stat</code>. Aliases <code>missing</code>, <code>p25</code>, <code>p50</code>, and <code>p75</code> retain their requested names and order; <code>sum</code> is available for numeric summaries. Unsupported statistics produce an error. See the <a href="https://socimh.github.io/tidystata/articles/migration.html">migration guide</a> for the date/datetime restrictions and cross-tabulation naming rules.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">tab1</a></span><span class="op">(</span><span class="va">lifeexp_tab</span>, <span class="va">region</span><span class="op">:</span><span class="va">lexp_70</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $region</span></span>
+<span><span class="co">#&gt; # A tibble: 3 x 6</span></span>
+<span><span class="co">#&gt;   value                    n percent   cum valid valid_cum</span></span>
+<span><span class="co">#&gt;   &lt;dbl+lbl&gt;            &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 1 [Europe &amp; C. Asia]    44    64.7  64.7  64.7      64.7</span></span>
+<span><span class="co">#&gt; 2 2 [North America]       14    20.6  85.3  20.6      85.3</span></span>
+<span><span class="co">#&gt; 3 3 [South America]       10    14.7 100    14.7     100  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lexp_70</span></span>
+<span><span class="co">#&gt; # A tibble: 2 x 6</span></span>
+<span><span class="co">#&gt;   value     n percent   cum valid valid_cum</span></span>
+<span><span class="co">#&gt;   &lt;lgl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 FALSE    21    30.9  30.9  30.9      30.9</span></span>
+<span><span class="co">#&gt; 2 TRUE     47    69.1 100    69.1     100</span></span></code></pre></div>
+<p><code><a href="reference/tab.html">tab2()</a></code> displays the joint counts as a cross-table, with region in rows and life expectancy category in columns.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/summ.html">summ</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="va">mpg</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"missing"</span>, <span class="st">"p50"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   type missing  p50   sum</span></span>
-<span><span class="co">#&gt; 1  dbl       0 19.2 642.9</span></span></code></pre></div>
-<p>With <code>.type = "table"</code>, numeric and calendar summaries share character columns for formatted statistics; counts remain numeric. Default list mode preserves numeric statistic types in the numeric summary.</p>
-</div>
-<div class="section level3">
-<h3 id="tab">tab()<a class="anchor" aria-label="anchor" href="#tab"></a>
-</h3>
-<p>Tabulate a single variable:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">tab</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/starwars.html" class="external-link">starwars</a></span>, <span class="va">sex</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 5 x 6</span></span>
-<span><span class="co">#&gt;   sex                n percent   cum valid valid_cum</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;          &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 female            16   18.4   18.4 19.3       19.3</span></span>
-<span><span class="co">#&gt; 2 hermaphroditic     1    1.15  19.5  1.20      20.5</span></span>
-<span><span class="co">#&gt; 3 male              60   69.0   88.5 72.3       92.8</span></span>
-<span><span class="co">#&gt; 4 none               6    6.90  95.4  7.23     100  </span></span>
-<span><span class="co">#&gt; 5 &lt;NA&gt;               4    4.60 100   NA         NA</span></span></code></pre></div>
-<p><code><a href="reference/tab.html">tab1()</a></code> tabulates variables one by one as a list, and <code><a href="reference/varlist.html">varlist()</a></code> can select variables in a Stata style.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">tab1</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/starwars.html" class="external-link">starwars</a></span>, <span class="fu"><a href="reference/varlist.html">varlist</a></span><span class="op">(</span><span class="st">"*color"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $hair_color</span></span>
-<span><span class="co">#&gt; # A tibble: 12 x 6</span></span>
-<span><span class="co">#&gt;    value             n percent    cum valid valid_cum</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;         &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 auburn            1    1.15   1.15  1.22      1.22</span></span>
-<span><span class="co">#&gt;  2 auburn, grey      1    1.15   2.30  1.22      2.44</span></span>
-<span><span class="co">#&gt;  3 auburn, white     1    1.15   3.45  1.22      3.66</span></span>
-<span><span class="co">#&gt;  4 black            13   14.9   18.4  15.9      19.5 </span></span>
-<span><span class="co">#&gt;  5 blond             3    3.45  21.8   3.66     23.2 </span></span>
-<span><span class="co">#&gt;  6 blonde            1    1.15  23.0   1.22     24.4 </span></span>
-<span><span class="co">#&gt;  7 brown            18   20.7   43.7  22.0      46.3 </span></span>
-<span><span class="co">#&gt;  8 brown, grey       1    1.15  44.8   1.22     47.6 </span></span>
-<span><span class="co">#&gt;  9 grey              1    1.15  46.0   1.22     48.8 </span></span>
-<span><span class="co">#&gt; 10 none             38   43.7   89.7  46.3      95.1 </span></span>
-<span><span class="co">#&gt; 11 white             4    4.60  94.3   4.88    100   </span></span>
-<span><span class="co">#&gt; 12 &lt;NA&gt;              5    5.75 100    NA        NA   </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $skin_color</span></span>
-<span><span class="co">#&gt; # A tibble: 31 x 6</span></span>
-<span><span class="co">#&gt;    value                   n percent   cum valid valid_cum</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;               &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 blue                    2    2.30  2.30  2.30      2.30</span></span>
-<span><span class="co">#&gt;  2 blue, grey              2    2.30  4.60  2.30      4.60</span></span>
-<span><span class="co">#&gt;  3 brown                   4    4.60  9.20  4.60      9.20</span></span>
-<span><span class="co">#&gt;  4 brown mottle            1    1.15 10.3   1.15     10.3 </span></span>
-<span><span class="co">#&gt;  5 brown, white            1    1.15 11.5   1.15     11.5 </span></span>
-<span><span class="co">#&gt;  6 dark                    6    6.90 18.4   6.90     18.4 </span></span>
-<span><span class="co">#&gt;  7 fair                   17   19.5  37.9  19.5      37.9 </span></span>
-<span><span class="co">#&gt;  8 fair, green, yellow     1    1.15 39.1   1.15     39.1 </span></span>
-<span><span class="co">#&gt;  9 gold                    1    1.15 40.2   1.15     40.2 </span></span>
-<span><span class="co">#&gt; 10 green                   6    6.90 47.1   6.90     47.1 </span></span>
-<span><span class="co">#&gt; # i 21 more rows</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $eye_color</span></span>
-<span><span class="co">#&gt; # A tibble: 15 x 6</span></span>
-<span><span class="co">#&gt;    value             n percent   cum valid valid_cum</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;         &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 black            10   11.5   11.5 11.5       11.5</span></span>
-<span><span class="co">#&gt;  2 blue             19   21.8   33.3 21.8       33.3</span></span>
-<span><span class="co">#&gt;  3 blue-gray         1    1.15  34.5  1.15      34.5</span></span>
-<span><span class="co">#&gt;  4 brown            21   24.1   58.6 24.1       58.6</span></span>
-<span><span class="co">#&gt;  5 dark              1    1.15  59.8  1.15      59.8</span></span>
-<span><span class="co">#&gt;  6 gold              1    1.15  60.9  1.15      60.9</span></span>
-<span><span class="co">#&gt;  7 green, yellow     1    1.15  62.1  1.15      62.1</span></span>
-<span><span class="co">#&gt;  8 hazel             3    3.45  65.5  3.45      65.5</span></span>
-<span><span class="co">#&gt;  9 orange            8    9.20  74.7  9.20      74.7</span></span>
-<span><span class="co">#&gt; 10 pink              1    1.15  75.9  1.15      75.9</span></span>
-<span><span class="co">#&gt; 11 red               5    5.75  81.6  5.75      81.6</span></span>
-<span><span class="co">#&gt; 12 red, blue         1    1.15  82.8  1.15      82.8</span></span>
-<span><span class="co">#&gt; 13 unknown           3    3.45  86.2  3.45      86.2</span></span>
-<span><span class="co">#&gt; 14 white             1    1.15  87.4  1.15      87.4</span></span>
-<span><span class="co">#&gt; 15 yellow           11   12.6  100   12.6      100</span></span></code></pre></div>
-<p>One-way tabulation also counts list-column values. Selecting no variables returns an empty result; <code><a href="reference/tab.html">tab1()</a></code> and <code><a href="reference/tab.html">fre1()</a></code> return empty lists by default. Matrix columns are unsupported.</p>
-<p><code><a href="reference/tab.html">tab2()</a></code> cross-tabulates two variables.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">tab2</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/starwars.html" class="external-link">starwars</a></span>, <span class="va">sex</span>, <span class="va">gender</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 5 x 4</span></span>
-<span><span class="co">#&gt;   `sex \\ gender` feminine masculine  `NA`</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;              &lt;int&gt;     &lt;int&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1 female                16         0     0</span></span>
-<span><span class="co">#&gt; 2 hermaphroditic         0         1     0</span></span>
-<span><span class="co">#&gt; 3 male                   0        60     0</span></span>
-<span><span class="co">#&gt; 4 none                   1         5     0</span></span>
-<span><span class="co">#&gt; 5 &lt;NA&gt;                   0         0     4</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="fre">fre()<a class="anchor" aria-label="anchor" href="#fre"></a>
-</h3>
-<p><code><a href="reference/tab.html">fre()</a></code> family functions simply add total rows (and total columns in <code><a href="reference/tab.html">fre2()</a></code>) to their <code><a href="reference/tab.html">tab()</a></code> counterparts.</p>
-<p><code><a href="reference/tab.html">fre()</a></code> and <code><a href="reference/tab.html">fre2()</a></code> default to <code>.type = "auto"</code>, preserving the input container. <code><a href="reference/tab.html">fre1()</a></code> returns a list whose tables preserve that container. Request <code>.type = "tibble"</code> explicitly when a tibble is required.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">fre</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/starwars.html" class="external-link">starwars</a></span>, <span class="va">sex</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 7 x 6</span></span>
-<span><span class="co">#&gt;   sex                n percent   cum  valid valid_cum</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;          &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 female            16   18.4   18.4  19.3       19.3</span></span>
-<span><span class="co">#&gt; 2 hermaphroditic     1    1.15  19.5   1.20      20.5</span></span>
-<span><span class="co">#&gt; 3 male              60   69.0   88.5  72.3       92.8</span></span>
-<span><span class="co">#&gt; 4 none               6    6.90  95.4   7.23     100  </span></span>
-<span><span class="co">#&gt; 5 Valid Total       83   95.4   NA   100         NA  </span></span>
-<span><span class="co">#&gt; 6 &lt;NA&gt;               4    4.60 100    NA         NA  </span></span>
-<span><span class="co">#&gt; 7 Total             87  100     NA    NA         NA</span></span></code></pre></div>
-<p>For optional rich formatting, install <code>flextable</code> and request it explicitly:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">fre</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/starwars.html" class="external-link">starwars</a></span>, <span class="va">sex</span>, .type <span class="op">=</span> <span class="st">"flextable"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="row-calculations-and-binning">Row calculations and binning<a class="anchor" aria-label="anchor" href="#row-calculations-and-binning"></a>
-</h3>
-<p>Row helpers return vectors that can be used in <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="cn">NA</span>, <span class="fl">3</span><span class="op">)</span>, b <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="cn">NA</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>row_average <span class="op">=</span> <span class="fu"><a href="reference/row_egen.html">row_mean</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">tab2</a></span><span class="op">(</span><span class="va">lifeexp_tab</span>, <span class="va">region</span><span class="op">:</span><span class="va">lexp_70</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 3 x 3</span></span>
-<span><span class="co">#&gt;       a     b row_average</span></span>
-<span><span class="co">#&gt;   &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1     1     3           2</span></span>
-<span><span class="co">#&gt; 2    NA    NA          NA</span></span>
-<span><span class="co">#&gt; 3     3     5           4</span></span></code></pre></div>
-<p><code><a href="reference/cut.html">xtile()</a></code> keeps equal values in the same group. Ties can reduce the number of intervals, with a warning, rather than splitting equal values by row order.</p>
+<span><span class="co">#&gt;   `region \\ lexp_70`  `FALSE` `TRUE`</span></span>
+<span><span class="co">#&gt;   &lt;dbl+lbl&gt;              &lt;int&gt;  &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 1 [Europe &amp; C. Asia]      12     32</span></span>
+<span><span class="co">#&gt; 2 2 [North America]          6      8</span></span>
+<span><span class="co">#&gt; 3 3 [South America]          3      7</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
+</h2>
+<p>tidystata also covers row calculations (<code><a href="reference/row_egen.html">row_mean()</a></code>), panel operators (<code><a href="reference/panel.html">stata_lag()</a></code>), correlations (<code><a href="reference/pwcorr.html">pwcorr()</a></code>), missing values (<code><a href="reference/misstable.html">misstable()</a></code>), keys and merging (<code><a href="reference/keys.html">isid()</a></code>, <code><a href="reference/stata_merge.html">stata_merge()</a></code>) and binning (<code><a href="reference/cut.html">xtile()</a></code>). See the guides below for examples and output conventions.</p>
+<ul>
+<li>
+<a href="https://socimh.github.io/tidystata/articles/getting-started.html">Getting started</a>: a short workflow.</li>
+<li>
+<a href="https://socimh.github.io/tidystata/articles/containers-and-missing-values.html">Containers and missing values</a>: return types, grouping and labels.</li>
+<li>
+<a href="https://socimh.github.io/tidystata/reference/index.html">Reference</a>: every function.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
@@ -320,7 +235,7 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a></li>
 <li><a href="https://CRAN.R-project.org/package=tidystata" class="external-link"><img src="https://www.r-pkg.org/badges/version/tidystata" alt="CRAN status"></a></li>
 <li><a href="https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/socimh/tidystata/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 </ul>

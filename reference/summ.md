@@ -22,9 +22,7 @@ summ(
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic"),
-  .na.rm = lifecycle::deprecated(),
-  .mode = lifecycle::deprecated()
+  .wt_type = c("frequency", "analytic")
 )
 
 tabstat(
@@ -41,9 +39,7 @@ tabstat(
   .sort = TRUE,
   .drop_empty = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic"),
-  .na.rm = lifecycle::deprecated(),
-  .mode = lifecycle::deprecated()
+  .wt_type = c("frequency", "analytic")
 )
 ```
 
@@ -99,7 +95,7 @@ tabstat(
   or `kurtosis` either; when such a statistic is requested alongside
   numeric variables, calendar variables are skipped with a warning.
   Percentiles `p0` through `p100`, including decimals such as `p2.5`,
-  use type-7 quantiles. Only requested statistics and their
+  follow Stata's rule (see Details). Only requested statistics and their
   prerequisites are calculated when `.stat` is nonempty.
 
 - .missing:
@@ -165,14 +161,9 @@ tabstat(
   is the sum of the weights (non-integer weights are allowed). Analytic
   weights (Stata's `[aweight]`, suitable for sampling weights) are
   rescaled within each group and variable to sum to the number of
-  observed values, so `n` is the number of observations. Means and
-  percentiles are the same under both types; `sd`, `se` and `sum`
+  observed values, so `n` is the number of observations. Means,
+  percentiles and `sum` are the same under both types; `sd` and `se`
   differ.
-
-- .na.rm, .mode:
-
-  **\[deprecated\]** Use `.missing` (with the opposite value) and
-  `.type` instead.
 
 ## Value
 
@@ -212,27 +203,42 @@ flagged with a warning. Measured vectors and `difftime` use their
 original units. In variable names, `*` marks labelled vectors, `**`
 marks factors and `***` marks retained nonnumeric columns.
 
-SD uses the sample denominator (`n - 1`); `se` is SD divided by
-`sqrt(n)`. Quantiles use R's default type 7, `mad` uses
-[`stats::mad()`](https://rdrr.io/r/stats/mad.html) with its default
-scaling, and `iqr` uses
-[`stats::IQR()`](https://rdrr.io/r/stats/IQR.html). `skew` is the mean
-cubed deviation divided by the sample SD cubed. `kurtosis` is the mean
-fourth-power deviation divided by the sample SD to the fourth power,
-minus three (excess kurtosis). These conventions are not promised to
-match Stata. For singleton or constant inputs, undefined spread or
-moment statistics may be `NA` or `NaN`.
+Statistics follow Stata's `summarize, detail` and are tested against
+Stata's own output:
+
+- SD uses the sample denominator (`n - 1`); `se` is SD divided by
+  `sqrt(n)`.
+
+- Percentiles use Stata's rule, not R's default
+  [`stats::quantile()`](https://rdrr.io/r/stats/quantile.html) type 7:
+  with `n` sorted values, the `p`th percentile is the value at position
+  `floor(n * p) + 1`, or the mean of the values at positions `n * p` and
+  `n * p + 1` when `n * p` is whole. So `q1` of `1:4` is 1.5 (type 7
+  gives 1.75). `median`, `q1`, `q3` and `iqr` (`q3 - q1`) use the same
+  rule.
+
+- `skew` and `kurtosis` use population moments, `m3 / m2^1.5` and
+  `m4 / m2^2`, so `kurtosis` is 3 for a normal distribution (not excess
+  kurtosis). They are `NA` when the values are constant or fewer than
+  two.
+
+- `mad` has no Stata counterpart; it uses
+  [`stats::mad()`](https://rdrr.io/r/stats/mad.html) with its default
+  scaling.
+
+For singleton or constant inputs, undefined spread statistics are `NA`.
 
 Weighted statistics:
 
 With `.wt`, the mean is `sum(w * x) / W` and the variance is
 `sum(w * (x - mean)^2) / (W - 1)`, where `W` is the summed weight (after
 rescaling for analytic weights); `se` is `sd / sqrt(W)`, and `sum` is
-`sum(w * x)`. Percentiles, `median`, `q1`, `q3`, `iqr` and `mad` use
-Stata's weighted percentile rule, so they can differ from the unweighted
-type-7 quantiles even when all weights are 1. `min` and `max` ignore
-rows with zero weight. `unique`, `miss_n` and `valid_pct` remain
-unweighted row counts.
+`sum(w * x)` with the weights as given, as Stata's `r(sum)`, even for
+analytic weights. Percentiles, `median`, `q1`, `q3`, `iqr` and `mad` use
+Stata's weighted percentile rule, the unweighted rule with cumulative
+weights in place of positions, so weights of 1 give the unweighted
+values. `min` and `max` ignore rows with zero weight. `unique`, `miss_n`
+and `valid_pct` remain unweighted row counts.
 
 Calendar output and grouping names:
 

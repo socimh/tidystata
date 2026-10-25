@@ -12,16 +12,13 @@ Coming from Stata?
 gives the R equivalent of a Stata command, such as `findit(reg)` or
 `findit("merge 1:1 id")`.
 
-## Tutorials and migration
+## Tutorials
 
 Read
 [`vignette("getting-started", package = "tidystata")`](https://socimh.github.io/tidystata/articles/getting-started.md)
 for a short workflow and
 [`vignette("containers-and-missing-values", package = "tidystata")`](https://socimh.github.io/tidystata/articles/containers-and-missing-values.md)
-for output containers, grouping and missing-value conventions. The full
-migration guide is the website's [Migration
-guide](https://socimh.github.io/tidystata/articles/migration.html)
-article.
+for output containers, grouping and missing-value conventions.
 
 ## See also
 

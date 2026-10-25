@@ -94,7 +94,7 @@ that are both missing on every selected column are duplicates.
 Other data checking functions:
 [`assert()`](https://socimh.github.io/tidystata/reference/assert.md),
 [`is_first()`](https://socimh.github.io/tidystata/reference/is_first.md),
-[`s_merge()`](https://socimh.github.io/tidystata/reference/s_merge.md)
+[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)
 
 ## Examples
 

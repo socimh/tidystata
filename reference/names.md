@@ -6,10 +6,6 @@ List column names by tidyselect
 
 ``` r
 ds(.data, ..., .type = c("vector", "table"))
-
-ds_as_column(.data, ...)
-
-names_as_column(.data, ...)
 ```
 
 ## Arguments
@@ -35,12 +31,11 @@ names_as_column(.data, ...)
 ## Value
 
 `ds()` returns a character vector. `ds(.type = "table")` returns a table
-with one character column, `name`; `ds_as_column()` and
-`names_as_column()` are aliases for it. On ungrouped data, an empty
-selection returns a zero-length vector or a zero-row table,
-respectively. Tables preserve the input's data.frame, tibble, or
-data.table container and supported preview settings, but do not recreate
-grouping or arbitrary subclasses on the new rows.
+with one character column, `name`. On ungrouped data, an empty selection
+returns a zero-length vector or a zero-row table, respectively. Tables
+preserve the input's data.frame, tibble, or data.table container and
+supported preview settings, but do not recreate grouping or arbitrary
+subclasses on the new rows.
 
 ## Details
 
@@ -70,31 +65,24 @@ Other inspection functions:
 ## Examples
 
 ``` r
-ds(dplyr::starwars) # equivalent to names(dplyr::starwars)
-#>  [1] "name"       "height"     "mass"       "hair_color" "skin_color"
-#>  [6] "eye_color"  "birth_year" "sex"        "gender"     "homeworld" 
-#> [11] "species"    "films"      "vehicles"   "starships" 
-ds(dplyr::starwars, homeworld:starships)
-#> [1] "homeworld" "species"   "films"     "vehicles"  "starships"
-ds(dplyr::starwars, ends_with("color"), .type = "table")
+ds(lifeexp) # equivalent to names(lifeexp)
+#> [1] "region"    "country"   "popgrowth" "lexp"      "gnppc"     "safewater"
+ds(lifeexp, country:lexp)
+#> [1] "country"   "popgrowth" "lexp"     
+ds(lifeexp, where(is.character), .type = "table")
+#> # A tibble: 1 × 1
+#>   name   
+#>   <chr>  
+#> 1 country
+
+starwars <- dplyr::starwars
+ds(starwars, ends_with("color"), .type = "table")
 #> # A tibble: 3 × 1
 #>   name      
 #>   <chr>     
 #> 1 hair_color
 #> 2 skin_color
 #> 3 eye_color 
-ds_as_column(dplyr::starwars, where(is.character))
-#> # A tibble: 8 × 1
-#>   name      
-#>   <chr>     
-#> 1 name      
-#> 2 hair_color
-#> 3 skin_color
-#> 4 eye_color 
-#> 5 sex       
-#> 6 gender    
-#> 7 homeworld 
-#> 8 species   
 
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))

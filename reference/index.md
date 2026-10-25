@@ -17,10 +17,8 @@
 - [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
   : Tabulate missing values
 
-- [`ds()`](https://socimh.github.io/tidystata/reference/names.md)
-  [`ds_as_column()`](https://socimh.github.io/tidystata/reference/names.md)
-  [`names_as_column()`](https://socimh.github.io/tidystata/reference/names.md)
-  : List column names by tidyselect
+- [`ds()`](https://socimh.github.io/tidystata/reference/names.md) : List
+  column names by tidyselect
 
 - [`var_type()`](https://socimh.github.io/tidystata/reference/var_type.md)
   [`var_unit()`](https://socimh.github.io/tidystata/reference/var_type.md)
@@ -37,7 +35,6 @@
 - [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md)
-  [`xtab()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) :
@@ -54,7 +51,6 @@
 - [`assert()`](https://socimh.github.io/tidystata/reference/assert.md) :
   Assert that conditions hold
 - [`is_first()`](https://socimh.github.io/tidystata/reference/is_first.md)
-  [`s_tag()`](https://socimh.github.io/tidystata/reference/is_first.md)
   : Flag the first row of each group
 - [`isid()`](https://socimh.github.io/tidystata/reference/keys.md)
   [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md)
@@ -62,7 +58,7 @@
   [`duplicates_list()`](https://socimh.github.io/tidystata/reference/keys.md)
   [`duplicates_drop()`](https://socimh.github.io/tidystata/reference/keys.md)
   : Check keys and duplicate rows
-- [`s_merge()`](https://socimh.github.io/tidystata/reference/s_merge.md)
+- [`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)
   : Merge two tables with a Stata-style match report
 
 ## Generate variables
@@ -75,10 +71,10 @@
   [`cut_length()`](https://socimh.github.io/tidystata/reference/cut.md)
   [`cut_breaks()`](https://socimh.github.io/tidystata/reference/cut.md)
   : Cut a numeric vector into groups
-- [`s_lag()`](https://socimh.github.io/tidystata/reference/panel.md)
-  [`s_lead()`](https://socimh.github.io/tidystata/reference/panel.md)
-  [`s_diff()`](https://socimh.github.io/tidystata/reference/panel.md) :
-  Panel lags, leads and differences
+- [`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)
+  [`stata_lead()`](https://socimh.github.io/tidystata/reference/panel.md)
+  [`stata_diff()`](https://socimh.github.io/tidystata/reference/panel.md)
+  : Panel lags, leads and differences
 - [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   [`row_sum()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   [`row_max()`](https://socimh.github.io/tidystata/reference/row_egen.md)
@@ -112,12 +108,11 @@
 
 ## Select and preview
 
-- [`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md)
+- [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md)
   : Select and compute columns
 - [`preview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`unpreview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`s_print()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`print_all()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`slice_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
@@ -129,8 +124,7 @@
 ## Small tools
 
 - [`capture()`](https://socimh.github.io/tidystata/reference/capture.md)
-  [`s_try()`](https://socimh.github.io/tidystata/reference/capture.md) :
-  Capture an error and report success
+  : Capture an error and report success
 - [`set_seed()`](https://socimh.github.io/tidystata/reference/set_seed.md)
   : Set the random seed, in a pipeline or alone
 - [`timer()`](https://socimh.github.io/tidystata/reference/timer.md) :

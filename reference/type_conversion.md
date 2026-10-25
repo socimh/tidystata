@@ -5,15 +5,15 @@ Vector helpers named after Stata's conversion commands:
 ## Usage
 
 ``` r
-destring(x, .x = lifecycle::deprecated())
+destring(x, ignore = NULL)
 
-decode(x, .x = lifecycle::deprecated())
+decode(x)
 
 tostring(x)
 
-as_character(x, .x = lifecycle::deprecated())
+as_character(x)
 
-as_numeric(x, .x = lifecycle::deprecated())
+as_numeric(x, ignore = NULL)
 ```
 
 ## Arguments
@@ -22,9 +22,12 @@ as_numeric(x, .x = lifecycle::deprecated())
 
   A vector or matrix; a vector for `tostring()`.
 
-- .x:
+- ignore:
 
-  **\[deprecated\]** Use `x` instead.
+  `NULL` (default) or a single string of characters to remove from text
+  before reading numbers, like Stata's `ignore()`. Each character is
+  removed wherever it appears: `ignore = "kg "` removes `k`, `g` and
+  spaces.
 
 ## Value
 
@@ -32,10 +35,11 @@ as_numeric(x, .x = lifecycle::deprecated())
 `as_numeric()` returns a double vector; unsupported types such as lists,
 raw vectors, and complex vectors return missing values of the same
 length. Empty inputs return typed empty vectors. Names, dimensions,
-labels, and units are dropped. Parsing failures retain
+labels, and units are dropped. Text that is not a number gives a warning
+and keeps its row and value in
 [`readr::problems()`](https://readr.tidyverse.org/reference/problems.html)
-diagnostics on the result. Conversion of large `integer64` values to
-double may lose precision and emits the underlying conversion warning.
+on the result. Conversion of large `integer64` values to double may lose
+precision and emits the underlying conversion warning.
 
 ## Details
 
@@ -51,19 +55,38 @@ double may lose precision and emits the underlying conversion warning.
   use [`as.character()`](https://rdrr.io/r/base/character.html), so they
   become `"2024-01-31"` rather than day numbers.
 
-Character input to `as_numeric()` is parsed with
-[`readr::parse_number()`](https://readr.tidyverse.org/reference/parse_number.html),
-preserving its length. Invalid numbers generate parsing warnings.
-Factors return their level codes; labelled numeric variables return
-their values. `as_character()` uses value labels when a labelled vector
-has a nonempty `labels` attribute. Without value labels, it uses
-ordinary character conversion, including for tagged missing values.
+`destring()` reads text the way Stata's `destring` does. A value must be
+a number, optionally with a sign, a currency symbol (dollar, euro,
+pound, yen), thousands separators (`1,234`), a trailing percent sign
+(`50%` gives 50) and surrounding spaces. Anything else, such as
+`"12abc"`, `"10 kg"` or a date, becomes `NA` with a warning, like
+Stata's `force` option; the positions are kept in
+[`readr::problems()`](https://readr.tidyverse.org/reference/problems.html).
+Use `ignore` to remove other characters first, like Stata's `ignore()`:
+`destring(x, ignore = "kg")` reads `"10 kg"` as 10. Empty strings,
+`"NA"` and Stata's `"."` are missing without a warning. Dates stay `NA`;
+convert them with [`as.Date()`](https://rdrr.io/r/base/as.Date.html) or
+`lubridate::ymd()` instead.
+
+A factor whose levels are all numbers, such as
+`factor(c("1990", "2000"))`, gives those numbers (1990, 2000). Other
+factors give their level codes. Labelled numeric variables return their
+values. `as_character()` uses value labels when a labelled vector has a
+nonempty `labels` attribute. Without value labels, it uses ordinary
+character conversion, including for tagged missing values.
 
 SPSS user-missing codes remain values in both conversions. Numeric
 conversion preserves tagged missing values. Dates become days since
 1970-01-01; date-times become seconds since the Unix epoch. Durations
 and measured vectors retain their numeric values in their existing
 units.
+
+The sjlabelled package also exports `as_numeric()` and `as_character()`.
+They differ: sjlabelled's `as_numeric()` turns non-numeric text into
+factor codes, and its `as_character()` gives `NA` for unlabelled values.
+Whichever package is attached last masks the other; write
+`tidystata::as_numeric()` to be explicit, or use `destring()` and
+`decode()`, which do not clash.
 
 ## See also
 

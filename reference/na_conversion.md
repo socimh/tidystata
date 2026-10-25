@@ -7,7 +7,7 @@ Vector helpers named after Stata's missing-value commands:
   [`dplyr::na_if()`](https://dplyr.tidyverse.org/reference/na_if.html).
 
 - `mvencode()` replaces missing values with `mv`, like
-  `mvencode x, mv(0)`, using
+  `mvencode x, mv(0)`. The replacement is cast to the type of `x`, as in
   [`tidyr::replace_na()`](https://tidyr.tidyverse.org/reference/replace_na.html).
 
 `na_if_value()` and `value_if_na()` are aliases of `mvdecode()` and
@@ -21,19 +21,9 @@ mvdecode(x, mv)
 
 mvencode(x, mv)
 
-na_if_value(
-  x,
-  value,
-  .x = lifecycle::deprecated(),
-  .value = lifecycle::deprecated()
-)
+na_if_value(x, value)
 
-value_if_na(
-  x,
-  value,
-  .x = lifecycle::deprecated(),
-  .value = lifecycle::deprecated()
-)
+value_if_na(x, value)
 ```
 
 ## Arguments
@@ -48,10 +38,6 @@ value_if_na(
   any value equal to one of them becomes missing. For `mvencode()` and
   `value_if_na()`, a single replacement value for missing elements, cast
   to the type of `x`.
-
-- .x, .value:
-
-  **\[deprecated\]** Use `x` and `value` instead.
 
 ## Value
 

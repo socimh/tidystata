@@ -1,0 +1,117 @@
+/* Vertical rhythm and readability tweaks on top of the pkgdown BS5 template */
+
+/* Navbar */
+.navbar {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+}
+
+/* Page title */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+/* Section headings */
+main h2 {
+  margin-top: 2.75rem;
+}
+
+main h3 {
+  margin-top: 2rem;
+}
+
+main h4 {
+  margin-top: 1.5rem;
+}
+
+main .page-header + h2,
+main .page-header + .section > h2:first-child {
+  margin-top: 1.5rem;
+}
+
+/* Lists */
+main li {
+  margin-bottom: 0.35rem;
+}
+
+main li > p {
+  margin-bottom: 0.5rem;
+}
+
+main ul,
+main ol {
+  margin-bottom: 1.25rem;
+}
+
+/* Code chunks and their output */
+main pre {
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.55;
+  border-radius: 0.5rem;
+}
+
+main div.sourceCode {
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+main div.sourceCode > pre {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Tables */
+main table {
+  margin-bottom: 1.75rem;
+}
+
+main table th,
+main table td {
+  padding: 0.5rem 0.75rem;
+}
+
+/* Definition lists: reference index rows and function arguments */
+main dt {
+  margin-top: 0.9rem;
+}
+
+main dd {
+  margin-bottom: 0.5rem;
+}
+
+.template-reference-index main .section.level2 {
+  margin-bottom: 2.25rem;
+}
+
+.template-reference-index main .section-desc {
+  margin-bottom: 0.75rem;
+}
+
+/* Reference topic sections */
+.template-reference-topic main .section.level2 + .section.level2 {
+  margin-top: 2rem;
+}
+
+/* Home page sidebar */
+aside h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+aside .list-unstyled li {
+  margin-bottom: 0.6rem;
+}
+
+/* Table of contents */
+#toc > .nav a.nav-link {
+  padding: 0.35rem 0.6rem;
+}
+
+/* Footer */
+footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+}

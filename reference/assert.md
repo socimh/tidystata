@@ -48,7 +48,7 @@ when `x` is missing; write `is.na(x) | x > 0` for that behaviour.
 Other data checking functions:
 [`is_first()`](https://socimh.github.io/tidystata/reference/is_first.md),
 [`keys`](https://socimh.github.io/tidystata/reference/keys.md),
-[`s_merge()`](https://socimh.github.io/tidystata/reference/s_merge.md)
+[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)
 
 ## Examples
 

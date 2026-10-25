@@ -14,7 +14,7 @@ Enhanced [`count()`](https://dplyr.tidyverse.org/reference/count.html).
 Each takes `.total = TRUE` to add "Total" rows (and, for `tab2()`, a
 "total" column). `fre()`, `fre1()` and `fre2()` are shortcuts for
 `tab(.total = TRUE)`, `tab1(.total = TRUE)` and `tab2(.total = TRUE)`,
-named after Stata's `fre`. `xtab()` is an alias of `tab2()`.
+named after Stata's `fre`.
 
 The functions return data by default. With totals, rich output is
 available from `fre()`, `fre1()` and `fre2()` with `.type = "flextable"`
@@ -47,18 +47,6 @@ tab1(
 )
 
 tab2(
-  .data,
-  ...,
-  .by = NULL,
-  .flip = FALSE,
-  .total = FALSE,
-  .type = c("auto", "tibble", "flextable"),
-  .wt = NULL,
-  .wt_type = c("frequency", "analytic"),
-  .chi2 = FALSE
-)
-
-xtab(
   .data,
   ...,
   .by = NULL,
@@ -215,7 +203,9 @@ observations within each group; `cum` follows the displayed category
 order. `valid` and `valid_cum` use only observations with no missing
 measured values. Missing group keys are retained and do not make an
 otherwise observed value invalid. Missing measured categories have `NA`
-valid percentages and appear last.
+valid percentages and appear last. So `percent` matches the user-written
+`fre` and `tabulate, missing`, and `valid` matches plain `tabulate`,
+which leaves missing values out.
 
 ### Totals
 
@@ -259,16 +249,17 @@ follow `FALSE`, `TRUE`, then missing values.
 ### Chi-square test
 
 With `.chi2 = TRUE`, `tab2()` tests the categories shown in the table,
-including missing ones (filter them out first to exclude them), and
-drops rows or columns with no observations. It prints Pearson's
-chi-square, its degrees of freedom, the p-value and Cramer's V as a
-message, and stores them as a one-row tibble in `attr(result, "chi2")`
-with columns `statistic`, `df`, `p_value`, `cramers_v` and `n`.
-Flextable output adds them as a footer. As in Stata, V keeps its sign in
-2 x 2 tables. The test matches `chisq.test(correct = FALSE)`. Frequency
-weights are treated as counts; analytic weights are an error, because a
-design-based test such as `survey::svychisq()` is needed for sampling
-weights.
+including missing ones (filter them out first to exclude them, as
+Stata's `tabulate, chi2` does without `missing`), and drops rows or
+columns with no observations. It prints Pearson's chi-square, its
+degrees of freedom, the p-value and Cramer's V as a message, and stores
+them as a one-row tibble in `attr(result, "chi2")` with columns
+`statistic`, `df`, `p_value`, `cramers_v` and `n`. Flextable output adds
+them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The
+statistic, p-value and V are tested against Stata's `tabulate, chi2 V`.
+Frequency weights are treated as counts; analytic weights are an error,
+because a design-based test such as `survey::svychisq()` is needed for
+sampling weights.
 
 ### Combined output
 
@@ -287,128 +278,99 @@ Other tabulation functions:
 ## Examples
 
 ``` r
-# tabulate the 8th column
-tab(dplyr::starwars, 8)
-#> # A tibble: 5 × 6
-#>   sex                n percent   cum valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 female            16   18.4   18.4 19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5  1.20      20.5
-#> 3 male              60   69.0   88.5 72.3       92.8
-#> 4 none               6    6.90  95.4  7.23     100  
-#> 5 NA                 4    4.60 100   NA         NA  
+# fre() shows value labels; tab() keeps the labelled codes
+fre(lifeexp, region)
+#> # A tibble: 4 × 6
+#>   region               n percent   cum valid valid_cum
+#>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
+#> 2 North America       14    20.6  85.3  20.6      85.3
+#> 3 South America       10    14.7 100    14.7     100  
+#> 4 Total               68   100    NA    NA        NA  
 
-# tabulate the "sex" column
-tab(dplyr::starwars, sex)
-#> # A tibble: 5 × 6
-#>   sex                n percent   cum valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 female            16   18.4   18.4 19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5  1.20      20.5
-#> 3 male              60   69.0   88.5 72.3       92.8
-#> 4 none               6    6.90  95.4  7.23     100  
-#> 5 NA                 4    4.60 100   NA         NA  
-
-tab(dplyr::starwars, sex, .desc = TRUE)
-#> # A tibble: 5 × 6
-#>   sex                n percent   cum valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 male              60   69.0   69.0 72.3       72.3
-#> 2 female            16   18.4   87.4 19.3       91.6
-#> 3 none               6    6.90  94.3  7.23      98.8
-#> 4 hermaphroditic     1    1.15  95.4  1.20     100  
-#> 5 NA                 4    4.60 100   NA         NA  
-
-fre(dplyr::starwars, sex)
-#> # A tibble: 7 × 6
-#>   sex                n percent   cum  valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
-#> 1 female            16   18.4   18.4  19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5   1.20      20.5
-#> 3 male              60   69.0   88.5  72.3       92.8
-#> 4 none               6    6.90  95.4   7.23     100  
-#> 5 Valid Total       83   95.4   NA   100         NA  
-#> 6 NA                 4    4.60 100    NA         NA  
-#> 7 Total             87  100     NA    NA         NA  
-
-fre(dplyr::starwars, sex, .desc = TRUE)
-#> # A tibble: 7 × 6
-#>   sex                n percent   cum  valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
-#> 1 male              60   69.0   69.0  72.3       72.3
-#> 2 female            16   18.4   87.4  19.3       91.6
-#> 3 none               6    6.90  94.3   7.23      98.8
-#> 4 hermaphroditic     1    1.15  95.4   1.20     100  
-#> 5 Valid Total       83   95.4   NA   100         NA  
-#> 6 NA                 4    4.60 100    NA         NA  
-#> 7 Total             87  100     NA    NA         NA  
-
-tab(dplyr::starwars, sex, gender)
-#> # A tibble: 6 × 7
-#>   sex            gender        n percent   cum valid valid_cum
-#>   <chr>          <chr>     <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 female         feminine     16   18.4   18.4 19.3       19.3
-#> 2 hermaphroditic masculine     1    1.15  19.5  1.20      20.5
-#> 3 male           masculine    60   69.0   88.5 72.3       92.8
-#> 4 none           feminine      1    1.15  89.7  1.20      94.0
-#> 5 none           masculine     5    5.75  95.4  6.02     100  
-#> 6 NA             NA            4    4.60 100   NA         NA  
-
-tab(dplyr::starwars, sex == "male")
+tab(lifeexp, region)
 #> # A tibble: 3 × 6
-#>   `sex == "male"`     n percent   cum valid valid_cum
-#>   <lgl>           <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 FALSE              23   26.4   26.4  27.7      27.7
-#> 2 TRUE               60   69.0   95.4  72.3     100  
-#> 3 NA                  4    4.60 100    NA        NA  
+#>   region                   n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
 
-tab(dplyr::starwars, male = sex == "male")
+# tabulate a condition
+tab(lifeexp, safewater > 50)
 #> # A tibble: 3 × 6
-#>   male      n percent   cum valid valid_cum
-#>   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 FALSE    23   26.4   26.4  27.7      27.7
-#> 2 TRUE     60   69.0   95.4  72.3     100  
-#> 3 NA        4    4.60 100    NA        NA  
+#>   `safewater > 50`     n percent   cum valid valid_cum
+#>   <lgl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 FALSE               11    16.2  16.2  20.4      20.4
+#> 2 TRUE                43    63.2  79.4  79.6     100  
+#> 3 NA                  14    20.6 100    NA        NA  
 
-tab(dplyr::starwars, ends_with("color"))
-#> # A tibble: 67 × 8
-#>    hair_color    skin_color eye_color     n percent   cum valid valid_cum
-#>    <chr>         <chr>      <chr>     <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 auburn        fair       blue          1    1.15  1.15  1.22      1.22
-#>  2 auburn, grey  fair       blue          1    1.15  2.30  1.22      2.44
-#>  3 auburn, white fair       blue-gray     1    1.15  3.45  1.22      3.66
-#>  4 black         blue, grey yellow        1    1.15  4.60  1.22      4.88
-#>  5 black         brown      brown         1    1.15  5.75  1.22      6.10
-#>  6 black         dark       brown         3    3.45  9.20  3.66      9.76
-#>  7 black         dark       dark          1    1.15 10.3   1.22     11.0 
-#>  8 black         fair       brown         2    2.30 12.6   2.44     13.4 
-#>  9 black         light      brown         1    1.15 13.8   1.22     14.6 
-#> 10 black         tan        brown         2    2.30 16.1   2.44     17.1 
-#> # ℹ 57 more rows
-
-tab(dplyr::starwars, varlist("s*e"))
-#> # A tibble: 0 × 5
-#> # ℹ 5 variables: n <int>, percent <dbl>, cum <dbl>, valid <dbl>,
-#> #   valid_cum <dbl>
-
-tab(dplyr::starwars)
-#> # A tibble: 87 × 19
-#>    name     height  mass hair_color skin_color eye_color birth_year sex   gender
-#>    <chr>     <int> <dbl> <chr>      <chr>      <chr>          <dbl> <chr> <chr> 
-#>  1 Ackbar      180  83   none       brown mot… orange          41   male  mascu…
-#>  2 Anakin …    188  84   blond      fair       blue            41.9 male  mascu…
-#>  3 Ayla Se…    178  55   none       blue       hazel           48   fema… femin…
-#>  4 Barriss…    166  50   black      yellow     blue            40   fema… femin…
-#>  5 Beru Wh…    165  75   brown      light      blue            47   fema… femin…
-#>  6 Biggs D…    183  84   black      light      brown           24   male  mascu…
-#>  7 Boba Fe…    183  78.2 black      fair       brown           31.5 male  mascu…
-#>  8 Bossk       190 113   none       green      red             53   male  mascu…
-#>  9 Chewbac…    228 112   brown      unknown    blue           200   male  mascu…
-#> 10 Darth M…    175  80   none       red        yellow          54   male  mascu…
-#> # ℹ 77 more rows
-#> # ℹ 10 more variables: homeworld <chr>, species <chr>, films <list>,
-#> #   vehicles <list>, starships <list>, n <int>, percent <dbl>, cum <dbl>,
-#> #   valid <dbl>, valid_cum <dbl>
+# Tabulate a column by position, a condition, or a named expression.
+tab(lifeexp, 1)
+#> # A tibble: 3 × 6
+#>   region                   n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
+tab(lifeexp, region, .desc = TRUE)
+#> # A tibble: 3 × 6
+#>   region                   n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
+fre(lifeexp, region, .desc = TRUE)
+#> # A tibble: 4 × 6
+#>   region               n percent   cum valid valid_cum
+#>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
+#> 2 North America       14    20.6  85.3  20.6      85.3
+#> 3 South America       10    14.7 100    14.7     100  
+#> 4 Total               68   100    NA    NA        NA  
+tab(lifeexp, lexp >= 70)
+#> # A tibble: 2 × 6
+#>   `lexp >= 70`     n percent   cum valid valid_cum
+#>   <lgl>        <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 FALSE           21    30.9  30.9  30.9      30.9
+#> 2 TRUE            47    69.1 100    69.1     100  
+tab(lifeexp, lexp_70 = lexp >= 70)
+#> # A tibble: 2 × 6
+#>   lexp_70     n percent   cum valid valid_cum
+#>   <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 FALSE      21    30.9  30.9  30.9      30.9
+#> 2 TRUE       47    69.1 100    69.1     100  
+tab(lifeexp, varlist("*p*"))
+#> # A tibble: 68 × 8
+#>    popgrowth  lexp gnppc     n percent   cum valid valid_cum
+#>        <dbl> <dbl> <dbl> <int>   <dbl> <dbl> <dbl>     <dbl>
+#>  1      -2.5    63  1340     1    1.47  1.47  1.49      1.49
+#>  2      -2.5    70   870     1    1.47  2.94  1.49      2.99
+#>  3      -1.2    70   570     1    1.47  4.41  1.49      4.48
+#>  4      -1      69  3820     1    1.47  5.88  1.49      5.97
+#>  5      -0.9    69  2790     1    1.47  7.35  1.49      7.46
+#>  6      -0.8    68   840     1    1.47  8.82  1.49      8.96
+#>  7      -0.7    71  1440     1    1.47 10.3   1.49     10.4 
+#>  8      -0.7    71  2870     1    1.47 11.8   1.49     11.9 
+#>  9      -0.6    74   870     1    1.47 13.2   1.49     13.4 
+#> 10      -0.5    68  1540     1    1.47 14.7   1.49     14.9 
+#> # ℹ 58 more rows
+tab(lifeexp)
+#> # A tibble: 68 × 11
+#>    region      country popgrowth  lexp gnppc safewater     n percent   cum valid
+#>    <dbl+lbl>   <chr>       <dbl> <dbl> <dbl>     <dbl> <int>   <dbl> <dbl> <dbl>
+#>  1 1 [Europe … Albania      -0.6    74   870        49     1    1.47  1.47  1.89
+#>  2 1 [Europe … Armenia      -1.2    70   570        83     1    1.47  2.94  1.89
+#>  3 1 [Europe … Austria       0.1    78 27810        97     1    1.47  4.41  1.89
+#>  4 1 [Europe … Azerba…       0.9    64   510        49     1    1.47  5.88  1.89
+#>  5 1 [Europe … Belarus      -0.5    68  1540        82     1    1.47  7.35  1.89
+#>  6 1 [Europe … Belgium       0.2    77 26530       100     1    1.47  8.82  1.89
+#>  7 1 [Europe … Bosnia…       1.8    74  1230        87     1    1.47 10.3   1.89
+#>  8 1 [Europe … Bulgar…      -0.7    71  1440        90     1    1.47 11.8   1.89
+#>  9 1 [Europe … Czechia      -0.1    75  6140        95     1    1.47 13.2   1.89
+#> 10 1 [Europe … Denmark       0.4    76 33440        95     1    1.47 14.7   1.89
+#> # ℹ 58 more rows
+#> # ℹ 1 more variable: valid_cum <dbl>
 
 tab(c(1, 1, 2, NA))
 #> # A tibble: 3 × 6
@@ -417,7 +379,6 @@ tab(c(1, 1, 2, NA))
 #> 1     1     2      50    50  66.7      66.7
 #> 2     2     1      25    75  33.3     100  
 #> 3    NA     1      25   100  NA        NA  
-
 fre(c(1, 1, 2, NA))
 #> # A tibble: 5 × 6
 #>   value           n percent   cum valid valid_cum
@@ -428,7 +389,7 @@ fre(c(1, 1, 2, NA))
 #> 4 NA              1      25   100  NA        NA  
 #> 5 Total           4     100    NA  NA        NA  
 
-# Weighted frequencies, like Stata's tab x [fw=w] or [aw=w]
+# Weighted frequencies, like Stata's tab x [fw=w] or [aw=w].
 survey <- tibble::tibble(edu = c("low", "high", "high"), w = c(2, 1, 1.5))
 tab(survey, edu, .wt = w)
 #> # A tibble: 2 × 6
@@ -443,73 +404,215 @@ tab(survey, edu, .wt = w, .wt_type = "analytic")
 #> 1 high   1.67    55.6  55.6  55.6      55.6
 #> 2 low    1.33    44.4 100    44.4     100  
 
-tab(dplyr::starwars, sex, .by = species, .group_order = "frequency")
-#> # A tibble: 41 × 7
-#>    species  sex        n percent   cum valid valid_cum
-#>    <chr>    <chr>  <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 Human    female     9    25.7  25.7  25.7      25.7
-#>  2 Human    male      26    74.3 100    74.3     100  
-#>  3 Droid    none       6   100   100   100       100  
-#>  4 Gungan   male       3   100   100   100       100  
-#>  5 Kaminoan female     1    50    50    50        50  
-#>  6 Kaminoan male       1    50   100    50       100  
-#>  7 Mirialan female     2   100   100   100       100  
-#>  8 Twi'lek  female     1    50    50    50        50  
-#>  9 Twi'lek  male       1    50   100    50       100  
-#> 10 Wookiee  male       2   100   100   100       100  
-#> # ℹ 31 more rows
-
-tab1(dplyr::starwars, 1:3)
-#> $name
-#> # A tibble: 87 × 6
-#>    value                   n percent   cum valid valid_cum
-#>    <chr>               <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 Ackbar                  1    1.15  1.15  1.15      1.15
-#>  2 Adi Gallia              1    1.15  2.30  1.15      2.30
-#>  3 Anakin Skywalker        1    1.15  3.45  1.15      3.45
-#>  4 Arvel Crynyd            1    1.15  4.60  1.15      4.60
-#>  5 Ayla Secura             1    1.15  5.75  1.15      5.75
-#>  6 BB8                     1    1.15  6.90  1.15      6.90
-#>  7 Bail Prestor Organa     1    1.15  8.05  1.15      8.05
-#>  8 Barriss Offee           1    1.15  9.20  1.15      9.20
-#>  9 Ben Quadinaros          1    1.15 10.3   1.15     10.3 
-#> 10 Beru Whitesun Lars      1    1.15 11.5   1.15     11.5 
-#> # ℹ 77 more rows
+# Illustrative indicators for cross-tabulation; keep lifeexp unchanged.
+countries <- dplyr::mutate(
+  lifeexp,
+  lexp_70 = lexp >= 70,
+  water_80 = safewater >= 80
+)
+tab(countries, region, lexp_70)
+#> # A tibble: 6 × 7
+#>   region               lexp_70     n percent   cum valid valid_cum
+#>   <dbl+lbl>            <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] FALSE      12   17.6   17.6 17.6       17.6
+#> 2 1 [Europe & C. Asia] TRUE       32   47.1   64.7 47.1       64.7
+#> 3 2 [North America]    FALSE       6    8.82  73.5  8.82      73.5
+#> 4 2 [North America]    TRUE        8   11.8   85.3 11.8       85.3
+#> 5 3 [South America]    FALSE       3    4.41  89.7  4.41      89.7
+#> 6 3 [South America]    TRUE        7   10.3  100   10.3      100  
+tab(countries, lexp_70, .by = region, .group_order = "frequency")
+#> # A tibble: 6 × 7
+#>   region               lexp_70     n percent   cum valid valid_cum
+#>   <dbl+lbl>            <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] FALSE      12    27.3  27.3  27.3      27.3
+#> 2 1 [Europe & C. Asia] TRUE       32    72.7 100    72.7     100  
+#> 3 2 [North America]    FALSE       6    42.9  42.9  42.9      42.9
+#> 4 2 [North America]    TRUE        8    57.1 100    57.1     100  
+#> 5 3 [South America]    FALSE       3    30    30    30        30  
+#> 6 3 [South America]    TRUE        7    70   100    70       100  
+tab1(lifeexp, 1:3)
+#> $region
+#> # A tibble: 3 × 6
+#>   value                    n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
 #> 
-#> $height
-#> # A tibble: 46 × 6
-#>    value     n percent   cum valid valid_cum
-#>    <int> <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1    66     1    1.15  1.15  1.23      1.23
-#>  2    79     1    1.15  2.30  1.23      2.47
-#>  3    88     1    1.15  3.45  1.23      3.70
-#>  4    94     1    1.15  4.60  1.23      4.94
-#>  5    96     2    2.30  6.90  2.47      7.41
-#>  6    97     1    1.15  8.05  1.23      8.64
-#>  7   112     1    1.15  9.20  1.23      9.88
-#>  8   122     1    1.15 10.3   1.23     11.1 
-#>  9   137     1    1.15 11.5   1.23     12.3 
-#> 10   150     2    2.30 13.8   2.47     14.8 
-#> # ℹ 36 more rows
+#> $country
+#> # A tibble: 68 × 6
+#>    value                      n percent   cum valid valid_cum
+#>    <chr>                  <int>   <dbl> <dbl> <dbl>     <dbl>
+#>  1 Albania                    1    1.47  1.47  1.47      1.47
+#>  2 Argentina                  1    1.47  2.94  1.47      2.94
+#>  3 Armenia                    1    1.47  4.41  1.47      4.41
+#>  4 Austria                    1    1.47  5.88  1.47      5.88
+#>  5 Azerbaijan                 1    1.47  7.35  1.47      7.35
+#>  6 Belarus                    1    1.47  8.82  1.47      8.82
+#>  7 Belgium                    1    1.47 10.3   1.47     10.3 
+#>  8 Bolivia                    1    1.47 11.8   1.47     11.8 
+#>  9 Bosnia and Herzegovina     1    1.47 13.2   1.47     13.2 
+#> 10 Brazil                     1    1.47 14.7   1.47     14.7 
+#> # ℹ 58 more rows
 #> 
-#> $mass
-#> # A tibble: 39 × 6
+#> $popgrowth
+#> # A tibble: 32 × 6
 #>    value     n percent   cum valid valid_cum
 #>    <dbl> <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1    15     1    1.15  1.15  1.69      1.69
-#>  2    17     1    1.15  2.30  1.69      3.39
-#>  3    20     1    1.15  3.45  1.69      5.08
-#>  4    32     2    2.30  5.75  3.39      8.47
-#>  5    40     1    1.15  6.90  1.69     10.2 
-#>  6    45     2    2.30  9.20  3.39     13.6 
-#>  7    48     2    2.30 11.5   3.39     16.9 
-#>  8    49     1    1.15 12.6   1.69     18.6 
-#>  9    50     2    2.30 14.9   3.39     22.0 
-#> 10    55     2    2.30 17.2   3.39     25.4 
-#> # ℹ 29 more rows
+#>  1  -2.5     2    2.94  2.94  2.94      2.94
+#>  2  -1.2     1    1.47  4.41  1.47      4.41
+#>  3  -1       1    1.47  5.88  1.47      5.88
+#>  4  -0.9     1    1.47  7.35  1.47      7.35
+#>  5  -0.8     1    1.47  8.82  1.47      8.82
+#>  6  -0.7     2    2.94 11.8   2.94     11.8 
+#>  7  -0.6     1    1.47 13.2   1.47     13.2 
+#>  8  -0.5     1    1.47 14.7   1.47     14.7 
+#>  9  -0.4     1    1.47 16.2   1.47     16.2 
+#> 10  -0.2     4    5.88 22.1   5.88     22.1 
+#> # ℹ 22 more rows
+#> 
+tab1(countries, matches("^(region|lexp_70)$"))
+#> $region
+#> # A tibble: 3 × 6
+#>   value                    n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
+#> 
+#> $lexp_70
+#> # A tibble: 2 × 6
+#>   value     n percent   cum valid valid_cum
+#>   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 FALSE    21    30.9  30.9  30.9      30.9
+#> 2 TRUE     47    69.1 100    69.1     100  
+#> 
+tab(lifeexp, region, .total = TRUE)
+#> # A tibble: 4 × 6
+#>   region               n percent   cum valid valid_cum
+#>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
+#> 2 North America       14    20.6  85.3  20.6      85.3
+#> 3 South America       10    14.7 100    14.7     100  
+#> 4 Total               68   100    NA    NA        NA  
+tab2(countries, region, lexp_70)
+#> # A tibble: 3 × 3
+#>   `region \\ lexp_70`  `FALSE` `TRUE`
+#>   <dbl+lbl>              <int>  <int>
+#> 1 1 [Europe & C. Asia]      12     32
+#> 2 2 [North America]          6      8
+#> 3 3 [South America]          3      7
+tab2(countries, lexp, lexp_70)
+#> # A tibble: 20 × 3
+#>    `lexp \\ lexp_70` `FALSE` `TRUE`
+#>                <dbl>   <int>  <int>
+#>  1                57       1      0
+#>  2                61       1      0
+#>  3                62       2      0
+#>  4                63       1      0
+#>  5                64       3      0
+#>  6                65       1      0
+#>  7                66       1      0
+#>  8                67       4      0
+#>  9                68       3      0
+#> 10                69       4      0
+#> 11                70       0      5
+#> 12                71       0      6
+#> 13                72       0      6
+#> 14                73       0      4
+#> 15                74       0      3
+#> 16                75       0      4
+#> 17                76       0      4
+#> 18                77       0      5
+#> 19                78       0      4
+#> 20                79       0      6
+fre2(countries, lexp, lexp_70)
+#> # A tibble: 21 × 4
+#>    `lexp \\ lexp_70` `FALSE` `TRUE` total
+#>    <chr>               <int>  <int> <int>
+#>  1 57                      1      0     1
+#>  2 61                      1      0     1
+#>  3 62                      2      0     2
+#>  4 63                      1      0     1
+#>  5 64                      3      0     3
+#>  6 65                      1      0     1
+#>  7 66                      1      0     1
+#>  8 67                      4      0     4
+#>  9 68                      3      0     3
+#> 10 69                      4      0     4
+#> # ℹ 11 more rows
+
+# Every pairwise table, like Stata's tab2 region lexp_70 water_80.
+tab2(countries, region, lexp_70, water_80)
+#> $`region x lexp_70`
+#> # A tibble: 3 × 3
+#>   `region \\ lexp_70`  `FALSE` `TRUE`
+#>   <dbl+lbl>              <int>  <int>
+#> 1 1 [Europe & C. Asia]      12     32
+#> 2 2 [North America]          6      8
+#> 3 3 [South America]          3      7
+#> 
+#> $`region x water_80`
+#> # A tibble: 3 × 4
+#>   `region \\ water_80` `FALSE` `TRUE`  `NA`
+#>   <dbl+lbl>              <int>  <int> <int>
+#> 1 1 [Europe & C. Asia]      14     28     2
+#> 2 2 [North America]          5      1     8
+#> 3 3 [South America]          5      1     4
+#> 
+#> $`lexp_70 x water_80`
+#> # A tibble: 2 × 4
+#>   `lexp_70 \\ water_80` `FALSE` `TRUE`  `NA`
+#>   <lgl>                   <int>  <int> <int>
+#> 1 FALSE                      13      3     5
+#> 2 TRUE                       11     27     9
 #> 
 
-tab1(dplyr::starwars, ends_with("color"))
+# One cross-table per group, like Stata's by region: tab lexp_70 water_80.
+tab2(countries, lexp_70, water_80, .by = region) |> head(2)
+#> $`region = Europe & C. Asia`
+#> # A tibble: 2 × 4
+#>   `lexp_70 \\ water_80` `FALSE` `TRUE`  `NA`
+#>   <lgl>                   <int>  <int> <int>
+#> 1 FALSE                       9      3     0
+#> 2 TRUE                        5     25     2
+#> 
+#> $`region = North America`
+#> # A tibble: 2 × 4
+#>   `lexp_70 \\ water_80` `FALSE` `TRUE`  `NA`
+#>   <lgl>                   <int>  <int> <int>
+#> 1 FALSE                       2      0     4
+#> 2 TRUE                        3      1     4
+#> 
+
+# Chi-square test of independence, like Stata's tab x y, chi2 V.
+chi2 <- tab2(countries, region, lexp_70, .chi2 = TRUE)
+#> Pearson chi2(2) = 1.2127   Pr = 0.545
+#> Cramer's V = 0.1335
+attr(chi2, "chi2")
+#> # A tibble: 1 × 5
+#>   statistic    df p_value cramers_v     n
+#>       <dbl> <int>   <dbl>     <dbl> <int>
+#> 1      1.21     2   0.545     0.134    68
+
+# Several character columns share a suffix in this dataset.
+starwars <- dplyr::starwars
+tab(starwars, ends_with("color"))
+#> # A tibble: 67 × 8
+#>    hair_color    skin_color eye_color     n percent   cum valid valid_cum
+#>    <chr>         <chr>      <chr>     <int>   <dbl> <dbl> <dbl>     <dbl>
+#>  1 auburn        fair       blue          1    1.15  1.15  1.22      1.22
+#>  2 auburn, grey  fair       blue          1    1.15  2.30  1.22      2.44
+#>  3 auburn, white fair       blue-gray     1    1.15  3.45  1.22      3.66
+#>  4 black         blue, grey yellow        1    1.15  4.60  1.22      4.88
+#>  5 black         brown      brown         1    1.15  5.75  1.22      6.10
+#>  6 black         dark       brown         3    3.45  9.20  3.66      9.76
+#>  7 black         dark       dark          1    1.15 10.3   1.22     11.0 
+#>  8 black         fair       brown         2    2.30 12.6   2.44     13.4 
+#>  9 black         light      brown         1    1.15 13.8   1.22     14.6 
+#> 10 black         tan        brown         2    2.30 16.1   2.44     17.1 
+#> # ℹ 57 more rows
+tab1(starwars, ends_with("color"))
 #> $hair_color
 #> # A tibble: 12 × 6
 #>    value             n percent    cum valid valid_cum
@@ -563,8 +666,7 @@ tab1(dplyr::starwars, ends_with("color"))
 #> 14 white             1    1.15  87.4  1.15      87.4
 #> 15 yellow           11   12.6  100   12.6      100  
 #> 
-
-tab1(dplyr::starwars, ends_with("color"), .type = "tibble")
+tab1(starwars, ends_with("color"), .type = "tibble")
 #> # A tibble: 58 × 7
 #>    variable   value             n percent   cum valid valid_cum
 #>    <chr>      <chr>         <int>   <dbl> <dbl> <dbl>     <dbl>
@@ -579,8 +681,7 @@ tab1(dplyr::starwars, ends_with("color"), .type = "tibble")
 #>  9 hair_color grey              1    1.15 46.0   1.22     48.8 
 #> 10 hair_color none             38   43.7  89.7  46.3      95.1 
 #> # ℹ 48 more rows
-
-fre1(dplyr::starwars, ends_with("color"))
+fre1(starwars, ends_with("color"))
 #> $hair_color
 #> # A tibble: 14 × 6
 #>    value             n percent    cum  valid valid_cum
@@ -637,8 +738,7 @@ fre1(dplyr::starwars, ends_with("color"))
 #> 15 yellow           11   12.6  100   12.6      100  
 #> 16 Total            87  100     NA   NA         NA  
 #> 
-
-fre1(dplyr::starwars, ends_with("color"), .type = "list")
+fre1(starwars, ends_with("color"), .type = "list")
 #> $hair_color
 #> # A tibble: 14 × 6
 #>    value             n percent    cum  valid valid_cum
@@ -695,119 +795,4 @@ fre1(dplyr::starwars, ends_with("color"), .type = "list")
 #> 15 yellow           11   12.6  100   12.6      100  
 #> 16 Total            87  100     NA   NA         NA  
 #> 
-
-tab(dplyr::starwars, sex, .total = TRUE)
-#> # A tibble: 7 × 6
-#>   sex                n percent   cum  valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
-#> 1 female            16   18.4   18.4  19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5   1.20      20.5
-#> 3 male              60   69.0   88.5  72.3       92.8
-#> 4 none               6    6.90  95.4   7.23     100  
-#> 5 Valid Total       83   95.4   NA   100         NA  
-#> 6 NA                 4    4.60 100    NA         NA  
-#> 7 Total             87  100     NA    NA         NA  
-
-tab2(dplyr::starwars, sex, gender)
-#> # A tibble: 5 × 4
-#>   `sex \\ gender` feminine masculine  `NA`
-#>   <chr>              <int>     <int> <int>
-#> 1 female                16         0     0
-#> 2 hermaphroditic         0         1     0
-#> 3 male                   0        60     0
-#> 4 none                   1         5     0
-#> 5 NA                     0         0     4
-
-tab2(dplyr::starwars, height, gender)
-#> # A tibble: 46 × 4
-#>    `height \\ gender` feminine masculine  `NA`
-#>                 <int>    <int>     <int> <int>
-#>  1                 66        0         1     0
-#>  2                 79        0         1     0
-#>  3                 88        0         1     0
-#>  4                 94        0         1     0
-#>  5                 96        1         1     0
-#>  6                 97        0         1     0
-#>  7                112        0         1     0
-#>  8                122        0         1     0
-#>  9                137        0         1     0
-#> 10                150        2         0     0
-#> # ℹ 36 more rows
-
-fre2(dplyr::starwars, height, gender)
-#> # A tibble: 47 × 5
-#>    `height \\ gender` feminine masculine  `NA` total
-#>    <chr>                 <int>     <int> <int> <int>
-#>  1 66                        0         1     0     1
-#>  2 79                        0         1     0     1
-#>  3 88                        0         1     0     1
-#>  4 94                        0         1     0     1
-#>  5 96                        1         1     0     2
-#>  6 97                        0         1     0     1
-#>  7 112                       0         1     0     1
-#>  8 122                       0         1     0     1
-#>  9 137                       0         1     0     1
-#> 10 150                       2         0     0     2
-#> # ℹ 37 more rows
-
-# Every pairwise table, like Stata's tab2 sex gender eye_color
-tab2(dplyr::starwars, sex, gender, eye_color)
-#> $`sex x gender`
-#> # A tibble: 5 × 4
-#>   `sex \\ gender` feminine masculine  `NA`
-#>   <chr>              <int>     <int> <int>
-#> 1 female                16         0     0
-#> 2 hermaphroditic         0         1     0
-#> 3 male                   0        60     0
-#> 4 none                   1         5     0
-#> 5 NA                     0         0     4
-#> 
-#> $`sex x eye_color`
-#> # A tibble: 5 × 16
-#>   `sex \\ eye_color` black  blue `blue-gray` brown  dark  gold `green, yellow`
-#>   <chr>              <int> <int>       <int> <int> <int> <int>           <int>
-#> 1 female                 2     6           0     4     0     0               0
-#> 2 hermaphroditic         0     0           0     0     0     0               0
-#> 3 male                   7    12           1    15     1     1               1
-#> 4 none                   1     0           0     0     0     0               0
-#> 5 NA                     0     1           0     2     0     0               0
-#> # ℹ 8 more variables: hazel <int>, orange <int>, pink <int>, red <int>,
-#> #   `red, blue` <int>, unknown <int>, white <int>, yellow <int>
-#> 
-#> $`gender x eye_color`
-#> # A tibble: 3 × 16
-#>   `gender \\ eye_color` black  blue `blue-gray` brown  dark  gold
-#>   <chr>                 <int> <int>       <int> <int> <int> <int>
-#> 1 feminine                  2     6           0     4     0     0
-#> 2 masculine                 8    12           1    15     1     1
-#> 3 NA                        0     1           0     2     0     0
-#> # ℹ 9 more variables: `green, yellow` <int>, hazel <int>, orange <int>,
-#> #   pink <int>, red <int>, `red, blue` <int>, unknown <int>, white <int>,
-#> #   yellow <int>
-#> 
-
-# One cross-table per group, like Stata's by species: tab sex gender
-tab2(dplyr::starwars, sex, gender, .by = species) |> head(2)
-#> $`species = Aleena`
-#> # A tibble: 1 × 2
-#>   `sex \\ gender` masculine
-#>   <chr>               <int>
-#> 1 male                    1
-#> 
-#> $`species = Besalisk`
-#> # A tibble: 1 × 2
-#>   `sex \\ gender` masculine
-#>   <chr>               <int>
-#> 1 male                    1
-#> 
-
-# Chi-square test of independence, like Stata's tab x y, chi2 V
-chi2 <- tab2(dplyr::starwars, sex, gender, .chi2 = TRUE)
-#> Pearson chi2(8) = 168.6368   Pr = 0.000
-#> Cramer's V = 0.9845
-attr(chi2, "chi2")
-#> # A tibble: 1 × 5
-#>   statistic    df  p_value cramers_v     n
-#>       <dbl> <int>    <dbl>     <dbl> <int>
-#> 1      169.     8 2.49e-32     0.984    87
 ```

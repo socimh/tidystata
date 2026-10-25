@@ -22,13 +22,13 @@ browse(.data, ...)
   \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
   Variables to browse. Omit to browse all columns. Selection and
   computed expressions follow
-  [`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md).
+  [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md).
 
 ## Value
 
 The viewed data, invisibly, with its data-frame class preserved. With no
 selection this is the input data; otherwise it is the result of
-[`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md).
+[`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md).
 The input is not modified.
 
 ## Details
@@ -36,7 +36,7 @@ The input is not modified.
 Viewing uses
 [`tibble::view()`](https://tibble.tidyverse.org/reference/view.html).
 Existing grouping and grouping-key retention follow
-[`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md).
+[`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md).
 Assign the invisible return value to keep the viewed columns for
 subsequent analysis. Precompute expressions with side effects before
 passing them to the selection interface.
@@ -58,12 +58,12 @@ Other inspection functions:
 
 ``` r
 if (interactive()) {
-  browse(dplyr::starwars)
-  browse(dplyr::starwars, name:mass)
-  browse(dplyr::starwars, varlist("*color"))
+  browse(lifeexp)
+  browse(lifeexp, country:lexp)
+  browse(lifeexp, varlist("*p*"))
 
   # Retain the viewed columns for the next pipeline stage.
-  selected <- browse(dplyr::starwars, name, height, mass)
-  summ(selected, height, mass)
+  selected <- browse(lifeexp, country, lexp, gnppc)
+  summ(selected, lexp, gnppc)
 }
 ```

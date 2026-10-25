@@ -12,20 +12,12 @@ Use `varlist()` within a *selecting* function, such as
 [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) or
 [`dplyr::across()`](https://dplyr.tidyverse.org/reference/across.html).
 Alternatively, provide `vars` explicitly to return matching positions in
-a standalone call. `varlist()` was called
-[`s_match()`](https://socimh.github.io/tidystata/reference/tidystata-deprecated.md)
-before tidystata 0.3.0; the old name still works with a deprecation
-warning.
+a standalone call.
 
 ## Usage
 
 ``` r
-varlist(
-  string,
-  ignore_case = TRUE,
-  vars = NULL,
-  ignore.case = lifecycle::deprecated()
-)
+varlist(string, ignore_case = TRUE, vars = NULL)
 ```
 
 ## Arguments
@@ -46,10 +38,6 @@ varlist(
   functions like
   [`select()`](https://dplyr.tidyverse.org/reference/select.html) or
   `pivot_longer()`).
-
-- ignore.case:
-
-  **\[deprecated\]** Use `ignore_case` instead.
 
 ## Value
 
@@ -78,7 +66,7 @@ contain their own range.
 ## See also
 
 Other selection and preview functions:
-[`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md),
+[`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md),
 [`special-print`](https://socimh.github.io/tidystata/reference/special-print.md)
 
 ## Examples

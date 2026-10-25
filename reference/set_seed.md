@@ -7,7 +7,7 @@ Attach a seed to one expression at the end of a pipeline, as in
 ## Usage
 
 ``` r
-set_seed(x, seed, .fn = lifecycle::deprecated())
+set_seed(x, seed)
 ```
 
 ## Arguments
@@ -20,10 +20,6 @@ set_seed(x, seed, .fn = lifecycle::deprecated())
 - seed:
 
   An integer for reproducibility.
-
-- .fn:
-
-  **\[deprecated\]** Use `x` instead.
 
 ## Value
 

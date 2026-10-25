@@ -1,8 +1,10 @@
 # Containers, grouping and missing values
 
-tidystata separates tabular results from display choices. This tutorial
-shows how to preserve data containers and interpret missing values
-before passing results to another calculation.
+This guide explains the types of objects tidystata returns, how groups
+and missing values affect calculations, and how to preview a table
+without changing its data. Start with [Getting
+started](https://socimh.github.io/tidystata/articles/getting-started.md)
+for a short workflow.
 
 ## Container types and lists
 
@@ -64,8 +66,7 @@ tables. Vectors, such as the result of
 keep their intentional vector output. New data.table summaries do not
 retain input keys or indexes.
 
-The optional data.table integration is exercised only when it is
-installed:
+data.table inputs follow the same rule:
 
 ``` r
 
@@ -77,8 +78,8 @@ if (requireNamespace("data.table", quietly = TRUE)) {
 #> [1] "data.table" "data.frame"
 ```
 
-Rich output is also optional. It is a display object rather than a data
-table:
+For a formatted table, install flextable and request
+`.type = "flextable"`:
 
 ``` r
 
@@ -140,8 +141,7 @@ summ(grouped, score, .by = answer, .stat = c("n", "mean"))
 Cross-tabulation with
 [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) or
 [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md) returns
-one table per group, in a list named after each group, as Stata’s
-`by group: tab2 x y` does:
+one table per group, in a list named after each group:
 
 ``` r
 
@@ -215,8 +215,9 @@ column-summary interfaces.
 ## Labels and special missing values
 
 Variable labels describe columns; value labels describe particular
-values. SPSS user-missing codes and Stata tagged missing values follow
-the original vector’s missingness rules.
+values. Numeric calculations exclude SPSS user-missing codes and Stata
+tagged missing values. Tabulations report missing categories alongside
+observed values.
 
 ``` r
 
@@ -296,9 +297,12 @@ or date-times, while a spread such as `sd` stays a `difftime`. Table
 mode combines families. A location column shared by numeric and calendar
 rows becomes character, and the spread column becomes a plain number of
 days for dates or seconds for date-times, with the unit shown in the
-`type` column. Use raw inputs and base R statistics when full calendar
-precision is needed. SD uses the sample denominator, quantiles use type
-7, and these conventions are not promises of exact Stata equivalence.
+`type` column.
+
+SD uses the sample denominator. Percentiles use Stata’s rule; for
+example, the quartiles of `1:4` are 1.5 and 3.5. See
+[`summ()`](https://socimh.github.io/tidystata/reference/summ.md) for
+formulas, weights and other statistics.
 
 ## A preview retains every row
 

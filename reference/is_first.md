@@ -11,14 +11,12 @@ for example to count or summarise each group once.
 Unlike
 [`duplicates_tag()`](https://socimh.github.io/tidystata/reference/keys.md),
 which counts the other rows sharing the same values, `is_first()` marks
-one row per group. `s_tag()` is an alias of `is_first()`.
+one row per group.
 
 ## Usage
 
 ``` r
 is_first(..., .missing = FALSE)
-
-s_tag(..., .missing = FALSE)
 ```
 
 ## Arguments
@@ -45,7 +43,7 @@ when a particular row should be flagged.
 Other data checking functions:
 [`assert()`](https://socimh.github.io/tidystata/reference/assert.md),
 [`keys`](https://socimh.github.io/tidystata/reference/keys.md),
-[`s_merge()`](https://socimh.github.io/tidystata/reference/s_merge.md)
+[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)
 
 ## Examples
 

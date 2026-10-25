@@ -2,14 +2,12 @@
 
 `capture()` works like Stata's `capture`: it evaluates an expression,
 suppresses any error, and returns `TRUE` if the expression succeeded and
-`FALSE` if it failed. `s_try()` is an alias of `capture()`.
+`FALSE` if it failed.
 
 ## Usage
 
 ``` r
-capture(x, .fn = lifecycle::deprecated())
-
-s_try(x, .fn = lifecycle::deprecated())
+capture(x)
 ```
 
 ## Arguments
@@ -17,10 +15,6 @@ s_try(x, .fn = lifecycle::deprecated())
 - x:
 
   An expression to evaluate once.
-
-- .fn:
-
-  **\[deprecated\]** Use `x` instead.
 
 ## Value
 
@@ -55,6 +49,6 @@ capture(means(1:10))
 #> [1] FALSE
 
 # Check a key without stopping the script
-capture(isid(dplyr::starwars, name))
+capture(isid(lifeexp, country))
 #> [1] TRUE
 ```

@@ -5,12 +5,7 @@
 ## Usage
 
 ``` r
-timer(
-  x,
-  on_error = TRUE,
-  .x = lifecycle::deprecated(),
-  .on_error = lifecycle::deprecated()
-)
+timer(x, on_error = TRUE)
 ```
 
 ## Arguments
@@ -24,10 +19,6 @@ timer(
   A single `TRUE` or `FALSE`. If `TRUE` (the default), also report
   elapsed time when the expression fails, then let the original error
   propagate. Use `FALSE` to report elapsed time only on success.
-
-- .x, .on_error:
-
-  **\[deprecated\]** Use `x` and `on_error` instead.
 
 ## Value
 

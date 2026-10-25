@@ -1,9 +1,9 @@
 # Getting started with tidystata
 
-tidystata provides short commands for exploring and preparing data. Its
-tables can be saved, filtered and joined in ordinary R workflows. This
-tutorial uses a small survey so that you can check the counts and
-calculations yourself.
+This tutorial follows a small survey from inspection to tabulation,
+grouped summaries and new variables. Results are ordinary R objects that
+you can save, filter and join. Install tidystata as shown on the
+[package homepage](https://socimh.github.io/tidystata/) before starting.
 
 ## Load data and inspect variables
 
@@ -68,7 +68,7 @@ variables_search(survey, "assessment")
 #>   name   label                 
 #>   <chr>  <chr>                 
 #> 1 score1 First assessment score
-s_select(survey, id, starts_with("score"))
+select_or_transmute(survey, id, starts_with("score"))
 #> # A tibble: 6 × 3
 #>      id score1 score2
 #>   <int>  <dbl>  <dbl>
@@ -239,27 +239,23 @@ destring(c("1,200", "2,500", NA))
 mvdecode(c(1, -99, 3), -99)
 #> [1]  1 NA  3
 xtile(1:8, 4)
-#> [1] [1,2.75]   [1,2.75]   (2.75,4.5] (2.75,4.5] (4.5,6.25] (4.5,6.25] (6.25,8]  
-#> [8] (6.25,8]  
-#> Levels: [1,2.75] < (2.75,4.5] < (4.5,6.25] < (6.25,8]
+#> [1] [1,2.5]   [1,2.5]   (2.5,4.5] (2.5,4.5] (4.5,6.5] (4.5,6.5] (6.5,8]  
+#> [8] (6.5,8]  
+#> Levels: [1,2.5] < (2.5,4.5] < (4.5,6.5] < (6.5,8]
 ```
 
 [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
-uses a flexible number parser; check parsing warnings when the input is
-messy. Quantile bins keep tied values together and may contain fewer
-intervals when cutpoints coincide. These conventions do not promise
-exact equivalence with every Stata command.
+reads numbers with currency symbols, thousands separators and percent
+signs; other text, such as `"10 kg"`, becomes `NA` with a warning unless
+you remove it with `ignore = "kg"`.
+[`xtile()`](https://socimh.github.io/tidystata/reference/cut.md) uses
+Stata’s percentile cutpoints and keeps tied values together; ties can
+leave some groups empty.
 
-## Continue with plain scripts
+## Next steps
 
-The source repository’s
-[`examples/`](https://github.com/socimh/tidystata/tree/master/examples)
-folder has scripts for inspection, tabulation, summaries, preparation
-and edge cases. Open one in your editor and run its lines individually.
-If results appear to use an older package, inspect
-`packageVersion("tidystata")` and `find.package("tidystata")`. For local
-source changes, install from the project and restart R before testing.
-
-The full [migration
-guide](https://socimh.github.io/tidystata/articles/migration.html) is on
-the package website.
+Read [Containers and missing
+values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.md)
+for output conventions, or [Coming from
+Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.md)
+to find the R equivalent of a Stata command.

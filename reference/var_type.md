@@ -5,14 +5,9 @@ Report an object's type or unit
 ## Usage
 
 ``` r
-var_type(
-  x,
-  abbr = FALSE,
-  .x = lifecycle::deprecated(),
-  .abbr = lifecycle::deprecated()
-)
+var_type(x, abbr = FALSE)
 
-var_unit(x, .x = lifecycle::deprecated())
+var_unit(x)
 ```
 
 ## Arguments
@@ -25,10 +20,6 @@ var_unit(x, .x = lifecycle::deprecated())
 
   A single `TRUE` or `FALSE`. If `TRUE`, the abbreviation of the type is
   returned.
-
-- .x, .abbr:
-
-  **\[deprecated\]** Use `x` and `abbr` instead.
 
 ## Value
 

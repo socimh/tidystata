@@ -2,7 +2,7 @@
 <url><loc>https://socimh.github.io/tidystata/404.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/LICENSE-text.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/LICENSE.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/MIGRATION.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/README.zh.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/articles/coming-from-stata.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/articles/containers-and-missing-values.html</loc></url>
@@ -30,14 +30,13 @@
 <url><loc>https://socimh.github.io/tidystata/reference/pipe.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/pwcorr.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/row_egen.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/reference/s_merge.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/reference/s_select.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/select_or_transmute.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/set_seed.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/special-print.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/stata_merge.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/std.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/summ.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/tab.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/reference/tidystata-deprecated.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/tidystata-package.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/tidystata_args.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/timer.html</loc></url>

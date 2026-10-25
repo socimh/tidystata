@@ -7,7 +7,6 @@ show evenly spaced rows. `unpreview_table()` removes the preference.
 `print_headtail()` and `print_interval()` print once and invisibly
 return the unchanged input. `print_all()` prints every row and every
 column, like Stata's `list`, and also returns the input invisibly.
-`s_print()` does all three through one `style` argument.
 `slice_headtail()` and `slice_interval()` actually select rows, so use
 them only when a smaller data set is wanted.
 
@@ -25,14 +24,6 @@ print_headtail(
   ...,
   max_extra_cols = NULL,
   max_footer_lines = NULL
-)
-
-s_print(
-  .data,
-  style = c("headtail", "interval", "all"),
-  n = 10,
-  width = NULL,
-  ...
 )
 
 print_all(.data, ...)
@@ -63,8 +54,7 @@ slice_interval(.data, n = 10)
 
 - style:
 
-  Either `"headtail"` or `"interval"`. `s_print()` also accepts `"all"`,
-  which prints every row and column like `print_all()`.
+  Either `"headtail"` or `"interval"`.
 
 - n:
 
@@ -131,7 +121,7 @@ while preview settings follow the result.
 ## See also
 
 Other selection and preview functions:
-[`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md),
+[`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md),
 [`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md)
 
 ## Examples
@@ -228,71 +218,63 @@ unpreview_table(x)
 #>  9     9    81
 #> 10    10   100
 #> # ℹ 20 more rows
-print_headtail(mtcars, n = 6)
-#> # Description: df [32 × 11]
-#>      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
-#>    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-#>  1  21       6   160   110  3.9   2.62  16.5     0     1     4     4
-#>  2  21       6   160   110  3.9   2.88  17.0     0     1     4     4
-#>  3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1
-#> 30  19.7     6   145   175  3.62  2.77  15.5     0     1     5     6
-#> 31  15       8   301   335  3.54  3.57  14.6     0     1     5     8
-#> 32  21.4     4   121   109  4.11  2.78  18.6     1     1     4     2
-#> # ... 26 rows omitted in the middle; use print(x, n = Inf) to show all rows.
-print_interval(mtcars, n = 6)
-#> # Description: df [32 × 11]
-#>      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
-#>    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-#>  1  21       6 160     110  3.9   2.62  16.5     0     1     4     4
-#>  7  14.3     8 360     245  3.21  3.57  15.8     0     0     3     4
-#> 13  17.3     8 276.    180  3.07  3.73  17.6     0     0     3     3
-#> 20  33.9     4  71.1    65  4.22  1.84  19.9     1     1     4     1
-#> 26  27.3     4  79      66  4.08  1.94  18.9     1     1     4     1
-#> 32  21.4     4 121     109  4.11  2.78  18.6     1     1     4     2
-#> # ... 26 rows omitted between displayed positions; use print(x, n = Inf) to
+print_headtail(lifeexp, n = 6)
+#> # A tibble: 68 × 6
+#>    region               country       popgrowth  lexp gnppc safewater
+#>    <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
+#>  1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
+#>  2 1 [Europe & C. Asia] Armenia            -1.2    70   570        83
+#>  3 1 [Europe & C. Asia] Austria             0.1    78 27810        97
+#> 66 3 [South America]    Peru                1.8    69  2150        45
+#> 67 3 [South America]    Uruguay             0.5    74  7360        NA
+#> 68 3 [South America]    Venezuela, RB       2      72  3380        NA
+#> # ... 62 rows omitted in the middle; use print(x, n = Inf) to show all rows.
+print_interval(lifeexp, n = 6)
+#> # A tibble: 68 × 6
+#>    region               country       popgrowth  lexp gnppc safewater
+#>    <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
+#>  1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
+#> 14 1 [Europe & C. Asia] France              0.4    79 25740        97
+#> 28 1 [Europe & C. Asia] Norway              0.6    78 36120       100
+#> 41 1 [Europe & C. Asia] Ukraine            -0.8    68   840        66
+#> 55 2 [North America]    Panama              2      73  3510        NA
+#> 68 3 [South America]    Venezuela, RB       2      72  3380        NA
+#> # ... 62 rows omitted between displayed positions; use print(x, n = Inf) to
 #> # show all rows.
-print_all(head(mtcars, 12))
-#> # Description: df [12 × 11]
-#>      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
-#>    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-#>  1  21       6  160    110  3.9   2.62  16.5     0     1     4     4
-#>  2  21       6  160    110  3.9   2.88  17.0     0     1     4     4
-#>  3  22.8     4  108     93  3.85  2.32  18.6     1     1     4     1
-#>  4  21.4     6  258    110  3.08  3.22  19.4     1     0     3     1
-#>  5  18.7     8  360    175  3.15  3.44  17.0     0     0     3     2
-#>  6  18.1     6  225    105  2.76  3.46  20.2     1     0     3     1
-#>  7  14.3     8  360    245  3.21  3.57  15.8     0     0     3     4
-#>  8  24.4     4  147.    62  3.69  3.19  20       1     0     4     2
-#>  9  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2
-#> 10  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
-#> 11  17.8     6  168.   123  3.92  3.44  18.9     1     0     4     4
-#> 12  16.4     8  276.   180  3.07  4.07  17.4     0     0     3     3
-s_print(mtcars, "interval", n = 6)
-#> # Description: df [32 × 11]
-#>      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
-#>    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-#>  1  21       6 160     110  3.9   2.62  16.5     0     1     4     4
-#>  7  14.3     8 360     245  3.21  3.57  15.8     0     0     3     4
-#> 13  17.3     8 276.    180  3.07  3.73  17.6     0     0     3     3
-#> 20  33.9     4  71.1    65  4.22  1.84  19.9     1     1     4     1
-#> 26  27.3     4  79      66  4.08  1.94  18.9     1     1     4     1
-#> 32  21.4     4 121     109  4.11  2.78  18.6     1     1     4     2
-#> # ... 26 rows omitted between displayed positions; use print(x, n = Inf) to
-#> # show all rows.
-slice_headtail(mtcars, n = 6)
-#>                mpg cyl disp  hp drat    wt  qsec vs am gear carb
-#> Mazda RX4     21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
-#> Mazda RX4 Wag 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
-#> Datsun 710    22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
-#> Ferrari Dino  19.7   6  145 175 3.62 2.770 15.50  0  1    5    6
-#> Maserati Bora 15.0   8  301 335 3.54 3.570 14.60  0  1    5    8
-#> Volvo 142E    21.4   4  121 109 4.11 2.780 18.60  1  1    4    2
-slice_interval(mtcars, n = 6)
-#>                 mpg cyl  disp  hp drat    wt  qsec vs am gear carb
-#> Mazda RX4      21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
-#> Duster 360     14.3   8 360.0 245 3.21 3.570 15.84  0  0    3    4
-#> Merc 450SL     17.3   8 275.8 180 3.07 3.730 17.60  0  0    3    3
-#> Toyota Corolla 33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1
-#> Fiat X1-9      27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1
-#> Volvo 142E     21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2
+print_all(head(lifeexp, 12))
+#> # A tibble: 12 × 6
+#>    region               country                popgrowth  lexp gnppc safewater
+#>    <dbl+lbl>            <chr>                      <dbl> <dbl> <dbl>     <dbl>
+#>  1 1 [Europe & C. Asia] Albania                     -0.6    74   870        49
+#>  2 1 [Europe & C. Asia] Armenia                     -1.2    70   570        83
+#>  3 1 [Europe & C. Asia] Austria                      0.1    78 27810        97
+#>  4 1 [Europe & C. Asia] Azerbaijan                   0.9    64   510        49
+#>  5 1 [Europe & C. Asia] Belarus                     -0.5    68  1540        82
+#>  6 1 [Europe & C. Asia] Belgium                      0.2    77 26530       100
+#>  7 1 [Europe & C. Asia] Bosnia and Herzegovina       1.8    74  1230        87
+#>  8 1 [Europe & C. Asia] Bulgaria                    -0.7    71  1440        90
+#>  9 1 [Europe & C. Asia] Croatia                     -0.1    72    NA        85
+#> 10 1 [Europe & C. Asia] Czechia                     -0.1    75  6140        95
+#> 11 1 [Europe & C. Asia] Denmark                      0.4    76 33440        95
+#> 12 1 [Europe & C. Asia] Estonia                     -1      69  3820        92
+slice_headtail(lifeexp, n = 6)
+#> # A tibble: 6 × 6
+#>   region               country       popgrowth  lexp gnppc safewater
+#>   <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
+#> 2 1 [Europe & C. Asia] Armenia            -1.2    70   570        83
+#> 3 1 [Europe & C. Asia] Austria             0.1    78 27810        97
+#> 4 3 [South America]    Peru                1.8    69  2150        45
+#> 5 3 [South America]    Uruguay             0.5    74  7360        NA
+#> 6 3 [South America]    Venezuela, RB       2      72  3380        NA
+slice_interval(lifeexp, n = 6)
+#> # A tibble: 6 × 6
+#>   region               country       popgrowth  lexp gnppc safewater
+#>   <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
+#> 2 1 [Europe & C. Asia] France              0.4    79 25740        97
+#> 3 1 [Europe & C. Asia] Norway              0.6    78 36120       100
+#> 4 1 [Europe & C. Asia] Ukraine            -0.8    68   840        66
+#> 5 2 [North America]    Panama              2      73  3510        NA
+#> 6 3 [South America]    Venezuela, RB       2      72  3380        NA
 ```

@@ -1,60 +1,15 @@
 # tidystata
 
-[tidystata](https://socimh.github.io/tidystata/) is a set of functions
-that combines Stata-inspired features with tidyverse-style operations.
+[中文版](https://github.com/socimh/tidystata/blob/master/README.zh.md)
 
-The package focuses on exploring and preparing data:
-
-- [`tab()`](https://socimh.github.io/tidystata/reference/tab.md),
-  [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md), and
-  [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) for
-  frequency tables.
-- [`fre()`](https://socimh.github.io/tidystata/reference/tab.md),
-  [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md), and
-  [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md) for
-  frequency tables with totals.
-- [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and
-  [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md)
-  for summary statistics.
-- [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
-  [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md),
-  and `tab2(.chi2 = TRUE)` for correlations, missing values, and tests
-  of independence.
-- [`codebook()`](https://socimh.github.io/tidystata/reference/codebook.md)
-  and
-  [`variables()`](https://socimh.github.io/tidystata/reference/variables.md)
-  for variable inspection.
-- [`isid()`](https://socimh.github.io/tidystata/reference/keys.md),
-  [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md),
-  [`assert()`](https://socimh.github.io/tidystata/reference/assert.md),
-  [`is_first()`](https://socimh.github.io/tidystata/reference/is_first.md),
-  and
-  [`s_merge()`](https://socimh.github.io/tidystata/reference/s_merge.md)
-  for checking keys and merging, and
-  [`print_all()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  for listing every row.
-- [`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md),
-  row calculations, conversion helpers,
-  [`std()`](https://socimh.github.io/tidystata/reference/std.md),
-  [`pc()`](https://socimh.github.io/tidystata/reference/std.md),
-  [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
-  panel lags
-  ([`s_lag()`](https://socimh.github.io/tidystata/reference/panel.md),
-  [`s_lead()`](https://socimh.github.io/tidystata/reference/panel.md),
-  [`s_diff()`](https://socimh.github.io/tidystata/reference/panel.md)),
-  and binning for data preparation.
-
-tidystata `0.3.0` retires the import/export, regression-table, and
-detailed-codebook wrappers. See the [migration
-guide](https://socimh.github.io/tidystata/articles/migration.html) for
-direct package alternatives and breaking changes. This experimental
-package is undergoing stabilization; see
-[NEWS](https://socimh.github.io/tidystata/news/index.html) for changes
-in each release.
+[tidystata](https://socimh.github.io/tidystata/) brings Stata-style data
+exploration and preparation to R. Inspect variables, summarise
+measurements, tabulate categories and prepare new columns. Select
+variables with tidyselect helpers and calculate by group with `.by`. The
+resulting tables work with ordinary R tools for filtering, joining and
+plotting.
 
 ## Installation
-
-You can install the development version of tidystata like so:
 
 ``` r
 
@@ -62,102 +17,7 @@ You can install the development version of tidystata like so:
 pak::pak("socimh/tidystata")
 ```
 
-R 4.1.0 or later and a suitable build toolchain are required to install
-from source. Rich table formatting is optional and requires `flextable`.
-
-If you already have this source repository on your computer, open
-`tidystata.Rproj` and restart R before installing the local changes:
-
-``` r
-
-devtools::install(".", upgrade = "never", build_vignettes = FALSE)
-```
-
-Restart R again, then check the version and installed location:
-
-``` r
-
-library(tidystata)
-packageVersion("tidystata")
-find.package("tidystata")
-```
-
-Opening the source folder alone does not change what
-[`library(tidystata)`](https://github.com/socimh/tidystata) loads.
-Repeat the installation after editing source code. During package
-development, `devtools::load_all(".")` loads the working source into the
-current session; installation followed by a fresh R session tests the
-installed package.
-
-## Learn the workflow
-
-Read [Getting
-started](https://socimh.github.io/tidystata/articles/getting-started.html)
-for a small exploration and preparation workflow, and [Containers and
-missing
-values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)
-for return types, grouping, labels and previews. In an installation that
-includes vignettes, use
-[`vignette("getting-started", package = "tidystata")`](https://socimh.github.io/tidystata/articles/getting-started.md).
-
-Coming from Stata?
-[`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
-gives the R equivalent of a Stata command. Type one Stata word bare, or
-quote anything longer; the usual Stata abbreviations work:
-
-``` r
-
-findit(reg)
-findit("merge 1:1 id, keep(match)")
-findit(left_join) # R functions work too
-```
-
-The [Coming from
-Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html)
-article lists every entry by topic, in English and
-[Chinese](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html),
-including the packages to use beyond tidystata.
-
-Plain manual scripts are in the source repository’s
-[`examples/`](https://github.com/socimh/tidystata/tree/master/examples)
-folder. Open a script in your editor and run its lines individually;
-from a source checkout,
-`source("examples/02_frequency_tables.R", echo = TRUE)` runs a complete
-example. The full [migration
-guide](https://socimh.github.io/tidystata/articles/migration.html) is on
-the website.
-
-## Table return types
-
-Most table-producing helpers, including the `tab`, `summ`, `codebook`
-and `variables` families, preserve the input container by default: a
-tibble returns a tibble, a base data frame returns a base data frame,
-and a data.table returns a data.table. List outputs remain lists, with
-each table following the same rule. Explicit output options override
-this default.
-[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
-[`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
-and
-[`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md)
-always return tibbles, as their help pages state. Summaries and variable
-inventories are ungrouped; grouping columns are retained where the
-function normally reports them. Arbitrary data-frame subclass metadata
-is not guaranteed on newly constructed tables. Vector and scalar helpers
-retain their usual outputs.
-
-[`preview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
-preserves the underlying container while changing its console display.
-[`unpreview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
-removes that display setting. External dplyr and tidyr verbs retain
-their own container and grouping behavior, with preview settings
-preserved for supported operations.
-
-## Example
-
-### Load the package
-
-Load `tidystata` and the data-manipulation package used in these
-examples.
+## Core functions
 
 ``` r
 
@@ -165,9 +25,32 @@ library(tidystata)
 library(dplyr)
 ```
 
-### codebook()
+### findit(): find the R equivalent of a Stata command
 
-View the codebook of `lifeexp`.
+``` r
+
+findit("reg, robust")
+#> # Heteroskedasticity-robust standard errors [fixest]
+#> Stata: regress y x1 x2, robust
+#> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
+#> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
+#> 
+#> # 17 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
+findit("egen rowmean")
+#> # Average available values across columns [base]
+#> Stata: egen z = rowmean(x y)
+#> R:     data$z <- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] <- NA_real_
+#> 
+#> # 59 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
+```
+
+A bare command such as `findit(reg)` shows one clear example;
+`findit(reg) |> print(n = Inf)` shows every match. Add variable names or
+hints with commas, as in `findit(tab, sex, region)` or
+`findit(tab, gen)`. Every entry is listed by topic in [Coming from
+Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
+
+### codebook(): describe every variable
 
 ``` r
 
@@ -183,200 +66,123 @@ codebook(lifeexp)
 #> 6 safewater Safe water               double          54     32
 ```
 
-### summ()
+### summ(): summary statistics
 
-Summarise selected numeric variables in `mtcars`.
+`lexp:safewater` selects the three consecutive variables from `lexp`
+through `safewater`, including both endpoints. Other tidyselect helpers
+such as
+[`ends_with()`](https://tidyselect.r-lib.org/reference/starts_with.html)
+and
+[`matches()`](https://tidyselect.r-lib.org/reference/starts_with.html),
+or a Stata-style
+[`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md),
+also work.
 
 ``` r
 
-summ(mtcars, mpg, wt)
-#>   name type  n unique    min     mean        sd    max
-#> 1  mpg  dbl 32     25 10.400 20.09062 6.0269481 33.900
-#> 2   wt  dbl 32     29  1.513  3.21725 0.9784574  5.424
+summ(lifeexp, lexp:safewater, .by = region)
+#> # A tibble: 9 x 9
+#>   region               name      type      n unique   min    mean       sd   max
+#>   <dbl+lbl>            <chr>     <chr> <int>  <int> <dbl>   <dbl>    <dbl> <dbl>
+#> 1 1 [Europe & C. Asia] lexp      dbl      44     17    62    72.5     4.95    79
+#> 2 1 [Europe & C. Asia] gnppc     dbl      43     42   170 11284.  12920.   46650
+#> 3 1 [Europe & C. Asia] safewater dbl      42     25    36    81.6    18.6    100
+#> 4 2 [North America]    lexp      dbl      14     13    57    69.7     6.14    79
+#> 5 2 [North America]    gnppc     dbl      14     14   410  6294.   9080.   32040
+#> 6 2 [North America]    safewater dbl       6      5    40    58      24.0     99
+#> 7 3 [South America]    lexp      dbl      10      8    61    70.7     4.06    76
+#> 8 3 [South America]    gnppc     dbl      10      9   960  3881    2432.    7960
+#> 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91
 ```
 
-Choose numeric variables deliberately: means and standard deviations of
-factor codes may have no substantive interpretation. Numeric and logical
-columns with no observed values are retained: `n` and `unique` are zero
-and summary statistics are `NA`, including `sum`.
+### tab(), tab1() and tab2(): compare frequency tables
 
-Select statistics with `.stat`. Aliases `missing`, `p25`, `p50`, and
-`p75` retain their requested names and order; `sum` is available for
-numeric summaries. Unsupported statistics produce an error. See the
-[migration
-guide](https://socimh.github.io/tidystata/articles/migration.html) for
-the date/datetime restrictions and cross-tabulation naming rules.
+Use region and a second category derived from `lifeexp`: whether life
+expectancy is at least 70 years. `region:lexp_70` selects these two
+columns.
+
+[`tab()`](https://socimh.github.io/tidystata/reference/tab.md) counts
+each observed combination, with percentages.
 
 ``` r
 
-summ(mtcars, mpg, .stat = c("missing", "p50", "sum"))
-#>   type missing  p50   sum
-#> 1  dbl       0 19.2 642.9
+lifeexp_tab <- lifeexp |>
+  transmute(region, lexp_70 = lexp >= 70)
+
+tab(lifeexp_tab, region:lexp_70)
+#> # A tibble: 6 x 7
+#>   region               lexp_70     n percent   cum valid valid_cum
+#>   <dbl+lbl>            <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] FALSE      12   17.6   17.6 17.6       17.6
+#> 2 1 [Europe & C. Asia] TRUE       32   47.1   64.7 47.1       64.7
+#> 3 2 [North America]    FALSE       6    8.82  73.5  8.82      73.5
+#> 4 2 [North America]    TRUE        8   11.8   85.3 11.8       85.3
+#> 5 3 [South America]    FALSE       3    4.41  89.7  4.41      89.7
+#> 6 3 [South America]    TRUE        7   10.3  100   10.3      100
 ```
 
-With `.type = "table"`, numeric and calendar summaries share character
-columns for formatted statistics; counts remain numeric. Default list
-mode preserves numeric statistic types in the numeric summary.
-
-### tab()
-
-Tabulate a single variable:
+[`tab1()`](https://socimh.github.io/tidystata/reference/tab.md) returns
+a named list with a separate frequency table for each variable.
 
 ``` r
 
-tab(dplyr::starwars, sex)
-#> # A tibble: 5 x 6
-#>   sex                n percent   cum valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 female            16   18.4   18.4 19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5  1.20      20.5
-#> 3 male              60   69.0   88.5 72.3       92.8
-#> 4 none               6    6.90  95.4  7.23     100  
-#> 5 <NA>               4    4.60 100   NA         NA
-```
-
-[`tab1()`](https://socimh.github.io/tidystata/reference/tab.md)
-tabulates variables one by one as a list, and
-[`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md)
-can select variables in a Stata style.
-
-``` r
-
-tab1(dplyr::starwars, varlist("*color"))
-#> $hair_color
-#> # A tibble: 12 x 6
-#>    value             n percent    cum valid valid_cum
-#>    <chr>         <int>   <dbl>  <dbl> <dbl>     <dbl>
-#>  1 auburn            1    1.15   1.15  1.22      1.22
-#>  2 auburn, grey      1    1.15   2.30  1.22      2.44
-#>  3 auburn, white     1    1.15   3.45  1.22      3.66
-#>  4 black            13   14.9   18.4  15.9      19.5 
-#>  5 blond             3    3.45  21.8   3.66     23.2 
-#>  6 blonde            1    1.15  23.0   1.22     24.4 
-#>  7 brown            18   20.7   43.7  22.0      46.3 
-#>  8 brown, grey       1    1.15  44.8   1.22     47.6 
-#>  9 grey              1    1.15  46.0   1.22     48.8 
-#> 10 none             38   43.7   89.7  46.3      95.1 
-#> 11 white             4    4.60  94.3   4.88    100   
-#> 12 <NA>              5    5.75 100    NA        NA   
+tab1(lifeexp_tab, region:lexp_70)
+#> $region
+#> # A tibble: 3 x 6
+#>   value                    n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
 #> 
-#> $skin_color
-#> # A tibble: 31 x 6
-#>    value                   n percent   cum valid valid_cum
-#>    <chr>               <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 blue                    2    2.30  2.30  2.30      2.30
-#>  2 blue, grey              2    2.30  4.60  2.30      4.60
-#>  3 brown                   4    4.60  9.20  4.60      9.20
-#>  4 brown mottle            1    1.15 10.3   1.15     10.3 
-#>  5 brown, white            1    1.15 11.5   1.15     11.5 
-#>  6 dark                    6    6.90 18.4   6.90     18.4 
-#>  7 fair                   17   19.5  37.9  19.5      37.9 
-#>  8 fair, green, yellow     1    1.15 39.1   1.15     39.1 
-#>  9 gold                    1    1.15 40.2   1.15     40.2 
-#> 10 green                   6    6.90 47.1   6.90     47.1 
-#> # i 21 more rows
-#> 
-#> $eye_color
-#> # A tibble: 15 x 6
-#>    value             n percent   cum valid valid_cum
-#>    <chr>         <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 black            10   11.5   11.5 11.5       11.5
-#>  2 blue             19   21.8   33.3 21.8       33.3
-#>  3 blue-gray         1    1.15  34.5  1.15      34.5
-#>  4 brown            21   24.1   58.6 24.1       58.6
-#>  5 dark              1    1.15  59.8  1.15      59.8
-#>  6 gold              1    1.15  60.9  1.15      60.9
-#>  7 green, yellow     1    1.15  62.1  1.15      62.1
-#>  8 hazel             3    3.45  65.5  3.45      65.5
-#>  9 orange            8    9.20  74.7  9.20      74.7
-#> 10 pink              1    1.15  75.9  1.15      75.9
-#> 11 red               5    5.75  81.6  5.75      81.6
-#> 12 red, blue         1    1.15  82.8  1.15      82.8
-#> 13 unknown           3    3.45  86.2  3.45      86.2
-#> 14 white             1    1.15  87.4  1.15      87.4
-#> 15 yellow           11   12.6  100   12.6      100
+#> $lexp_70
+#> # A tibble: 2 x 6
+#>   value     n percent   cum valid valid_cum
+#>   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 FALSE    21    30.9  30.9  30.9      30.9
+#> 2 TRUE     47    69.1 100    69.1     100
 ```
 
-One-way tabulation also counts list-column values. Selecting no
-variables returns an empty result;
-[`tab1()`](https://socimh.github.io/tidystata/reference/tab.md) and
-[`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) return
-empty lists by default. Matrix columns are unsupported.
-
-[`tab2()`](https://socimh.github.io/tidystata/reference/tab.md)
-cross-tabulates two variables.
+[`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) displays
+the joint counts as a cross-table, with region in rows and life
+expectancy category in columns.
 
 ``` r
 
-tab2(dplyr::starwars, sex, gender)
-#> # A tibble: 5 x 4
-#>   `sex \\ gender` feminine masculine  `NA`
-#>   <chr>              <int>     <int> <int>
-#> 1 female                16         0     0
-#> 2 hermaphroditic         0         1     0
-#> 3 male                   0        60     0
-#> 4 none                   1         5     0
-#> 5 <NA>                   0         0     4
-```
-
-### fre()
-
-[`fre()`](https://socimh.github.io/tidystata/reference/tab.md) family
-functions simply add total rows (and total columns in
-[`fre2()`](https://socimh.github.io/tidystata/reference/tab.md)) to
-their [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
-counterparts.
-
-[`fre()`](https://socimh.github.io/tidystata/reference/tab.md) and
-[`fre2()`](https://socimh.github.io/tidystata/reference/tab.md) default
-to `.type = "auto"`, preserving the input container.
-[`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) returns
-a list whose tables preserve that container. Request `.type = "tibble"`
-explicitly when a tibble is required.
-
-``` r
-
-fre(dplyr::starwars, sex)
-#> # A tibble: 7 x 6
-#>   sex                n percent   cum  valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl>  <dbl>     <dbl>
-#> 1 female            16   18.4   18.4  19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5   1.20      20.5
-#> 3 male              60   69.0   88.5  72.3       92.8
-#> 4 none               6    6.90  95.4   7.23     100  
-#> 5 Valid Total       83   95.4   NA   100         NA  
-#> 6 <NA>               4    4.60 100    NA         NA  
-#> 7 Total             87  100     NA    NA         NA
-```
-
-For optional rich formatting, install `flextable` and request it
-explicitly:
-
-``` r
-
-fre(dplyr::starwars, sex, .type = "flextable")
-```
-
-### Row calculations and binning
-
-Row helpers return vectors that can be used in
-[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html):
-
-``` r
-
-tibble(a = c(1, NA, 3), b = c(3, NA, 5)) |>
-  mutate(row_average = row_mean(a, b))
+tab2(lifeexp_tab, region:lexp_70)
 #> # A tibble: 3 x 3
-#>       a     b row_average
-#>   <dbl> <dbl>       <dbl>
-#> 1     1     3           2
-#> 2    NA    NA          NA
-#> 3     3     5           4
+#>   `region \\ lexp_70`  `FALSE` `TRUE`
+#>   <dbl+lbl>              <int>  <int>
+#> 1 1 [Europe & C. Asia]      12     32
+#> 2 2 [North America]          6      8
+#> 3 3 [South America]          3      7
 ```
 
-[`xtile()`](https://socimh.github.io/tidystata/reference/cut.md) keeps
-equal values in the same group. Ties can reduce the number of intervals,
-with a warning, rather than splitting equal values by row order.
+## Learn more
+
+tidystata also covers row calculations
+([`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md)),
+panel operators
+([`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)),
+correlations
+([`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)),
+missing values
+([`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)),
+keys and merging
+([`isid()`](https://socimh.github.io/tidystata/reference/keys.md),
+[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md))
+and binning
+([`xtile()`](https://socimh.github.io/tidystata/reference/cut.md)). See
+the guides below for examples and output conventions.
+
+- [Getting
+  started](https://socimh.github.io/tidystata/articles/getting-started.html):
+  a short workflow.
+- [Containers and missing
+  values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html):
+  return types, grouping and labels.
+- [Reference](https://socimh.github.io/tidystata/reference/index.html):
+  every function.
 
 ## Code of Conduct
 
@@ -404,10 +210,8 @@ By contributing to this project, you agree to abide by its terms.
 - [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
   : Tabulate missing values
 
-- [`ds()`](https://socimh.github.io/tidystata/reference/names.md)
-  [`ds_as_column()`](https://socimh.github.io/tidystata/reference/names.md)
-  [`names_as_column()`](https://socimh.github.io/tidystata/reference/names.md)
-  : List column names by tidyselect
+- [`ds()`](https://socimh.github.io/tidystata/reference/names.md) : List
+  column names by tidyselect
 
 - [`var_type()`](https://socimh.github.io/tidystata/reference/var_type.md)
   [`var_unit()`](https://socimh.github.io/tidystata/reference/var_type.md)
@@ -424,7 +228,6 @@ By contributing to this project, you agree to abide by its terms.
 - [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md)
-  [`xtab()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) :
@@ -441,7 +244,6 @@ By contributing to this project, you agree to abide by its terms.
 - [`assert()`](https://socimh.github.io/tidystata/reference/assert.md) :
   Assert that conditions hold
 - [`is_first()`](https://socimh.github.io/tidystata/reference/is_first.md)
-  [`s_tag()`](https://socimh.github.io/tidystata/reference/is_first.md)
   : Flag the first row of each group
 - [`isid()`](https://socimh.github.io/tidystata/reference/keys.md)
   [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md)
@@ -449,7 +251,7 @@ By contributing to this project, you agree to abide by its terms.
   [`duplicates_list()`](https://socimh.github.io/tidystata/reference/keys.md)
   [`duplicates_drop()`](https://socimh.github.io/tidystata/reference/keys.md)
   : Check keys and duplicate rows
-- [`s_merge()`](https://socimh.github.io/tidystata/reference/s_merge.md)
+- [`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)
   : Merge two tables with a Stata-style match report
 
 ## Generate variables
@@ -462,10 +264,10 @@ By contributing to this project, you agree to abide by its terms.
   [`cut_length()`](https://socimh.github.io/tidystata/reference/cut.md)
   [`cut_breaks()`](https://socimh.github.io/tidystata/reference/cut.md)
   : Cut a numeric vector into groups
-- [`s_lag()`](https://socimh.github.io/tidystata/reference/panel.md)
-  [`s_lead()`](https://socimh.github.io/tidystata/reference/panel.md)
-  [`s_diff()`](https://socimh.github.io/tidystata/reference/panel.md) :
-  Panel lags, leads and differences
+- [`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)
+  [`stata_lead()`](https://socimh.github.io/tidystata/reference/panel.md)
+  [`stata_diff()`](https://socimh.github.io/tidystata/reference/panel.md)
+  : Panel lags, leads and differences
 - [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   [`row_sum()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   [`row_max()`](https://socimh.github.io/tidystata/reference/row_egen.md)
@@ -499,12 +301,11 @@ By contributing to this project, you agree to abide by its terms.
 
 ## Select and preview
 
-- [`s_select()`](https://socimh.github.io/tidystata/reference/s_select.md)
+- [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md)
   : Select and compute columns
 - [`preview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`unpreview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`s_print()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`print_all()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`slice_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
@@ -516,8 +317,7 @@ By contributing to this project, you agree to abide by its terms.
 ## Small tools
 
 - [`capture()`](https://socimh.github.io/tidystata/reference/capture.md)
-  [`s_try()`](https://socimh.github.io/tidystata/reference/capture.md) :
-  Capture an error and report success
+  : Capture an error and report success
 - [`set_seed()`](https://socimh.github.io/tidystata/reference/set_seed.md)
   : Set the random seed, in a pipeline or alone
 - [`timer()`](https://socimh.github.io/tidystata/reference/timer.md) :
@@ -542,5 +342,3 @@ By contributing to this project, you agree to abide by its terms.
   Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.md):
 - [从 Stata 到
   R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.md):
-- [Migration
-  guide](https://socimh.github.io/tidystata/articles/migration.md):
