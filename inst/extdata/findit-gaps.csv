@@ -1,0 +1,7 @@
+"query","detail","detail_zh"
+"gmm","General moment-condition programs need a model-specific R implementation; a general translation has not been reviewed.","通用矩条件程序需要针对具体模型编写 R 实现，通用转换尚未核验。"
+"gsem","Generalized structural equation models need model-specific choices; the catalogue does not provide a general conversion.","广义结构方程模型需要针对具体模型选择实现方式，本目录不提供通用转换。"
+"collect","Stata collections have no reviewed general conversion here. See the table and reporting workflows instead.","本目录尚无 Stata 结果集合的通用转换，请参阅表格和报告工作流程。"
+"xtnbreg","The dictionary's fixest::fenegbin reference is not a reviewed translation of Stata's conditional fixed-effects or random-effects negative-binomial estimators.","词典中的 fixest::fenegbin 不是 Stata 条件固定效应或随机效应负二项估计的已核验转换。"
+"tsspell","The dictionary names dplyr::consecutive_id for runs of values; panel boundaries and time gaps require a separate spell definition that has not been reviewed here.","词典将连续相同取值与 dplyr::consecutive_id 联系起来，但面板边界及时间缺口需要单独定义持续段，本目录尚未核验。"
+"spmap","The dictionary names ggplot2::geom_sf as a mapping tool; Stata map-coordinate files and spmap options need a separate conversion that has not been reviewed.","词典将 ggplot2::geom_sf 列为绘图工具，但 Stata 地图坐标文件及 spmap 选项尚需单独转换，目前未核验。"

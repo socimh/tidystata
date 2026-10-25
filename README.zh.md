@@ -34,14 +34,15 @@ findit("reg, robust")
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
+#> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
-#> # 5 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
+#> # 17 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
 findit("egen rowmean")
-#> # Row mean [tidystata]
-#> Stata: egen x_avg = rowmean(x1-x5)
-#> R:     mutate(data, x_avg = row_mean(x1:x5))
+#> # Average available values across columns [base]
+#> Stata: egen z = rowmean(x y)
+#> R:     data$z <- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] <- NA_real_
 #> 
-#> # 28 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
+#> # 59 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
 ```
 
 只写一个命令，例如 `findit(reg)`，默认显示一个明确的例子；`findit(reg) |> print(n = Inf)` 显示所有匹配项。可以用逗号添加变量名或提示，例如 `findit(tab, sex, region)` 或 `findit(tab, gen)`。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到 R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
@@ -63,8 +64,10 @@ codebook(lifeexp)
 
 ### summ()：汇总统计
 
+`lexp:safewater` 选择从 `lexp` 到 `safewater` 的三个连续变量，包括两端；也可以使用 `ends_with()`、`matches()` 等 tidyselect 函数或 Stata 风格的 `varlist()`。
+
 ``` r
-summ(lifeexp, lexp, gnppc, safewater, .by = region)
+summ(lifeexp, lexp:safewater, .by = region)
 #> # A tibble: 9 x 9
 #>   region               name      type      n unique   min    mean       sd   max
 #>   <dbl+lbl>            <chr>     <chr> <int>  <int> <dbl>   <dbl>    <dbl> <dbl>
@@ -79,90 +82,63 @@ summ(lifeexp, lexp, gnppc, safewater, .by = region)
 #> 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91
 ```
 
-### tab()：频数表
+### tab()、tab1() 和 tab2()：比较频数表
+
+用 `lifeexp` 中的地区和一个新类别作比较：预期寿命是否达到 70 岁。`region:lexp_70` 选择这两列。
+
+`tab()` 统计每种实际出现的组合的频数，并给出百分比。
 
 ``` r
-tab(dplyr::starwars, sex)
-#> # A tibble: 5 x 6
-#>   sex                n percent   cum valid valid_cum
-#>   <chr>          <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 female            16   18.4   18.4 19.3       19.3
-#> 2 hermaphroditic     1    1.15  19.5  1.20      20.5
-#> 3 male              60   69.0   88.5 72.3       92.8
-#> 4 none               6    6.90  95.4  7.23     100  
-#> 5 <NA>               4    4.60 100   NA         NA
+lifeexp_tab <- lifeexp |>
+  transmute(region, lexp_70 = lexp >= 70)
+
+tab(lifeexp_tab, region:lexp_70)
+#> # A tibble: 6 x 7
+#>   region               lexp_70     n percent   cum valid valid_cum
+#>   <dbl+lbl>            <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] FALSE      12   17.6   17.6 17.6       17.6
+#> 2 1 [Europe & C. Asia] TRUE       32   47.1   64.7 47.1       64.7
+#> 3 2 [North America]    FALSE       6    8.82  73.5  8.82      73.5
+#> 4 2 [North America]    TRUE        8   11.8   85.3 11.8       85.3
+#> 5 3 [South America]    FALSE       3    4.41  89.7  4.41      89.7
+#> 6 3 [South America]    TRUE        7   10.3  100   10.3      100
 ```
 
-`tab1()` 对多个变量分别列频数表，变量可以用 `ends_with()`、`matches()` 等 tidyselect 函数或 Stata 风格的 `varlist()` 选择；`tab2()` 生成两个变量的交叉表。
-
-### fre()：带合计和值标签的频数表
+`tab1()` 返回一个命名列表，为每个变量分别生成频数表。
 
 ``` r
-fre(lifeexp, region)
-#> # A tibble: 4 x 6
-#>   region               n percent   cum valid valid_cum
-#>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
-#> 2 North America       14    20.6  85.3  20.6      85.3
-#> 3 South America       10    14.7 100    14.7     100  
-#> 4 Total               68   100    NA    NA        NA
+tab1(lifeexp_tab, region:lexp_70)
+#> $region
+#> # A tibble: 3 x 6
+#>   value                    n percent   cum valid valid_cum
+#>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
+#> 2 2 [North America]       14    20.6  85.3  20.6      85.3
+#> 3 3 [South America]       10    14.7 100    14.7     100  
+#> 
+#> $lexp_70
+#> # A tibble: 2 x 6
+#>   value     n percent   cum valid valid_cum
+#>   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 FALSE    21    30.9  30.9  30.9      30.9
+#> 2 TRUE     47    69.1 100    69.1     100
 ```
 
-### row_mean() 等：按行计算
-
-与 Stata 的 `egen rowmean()`、`rowtotal()` 和 `rownonmiss()` 一样，按行计算的函数接受一组连续的列，并跳过缺失值。
+`tab2()` 将联合频数排列成交叉表，地区为行，预期寿命类别为列。
 
 ``` r
-scores <- tibble(
-  id = 1:4,
-  math = c(80, 92, NA, 75),
-  read = c(70, 88, 95, NA),
-  art = c(90, NA, 85, 60)
-)
-scores |>
-  mutate(
-    mean = row_mean(math:art),
-    total = row_sum(math:art),
-    answered = row_non_miss(math:art)
-  )
-#> # A tibble: 4 x 7
-#>      id  math  read   art  mean total answered
-#>   <int> <dbl> <dbl> <dbl> <dbl> <dbl>    <int>
-#> 1     1    80    70    90  80     240        3
-#> 2     2    92    88    NA  90     180        2
-#> 3     3    NA    95    85  90     180        2
-#> 4     4    75    NA    60  67.5   135        2
-```
-
-### stata_lag()：面板数据的滞后、超前和差分
-
-`stata_lag()`、`stata_lead()` 和 `stata_diff()` 相当于 `xtset id year` 之后的 `L.`、`F.` 和 `D.`：它们按时间变量取值，所以年份不连续时得到缺失值，而不是上一行的值。
-
-``` r
-panel <- tibble(
-  id = c(1, 1, 1, 2, 2),
-  year = c(2001, 2002, 2004, 2001, 2002),
-  x = c(10, 12, 15, 20, 21)
-)
-panel |>
-  mutate(
-    lag_x = stata_lag(x, time = year),
-    d_x = stata_diff(x, time = year),
-    .by = id
-  )
-#> # A tibble: 5 x 5
-#>      id  year     x lag_x   d_x
-#>   <dbl> <dbl> <dbl> <dbl> <dbl>
-#> 1     1  2001    10    NA    NA
-#> 2     1  2002    12    10     2
-#> 3     1  2004    15    NA    NA
-#> 4     2  2001    20    NA    NA
-#> 5     2  2002    21    20     1
+tab2(lifeexp_tab, region:lexp_70)
+#> # A tibble: 3 x 3
+#>   `region \\ lexp_70`  `FALSE` `TRUE`
+#>   <dbl+lbl>              <int>  <int>
+#> 1 1 [Europe & C. Asia]      12     32
+#> 2 2 [North America]          6      8
+#> 3 3 [South America]          3      7
 ```
 
 ## 了解更多
 
-tidystata 还提供相关系数（`pwcorr()`）、缺失值报告（`misstable()`）、主键检查与合并（`isid()`、`stata_merge()`）以及分组（`xtile()`）等函数。示例和输出约定见以下指南（英文）。
+tidystata 还提供按行计算（`row_mean()` 等）、面板运算（`stata_lag()` 等）、相关系数（`pwcorr()`）、缺失值报告（`misstable()`）、主键检查与合并（`isid()`、`stata_merge()`）以及分组（`xtile()`）等函数。示例和输出约定见以下指南（英文）。
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html)：简短的工作流程。
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)：返回类型、分组和标签。

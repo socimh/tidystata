@@ -29,7 +29,9 @@ used in the entry, \code{"keyword"} for a text match, \code{"nearest"} for the
 closest entries to a plain question, \code{"all"} for the whole list), \code{stata} (the Stata code), \code{r} (equivalent R code), \code{package} (where
 the R function lives) and \code{task} (what it does). It prints each entry as
 a short block: what it does, then the Stata code and the R code on lines
-labelled \verb{Stata:} and \verb{R:}, so the code is never cut off. When one entry
+labelled \verb{Stata:} and \verb{R:}, so the code is never cut off. The \code{package}
+column identifies the primary package; namespace-qualified helper calls may
+require additional packages. When one entry
 answers the query, only that entry is printed. Routine commands have a
 canonical default, such as \verb{tabulate x} for \code{findit(tab)}. Up to five examples
 are printed when different meanings or structural choices remain unresolved,
@@ -75,7 +77,7 @@ Stata's minimum abbreviations work: \code{reg}, \code{regr} and \code{regress} a
 matches.
 \item Entries found as a Stata command come first. Entries found only through
 the R function follow. A description is added only when the function does
-not appear in a displayed example. About 600
+not appear in a displayed example. Hundreds of
 R functions are described, including many that no entry uses yet, such
 as \code{n_distinct()} or \code{fct_relevel()}; for those, \code{findit()} prints the
 description and the related Stata command.
@@ -126,6 +128,16 @@ own messages.
 The list is curated rather than exhaustive. Longer explanations, in English
 and Chinese, are in the "Coming from Stata" articles on the package
 website.
+
+Nonempty notes and qualifications print with their examples, including legacy
+workflows. Explicit expansion also prints reference links. Reference
+packages are needed only when running their examples; lookup stays offline
+and does not load or install them. A qualification identifies supplied option
+combinations absent from the curated examples. Known unsupported queries are
+explained explicitly. The reference articles distinguish canonical commands,
+Stata functions and operators, Stata examples and alternative R approaches.
+Example metadata uses stable IDs, so several R implementations may share the
+same Stata syntax without losing their variable-role annotations.
 
 tidystata and statar can be attached together; only \code{tab()} and \code{xtile()}
 share names. Attach tidystata last, or write \code{tidystata::tab()}.

@@ -12,7 +12,11 @@ test_that("clear commands show one default and offer every remaining example", {
   out <- capture.output(print(findit(tab)))
   expect_true("Stata: tabulate x" %in% out)
   expect_true(
-    "# 10 more examples. To see them all: findit(tab) |> print(n = Inf)" %in%
+    paste0(
+      "# ",
+      nrow(findit(tab)) - 1L,
+      " more examples. To see them all: findit(tab) |> print(n = Inf)"
+    ) %in%
       out
   )
   expect_identical(
@@ -30,7 +34,7 @@ test_that("comma arguments select tabulation examples without evaluation", {
   two <- findit(tab, sex, region)
   expect_identical(two$stata[1], "tabulate sex region")
   expect_identical(two$r[1], "tab2(data, sex, region)")
-  expect_identical(nrow(two), 11L)
+  expect_identical(nrow(two), nrow(findit(tab)))
   expect_named(two, c("match", "stata", "r", "package", "task"))
   expect_identical(findit(ta, sex, region)$r[1], two$r[1])
   expect_identical(findit("tabulate", "sex", "region")$r[1], two$r[1])
@@ -77,8 +81,9 @@ test_that("supplied names bind in Stata operand order across command families", 
   expect_identical(
     findit(reshape, measure, person, wave, long)$r[1],
     paste0(
-      'pivot_longer(data, starts_with("measure"), names_to = "wave", ',
-      'names_prefix = "measure", values_to = "measure")'
+      'tidyr::pivot_longer(data, tidyselect::starts_with("measure"), ',
+      'names_to = "wave", names_prefix = "measure", ',
+      'names_transform = list(wave = as.integer), values_to = "measure")'
     )
   )
   expect_identical(
@@ -95,7 +100,7 @@ test_that("customization is simultaneous and leaves incompatible examples intact
   found <- findit(tab, sex, region)
   expect_true("tab(data, x)" %in% found$r)
   full <- capture.output(print(found, n = Inf))
-  expect_identical(sum(startsWith(full, "Stata: ")), 11L)
+  expect_identical(sum(startsWith(full, "Stata: ")), nrow(findit(tab)))
   expect_true(any(grepl("retain.*placeholder", full)))
   expect_identical(findit(tab, x2, x1)$r[1], "tab2(data, x2, x1)")
   expect_identical(
@@ -256,7 +261,7 @@ test_that("cross-language operands bind without requiring retained model context
 test_that("templates explicitly cover the complete catalogue", {
   data <- findit_entries()
   templates <- findit_templates()
-  expect_identical(names(templates), data$stata)
+  expect_identical(names(templates), data$id)
   for (i in seq_len(nrow(data))) {
     template <- templates[[i]]
     expect_type(template$variables, "character")

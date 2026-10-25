@@ -62,64 +62,40 @@ codebook(lifeexp)
 
 ### summ(): summary statistics
 
+`lexp:safewater` selects the three consecutive variables from `lexp` through `safewater`, including both endpoints. Other tidyselect helpers such as `ends_with()` and `matches()`, or a Stata-style `varlist()`, also work.
+
 ```{r}
-summ(lifeexp, lexp, gnppc, safewater, .by = region)
+summ(lifeexp, lexp:safewater, .by = region)
 ```
 
-### tab(): frequency tables
+### tab(), tab1() and tab2(): compare frequency tables
+
+Use region and a second category derived from `lifeexp`: whether life expectancy is at least 70 years. `region:lexp_70` selects these two columns.
+
+`tab()` counts each observed combination, with percentages.
 
 ```{r}
-tab(dplyr::starwars, sex)
+lifeexp_tab <- lifeexp |>
+  transmute(region, lexp_70 = lexp >= 70)
+
+tab(lifeexp_tab, region:lexp_70)
 ```
 
-`tab1()` tabulates several variables, selected with tidyselect helpers such as `ends_with()` and `matches()` or a Stata `varlist()`; `tab2()` cross-tabulates two.
-
-### fre(): frequency tables with totals and value labels
+`tab1()` returns a named list with a separate frequency table for each variable.
 
 ```{r}
-fre(lifeexp, region)
+tab1(lifeexp_tab, region:lexp_70)
 ```
 
-### row_mean() and friends: row calculations
-
-Like Stata's `egen rowmean()`, `rowtotal()` and `rownonmiss()`, row functions take a range of columns and skip missing values.
+`tab2()` displays the joint counts as a cross-table, with region in rows and life expectancy category in columns.
 
 ```{r}
-scores <- tibble(
-  id = 1:4,
-  math = c(80, 92, NA, 75),
-  read = c(70, 88, 95, NA),
-  art = c(90, NA, 85, 60)
-)
-scores |>
-  mutate(
-    mean = row_mean(math:art),
-    total = row_sum(math:art),
-    answered = row_non_miss(math:art)
-  )
-```
-
-### stata_lag(): panel lags, leads and differences
-
-`stata_lag()`, `stata_lead()` and `stata_diff()` work like `L.`, `F.` and `D.` after `xtset id year`: they follow the time variable, so a gap in the years gives a missing value instead of the previous row.
-
-```{r}
-panel <- tibble(
-  id = c(1, 1, 1, 2, 2),
-  year = c(2001, 2002, 2004, 2001, 2002),
-  x = c(10, 12, 15, 20, 21)
-)
-panel |>
-  mutate(
-    lag_x = stata_lag(x, time = year),
-    d_x = stata_diff(x, time = year),
-    .by = id
-  )
+tab2(lifeexp_tab, region:lexp_70)
 ```
 
 ## Learn more
 
-tidystata also covers correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
+tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.

@@ -1,5 +1,21 @@
 # tidystata 0.3.1
 
+- `findit()` corrects audited statistical mappings, missing-value handling and
+  estimator defaults, with explicit bilingual qualifications and command-specific
+  sources. Name substitution, documented abbreviations, row-number queries,
+  by-prefix options and Chinese chart questions work while example anchors stay
+  stable. Earlier curated examples show their notes in compact output too.
+- Add a searchable English/Chinese Stata-to-R reference book, generated from the
+  `findit()` catalogue, with chapter navigation and a matching-page language switch.
+  A dedicated pkgdown navigation link opens the book on the author's website.
+- Expand the bilingual `findit()` reference with executable, source-linked
+  examples and selected alternative R approaches. The generated guide provides
+  an alphabetical command index, subject tables and a package-sorted R index.
+- Keep concise defaults while showing qualifications and sources on explicit
+  expansion. Stable example IDs allow several R answers for the same Stata code.
+- Respect package-qualified R queries, avoid unrelated word-fragment matches,
+  and explain known gaps and unrepresented option combinations.
+
 * `findit()` shows a single clear default, retaining alternatives for ambiguous
   inputs. Comma-separated variable names and hints customize catalogue examples,
   as in `findit(tab, sex, region)` and `findit(tab, gen)`; all matches remain

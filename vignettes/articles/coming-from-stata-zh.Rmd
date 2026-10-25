@@ -6,57 +6,20 @@ title: "从 Stata 到 R"
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(tidystata)
 
-entries <- tidystata:::findit_entries()
-
-# Pandoc reads markdown inside HTML blocks, so encode ASCII punctuation as
-# entities to keep code such as `x*` and quotes exactly as written. Non-ASCII
-# text is encoded too: pkgdown may render in a non-UTF-8 locale, where cat()
-# would print Chinese as <U+xxxx> escapes.
-escape_html <- function(x) {
-  vapply(
-    x,
-    function(text) {
-      codes <- utf8ToInt(text)
-      punct <- codes %in% c(33:47, 58:64, 91:96, 123:126) | codes > 127
-      chars <- vapply(codes, intToUtf8, character(1))
-      chars[punct] <- paste0("&#", codes[punct], ";")
-      paste(chars, collapse = "")
-    },
-    character(1),
-    USE.NAMES = FALSE
-  )
-}
-
-section_tables <- function(section, task, detail, headers) {
-  for (name in unique(entries[[section]])) {
-    rows <- entries[entries[[section]] == name, ]
-    notes <- ifelse(
-      nzchar(rows[[detail]]),
-      paste0(escape_html(rows[[task]]), "<br><small>", escape_html(rows[[detail]]), "</small>"),
-      escape_html(rows[[task]])
-    )
-    table <- data.frame(
-      paste0("<code>", escape_html(rows$stata), "</code>"),
-      paste0("<code>", escape_html(rows$r), "</code>"),
-      notes
-    )
-    names(table) <- escape_html(headers)
-    cat("\n\n## ", escape_html(name), "\n\n", sep = "")
-    cat(
-      knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
-      sep = "\n"
-    )
-  }
-}
+counts <- tidystata:::findit_reference_counts()
 ```
 
 [English version](coming-from-stata.html)
+
+需要按章节浏览、搜索或展开替代实现时，请打开
+**[Stata 转 R 参考手册](https://www.socimh.com/stata-to-r/zh/)**。
+手册提供中英文两个版本，每章均可切换语言。本页继续保留完整的单页对照表。
 
 熟悉 Stata 的用户已经知道自己想做什么，需要的只是知道在 R 中怎么写。本页把 Stata
 命令和完成同样任务的 R 代码并列：tidystata 中有 Stata 风格函数的，使用 tidystata；其他情况使用常用的
 R 包。
 
-## 在 R 中直接查询
+## 在 R 中直接查询 {#look-it-up-in-r}
 
 `findit()` 在 R 中查询同一份列表。单个 Stata 命令可以不加引号，更长的内容需要加引号；支持
 Stata 的标准缩写。说明文字随 R 的语言设置显示为中文或英文，两种语言的查询都可使用。
@@ -69,37 +32,33 @@ findit("merge 1:1 id, keep(match)")
 也可以查询 R 函数（`findit(left_join)`），或直接提问（`findit("如何删除重复行")`）。
 控制台显示最相关的结果，返回的表保留全部匹配项；不带参数的 `findit()` 返回完整列表。
 
-## 使用命令对照表
+逗号分隔的变量名会填入兼容的示例，例如 `findit(tab, sex, region)`。任务明确时默认只显示
+一个优先推荐的答案；`findit(tab) |> print(n = Inf)` 展开全部变体、精选的 R 实现、
+差异说明和参考链接。`findit(dplyr::filter)` 这样的包限定查询可以区分同名函数。
+
+本指南包含 `r counts$commands` 个命令族、`r counts$functions` 个 Stata 函数和
+`r counts$operators` 个运算符，共有 `r counts$stata_examples` 个不同的 Stata 示例和
+`r counts$examples` 条 R 对照示例。缩写及同一任务的其他 R 实现不会增加命令数量。
+R 函数索引包含 `r counts$r_functions` 个函数与包的组合。
+
+## 使用命令对照表 {#use-the-command-tables}
 
 下表涵盖 tidystata 和其他常用 R 包，包括建模、长宽转换、调查分析和作图。
 面板滞后、超前和差分可使用 tidystata 的 `stata_lag()`、`stata_lead()` 和
 `stata_diff()`；指定时间列，并用 `.by` 区分面板。
 
+索引按字母顺序排列，对照表按主题分组，并依次按命令、推荐顺序和示例排序。
+运行某个示例需要其标注的 R 包；`findit()` 本身不会加载或安装这些参考包。
+包标签只列出主要实现包，并不列出所有辅助依赖；R 函数索引标明其他函数及其所属包。
+
+以 **与 Stata 有差异** 开头的说明表示 R 代码完成相同任务，但默认设置、缺失值处理、
+估计方法或输出形式有所不同，说明会列出具体差异。其余说明是使用提示。多数 R 示例在构建目录时
+运行核验，检查的是 R 代码本身，并非与 Stata 的数值一致性检验。缺失值比较、权重、因子参照组、连接规则和标准误修正尤其需要核对。
+已知缺口会明确说明，相关搜索结果不代表已经实现查询中尚未支持的语法。
+
 下表中，`data` 是你的数据，`data1` 和 `data2` 是合并时的主数据和被合并数据，`fit`
 是已估计的模型。大部分条目使用 dplyr，请先用 `library(dplyr)` 或 `library(tidyverse)` 加载。
 
 ```{r, echo = FALSE, results = "asis"}
-# "\u8bf4\u660e" is the Chinese column header; the escape survives a non-UTF-8
-# locale, which a literal in R code would not.
-section_tables("section_zh", "task_zh", "detail_zh", c("Stata", "R", "\u8bf4\u660e"))
-```
-
-## 本指南中的 R 函数
-
-按所属包、相关 Stata 命令和用途查阅常用 R 函数。也可以在控制台用
-`findit(left_join)` 单独查询。
-
-```{r, echo = FALSE, results = "asis"}
-functions <- tidystata:::findit_functions()
-table <- data.frame(
-  paste0("<code>", escape_html(functions$`function`), "()</code>"),
-  escape_html(functions$package),
-  escape_html(functions$stata),
-  escape_html(functions[["description_zh"]])
-)
-names(table) <- escape_html(c("\u51fd\u6570", "\u5305", "\u76f8\u5173 Stata \u547d\u4ee4", "\u8bf4\u660e"))
-cat(
-  knitr::kable(table, format = "html", escape = FALSE, table.attr = 'class="table"'),
-  sep = "\n"
-)
+cat(tidystata:::findit_reference_html(TRUE), sep = "\n")
 ```

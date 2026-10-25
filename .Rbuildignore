@@ -5,6 +5,7 @@
 ^README\.zh\.Rmd$
 ^README\.zh\.md$
 ^data-raw$
+^book$
 ^\.github$
 ^_pkgdown\.yml$
 ^docs$

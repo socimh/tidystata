@@ -62,64 +62,40 @@ codebook(lifeexp)
 
 ### summ()：汇总统计
 
+`lexp:safewater` 选择从 `lexp` 到 `safewater` 的三个连续变量，包括两端；也可以使用 `ends_with()`、`matches()` 等 tidyselect 函数或 Stata 风格的 `varlist()`。
+
 ```{r}
-summ(lifeexp, lexp, gnppc, safewater, .by = region)
+summ(lifeexp, lexp:safewater, .by = region)
 ```
 
-### tab()：频数表
+### tab()、tab1() 和 tab2()：比较频数表
+
+用 `lifeexp` 中的地区和一个新类别作比较：预期寿命是否达到 70 岁。`region:lexp_70` 选择这两列。
+
+`tab()` 统计每种实际出现的组合的频数，并给出百分比。
 
 ```{r}
-tab(dplyr::starwars, sex)
+lifeexp_tab <- lifeexp |>
+  transmute(region, lexp_70 = lexp >= 70)
+
+tab(lifeexp_tab, region:lexp_70)
 ```
 
-`tab1()` 对多个变量分别列频数表，变量可以用 `ends_with()`、`matches()` 等 tidyselect 函数或 Stata 风格的 `varlist()` 选择；`tab2()` 生成两个变量的交叉表。
-
-### fre()：带合计和值标签的频数表
+`tab1()` 返回一个命名列表，为每个变量分别生成频数表。
 
 ```{r}
-fre(lifeexp, region)
+tab1(lifeexp_tab, region:lexp_70)
 ```
 
-### row_mean() 等：按行计算
-
-与 Stata 的 `egen rowmean()`、`rowtotal()` 和 `rownonmiss()` 一样，按行计算的函数接受一组连续的列，并跳过缺失值。
+`tab2()` 将联合频数排列成交叉表，地区为行，预期寿命类别为列。
 
 ```{r}
-scores <- tibble(
-  id = 1:4,
-  math = c(80, 92, NA, 75),
-  read = c(70, 88, 95, NA),
-  art = c(90, NA, 85, 60)
-)
-scores |>
-  mutate(
-    mean = row_mean(math:art),
-    total = row_sum(math:art),
-    answered = row_non_miss(math:art)
-  )
-```
-
-### stata_lag()：面板数据的滞后、超前和差分
-
-`stata_lag()`、`stata_lead()` 和 `stata_diff()` 相当于 `xtset id year` 之后的 `L.`、`F.` 和 `D.`：它们按时间变量取值，所以年份不连续时得到缺失值，而不是上一行的值。
-
-```{r}
-panel <- tibble(
-  id = c(1, 1, 1, 2, 2),
-  year = c(2001, 2002, 2004, 2001, 2002),
-  x = c(10, 12, 15, 20, 21)
-)
-panel |>
-  mutate(
-    lag_x = stata_lag(x, time = year),
-    d_x = stata_diff(x, time = year),
-    .by = id
-  )
+tab2(lifeexp_tab, region:lexp_70)
 ```
 
 ## 了解更多
 
-tidystata 还提供相关系数（`pwcorr()`）、缺失值报告（`misstable()`）、主键检查与合并（`isid()`、`stata_merge()`）以及分组（`xtile()`）等函数。示例和输出约定见以下指南（英文）。
+tidystata 还提供按行计算（`row_mean()` 等）、面板运算（`stata_lag()` 等）、相关系数（`pwcorr()`）、缺失值报告（`misstable()`）、主键检查与合并（`isid()`、`stata_merge()`）以及分组（`xtile()`）等函数。示例和输出约定见以下指南（英文）。
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html)：简短的工作流程。
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)：返回类型、分组和标签。

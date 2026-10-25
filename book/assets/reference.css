@@ -1,0 +1,100 @@
+:root {
+  --reference-accent: #36539c;
+  --reference-border: #e3e8ef;
+  --reference-muted: #5b6676;
+  --status-equivalent: #2f7d4f;
+  --status-equivalent-bg: #edf7f0;
+  --status-qualified: #9a6400;
+  --status-qualified-bg: #fdf5e4;
+  --status-workflow: #5b6676;
+  --status-workflow-bg: #f1f3f6;
+  --code-stata: #b42318;
+  --code-r: #1d5fae;
+  --code-string: #2f7d4f;
+  --code-number: #9a5b00;
+  --code-operator: #6b7280;
+  --code-comment: #8a94a3;
+}
+body { line-height: 1.7; }
+.quarto-container { max-width: 1600px; }
+
+/* Navigation: separate wrapped titles from neighbouring items. */
+#quarto-sidebar { font-size: .95rem; }
+#quarto-sidebar .sidebar-item { margin-bottom: .55rem; }
+#quarto-sidebar .sidebar-item-text { line-height: 1.35; }
+#quarto-sidebar .sidebar-item-section { margin-top: 1rem; }
+#quarto-sidebar .sidebar-item-section > .sidebar-item-container { margin-bottom: .45rem; }
+#quarto-sidebar .sidebar-section .sidebar-item-text { padding-left: 1.1em; text-indent: -.6em; }
+#TOC li { margin-bottom: .3rem; line-height: 1.4; }
+#TOC ul ul a { font-size: .82rem; }
+@media (min-width: 992px) { .quarto-page-breadcrumbs { display: none; } }
+
+/* Command headings and example cards. */
+main.content h2 { margin-top: 2.6rem; padding-top: .9rem; border-top: 1px solid var(--reference-border); }
+main.content h2 code { padding: 0; background: none; color: #1f2d45; font-size: 1.15em; font-weight: 600; }
+.reference-example {
+  margin: 1rem 0 1.25rem; padding: 1rem 1.2rem .8rem; border: 1px solid var(--reference-border);
+  border-radius: .5rem; background: #fff; scroll-margin-top: 6rem;
+}
+.example-head p { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem .5rem; margin-bottom: .8rem; }
+.example-task { margin-right: auto; color: #1f2d45; font-weight: 600; line-height: 1.45; }
+.caveat-tag {
+  display: inline-block; margin-right: .4rem; padding: 0 .5rem; border-radius: 1rem;
+  background: #fff; color: var(--status-qualified); border: 1px solid #e9c98a;
+  font-size: .75rem; font-weight: 600; line-height: 1.6; white-space: nowrap; text-decoration: none;
+}
+.caveat-tag:hover { background: var(--status-qualified); color: #fff; }
+
+/* Code: Stata keywords in red, R functions in blue, shared muted tones for the rest. */
+pre.sourceCode.stata code span.kw, pre.sourceCode.stata code span.fu { color: var(--code-stata); }
+pre.sourceCode.stata code span.kw { font-weight: 600; }
+pre.sourceCode.stata code span.qu { color: var(--code-stata); font-style: italic; }
+pre.sourceCode.stata code span.mc { color: var(--code-number); }
+pre.sourceCode.r code span.fu { color: var(--code-r); font-weight: 600; }
+pre.sourceCode code span.st { color: var(--code-string); }
+pre.sourceCode code span.dv, pre.sourceCode code span.dt, pre.sourceCode code span.cn,
+pre.sourceCode code span.fl { color: var(--code-number); }
+pre.sourceCode code span.ot, pre.sourceCode code span.sc, pre.sourceCode code span.at,
+pre.sourceCode code span.cf, pre.sourceCode code span.op { color: var(--code-operator); font-weight: 400; }
+pre.sourceCode code span.co { color: var(--code-comment); font-style: italic; }
+
+/* Stata and R side by side, with aligned code boxes. */
+.comparison { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 1rem; align-items: stretch; }
+.comparison > div { display: flex; flex-direction: column; min-width: 0; }
+.comparison p { margin-bottom: .3rem; }
+.comparison div.sourceCode, .comparison pre { flex: 1 1 auto; margin-bottom: 0; }
+.comparison div.sourceCode { margin-top: 0; }
+/* Wrap long one-liners instead of hiding them; copy still returns the original text. */
+.comparison pre, .comparison pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
+.comparison pre { padding-right: 2.6rem; }
+.col-label { color: var(--reference-muted); font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.comparison-stata .col-label { color: var(--code-stata); }
+.comparison-r .col-label { color: var(--code-r); }
+.comparison-stata pre.sourceCode { border-top: 2px solid var(--code-stata); }
+.comparison-r pre.sourceCode { border-top: 2px solid var(--code-r); }
+.col-label code { margin-left: .35rem; padding: .05rem .4rem; color: var(--code-r); background: #eef3fa; text-transform: none; letter-spacing: 0; font-size: .8rem; }
+.example-note {
+  margin: .9rem 0 .2rem; padding: .5rem .8rem; border-left: 3px solid var(--status-workflow);
+  background: var(--status-workflow-bg); border-radius: 0 .3rem .3rem 0; font-size: .95rem;
+}
+.example-note p:last-child { margin-bottom: 0; }
+.example-note.status-qualified { border-left-color: var(--status-qualified); background: var(--status-qualified-bg); }
+.example-sources { margin-top: .6rem; color: var(--reference-muted); font-size: .82rem; }
+
+/* Variants: one flat list inside the disclosure rather than nested cards. */
+.reference-variants { padding: .8rem 1rem; border: 1px solid #dce2eb; border-radius: .5rem; margin: 1rem 0 2rem; background: #fafbfc; }
+.reference-variants > summary { cursor: pointer; color: var(--reference-accent); font-weight: 600; }
+.reference-variants .reference-example { margin: 0; padding: 1rem .2rem; border: 0; border-top: 1px solid var(--reference-border); border-radius: 0; background: none; }
+.reference-variants > summary + .reference-example, .reference-variants[open] > summary { margin-bottom: .6rem; }
+
+.quarto-navbar-tools { display: flex; align-items: center; gap: .7rem; }
+.language-switch { display: inline-block; margin-right: .3rem; }
+.language-switch a { display: inline-block; padding: .25rem .65rem; border: 1px solid #ced6e0; border-radius: .35rem; background: white; color: #243e71; font-size: .85rem; text-decoration: none; }
+.language-switch a:focus-visible, summary:focus-visible { outline: 3px solid #36539c; outline-offset: 3px; }
+@media (max-width: 767px) {
+  .comparison { grid-template-columns: minmax(0, 1fr); gap: .6rem; }
+  .reference-example { padding: .8rem .8rem .6rem; }
+  .reference-variants { padding: .6rem; }
+  main.content { overflow-wrap: anywhere; }
+}
+.example-note code, .example-task code { color: #1f2d45; background: rgba(31,45,69,.06); }
