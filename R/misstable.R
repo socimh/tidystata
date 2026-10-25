@@ -30,11 +30,16 @@
 #'
 #' @details
 #' A value is missing when `is.na()` is `TRUE` for it, which includes `NaN`
-#' and haven's tagged missing values such as Stata's `.a`. Empty strings are
+#' and haven's tagged missing values such as Stata's `.a`. In a list column,
+#' `NA` elements are missing and `NULL` elements are values, as in [summ()] and
+#' [fre()]. Matrix and data-frame columns follow vctrs row missingness: a row
+#' is missing only when every component is missing. Empty strings are
 #' observed values, unlike Stata's missing string; convert them first with
 #' [na_if_value()]. When no checked variable has missing values and
 #' `.all = FALSE`, a message says so and the result has no variable rows or
 #' columns.
+#' Grouping names must not collide with result columns; rename those keys
+#' before calling `misstable()`.
 #'
 #' @examples
 #' misstable(lifeexp)
@@ -63,9 +68,24 @@ misstable <- function(
     if (rlang::quo_is_null(by)) .data else dplyr::ungroup(.data),
     by
   )
+  reserved <- if (.patterns) {
+    c("n", "percent")
+  } else {
+    c("variable", "miss_n", "miss_pct", "valid_n")
+  }
+  clash <- intersect(group_vars, reserved)
+  if (length(clash)) {
+    cli::cli_abort(
+      "Grouping column {.var {clash[[1L]]}} clashes with a result column; rename it first."
+    )
+  }
   .data <- dplyr::ungroup(.data)
   values <- remove_group_vars(.data, ..., group_vars = group_vars)
-  missing <- lapply(values, detect_missing)
+  # List columns follow is.na(), as in summ() and fre(): `NA` elements are
+  # missing and `NULL` elements are values.
+  missing <- lapply(values, function(x) {
+    if (is.list(x) && !is.data.frame(x)) unname(is.na(x)) else detect_missing(x)
+  })
   if (!.all) {
     missing <- missing[vapply(missing, any, logical(1))]
     if (!length(missing) && length(values)) {
@@ -132,7 +152,7 @@ misstable_patterns <- function(
     patterns <- vctrs::vec_group_loc(rows)
     n <- lengths(patterns$loc)
     table <- patterns$key
-    # Most frequent first; ties put patterns with more observed values first.
+    # Most frequent first; ties put observed values first, column by column.
     order <- do.call(base::order, c(list(-n), lapply(unname(table), `-`)))
     table <- vctrs::vec_slice(table, order)
     table$n <- n[order]

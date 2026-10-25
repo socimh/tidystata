@@ -18,7 +18,7 @@ A tibble with 68 rows and 6 variables:
 }
 \source{
 World Bank, World Development Indicators,
-\url{https://datacatalog.worldbank.org/search/dataset/0037712}, licensed under
+\url{https://datatopics.worldbank.org/world-development-indicators/}, licensed under
 CC BY 4.0 (\url{https://creativecommons.org/licenses/by/4.0/}). Indicators
 \code{SP.POP.GROW}, \code{SP.DYN.LE00.IN} and \code{NY.GNP.PCAP.CD} for 1998 and
 \code{SH.H2O.SMDW.ZS} for 2000; values are rounded. Country names follow WDI,

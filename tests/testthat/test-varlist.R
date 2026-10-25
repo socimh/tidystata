@@ -390,3 +390,30 @@ test_that("varlist() reports invalid patterns", {
     varlist("x[3-1]", vars = "x1")
   })
 })
+
+test_that("malformed ranges give the range message", {
+  for (pattern in c("x[1-b]", "x[5]", "x[1-]")) {
+    expect_error(
+      varlist(pattern, vars = "x1"),
+      "The range should be specified as",
+      info = pattern
+    )
+  }
+  expect_error(
+    variables_search(tibble::tibble(x1 = 1), "x[1-b]"),
+    "The range should be specified as"
+  )
+})
+
+
+test_that("numeric range endpoints reject integer overflow before coercion", {
+  for (pattern in c("x[2147483648-2147483649]", "x[1-99999999999999999999]")) {
+    expect_no_warning(
+      expect_error(varlist(pattern, vars = "x1"), "endpoints must not exceed")
+    )
+  }
+  expect_identical(
+    varlist("x[2147483647-2147483647]", vars = "x2147483647"),
+    1L
+  )
+})

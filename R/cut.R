@@ -9,7 +9,8 @@
 #' `cut_quantile()` is an alias of `xtile()`.
 #'
 #' @param x A numeric vector. `xtile()` also accepts a logical vector,
-#' treated as 0/1.
+#' treated as 0/1. SPSS user-missing codes and ranges are omitted. Convert
+#' `integer64` inputs and cutpoints explicitly to ordinary numeric values first.
 #' @param n A positive integer. The number of intervals.
 #' @param method Quantile boundaries (`"quantile"`, the default), or balanced
 #' rank groups (`"rank"`, which has no Stata counterpart). Rank groups may
@@ -24,18 +25,18 @@
 #' observed median as an interior cutpoint. A single number supplies one
 #' interior cutpoint, rather than the number of intervals.
 #' @param right A single `TRUE` or `FALSE`. If `FALSE` (default), intervals are
-#' closed on the left, `[a, b)`, as in Stata's `egen cut()`; the last interval
-#' also includes its upper end. If `TRUE`, they are closed on the right,
-#' `(a, b]`, as in [base::cut()].
+#' closed on the left (`a <= x < b`), as in Stata's `egen cut()`; the last
+#' interval also includes its upper end. If `TRUE`, they are closed on the
+#' right (`a < x <= b`), as in [base::cut()].
 #' @inheritParams base::cut
 #'
 #' @details `xtile()` follows Stata's `xtile`, and its codes are tested against
 #' Stata's output. Cutpoints are the percentiles at `1/n, 2/n, ...`, using
 #' Stata's percentile rule (see [summ()]), and each value joins the first group
-#' whose cutpoint is at least that value. Equal values stay in the same group
-#' and distinct values are never merged, so a 0/1 dummy always gives two
-#' groups. Ties can leave groups empty; as in Stata, their codes are skipped
-#' (codes 1, 3 and 4, say) and a warning is given. Factor levels are the
+#' whose cutpoint is at least that value. Equal values stay in the same group;
+#' different values may share a group. Ties can leave groups empty; as in
+#' Stata, their codes are skipped (codes 1, 3 and 4, say) and a warning is
+#' given. Factor levels are the
 #' occupied groups. Default labels are the
 #' contiguous intervals covered by each group, for example `"[0,0]"` and
 #' `"(0,1]"`. Custom labels must match the effective number of groups.
@@ -81,6 +82,7 @@ xtile <- function(
   wt = NULL
 ) {
   method <- rlang::arg_match(method)
+  x <- cut_numeric_input(x)
   if (is.logical(x) && is.null(dim(x))) {
     x <- as.integer(x)
   }
@@ -158,7 +160,7 @@ xtile_quantile <- function(
     )
   }
   # Stata xtile rule: a value joins the first group whose cutpoint is at least
-  # the value, so distinct values are never merged into one group.
+  # the value; repeated cutpoints retain their original group codes.
   cutpoints <- if (is.null(wt)) {
     stata_quantile(observed, seq_len(n - 1L) / n)
   } else {
@@ -247,6 +249,8 @@ quantile_interval_labels <- function(bounds) {
 #' @export
 cut_length <- function(x, n = 4, labels = NULL) {
   check_number_whole(n, min = 1)
+  x <- cut_numeric_input(x)
+  cut_check_x(x)
   breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = n + 1)
   cut_breaks(x, breaks = breaks, labels = labels)
 }
@@ -254,16 +258,25 @@ cut_length <- function(x, n = 4, labels = NULL) {
 #' @rdname cut
 #' @export
 cut_breaks <- function(x, breaks = NULL, labels = NULL, right = FALSE) {
-  if (is.null(breaks)) {
-    breaks <- stats::median(x, na.rm = TRUE)
-  }
-  if (!is.numeric(breaks)) {
-    stop_input_type(breaks, "a numeric vector")
-  }
+  x <- cut_numeric_input(x)
+  cut_check_x(x)
   x_min <- min(x, na.rm = TRUE)
   x_max <- max(x, na.rm = TRUE)
   if (x_min == x_max) {
     cli::cli_abort("Can't cut a vector with only one unique value.")
+  }
+  if (is.null(breaks)) {
+    breaks <- stats::median(x, na.rm = TRUE)
+    if (breaks %in% c(x_min, x_max)) {
+      cli::cli_warn(c(
+        "The median ({breaks}) equals the {if (breaks == x_min) 'minimum' else 'maximum'}, so it does not split the values.",
+        i = "Supply {.arg breaks} for two groups."
+      ))
+    }
+  }
+  breaks <- cut_numeric_input(breaks, "breaks")
+  if (!is.numeric(breaks) || anyNA(breaks)) {
+    stop_input_type(breaks, "a numeric vector without missing values")
   }
 
   # The observed range extends the breaks only where values lie beyond them;
@@ -282,4 +295,32 @@ cut_breaks <- function(x, breaks = NULL, labels = NULL, right = FALSE) {
     labels = labels,
     ordered_result = TRUE
   )
+}
+
+# Empty input keeps its established handling; all-missing input is rejected
+# before min() and max() warn.
+cut_check_x <- function(x, call = rlang::caller_env()) {
+  if (!is.numeric(x) || is.factor(x)) {
+    stop_input_type(x, "a numeric vector", call = call)
+  }
+  if (length(x) && all(is.na(x))) {
+    cli::cli_abort(
+      "{.arg x} must contain non-missing observations.",
+      call = call
+    )
+  }
+}
+
+# Normalize labelled missingness before any range or interval computation.
+cut_numeric_input <- function(x, arg = "x", call = rlang::caller_env()) {
+  if (inherits(x, "integer64")) {
+    cli::cli_abort(
+      "Convert {.arg {arg}} from {.cls integer64} explicitly to ordinary numeric values before binning.",
+      call = call
+    )
+  }
+  if (inherits(x, "haven_labelled")) {
+    return(haven::zap_labels(haven::zap_missing(x)))
+  }
+  x
 }

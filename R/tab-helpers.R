@@ -356,6 +356,9 @@ tab2_data <- function(.data, weights = NULL, call = rlang::caller_env()) {
   counts <- tab_counts(.data, weights)
 
   column_values <- counts[[2L]]
+  # Order headers by raw values (factor levels, ascending, missing last), before
+  # blank values receive display headers.
+  raw_order <- vctrs::vec_order(column_values)
   # Count raw values before assigning display headers, so identities stay apart.
   blank <- !is.na(column_values) & as.character(column_values) == ""
   if (any(blank)) {
@@ -370,8 +373,6 @@ tab2_data <- function(.data, weights = NULL, call = rlang::caller_env()) {
     column_values[blank] <- empty_name
     counts[[2L]] <- column_values
   }
-  # Order headers by raw values (factor levels, ascending, missing last).
-  raw_order <- vctrs::vec_order(counts[[2L]])
   headers <- as.character(column_values)[raw_order]
   headers[is.na(headers)] <- "NA"
   columns <- vctrs::vec_group_loc(counts[[2L]])
@@ -541,6 +542,8 @@ xtab_chi2 <- function(out) {
   counts <- as.matrix(out[-1L])
   counts <- counts[rowSums(counts) > 0, colSums(counts) > 0, drop = FALSE]
   n <- sum(counts)
+  # Integer cell products in 2 x 2 tables overflow beyond about 46,000 per cell.
+  storage.mode(counts) <- "double"
   statistic <- p_value <- cramers_v <- NA_real_
   df <- NA_integer_
   if (nrow(counts) >= 2L && ncol(counts) >= 2L) {

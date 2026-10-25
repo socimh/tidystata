@@ -119,3 +119,19 @@ test_that("as_dummy() reports invalid input", {
     as_dummy(dplyr::group_by(d, sex), sex, .remove = TRUE)
   })
 })
+
+test_that("columns without observed values add no indicators", {
+  data <- tibble::tibble(id = 1:2, x = c(NA, NA))
+  expect_identical(as_dummy(data, x), data)
+  expect_named(as_dummy(data, x, .remove = TRUE), "id")
+  expect_identical(as_dummy(data[0, ], x, .names = "index"), data[0, ])
+})
+
+test_that("values that format alike name the collision", {
+  data <- tibble::tibble(x = c(0.3, 0.1 + 0.2))
+  expect_error(
+    as_dummy(data, x),
+    "Several values would create the same column `x_0.3`"
+  )
+  expect_named(as_dummy(data, x, .names = "index"), c("x", "x_1", "x_2"))
+})

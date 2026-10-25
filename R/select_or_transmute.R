@@ -229,7 +229,12 @@ select_check_unmatched <- function(.data, dots, call = rlang::caller_env()) {
       }
       unmatched <- c(unmatched, paste0("`", name, "`"))
     } else if (is.numeric(expr) && length(expr) == 1L) {
-      if (expr != round(expr) || abs(expr) > length(columns) || expr == 0) {
+      if (
+        is.na(expr) ||
+          expr != round(expr) ||
+          abs(expr) > length(columns) ||
+          expr == 0
+      ) {
         unmatched <- c(unmatched, paste0("position ", expr))
       }
     }

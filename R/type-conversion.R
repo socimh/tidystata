@@ -8,8 +8,10 @@
 #'   value labels, like Stata's `decode`.
 #' * `tostring()` converts values to text and ignores value labels, like
 #'   Stata's `tostring`: a labelled vector or factor gives its codes, and
-#'   character input is returned unchanged. Missing values stay `NA`. Dates use
-#'   [as.character()], so they become `"2024-01-31"` rather than day numbers.
+#'   character input is returned unchanged. Missing values stay `NA`. Numbers
+#'   are written in full, as Stata does, so 100000 gives `"100000"`, not
+#'   `"1e+05"`. Dates use [as.character()], so they become `"2024-01-31"`
+#'   rather than day numbers.
 #'
 #' `destring()` reads text the way Stata's `destring` does. A value must be a
 #' number, optionally with a sign, a currency symbol (dollar, euro, pound, yen),
@@ -24,7 +26,8 @@
 #'
 #' A factor whose levels are all numbers, such as `factor(c("1990", "2000"))`,
 #' gives those numbers (1990, 2000). Other factors give their level codes.
-#' Labelled numeric variables return their values.
+#' Labelled numeric variables return their values; labelled text is read
+#' from its values like plain text.
 #' `as_character()` uses value labels when a labelled vector has a nonempty
 #' `labels` attribute. Without value labels, it uses ordinary character
 #' conversion, including for tagged missing values.
@@ -50,7 +53,9 @@
 #' @returns `as_character()` and `tostring()` return a character vector. `as_numeric()` returns
 #'   a double vector; unsupported types such as lists, raw vectors, and complex
 #'   vectors return missing values of the same length. Empty inputs return
-#'   typed empty vectors. Names, dimensions, labels, and units are dropped.
+#'   typed empty vectors. Names, dimensions, labels, and units are dropped,
+#'   except that `tostring()` returns character input with its attributes
+#'   unchanged.
 #'   Text that is not a number gives a warning and keeps its row and value in
 #'   [readr::problems()] on the result.
 #'   Conversion of large `integer64` values to double may lose precision and
@@ -86,9 +91,11 @@ destring <- function(x, ignore = NULL) {
     as.numeric(x)
   } else if (type %in% c("units", "drtn", "time", "dttm")) {
     as.numeric(x)
-  } else if (inherits(x, "haven_labelled")) {
+  } else if (inherits(x, "haven_labelled") && !is.character(x)) {
     as.numeric(unclass(x))
   } else if (is.character(x)) {
+    # Labelled text is read from its values, like plain text.
+    x <- vctrs::vec_data(x)
     out <- destring_text(x, ignore)
     if (length(out$invalid)) {
       destring_warn(x[out$invalid])
@@ -107,13 +114,16 @@ destring <- function(x, ignore = NULL) {
   }
 }
 
-# A number with an optional sign, one currency symbol, thousands separators,
-# an exponent and a trailing percent sign, with spaces around it.
+# A number with one optional sign (before or after one currency symbol),
+# thousands separators, an exponent and a trailing percent sign, with spaces
+# around it.
 destring_currency <- "$\u20ac\u00a3\u00a5"
 destring_pattern <- paste0(
-  "^\\s*[-+]?(?:[",
+  "^\\s*(?:[",
   destring_currency,
-  "]\\s*[-+]?)?(?=\\.?\\d)",
+  "]\\s*[-+]|[-+]?(?:[",
+  destring_currency,
+  "]\\s*)?)(?=\\.?\\d)",
   "(?:\\d{1,3}(?:,\\d{3})+|\\d*)(?:\\.\\d*)?(?:[eE][-+]?\\d+)?(?:\\s*%)?\\s*$"
 )
 
@@ -129,7 +139,7 @@ destring_text <- function(x, ignore = NULL) {
   values <- rep(NA_real_, length(x))
   number <- grepl(destring_pattern, x, perl = TRUE)
   values[number] <- as.numeric(gsub(
-    paste0("[", destring_currency, ",%]"),
+    paste0("[", destring_currency, ",%\\s]"),
     "",
     x[number],
     perl = TRUE
@@ -183,6 +193,17 @@ tostring <- function(x) {
     x <- vctrs::vec_data(x)
   }
   out <- as.character(x)
+  if (is.numeric(x) && !is.object(x)) {
+    # Rewrite exponents with the same 15 significant digits as as.character().
+    exponent <- which(is.finite(x) & grepl("e", out, fixed = TRUE))
+    out[exponent] <- vapply(
+      x[exponent],
+      function(value) {
+        format(value, digits = 15, scientific = FALSE, trim = TRUE)
+      },
+      character(1)
+    )
+  }
   out[missing_value] <- NA_character_
   out
 }

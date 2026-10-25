@@ -1116,3 +1116,80 @@ test_that("row helpers report invalid input", {
     dplyr::mutate(d, m = row_mean(tidyselect::where(is.list)))
   })
 })
+
+test_that(".values columns fill all-missing rows in one-row groups too", {
+  data <- tibble::tibble(g = c(1, 1, 2), x = c(NA, 1, NA), y = c(5, 5, 5))
+  out <- data |>
+    dplyr::group_by(g) |>
+    dplyr::mutate(
+      column = row_max(x, .values = y),
+      constant = row_max(x, .values = 5),
+      mixed = row_max(x, .values = list(2, y))
+    )
+  expect_identical(out$column, c(5, 5, 5))
+  expect_identical(out$constant, c(NA, 5, NA))
+  expect_identical(out$mixed, c(5, 5, 5))
+})
+
+test_that("a missing constant makes rows missing unless na.rm", {
+  data <- tibble::tibble(x = 1:2)
+  expect_identical(
+    row_min(data, .values = NA_integer_, na.rm = FALSE),
+    c(NA_integer_, NA_integer_)
+  )
+  expect_identical(row_min(data, .values = NA_integer_), 1:2)
+  expect_identical(row_max(data, .values = 0L, na.rm = FALSE), 1:2)
+})
+
+test_that("row extrema recognize indexed data-pronoun columns in tiny groups", {
+  data <- tibble::tibble(g = 1:2, x = c(NA, NA), y = c(5, 6))
+  column <- "y"
+  for (fn in list(row_min, row_max)) {
+    out <- dplyr::mutate(
+      data,
+      literal = fn(x, .values = .data[["y"]]),
+      dynamic = fn(x, .values = .data[[column]]),
+      .by = g
+    )
+    expect_identical(out$literal, c(5, 6))
+    expect_identical(out$dynamic, c(5, 6))
+  }
+})
+
+test_that("row extrema keep environment-pronoun scalars as constants", {
+  data <- tibble::tibble(g = 1:2, x = c(NA_real_, NA_real_))
+  g <- 5
+  for (fn in list(row_min, row_max)) {
+    calls <- new.env(parent = emptyenv())
+    calls$n <- 0L
+    out <- dplyr::mutate(
+      data,
+      value = fn(x, .values = {
+        calls$n <- calls$n + 1L
+        .env$g
+      }),
+      .by = g
+    )
+    expect_identical(out$value, c(NA_real_, NA_real_))
+    expect_identical(calls$n, 2L)
+  }
+})
+
+
+test_that("row extrema keep reductions of columns as scalar constants", {
+  data <- tibble::tibble(
+    g = c(1, 1, 2),
+    x = c(NA_real_, NA_real_, NA_real_),
+    y = c(1, 2, 3)
+  )
+  for (fn in list(row_min, row_max)) {
+    out <- dplyr::mutate(
+      data,
+      value = fn(x, .values = mean(y)),
+      indexed = fn(x, .values = mean(.data[["y"]])),
+      .by = g
+    )
+    expect_identical(out$value, rep(NA_real_, 3))
+    expect_identical(out$indexed, rep(NA_real_, 3))
+  }
+})

@@ -586,3 +586,10 @@ test_that("select_or_transmute() reports unmatched and unrecognised input", {
     select_or_transmute(d, ratio = mass / missing_column)
   })
 })
+
+test_that("missing positions are reported as unmatched", {
+  expect_error(
+    select_or_transmute(tibble::tibble(x = 1), NA_integer_),
+    "position NA"
+  )
+})

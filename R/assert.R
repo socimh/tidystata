@@ -39,8 +39,18 @@ assert <- function(.data, ..., .by = NULL) {
     cli::cli_abort("Supply at least one condition to check.")
   }
   labels <- vapply(conditions, rlang::as_label, character(1))
-  names(conditions) <- paste0("...assert", seq_along(conditions))
   data <- table_working_data(.data)
+  referenced <- unlist(
+    lapply(conditions, function(condition) {
+      all.names(rlang::quo_get_expr(condition))
+    }),
+    use.names = FALSE
+  )
+  result_names <- paste0("...assert", seq_along(conditions))
+  while (any(result_names %in% c(names(data), referenced))) {
+    result_names <- paste0(".", result_names)
+  }
+  names(conditions) <- result_names
   results <- dplyr::mutate(
     data,
     !!!conditions,
@@ -53,6 +63,11 @@ assert <- function(.data, ..., .by = NULL) {
     if (!is.logical(value)) {
       cli::cli_abort(
         "Condition {.code {labels[[i]]}} must give {.code TRUE} or {.code FALSE}, not {.obj_type_friendly {value}}."
+      )
+    }
+    if (!is.null(dim(value))) {
+      cli::cli_abort(
+        "Condition {.code {labels[[i]]}} must give a logical vector with one value per row."
       )
     }
     failed <- which(!value | is.na(value))

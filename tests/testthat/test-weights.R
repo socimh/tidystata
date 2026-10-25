@@ -163,3 +163,86 @@ test_that("analytic tabulation rescales finite weights without overflow", {
   empty <- data[integer(), ]
   expect_equal(nrow(tab(empty, x, .wt = w, .wt_type = "analytic")), 0L)
 })
+
+test_that("zero-weight summary rows do not enter arithmetic", {
+  statistics <- c("n", "mean", "sd", "se", "sum", "skew", "kurtosis")
+  for (extreme in c(1e200, Inf)) {
+    data <- data.frame(x = c(1, 2, extreme), w = c(1, 1, 0))
+    for (grouped in c(FALSE, TRUE)) {
+      input <- if (grouped) {
+        rbind(transform(data, g = 1), transform(data, g = 2))
+      } else {
+        data
+      }
+      out <- if (grouped) {
+        summ(input, x, .by = g, .wt = w, .stat = statistics)
+      } else {
+        summ(input, x, .wt = w, .stat = statistics)
+      }
+      for (statistic in statistics) {
+        expected <- c(
+          n = 2,
+          mean = 1.5,
+          sd = sqrt(0.5),
+          se = 0.5,
+          sum = 3,
+          skew = 0,
+          kurtosis = 1
+        )
+        expect_equal(out[[statistic]], rep(expected[[statistic]], nrow(out)))
+      }
+    }
+  }
+})
+
+test_that("analytic summary weights rescale before overflowing", {
+  statistics <- c("n", "mean", "sd", "se", "median")
+  data <- data.frame(x = 1:3, w = rep(1e308, 3))
+  for (grouped in c(FALSE, TRUE)) {
+    input <- if (grouped) {
+      rbind(transform(data, g = 1), transform(data, g = 2))
+    } else {
+      data
+    }
+    out <- if (grouped) {
+      summ(
+        input,
+        x,
+        .by = g,
+        .wt = w,
+        .wt_type = "analytic",
+        .stat = statistics
+      )
+    } else {
+      summ(input, x, .wt = w, .wt_type = "analytic", .stat = statistics)
+    }
+    expected <- c(n = 3, mean = 2, sd = 1, se = 1 / sqrt(3), median = 2)
+    for (statistic in statistics) {
+      expect_equal(out[[statistic]], rep(expected[[statistic]], nrow(out)))
+    }
+  }
+})
+
+test_that("finite frequency weights cannot overflow percentile positions", {
+  data <- data.frame(x = 1:3, w = rep(1e308, 3))
+  expect_equal(summ(data, x, .wt = w, .stat = "median")$median, 2)
+  grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+  expect_equal(
+    summ(grouped, x, .by = g, .wt = w, .stat = "median")$median,
+    c(2, 2)
+  )
+  expect_identical(xtile(data$x, 2, wt = data$w, labels = FALSE), c(1L, 1L, 2L))
+})
+
+test_that("grouping keys used as weights remain available for implicit selection", {
+  data <- data.frame(g = c(1, 1, 2, 2), x = c(1, 3, 2, 4), y = c(2, 4, 4, 1))
+  expect_equal(summ(data, .by = g, .wt = g)$mean, c(2, 3, 3, 2.5))
+  expect_equal(tab(data, .by = g, .wt = g)$n, c(1, 1, 2, 2))
+  expect_equal(tab1(data, .by = g, .wt = g)$x$n, c(1, 1, 2, 2))
+  expect_equal(fre(data, .by = g, .wt = g)$n, c(1, 1, 2, 2, 2, 4))
+  expect_equal(fre1(data, .by = g, .wt = g)$x$n, c(1, 1, 2, 2, 2, 4))
+  cross <- tab2(data, .by = g, .wt = g)
+  expect_equal(sum(as.matrix(cross[[1L]][-1L])), 2)
+  expect_equal(sum(as.matrix(cross[[2L]][-1L])), 4)
+  expect_equal(pwcorr(data, .by = g, .wt = g)$r, c(1, -1))
+})

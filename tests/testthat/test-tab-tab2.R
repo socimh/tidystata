@@ -676,3 +676,44 @@ test_that("tab2(.by) returns one cross-table per group", {
   expect_true("g = a, w = 1" %in% names(keys))
   expect_message(tab2(d, x, y, .by = g, .chi2 = TRUE), "-> g = a")
 })
+
+test_that("grouped data without .by cross-tabulate only the selected variables", {
+  data <- dplyr::group_by(
+    tibble::tibble(g = c(1, 1, 2), x = c("a", "b", "a"), y = c("u", "u", "v")),
+    g
+  )
+  expect_message(out <- tab2(data, x, y), "Ungrouping")
+  expect_identical(out, suppressMessages(tab2(dplyr::ungroup(data), x, y)))
+  expect_error(suppressMessages(tab2(data, x)), "Only 1 variable")
+})
+
+test_that("the weight column is not tabulated when no variables are selected", {
+  data <- tibble::tibble(x = c(1, 2), y = c(1, 1), w = c(1, 2))
+  out <- tab2(data, .wt = w)
+  expect_s3_class(out, "tbl_df")
+  expect_identical(names(out), c("x \\ y", "1"))
+  expect_identical(out$`1`, c(1, 2))
+  expect_identical(names(fre2(data, .wt = w))[1L], "x \\ y")
+})
+
+test_that("blank headers keep factor and raw-value order", {
+  factor_y <- factor(c("lo", "", "hi"), levels = c("lo", "hi", ""))
+  out <- tab2(tibble::tibble(x = c("a", "a", "b"), y = factor_y), x, y)
+  expect_named(out, c("x \\ y", "lo", "hi", "<empty>"))
+  out <- tab2(tibble::tibble(x = c("a", "a"), y = c("10", "")), x, y)
+  expect_named(out, c("x \\ y", "<empty>", "10"))
+})
+
+test_that("Cramer's V does not overflow in large 2 x 2 tables", {
+  data <- tibble::tibble(
+    x = rep(c(0, 1, 0, 1), c(60000, 60000, 55000, 65000)),
+    y = rep(c(0, 0, 1, 1), c(60000, 60000, 55000, 65000))
+  )
+  expect_no_warning(
+    expect_message(out <- tab2(data, x, y, .chi2 = TRUE), "Cramer's V")
+  )
+  counts <- matrix(c(60000, 55000, 60000, 65000), 2)
+  v <- (counts[1, 1] * counts[2, 2] - counts[1, 2] * counts[2, 1]) /
+    sqrt(prod(rowSums(counts)) * prod(colSums(counts)))
+  expect_equal(attr(out, "chi2")$cramers_v, v)
+})

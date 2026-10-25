@@ -33,9 +33,9 @@
 #' @examples
 #' varlist("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
 #'
-#' tb <- paste0("x", 1:15) |>
-#'   tibble::as_tibble() |>
-#'   tidyr::pivot_wider(names_from = value)
+#' tb <- tibble::as_tibble(
+#'   matrix(1:15, nrow = 1, dimnames = list(NULL, paste0("x", 1:15)))
+#' )
 #' tb
 #'
 #' # List variable names by ds()
@@ -136,11 +136,16 @@ num_range_to_regex <- function(string, call = rlang::caller_env()) {
     return(string)
   }
 
-  num_range <- start_end |>
-    as.integer() |>
-    capture()
+  num_range <- length(start_end) == 2L &&
+    all(grepl("^[0-9]+$", start_end))
 
   if (num_range) {
+    if (any(as.double(start_end) > .Machine$integer.max)) {
+      cli::cli_abort(
+        "Numeric range endpoints must not exceed {.val {(.Machine$integer.max)}}.",
+        call = call
+      )
+    }
     begin <- as.integer(start_end[1])
     end <- as.integer(start_end[2])
     if (begin > end) {

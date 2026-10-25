@@ -15,7 +15,7 @@
 #' @param na.rm For arithmetic and extrema helpers, a single logical value. If
 #'   `TRUE` (the default), omit missing values; if `FALSE`, any missing input
 #'   makes that row's result missing. Count helpers (`row_unique()`,
-#'   `row_miss()`, `row_non_miss()`) reject `na.rm`.
+#'   `row_nvals()`, `row_miss()`, `row_non_miss()`) reject `na.rm`.
 #' @param .values For `row_min()` and `row_max()`, additional values to compare
 #'   with selected columns: a vector, or a list of vectors. Each must have
 #'   length one or the number of input rows (the current group size inside
@@ -51,6 +51,8 @@
 #' position with `c()` or a tidyselect helper, for example `row_min(c(1, 2))`.
 #' Length-one constants (including those in `.values`) never fill a row whose
 #' other inputs are all missing; such rows stay `NA`, as with `pmin()`.
+#' Direct column references remain columns in one-row groups; computed
+#' length-one values are constants.
 #'
 #' @section Arithmetic:
 #' Plain logical, integer, double, and numeric labelled columns return double
@@ -91,9 +93,10 @@
 #' @section Implementation:
 #' All row summaries and counts use native C++ kernels registered through
 #' cpp11, which read logical, integer and double columns directly and count
-#' missing values in the same pass. Means and sums give the same results as
+#' missing values in the same pass. Means and sums of observed values match
 #' [base::rowMeans()] and [base::rowSums()] without first copying the columns
-#' into a matrix. Rfast is no longer required.
+#' into a matrix; unlike those, an all-missing row's mean is `NA`, not `NaN`.
+#' Undefined arithmetic on observed infinities can produce `NaN`, as in base R.
 #'
 #' @returns A vector with one value per input row. Extrema retain the compatible
 #'   common type; arithmetic returns doubles or a supported class as described
@@ -141,14 +144,20 @@ row_sum <- function(..., na.rm = TRUE) {
 #' @export
 row_max <- function(..., .values = NULL, na.rm = TRUE) {
   check_bool(na.rm)
-  row_extreme_constants(row_extreme_input(..., .values = .values), TRUE, na.rm)
+  # Capture the expression before `.values` is evaluated.
+  values_expr <- rlang::enexpr(.values)
+  input <- row_extreme_input(..., .values = .values, .values_expr = values_expr)
+  row_extreme_constants(input, TRUE, na.rm)
 }
 
 #' @rdname row_egen
 #' @export
 row_min <- function(..., .values = NULL, na.rm = TRUE) {
   check_bool(na.rm)
-  row_extreme_constants(row_extreme_input(..., .values = .values), FALSE, na.rm)
+  # Capture the expression before `.values` is evaluated.
+  values_expr <- rlang::enexpr(.values)
+  input <- row_extreme_input(..., .values = .values, .values_expr = values_expr)
+  row_extreme_constants(input, FALSE, na.rm)
 }
 
 #' @rdname row_egen
@@ -258,9 +267,27 @@ row_is_number_literal <- function(expr) {
   is.numeric(expr) && length(expr) == 1L
 }
 
+# Only direct column references retain column status in a one-row group.
+# Reductions and other computed length-one results remain scalar constants.
+row_refers_to_columns <- function(expr) {
+  if (is.null(expr)) {
+    return(FALSE)
+  }
+  columns <- c(
+    names(dplyr::pick(dplyr::everything())),
+    names(dplyr::cur_group())
+  )
+  if (rlang::is_symbol(expr)) {
+    return(rlang::as_string(expr) %in% columns)
+  }
+  rlang::is_call(expr, c("$", "[[")) &&
+    length(expr) >= 3L &&
+    identical(expr[[2L]], quote(.data))
+}
+
 # Split extrema inputs into selected columns, full-length vectors and scalar
 # constants. Constants never make an otherwise all-missing row observed.
-row_extreme_input <- function(..., .values = NULL) {
+row_extreme_input <- function(..., .values = NULL, .values_expr = NULL) {
   # Dots hold user columns, so report errors through the caller's frame.
   rlang::local_error_call(rlang::caller_env())
   dots <- rlang::enquos(...)
@@ -292,10 +319,31 @@ row_extreme_input <- function(..., .values = NULL) {
     extra <- c(extra, lapply(rest[external], rlang::eval_tidy))
     rest <- rest[!external]
   }
+  from_column <- logical(length(extra))
   if (!is.null(.values)) {
-    extra <- c(
-      extra,
-      if (is.list(.values) && !is.object(.values)) .values else list(.values)
+    values <- if (is.list(.values) && !is.object(.values)) {
+      .values
+    } else {
+      list(.values)
+    }
+    extra <- c(extra, values)
+    # Inside mutate(), `.values` that refer to columns are columns even when a
+    # one-row group makes them length one.
+    exprs <- if (
+      rlang::is_call(.values_expr, "list") &&
+        length(.values_expr) - 1L == length(values)
+    ) {
+      as.list(.values_expr[-1L])
+    } else {
+      rep(list(.values_expr), length(values))
+    }
+    from_column <- c(
+      from_column,
+      if (in_mutate) {
+        vapply(exprs, row_refers_to_columns, logical(1))
+      } else {
+        logical(length(values))
+      }
     )
   }
   data <- if (length(rest)) {
@@ -305,7 +353,7 @@ row_extreme_input <- function(..., .values = NULL) {
     tibble::new_tibble(list(), nrow = rows)
   }
   rows <- nrow(data)
-  scalar <- lengths(extra) == 1L
+  scalar <- lengths(extra) == 1L & !from_column
   if (any(!scalar)) {
     data <- row_add_values(data, unname(extra[!scalar]))
   }
@@ -328,6 +376,10 @@ row_extreme_constants <- function(
   missing <- if (ncol(data)) row_missing_count(data) else integer(nrow(data))
   observed <- if (ncol(data)) missing < ncol(data) else rep(TRUE, nrow(data))
   complete <- missing == 0L
+  # As in pmin(), a missing constant makes every row missing unless na.rm.
+  if (!na.rm && any(vapply(input$scalars, detect_missing, logical(1)))) {
+    complete[] <- FALSE
+  }
   if (length(input$scalars)) {
     data <- row_add_values(data, unname(input$scalars), call)
   }

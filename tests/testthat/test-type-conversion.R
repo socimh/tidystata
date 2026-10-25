@@ -527,3 +527,30 @@ test_that("as_numeric imported columns retain positions in mutate", {
   empty <- dplyr::mutate(data[0, ], value = as_numeric(raw))
   expect_identical(empty$value, numeric())
 })
+
+test_that("destring() accepts one sign around a currency symbol", {
+  expect_identical(destring(c("-$5", "$-5", "+$ 5", "$ +5")), c(-5, -5, 5, 5))
+  expect_warning(
+    result <- destring(c("-$-5", "+$+5", "--5")),
+    "are not numbers"
+  )
+  expect_equal(c(result), rep(NA_real_, 3))
+  expect_identical(readr::problems(result)$actual, c("-$-5", "+$+5", "--5"))
+})
+
+test_that("tostring() writes numbers without exponents", {
+  expect_identical(
+    tostring(c(100000, 1e15, 0.1, 123456.789, 1 / 3, -2e-7, NA, Inf)),
+    c(
+      "100000",
+      "1000000000000000",
+      "0.1",
+      "123456.789",
+      "0.333333333333333",
+      "-0.0000002",
+      NA,
+      "Inf"
+    )
+  )
+  expect_identical(tostring(c(100000L, NA)), c("100000", NA))
+})

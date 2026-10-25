@@ -106,8 +106,9 @@ group (missing categories stay last). To order the \code{.by} group blocks by
 size, use \code{.group_order = "frequency"}.}
 
 \item{.group_order}{Group block order for one-way and joint tables. \code{"keys"}
-retains key order; \code{"frequency"} orders by descending observation count,
-including missing measured values. Missing grouping keys appear last and ties
+retains key order; \code{"frequency"} orders by descending observation count
+(summed frequency weights when \code{.wt} is used), including missing measured
+values. Missing grouping keys appear last and ties
 follow key order. \code{.desc} controls categories within each group independently.}
 
 \item{.total}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, add "Total" rows:
@@ -123,7 +124,7 @@ When \code{...} is omitted, the weight column is not tabulated itself.}
 \item{.wt_type}{\code{"frequency"} (default) or \code{"analytic"}. Frequency weights
 count each row \code{w} times, so \code{n} is the sum of the weights, as in
 \code{dplyr::count(wt =)}; non-integer weights are allowed. Analytic weights
-(Stata's \verb{[aweight]}, suitable for sampling weights) are rescaled within
+(Stata's \verb{[aweight]}) are rescaled within
 each \code{.by} group to sum to the number of rows, so \code{n} stays on the sample
 scale. Percentages are the same under both types.}
 

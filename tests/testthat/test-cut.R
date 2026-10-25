@@ -383,12 +383,18 @@ test_that("all cut functions: all NA errors", {
   x <- rep(NA, 100)
   expect_error(xtile(x, n = 4))
   expect_identical(
-    cut_test_warnings(expect_error(cut_length(x, n = 4), "finite")),
-    cut_empty_range_warnings
+    cut_test_warnings(expect_error(cut_length(x, n = 4), "numeric")),
+    character()
   )
   expect_identical(
     cut_test_warnings(expect_error(cut_breaks(x, breaks = 50), "numeric")),
-    cut_empty_range_warnings
+    character()
+  )
+  expect_identical(
+    cut_test_warnings(
+      expect_error(cut_length(rep(NA_real_, 3), n = 4), "non-missing")
+    ),
+    character()
   )
 })
 
@@ -827,4 +833,58 @@ test_that("binning reports invalid input", {
     cut_length(1:10, n = "2")
   })
   expect_snapshot(xtile(1:2, n = 4, method = "rank"))
+})
+
+test_that("cut_breaks() and cut_length() validate their inputs", {
+  expect_error(cut_breaks(1:5, breaks = c(2, NA)), "without missing values")
+  expect_error(
+    cut_breaks(c(NA_real_, NA)),
+    "must contain non-missing observations"
+  )
+  expect_error(
+    cut_length(c(NA_real_, NA)),
+    "must contain non-missing observations"
+  )
+  expect_error(
+    cut_length(as.Date("2020-01-01") + 0:3),
+    "must be a numeric vector"
+  )
+  expect_error(cut_breaks(factor(1:3)), "must be a numeric vector")
+})
+
+test_that("cut_breaks() warns when the default median does not split", {
+  expect_warning(out <- cut_breaks(c(0, 0, 0, 1)), "equals the minimum")
+  expect_identical(nlevels(out), 1L)
+  expect_warning(cut_breaks(c(0, 1, 1, 1)), "equals the maximum")
+  expect_no_warning(cut_breaks(c(0, 1, 2, 3)))
+})
+
+test_that("binning omits SPSS user-missing codes before computing boundaries", {
+  x <- haven::labelled_spss(
+    c(1, 2, 99, 3, 97, NA),
+    labels = c(refused = 99),
+    na_values = 99,
+    na_range = c(97, 98)
+  )
+  original <- serialize(x, NULL)
+  expected <- c(1L, 2L, NA_integer_, 2L, NA_integer_, NA_integer_)
+  expect_identical(cut_length(x, 2, labels = FALSE), expected)
+  expect_identical(cut_breaks(x, breaks = 2, labels = FALSE), expected)
+  expect_identical(serialize(x, NULL), original)
+  expect_identical(
+    xtile(x, 2, labels = FALSE),
+    c(1L, 1L, NA_integer_, 2L, NA_integer_, NA_integer_)
+  )
+})
+
+test_that("binning requires deliberate conversion of integer64 payloads", {
+  skip_if_not_installed("bit64")
+  x <- bit64::as.integer64(1:4)
+  for (fn in list(xtile, cut_length, cut_breaks)) {
+    expect_error(fn(x), "integer64.*explicitly|explicitly.*integer64")
+  }
+  expect_error(
+    cut_breaks(1:4, breaks = bit64::as.integer64(2)),
+    "integer64.*explicitly|explicitly.*integer64"
+  )
 })

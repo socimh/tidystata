@@ -69,3 +69,7 @@ test_that("std() and pct() treat SPSS user-missing values as missing", {
   )
   expect_equal(out$share, c(25, 75, NA, 25, 75))
 })
+
+test_that("pc() is missing when the total is infinite", {
+  expect_identical(pc(c(1, Inf)), c(NA_real_, NA_real_))
+})

@@ -523,7 +523,7 @@ summ_sorted_quantile <- function(sorted, p) {
   position <- ifelse(exact, whole, floor(target) + 1)
   qs <- sorted$values[start + position]
   i <- which(exact)
-  qs[i] <- (qs[i] + sorted$values[start[i] + whole[i] + 1L]) / 2
+  qs[i] <- weights_midpoint(qs[i], sorted$values[start[i] + whole[i] + 1L])
   result[ok] <- qs
   result
 }
@@ -594,7 +594,7 @@ fmt_clock <- function(seconds) {
 
 summ_time_zone <- function(var) {
   zone <- attr(var, "tzone", exact = TRUE)
-  if (is.null(zone) || !nzchar(zone[[1L]])) "" else zone[[1L]]
+  if (!length(zone) || !nzchar(zone[[1L]])) "" else zone[[1L]]
 }
 
 calendar_unsupported <- c("sum", "skew", "kurtosis")
@@ -953,11 +953,16 @@ summ_weighted <- function(
     w <- weights[kept]
     # Stata's r(sum) uses the weights as given, even analytic ones.
     raw <- w
-    if (weight_type == "analytic" && sum(w) > 0) {
-      w <- w * length(w) / sum(w)
+    if (weight_type == "analytic" && any(w > 0)) {
+      normalized <- w / max(w)
+      w <- normalized * (length(w) / sum(normalized))
     }
     total <- sum(w)
-    x <- if (is.null(numeric)) numeric() else numeric[kept]
+    # Counts retain zero-weight observations, while arithmetic excludes them.
+    positive <- w > 0
+    x <- if (is.null(numeric)) numeric() else numeric[kept][positive]
+    w <- w[positive]
+    raw <- raw[positive]
     has <- length(x) > 0L && total > 0
     center <- if (has && center_needed) sum(w * x) / total else NA_real_
     spread <- if (has && spread_needed && total > 1) {
@@ -1053,11 +1058,13 @@ summ_weighted_groups <- function(
   group <- rep.int(seq_len(groups), n_val)
   w <- weights
   if (weight_type == "analytic") {
-    raw <- group_sum_dbl(weights, kept)
-    scaled <- raw[group] > 0
-    w[rows[scaled]] <- weights[rows[scaled]] *
-      n_val[group[scaled]] /
-      raw[group[scaled]]
+    maxima <- vapply(kept, function(loc) max(c(0, weights[loc])), numeric(1))
+    maxima[maxima == 0] <- 1
+    w[rows] <- weights[rows] / maxima[group]
+    normalized <- group_sum_dbl(w, kept)
+    scaled <- normalized[group] > 0
+    w[rows[scaled]] <- w[rows[scaled]] *
+      (n_val[group[scaled]] / normalized[group[scaled]])
   }
   total <- group_sum_dbl(w, kept)
   has <- !is.null(numeric) & n_val > 0L & total > 0
@@ -1082,9 +1089,12 @@ summ_weighted_groups <- function(
   if (!is.null(numeric)) {
     x <- numeric
     if (any(c("mean", "sd", "se", "skew", "kurtosis") %in% statistics)) {
-      center <- only_has(group_sum_dbl(w * x, kept) / total)
+      product <- w * x
+      product[w == 0] <- 0
+      center <- only_has(group_sum_dbl(product, kept) / total)
     }
     deviation <- x - spread_rows(center)
+    deviation[w == 0] <- 0
     if (any(c("sd", "se", "skew", "kurtosis") %in% statistics)) {
       spread <- sqrt(group_sum_dbl(w * deviation^2, kept) / (total - 1))
       spread[!(has & total > 1)] <- NA_real_
@@ -1150,7 +1160,11 @@ summ_weighted_groups <- function(
         skew = only_has(moment(3)),
         kurtosis = only_has(moment(4)),
         se = spread / sqrt(total),
-        sum = only_has(group_sum_dbl(weights * x, kept))
+        sum = {
+          product <- weights * x
+          product[weights == 0] <- 0
+          only_has(group_sum_dbl(product, kept))
+        }
       )
     }
   }

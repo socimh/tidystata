@@ -26,7 +26,7 @@ proportions (summing to 1) instead of percentages (summing to 100).}
 A double vector the same length as \code{x}. Missing values stay
 missing. \code{std()} returns all \code{NA} when the standard deviation is zero or
 undefined (fewer than two observed values), and \code{pc()} when the total is
-zero, as Stata gives missing values there.
+zero or infinite, as Stata gives missing values there.
 }
 \description{
 Vector helpers for \code{\link[dplyr:mutate]{dplyr::mutate()}}, following Stata's \code{egen}:

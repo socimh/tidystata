@@ -47,9 +47,9 @@ contain their own range.
 \examples{
 varlist("x[1-2] y", vars = c("x1", "x2", "x3", "y"))
 
-tb <- paste0("x", 1:15) |>
-  tibble::as_tibble() |>
-  tidyr::pivot_wider(names_from = value)
+tb <- tibble::as_tibble(
+  matrix(1:15, nrow = 1, dimnames = list(NULL, paste0("x", 1:15)))
+)
 tb
 
 # List variable names by ds()

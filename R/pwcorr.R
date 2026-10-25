@@ -73,7 +73,12 @@ pwcorr <- function(
   if (!is.null(weighted$weights) && .method != "pearson") {
     cli::cli_abort("{.arg .wt} is supported for Pearson correlations only.")
   }
-  .data <- weights_drop_column(weighted$data, weighted$column, !missing(...))
+  .data <- weights_drop_column(
+    weighted$data,
+    weighted$column,
+    !missing(...),
+    group_vars
+  )
   weights <- weighted$weights
 
   values <- remove_group_vars(.data, ..., group_vars = group_vars)

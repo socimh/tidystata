@@ -60,8 +60,13 @@ weights_check <- function(weights, size, arg, call = rlang::caller_env()) {
 }
 
 # Drop the weight column from an implicit "all columns" selection.
-weights_drop_column <- function(data, column, selected) {
-  if (is.null(column) || selected) {
+weights_drop_column <- function(
+  data,
+  column,
+  selected,
+  group_vars = character()
+) {
+  if (is.null(column) || selected || column %in% group_vars) {
     return(data)
   }
   data[setdiff(names(data), column)]
@@ -103,6 +108,10 @@ weighted_quantile <- function(x, w, probs) {
   if (!length(x)) {
     return(rep(NA_real_, length(probs)))
   }
+  # The percentile is invariant to weight scale, even if the total overflows.
+  if (!is.finite(sum(w))) {
+    w <- w / max(w)
+  }
   order_x <- order(x)
   x <- x[order_x]
   cumulative <- cumsum(w[order_x])
@@ -121,7 +130,7 @@ weighted_quantile <- function(x, w, probs) {
       exact <- which(abs(cumulative - target) <= tolerance)
       if (length(exact) && exact[[1L]] < length(x)) {
         i <- exact[[1L]]
-        return((x[[i]] + x[[i + 1L]]) / 2)
+        return(weights_midpoint(x[[i]], x[[i + 1L]]))
       }
       x[[which(cumulative > target)[[1L]]]]
     },
@@ -132,4 +141,14 @@ weighted_quantile <- function(x, w, probs) {
 # Unweighted percentiles use the same rule with every weight 1.
 stata_quantile <- function(x, probs) {
   weighted_quantile(x, rep.int(1, length(x)), probs)
+}
+
+# Keep finite midpoints finite without rounding away subnormal values.
+weights_midpoint <- function(x, y) {
+  x <- as.double(x)
+  y <- as.double(y)
+  result <- (x + y) / 2
+  overflow <- is.infinite(result) & is.finite(x) & is.finite(y)
+  result[overflow] <- x[overflow] / 2 + y[overflow] / 2
+  result
 }

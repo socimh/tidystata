@@ -6,6 +6,7 @@ findit_audit_row <- function(id) {
 }
 
 findit_audit_eval <- function(id, data, ...) {
+  skip_if_not_installed("tidyr")
   scope <- list2env(c(list(data = data), list(...)), parent = globalenv())
   scope$mutate <- dplyr::mutate
   scope$pivot_longer <- tidyr::pivot_longer
@@ -67,6 +68,7 @@ test_that("indicator generation preserves rows missing the category", {
 })
 
 test_that("Johansen mappings describe actual deterministic model matrices", {
+  skip_on_cran()
   skip_if_not_installed("urca")
   set.seed(219)
   Y <- apply(matrix(stats::rnorm(160), 80, 2), 2, cumsum)
@@ -94,6 +96,7 @@ test_that("Johansen mappings describe actual deterministic model matrices", {
 })
 
 test_that("mixed estimation uses maximum likelihood on new data", {
+  skip_on_cran()
   skip_if_not_installed("lme4")
   # These model packages support optional reference examples, not lookup itself.
   fit <- findit_audit_eval(
@@ -110,6 +113,7 @@ test_that("mixed estimation uses maximum likelihood on new data", {
 })
 
 test_that("Cox examples select Breslow for tied event times", {
+  skip_on_cran()
   skip_if_not_installed("survival")
   data <- data.frame(
     time = c(1, 1, 2, 2, 3, 4, 4, 5),
@@ -169,6 +173,7 @@ test_that("matching and PCSE select the stated replacement and covariance", {
 })
 
 test_that("meta mean-difference variances use the equal-variance model", {
+  skip_on_cran()
   skip_if_not_installed("metafor")
   data <- data.frame(
     n1 = c(10, 15),
@@ -189,6 +194,7 @@ test_that("meta mean-difference variances use the equal-variance model", {
 })
 
 test_that("meta set consumes standard errors without a fixture-only variance", {
+  skip_on_cran()
   skip_if_not_installed("metafor")
   data <- data.frame(yi = c(0.2, -0.1, 0.6), sei = c(0.1, 0.2, 0.3))
   result <- findit_audit_eval("ref-0b4e9c21e56a3c3e", data)$value
@@ -208,6 +214,7 @@ test_that("first-row indicators sort observations and retain missing groups", {
 })
 
 test_that("random-coefficient mappings fit every coefficient on new panel data", {
+  skip_on_cran()
   skip_if_not_installed("nlme")
   set.seed(211)
   data <- expand.grid(time = 1:15, id = factor(1:20))
@@ -226,6 +233,7 @@ test_that("random-coefficient mappings fit every coefficient on new panel data",
 })
 
 test_that("cluster reference degrees of freedom handle numeric groups", {
+  skip_on_cran()
   skip_if_not_installed("sandwich")
   skip_if_not_installed("lmtest")
   data <- transform(mtcars, y = mpg, x = wt, z = hp, g = cyl)
@@ -240,6 +248,7 @@ test_that("cluster reference degrees of freedom handle numeric groups", {
 })
 
 test_that("discriminant priors use only classes in the analysis sample", {
+  skip_on_cran()
   skip_if_not_installed("MASS")
   data <- transform(
     iris,

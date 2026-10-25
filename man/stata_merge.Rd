@@ -22,9 +22,9 @@ stata_merge(
 
 \item{relationship}{The key relationship, as in Stata: \code{"1:1"} (keys unique
 in both tables), \code{"m:1"} (unique in \code{using}) or \code{"1:m"} (unique in \code{.data}).
-It is required and checked before joining. Many-to-many merges are not
-supported, as in Stata; use \code{\link[dplyr:inner_join]{dplyr::inner_join()}} with
-\code{relationship = "many-to-many"} if you really need all pairings.}
+It is required and checked before joining. Stata's many-to-many (\code{m:m})
+merge is not supported. Use \code{\link[dplyr:inner_join]{dplyr::inner_join()}} with
+\code{relationship = "many-to-many"} if you need all pairings.}
 
 \item{by}{A character vector of key columns. Use a named vector, such as
 \code{c(id = "person_id")}, when the names differ (\code{.data} name = \code{using} name).}
@@ -57,9 +57,11 @@ in a \code{.merge} column (Stata's \verb{_merge}).
 }
 \details{
 Missing key values match each other, as in Stata. When a non-key column
-exists in both tables, the values from \code{.data} are kept and the \code{using}
-column is dropped with a message, as Stata does without \code{update}; rename
-the column first to keep both. Grouping is not retained.
+exists in both tables, matched rows keep the values from \code{.data}, including
+missing values, as Stata does without \code{update}. Rows found only in \code{using}
+keep its values. Shared columns use a compatible common type when using-only
+values are needed; incompatible types cause an error. A message identifies
+shared columns; rename them first to keep both. Grouping is not retained.
 }
 \examples{
 people <- tibble::tibble(id = 1:3, age = c(30, 41, 25))
