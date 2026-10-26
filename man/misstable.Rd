@@ -9,58 +9,76 @@ misstable(.data, ..., .by = NULL, .patterns = FALSE, .all = FALSE)
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Variables to check. Omit to
-check every column except grouping keys.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with
+\code{\link[=select_or_transmute]{select_or_transmute()}}. Existing columns, selection helpers, and named
+expressions can be mixed. Omit to check all columns except grouping keys.}
 
-\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping
-variables. Grouped data use their groups unless \code{.by} is supplied.}
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables.
+Grouped data use their groups unless \code{.by} is supplied. Select existing
+columns only; create new grouping columns with \code{\link[dplyr:mutate]{dplyr::mutate()}} first.}
 
-\item{.patterns}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, tabulate missing
-patterns instead of counting by variable.}
+\item{.patterns}{If \code{TRUE}, tabulate missingness patterns instead of
+summarizing individual variables.}
 
-\item{.all}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), only
-variables with at least one missing value are shown, as in Stata; if
-\code{TRUE}, all checked variables are shown.}
+\item{.all}{If \code{TRUE}, include variables without missing values in either
+mode. Defaults to \code{FALSE}, as in Stata.}
 }
 \value{
-By default, a tibble with any grouping keys, \code{variable}, \code{miss_n} (missing
-values), \code{miss_pct} (percentage of rows, from zero to 100) and \code{valid_n}
-(observed values), one row per variable (and group).
+An ungrouped tibble with any grouping keys and:
+\itemize{
+\item By default, one row per checked variable and group, with \code{variable},
+\code{miss_n} (missing count), \code{miss_pct} (missing percentage), and \code{valid_n}
+(observed count). No checked variables gives zero rows.
+\item With \code{.patterns = TRUE}, one row per observed pattern and group, with a \code{1}
+(observed) or \code{0} (missing) column per checked variable, plus \code{n}
+(frequency) and \code{percent}. With no checked variables, each nonempty group
+has one row containing only its keys, \code{n}, and \code{percent}.
+}
 
-With \code{.patterns = TRUE}, a tibble with any grouping keys, one column per
-variable holding \code{1} (observed) or \code{0} (missing) as in Stata, \code{n} (rows with
-that pattern) and \code{percent} (of the rows in the group). Patterns are sorted
-by decreasing frequency within each group, so the first row is usually the
-complete cases.
+Percentages range from zero to 100 within each group. Summary rows for
+zero-row ungrouped inputs have zero counts and \code{NA} percentages when \code{.all = TRUE}; empty inputs have no pattern rows.
 }
 \description{
-Missing-value summaries, like Stata's \code{misstable}.
-\itemize{
-\item By default, \code{misstable()} counts the missing values of each variable,
-like \verb{misstable summarize}.
-\item With \code{.patterns = TRUE}, it counts the combinations of observed and
-missing variables across rows, like \verb{misstable patterns}.
-}
+Summarize missing values by variable (\verb{misstable summarize}) or tabulate
+missingness patterns across rows (\verb{misstable patterns}), following Stata's
+\code{misstable} command.
 }
 \details{
-A value is missing when \code{is.na()} is \code{TRUE} for it, which includes \code{NaN}
-and haven's tagged missing values such as Stata's \code{.a}. In a list column,
-\code{NA} elements are missing and \code{NULL} elements are values, as in \code{\link[=summ]{summ()}} and
-\code{\link[=fre]{fre()}}. Matrix and data-frame columns follow vctrs row missingness: a row
-is missing only when every component is missing. Empty strings are
-observed values, unlike Stata's missing string; convert them first with
-\code{\link[=na_if_value]{na_if_value()}}. When no checked variable has missing values and
-\code{.all = FALSE}, a message says so and the result has no variable rows or
-columns.
-Grouping names must not collide with result columns; rename those keys
-before calling \code{misstable()}.
+Atomic missingness follows \code{is.na()}, including \code{NaN}, haven's tagged missing
+values, and SPSS user-missing codes and ranges. In list columns, \code{NA} is
+missing but \code{NULL} is observed. Matrix and data-frame columns are missing
+only when all components in a row are missing, following vctrs conventions.
+
+Computed columns are evaluated on ungrouped working data before missingness
+is summarized within groups. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}
+first when a calculation needs to run separately within each group.
+
+Empty strings are treated as observed values, unlike in Stata. Use
+\code{\link[=na_if_value]{na_if_value()}} to convert them to missing values.
+
+With \code{.all = FALSE}, variables are checked only if they contain missing
+values anywhere in the input. A message is displayed when none do. Summary
+rows follow selection order within each group; patterns follow decreasing
+frequency, with ties preferring observed values column by column. Grouping
+keys must not conflict with output column names. Pattern variables must also
+differ from grouping keys and the names \code{n} and \code{percent}.
 }
 \examples{
+# Summarize missing values
 misstable(lifeexp)
+
 misstable(lifeexp, .all = TRUE)
+
+# Tabulate missingness patterns
 misstable(lifeexp, .patterns = TRUE)
+
+# Select variables and group observations
 misstable(lifeexp, gnppc, safewater, .by = region)
-misstable(dplyr::starwars, height, mass, birth_year, .patterns = TRUE)
+
+# Check an existing column alongside a computed column
+misstable(lifeexp, gnppc, water_share = safewater / 100, .all = TRUE)
+
 }
 \seealso{
 Other inspection functions:

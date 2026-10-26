@@ -1,136 +1,63 @@
-#' Find the R equivalent of a Stata command
+#' Find R equivalents of Stata commands
 #'
-#' @description
-#' `findit()` looks up a Stata command and returns the R code that does the
-#' same job, whether a tidystata function or one from another package. It
-#' covers everyday data work (browsing, tabulating, generating, merging,
-#' reshaping) and points to the packages tidystata leaves to others, such as
-#' fixest for `reghdfe`, modelsummary for `esttab`, binsreg for `binscatter`
-#' and srvyr for `svy`.
+#' `findit()` looks up Stata commands and their R equivalents, including
+#' functions from tidystata and other packages. It also supports reverse lookup
+#' from R functions, keyword searches, and plain-language questions. Omit the
+#' query to browse all entries.
 #'
-#' It also works the other way round: give it an R function, such as
-#' `findit(left_join)`, and it describes the function and lists the Stata
-#' commands it replaces. Beginners need not know which is which; a word that
-#' is both, such as `log` or `round`, shows both meanings.
+#' @param command A Stata command, R function, or search phrase. Supply a bare
+#'   name (`findit(reg)`, `findit(left_join)`) or a quoted string for full
+#'   syntax (`findit("merge 1:1 id, keep(match)")`). R function names may
+#'   include `()` or a namespace prefix. Use `!!cmd` to look up a string stored
+#'   in `cmd`. Defaults to `NULL` (all entries).
 #'
-#' Type a single word bare, as in `findit(reg)`, add names and hints with commas,
-#' as in `findit(tab, sex, region)` or `findit(tab, gen)`, or quote full Stata
-#' syntax, as in `findit("merge 1:1 id, keep(match)")`. Call `findit()` with no
-#' argument for the whole list.
+#' @param ... Optional variable names or command hints, captured without
+#'   evaluation. Names customize examples in Stata operand order, while hints
+#'   prioritize examples (`findit(tab, gen)`). Hints accept exact or unambiguous
+#'   prefixes of at least three letters. Quote names that conflict with hints
+#'   (`findit(tab, "gen")`). Use `!!` for stored strings. Only unnamed names and
+#'   strings are accepted.
 #'
-#' @param command A Stata command or an R function name, either one bare word
-#' (`findit(tab)`, `findit(left_join)`) or a quoted string
-#' (`findit("bysort g: egen m = mean(x)")`). R functions may also be written
-#' as `lm()` or `dplyr::left_join`. Use `!!` to look up a string stored in a
-#' variable: `findit(!!cmd)`. `NULL` (default) returns every entry.
-#' @param ... Unnamed variable names and command hints, captured without
-#' evaluation. Names customize examples in Stata operand order, including new
-#' output variables: `findit(xtile, quartile, income)`. A bare hint such as `gen`
-#' selects the `generate()` option. Hints match exactly or by an unambiguous
-#' prefix of at least three letters. Quote a name to use it literally when it
-#' conflicts with a hint, as in `findit(tab, "gen")`. Use `!!` for a name stored
-#' in a string. Calls, numbers, missing arguments and named arguments are not
-#' accepted here.
-#'
-#' @returns A tibble with one row per Stata idiom and the columns `match`
-#' (`"stata"` when the word is a Stata command, `"r"` when it is an R function
-#' used in the entry, `"keyword"` for a text match, `"nearest"` for the
-#' closest entries to a plain question, `"all"` for the whole list), `stata` (the Stata code), `r` (equivalent R code), `package` (where
-#' the R function lives) and `task` (what it does). It prints each entry as
-#' a short block: what it does, then the Stata code and the R code on lines
-#' labelled `Stata:` and `R:`, so the code is never cut off. The `package`
-#' column identifies the primary package; namespace-qualified helper calls may
-#' require additional packages. When one entry
-#' answers the query, only that entry is printed. Routine commands have a
-#' canonical default, such as `tabulate x` for `findit(tab)`. Up to five examples
-#' are printed when different meanings or structural choices remain unresolved,
-#' such as the direction of `reshape`. Hidden examples are always counted, with
-#' a line to run for the rest, such as `findit(tab) |> print(n = Inf)`.
-#' The returned tibble
-#' always has every match, so it can be stored, filtered or opened with
-#' `View()`. Headings use a single `#`, without an introductory summary.
-#' R-function notes already demonstrated or resolved by comma-separated inputs
-#' are omitted. Supplied names customize compatible
-#' examples; examples requiring different variables retain all their original
-#' placeholders. No matches are removed. A note identifies retained placeholders
-#' when those examples are displayed, or explains when no example fits. If
-#' nothing matches, a message suggests similar names and an empty tibble is
-#' returned invisibly.
+#' @returns A tibble of class `tidystata_findit` with one row per matching Stata
+#'   idiom and five columns: `match` (match type), `stata` (Stata code), `r`
+#'   (equivalent R code), `package` (primary R package), and `task`
+#'   (description). All matches are returned, even when fewer are printed. If
+#'   nothing matches, an empty tibble is returned invisibly with an explanatory
+#'   message.
 #'
 #' @details
-#' Matching follows fixed rules, without any guessing:
+#' **Matching**
 #'
-#' * The first word is looked up both as a Stata command and as an R function.
-#'   Stata's minimum abbreviations work: `reg`, `regr` and `regress` all find
-#'   `regress`; `su` and `sum` find `summarize`; `ta` and `tab` find
-#'   `tabulate`. R functions must be named in full (`lm` finds `lm()` but not
-#'   `glm()`); upper and lower case are ignored only when no exact name
-#'   matches.
-#' * Entries found as a Stata command come first. Entries found only through
-#'   the R function follow. A description is added only when the function does
-#'   not appear in a displayed example. Hundreds of
-#'   R functions are described, including many that no entry uses yet, such
-#'   as `n_distinct()` or `fct_relevel()`; for those, `findit()` prints the
-#'   description and the related Stata command.
-#' * A leading `by ...:` or `bysort ...:` prefix is set aside, so
-#'   `findit("bys g: sum x")` looks up `summarize` and lists the grouped
-#'   entries first.
-#' * The remaining words put the best-matching entries first. For example,
-#'   `findit("merge keep(match)")` lists `inner_join()` before the other merge
-#'   entries, and `findit("mutate egen")` lists the `egen` entries among the
-#'   many that use `mutate()`. Among equally good entries, the one with the
-#'   fewest further words comes first. All matching entries are still
-#'   returned.
-#' * Comma-separated names and hints select among these examples and fill their
-#'   recorded variable roles. Variable lists can accept several names, while
-#'   fixed roles must all be supplied. Dataset names, function names and unrelated
-#'   constants are unchanged. Strings that represent column names or formulas
-#'   are customized too. R names are quoted as needed; non-Stata names are shown
-#'   with backticks in the reference Stata line. This is a lookup over existing
-#'   examples, not a parser or executor for arbitrary Stata programs.
-#' * If a hint prefix has several interpretations, competing examples are shown.
-#'   If no example satisfies every hint, the closest alternatives are shown with
-#'   an explanation. For plain questions a uniquely highest-ranked meaning is
-#'   shown alone; tied meanings retain up to five representative examples.
-#' * If neither matches, the text is searched for in the Stata code, the R
-#'   code and the task, so `findit(winsor)` and `findit(dummy)` also work.
-#' * Otherwise the text is read as a plain question, in English or Chinese,
-#'   and the closest entries are listed under their own heading:
-#'   `findit("how do I remove duplicate rows")`. The closest entries are
-#'   the ones sharing the most informative words with the question, after
-#'   common words are dropped and a short built-in list of synonyms is
-#'   applied ("average" also means "mean"). A question of three or more
-#'   words that happens to start with a command, such as
-#'   `findit("count how many people in each category")`, lists the closest
-#'   entries first. No language model is involved, so the same question
-#'   always gives the same answer.
+#' * Stata abbreviations are recognized (`reg`, `regr`, `regress`), while R
+#'   functions require their full names. Exact-case matches take priority.
+#'   Shared names, such as `log`, show both Stata and R interpretations.
+#' * Stata command matches appear before R function matches. Keyword searches
+#'   are used when neither matches. Additional syntax and hints refine the
+#'   ranking without discarding matches. `by` and `bysort` prefixes prioritize
+#'   grouped operations.
+#' * Plain-language questions use deterministic keyword and synonym matching in
+#'   English or Chinese, without a language model.
 #'
-#' R reads a call before `findit()` runs, so anything that is not a single R
-#' name must be quoted: several words (`"merge 1:1 id"`), reserved words
-#' (`"if"`), and names starting with an underscore (`"_n"`).
+#' **Output**
 #'
-#' When R runs in Chinese (the `LANGUAGE` environment variable or, if it is
-#' unset, the locale), the task and function descriptions are shown in
-#' Chinese, and Chinese keywords are searched in any language.
-#' `Sys.setenv(LANGUAGE = "en")` switches back to English, as it does for R's
-#' own messages.
+#' * Results print as readable Stata/R code pairs. A single clear match is shown
+#'   alone; otherwise, up to five representative examples appear. Use `print(n =
+#'   Inf)` to display all matches.
+#' * The `match` column identifies the lookup type: `"stata"`, `"r"`,
+#'   `"keyword"`, `"nearest"`, or `"all"`.
+#' * Supplied variable names customize compatible examples. Unresolved
+#'   placeholders and unsupported combinations are explained in notes.
 #'
-#' The list is curated rather than exhaustive. Longer explanations, in English
-#' and Chinese, are in the "Coming from Stata" articles on the package
-#' website.
+#' **Notes**
 #'
-#' Nonempty notes and qualifications print with their examples, including legacy
-#' workflows. Explicit expansion also prints reference links. Reference
-#' packages are needed only when running their examples; lookup stays offline
-#' and does not load or install them. A qualification identifies supplied option
-#' combinations absent from the curated examples. Known unsupported queries are
-#' explained explicitly. The reference articles distinguish canonical commands,
-#' Stata functions and operators, Stata examples and alternative R approaches.
-#' Example metadata uses stable IDs, so several R implementations may share the
-#' same Stata syntax without losing their variable-role annotations.
-#'
-#' tidystata and statar can be attached together; only `tab()` and `xtile()`
-#' share names. Attach tidystata last, or write `tidystata::tab()`.
+#' * Quote multiword Stata syntax, reserved words (`"if"`), and names that are
+#'   not valid R symbols (`"_n"`).
+#' * Lookup works offline. External packages such as fixest, modelsummary, and
+#'   srvyr are needed only when running their examples.
+#' * Chinese descriptions follow R's language settings. Use `Sys.setenv(LANGUAGE
+#'   = "en")` to switch to English.
+#' * The reference is curated, not a parser or executor for arbitrary Stata
+#'   programs. See the "Coming from Stata" articles for further guidance.
 #'
 #' @concept Stata
 #' @concept Stata to R
@@ -138,25 +65,28 @@
 #' @concept search
 #' @concept help
 #' @export
-#' @examples
-#' findit(reg)
-#' findit(su)
-#' findit(tab, sex, region)
-#' findit(tab, gen)
-#' findit(xtile, quartile, income)
-#' findit("merge 1:1 id, keep(match)")
-#' findit("bys g: egen m = mean(x)")
-#' findit(winsor)
 #'
-#' # Plain questions
+#' @examples
+#' # Look up a Stata command
+#' findit(reg)
+#'
+#' # Look up an R function
+#' findit(left_join)
+#'
+#' # Customize variables or select an option
+#' findit(tab, sex, region)
+#'
+#' findit(tab, gen)
+#'
+#' # Search Stata syntax or ask a question
+#' findit("merge 1:1 id, keep(match)")
+#'
 #' findit("how do I remove duplicate rows")
 #'
-#' # R functions work too, and words with both meanings show both
-#' findit(left_join)
-#' findit(log)
-#'
-#' # The whole list
-#' findit()
+#' # Filter the complete reference
+#' entries <- findit()
+#' entries |>
+#'   dplyr::filter(package == "tidystata")
 findit <- function(command = NULL, ...) {
   expr <- rlang::enexpr(command)
   extra <- rlang::enexprs(..., .ignore_empty = "none")

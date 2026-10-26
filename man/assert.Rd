@@ -13,23 +13,23 @@ assert(.data, ..., .by = NULL)
 giving \code{TRUE} or \code{FALSE} per row (or a single value). Group functions such
 as \code{n()} and \code{mean()} use the groups of \code{.data} or \code{.by}.}
 
-\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping
-variables, like Stata's \verb{by g: assert}.}
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables,
+like Stata's \verb{by g: assert}.}
 }
 \value{
 \code{.data}, invisibly, when every condition holds.
 }
 \description{
-Checks conditions on every row, like Stata's \code{assert}, and stops with the
-number of contradictions when any fails. It returns the data invisibly
-when all hold, so it can sit inside a pipeline.
+Check conditions on every row, like Stata's \code{assert}, and stop with the
+number of contradictions when any fails. It returns the data invisibly when
+all hold, so it can sit inside a pipeline.
 }
 \details{
-The error lists each failing condition with its number of contradictions
-and the first failing rows. A missing result (\code{NA}) counts as a
-contradiction and is reported separately. This differs from Stata, where
-a missing value is larger than every number, so \verb{assert x > 0} holds when
-\code{x} is missing; write \code{is.na(x) | x > 0} for that behaviour.
+The error lists each failing condition with its number of contradictions and
+the first failing rows. A missing result (\code{NA}) counts as a contradiction and
+is reported separately. This differs from Stata, where a missing value is
+larger than every number, so \verb{assert x > 0} holds when \code{x} is missing; write
+\code{is.na(x) | x > 0} for that behaviour.
 }
 \examples{
 lifeexp |>

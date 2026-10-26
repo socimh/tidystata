@@ -1,36 +1,40 @@
 #' List column names by tidyselect
 #'
 #' @param .data A data frame, tibble, or data.table. `ds()` also accepts a
-#'   character vector representing a name inventory, such as an earlier
-#'   `ds()` result. Inventory entries must be unique, nonempty, and nonmissing;
-#'   the vector's own names are ignored. An empty inventory is allowed.
-#' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to
-#' select or rename. Omit to include all columns. Computed columns are not
-#' created by this argument.
+#'   character vector representing a name inventory, such as an earlier `ds()`
+#'   result. Inventory entries must be unique, nonempty, and nonmissing; the
+#'   vector's own names are ignored. An empty inventory is allowed.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to select or
+#'   rename. Omit to include all columns. Computed columns are not created by
+#'   this argument.
 #' @param .type `"vector"` (the default) returns the names as a character
 #'   vector, like Stata's `ds`; `"table"` returns them as a one-column table.
 #'
 #' @returns `ds()` returns a character vector. `ds(.type = "table")` returns a
-#' table with one character column, `name`. On ungrouped data, an empty
-#' selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
-#' data.frame, tibble, or data.table container and supported preview settings,
-#' but do not recreate grouping or arbitrary subclasses on the new rows.
+#'   table with one character column, `name`, and one row per selected name, in
+#'   selection order. On ungrouped data, an empty selection returns a
+#'   zero-length vector or zero-row table. Tables preserve the input's
+#'   data.frame, tibble, or data.table container and supported preview settings,
+#'   without grouping or arbitrary subclasses; character inventories return a
+#'   tibble in table mode.
 #'
 #' @details
 #' Selection order and renamed column names follow [dplyr::select()]. On a
-#' grouped data frame, selection retains grouping columns and can emit a
-#' message when they were not explicitly selected. Ungroup first to select
-#' independently of grouping columns. The input data are not modified.
-#' For character inventories, select by names, positions, or name helpers and
-#' rename as usual. Data-type predicates such as `where(is.numeric)` are not
-#' available because an inventory contains no column data.
+#' grouped data frame, selection retains grouping columns and can emit a message
+#' when they were not explicitly selected. Ungroup first to select independently
+#' of grouping columns. The input data are not modified. For character
+#' inventories, select by names, positions, or name helpers and rename as usual.
+#' Data-type predicates such as `where(is.numeric)` are not available because an
+#' inventory contains no column data.
 #'
 #' @name names
 #' @seealso [variables()], [codebook()], [browse()]
 #'
 #' @examples
 #' ds(lifeexp) # equivalent to names(lifeexp)
+#'
 #' ds(lifeexp, country:lexp)
+#'
 #' ds(lifeexp, where(is.character), .type = "table")
 #'
 #' starwars <- dplyr::starwars
@@ -39,6 +43,7 @@
 #' # Save a programmatic selection for later stages of a pipeline.
 #' numeric_names <- ds(lifeexp, where(is.numeric))
 #' dplyr::select(lifeexp, dplyr::all_of(numeric_names))
+#'
 #' ds(numeric_names, dplyr::starts_with("pop"))
 #' @family inspection functions
 

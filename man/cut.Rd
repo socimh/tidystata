@@ -23,9 +23,9 @@ cut_length(x, n = 4, labels = NULL)
 cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 }
 \arguments{
-\item{x}{A numeric vector. \code{xtile()} also accepts a logical vector,
-treated as 0/1. SPSS user-missing codes and ranges are omitted. Convert
-\code{integer64} inputs and cutpoints explicitly to ordinary numeric values first.}
+\item{x}{A numeric vector. \code{xtile()} also accepts a logical vector, treated
+as 0/1. SPSS user-missing codes and ranges are omitted. Convert \code{integer64}
+inputs and cutpoints explicitly to ordinary numeric values first.}
 
 \item{n}{A positive integer. The number of intervals.}
 
@@ -49,14 +49,15 @@ maximum are added when values lie beyond the breaks. \code{NULL} uses the
 observed median as an interior cutpoint. A single number supplies one
 interior cutpoint, rather than the number of intervals.}
 
-\item{right}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), intervals are
-closed on the left (\verb{a <= x < b}), as in Stata's \verb{egen cut()}; the last
-interval also includes its upper end. If \code{TRUE}, they are closed on the
-right (\verb{a < x <= b}), as in \code{\link[base:cut]{base::cut()}}.}
+\item{right}{If \code{FALSE} (default), intervals are closed on the left (\verb{a <= x < b}), as in Stata's \verb{egen cut()}; the last interval also includes its
+upper end. If \code{TRUE}, they are closed on the right (\verb{a < x <= b}), as in
+\code{\link[base:cut]{base::cut()}}.}
 }
 \value{
 An ordered factor, or integer interval codes when \code{labels = FALSE}
-or when \code{xtile()} runs in a grouped data mask with default labels.
+or when \code{xtile()} runs in a grouped data mask with default labels. The
+result has the same length and order as \code{x}, with missing inputs remaining
+missing. Empty and all-missing inputs are rejected.
 }
 \description{
 \itemize{
@@ -69,28 +70,26 @@ equal-width command (\verb{egen cut(), group()} is not equal-width).
 \code{cut_quantile()} is an alias of \code{xtile()}.
 }
 \details{
-\code{xtile()} follows Stata's \code{xtile}, and its codes are tested against
-Stata's output. Cutpoints are the percentiles at \verb{1/n, 2/n, ...}, using
-Stata's percentile rule (see \code{\link[=summ]{summ()}}), and each value joins the first group
-whose cutpoint is at least that value. Equal values stay in the same group;
-different values may share a group. Ties can leave groups empty; as in
-Stata, their codes are skipped (codes 1, 3 and 4, say) and a warning is
-given. Factor levels are the
-occupied groups. Default labels are the
-contiguous intervals covered by each group, for example \code{"[0,0]"} and
-\code{"(0,1]"}. Custom labels must match the effective number of groups.
-Empty and all-missing vectors are rejected. Constant vectors are rejected
-only by the default quantile method.
+Quantile cutpoints are the percentiles at \verb{1/n, 2/n, ...}, using Stata's
+percentile rule (see \code{\link[=summ]{summ()}}), and each value joins the first group whose
+cutpoint is at least that value. Equal values stay in the same group;
+different values may share a group. Ties can leave groups empty; as in Stata,
+their codes are skipped (codes 1, 3 and 4, say) and a warning is given.
+Factor levels are the occupied groups. Default labels describe the contiguous
+intervals covered by each group, for example \code{"[0,0]"} and \code{"(0,1]"}. Custom
+labels must match the effective number of groups. Empty and all-missing
+vectors are rejected. Constant vectors are rejected only by the default
+quantile method.
 
 \code{cut_breaks()} differs from \verb{egen cut(), at()} at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while
 \code{cut_breaks()} extends the end intervals to the observed range.
 
-\code{labels = NULL} (the default) or \code{TRUE} gives interval labels; \code{FALSE}
-gives integer codes. Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its
-own cutpoints and interval labels, which cannot be combined, so the default
-returns integer codes within each group (like Stata's \verb{xtile, by()}).
-Supply \code{labels = TRUE} to request labels there anyway.
+\code{labels = NULL} (the default) or \code{TRUE} gives interval labels; \code{FALSE} gives
+integer codes. Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its own
+cutpoints and interval labels, which cannot be combined, so the default
+returns integer codes within each group (like Stata's \verb{xtile, by()}). Supply
+\code{labels = TRUE} to request labels there anyway.
 
 Rank groups omit missing observations when ranking, then restore missing
 output positions. If \code{n} exceeds the observed count, use one group per
@@ -99,11 +98,13 @@ group count; custom labels must match that count.
 }
 \examples{
 xtile(1:20)
+
 xtile(c(0, 0, 0, 1, 1), 2)
 
 cut_length(1:20)
 
 cut_breaks(1:20, breaks = c(5, 15))
+
 cut_breaks(1:20, breaks = 10)
 }
 \seealso{

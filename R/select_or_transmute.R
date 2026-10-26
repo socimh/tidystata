@@ -1,33 +1,34 @@
 #' Select and compute columns
 #'
-#' An enhanced [dplyr::select()] that also accepts data-masking expressions.
-#' As with [dplyr::transmute()], only the selected and computed columns are
+#' An enhanced [dplyr::select()] that also accepts data-masking expressions. As
+#' with [dplyr::transmute()], only the selected and computed columns are
 #' returned.
 #'
 #' @param .data A data frame or tibble.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> selections or
-#' <[`data-masking`][args_data_masking]> expressions. Omit to return the input
-#' unchanged.
+#'   <[`data-masking`][args_data_masking]> expressions. Omit to return the input
+#'   unchanged.
 #'
-#' @returns The selected (and computed) columns. Data-frame classes and
-#' grouping follow [dplyr::select()]; a tibble input returns a tibble.
+#' @returns A table containing the selected and computed columns in argument
+#'   order. Data-frame classes and grouping follow [dplyr::select()]; a tibble
+#'   input returns a tibble. Grouping columns are retained. Unnamed computed
+#'   columns use their expression as the name.
 #'
 #' @details
-#' Each argument is classified before evaluation. Column names, strings,
-#' numeric positions, selection syntax (`c()`, `:`, `!`, `&`, `|`, unary `-`)
-#' and tidyselect helpers such as `starts_with()`, `where()`, `all_of()` or
+#' Each argument is classified before evaluation. Column names, strings, numeric
+#' positions, selection syntax (`c()`, `:`, `!`, `&`, `|`, unary `-`) and
+#' tidyselect helpers such as `starts_with()`, `where()`, `all_of()` or
 #' [varlist()] select existing columns, as do calls that use no column names
-#' (for example `all_of(vars)` or `seq_len(2)`). Any other expression that
-#' uses columns, such as `lexp >= 70` or `gnp_thousands = gnppc / 1000`, is computed
-#' with [dplyr::mutate()] and then selected, so arithmetic on columns is never
-#' misread as column positions. Selections and computed values can be mixed;
-#' output follows argument order. Unnamed computed columns are named by their
-#' expression.
+#' (for example `all_of(vars)` or `seq_len(2)`). Any other expression that uses
+#' columns, such as `lexp >= 70` or `gnp_thousands = gnppc / 1000`, is computed
+#' with [dplyr::mutate()] and then selected, so arithmetic is never misread as
+#' column positions. Selections and computed values can be mixed; output follows
+#' argument order.
 #'
-#' A named constant such as `one = 1`, `label = "x"` or `y = c(1, 2)` creates
-#' a constant column; it never selects or renames columns by position. Unnamed
-#' names, strings and positions must identify existing columns. If they do
-#' not, an error lists every unmatched name instead of evaluating them as
+#' A named constant such as `one = 1`, `label = "x"` or `y = c(1, 2)` creates a
+#' constant column; it never selects or renames columns by position. Unnamed
+#' names, strings and positions must identify existing columns. If they do not,
+#' an error lists every unmatched name instead of evaluating them as
 #' expressions, so a misspelled column is never replaced by an object of the
 #' same name in the calling environment. (A symbol naming a character vector in
 #' the calling environment is still passed to tidyselect, which deprecates that
@@ -35,8 +36,8 @@
 #'
 #' If selection itself fails for another reason (for example, duplicate output
 #' names), the arguments are evaluated sequentially with [dplyr::transmute()];
-#' if that also fails, the error reports both attempts. Computed expressions
-#' are evaluated once when selection succeeds. Grouping columns are retained
+#' if that also fails, the error reports both attempts. Computed expressions are
+#' evaluated once when selection succeeds. Grouping columns are retained
 #' according to dplyr's selection rules.
 #' @family selection and preview functions
 #' @export
@@ -44,10 +45,13 @@
 #' @examples
 #' lifeexp |>
 #'   select_or_transmute()
+#'
 #' lifeexp |>
 #'   select_or_transmute(country, lexp)
+#'
 #' # Ordinary select() rejects this computed expression.
 #' try(dplyr::select(lifeexp, lexp >= 70))
+#'
 #' lifeexp |>
 #'   select_or_transmute(lexp >= 70)
 select_or_transmute <- function(.data, ...) {

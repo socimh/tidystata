@@ -1,16 +1,19 @@
 #' Report an object's type or unit
 #'
+#' Describe an object's storage type or class with `var_type()`, or its
+#' measurement unit with `var_unit()`.
+#'
 #' @name var_type
 #' @param x An object.
-#' @param abbr A single `TRUE` or `FALSE`. If `TRUE`, the abbreviation of the
-#'   type is returned.
-#' @returns A character. `var_type()` returns `"units"` for measured vectors
-#' in either abbreviation mode. `var_unit()` returns the unit string for measured
-#' or duration vectors, including empty or all-missing measured vectors, and
-#' `NA_character_` for vectors without units.
+#' @param abbr If `TRUE`, return an abbreviated type. Defaults to `FALSE`.
+#' @returns A character string. `var_type()` gives the type description,
+#'   including `"units"` for measured vectors in either abbreviation mode.
+#'   `var_unit()` gives the unit string for measured or duration vectors,
+#'   including empty or all-missing measured vectors, and `NA_character_` for
+#'   vectors without units.
 #' @details
 #' Types describe storage and class metadata, not the observed values: empty and
-#' all-missing vectors retain their type. Known scalar abbreviations are expanded
+#' all-missing vectors retain their type. Known scalar abbreviations expand
 #' exactly, including `int64` to `integer64`. Haven-labelled vectors append
 #' `+lbl` in abbreviation mode and `+label` otherwise.
 #'
@@ -19,9 +22,8 @@
 #' use their pillar type description, preserving punctuation and structured
 #' labels such as `I<int>` and `list<int>` in both modes. An empty or missing
 #' custom description falls back to the first class name; errors in custom
-#' methods are propagated. Custom labels that merely start with a numeric
-#' abbreviation do not make a class suitable for numeric summaries. Haven-label
-#' conversion requires an actual haven-labelled class.
+#' methods are propagated. A numeric-looking type description does not imply
+#' support for numeric summaries.
 #'
 #' `var_unit()` reads actual units/difftime metadata (including hms times), and
 #' retains custom unit methods for classes describing themselves as `units`,
@@ -31,6 +33,7 @@
 #'
 #' @examples
 #' var_type(1:10)
+#'
 #' var_type(letters)
 
 #' @export

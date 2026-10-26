@@ -12,39 +12,39 @@ tab_gen(.data, ..., .names = c("value", "index"), .remove = FALSE)
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The categorical variables
-to expand.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The categorical variables to
+expand.}
 
 \item{.names}{How to name the new columns: \code{"value"} (default) appends the
 category, as in \code{sex_male}; \code{"index"} numbers the categories, as in
 \code{sex_1}, like Stata's \code{generate()} option.}
 
-\item{.remove}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, drop the source
-variables.}
+\item{.remove}{If \code{TRUE}, drop the source variables. Defaults to \code{FALSE}.}
 }
 \value{
 \code{.data} with integer indicator columns, keeping its data.frame,
-tibble, data.table, grouped or sf container. Each indicator is \code{1} when the
-row has that category, \code{0} otherwise, and \code{NA} when the source value is
-missing, as in Stata. Each new column has a \code{"label"} attribute such as
-\code{"sex==male"}, as Stata's variable labels do; for labelled vectors the
-label uses the value label.
+tibble, data.table, grouped or sf container and the original rows. Each
+indicator is \code{1} for its category, \code{0} otherwise, and \code{NA} for missing
+source values. New columns have a \code{"label"} attribute such as
+\code{"sex==male"}; for labelled vectors, this uses the value label.
 }
 \description{
-Adds one 0/1 column per observed category of each selected variable, like
+Add one 0/1 column per observed category of each selected variable, like
 Stata's \verb{tabulate x, generate(x_)}. The new columns are placed right after
 their source variable. \code{tab_gen()} is an alias of \code{as_dummy()}.
 }
 \details{
-Categories are the observed, non-missing values: factor levels in level
-order (unused levels are skipped), and other values in ascending order. For
+Categories are the observed, non-missing values: factor levels in level order
+(unused levels are skipped), and other values in ascending order. For
 labelled vectors, \code{.names = "value"} uses the codes, such as \code{region_1}.
-New names must not already exist in \code{.data}, and grouping keys cannot be
-removed. For model formulas, R's factors already expand to dummies; use
-\code{as_dummy()} when the indicator columns themselves are needed.
+Missing values include tagged and SPSS user-missing values. New names must
+not already exist in \code{.data}, and grouping keys cannot be removed. For model
+formulas, R's factors already expand to dummies; use \code{as_dummy()} when the
+indicator columns themselves are needed.
 }
 \examples{
 as_dummy(lifeexp, region)
+
 as_dummy(lifeexp, region, .names = "index", .remove = TRUE)
 }
 \seealso{

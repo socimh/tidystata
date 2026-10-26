@@ -28,64 +28,68 @@ is removed wherever it appears: \code{ignore = "kg "} removes \code{k}, \code{g}
 spaces.}
 }
 \value{
-\code{as_character()} and \code{tostring()} return a character vector. \code{as_numeric()} returns
-a double vector; unsupported types such as lists, raw vectors, and complex
-vectors return missing values of the same length. Empty inputs return
-typed empty vectors. Names, dimensions, labels, and units are dropped,
-except that \code{tostring()} returns character input with its attributes
-unchanged.
-Text that is not a number gives a warning and keeps its row and value in
-\code{\link[readr:problems]{readr::problems()}} on the result.
-Conversion of large \code{integer64} values to double may lose precision and
-emits the underlying conversion warning.
+\code{destring()} and \code{as_numeric()} return a double vector; \code{decode()},
+\code{as_character()}, and \code{tostring()} return a character vector. Results have
+the same length as \code{x}; matrices are flattened in column order. Unsupported
+numeric-conversion inputs, such as lists, raw vectors, and complex vectors,
+return missing values of the same length. Empty inputs return typed empty
+vectors. Names, dimensions, labels, and units are dropped, except that
+\code{tostring()} returns character input unchanged, including its attributes.
+Invalid numeric text adds a \code{problems} attribute readable with
+\code{\link[readr:problems]{readr::problems()}}.
 }
 \description{
-Vector helpers named after Stata's conversion commands:
+Convert text to numbers with \code{destring()}, labelled values to labels with
+\code{decode()}, or values to text with \code{tostring()}, following Stata's conversion
+commands. \code{as_numeric()} and \code{as_character()} are aliases of \code{destring()} and
+\code{decode()}.
 }
 \details{
-\itemize{
-\item \code{destring()} (alias \code{as_numeric()}) converts text to numbers, like
-Stata's \code{destring}. Use \code{mutate(x = destring(x))}.
-\item \code{decode()} (alias \code{as_character()}) converts a labelled vector to its
-value labels, like Stata's \code{decode}.
-\item \code{tostring()} converts values to text and ignores value labels, like
-Stata's \code{tostring}: a labelled vector or factor gives its codes, and
-character input is returned unchanged. Missing values stay \code{NA}. Numbers
-are written in full, as Stata does, so 100000 gives \code{"100000"}, not
-\code{"1e+05"}. Dates use \code{\link[=as.character]{as.character()}}, so they become \code{"2024-01-31"}
-rather than day numbers.
-}
+\strong{Reading numbers}
 
 \code{destring()} reads text the way Stata's \code{destring} does. A value must be a
-number, optionally with a sign, a currency symbol (dollar, euro, pound, yen),
-thousands separators (\verb{1,234}), a trailing percent sign (\verb{50\%} gives 50)
-and surrounding spaces. Anything else, such as \code{"12abc"}, \code{"10 kg"} or a
-date, becomes \code{NA} with a warning, like Stata's \code{force} option; the
-positions are kept in \code{\link[readr:problems]{readr::problems()}}. Use \code{ignore} to remove other
-characters first, like Stata's \code{ignore()}: \code{destring(x, ignore = "kg")}
-reads \code{"10 kg"} as 10. Empty strings, \code{"NA"} and Stata's \code{"."} are missing
-without a warning. Dates stay \code{NA}; convert them with \code{\link[=as.Date]{as.Date()}} or
-\code{lubridate::ymd()} instead.
+number, optionally with a sign, exponent, currency symbol (dollar, euro,
+pound, yen), thousands separators (\verb{1,234}), a trailing percent sign (\verb{50\%}
+gives 50) and surrounding spaces. Anything else, such as \code{"12abc"}, \code{"10 kg"}
+or a date, becomes \code{NA} with a warning, like Stata's \code{force} option; the
+positions and original values are kept in \code{\link[readr:problems]{readr::problems()}}. Use \code{ignore}
+to remove other characters first, like Stata's \code{ignore()}: \code{destring(x, ignore = "kg")} reads \code{"10 kg"} as 10. Empty strings, \code{"NA"} and Stata's
+\code{"."} are missing without a warning; the text \code{"NaN"} becomes \code{NaN}. Date
+strings become \code{NA}; parse them with \code{\link[=as.Date]{as.Date()}} or \code{lubridate::ymd()}
+instead.
 
 A factor whose levels are all numbers, such as \code{factor(c("1990", "2000"))},
 gives those numbers (1990, 2000). Other factors give their level codes.
-Labelled numeric variables return their values; labelled text is read
-from its values like plain text.
-\code{as_character()} uses value labels when a labelled vector has a nonempty
-\code{labels} attribute. Without value labels, it uses ordinary character
-conversion, including for tagged missing values.
+Labelled numeric variables return their values; labelled text is read from
+its values like plain text.
 
-SPSS user-missing codes remain values in both conversions. Numeric conversion
-preserves tagged missing values. Dates become days since 1970-01-01;
-date-times become seconds since the Unix epoch. Durations and measured
-vectors retain their numeric values in their existing units.
+\strong{Labels, missing values, and units}
 
-The sjlabelled package also exports \code{as_numeric()} and \code{as_character()}.
-They differ: sjlabelled's \code{as_numeric()} turns non-numeric text into factor
-codes, and its \code{as_character()} gives \code{NA} for unlabelled values.
-Whichever package is attached last masks the other; write
-\code{tidystata::as_numeric()} to be explicit, or use \code{destring()} and
-\code{decode()}, which do not clash.
+\code{decode()} uses value labels when a labelled vector has a nonempty \code{labels}
+attribute. Without value labels, it uses ordinary character conversion,
+including for tagged missing values.
+
+\code{destring()} and \code{decode()} keep SPSS user-missing codes as values or labels.
+Numeric conversion preserves tagged missing values. Dates become days since
+1970-01-01; date-times become seconds since the Unix epoch. Durations and
+measured vectors retain their numeric values in their existing units.
+Conversion of large \code{integer64} values to double can lose precision and emits
+the underlying conversion warning.
+
+\strong{Text formatting}
+
+\code{tostring()} ignores value labels: labelled numeric vectors and factors give
+their codes. For non-character input, values flagged by \code{is.na()}, including
+\code{NaN}, tagged missing values, and SPSS user-missing codes, become \code{NA}.
+Character input is returned unchanged. Numbers are written in full, so 100000
+gives \code{"100000"}, not \code{"1e+05"}. Dates use \code{\link[=as.character]{as.character()}}, giving
+\code{"2024-01-31"} rather than day numbers.
+
+The sjlabelled package also exports \code{as_numeric()} and \code{as_character()}. They
+differ: sjlabelled's \code{as_numeric()} turns non-numeric text into factor codes,
+and its \code{as_character()} gives \code{NA} for unlabelled values. Whichever package
+is attached last masks the other; write \code{tidystata::as_numeric()} to be
+explicit, or use \code{destring()} and \code{decode()}, which do not clash.
 }
 \examples{
 lifeexp |>

@@ -8,50 +8,49 @@
 #'
 #' `cut_quantile()` is an alias of `xtile()`.
 #'
-#' @param x A numeric vector. `xtile()` also accepts a logical vector,
-#' treated as 0/1. SPSS user-missing codes and ranges are omitted. Convert
-#' `integer64` inputs and cutpoints explicitly to ordinary numeric values first.
+#' @param x A numeric vector. `xtile()` also accepts a logical vector, treated
+#'   as 0/1. SPSS user-missing codes and ranges are omitted. Convert `integer64`
+#'   inputs and cutpoints explicitly to ordinary numeric values first.
 #' @param n A positive integer. The number of intervals.
 #' @param method Quantile boundaries (`"quantile"`, the default), or balanced
-#' rank groups (`"rank"`, which has no Stata counterpart). Rank groups may
-#' split ties, breaking them by original position. They differ in size by at
-#' most one; earlier groups get extra rows.
+#'   rank groups (`"rank"`, which has no Stata counterpart). Rank groups may
+#'   split ties, breaking them by original position. They differ in size by at
+#'   most one; earlier groups get extra rows.
 #' @param wt Optional weights for `xtile()`, one per element of `x`, like
-#' Stata's `xtile ... [aweight = w]`. Cutpoints then follow Stata's weighted
-#' percentile rule; elements with a missing weight get a missing code. Not
-#' available with `method = "rank"`.
+#'   Stata's `xtile ... [aweight = w]`. Cutpoints then follow Stata's weighted
+#'   percentile rule; elements with a missing weight get a missing code. Not
+#'   available with `method = "rank"`.
 #' @param breaks Numeric cutpoints for `cut_breaks()`. The observed minimum and
-#' maximum are added when values lie beyond the breaks. `NULL` uses the
-#' observed median as an interior cutpoint. A single number supplies one
-#' interior cutpoint, rather than the number of intervals.
-#' @param right A single `TRUE` or `FALSE`. If `FALSE` (default), intervals are
-#' closed on the left (`a <= x < b`), as in Stata's `egen cut()`; the last
-#' interval also includes its upper end. If `TRUE`, they are closed on the
-#' right (`a < x <= b`), as in [base::cut()].
+#'   maximum are added when values lie beyond the breaks. `NULL` uses the
+#'   observed median as an interior cutpoint. A single number supplies one
+#'   interior cutpoint, rather than the number of intervals.
+#' @param right If `FALSE` (default), intervals are closed on the left (`a <= x
+#'   < b`), as in Stata's `egen cut()`; the last interval also includes its
+#'   upper end. If `TRUE`, they are closed on the right (`a < x <= b`), as in
+#'   [base::cut()].
 #' @inheritParams base::cut
 #'
-#' @details `xtile()` follows Stata's `xtile`, and its codes are tested against
-#' Stata's output. Cutpoints are the percentiles at `1/n, 2/n, ...`, using
-#' Stata's percentile rule (see [summ()]), and each value joins the first group
-#' whose cutpoint is at least that value. Equal values stay in the same group;
-#' different values may share a group. Ties can leave groups empty; as in
-#' Stata, their codes are skipped (codes 1, 3 and 4, say) and a warning is
-#' given. Factor levels are the
-#' occupied groups. Default labels are the
-#' contiguous intervals covered by each group, for example `"[0,0]"` and
-#' `"(0,1]"`. Custom labels must match the effective number of groups.
-#' Empty and all-missing vectors are rejected. Constant vectors are rejected
-#' only by the default quantile method.
+#' @details
+#' Quantile cutpoints are the percentiles at `1/n, 2/n, ...`, using Stata's
+#' percentile rule (see [summ()]), and each value joins the first group whose
+#' cutpoint is at least that value. Equal values stay in the same group;
+#' different values may share a group. Ties can leave groups empty; as in Stata,
+#' their codes are skipped (codes 1, 3 and 4, say) and a warning is given.
+#' Factor levels are the occupied groups. Default labels describe the contiguous
+#' intervals covered by each group, for example `"[0,0]"` and `"(0,1]"`. Custom
+#' labels must match the effective number of groups. Empty and all-missing
+#' vectors are rejected. Constant vectors are rejected only by the default
+#' quantile method.
 #'
 #' `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
 #' values outside the breaks (and at the last break) missing, while
 #' `cut_breaks()` extends the end intervals to the observed range.
 #'
-#' `labels = NULL` (the default) or `TRUE` gives interval labels; `FALSE`
-#' gives integer codes. Inside grouped [dplyr::mutate()], each group has its
-#' own cutpoints and interval labels, which cannot be combined, so the default
-#' returns integer codes within each group (like Stata's `xtile, by()`).
-#' Supply `labels = TRUE` to request labels there anyway.
+#' `labels = NULL` (the default) or `TRUE` gives interval labels; `FALSE` gives
+#' integer codes. Inside grouped [dplyr::mutate()], each group has its own
+#' cutpoints and interval labels, which cannot be combined, so the default
+#' returns integer codes within each group (like Stata's `xtile, by()`). Supply
+#' `labels = TRUE` to request labels there anyway.
 #'
 #' Rank groups omit missing observations when ranking, then restore missing
 #' output positions. If `n` exceeds the observed count, use one group per
@@ -59,16 +58,20 @@
 #' group count; custom labels must match that count.
 #'
 #' @returns An ordered factor, or integer interval codes when `labels = FALSE`
-#' or when `xtile()` runs in a grouped data mask with default labels.
+#'   or when `xtile()` runs in a grouped data mask with default labels. The
+#'   result has the same length and order as `x`, with missing inputs remaining
+#'   missing. Empty and all-missing inputs are rejected.
 #'
 #' @name cut
 #' @examples
 #' xtile(1:20)
+#'
 #' xtile(c(0, 0, 0, 1, 1), 2)
 #'
 #' cut_length(1:20)
 #'
 #' cut_breaks(1:20, breaks = c(5, 15))
+#'
 #' cut_breaks(1:20, breaks = 10)
 #' @family variable generation functions
 

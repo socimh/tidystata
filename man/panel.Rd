@@ -5,7 +5,7 @@
 \alias{stata_lag}
 \alias{stata_lead}
 \alias{stata_diff}
-\title{Panel lags, leads and differences}
+\title{Calculate panel lags, leads and differences}
 \usage{
 stata_lag(x, n = 1L, time, delta = 1, unit = NULL)
 
@@ -18,30 +18,31 @@ stata_diff(x, n = 1L, time, delta = 1, unit = NULL)
 or \code{difftime} vector.}
 
 \item{n}{A single non-negative whole number: the number of periods
-(\code{stata_lag()}, \code{stata_lead()}) or the order of the difference (\code{stata_diff()}).}
+(\code{stata_lag()}, \code{stata_lead()}) or the difference order (\code{stata_diff()}).}
 
 \item{time}{The time variable, unique within each panel. Supported types:
 \itemize{
 \item numbers, including labelled numbers and Stata \verb{\%tm}, \verb{\%tq} or \verb{\%ty}
 variables read by haven, which arrive as plain numbers;
 \item \code{Date} and date-times (\code{POSIXct}/\code{POSIXlt}), with \code{unit};
-\item period classes, which need no \code{unit}: tsibble's \code{yearweek()},
-\code{yearmonth()} and \code{yearquarter()}, and zoo's \code{yearmon} and \code{yearqtr};
+\item period classes, which need no \code{unit}: tsibble's \code{yearweek()}, \code{yearmonth()}
+and \code{yearquarter()}, and zoo's \code{yearmon} and \code{yearqtr};
 \item ordered factors, such as survey waves, where each level is one period in
 level order, so an unused level is a gap.
 }
 
-Missing times give missing results. Text and unordered factors are not
+Missing times give missing results, except for zero-order differences.
+Text and unordered factors are not
 accepted, because their sorted order need not be the time order (\code{"W10"}
 sorts before \code{"W2"}); convert them first, for example with
 \code{as.numeric(as.character(year))} or \code{factor(wave, levels, ordered = TRUE)}.}
 
-\item{delta}{The length of one period in units of \code{time} (or of \code{unit}),
-like the \code{delta()} option of \code{xtset}. For example, \code{delta = 5} for data
-every five years.}
+\item{delta}{The length of one period in units of \code{time} (or of \code{unit}), like
+the \code{delta()} option of \code{xtset}. For example, \code{delta = 5} for data every
+five years.}
 
-\item{unit}{For \code{Date} and date-time times, the period: \code{"day"} (the
-default for dates), \code{"week"}, \code{"month"}, \code{"quarter"} or \code{"year"}, and for
+\item{unit}{For \code{Date} and date-time times, the period: \code{"day"} (the default
+for dates), \code{"week"}, \code{"month"}, \code{"quarter"} or \code{"year"}, and for
 date-times also \code{"second"} (their default), \code{"minute"} and \code{"hour"}. Times
 are compared by whole periods, as with Stata's \verb{\%tw}, \verb{\%tm}, \verb{\%tq} and
 \verb{\%ty} dates, so any day in March is one month after any day in February.
@@ -51,41 +52,45 @@ weeks). Date-times use the local clock of their time zone. Must be \code{NULL}
 for numbers and period classes.}
 }
 \value{
-A vector like \code{x}, with \code{NA} where the required period is absent
-from the panel. \code{stata_diff()} returns a double vector, or a \code{difftime} for
-dates, date-times and \code{difftime} input.
+A vector with the length and row order of \code{x}, with \code{NA} where the
+required period is absent or time is missing. Lags and leads retain the
+type and attributes of \code{x}. Positive-order differences return doubles,
+or \code{difftime} for dates, date-times and \code{difftime} input.
+
+With \code{stata_diff(n = 0)}, numeric/logical inputs return doubles and
+calendar/duration inputs retain their class (\code{POSIXlt} becomes \code{POSIXct}).
+Missing times do not mask values in this case.
 }
 \description{
-Time-aware versions of \code{\link[dplyr:lag]{dplyr::lag()}} and \code{\link[dplyr:lead]{dplyr::lead()}}, following
-Stata's time-series operators after \code{xtset}:
+Time-aware versions of \code{\link[dplyr:lag]{dplyr::lag()}} and \code{\link[dplyr:lead]{dplyr::lead()}}, following Stata's
+time-series operators after \code{xtset}. Values are found by time rather than row
+position, so gaps give missing values and row order does not matter. Use them
+in \code{\link[dplyr:mutate]{dplyr::mutate()}} with the panel identifier in \code{.by} or
+\code{\link[dplyr:group_by]{dplyr::group_by()}}.
+}
+\details{
 \itemize{
-\item \code{stata_lag(x, n, time = t)} is \code{Ln.x}: the value of \code{x} at time \code{t - n}.
-\item \code{stata_lead(x, n, time = t)} is \code{Fn.x}: the value of \code{x} at time \code{t + n}.
+\item \code{stata_lag(x, n, time = t)} is \code{Ln.x}: the value at time \code{t - n * delta}.
+\item \code{stata_lead(x, n, time = t)} is \code{Fn.x}: the value at time \code{t + n * delta}.
 \item \code{stata_diff(x, n, time = t)} is \code{Dn.x}: the \code{n}th difference, so
 \code{stata_diff(x, time = t)} is \code{x - L.x} and \code{stata_diff(x, 2, time = t)} is
 \code{D.(D.x)}.
 }
 
-Values are found by time, not by row position, so gaps in time give
-missing values and the row order does not matter. Use them in
-\code{\link[dplyr:mutate]{dplyr::mutate()}} with the panel identifier in \code{.by} or \code{\link[dplyr:group_by]{dplyr::group_by()}},
-as \verb{xtset id year} would declare it.
-}
-\details{
 Compared with \code{\link[dplyr:lag]{dplyr::lag()}}: \code{lag(x, order_by = year)} takes the previous
 \emph{row} after sorting, so after a gap (2002, then 2004) it returns the 2002
 value as the lag of 2004, and it silently accepts repeated years or a
 forgotten \code{.by}. \code{stata_lag(x, time = year)} takes the value at \code{year - 1},
-returns \code{NA} across the gap, and errors on repeated times, as Stata's
-\code{L.x} does. The two agree on sorted, gap-free panels. For irregular event
-sequences, where the previous record is wanted however long ago it was,
-use \code{dplyr::lag()}.
+returns \code{NA} across the gap, and errors on repeated times, as Stata's \code{L.x}
+does. The two agree on sorted, gap-free panels. For irregular event
+sequences, where the previous record is wanted however long ago it was, use
+\code{dplyr::lag()}.
 
 Time values must be unique within each panel (within the whole vector when
 there is no grouping), as Stata requires with "repeated time values within
 panel"; check them first with \code{\link[=isid]{isid()}}, such as \code{isid(data, id, year)}.
-Numeric times are matched exactly, so steps such as \code{0.1} should be
-rescaled to whole numbers first.
+Numeric times are matched exactly, so steps such as \code{0.1} should be rescaled
+to whole numbers first.
 }
 \examples{
 panel <- tibble::tibble(
@@ -107,7 +112,10 @@ sales <- tibble::tibble(
   month = as.Date(c("2024-01-31", "2024-02-29", "2024-04-30")),
   amount = c(5, 7, 4)
 )
-dplyr::mutate(sales, previous = stata_lag(amount, time = month, unit = "month"))
+dplyr::mutate(
+  sales,
+  previous = stata_lag(amount, time = month, unit = "month")
+)
 }
 \seealso{
 Other variable generation functions:

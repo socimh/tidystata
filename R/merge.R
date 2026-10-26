@@ -1,35 +1,35 @@
 #' Merge two tables with a Stata-style match report
 #'
 #' @description
-#' `stata_merge()` joins `using` onto `.data` like Stata's `merge`. It checks the
-#' stated key relationship first, keeps master, using and matched rows by
+#' `stata_merge()` joins `using` onto `.data` like Stata's `merge`. It checks
+#' the stated key relationship first, keeps master, using and matched rows by
 #' default, reports how many rows fell into each group, and records the result
 #' in a `.merge` column (Stata's `_merge`).
 #'
 #' @param .data The master table: a data frame, tibble, or data.table.
 #' @param using The table to merge in.
 #' @param relationship The key relationship, as in Stata: `"1:1"` (keys unique
-#' in both tables), `"m:1"` (unique in `using`) or `"1:m"` (unique in `.data`).
-#' It is required and checked before joining. Stata's many-to-many (`m:m`)
-#' merge is not supported. Use [dplyr::inner_join()] with
-#' `relationship = "many-to-many"` if you need all pairings.
+#'   in both tables), `"m:1"` (unique in `using`) or `"1:m"` (unique in
+#'   `.data`). It is required and checked before joining. Stata's many-to-many
+#'   (`m:m`) merge is not supported. Use [dplyr::inner_join()] with
+#'   `relationship = "many-to-many"` if you need all pairings.
 #' @param by A character vector of key columns. Use a named vector, such as
-#' `c(id = "person_id")`, when the names differ (`.data` name = `using` name).
+#'   `c(id = "person_id")`, when the names differ (`.data` name = `using` name).
 #' @param keep Which rows to keep: any of `"master"` (only in `.data`),
-#' `"using"` (only in `using`) and `"match"` (in both). Default keeps all, as
-#' Stata does.
-#' @param assert `NULL` (default) or any of `"master"`, `"using"` and
-#' `"match"`. If given, every row must be in one of these groups, otherwise
-#' `stata_merge()` errors, like Stata's `assert()` option.
-#' @param generate Name of the result column, `".merge"` by default. Use
-#' `NULL` to omit it (Stata's `nogenerate`).
-#' @param report A single `TRUE` or `FALSE`. If `TRUE` (default), print the
-#' match report as a message.
+#'   `"using"` (only in `using`) and `"match"` (in both). Default keeps all, as
+#'   Stata does.
+#' @param assert `NULL` (default) or any of `"master"`, `"using"` and `"match"`.
+#'   If given, every row must be in one of these groups, otherwise
+#'   `stata_merge()` errors, like Stata's `assert()` option.
+#' @param generate Name of the result column, `".merge"` by default. Use `NULL`
+#'   to omit it (Stata's `nogenerate`).
+#' @param report If `TRUE` (default), print the match report as a message.
 #'
-#' @returns The merged table, in the container of `.data`. Rows from `.data`
-#' come first in their original order, followed by rows found only in
-#' `using`. The `.merge` column is a factor with levels `"master only"`,
-#' `"using only"` and `"matched"`.
+#' @returns An ungrouped merged table in the data.frame, tibble, or data.table
+#'   container of `.data`. Retained rows from `.data` come first in their
+#'   original order, followed by rows found only in `using`. Unless `generate =
+#'   NULL`, the match-status column (`.merge` by default) is a factor with
+#'   levels `"master only"`, `"using only"`, and `"matched"`.
 #'
 #' @details
 #' Missing key values match each other, as in Stata. When a non-key column
@@ -46,8 +46,10 @@
 #' income <- tibble::tibble(id = c(2, 3, 4), income = c(10, 20, 30))
 #' stata_merge(people, income, "1:1", by = "id")
 #'
-#' # Keep matched rows only, and insist that every person is matched
+#' # Require every person to be matched
 #' try(stata_merge(people, income, "1:1", by = "id", assert = "match"))
+#'
+#' # Keep matched rows only
 #' stata_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
 #'
 #' # Many people per household

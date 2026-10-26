@@ -11,23 +11,25 @@ is_first(..., .missing = FALSE)
 grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}) to flag the first row of each
 group.}
 
-\item{.missing}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), rows with
-a missing value in any argument are \code{FALSE}, as Stata's \code{tag()} does
-without its \code{missing} option. If \code{TRUE}, missing values form groups of
-their own.}
+\item{.missing}{If \code{FALSE} (default), rows with a missing value in any
+argument are \code{FALSE}, as Stata's \code{tag()} does without its \code{missing} option.
+If \code{TRUE}, missing values form groups of their own.}
 }
 \value{
-A logical vector. "First" follows the current row order, so sort
-first when a particular row should be flagged.
+A logical vector with one value per input row, or per row in the
+current data-mask group when no arguments are supplied.
 }
 \description{
-\code{is_first()} is \code{TRUE} for the first row of each distinct combination of
-its arguments and \code{FALSE} for the others, like Stata's
-\verb{egen t = tag(id year)}. Use it in \code{\link[dplyr:mutate]{dplyr::mutate()}} or \code{\link[dplyr:filter]{dplyr::filter()}},
-for example to count or summarise each group once.
-
+\code{is_first()} is \code{TRUE} for the first row of each distinct combination of its
+arguments and \code{FALSE} for the others, like Stata's \verb{egen t = tag(id year)}.
+Use it in \code{\link[dplyr:mutate]{dplyr::mutate()}} or \code{\link[dplyr:filter]{dplyr::filter()}}, for example to count or
+summarise each group once.
+}
+\details{
+"First" follows the current row order; sort first to choose a particular row.
 Unlike \code{\link[=duplicates_tag]{duplicates_tag()}}, which counts the other rows sharing the same
-values, \code{is_first()} marks one row per group.
+values, \code{is_first()} marks one row per group. Missing values include tagged
+and SPSS user-missing values.
 }
 \examples{
 panel <- tibble::tibble(

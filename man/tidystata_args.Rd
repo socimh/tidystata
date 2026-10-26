@@ -6,8 +6,9 @@
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
-\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping
-variables. Grouped data use their groups unless \code{.by} is supplied.}
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables.
+Grouped data use their groups unless \code{.by} is supplied. Select existing
+columns only; create new grouping columns with \code{\link[dplyr:mutate]{dplyr::mutate()}} first.}
 }
 \description{
 Functions that take these arguments inherit their documentation from this

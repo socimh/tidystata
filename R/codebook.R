@@ -1,66 +1,61 @@
-#' View the codebook of a dataset or selected columns
+#' Inspect a dataset's codebook
 #'
-#' @description
 #' Inspect the types, observed counts, distinct observed values, and variable
 #' labels of a dataset or selected columns.
 #'
 #' @param .data The input data (data frame, tibble, or data.table).
-#' @param ...  <[`tidy-select`][dplyr_tidy_select]> or
-#' <[`data-masking`][args_data_masking]> Variables to include in the codebook.
-#' Omit to include all columns. Selection is attempted first; expressions that
-#' are not valid selections are evaluated as computed columns by
-#' [select_or_transmute()].
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> or
+#'   <[`data-masking`][args_data_masking]> Columns to select or compute with
+#'   [select_or_transmute()]. Existing columns, selection helpers, and named
+#'   expressions can be mixed. Omit to include all columns.
 #'
 #' @returns An ungrouped table with one row per selected variable, in selection
-#' order. Columns are `variable`, optional `label`, `type`, `n`, and `unique`.
-#' `n` counts observed values and `unique` counts distinct observed values.
-#' Empty and all-missing columns have zero counts. A zero-column selection
-#' returns zero rows with `variable`, `type`, `n`, and `unique` columns.
-#' The input's data.frame, tibble, or data.table container and supported preview
-#' settings are preserved. Other subclasses are not reconstructed.
+#'   order, and columns `variable`, `type`, `n` (observed values), and `unique`
+#'   (distinct observed values). A `label` column is included when labels are
+#'   available. Empty or entirely missing columns have zero counts; selecting no
+#'   columns returns zero rows with `variable`, `type`, `n`, and `unique`
+#'   columns. The input's data.frame, tibble, or data.table container and
+#'   supported preview settings are preserved; other subclasses are not
+#'   reconstructed.
 #'
 #' @details
-#' Counts describe the complete input, irrespective of existing grouping. Data
-#' are ungrouped before selection, so omitted grouping keys are not reinserted.
-#' With no selection, grouping-key columns are included like other columns.
-#' The input data are not modified.
+#' **Counting**
 #'
-#' Missingness is determined on the original column before counting. Ordinary
-#' missing values, `NaN`, tagged missing values and SPSS user-missing codes or
-#' ranges are excluded. List columns are counted by element identity without
-#' flattening: scalar missing elements are excluded, while `NULL` and empty
-#' elements remain observed values. Matrix and nested data-frame columns count
-#' complete rows as observations; a row with any missing cell is excluded.
+#' * Counts ignore existing groups. Data are ungrouped before selection, so
+#'   grouping columns can be omitted. The input data remain unchanged.
+#' * Missing values, including `NaN`, tagged missing values, and SPSS
+#'   user-missing values, are excluded.
+#' * List columns count distinct elements without flattening; `NULL` and empty
+#'   elements are included. Matrix and nested data-frame columns count complete
+#'   rows, excluding rows with missing cells.
 #'
-#' Units are appended to `type` when available. Variable labels are read from
-#' each column's `label` attribute, not its value-label mapping. The `label`
-#' column appears only when at least one selected variable has a usable label;
-#' unlabelled variables then have `NA` labels.
+#' **Labels and types**
+#'
+#' * Variable labels come from the `label` attribute, not value labels.
+#'   Unlabelled variables receive `NA` when a label column is present.
+#' * Units are appended to `type` when available.
+#'
 #' @name codebook
 #' @seealso [ds()], [variables()], [browse()]
 #'
 #' @examples
+#' # All variables
 #' codebook(lifeexp)
 #'
+#' # Selected variables
 #' codebook(lifeexp, 1:4)
 #'
 #' codebook(lifeexp, where(is.numeric))
 #'
-#' starwars <- dplyr::starwars
+#' # Inspect an existing column alongside a computed column
+#' codebook(lifeexp, country, gnppc_thousands = gnppc / 1000)
 #'
+#' starwars <- dplyr::starwars
 #' codebook(starwars, films:starships)
 #'
 #' codebook(starwars, ends_with("color"))
 #'
-#' # Save a compact inventory before preparing an analysis sample.
-#' survey <- tibble::tibble(age = c(30, NA, 45), income = c(2000, 3000, 4000))
-#' attr(survey$income, "label") <- "Monthly earnings"
-#' inventory <- codebook(survey, age, income)
-#' inventory
-#' codebook(survey, income_thousands = income / 1000)
-#'
 #' @family inspection functions
-
 #' @rdname codebook
 #' @export
 codebook <- function(.data, ...) {

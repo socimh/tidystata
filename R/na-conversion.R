@@ -1,38 +1,36 @@
 #' Replace values with missing values or fill missing values
 #'
 #' @description
-#' Vector helpers named after Stata's missing-value commands:
-#'
-#' * `mvdecode()` replaces every value in `mv` with `NA`, like
-#'   `mvdecode x, mv(-98 -99)`. Each code is matched with [dplyr::na_if()].
-#' * `mvencode()` replaces missing values with `mv`, like `mvencode x, mv(0)`.
-#'   The replacement is cast to the type of `x`, as in [tidyr::replace_na()].
+#' `mvdecode()` replaces specified codes with `NA`, like Stata's `mvdecode x,
+#' mv(-98 -99)`. `mvencode()` fills missing values with a replacement, like
+#' `mvencode x, mv(0)`.
 #'
 #' `na_if_value()` and `value_if_na()` are aliases of `mvdecode()` and
-#' `mvencode()`. Use `mutate(x = mvdecode(x, -99))` for one variable, or
-#' `mutate(across(c(x, y), \(v) mvdecode(v, -99)))` for a varlist.
+#' `mvencode()`.
 #'
 #' @details
-#' Casting and error behavior follow the underlying functions: codes are cast
-#' to the type of `x`, so a lossy cast such as `1.5` for an integer vector is
-#' an error. A call with only one argument is incomplete.
-#' For SPSS labelled vectors ([haven::labelled_spss()]), user-defined missing
-#' codes and ranges also count as missing, matching their `is.na()` method;
-#' labels and missing-value metadata are retained.
+#' Codes are matched with [dplyr::na_if()]; filling follows
+#' [tidyr::replace_na()]. Codes and replacements are cast to the type of `x`, so
+#' a lossy cast such as `1.5` for an integer vector is an error. Both the input
+#' vector and the codes or replacement must be supplied. For SPSS labelled
+#' vectors ([haven::labelled_spss()]), user-defined missing codes and ranges
+#' also count as missing, matching their `is.na()` method; labels and
+#' missing-value metadata are retained.
 #'
 #' @name na_conversion
 #'
 #' @param x A vector.
 #' @param mv,value For `mvdecode()` and `na_if_value()`, the codes to replace
-#'   with `NA`; any value equal to one of them becomes missing. For
-#'   `mvencode()` and `value_if_na()`, a single replacement value for missing
-#'   elements, cast to the type of `x`.
+#'   with `NA`; any value equal to one of them becomes missing. For `mvencode()`
+#'   and `value_if_na()`, a single replacement value for missing elements, cast
+#'   to the type of `x`.
 #' @returns A vector with the same type and size as `x`, with matching values
 #'   replaced or missing values filled.
 #'
 #' @examples
 #' x <- c(1, -99, NA, 4, -98)
 #' mvdecode(x, -99)
+#'
 #' mvdecode(x, c(-98, -99))
 #'
 #' mvencode(c(1, NA, 4), 0)

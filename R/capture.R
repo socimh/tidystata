@@ -5,20 +5,20 @@
 #' `FALSE` if it failed.
 #'
 #' @param x An expression to evaluate once.
-#' @returns A single logical value.
+#' @returns A single logical value: `TRUE` on success, `FALSE` on error or when
+#'   the expression returns an object inheriting from `try-error`.
 #' @details
 #' Errors are caught without printing their messages; warnings and messages
-#' propagate normally. For compatibility with [try()], a successful expression
-#' that returns an object inheriting from `try-error` also yields `FALSE`.
+#' propagate normally. The `try-error` exception follows [try()] compatibility.
 #'
 #' @name capture
 #' @examples
 #' capture(mean(1:10))
 #'
-#' # This gives a warning, but it is still working, so capture() returns TRUE
+#' # Warnings do not count as errors
 #' capture(mean(letters[1:10]))
 #'
-#' # This throws an error, so capture() returns FALSE
+#' # Errors return FALSE
 #' capture(means(1:10))
 #'
 #' # Check a key without stopping the script

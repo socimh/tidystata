@@ -2,7 +2,7 @@
 % Please edit documentation in R/codebook.R
 \name{codebook}
 \alias{codebook}
-\title{View the codebook of a dataset or selected columns}
+\title{Inspect a dataset's codebook}
 \usage{
 codebook(.data, ...)
 }
@@ -10,61 +10,59 @@ codebook(.data, ...)
 \item{.data}{The input data (data frame, tibble, or data.table).}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to include in the codebook.
-Omit to include all columns. Selection is attempted first; expressions that
-are not valid selections are evaluated as computed columns by
-\code{\link[=select_or_transmute]{select_or_transmute()}}.}
+<\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with
+\code{\link[=select_or_transmute]{select_or_transmute()}}. Existing columns, selection helpers, and named
+expressions can be mixed. Omit to include all columns.}
 }
 \value{
 An ungrouped table with one row per selected variable, in selection
-order. Columns are \code{variable}, optional \code{label}, \code{type}, \code{n}, and \code{unique}.
-\code{n} counts observed values and \code{unique} counts distinct observed values.
-Empty and all-missing columns have zero counts. A zero-column selection
-returns zero rows with \code{variable}, \code{type}, \code{n}, and \code{unique} columns.
-The input's data.frame, tibble, or data.table container and supported preview
-settings are preserved. Other subclasses are not reconstructed.
+order, and columns \code{variable}, \code{type}, \code{n} (observed values), and \code{unique}
+(distinct observed values). A \code{label} column is included when labels are
+available. Empty or entirely missing columns have zero counts; selecting no
+columns returns zero rows with \code{variable}, \code{type}, \code{n}, and \code{unique}
+columns. The input's data.frame, tibble, or data.table container and
+supported preview settings are preserved; other subclasses are not
+reconstructed.
 }
 \description{
 Inspect the types, observed counts, distinct observed values, and variable
 labels of a dataset or selected columns.
 }
 \details{
-Counts describe the complete input, irrespective of existing grouping. Data
-are ungrouped before selection, so omitted grouping keys are not reinserted.
-With no selection, grouping-key columns are included like other columns.
-The input data are not modified.
+\strong{Counting}
+\itemize{
+\item Counts ignore existing groups. Data are ungrouped before selection, so
+grouping columns can be omitted. The input data remain unchanged.
+\item Missing values, including \code{NaN}, tagged missing values, and SPSS
+user-missing values, are excluded.
+\item List columns count distinct elements without flattening; \code{NULL} and empty
+elements are included. Matrix and nested data-frame columns count complete
+rows, excluding rows with missing cells.
+}
 
-Missingness is determined on the original column before counting. Ordinary
-missing values, \code{NaN}, tagged missing values and SPSS user-missing codes or
-ranges are excluded. List columns are counted by element identity without
-flattening: scalar missing elements are excluded, while \code{NULL} and empty
-elements remain observed values. Matrix and nested data-frame columns count
-complete rows as observations; a row with any missing cell is excluded.
-
-Units are appended to \code{type} when available. Variable labels are read from
-each column's \code{label} attribute, not its value-label mapping. The \code{label}
-column appears only when at least one selected variable has a usable label;
-unlabelled variables then have \code{NA} labels.
+\strong{Labels and types}
+\itemize{
+\item Variable labels come from the \code{label} attribute, not value labels.
+Unlabelled variables receive \code{NA} when a label column is present.
+\item Units are appended to \code{type} when available.
+}
 }
 \examples{
+# All variables
 codebook(lifeexp)
 
+# Selected variables
 codebook(lifeexp, 1:4)
 
 codebook(lifeexp, where(is.numeric))
 
-starwars <- dplyr::starwars
+# Inspect an existing column alongside a computed column
+codebook(lifeexp, country, gnppc_thousands = gnppc / 1000)
 
+starwars <- dplyr::starwars
 codebook(starwars, films:starships)
 
 codebook(starwars, ends_with("color"))
-
-# Save a compact inventory before preparing an analysis sample.
-survey <- tibble::tibble(age = c(30, NA, 45), income = c(2000, 3000, 4000))
-attr(survey$income, "label") <- "Monthly earnings"
-inventory <- codebook(survey, age, income)
-inventory
-codebook(survey, income_thousands = income / 1000)
 
 }
 \seealso{

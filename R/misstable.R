@@ -1,52 +1,67 @@
 #' Tabulate missing values
 #'
-#' @description
-#' Missing-value summaries, like Stata's `misstable`.
-#'
-#' * By default, `misstable()` counts the missing values of each variable,
-#'   like `misstable summarize`.
-#' * With `.patterns = TRUE`, it counts the combinations of observed and
-#'   missing variables across rows, like `misstable patterns`.
+#' Summarize missing values by variable (`misstable summarize`) or tabulate
+#' missingness patterns across rows (`misstable patterns`), following Stata's
+#' `misstable` command.
 #'
 #' @inheritParams tidystata_args
-#' @param ... <[`tidy-select`][dplyr_tidy_select]> Variables to check. Omit to
-#' check every column except grouping keys.
-#' @param .patterns A single `TRUE` or `FALSE`. If `TRUE`, tabulate missing
-#' patterns instead of counting by variable.
-#' @param .all A single `TRUE` or `FALSE`. If `FALSE` (default), only
-#' variables with at least one missing value are shown, as in Stata; if
-#' `TRUE`, all checked variables are shown.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> or
+#'   <[`data-masking`][args_data_masking]> Columns to select or compute with
+#'   [select_or_transmute()]. Existing columns, selection helpers, and named
+#'   expressions can be mixed. Omit to check all columns except grouping keys.
+#' @param .patterns If `TRUE`, tabulate missingness patterns instead of
+#'   summarizing individual variables.
+#' @param .all If `TRUE`, include variables without missing values in either
+#'   mode. Defaults to `FALSE`, as in Stata.
 #'
-#' @returns
-#' By default, a tibble with any grouping keys, `variable`, `miss_n` (missing
-#' values), `miss_pct` (percentage of rows, from zero to 100) and `valid_n`
-#' (observed values), one row per variable (and group).
+#' @returns An ungrouped tibble with any grouping keys and:
+#' * By default, one row per checked variable and group, with `variable`,
+#'   `miss_n` (missing count), `miss_pct` (missing percentage), and `valid_n`
+#'   (observed count). No checked variables gives zero rows.
+#' * With `.patterns = TRUE`, one row per observed pattern and group, with a `1`
+#'   (observed) or `0` (missing) column per checked variable, plus `n`
+#'   (frequency) and `percent`. With no checked variables, each nonempty group
+#'   has one row containing only its keys, `n`, and `percent`.
 #'
-#' With `.patterns = TRUE`, a tibble with any grouping keys, one column per
-#' variable holding `1` (observed) or `0` (missing) as in Stata, `n` (rows with
-#' that pattern) and `percent` (of the rows in the group). Patterns are sorted
-#' by decreasing frequency within each group, so the first row is usually the
-#' complete cases.
+#' Percentages range from zero to 100 within each group. Summary rows for
+#' zero-row ungrouped inputs have zero counts and `NA` percentages when `.all =
+#' TRUE`; empty inputs have no pattern rows.
 #'
 #' @details
-#' A value is missing when `is.na()` is `TRUE` for it, which includes `NaN`
-#' and haven's tagged missing values such as Stata's `.a`. In a list column,
-#' `NA` elements are missing and `NULL` elements are values, as in [summ()] and
-#' [fre()]. Matrix and data-frame columns follow vctrs row missingness: a row
-#' is missing only when every component is missing. Empty strings are
-#' observed values, unlike Stata's missing string; convert them first with
-#' [na_if_value()]. When no checked variable has missing values and
-#' `.all = FALSE`, a message says so and the result has no variable rows or
-#' columns.
-#' Grouping names must not collide with result columns; rename those keys
-#' before calling `misstable()`.
+#' Atomic missingness follows `is.na()`, including `NaN`, haven's tagged missing
+#' values, and SPSS user-missing codes and ranges. In list columns, `NA` is
+#' missing but `NULL` is observed. Matrix and data-frame columns are missing
+#' only when all components in a row are missing, following vctrs conventions.
+#'
+#' Computed columns are evaluated on ungrouped working data before missingness
+#' is summarized within groups. Create columns with grouped [dplyr::mutate()]
+#' first when a calculation needs to run separately within each group.
+#'
+#' Empty strings are treated as observed values, unlike in Stata. Use
+#' [na_if_value()] to convert them to missing values.
+#'
+#' With `.all = FALSE`, variables are checked only if they contain missing
+#' values anywhere in the input. A message is displayed when none do. Summary
+#' rows follow selection order within each group; patterns follow decreasing
+#' frequency, with ties preferring observed values column by column. Grouping
+#' keys must not conflict with output column names. Pattern variables must also
+#' differ from grouping keys and the names `n` and `percent`.
 #'
 #' @examples
+#' # Summarize missing values
 #' misstable(lifeexp)
+#'
 #' misstable(lifeexp, .all = TRUE)
+#'
+#' # Tabulate missingness patterns
 #' misstable(lifeexp, .patterns = TRUE)
+#'
+#' # Select variables and group observations
 #' misstable(lifeexp, gnppc, safewater, .by = region)
-#' misstable(dplyr::starwars, height, mass, birth_year, .patterns = TRUE)
+#'
+#' # Check an existing column alongside a computed column
+#' misstable(lifeexp, gnppc, water_share = safewater / 100, .all = TRUE)
+#'
 #' @family inspection functions
 #' @export
 misstable <- function(

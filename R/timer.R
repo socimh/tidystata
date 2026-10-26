@@ -1,12 +1,11 @@
-#' Time spent on a function
+#' Time an expression
 #'
-#' @description
-#' `timer()` works like the `timer` command in Stata.
+#' Evaluate an expression and report its elapsed time, like Stata's `timer`.
 #'
 #' @param x An expression to evaluate and time.
-#' @param on_error A single `TRUE` or `FALSE`. If `TRUE` (the default), also
-#'   report elapsed time when the expression fails, then let the original error
-#'   propagate. Use `FALSE` to report elapsed time only on success.
+#' @param on_error If `TRUE` (the default), also report elapsed time when the
+#'   expression fails, then let the original error propagate. Use `FALSE` to
+#'   report elapsed time only on success.
 #' @returns The evaluated result, invisibly.
 #' @details
 #' The expression is evaluated once. On success, elapsed time is emitted as a
@@ -15,14 +14,15 @@
 #' execution reports the elapsed time while the error unwinds; the original
 #' condition object, including its call, is not modified.
 #'
-#' Nested or repeated timers each measure everything evaluated inside them,
-#' so a later timer in a pipeline reports cumulative time from its own start.
+#' Nested or repeated timers each measure everything evaluated inside them, so a
+#' later timer in a pipeline reports cumulative time from its own start.
 #' @family utility functions
 #' @export
 #'
 #' @examples
 #' x <- seq_len(1e6)
 #' mean(x) |> timer()
+#'
 #' try(timer(stop("failure")))
 timer <- function(x, on_error = TRUE) {
   check_bool(on_error)

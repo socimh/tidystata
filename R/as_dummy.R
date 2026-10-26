@@ -1,36 +1,35 @@
 #' Create indicator (dummy) variables
 #'
-#' @description
-#' Adds one 0/1 column per observed category of each selected variable, like
+#' Add one 0/1 column per observed category of each selected variable, like
 #' Stata's `tabulate x, generate(x_)`. The new columns are placed right after
 #' their source variable. `tab_gen()` is an alias of `as_dummy()`.
 #'
 #' @inheritParams tidystata_args
-#' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables
-#' to expand.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables to
+#'   expand.
 #' @param .names How to name the new columns: `"value"` (default) appends the
-#' category, as in `sex_male`; `"index"` numbers the categories, as in
-#' `sex_1`, like Stata's `generate()` option.
-#' @param .remove A single `TRUE` or `FALSE`. If `TRUE`, drop the source
-#' variables.
+#'   category, as in `sex_male`; `"index"` numbers the categories, as in
+#'   `sex_1`, like Stata's `generate()` option.
+#' @param .remove If `TRUE`, drop the source variables. Defaults to `FALSE`.
 #'
 #' @returns `.data` with integer indicator columns, keeping its data.frame,
-#' tibble, data.table, grouped or sf container. Each indicator is `1` when the
-#' row has that category, `0` otherwise, and `NA` when the source value is
-#' missing, as in Stata. Each new column has a `"label"` attribute such as
-#' `"sex==male"`, as Stata's variable labels do; for labelled vectors the
-#' label uses the value label.
+#'   tibble, data.table, grouped or sf container and the original rows. Each
+#'   indicator is `1` for its category, `0` otherwise, and `NA` for missing
+#'   source values. New columns have a `"label"` attribute such as
+#'   `"sex==male"`; for labelled vectors, this uses the value label.
 #'
 #' @details
-#' Categories are the observed, non-missing values: factor levels in level
-#' order (unused levels are skipped), and other values in ascending order. For
+#' Categories are the observed, non-missing values: factor levels in level order
+#' (unused levels are skipped), and other values in ascending order. For
 #' labelled vectors, `.names = "value"` uses the codes, such as `region_1`.
-#' New names must not already exist in `.data`, and grouping keys cannot be
-#' removed. For model formulas, R's factors already expand to dummies; use
-#' `as_dummy()` when the indicator columns themselves are needed.
+#' Missing values include tagged and SPSS user-missing values. New names must
+#' not already exist in `.data`, and grouping keys cannot be removed. For model
+#' formulas, R's factors already expand to dummies; use `as_dummy()` when the
+#' indicator columns themselves are needed.
 #'
 #' @examples
 #' as_dummy(lifeexp, region)
+#'
 #' as_dummy(lifeexp, region, .names = "index", .remove = TRUE)
 #' @name as_dummy
 #' @family variable generation functions

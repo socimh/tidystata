@@ -1,24 +1,25 @@
 #' Flag the first row of each group
 #'
-#' @description
-#' `is_first()` is `TRUE` for the first row of each distinct combination of
-#' its arguments and `FALSE` for the others, like Stata's
-#' `egen t = tag(id year)`. Use it in [dplyr::mutate()] or [dplyr::filter()],
-#' for example to count or summarise each group once.
-#'
-#' Unlike [duplicates_tag()], which counts the other rows sharing the same
-#' values, `is_first()` marks one row per group.
+#' `is_first()` is `TRUE` for the first row of each distinct combination of its
+#' arguments and `FALSE` for the others, like Stata's `egen t = tag(id year)`.
+#' Use it in [dplyr::mutate()] or [dplyr::filter()], for example to count or
+#' summarise each group once.
 #'
 #' @param ... Vectors of equal length that define the groups. Omit them in
-#' grouped [dplyr::mutate()] (or with `.by`) to flag the first row of each
-#' group.
-#' @param .missing A single `TRUE` or `FALSE`. If `FALSE` (default), rows with
-#' a missing value in any argument are `FALSE`, as Stata's `tag()` does
-#' without its `missing` option. If `TRUE`, missing values form groups of
-#' their own.
+#'   grouped [dplyr::mutate()] (or with `.by`) to flag the first row of each
+#'   group.
+#' @param .missing If `FALSE` (default), rows with a missing value in any
+#'   argument are `FALSE`, as Stata's `tag()` does without its `missing` option.
+#'   If `TRUE`, missing values form groups of their own.
 #'
-#' @returns A logical vector. "First" follows the current row order, so sort
-#' first when a particular row should be flagged.
+#' @returns A logical vector with one value per input row, or per row in the
+#'   current data-mask group when no arguments are supplied.
+#'
+#' @details
+#' "First" follows the current row order; sort first to choose a particular row.
+#' Unlike [duplicates_tag()], which counts the other rows sharing the same
+#' values, `is_first()` marks one row per group. Missing values include tagged
+#' and SPSS user-missing values.
 #'
 #' @examples
 #' panel <- tibble::tibble(
