@@ -29,9 +29,12 @@ source values. New columns have a \code{"label"} attribute such as
 \code{"sex==male"}; for labelled vectors, this uses the value label.
 }
 \description{
-Add one 0/1 column per observed category of each selected variable, like
-Stata's \verb{tabulate x, generate(x_)}. The new columns are placed right after
-their source variable. \code{tab_gen()} is an alias of \code{as_dummy()}.
+Expand categorical variables into indicator columns:
+\itemize{
+\item \code{as_dummy()} (\code{tab_gen()}): Add one 0/1 column per observed category of
+each selected variable, like Stata's \verb{tabulate x, generate(x_)}. Place
+the new columns right after their source variable.
+}
 }
 \details{
 Categories are the observed, non-missing values: factor levels in level order

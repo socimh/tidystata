@@ -10,8 +10,9 @@ tests compare tidystata against. Each writes CSV files to
 | `xtile.do`       | `xtile, nquantiles()` and `egen cut(), at()`          | `test-stata-parity-cut.R`        |
 | `egen.do`        | `egen row*()`, `std()`, `pc()` and `tag()`            | `test-stata-parity-egen.R`       |
 | `pwcorr_tab.do`  | `pwcorr, sig obs` and `tabulate, chi2 V`              | `test-stata-parity-pwcorr-tab.R` |
+| `corr.do`        | `correlate`, unweighted, `[fw]`, `[aw]`, and groups | `test-stata-parity-corr.R` |
 | `panel.do`       | `L.`, `F.` and `D.` after `xtset`, with `%tw`, `%tm`, `%tq` | `test-stata-parity-panel.R` |
-| `duplicates.do`  | `duplicates tag`                                      | `test-stata-parity-duplicates.R` |
+| `duplicates.do`  | `duplicates tag` and `isid`, including missing and string keys                                      | `test-stata-parity-duplicates.R` |
 
 `xtile.do` reads `summ-input.csv`, so run `summ.do` first. Run each file from
 this folder in batch mode, for example `stata-mp -b do summ.do` (or the

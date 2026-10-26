@@ -22,8 +22,13 @@ including empty or all-missing measured vectors, and \code{NA_character_} for
 vectors without units.
 }
 \description{
-Describe an object's storage type or class with \code{var_type()}, or its
-measurement unit with \code{var_unit()}.
+Inspect an object's type and measurement metadata:
+\itemize{
+\item \code{var_type()}: Describe the object's storage type or class, optionally
+using an abbreviation.
+\item \code{var_unit()}: Report the measurement or duration unit, or \code{NA_character_}
+when the object has no unit.
+}
 }
 \details{
 Types describe storage and class metadata, not the observed values: empty and
@@ -46,7 +51,15 @@ retains custom unit methods for classes describing themselves as \code{units},
 \examples{
 var_type(1:10)
 
+var_type(1:10, abbr = TRUE)
+
 var_type(letters)
+
+# Type and unit describe different properties of the same object
+elapsed <- as.difftime(c(1, 2, 3), units = "hours")
+var_type(elapsed)
+
+var_unit(elapsed)
 }
 \seealso{
 Other inspection functions:

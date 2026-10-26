@@ -1,8 +1,17 @@
 #' Preview complete tables or select representative rows
 #'
-#' `preview_table()` keeps the complete data and remembers how to print it. The
-#' default shows the first five and last five rows. Interval previews show
-#' evenly spaced rows; separate helpers print once or select actual rows.
+#' @description
+#' Control how a complete table is printed, or select a smaller set of rows:
+#'
+#' * `preview_table()`: Keep the complete data and store a print preference.
+#'   By default, show the first five and last five rows; interval previews
+#'   show evenly spaced rows.
+#' * `unpreview_table()`: Remove the stored print preference, keeping all data.
+#' * `print_headtail()`: Print the first and last rows once, keeping all data.
+#' * `print_interval()`: Print evenly spaced rows once, keeping all data.
+#' * `print_all()`: Print every row and column, like Stata's `list`.
+#' * `slice_headtail()`: Return only the selected first and last rows.
+#' * `slice_interval()`: Return only the selected evenly spaced rows.
 #'
 #' @param .data An in-memory data frame, data.table, ordinary tibble, grouped
 #'   tibble, rowwise tibble, or `sf` data frame (geometry is kept when slicing
@@ -21,11 +30,6 @@
 #' @param max_extra_cols,max_footer_lines Tibble formatting controls.
 #'
 #' @details
-#' `unpreview_table()` removes the stored preference. `print_headtail()` and
-#' `print_interval()` print once; `print_all()` prints every row and column,
-#' like Stata's `list`. Use `slice_headtail()` or `slice_interval()` only when a
-#' smaller data set is wanted: they actually select rows.
-#'
 #' Preview settings survive table subsetting/replacement, dplyr mutation,
 #' filtering, sorting, column selection, renaming, relocation, distinct rows,
 #' slicing, grouping, rowwise operations, summaries and reframing, as well as

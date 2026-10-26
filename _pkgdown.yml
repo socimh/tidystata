@@ -41,11 +41,9 @@ reference:
 - title: "Inspect variables"
   contents:
   - has_concept("inspection functions")
-- title: "Tabulate"
+- title: "Tabulate and summarise"
   contents:
   - has_concept("tabulation functions")
-- title: "Summarise"
-  contents:
   - has_concept("summary functions")
 - title: "Check and combine data"
   contents:

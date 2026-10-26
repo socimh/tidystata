@@ -9,7 +9,7 @@
 \alias{duplicates_drop}
 \title{Check keys and duplicate rows}
 \usage{
-isid(.data, ..., .missok = FALSE)
+isid(.data, ..., .missing = FALSE)
 
 duplicates_report(.data, ...)
 
@@ -23,11 +23,12 @@ duplicates_drop(.data, ..., .force = FALSE)
 \item{.data}{A data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The identifying columns. Omit
-to use all columns, as Stata does.}
+to use all columns. Stata's \code{isid} requires an explicit variable list.}
 
-\item{.missok}{If \code{FALSE} (default), \code{isid()} errors when an identifying
-column contains missing values, as Stata's \code{isid} does without the \code{missok}
-option.}
+\item{.missing}{If \code{FALSE} (default), \code{isid()} errors when an identifying
+column contains missing values or empty strings, as Stata's \code{isid} does
+without \code{missok}. If \code{TRUE}, permit these values but still require unique
+key combinations. Rows are not dropped.}
 
 \item{.name}{Name of the new column created by \code{duplicates_tag()}.}
 
@@ -37,7 +38,7 @@ without this option.}
 }
 \value{
 \itemize{
-\item \code{isid()}: \code{.data}, invisibly.
+\item \code{isid()}: \code{.data}, unchanged and invisibly, after a confirmation message.
 \item \code{duplicates_report()}: a tibble with one row per number of copies:
 \code{copies}, \code{observations} (rows with that many copies) and \code{surplus} (rows
 beyond the first of each set).
@@ -55,20 +56,26 @@ rows or columns of \code{.data} are returned.
 \description{
 Stata-style checks of identifying variables and duplicated rows.
 \itemize{
-\item \code{isid()} checks that the selected columns uniquely identify the rows, like
-Stata's \code{isid}. It returns the data invisibly when they do and errors
-otherwise, so it can sit inside a pipeline. Wrap it in \code{\link[=capture]{capture()}} for a
-\code{TRUE}/\code{FALSE} answer.
-\item \code{duplicates_report()} counts how many rows share the same values, like
+\item \code{isid()}: Check that the selected columns uniquely identify the rows, like
+Stata's \code{isid}. It confirms a valid key with a message and returns the
+data invisibly, so it can sit inside a pipeline. Invalid keys raise an error.
+\item \code{duplicates_report()}: Count how many rows share the same values, like
 \verb{duplicates report}.
-\item \code{duplicates_tag()} adds the number of other rows with the same values, like
+\item \code{duplicates_tag()}: Add the number of other rows with the same values, like
 \verb{duplicates tag, generate()}.
-\item \code{duplicates_list()} returns the duplicated rows, like \verb{duplicates list}.
-\item \code{duplicates_drop()} keeps the first row of each duplicated set, like
+\item \code{duplicates_list()}: Return the duplicated rows, like \verb{duplicates list}.
+\item \code{duplicates_drop()}: Keep the first row of each duplicated set, like
 \verb{duplicates drop}.
 }
 }
 \details{
+Unlike Stata's silent success, \code{isid()} names the columns that form a valid
+key. This confirms uniqueness without storing an ID declaration or adding
+metadata. Use \code{\link[=suppressMessages]{suppressMessages()}} for silent execution. An empty input
+reports that there are no rows to check. Checks preserve row order; use
+\code{\link[dplyr:arrange]{dplyr::arrange()}} separately to sort, or \code{\link[haven:read_dta]{haven::read_dta()}} to read a file.
+Factor values equal to \code{""} are empty strings; whitespace is not trimmed.
+
 Missing values count as equal to each other, as in Stata, so two rows that
 are both missing on every selected column are duplicates. Checks and
 duplicate counts use the whole input, regardless of grouping.
@@ -82,12 +89,13 @@ panel <- tibble::tibble(
   wave = c(1, 2, 1, 1, 1),
   score = c(5, 6, 7, 7, 8)
 )
-# id repeats, so this errors; capture() turns it into TRUE/FALSE
+# id repeats, so this check fails and shows the error
 try(isid(panel, id))
 
-capture(isid(panel, id))
-
-isid(panel[-4, ], id, wave)
+# Remove the duplicate row so id + wave uniquely identify observations
+unique_panel <- dplyr::distinct(panel)
+# Confirms that id + wave form a key; returns unique_panel invisibly
+isid(unique_panel, id, wave)
 
 duplicates_report(panel, id, wave)
 

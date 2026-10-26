@@ -52,22 +52,16 @@ tab_rename_reserved <- function(
     function_name
   )
 
-  can_rename <- .data |>
-    dplyr::rename_with(
-      ~ paste0(".", .x),
-      tidyselect::all_of(detected_names)
-    ) |>
-    capture()
-
-  if (can_rename) {
+  tryCatch(
     dplyr::rename_with(
       .data,
       ~ paste0(".", .x),
       tidyselect::all_of(detected_names)
-    )
-  } else {
-    cli::cli_abort("The new name is also taken. Rename fails.", call = call)
-  }
+    ),
+    error = function(e) {
+      cli::cli_abort("The new name is also taken. Rename fails.", call = call)
+    }
+  )
 }
 
 # Shared wording for input columns renamed to avoid output-column collisions.

@@ -1,7 +1,12 @@
 #' Report an object's type or unit
 #'
-#' Describe an object's storage type or class with `var_type()`, or its
-#' measurement unit with `var_unit()`.
+#' @description
+#' Inspect an object's type and measurement metadata:
+#'
+#' * `var_type()`: Describe the object's storage type or class, optionally
+#'   using an abbreviation.
+#' * `var_unit()`: Report the measurement or duration unit, or `NA_character_`
+#'   when the object has no unit.
 #'
 #' @name var_type
 #' @param x An object.
@@ -34,7 +39,15 @@
 #' @examples
 #' var_type(1:10)
 #'
+#' var_type(1:10, abbr = TRUE)
+#'
 #' var_type(letters)
+#'
+#' # Type and unit describe different properties of the same object
+#' elapsed <- as.difftime(c(1, 2, 3), units = "hours")
+#' var_type(elapsed)
+#'
+#' var_unit(elapsed)
 
 #' @export
 #' @rdname var_type

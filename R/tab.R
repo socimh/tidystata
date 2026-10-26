@@ -1,229 +1,204 @@
-#' Tabulate columns
+#' Frequency tables and cross-tabulations
 #'
-#' Count joint categories with `tab()`, variables individually with `tab1()`, or
-#' every pair of variables with `tab2()`, following Stata's tabulation commands.
-#' The `fre()`, `fre1()`, and `fre2()` variants add totals and value labels.
+#' @description
+#' Create Stata-style frequency tables using joint counts, separate one-way
+#' tables, or pairwise cross-tabulations:
+#'
+#' * `tab()`: Count combinations of selected variables in one long-format
+#'   table with frequencies and percentages.
+#' * `fre()`: Count the same combinations as `tab()`, adding totals and
+#'   displaying value labels.
+#' * `tab1()`: Tabulate each variable separately, returning a one-way
+#'   frequency table for each variable.
+#' * `fre1()`: Tabulate each variable separately as in `tab1()`, adding totals
+#'   and displaying value labels.
+#' * `tab2()`: Cross-tabulate every pair of selected variables, returning
+#'   wide contingency tables with categories in rows and columns.
+#' * `fre2()`: Cross-tabulate every pair as in `tab2()`, adding marginal totals
+#'   and displaying row-category labels. Column headers retain category codes.
+#'
+#' @param .data An in-memory data frame, tibble, or data.table. `tab()`,
+#'   `tab1()`, `fre()`, and `fre1()` also accept an atomic vector (without
+#'   selectors or `.by`). Collect lazy tables first. Spatial geometry columns
+#'   are excluded.
+#' @param ... Variables selected with tidyselect, or named expressions such as
+#'   `high = score >= 70`. Defaults to all columns except active grouping keys.
+#'   Without explicit `.by`, `tab2()` and `fre2()` treat inherited grouping
+#'   columns as ordinary variables. Select at least two variables for
+#'   cross-tabulation.
+#' @param .by Optional grouping columns selected with tidyselect. For one-way
+#'   and joint tables, existing [dplyr::group_by()] groups are inherited unless
+#'   `.by` is supplied. `tab2()` and `fre2()` require explicit `.by` to create
+#'   separate cross-tables for each group. Grouping keys are not tabulated.
+#' @param .desc If `TRUE`, sort categories by decreasing frequency within each
+#'   group; missing categories remain last. Defaults to `FALSE`.
+#' @param .group_order Order group blocks by `"keys"` (default) or decreasing
+#'   `"frequency"`. Does not change category order within groups.
+#' @param .total If `TRUE`, add totals, as in the corresponding `fre()` family
+#'   function. Defaults to `FALSE` for `tab()`, `tab1()`, and `tab2()`; the
+#'   `fre()` family always includes totals.
+#' @param .wt Optional numeric weights, given as a column or one value per
+#'   row. Missing weights exclude rows; negative weights are invalid.
+#' @param .wt_type `"frequency"` (default) or `"analytic"`. Frequency weights
+#'   are summed as counts; analytic weights are normalized within groups.
+#'   See Details for the formulas.
+#' @param .type Output format, where supported. `tab1()` and `fre1()` default
+#'   to `"list"`; `fre()`, `tab2()`, and `fre2()` default to `"auto"`, preserving
+#'   the input table class. `"tibble"` requests a tibble; `"flextable"`
+#'   requires the optional flextable package. `tab2()` needs totals for
+#'   flextable output. `tab()` has no `.type` argument.
+#' @param .flip If `TRUE`, exchange the row and column variables in a
+#'   cross-tabulation. Defaults to `FALSE`.
+#' @param .chi2 If `TRUE`, report Pearson's chi-square test and Cramer's V for
+#'   cross-tabulations. Analytic weights are not supported for this test.
+#'
+#' @returns A table or list of tables, depending on the function:
+#'
+#' * `tab()` and `fre()` return one row per observed combination of selected
+#'   categories and grouping keys, followed by `n`, `percent`, `cum`, `valid`,
+#'   and `valid_cum`. The `fre()` variant adds total rows.
+#' * `tab1()` and `fre1()` return named lists of one-variable frequency tables.
+#'   Each contains a `value` column and the same five statistics. Use
+#'   `.type = "tibble"` to combine them, adding a `variable` column.
+#' * `tab2()` and `fre2()` return wide cross-tabulations: rows represent
+#'   categories of one variable, columns represent categories of the other,
+#'   and cells contain counts. `fre2()` adds marginal totals. Multiple pairs
+#'   or explicit `.by` groups produce lists of tables.
+#'
+#' For two selected variables, `tab()` and `tab2()` represent the same joint
+#' frequencies in different layouts: `tab()` provides a long table with
+#' percentages, whereas `tab2()` shows cell counts in a two-way table. With
+#' three or more variables, `tab()` counts their joint combinations, while
+#' `tab2()` produces a separate table for each variable pair.
+#'
+#' Results are ungrouped and retain the input table class where supported.
+#' Chi-square results for data tables are stored in the `"chi2"` attribute,
+#' with `statistic`, `df`, `p_value`, `cramers_v`, and `n`. Flextables display
+#' these results in a footer instead.
 #'
 #' @details
-#' **Selection and missing values**
+#' **Counts and percentages**
 #'
-#' Computed columns are evaluated on ungrouped working data before counts are
-#' calculated within groups. Create columns with grouped [dplyr::mutate()] first
-#' when a calculation needs to run separately within each group. Missingness
-#' includes `NaN`, tagged missing values, and SPSS user-missing codes and
-#' ranges. Empty strings are observed values. List-column values are counted by
-#' their complete identities, without flattening.
+#' The following five columns are produced by `tab()`, `tab1()`, `fre()`, and
+#' `fre1()`. For each group, let `n_i` be the count for category (or category
+#' combination) `i`, `N` the count across all categories, and `N_valid` the
+#' count excluding observations missing any measured variable. All percentages
+#' are on a **0–100 scale**.
 #'
-#' **Counts, percentages, and totals**
+#' * `n`: Number of observations in the category, or sum of weights if weighted.
+#' * `percent`: Percentage of all observations, `100 * n_i / N`, **including**
+#'   missing measured values in the denominator.
+#' * `cum`: Cumulative `percent`, summed in the displayed category order.
+#' * `valid`: Percentage of complete observations, `100 * n_i / N_valid`.
+#'   This is `NA` for categories with missing measured values.
+#' * `valid_cum`: Cumulative `valid`, in displayed order, omitting missing
+#'   measured categories.
 #'
-#' For `tab()`, `tab1()`, `fre()` and `fre1()`, `n` counts observations.
-#' `percent` and `cum` are percentages from zero to 100 using all observations
-#' within each group; `cum` follows the displayed category order. `valid` and
-#' `valid_cum` use only observations with no missing measured values. Missing
-#' group keys are retained and do not make an otherwise observed value invalid.
-#' Missing measured categories have `NA` valid percentages and appear last. So
-#' `percent` matches the user-written `fre` and `tabulate, missing`, and `valid`
-#' matches plain `tabulate`, which leaves missing values out.
+#' Thus `percent` corresponds to Stata's `tabulate, missing`, while `valid`
+#' uses the denominator from `tabulate` without `missing`. A missing grouping
+#' key does not by itself make a measured value invalid.
+#'
+#' **Missing values and category order**
+#'
+#' Missing measured values are kept as categories and shown last. Missingness
+#' includes `NA`, `NaN`, tagged missing values, and SPSS user-missing codes or
+#' ranges; empty strings are observed values. Factors follow their level order;
+#' other categories are sorted by value unless `.desc` requests frequency
+#' order. List-column elements are counted as complete values, not flattened.
+#'
+#' **Weighted counts and percentages**
+#'
+#' Let `w_j` be the weight for observation `j` in a group.
+#'
+#' * **Frequency weights** (`.wt_type = "frequency"`): Category counts are
+#'   `n_i = sum(w_j)` over observations in that category. Weights need not be
+#'   integers.
+#' * **Analytic weights** (`.wt_type = "analytic"`): Weights are rescaled
+#'   within each group to sum to its number of rows. Category counts sum the
+#'   rescaled weights, so the overall count stays on the sample-size scale.
+#' * **Percentages:** Both weight types give the same percentages because the
+#'   normalization factor cancels in each group. Cumulative and valid
+#'   percentages use the corresponding weighted counts and denominators.
+#'
+#' Rows with missing weights are excluded; negative weights are not allowed.
+#' If `...` is omitted, the weight column is not itself tabulated.
+#'
+#' **Totals and value labels**
 #'
 #' `fre()` and `fre1()` append a `"Total"` row within each group and may add
-#' `"Valid Total"` and `"Missing Total"` subtotals. In tables with up to five
-#' measured variables, the final measured column is converted to character to
-#' hold these labels; wider tables use a separate `total` label column.
-#' Displayed value labels can coincide for distinct underlying values, or with
-#' an observed `"Total"` category. Counts remain separate; use `tab()` or
-#' `tab1()` when original category values and types are needed.
+#' `"Valid Total"` and `"Missing Total"` subtotals. `fre2()` adds a marginal
+#' total row and column. `fre()` and `fre1()` display value labels; `fre2()`
+#' displays row-category labels but keeps column headers based on category
+#' codes. `tab()` and `tab1()` retain underlying category codes and types. Totals
+#' may convert a category column to character or introduce a `total` label column.
+#' Distinct category codes remain separate even if their labels coincide.
 #'
-#' **Cross-tabulation**
+#' **Cross-tabulations and association tests**
 #'
-#' Cross-tabulation keeps category names unchanged. Categories may match the
-#' original variable names. Column categories follow their values: factor levels
-#' in order, other types ascending, with missing values last. A category
-#' matching the combined row-header name, or literal `"NA"` alongside a missing
-#' column category, causes a name collision. With `tab2(.total = TRUE)`, the
-#' column category `"total"` is reserved for marginal totals; recode it first or
-#' omit the totals. The final row of `tab2(.total = TRUE)` is the marginal
-#' total, labelled `"total"`; an observed row category with that label remains a
-#' separate row. Blank column categories use `"<empty>"`, with the smallest
-#' unused numeric suffix when that header is already taken. Logical
-#' cross-tabulation axes follow `FALSE`, `TRUE`, then missing values.
+#' `tab2()` and `fre2()` report cell counts rather than the five percentages
+#' listed above. With `.chi2 = TRUE`, Pearson's chi-square test uses the
+#' displayed categories, including missing ones. Filter missing categories
+#' beforehand if they should not contribute to the test. Empty rows and
+#' columns are excluded from the calculation.
 #'
-#' With `.chi2 = TRUE`, `tab2()` tests the categories shown in the table,
-#' including missing ones (filter them out first to exclude them, as Stata's
-#' `tabulate, chi2` does without `missing`), and drops rows or columns with no
-#' observations. It prints Pearson's chi-square, its degrees of freedom, the
-#' p-value and Cramer's V as a message; flextable output adds them as a footer.
-#' As in Stata, V keeps its sign in 2 x 2 tables. Frequency weights are treated
-#' as counts; analytic weights are an error, because a design-based test such as
-#' `survey::svychisq()` is needed for sampling weights.
+#' Let `O_ij` be an observed cell count, `E_ij` its expected count under
+#' independence, `r` the number of nonempty rows, `c` the number of nonempty
+#' columns, and `N` the total count:
 #'
-#' **Combined output and names**
+#' * **Expected counts:** `E_ij = row_total_i * column_total_j / N`.
+#' * **Pearson's chi-square:** `X^2 = sum((O_ij - E_ij)^2 / E_ij)`.
+#' * **Degrees of freedom:** `df = (r - 1) * (c - 1)`.
+#' * **p-value:** Upper-tail probability of a chi-square distribution with
+#'   `df` degrees of freedom.
+#' * **Cramer's V:** `sqrt(X^2 / (N * min(r - 1, c - 1)))`; for 2-by-2 tables,
+#'   the reported value retains the sign used by the implementation.
 #'
-#' Combined `tab1()` output uses character values when factor types cannot be
-#' combined; each variable's category order is retained. List output preserves
-#' the original category classes.
+#' Frequency weights act as cell counts for the test. Analytic weights are
+#' not supported; for complex survey designs, use [survey::svychisq()].
+#' Cross-tabulation category values become column names, so conflicts with
+#' reserved names such as `"total"` may require recoding.
 #'
-#' Input columns that clash with output names are renamed with a leading dot,
-#' with a message. If the new name is already taken, rename the input first. The
-#' input data are not modified.
+#' **Computed variables and groups**
 #'
-#' @param .data An in-memory data frame, tibble, or data.table. Collect lazy
-#'   tables before tabulating. `tab()`, `tab1()`, `fre()` and `fre1()` also
-#'   accept an atomic vector, tabulated as a tibble column named `value`; omit
-#'   selectors and `.by` in this form. `tab2()` needs a data frame. All spatial
-#'   `sfc` geometry columns are excluded before attribute tabulation; geometry
-#'   columns cannot be selected as measured variables or grouping keys.
-#' @param ... <[`tidy-select`][dplyr_tidy_select]> or
-#'   <[`data-masking`][args_data_masking]> Columns to select or compute with
-#'   [select_or_transmute()]. Existing columns, selection helpers, and named
-#'   expressions can be mixed. Omit to tabulate all columns except grouping
-#'   keys; cross-tabulations require at least two measured columns.
-#' @param .by Optional grouping columns, selected with tidyselect. For `tab()`,
-#'   `tab1()`, `fre()` and `fre1()`, `NULL` inherits existing `group_by()`
-#'   groups; an explicit selection replaces them. Grouping columns are not
-#'   measured variables. For `tab2()` and `fre2()`, `.by` returns a list with
-#'   one cross-table per group, named like `"g = a"`, as Stata's `by g: tab x
-#'   y`; grouped data are not split without `.by`. `tab2()` does not accept
-#'   `.desc` or `.group_order`. Select existing columns only; create new
-#'   grouping columns with [dplyr::mutate()] first.
-#' @param .desc If `TRUE`, sort categories by descending count within each group
-#'   (missing categories stay last). To order the `.by` group blocks by size,
-#'   use `.group_order = "frequency"`.
-#' @param .type Output type. `tab1()` and `fre1()` default to a list of tables;
-#'   `fre()`, `tab2()` and `fre2()` default to `"auto"`, preserving the input
-#'   container. Explicit `"tibble"` always returns a plain tibble. Explicit
-#'   `"flextable"` output requires the optional flextable package.
-#' @param .flip If `TRUE`, swap the rows and columns of the cross-table.
-#'   Defaults to `FALSE`.
-#' @param .wt Optional weights: a numeric column of `.data` (or a vector with
-#'   one value per row), like Stata's `[fweight]`/`[aweight]`. Rows with a
-#'   missing weight are excluded with a message; negative weights are an error.
-#'   When `...` is omitted, the weight column is not tabulated itself.
-#' @param .wt_type `"frequency"` (default) or `"analytic"`. Frequency weights
-#'   count each row `w` times, so `n` is the sum of the weights, as in
-#'   `dplyr::count(wt =)`; non-integer weights are allowed. Analytic weights
-#'   (Stata's `[aweight]`) are rescaled within each `.by` group to sum to the
-#'   number of rows, so `n` stays on the sample scale. Percentages are the same
-#'   under both types.
-#' @param .total If `TRUE`, add "Total" rows: `tab(.total = TRUE)` is `fre()`
-#'   and `tab1(.total = TRUE)` is `fre1()`. `tab2(.total = TRUE)` is `fre2()`
-#'   and adds a total row and a total column. Defaults to `FALSE` for `tab()`,
-#'   `tab1()`, and `tab2()`; the `fre()` family always adds totals. Flextable
-#'   output from `tab2()` requires totals.
-#' @param .chi2 If `TRUE`, `tab2()` reports Pearson's chi-square test of
-#'   independence and Cramer's V, like Stata's `tab x y, chi2 V`. Defaults to
-#'   `FALSE`. See Details.
-#' @param .group_order Group block order for one-way and joint tables. `"keys"`
-#'   retains key order; `"frequency"` orders by descending observation count
-#'   (summed frequency weights when `.wt` is used), including missing measured
-#'   values. Missing grouping keys appear last and ties follow key order.
-#'   `.desc` controls categories within groups independently.
-#'
-#' @returns A table, list of tables, or explicitly requested flextable:
-#' * `tab()` and `fre()` return one row per observed combination of measured
-#'   categories and grouping keys, with the selected columns, `n` (count),
-#'   `percent`, `cum`, `valid`, and `valid_cum` (percentages from zero to 100).
-#'   Totals add rows and can change category types or add a `total` column (see
-#'   Details).
-#' * `tab1()` and `fre1()` return a list named by measured variable. Each table
-#'   contains grouping keys, a `value` column, and the same count/percentage
-#'   columns. `.type = "tibble"` combines tables with a `variable` column.
-#' * `tab2()` and `fre2()` return counts with one row per row category and one
-#'   column per column category, preceded by the row-category column. Totals add
-#'   a row and column. Three or more variables give a list of pairwise tables
-#'   named like `"x x y"`; explicit `.by` gives a list per group, containing
-#'   pairwise lists when needed.
-#'
-#' Selecting no measured variables returns zero rows with count/percentage
-#' columns and grouping keys for `tab()`/`fre()`, an empty list (or empty
-#' combined tibble) for `tab1()`/`fre1()`, and an empty table for
-#' `tab2()`/`fre2()`. Cross-tabulation rejects one selected variable; flextable
-#' cross-tabulation requires at least two.
-#'
-#' With `.chi2 = TRUE`, each data cross-table has a one-row tibble in its `chi2`
-#' attribute: `statistic`, `df`, `p_value`, `cramers_v`, and `n`. Undefined test
-#' statistics are `NA`. Flextables show the test in their footer instead.
-#'
-#' Default tables preserve the input's data.frame, tibble, or data.table
-#' container, including tables in lists. Results are ungrouped; supported
-#' preview settings persist unless an explicit output type is requested. Other
-#' subclasses are not reconstructed.
+#' Named expressions in `...` are evaluated on ungrouped data, before counts
+#' are calculated within groups. Use grouped [dplyr::mutate()] first for
+#' group-specific computations. Input column names that conflict with output
+#' columns are renamed in the result; the input data are unchanged.
 #'
 #' @name tab
+#' @family tabulation functions
 #'
 #' @examples
-#' # fre() shows value labels; tab() keeps the labelled codes
+#' # Compare the three approaches using the same variables
+#' # Joint frequencies: one long table
+#' tab(lifeexp, region, high = lexp >= 70)
+#'
+#' # Separate one-way tables: one for region and one for high
+#' tab1(lifeexp, region, high = lexp >= 70)
+#'
+#' # Two-way cross-tabulation: region by high
+#' tab2(lifeexp, region, high = lexp >= 70)
+#'
+#' # Add totals and display value labels
 #' fre(lifeexp, region)
 #'
-#' tab(lifeexp, region)
+#' fre2(lifeexp, region, high = lexp >= 70)
 #'
-#' # Tabulate a column by position, a condition, or a named expression.
-#' tab(lifeexp, 1)
+#' # Frequencies within groups
+#' tab(lifeexp, high = lexp >= 70, .by = region)
 #'
-#' tab(lifeexp, region, .desc = TRUE)
+#' # Many distinct values of a continuous variable: preview the table compactly
+#' tab(lifeexp, lexp) |> print_headtail(n = 6)
 #'
-#' tab(lifeexp, lexp >= 70)
+#' tab(lifeexp, lexp) |> print_interval(n = 6)
 #'
-#' tab(lifeexp, lexp_70 = lexp >= 70)
+#' # Pearson's chi-square and Cramer's V
+#' result <- tab2(lifeexp, region, high = lexp >= 70, .chi2 = TRUE)
+#' attr(result, "chi2")
 #'
-#' # Mix an existing column and a computed category
-#' tab(lifeexp, region, lexp_70 = lexp >= 70)
-#'
-#' tab2(lifeexp, region, lexp_70 = lexp >= 70)
-#'
-#' tab(lifeexp, varlist("*p*"))
-#'
-#' tab(lifeexp)
-#'
-#' tab(c(1, 1, 2, NA))
-#'
-#' fre(c(1, 1, 2, NA))
-#'
-#' # Weighted frequencies, like Stata's tab x [fw=w] or [aw=w].
-#' survey <- tibble::tibble(edu = c("low", "high", "high"), w = c(2, 1, 1.5))
-#' tab(survey, edu, .wt = w)
-#'
-#' tab(survey, edu, .wt = w, .wt_type = "analytic")
-#'
-#' # Illustrative indicators for cross-tabulation; keep lifeexp unchanged.
-#' countries <- dplyr::mutate(
-#'   lifeexp,
-#'   lexp_70 = lexp >= 70,
-#'   water_80 = safewater >= 80
-#' )
-#' tab(countries, region, lexp_70)
-#'
-#' tab(countries, lexp_70, .by = region, .group_order = "frequency")
-#'
-#' tab1(lifeexp, 1:3)
-#'
-#' tab1(countries, matches("^(region|lexp_70)$"))
-#'
-#' tab(lifeexp, region, .total = TRUE)
-#'
-#' tab2(countries, region, lexp_70)
-#'
-#' fre2(countries, lexp, lexp_70)
-#'
-#' # Every pairwise table, like Stata's tab2 region lexp_70 water_80.
-#' tab2(countries, region, lexp_70, water_80)
-#'
-#' # One cross-table per group, like Stata's by region: tab lexp_70 water_80.
-#' tab2(countries, lexp_70, water_80, .by = region) |> head(2)
-#'
-#' # Chi-square test of independence, like Stata's tab x y, chi2 V.
-#' chi2 <- tab2(countries, region, lexp_70, .chi2 = TRUE)
-#' attr(chi2, "chi2")
-#'
-#' # Several character columns share a suffix in this dataset.
-#' starwars <- dplyr::starwars
-#' tab(starwars, ends_with("color"))
-#'
-#' tab1(starwars, ends_with("color"))
-#'
-#' tab1(starwars, ends_with("color"), .type = "tibble")
-#'
-#' fre1(starwars, ends_with("color"))
-#' @family tabulation functions
+#' # Frequency weights
+#' survey <- tibble::tibble(response = c("yes", "no", "yes"), w = c(2, 1, 3))
+#' tab(survey, response, .wt = w)
 NULL
 
 #' @export

@@ -67,21 +67,17 @@
 #' @export
 #'
 #' @examples
-#' # Look up a Stata command
 #' findit(reg)
-#'
-#' # Look up an R function
-#' findit(left_join)
-#'
-#' # Customize variables or select an option
-#' findit(tab, sex, region)
 #'
 #' findit(tab, gen)
 #'
-#' # Search Stata syntax or ask a question
+#' findit(tab, sex, region)
+#'
 #' findit("merge 1:1 id, keep(match)")
 #'
 #' findit("how do I remove duplicate rows")
+#'
+#' findit(left_join)
 #'
 #' # Filter the complete reference
 #' entries <- findit()

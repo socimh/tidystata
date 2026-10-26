@@ -31,15 +31,15 @@ infinite, as Stata gives missing values there.
 \description{
 Vector helpers for \code{\link[dplyr:mutate]{dplyr::mutate()}}, following Stata's \code{egen}:
 \itemize{
-\item \code{std()} standardises to mean 0 and standard deviation 1, like \verb{egen z = std(x)}. Unlike \code{\link[=scale]{scale()}}, it returns a plain vector.
-\item \code{pc()} gives each value as a percentage of the total, like \verb{egen p = pc(x)}, or as a proportion with \code{prop = TRUE}.
+\item \code{std()}: Standardise to mean 0 and standard deviation 1, like \verb{egen z = std(x)}. Unlike \code{\link[=scale]{scale()}}, it returns a plain vector.
+\item \code{pc()} (\code{pct()}): Express each value as a percentage of the total, like
+\verb{egen p = pc(x)}, or as a proportion with \code{prop = TRUE}.
 }
 }
 \details{
-\code{pct()} is an alias of \code{pc()}. The gt package also exports a \code{pct()} (for
-column widths), so prefer \code{pc()} when gt is attached. In grouped
-\code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}), the mean, standard deviation and total
-come from each group, like Stata's \verb{by g: egen}.
+The gt package also exports a \code{pct()} (for column widths), so prefer \code{pc()}
+when gt is attached. In grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}), the mean,
+standard deviation and total come from each group, like Stata's \verb{by g: egen}.
 }
 \examples{
 std(c(1, 2, 3, NA))

@@ -15,3 +15,37 @@ test_that("duplicates_report() matches duplicates report", {
   expect_equal(report$observations, c(3, 2, 3))
   expect_equal(report$surplus, c(0, 1, 2))
 })
+
+
+test_that("isid() agrees with Stata on valid, repeated and missing keys", {
+  input <- stata_fixture("isid-input")
+  input$code[is.na(input$code)] <- ""
+  expected <- stata_fixture("isid-output")
+  for (i in seq_len(nrow(expected))) {
+    rows <- as.integer(strsplit(expected$rows[[i]], " ", fixed = TRUE)[[1L]])
+    keys <- strsplit(expected$keys[[i]], " ", fixed = TRUE)[[1L]]
+    data <- input[match(rows, input$row), ]
+    if (expected$rc[[i]] == 0L) {
+      expect_identical(
+        suppressMessages(isid(
+          data,
+          dplyr::all_of(keys),
+          .missing = as.logical(expected$missing[[i]])
+        )),
+        data,
+        info = expected$case[[i]]
+      )
+    } else {
+      expect_identical(expected$rc[[i]], 459L)
+      expect_error(
+        isid(
+          data,
+          dplyr::all_of(keys),
+          .missing = as.logical(expected$missing[[i]])
+        ),
+        "should never be missing|not uniquely identify",
+        info = expected$case[[i]]
+      )
+    }
+  }
+})

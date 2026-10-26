@@ -39,10 +39,15 @@ Invalid numeric text adds a \code{problems} attribute readable with
 \code{\link[readr:problems]{readr::problems()}}.
 }
 \description{
-Convert text to numbers with \code{destring()}, labelled values to labels with
-\code{decode()}, or values to text with \code{tostring()}, following Stata's conversion
-commands. \code{as_numeric()} and \code{as_character()} are aliases of \code{destring()} and
-\code{decode()}.
+Prepare vectors using Stata-style conversion commands:
+\itemize{
+\item \code{destring()} (\code{as_numeric()}): Convert text to numbers; labelled numeric
+vectors use their stored values.
+\item \code{decode()} (\code{as_character()}): Convert values to text, using value labels
+for labelled vectors and level text for factors.
+\item \code{tostring()}: Convert stored values to text, using numeric codes for
+labelled numeric vectors and factors rather than their labels.
+}
 }
 \details{
 \strong{Reading numbers}

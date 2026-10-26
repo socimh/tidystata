@@ -3,24 +3,24 @@
 #' @description
 #' Stata-style checks of identifying variables and duplicated rows.
 #'
-#' * `isid()` checks that the selected columns uniquely identify the rows, like
-#'   Stata's `isid`. It returns the data invisibly when they do and errors
-#'   otherwise, so it can sit inside a pipeline. Wrap it in [capture()] for a
-#'   `TRUE`/`FALSE` answer.
-#' * `duplicates_report()` counts how many rows share the same values, like
+#' * `isid()`: Check that the selected columns uniquely identify the rows, like
+#'   Stata's `isid`. It confirms a valid key with a message and returns the
+#'   data invisibly, so it can sit inside a pipeline. Invalid keys raise an error.
+#' * `duplicates_report()`: Count how many rows share the same values, like
 #'   `duplicates report`.
-#' * `duplicates_tag()` adds the number of other rows with the same values, like
+#' * `duplicates_tag()`: Add the number of other rows with the same values, like
 #'   `duplicates tag, generate()`.
-#' * `duplicates_list()` returns the duplicated rows, like `duplicates list`.
-#' * `duplicates_drop()` keeps the first row of each duplicated set, like
+#' * `duplicates_list()`: Return the duplicated rows, like `duplicates list`.
+#' * `duplicates_drop()`: Keep the first row of each duplicated set, like
 #'   `duplicates drop`.
 #'
 #' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The identifying columns. Omit
-#'   to use all columns, as Stata does.
-#' @param .missok If `FALSE` (default), `isid()` errors when an identifying
-#'   column contains missing values, as Stata's `isid` does without the `missok`
-#'   option.
+#'   to use all columns. Stata's `isid` requires an explicit variable list.
+#' @param .missing If `FALSE` (default), `isid()` errors when an identifying
+#'   column contains missing values or empty strings, as Stata's `isid` does
+#'   without `missok`. If `TRUE`, permit these values but still require unique
+#'   key combinations. Rows are not dropped.
 #' @param .name Name of the new column created by `duplicates_tag()`.
 #' @param .force If `TRUE`, allow `duplicates_drop()` to remove rows that match
 #'   on the selected columns but differ elsewhere, like Stata's `duplicates drop
@@ -28,7 +28,7 @@
 #'   without this option.
 #'
 #' @returns
-#' * `isid()`: `.data`, invisibly.
+#' * `isid()`: `.data`, unchanged and invisibly, after a confirmation message.
 #' * `duplicates_report()`: a tibble with one row per number of copies:
 #'   `copies`, `observations` (rows with that many copies) and `surplus` (rows
 #'   beyond the first of each set).
@@ -43,6 +43,13 @@
 #' rows or columns of `.data` are returned.
 #'
 #' @details
+#' Unlike Stata's silent success, `isid()` names the columns that form a valid
+#' key. This confirms uniqueness without storing an ID declaration or adding
+#' metadata. Use [suppressMessages()] for silent execution. An empty input
+#' reports that there are no rows to check. Checks preserve row order; use
+#' [dplyr::arrange()] separately to sort, or [haven::read_dta()] to read a file.
+#' Factor values equal to `""` are empty strings; whitespace is not trimmed.
+#'
 #' Missing values count as equal to each other, as in Stata, so two rows that
 #' are both missing on every selected column are duplicates. Checks and
 #' duplicate counts use the whole input, regardless of grouping.
@@ -57,12 +64,13 @@
 #'   wave = c(1, 2, 1, 1, 1),
 #'   score = c(5, 6, 7, 7, 8)
 #' )
-#' # id repeats, so this errors; capture() turns it into TRUE/FALSE
+#' # id repeats, so this check fails and shows the error
 #' try(isid(panel, id))
 #'
-#' capture(isid(panel, id))
-#'
-#' isid(panel[-4, ], id, wave)
+#' # Remove the duplicate row so id + wave uniquely identify observations
+#' unique_panel <- dplyr::distinct(panel)
+#' # Confirms that id + wave form a key; returns unique_panel invisibly
+#' isid(unique_panel, id, wave)
 #'
 #' duplicates_report(panel, id, wave)
 #'
@@ -76,16 +84,26 @@ NULL
 
 #' @rdname keys
 #' @export
-isid <- function(.data, ..., .missok = FALSE) {
-  check_bool(.missok)
+isid <- function(.data, ..., .missing = FALSE) {
+  check_bool(.missing)
   keys <- key_columns(.data, ...)
   labels <- key_label(names(keys))
-  if (!.missok) {
-    missing <- vapply(keys, function(x) any(is.na(x)), logical(1))
+  if (!.missing) {
+    missing <- vapply(
+      keys,
+      function(x) {
+        missing <- any(is.na(x))
+        if (is.character(x) || is.factor(x)) {
+          missing <- missing || any(as.character(x) == "", na.rm = TRUE)
+        }
+        missing
+      },
+      logical(1)
+    )
     if (any(missing)) {
       cli::cli_abort(c(
         "{.var {names(keys)[missing]}} should never be missing to identify rows.",
-        i = "Use {.code .missok = TRUE} to allow missing key values."
+        i = "Use {.code .missing = TRUE} to allow missing key values."
       ))
     }
   }
@@ -98,6 +116,13 @@ isid <- function(.data, ..., .missok = FALSE) {
       "{labels} {verb} not uniquely identify the rows: {sets} value{?s} appear{?s/} more than once ({repeated} rows).",
       i = "See them with {.fn duplicates_list}."
     ))
+  }
+  if (!nrow(.data)) {
+    cli::cli_inform("No rows to check.")
+  } else if (ncol(keys) == 1L) {
+    cli::cli_inform("{labels} uniquely identifies the rows.")
+  } else {
+    cli::cli_inform("{labels} together uniquely identify the rows.")
   }
   invisible(.data)
 }

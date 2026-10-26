@@ -45,8 +45,8 @@
 #' it is the same large-sample approximation that Stata uses. Correlations with
 #' a constant variable, and p-values with fewer than three observations, are
 #' `NA`. Labelled numeric columns are correlated on their codes, excluding
-#' tagged and SPSS user-missing values. For listwise deletion, as in Stata's
-#' `correlate`, drop incomplete rows first with `tidyr::drop_na()`.
+#' tagged and SPSS user-missing values. Use [corr()] for listwise Pearson
+#' correlations, like Stata's `corr` (`correlate`).
 #'
 #' @examples
 #' pwcorr(lifeexp, lexp, gnppc, safewater)
@@ -70,6 +70,29 @@ pwcorr <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
+  pwcorr_data(
+    .data,
+    ...,
+    .by = {{ .by }},
+    .method = .method,
+    .wide = .wide,
+    .wt = {{ .wt }},
+    .wt_type = .wt_type
+  )
+}
+
+# Shared preparation and output for pairwise and complete-case correlations.
+pwcorr_data <- function(
+  .data,
+  ...,
+  .by = NULL,
+  .method = c("pearson", "spearman"),
+  .wide = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic"),
+  .listwise = FALSE
+) {
+  local_wrapper_error_call()
   check_data_frame(.data)
   .method <- rlang::arg_match(.method)
   .wt_type <- rlang::arg_match(.wt_type)
@@ -104,7 +127,11 @@ pwcorr <- function(
       "Column {.var variable} holds the row names of the wide table; rename the variable {.var variable} first."
     )
   }
-  reserved <- if (.wide) "variable" else c("var1", "var2", "r", "n", "p")
+  reserved <- if (.wide) {
+    "variable"
+  } else {
+    c("var1", "var2", "r", "n", if (!.listwise) "p")
+  }
   clash <- intersect(group_vars, c(reserved, if (.wide) names(values)))
   if (length(clash)) {
     cli::cli_abort(
@@ -117,10 +144,21 @@ pwcorr <- function(
     loc <- groups$locs[[i]]
     w <- if (is.null(weights)) NULL else weights[loc]
     columns <- lapply(values, `[`, loc)
+    if (.listwise) {
+      complete <- Reduce(`&`, lapply(columns, Negate(is.na)))
+      if (!is.null(w)) {
+        complete <- complete & w > 0
+      }
+      columns <- lapply(columns, `[`, complete)
+      if (!is.null(w)) w <- w[complete]
+    }
     table <- if (.wide) {
       pwcorr_wide(columns, w, .method)
     } else {
       pwcorr_long(columns, w, .method, .wt_type)
+    }
+    if (.listwise && !.wide) {
+      table$p <- NULL
     }
     keys <- vctrs::vec_slice(groups$keys, rep(i, nrow(table)))
     dplyr::bind_cols(keys, table)
@@ -130,6 +168,9 @@ pwcorr <- function(
       pwcorr_wide(lapply(values, `[`, 0L), NULL, .method)
     } else {
       pwcorr_long(lapply(values, `[`, 0L), NULL, .method, .wt_type)
+    }
+    if (.listwise && !.wide) {
+      empty$p <- NULL
     }
     return(dplyr::bind_cols(groups$keys, empty[0L, ]))
   }

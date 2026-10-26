@@ -73,9 +73,6 @@ tb |>
 tb |>
   ds(varlist("x1-x5"))
 
-tb |>
-  ds(x1:x5)
-
 }
 \seealso{
 Other selection and preview functions:

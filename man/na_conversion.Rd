@@ -29,17 +29,24 @@ A vector with the same type and size as \code{x}, with matching values
 replaced or missing values filled.
 }
 \description{
-\code{mvdecode()} replaces specified codes with \code{NA}, like Stata's \verb{mvdecode x, mv(-98 -99)}. \code{mvencode()} fills missing values with a replacement, like
-\verb{mvencode x, mv(0)}.
+Convert between missing values and explicit replacement codes:
+\itemize{
+\item \code{mvdecode()} (\code{na_if_value()}): Replace specified codes with \code{NA}, like
+Stata's \verb{mvdecode x, mv(-98 -99)}.
+\item \code{mvencode()} (\code{value_if_na()}): Fill missing values with one replacement,
+like Stata's \verb{mvencode x, mv(0)}.
+}
 
-\code{na_if_value()} and \code{value_if_na()} are aliases of \code{mvdecode()} and
-\code{mvencode()}.
+The aliases perform the same operations but name the replacement argument
+\code{value} instead of \code{mv}.
 }
 \details{
 Codes are matched with \code{\link[dplyr:na_if]{dplyr::na_if()}}; filling follows
 \code{\link[tidyr:replace_na]{tidyr::replace_na()}}. Codes and replacements are cast to the type of \code{x}, so
-a lossy cast such as \code{1.5} for an integer vector is an error. Both the input
-vector and the codes or replacement must be supplied. For SPSS labelled
+a lossy cast such as \code{1.5} for an integer vector is an error when applied.
+Filling a non-SPSS vector with no missing values returns it unchanged without
+casting the replacement. Both the input vector and the codes or replacement
+must be supplied. For SPSS labelled
 vectors (\code{\link[haven:labelled_spss]{haven::labelled_spss()}}), user-defined missing codes and ranges
 also count as missing, matching their \code{is.na()} method; labels and
 missing-value metadata are retained.
@@ -50,7 +57,7 @@ mvdecode(x, -99)
 
 mvdecode(x, c(-98, -99))
 
-mvencode(c(1, NA, 4), 0)
+mvencode(x, 0)
 }
 \seealso{
 Other conversion functions:

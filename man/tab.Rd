@@ -7,7 +7,7 @@
 \alias{fre2}
 \alias{fre}
 \alias{fre1}
-\title{Tabulate columns}
+\title{Frequency tables and cross-tabulations}
 \usage{
 tab(
   .data,
@@ -78,243 +78,222 @@ fre1(
 )
 }
 \arguments{
-\item{.data}{An in-memory data frame, tibble, or data.table. Collect lazy
-tables before tabulating. \code{tab()}, \code{tab1()}, \code{fre()} and \code{fre1()} also
-accept an atomic vector, tabulated as a tibble column named \code{value}; omit
-selectors and \code{.by} in this form. \code{tab2()} needs a data frame. All spatial
-\code{sfc} geometry columns are excluded before attribute tabulation; geometry
-columns cannot be selected as measured variables or grouping keys.}
+\item{.data}{An in-memory data frame, tibble, or data.table. \code{tab()},
+\code{tab1()}, \code{fre()}, and \code{fre1()} also accept an atomic vector (without
+selectors or \code{.by}). Collect lazy tables first. Spatial geometry columns
+are excluded.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with
-\code{\link[=select_or_transmute]{select_or_transmute()}}. Existing columns, selection helpers, and named
-expressions can be mixed. Omit to tabulate all columns except grouping
-keys; cross-tabulations require at least two measured columns.}
+\item{...}{Variables selected with tidyselect, or named expressions such as
+\code{high = score >= 70}. Defaults to all columns except active grouping keys.
+Without explicit \code{.by}, \code{tab2()} and \code{fre2()} treat inherited grouping
+columns as ordinary variables. Select at least two variables for
+cross-tabulation.}
 
-\item{.by}{Optional grouping columns, selected with tidyselect. For \code{tab()},
-\code{tab1()}, \code{fre()} and \code{fre1()}, \code{NULL} inherits existing \code{group_by()}
-groups; an explicit selection replaces them. Grouping columns are not
-measured variables. For \code{tab2()} and \code{fre2()}, \code{.by} returns a list with
-one cross-table per group, named like \code{"g = a"}, as Stata's \verb{by g: tab x y}; grouped data are not split without \code{.by}. \code{tab2()} does not accept
-\code{.desc} or \code{.group_order}. Select existing columns only; create new
-grouping columns with \code{\link[dplyr:mutate]{dplyr::mutate()}} first.}
+\item{.by}{Optional grouping columns selected with tidyselect. For one-way
+and joint tables, existing \code{\link[dplyr:group_by]{dplyr::group_by()}} groups are inherited unless
+\code{.by} is supplied. \code{tab2()} and \code{fre2()} require explicit \code{.by} to create
+separate cross-tables for each group. Grouping keys are not tabulated.}
 
-\item{.desc}{If \code{TRUE}, sort categories by descending count within each group
-(missing categories stay last). To order the \code{.by} group blocks by size,
-use \code{.group_order = "frequency"}.}
+\item{.desc}{If \code{TRUE}, sort categories by decreasing frequency within each
+group; missing categories remain last. Defaults to \code{FALSE}.}
 
-\item{.group_order}{Group block order for one-way and joint tables. \code{"keys"}
-retains key order; \code{"frequency"} orders by descending observation count
-(summed frequency weights when \code{.wt} is used), including missing measured
-values. Missing grouping keys appear last and ties follow key order.
-\code{.desc} controls categories within groups independently.}
+\item{.group_order}{Order group blocks by \code{"keys"} (default) or decreasing
+\code{"frequency"}. Does not change category order within groups.}
 
-\item{.total}{If \code{TRUE}, add "Total" rows: \code{tab(.total = TRUE)} is \code{fre()}
-and \code{tab1(.total = TRUE)} is \code{fre1()}. \code{tab2(.total = TRUE)} is \code{fre2()}
-and adds a total row and a total column. Defaults to \code{FALSE} for \code{tab()},
-\code{tab1()}, and \code{tab2()}; the \code{fre()} family always adds totals. Flextable
-output from \code{tab2()} requires totals.}
+\item{.total}{If \code{TRUE}, add totals, as in the corresponding \code{fre()} family
+function. Defaults to \code{FALSE} for \code{tab()}, \code{tab1()}, and \code{tab2()}; the
+\code{fre()} family always includes totals.}
 
-\item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector with
-one value per row), like Stata's \verb{[fweight]}/\verb{[aweight]}. Rows with a
-missing weight are excluded with a message; negative weights are an error.
-When \code{...} is omitted, the weight column is not tabulated itself.}
+\item{.wt}{Optional numeric weights, given as a column or one value per
+row. Missing weights exclude rows; negative weights are invalid.}
 
 \item{.wt_type}{\code{"frequency"} (default) or \code{"analytic"}. Frequency weights
-count each row \code{w} times, so \code{n} is the sum of the weights, as in
-\code{dplyr::count(wt =)}; non-integer weights are allowed. Analytic weights
-(Stata's \verb{[aweight]}) are rescaled within each \code{.by} group to sum to the
-number of rows, so \code{n} stays on the sample scale. Percentages are the same
-under both types.}
+are summed as counts; analytic weights are normalized within groups.
+See Details for the formulas.}
 
-\item{.type}{Output type. \code{tab1()} and \code{fre1()} default to a list of tables;
-\code{fre()}, \code{tab2()} and \code{fre2()} default to \code{"auto"}, preserving the input
-container. Explicit \code{"tibble"} always returns a plain tibble. Explicit
-\code{"flextable"} output requires the optional flextable package.}
+\item{.type}{Output format, where supported. \code{tab1()} and \code{fre1()} default
+to \code{"list"}; \code{fre()}, \code{tab2()}, and \code{fre2()} default to \code{"auto"}, preserving
+the input table class. \code{"tibble"} requests a tibble; \code{"flextable"}
+requires the optional flextable package. \code{tab2()} needs totals for
+flextable output. \code{tab()} has no \code{.type} argument.}
 
-\item{.flip}{If \code{TRUE}, swap the rows and columns of the cross-table.
-Defaults to \code{FALSE}.}
+\item{.flip}{If \code{TRUE}, exchange the row and column variables in a
+cross-tabulation. Defaults to \code{FALSE}.}
 
-\item{.chi2}{If \code{TRUE}, \code{tab2()} reports Pearson's chi-square test of
-independence and Cramer's V, like Stata's \verb{tab x y, chi2 V}. Defaults to
-\code{FALSE}. See Details.}
+\item{.chi2}{If \code{TRUE}, report Pearson's chi-square test and Cramer's V for
+cross-tabulations. Analytic weights are not supported for this test.}
 }
 \value{
-A table, list of tables, or explicitly requested flextable:
+A table or list of tables, depending on the function:
 \itemize{
-\item \code{tab()} and \code{fre()} return one row per observed combination of measured
-categories and grouping keys, with the selected columns, \code{n} (count),
-\code{percent}, \code{cum}, \code{valid}, and \code{valid_cum} (percentages from zero to 100).
-Totals add rows and can change category types or add a \code{total} column (see
-Details).
-\item \code{tab1()} and \code{fre1()} return a list named by measured variable. Each table
-contains grouping keys, a \code{value} column, and the same count/percentage
-columns. \code{.type = "tibble"} combines tables with a \code{variable} column.
-\item \code{tab2()} and \code{fre2()} return counts with one row per row category and one
-column per column category, preceded by the row-category column. Totals add
-a row and column. Three or more variables give a list of pairwise tables
-named like \code{"x x y"}; explicit \code{.by} gives a list per group, containing
-pairwise lists when needed.
+\item \code{tab()} and \code{fre()} return one row per observed combination of selected
+categories and grouping keys, followed by \code{n}, \code{percent}, \code{cum}, \code{valid},
+and \code{valid_cum}. The \code{fre()} variant adds total rows.
+\item \code{tab1()} and \code{fre1()} return named lists of one-variable frequency tables.
+Each contains a \code{value} column and the same five statistics. Use
+\code{.type = "tibble"} to combine them, adding a \code{variable} column.
+\item \code{tab2()} and \code{fre2()} return wide cross-tabulations: rows represent
+categories of one variable, columns represent categories of the other,
+and cells contain counts. \code{fre2()} adds marginal totals. Multiple pairs
+or explicit \code{.by} groups produce lists of tables.
 }
 
-Selecting no measured variables returns zero rows with count/percentage
-columns and grouping keys for \code{tab()}/\code{fre()}, an empty list (or empty
-combined tibble) for \code{tab1()}/\code{fre1()}, and an empty table for
-\code{tab2()}/\code{fre2()}. Cross-tabulation rejects one selected variable; flextable
-cross-tabulation requires at least two.
+For two selected variables, \code{tab()} and \code{tab2()} represent the same joint
+frequencies in different layouts: \code{tab()} provides a long table with
+percentages, whereas \code{tab2()} shows cell counts in a two-way table. With
+three or more variables, \code{tab()} counts their joint combinations, while
+\code{tab2()} produces a separate table for each variable pair.
 
-With \code{.chi2 = TRUE}, each data cross-table has a one-row tibble in its \code{chi2}
-attribute: \code{statistic}, \code{df}, \code{p_value}, \code{cramers_v}, and \code{n}. Undefined test
-statistics are \code{NA}. Flextables show the test in their footer instead.
-
-Default tables preserve the input's data.frame, tibble, or data.table
-container, including tables in lists. Results are ungrouped; supported
-preview settings persist unless an explicit output type is requested. Other
-subclasses are not reconstructed.
+Results are ungrouped and retain the input table class where supported.
+Chi-square results for data tables are stored in the \code{"chi2"} attribute,
+with \code{statistic}, \code{df}, \code{p_value}, \code{cramers_v}, and \code{n}. Flextables display
+these results in a footer instead.
 }
 \description{
-Count joint categories with \code{tab()}, variables individually with \code{tab1()}, or
-every pair of variables with \code{tab2()}, following Stata's tabulation commands.
-The \code{fre()}, \code{fre1()}, and \code{fre2()} variants add totals and value labels.
+Create Stata-style frequency tables using joint counts, separate one-way
+tables, or pairwise cross-tabulations:
+\itemize{
+\item \code{tab()}: Count combinations of selected variables in one long-format
+table with frequencies and percentages.
+\item \code{fre()}: Count the same combinations as \code{tab()}, adding totals and
+displaying value labels.
+\item \code{tab1()}: Tabulate each variable separately, returning a one-way
+frequency table for each variable.
+\item \code{fre1()}: Tabulate each variable separately as in \code{tab1()}, adding totals
+and displaying value labels.
+\item \code{tab2()}: Cross-tabulate every pair of selected variables, returning
+wide contingency tables with categories in rows and columns.
+\item \code{fre2()}: Cross-tabulate every pair as in \code{tab2()}, adding marginal totals
+and displaying row-category labels. Column headers retain category codes.
+}
 }
 \details{
-\strong{Selection and missing values}
+\strong{Counts and percentages}
 
-Computed columns are evaluated on ungrouped working data before counts are
-calculated within groups. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} first
-when a calculation needs to run separately within each group. Missingness
-includes \code{NaN}, tagged missing values, and SPSS user-missing codes and
-ranges. Empty strings are observed values. List-column values are counted by
-their complete identities, without flattening.
+The following five columns are produced by \code{tab()}, \code{tab1()}, \code{fre()}, and
+\code{fre1()}. For each group, let \code{n_i} be the count for category (or category
+combination) \code{i}, \code{N} the count across all categories, and \code{N_valid} the
+count excluding observations missing any measured variable. All percentages
+are on a \strong{0–100 scale}.
+\itemize{
+\item \code{n}: Number of observations in the category, or sum of weights if weighted.
+\item \code{percent}: Percentage of all observations, \code{100 * n_i / N}, \strong{including}
+missing measured values in the denominator.
+\item \code{cum}: Cumulative \code{percent}, summed in the displayed category order.
+\item \code{valid}: Percentage of complete observations, \code{100 * n_i / N_valid}.
+This is \code{NA} for categories with missing measured values.
+\item \code{valid_cum}: Cumulative \code{valid}, in displayed order, omitting missing
+measured categories.
+}
 
-\strong{Counts, percentages, and totals}
+Thus \code{percent} corresponds to Stata's \verb{tabulate, missing}, while \code{valid}
+uses the denominator from \code{tabulate} without \code{missing}. A missing grouping
+key does not by itself make a measured value invalid.
 
-For \code{tab()}, \code{tab1()}, \code{fre()} and \code{fre1()}, \code{n} counts observations.
-\code{percent} and \code{cum} are percentages from zero to 100 using all observations
-within each group; \code{cum} follows the displayed category order. \code{valid} and
-\code{valid_cum} use only observations with no missing measured values. Missing
-group keys are retained and do not make an otherwise observed value invalid.
-Missing measured categories have \code{NA} valid percentages and appear last. So
-\code{percent} matches the user-written \code{fre} and \verb{tabulate, missing}, and \code{valid}
-matches plain \code{tabulate}, which leaves missing values out.
+\strong{Missing values and category order}
+
+Missing measured values are kept as categories and shown last. Missingness
+includes \code{NA}, \code{NaN}, tagged missing values, and SPSS user-missing codes or
+ranges; empty strings are observed values. Factors follow their level order;
+other categories are sorted by value unless \code{.desc} requests frequency
+order. List-column elements are counted as complete values, not flattened.
+
+\strong{Weighted counts and percentages}
+
+Let \code{w_j} be the weight for observation \code{j} in a group.
+\itemize{
+\item \strong{Frequency weights} (\code{.wt_type = "frequency"}): Category counts are
+\code{n_i = sum(w_j)} over observations in that category. Weights need not be
+integers.
+\item \strong{Analytic weights} (\code{.wt_type = "analytic"}): Weights are rescaled
+within each group to sum to its number of rows. Category counts sum the
+rescaled weights, so the overall count stays on the sample-size scale.
+\item \strong{Percentages:} Both weight types give the same percentages because the
+normalization factor cancels in each group. Cumulative and valid
+percentages use the corresponding weighted counts and denominators.
+}
+
+Rows with missing weights are excluded; negative weights are not allowed.
+If \code{...} is omitted, the weight column is not itself tabulated.
+
+\strong{Totals and value labels}
 
 \code{fre()} and \code{fre1()} append a \code{"Total"} row within each group and may add
-\code{"Valid Total"} and \code{"Missing Total"} subtotals. In tables with up to five
-measured variables, the final measured column is converted to character to
-hold these labels; wider tables use a separate \code{total} label column.
-Displayed value labels can coincide for distinct underlying values, or with
-an observed \code{"Total"} category. Counts remain separate; use \code{tab()} or
-\code{tab1()} when original category values and types are needed.
+\code{"Valid Total"} and \code{"Missing Total"} subtotals. \code{fre2()} adds a marginal
+total row and column. \code{fre()} and \code{fre1()} display value labels; \code{fre2()}
+displays row-category labels but keeps column headers based on category
+codes. \code{tab()} and \code{tab1()} retain underlying category codes and types. Totals
+may convert a category column to character or introduce a \code{total} label column.
+Distinct category codes remain separate even if their labels coincide.
 
-\strong{Cross-tabulation}
+\strong{Cross-tabulations and association tests}
 
-Cross-tabulation keeps category names unchanged. Categories may match the
-original variable names. Column categories follow their values: factor levels
-in order, other types ascending, with missing values last. A category
-matching the combined row-header name, or literal \code{"NA"} alongside a missing
-column category, causes a name collision. With \code{tab2(.total = TRUE)}, the
-column category \code{"total"} is reserved for marginal totals; recode it first or
-omit the totals. The final row of \code{tab2(.total = TRUE)} is the marginal
-total, labelled \code{"total"}; an observed row category with that label remains a
-separate row. Blank column categories use \code{"<empty>"}, with the smallest
-unused numeric suffix when that header is already taken. Logical
-cross-tabulation axes follow \code{FALSE}, \code{TRUE}, then missing values.
+\code{tab2()} and \code{fre2()} report cell counts rather than the five percentages
+listed above. With \code{.chi2 = TRUE}, Pearson's chi-square test uses the
+displayed categories, including missing ones. Filter missing categories
+beforehand if they should not contribute to the test. Empty rows and
+columns are excluded from the calculation.
 
-With \code{.chi2 = TRUE}, \code{tab2()} tests the categories shown in the table,
-including missing ones (filter them out first to exclude them, as Stata's
-\verb{tabulate, chi2} does without \code{missing}), and drops rows or columns with no
-observations. It prints Pearson's chi-square, its degrees of freedom, the
-p-value and Cramer's V as a message; flextable output adds them as a footer.
-As in Stata, V keeps its sign in 2 x 2 tables. Frequency weights are treated
-as counts; analytic weights are an error, because a design-based test such as
-\code{survey::svychisq()} is needed for sampling weights.
+Let \code{O_ij} be an observed cell count, \code{E_ij} its expected count under
+independence, \code{r} the number of nonempty rows, \code{c} the number of nonempty
+columns, and \code{N} the total count:
+\itemize{
+\item \strong{Expected counts:} \code{E_ij = row_total_i * column_total_j / N}.
+\item \strong{Pearson's chi-square:} \code{X^2 = sum((O_ij - E_ij)^2 / E_ij)}.
+\item \strong{Degrees of freedom:} \code{df = (r - 1) * (c - 1)}.
+\item \strong{p-value:} Upper-tail probability of a chi-square distribution with
+\code{df} degrees of freedom.
+\item \strong{Cramer's V:} \code{sqrt(X^2 / (N * min(r - 1, c - 1)))}; for 2-by-2 tables,
+the reported value retains the sign used by the implementation.
+}
 
-\strong{Combined output and names}
+Frequency weights act as cell counts for the test. Analytic weights are
+not supported; for complex survey designs, use \code{\link[survey:svychisq]{survey::svychisq()}}.
+Cross-tabulation category values become column names, so conflicts with
+reserved names such as \code{"total"} may require recoding.
 
-Combined \code{tab1()} output uses character values when factor types cannot be
-combined; each variable's category order is retained. List output preserves
-the original category classes.
+\strong{Computed variables and groups}
 
-Input columns that clash with output names are renamed with a leading dot,
-with a message. If the new name is already taken, rename the input first. The
-input data are not modified.
+Named expressions in \code{...} are evaluated on ungrouped data, before counts
+are calculated within groups. Use grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} first for
+group-specific computations. Input column names that conflict with output
+columns are renamed in the result; the input data are unchanged.
 }
 \examples{
-# fre() shows value labels; tab() keeps the labelled codes
+# Compare the three approaches using the same variables
+# Joint frequencies: one long table
+tab(lifeexp, region, high = lexp >= 70)
+
+# Separate one-way tables: one for region and one for high
+tab1(lifeexp, region, high = lexp >= 70)
+
+# Two-way cross-tabulation: region by high
+tab2(lifeexp, region, high = lexp >= 70)
+
+# Add totals and display value labels
 fre(lifeexp, region)
 
-tab(lifeexp, region)
+fre2(lifeexp, region, high = lexp >= 70)
 
-# Tabulate a column by position, a condition, or a named expression.
-tab(lifeexp, 1)
+# Frequencies within groups
+tab(lifeexp, high = lexp >= 70, .by = region)
 
-tab(lifeexp, region, .desc = TRUE)
+# Many distinct values of a continuous variable: preview the table compactly
+tab(lifeexp, lexp) |> print_headtail(n = 6)
 
-tab(lifeexp, lexp >= 70)
+tab(lifeexp, lexp) |> print_interval(n = 6)
 
-tab(lifeexp, lexp_70 = lexp >= 70)
+# Pearson's chi-square and Cramer's V
+result <- tab2(lifeexp, region, high = lexp >= 70, .chi2 = TRUE)
+attr(result, "chi2")
 
-# Mix an existing column and a computed category
-tab(lifeexp, region, lexp_70 = lexp >= 70)
-
-tab2(lifeexp, region, lexp_70 = lexp >= 70)
-
-tab(lifeexp, varlist("*p*"))
-
-tab(lifeexp)
-
-tab(c(1, 1, 2, NA))
-
-fre(c(1, 1, 2, NA))
-
-# Weighted frequencies, like Stata's tab x [fw=w] or [aw=w].
-survey <- tibble::tibble(edu = c("low", "high", "high"), w = c(2, 1, 1.5))
-tab(survey, edu, .wt = w)
-
-tab(survey, edu, .wt = w, .wt_type = "analytic")
-
-# Illustrative indicators for cross-tabulation; keep lifeexp unchanged.
-countries <- dplyr::mutate(
-  lifeexp,
-  lexp_70 = lexp >= 70,
-  water_80 = safewater >= 80
-)
-tab(countries, region, lexp_70)
-
-tab(countries, lexp_70, .by = region, .group_order = "frequency")
-
-tab1(lifeexp, 1:3)
-
-tab1(countries, matches("^(region|lexp_70)$"))
-
-tab(lifeexp, region, .total = TRUE)
-
-tab2(countries, region, lexp_70)
-
-fre2(countries, lexp, lexp_70)
-
-# Every pairwise table, like Stata's tab2 region lexp_70 water_80.
-tab2(countries, region, lexp_70, water_80)
-
-# One cross-table per group, like Stata's by region: tab lexp_70 water_80.
-tab2(countries, lexp_70, water_80, .by = region) |> head(2)
-
-# Chi-square test of independence, like Stata's tab x y, chi2 V.
-chi2 <- tab2(countries, region, lexp_70, .chi2 = TRUE)
-attr(chi2, "chi2")
-
-# Several character columns share a suffix in this dataset.
-starwars <- dplyr::starwars
-tab(starwars, ends_with("color"))
-
-tab1(starwars, ends_with("color"))
-
-tab1(starwars, ends_with("color"), .type = "tibble")
-
-fre1(starwars, ends_with("color"))
+# Frequency weights
+survey <- tibble::tibble(response = c("yes", "no", "yes"), w = c(2, 1, 3))
+tab(survey, response, .wt = w)
 }
 \seealso{
 Other tabulation functions:
+\code{\link[=corr]{corr()}},
 \code{\link[=pwcorr]{pwcorr()}}
 }
 \concept{tabulation functions}

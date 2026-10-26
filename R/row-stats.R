@@ -1,8 +1,23 @@
 #' Calculate summaries across columns within each row
 #'
+#' @description
 #' Summarize selected columns within each row using arithmetic, extrema,
 #' distinct-value counts, or missing-value counts. Use a data frame directly or
 #' select columns inside [dplyr::mutate()].
+#'
+#' * `row_mean()`: Calculate the arithmetic mean within each row.
+#' * `row_sum()`: Add the values within each row.
+#' * `row_max()`: Find the largest value within each row.
+#' * `row_min()`: Find the smallest value within each row.
+#' * `row_median()`: Find the median within each row.
+#' * `row_var()`: Calculate the sample variance within each row.
+#' * `row_sd()`: Calculate the sample standard deviation within each row.
+#' * `row_unique()`: Count distinct values within each row, counting missing
+#'   values as one category.
+#' * `row_nvals()`: Count distinct non-missing values within each row by
+#'   default; use `.missing = TRUE` to count missing values as one category.
+#' * `row_miss()`: Count missing values within each row.
+#' * `row_non_miss()`: Count non-missing values within each row.
 #'
 #' @param ... A data frame or tibble, or
 #'   <[`tidy-select`][dplyr::dplyr_tidy_select]> expressions inside

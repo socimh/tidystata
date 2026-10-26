@@ -3,16 +3,15 @@
 #' @description
 #' Vector helpers for [dplyr::mutate()], following Stata's `egen`:
 #'
-#' * `std()` standardises to mean 0 and standard deviation 1, like `egen z =
+#' * `std()`: Standardise to mean 0 and standard deviation 1, like `egen z =
 #'   std(x)`. Unlike [scale()], it returns a plain vector.
-#' * `pc()` gives each value as a percentage of the total, like `egen p =
-#'   pc(x)`, or as a proportion with `prop = TRUE`.
+#' * `pc()` (`pct()`): Express each value as a percentage of the total, like
+#'   `egen p = pc(x)`, or as a proportion with `prop = TRUE`.
 #'
 #' @details
-#' `pct()` is an alias of `pc()`. The gt package also exports a `pct()` (for
-#' column widths), so prefer `pc()` when gt is attached. In grouped
-#' [dplyr::mutate()] (or with `.by`), the mean, standard deviation and total
-#' come from each group, like Stata's `by g: egen`.
+#' The gt package also exports a `pct()` (for column widths), so prefer `pc()`
+#' when gt is attached. In grouped [dplyr::mutate()] (or with `.by`), the mean,
+#' standard deviation and total come from each group, like Stata's `by g: egen`.
 #'
 #' @param x A numeric or logical vector. Labelled numeric vectors are used
 #'   through their codes.

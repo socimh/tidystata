@@ -77,16 +77,20 @@ Supported containers are listed under \code{.data}; other subclasses are
 unsupported.
 }
 \description{
-\code{preview_table()} keeps the complete data and remembers how to print it. The
-default shows the first five and last five rows. Interval previews show
-evenly spaced rows; separate helpers print once or select actual rows.
+Control how a complete table is printed, or select a smaller set of rows:
+\itemize{
+\item \code{preview_table()}: Keep the complete data and store a print preference.
+By default, show the first five and last five rows; interval previews
+show evenly spaced rows.
+\item \code{unpreview_table()}: Remove the stored print preference, keeping all data.
+\item \code{print_headtail()}: Print the first and last rows once, keeping all data.
+\item \code{print_interval()}: Print evenly spaced rows once, keeping all data.
+\item \code{print_all()}: Print every row and column, like Stata's \code{list}.
+\item \code{slice_headtail()}: Return only the selected first and last rows.
+\item \code{slice_interval()}: Return only the selected evenly spaced rows.
+}
 }
 \details{
-\code{unpreview_table()} removes the stored preference. \code{print_headtail()} and
-\code{print_interval()} print once; \code{print_all()} prints every row and column,
-like Stata's \code{list}. Use \code{slice_headtail()} or \code{slice_interval()} only when a
-smaller data set is wanted: they actually select rows.
-
 Preview settings survive table subsetting/replacement, dplyr mutation,
 filtering, sorting, column selection, renaming, relocation, distinct rows,
 slicing, grouping, rowwise operations, summaries and reframing, as well as
