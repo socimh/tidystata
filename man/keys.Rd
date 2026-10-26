@@ -22,57 +22,59 @@ duplicates_drop(.data, ..., .force = FALSE)
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The identifying columns.
-Omit to use all columns, as Stata does.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The identifying columns. Omit
+to use all columns, as Stata does.}
 
-\item{.missok}{A single \code{TRUE} or \code{FALSE}. If \code{FALSE} (default), \code{isid()}
-errors when an identifying column contains missing values, as Stata's
-\code{isid} does without the \code{missok} option.}
+\item{.missok}{If \code{FALSE} (default), \code{isid()} errors when an identifying
+column contains missing values, as Stata's \code{isid} does without the \code{missok}
+option.}
 
 \item{.name}{Name of the new column created by \code{duplicates_tag()}.}
 
-\item{.force}{A single \code{TRUE} or \code{FALSE}. When only some columns are
-selected, rows that share those columns can still differ elsewhere, and
-\code{duplicates_drop()} errors unless \code{.force = TRUE}, like Stata's
-\verb{duplicates drop varlist, force}.}
+\item{.force}{If \code{TRUE}, allow \code{duplicates_drop()} to remove rows that match
+on the selected columns but differ elsewhere, like Stata's \verb{duplicates drop varlist, force}. Defaults to \code{FALSE}; exact duplicate rows can be dropped
+without this option.}
 }
 \value{
 \itemize{
 \item \code{isid()}: \code{.data}, invisibly.
 \item \code{duplicates_report()}: a tibble with one row per number of copies:
-\code{copies}, \code{observations} (rows with that many copies) and \code{surplus}
-(rows beyond the first of each set).
-\item \code{duplicates_tag()}: \code{.data} with an integer column of the number of
-other rows sharing the same values (0 for unique rows).
+\code{copies}, \code{observations} (rows with that many copies) and \code{surplus} (rows
+beyond the first of each set).
+\item \code{duplicates_tag()}: \code{.data} with an integer column of the number of other
+rows sharing the same values (0 for unique rows).
 \item \code{duplicates_list()}: the duplicated rows, ordered by their identifying
 values, with \code{.dup_group} (set number) and \code{.row} (original position).
-Existing columns with either metadata name cause an error; rename them first.
-\item \code{duplicates_drop()}: \code{.data} without the surplus rows, with a message
-giving the number of rows removed.
+\item \code{duplicates_drop()}: \code{.data} without surplus rows, keeping the first row of
+each set in input order.
 }
 
-The input's data.frame, tibble, data.table or grouped container is kept
-where rows or columns of \code{.data} are returned.
+The input's data.frame, tibble, data.table or grouped container is kept where
+rows or columns of \code{.data} are returned.
 }
 \description{
 Stata-style checks of identifying variables and duplicated rows.
 \itemize{
-\item \code{isid()} checks that the selected columns uniquely identify the rows,
-like Stata's \code{isid}. It returns the data invisibly when they do and
-errors otherwise, so it can sit inside a pipeline. Wrap it in
-\code{\link[=capture]{capture()}} for a \code{TRUE}/\code{FALSE} answer.
+\item \code{isid()} checks that the selected columns uniquely identify the rows, like
+Stata's \code{isid}. It returns the data invisibly when they do and errors
+otherwise, so it can sit inside a pipeline. Wrap it in \code{\link[=capture]{capture()}} for a
+\code{TRUE}/\code{FALSE} answer.
 \item \code{duplicates_report()} counts how many rows share the same values, like
 \verb{duplicates report}.
-\item \code{duplicates_tag()} adds the number of other rows with the same values,
-like \verb{duplicates tag, generate()}.
+\item \code{duplicates_tag()} adds the number of other rows with the same values, like
+\verb{duplicates tag, generate()}.
 \item \code{duplicates_list()} returns the duplicated rows, like \verb{duplicates list}.
 \item \code{duplicates_drop()} keeps the first row of each duplicated set, like
 \verb{duplicates drop}.
 }
 }
 \details{
-Missing values count as equal to each other, as in Stata, so two rows
-that are both missing on every selected column are duplicates.
+Missing values count as equal to each other, as in Stata, so two rows that
+are both missing on every selected column are duplicates. Checks and
+duplicate counts use the whole input, regardless of grouping.
+\code{duplicates_list()} rejects existing \code{.dup_group} or \code{.row} columns; rename
+them first. \code{duplicates_drop()} reports the number of rows removed as a
+message. The input data are not modified.
 }
 \examples{
 panel <- tibble::tibble(
@@ -82,12 +84,17 @@ panel <- tibble::tibble(
 )
 # id repeats, so this errors; capture() turns it into TRUE/FALSE
 try(isid(panel, id))
+
 capture(isid(panel, id))
+
 isid(panel[-4, ], id, wave)
 
 duplicates_report(panel, id, wave)
+
 duplicates_tag(panel, id, wave)
+
 duplicates_list(panel, id, wave)
+
 duplicates_drop(panel)
 }
 \seealso{

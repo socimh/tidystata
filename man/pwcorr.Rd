@@ -2,7 +2,7 @@
 % Please edit documentation in R/pwcorr.R
 \name{pwcorr}
 \alias{pwcorr}
-\title{Pairwise correlations}
+\title{Calculate pairwise correlations}
 \usage{
 pwcorr(
   .data,
@@ -17,20 +17,23 @@ pwcorr(
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Numeric or logical
-vector columns. Matrix columns are unsupported. Omit to use every numeric
-or logical vector column; other columns are then skipped. Selecting another
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with
+\code{\link[=select_or_transmute]{select_or_transmute()}}. Existing columns, selection helpers, and named
+expressions can be mixed. Results must be numeric or logical vector
+columns. Matrix columns are unsupported. Omit to use every numeric or
+logical vector column; other columns are then skipped. Selecting another
 type is an error.}
 
-\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping
-variables. Grouped data use their groups unless \code{.by} is supplied.}
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables.
+Grouped data use their groups unless \code{.by} is supplied. Select existing
+columns only; create new grouping columns with \code{\link[dplyr:mutate]{dplyr::mutate()}} first.}
 
-\item{.method}{\code{"pearson"} (default) or \code{"spearman"}, like Stata's
-\code{pwcorr} and \code{spearman}.}
+\item{.method}{\code{"pearson"} (default) or \code{"spearman"}, like Stata's \code{pwcorr}
+and \code{spearman}.}
 
-\item{.wide}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE}, return the correlation
-matrix as Stata prints it: one row per variable and the lower triangle
-filled, without \code{n} or \code{p}.}
+\item{.wide}{If \code{TRUE}, return the correlation matrix as Stata prints it: one
+row per variable and the lower triangle filled, without \code{n} or \code{p}.}
 
 \item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector with
 one value per row), like Stata's \code{pwcorr [fweight/aweight]}. Pearson
@@ -41,31 +44,48 @@ the same under both; with frequency weights, \code{n} and the p-value use the
 summed weight, and with analytic weights the number of rows.}
 }
 \value{
-By default, a tibble with one row per pair (and group): any grouping keys,
-\code{var1}, \code{var2}, \code{r}, \code{n} and \code{p}. With \code{.wide = TRUE}, a tibble with any
-grouping keys, \code{variable} and one column of correlations per variable.
+An ungrouped tibble with:
+\itemize{
+\item By default, one row per distinct variable pair and group, with any grouping
+keys, \code{var1}, \code{var2}, \code{r} (correlation), \code{n} (observations or summed
+frequency weight), and \code{p} (two-sided p-value).
+\item With \code{.wide = TRUE}, one row per variable and group, with grouping keys,
+\code{variable}, and one correlation column per variable. The diagonal is 1 and
+the upper triangle is \code{NA}; \code{n} and \code{p} are omitted.
+}
+
+Undefined correlations and p-values are \code{NA} (see Details).
 }
 \description{
-A tidy table of pairwise correlations, like Stata's \verb{pwcorr, sig obs}.
-Each pair of variables uses every row where both are observed (pairwise
-deletion), and the table reports the correlation, the number of
-observations and the p-value.
+Calculate pairwise correlations, like Stata's \verb{pwcorr, sig obs}. Each pair of
+variables uses every row where both are observed (pairwise deletion), and the
+table reports the correlation, the number of observations and the p-value.
 }
 \details{
+Computed columns are evaluated on ungrouped working data before correlations
+are calculated within groups. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}
+first when a calculation needs to run separately within each group.
+
 The p-value is the two-sided test of zero correlation that Stata reports,
-based on \code{t = r * sqrt((n - 2) / (1 - r^2))} with \code{n - 2} degrees of
-freedom. For Pearson correlations it matches \code{cor.test()}; for Spearman
-correlations it is the same large-sample approximation that Stata uses.
-Correlations with a constant variable, and p-values with fewer than three
-observations, are \code{NA}. Labelled numeric columns are correlated on their
-codes. For listwise deletion, as in Stata's \code{correlate}, drop incomplete
-rows first with \code{tidyr::drop_na()}.
+based on \code{t = r * sqrt((n - 2) / (1 - r^2))} with \code{n - 2} degrees of freedom.
+For Pearson correlations it matches \code{cor.test()}; for Spearman correlations
+it is the same large-sample approximation that Stata uses. Correlations with
+a constant variable, and p-values with fewer than three observations, are
+\code{NA}. Labelled numeric columns are correlated on their codes, excluding
+tagged and SPSS user-missing values. For listwise deletion, as in Stata's
+\code{correlate}, drop incomplete rows first with \code{tidyr::drop_na()}.
 }
 \examples{
 pwcorr(lifeexp, lexp, gnppc, safewater)
+
 pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
+
 pwcorr(lifeexp, lexp, gnppc, .by = region)
+
 pwcorr(lifeexp, lexp, gnppc, .method = "spearman")
+
+# Correlate an existing column with a computed column
+pwcorr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
 }
 \seealso{
 Other tabulation functions:

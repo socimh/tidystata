@@ -1,48 +1,64 @@
-#' Pairwise correlations
+#' Calculate pairwise correlations
 #'
 #' @description
-#' A tidy table of pairwise correlations, like Stata's `pwcorr, sig obs`.
-#' Each pair of variables uses every row where both are observed (pairwise
-#' deletion), and the table reports the correlation, the number of
-#' observations and the p-value.
+#' Calculate pairwise correlations, like Stata's `pwcorr, sig obs`. Each pair of
+#' variables uses every row where both are observed (pairwise deletion), and the
+#' table reports the correlation, the number of observations and the p-value.
 #'
 #' @inheritParams tidystata_args
-#' @param ... <[`tidy-select`][dplyr_tidy_select]> Numeric or logical
-#' vector columns. Matrix columns are unsupported. Omit to use every numeric
-#' or logical vector column; other columns are then skipped. Selecting another
-#' type is an error.
-#' @param .method `"pearson"` (default) or `"spearman"`, like Stata's
-#' `pwcorr` and `spearman`.
-#' @param .wide A single `TRUE` or `FALSE`. If `TRUE`, return the correlation
-#' matrix as Stata prints it: one row per variable and the lower triangle
-#' filled, without `n` or `p`.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> or
+#'   <[`data-masking`][args_data_masking]> Columns to select or compute with
+#'   [select_or_transmute()]. Existing columns, selection helpers, and named
+#'   expressions can be mixed. Results must be numeric or logical vector
+#'   columns. Matrix columns are unsupported. Omit to use every numeric or
+#'   logical vector column; other columns are then skipped. Selecting another
+#'   type is an error.
+#' @param .method `"pearson"` (default) or `"spearman"`, like Stata's `pwcorr`
+#'   and `spearman`.
+#' @param .wide If `TRUE`, return the correlation matrix as Stata prints it: one
+#'   row per variable and the lower triangle filled, without `n` or `p`.
 #' @param .wt Optional weights: a numeric column of `.data` (or a vector with
-#' one value per row), like Stata's `pwcorr [fweight/aweight]`. Pearson
-#' correlations only. Rows with a missing weight are excluded with a message.
+#'   one value per row), like Stata's `pwcorr [fweight/aweight]`. Pearson
+#'   correlations only. Rows with a missing weight are excluded with a message.
 #' @param .wt_type `"frequency"` (default) or `"analytic"`. The correlation is
-#' the same under both; with frequency weights, `n` and the p-value use the
-#' summed weight, and with analytic weights the number of rows.
+#'   the same under both; with frequency weights, `n` and the p-value use the
+#'   summed weight, and with analytic weights the number of rows.
 #'
-#' @returns
-#' By default, a tibble with one row per pair (and group): any grouping keys,
-#' `var1`, `var2`, `r`, `n` and `p`. With `.wide = TRUE`, a tibble with any
-#' grouping keys, `variable` and one column of correlations per variable.
+#' @returns An ungrouped tibble with:
+#' * By default, one row per distinct variable pair and group, with any grouping
+#'   keys, `var1`, `var2`, `r` (correlation), `n` (observations or summed
+#'   frequency weight), and `p` (two-sided p-value).
+#' * With `.wide = TRUE`, one row per variable and group, with grouping keys,
+#'   `variable`, and one correlation column per variable. The diagonal is 1 and
+#'   the upper triangle is `NA`; `n` and `p` are omitted.
+#'
+#' Undefined correlations and p-values are `NA` (see Details).
 #'
 #' @details
+#' Computed columns are evaluated on ungrouped working data before correlations
+#' are calculated within groups. Create columns with grouped [dplyr::mutate()]
+#' first when a calculation needs to run separately within each group.
+#'
 #' The p-value is the two-sided test of zero correlation that Stata reports,
-#' based on `t = r * sqrt((n - 2) / (1 - r^2))` with `n - 2` degrees of
-#' freedom. For Pearson correlations it matches `cor.test()`; for Spearman
-#' correlations it is the same large-sample approximation that Stata uses.
-#' Correlations with a constant variable, and p-values with fewer than three
-#' observations, are `NA`. Labelled numeric columns are correlated on their
-#' codes. For listwise deletion, as in Stata's `correlate`, drop incomplete
-#' rows first with `tidyr::drop_na()`.
+#' based on `t = r * sqrt((n - 2) / (1 - r^2))` with `n - 2` degrees of freedom.
+#' For Pearson correlations it matches `cor.test()`; for Spearman correlations
+#' it is the same large-sample approximation that Stata uses. Correlations with
+#' a constant variable, and p-values with fewer than three observations, are
+#' `NA`. Labelled numeric columns are correlated on their codes, excluding
+#' tagged and SPSS user-missing values. For listwise deletion, as in Stata's
+#' `correlate`, drop incomplete rows first with `tidyr::drop_na()`.
 #'
 #' @examples
 #' pwcorr(lifeexp, lexp, gnppc, safewater)
+#'
 #' pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
+#'
 #' pwcorr(lifeexp, lexp, gnppc, .by = region)
+#'
 #' pwcorr(lifeexp, lexp, gnppc, .method = "spearman")
+#'
+#' # Correlate an existing column with a computed column
+#' pwcorr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
 #' @family tabulation functions
 #' @export
 pwcorr <- function(

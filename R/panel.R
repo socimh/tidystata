@@ -1,69 +1,73 @@
-#' Panel lags, leads and differences
+#' Calculate panel lags, leads and differences
 #'
 #' @description
-#' Time-aware versions of [dplyr::lag()] and [dplyr::lead()], following
-#' Stata's time-series operators after `xtset`:
-#'
-#' * `stata_lag(x, n, time = t)` is `Ln.x`: the value of `x` at time `t - n`.
-#' * `stata_lead(x, n, time = t)` is `Fn.x`: the value of `x` at time `t + n`.
-#' * `stata_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
-#'   `stata_diff(x, time = t)` is `x - L.x` and `stata_diff(x, 2, time = t)` is
-#'   `D.(D.x)`.
-#'
-#' Values are found by time, not by row position, so gaps in time give
-#' missing values and the row order does not matter. Use them in
-#' [dplyr::mutate()] with the panel identifier in `.by` or [dplyr::group_by()],
-#' as `xtset id year` would declare it.
+#' Time-aware versions of [dplyr::lag()] and [dplyr::lead()], following Stata's
+#' time-series operators after `xtset`. Values are found by time rather than row
+#' position, so gaps give missing values and row order does not matter. Use them
+#' in [dplyr::mutate()] with the panel identifier in `.by` or
+#' [dplyr::group_by()].
 #'
 #' @param x A vector. `stata_diff()` needs a numeric, logical, `Date`, date-time
-#' or `difftime` vector.
+#'   or `difftime` vector.
 #' @param n A single non-negative whole number: the number of periods
-#' (`stata_lag()`, `stata_lead()`) or the order of the difference (`stata_diff()`).
+#'   (`stata_lag()`, `stata_lead()`) or the difference order (`stata_diff()`).
 #' @param time The time variable, unique within each panel. Supported types:
 #' * numbers, including labelled numbers and Stata `%tm`, `%tq` or `%ty`
 #'   variables read by haven, which arrive as plain numbers;
 #' * `Date` and date-times (`POSIXct`/`POSIXlt`), with `unit`;
-#' * period classes, which need no `unit`: tsibble's `yearweek()`,
-#'   `yearmonth()` and `yearquarter()`, and zoo's `yearmon` and `yearqtr`;
+#' * period classes, which need no `unit`: tsibble's `yearweek()`, `yearmonth()`
+#'   and `yearquarter()`, and zoo's `yearmon` and `yearqtr`;
 #' * ordered factors, such as survey waves, where each level is one period in
 #'   level order, so an unused level is a gap.
 #'
-#' Missing times give missing results. Text and unordered factors are not
+#' Missing times give missing results, except for zero-order differences.
+#' Text and unordered factors are not
 #' accepted, because their sorted order need not be the time order (`"W10"`
 #' sorts before `"W2"`); convert them first, for example with
 #' `as.numeric(as.character(year))` or `factor(wave, levels, ordered = TRUE)`.
-#' @param delta The length of one period in units of `time` (or of `unit`),
-#' like the `delta()` option of `xtset`. For example, `delta = 5` for data
-#' every five years.
-#' @param unit For `Date` and date-time times, the period: `"day"` (the
-#' default for dates), `"week"`, `"month"`, `"quarter"` or `"year"`, and for
-#' date-times also `"second"` (their default), `"minute"` and `"hour"`. Times
-#' are compared by whole periods, as with Stata's `%tw`, `%tm`, `%tq` and
-#' `%ty` dates, so any day in March is one month after any day in February.
-#' Weeks follow Stata's `%tw`: each year has 52 weeks starting on 1 January,
-#' so the last week has 8 or 9 days (tsibble's `yearweek()` keeps its ISO
-#' weeks). Date-times use the local clock of their time zone. Must be `NULL`
-#' for numbers and period classes.
+#' @param delta The length of one period in units of `time` (or of `unit`), like
+#'   the `delta()` option of `xtset`. For example, `delta = 5` for data every
+#'   five years.
+#' @param unit For `Date` and date-time times, the period: `"day"` (the default
+#'   for dates), `"week"`, `"month"`, `"quarter"` or `"year"`, and for
+#'   date-times also `"second"` (their default), `"minute"` and `"hour"`. Times
+#'   are compared by whole periods, as with Stata's `%tw`, `%tm`, `%tq` and
+#'   `%ty` dates, so any day in March is one month after any day in February.
+#'   Weeks follow Stata's `%tw`: each year has 52 weeks starting on 1 January,
+#'   so the last week has 8 or 9 days (tsibble's `yearweek()` keeps its ISO
+#'   weeks). Date-times use the local clock of their time zone. Must be `NULL`
+#'   for numbers and period classes.
 #'
-#' @returns A vector like `x`, with `NA` where the required period is absent
-#' from the panel. `stata_diff()` returns a double vector, or a `difftime` for
-#' dates, date-times and `difftime` input.
+#' @returns A vector with the length and row order of `x`, with `NA` where the
+#'   required period is absent or time is missing. Lags and leads retain the
+#'   type and attributes of `x`. Positive-order differences return doubles,
+#'   or `difftime` for dates, date-times and `difftime` input.
+#'
+#'   With `stata_diff(n = 0)`, numeric/logical inputs return doubles and
+#'   calendar/duration inputs retain their class (`POSIXlt` becomes `POSIXct`).
+#'   Missing times do not mask values in this case.
 #'
 #' @details
+#' * `stata_lag(x, n, time = t)` is `Ln.x`: the value at time `t - n * delta`.
+#' * `stata_lead(x, n, time = t)` is `Fn.x`: the value at time `t + n * delta`.
+#' * `stata_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
+#'   `stata_diff(x, time = t)` is `x - L.x` and `stata_diff(x, 2, time = t)` is
+#'   `D.(D.x)`.
+#'
 #' Compared with [dplyr::lag()]: `lag(x, order_by = year)` takes the previous
 #' *row* after sorting, so after a gap (2002, then 2004) it returns the 2002
 #' value as the lag of 2004, and it silently accepts repeated years or a
 #' forgotten `.by`. `stata_lag(x, time = year)` takes the value at `year - 1`,
-#' returns `NA` across the gap, and errors on repeated times, as Stata's
-#' `L.x` does. The two agree on sorted, gap-free panels. For irregular event
-#' sequences, where the previous record is wanted however long ago it was,
-#' use `dplyr::lag()`.
+#' returns `NA` across the gap, and errors on repeated times, as Stata's `L.x`
+#' does. The two agree on sorted, gap-free panels. For irregular event
+#' sequences, where the previous record is wanted however long ago it was, use
+#' `dplyr::lag()`.
 #'
 #' Time values must be unique within each panel (within the whole vector when
 #' there is no grouping), as Stata requires with "repeated time values within
 #' panel"; check them first with [isid()], such as `isid(data, id, year)`.
-#' Numeric times are matched exactly, so steps such as `0.1` should be
-#' rescaled to whole numbers first.
+#' Numeric times are matched exactly, so steps such as `0.1` should be rescaled
+#' to whole numbers first.
 #'
 #' @name panel
 #' @examples
@@ -86,7 +90,10 @@
 #'   month = as.Date(c("2024-01-31", "2024-02-29", "2024-04-30")),
 #'   amount = c(5, 7, 4)
 #' )
-#' dplyr::mutate(sales, previous = stata_lag(amount, time = month, unit = "month"))
+#' dplyr::mutate(
+#'   sales,
+#'   previous = stata_lag(amount, time = month, unit = "month")
+#' )
 #' @family variable generation functions
 NULL
 

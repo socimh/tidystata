@@ -21,9 +21,9 @@ stata_merge(
 \item{using}{The table to merge in.}
 
 \item{relationship}{The key relationship, as in Stata: \code{"1:1"} (keys unique
-in both tables), \code{"m:1"} (unique in \code{using}) or \code{"1:m"} (unique in \code{.data}).
-It is required and checked before joining. Stata's many-to-many (\code{m:m})
-merge is not supported. Use \code{\link[dplyr:inner_join]{dplyr::inner_join()}} with
+in both tables), \code{"m:1"} (unique in \code{using}) or \code{"1:m"} (unique in
+\code{.data}). It is required and checked before joining. Stata's many-to-many
+(\code{m:m}) merge is not supported. Use \code{\link[dplyr:inner_join]{dplyr::inner_join()}} with
 \code{relationship = "many-to-many"} if you need all pairings.}
 
 \item{by}{A character vector of key columns. Use a named vector, such as
@@ -33,25 +33,24 @@ merge is not supported. Use \code{\link[dplyr:inner_join]{dplyr::inner_join()}} 
 \code{"using"} (only in \code{using}) and \code{"match"} (in both). Default keeps all, as
 Stata does.}
 
-\item{assert}{\code{NULL} (default) or any of \code{"master"}, \code{"using"} and
-\code{"match"}. If given, every row must be in one of these groups, otherwise
+\item{assert}{\code{NULL} (default) or any of \code{"master"}, \code{"using"} and \code{"match"}.
+If given, every row must be in one of these groups, otherwise
 \code{stata_merge()} errors, like Stata's \code{assert()} option.}
 
-\item{generate}{Name of the result column, \code{".merge"} by default. Use
-\code{NULL} to omit it (Stata's \code{nogenerate}).}
+\item{generate}{Name of the result column, \code{".merge"} by default. Use \code{NULL}
+to omit it (Stata's \code{nogenerate}).}
 
-\item{report}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), print the
-match report as a message.}
+\item{report}{If \code{TRUE} (default), print the match report as a message.}
 }
 \value{
-The merged table, in the container of \code{.data}. Rows from \code{.data}
-come first in their original order, followed by rows found only in
-\code{using}. The \code{.merge} column is a factor with levels \code{"master only"},
-\code{"using only"} and \code{"matched"}.
+An ungrouped merged table in the data.frame, tibble, or data.table
+container of \code{.data}. Retained rows from \code{.data} come first in their
+original order, followed by rows found only in \code{using}. Unless \code{generate = NULL}, the match-status column (\code{.merge} by default) is a factor with
+levels \code{"master only"}, \code{"using only"}, and \code{"matched"}.
 }
 \description{
-\code{stata_merge()} joins \code{using} onto \code{.data} like Stata's \code{merge}. It checks the
-stated key relationship first, keeps master, using and matched rows by
+\code{stata_merge()} joins \code{using} onto \code{.data} like Stata's \code{merge}. It checks
+the stated key relationship first, keeps master, using and matched rows by
 default, reports how many rows fell into each group, and records the result
 in a \code{.merge} column (Stata's \verb{_merge}).
 }
@@ -68,8 +67,10 @@ people <- tibble::tibble(id = 1:3, age = c(30, 41, 25))
 income <- tibble::tibble(id = c(2, 3, 4), income = c(10, 20, 30))
 stata_merge(people, income, "1:1", by = "id")
 
-# Keep matched rows only, and insist that every person is matched
+# Require every person to be matched
 try(stata_merge(people, income, "1:1", by = "id", assert = "match"))
+
+# Keep matched rows only
 stata_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
 
 # Many people per household

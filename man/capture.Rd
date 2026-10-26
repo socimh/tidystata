@@ -10,7 +10,8 @@ capture(x)
 \item{x}{An expression to evaluate once.}
 }
 \value{
-A single logical value.
+A single logical value: \code{TRUE} on success, \code{FALSE} on error or when
+the expression returns an object inheriting from \code{try-error}.
 }
 \description{
 \code{capture()} works like Stata's \code{capture}: it evaluates an expression,
@@ -19,16 +20,15 @@ suppresses any error, and returns \code{TRUE} if the expression succeeded and
 }
 \details{
 Errors are caught without printing their messages; warnings and messages
-propagate normally. For compatibility with \code{\link[=try]{try()}}, a successful expression
-that returns an object inheriting from \code{try-error} also yields \code{FALSE}.
+propagate normally. The \code{try-error} exception follows \code{\link[=try]{try()}} compatibility.
 }
 \examples{
 capture(mean(1:10))
 
-# This gives a warning, but it is still working, so capture() returns TRUE
+# Warnings do not count as errors
 capture(mean(letters[1:10]))
 
-# This throws an error, so capture() returns FALSE
+# Errors return FALSE
 capture(means(1:10))
 
 # Check a key without stopping the script

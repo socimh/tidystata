@@ -1,31 +1,31 @@
-#' Persistent previews of complete tables
+#' Preview complete tables or select representative rows
 #'
-#' @description
-#' `preview_table()` keeps the complete data and remembers how to print it.
-#' The default shows the first five and last five rows. Interval previews show
-#' evenly spaced rows. `unpreview_table()` removes the preference.
-#'
-#' `print_headtail()` and `print_interval()` print once and invisibly return
-#' the unchanged input. `print_all()` prints every row and every column, like
-#' Stata's `list`, and also returns the input invisibly. `slice_headtail()` and
-#' `slice_interval()` actually select rows, so use them only when a smaller
-#' data set is wanted.
+#' `preview_table()` keeps the complete data and remembers how to print it. The
+#' default shows the first five and last five rows. Interval previews show
+#' evenly spaced rows; separate helpers print once or select actual rows.
 #'
 #' @param .data An in-memory data frame, data.table, ordinary tibble, grouped
-#' tibble, rowwise tibble, or `sf` data frame (geometry is kept when slicing and
-#' printed as a column). Convert other subclasses explicitly before wrapping;
-#' collect lazy tables first. Apply the wrapper separately to lists of tables.
+#'   tibble, rowwise tibble, or `sf` data frame (geometry is kept when slicing
+#'   and printed as a column). Convert other subclasses explicitly before
+#'   wrapping; collect lazy tables first. Apply the wrapper separately to lists
+#'   of tables.
 #' @param style Either `"headtail"` or `"interval"`.
 #' @param n Total number of rows to display or select: a positive whole number
-#' or `Inf` for all rows. An odd head/tail budget gives the head the extra row.
-#' With `n = 1`, both styles select the first row. Short tables never repeat rows.
+#'   or `Inf` for all rows. An odd head/tail budget gives the head the extra
+#'   row. With `n = 1`, both styles select the first row. Short tables do not
+#'   repeat rows.
 #' @param width Console width, passed to tibble formatting. `NULL` uses the
-#' current console width; `Inf` (the default for `print_all()`) shows all
-#' columns.
+#'   current console width; `Inf` (the default for `print_all()`) shows all
+#'   columns.
 #' @param ... Additional arguments passed to tibble formatting.
 #' @param max_extra_cols,max_footer_lines Tibble formatting controls.
 #'
 #' @details
+#' `unpreview_table()` removes the stored preference. `print_headtail()` and
+#' `print_interval()` print once; `print_all()` prints every row and column,
+#' like Stata's `list`. Use `slice_headtail()` or `slice_interval()` only when a
+#' smaller data set is wanted: they actually select rows.
+#'
 #' Preview settings survive table subsetting/replacement, dplyr mutation,
 #' filtering, sorting, column selection, renaming, relocation, distinct rows,
 #' slicing, grouping, rowwise operations, summaries and reframing, as well as
@@ -41,33 +41,46 @@
 #'
 #' `print(x, n = Inf)` displays the entire table. Per-call formatting overrides
 #' do not change stored settings. Explicit `tibble::as_tibble()` or
-#' `as.data.frame()` conversions remove the preview, as does extracting a column.
-#' This feature controls console printing, not HTML widgets or GUI viewers.
-#' Only the temporary display is converted to a tibble. Wrapping and unwrapping
-#' a data.table creates an independent copy; native operations such as `:=`
-#' on a wrapped data.table retain ordinary reference semantics. External
-#' dplyr/tidyr verbs determine their own result container and grouping, while
-#' preview settings follow the result.
+#' `as.data.frame()` conversions remove the preview, as does column extraction.
+#' This feature controls console printing, not HTML widgets or GUI viewers. Only
+#' the temporary display is converted to a tibble. Wrapping and unwrapping a
+#' data.table creates an independent copy; native operations such as `:=` on a
+#' wrapped data.table retain ordinary reference semantics. External dplyr/tidyr
+#' verbs determine their own result container and grouping, while preview
+#' settings follow the result.
 #'
-#' @returns `preview_table()` returns the complete input container with an additional
-#' `tidystata_preview` class. `unpreview_table()` returns the table without that
-#' class or its settings, preserving grouping. The print helpers invisibly
-#' return their original input. The slice helpers return the selected rows in
-#' the input container, retaining valid grouping and existing preview settings.
-#' Explicit base data.frame row names are preserved. Slice helpers regenerate
-#' automatic row names following dplyr's row-slicing behavior. Other subclasses
-#' are unsupported.
+#' @returns
+#' * `preview_table()`: the complete input container with an additional
+#'   `tidystata_preview` class and stored print settings.
+#' * `unpreview_table()`: the table without that class or its settings,
+#'   preserving grouping.
+#' * Print helpers: the original input, invisibly.
+#' * Slice helpers: the selected rows in the input container, retaining valid
+#'   grouping and existing preview settings. Explicit data.frame row names are
+#'   preserved; automatic row names are regenerated as in dplyr slicing.
+#'
+#' Supported containers are listed under `.data`; other subclasses are
+#' unsupported.
 #' @examples
 #' x <- preview_table(tibble::tibble(id = 1:30, value = (1:30)^2))
 #' x
+#'
 #' dplyr::filter(x, id > 10)
+#'
 #' preview_table(x, style = "interval", n = 5)
+#'
 #' print(x, n = Inf)
+#'
 #' unpreview_table(x)
+#'
 #' print_headtail(lifeexp, n = 6)
+#'
 #' print_interval(lifeexp, n = 6)
+#'
 #' print_all(head(lifeexp, 12))
+#'
 #' slice_headtail(lifeexp, n = 6)
+#'
 #' slice_interval(lifeexp, n = 6)
 #' @name special-print
 #' @family selection and preview functions

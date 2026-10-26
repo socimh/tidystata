@@ -42,65 +42,61 @@ row_non_miss(...)
 <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> expressions inside
 \code{\link[dplyr:mutate]{dplyr::mutate()}}. Each selected column must be one-dimensional.}
 
-\item{na.rm}{For arithmetic and extrema helpers, a single logical value. If
-\code{TRUE} (the default), omit missing values; if \code{FALSE}, any missing input
-makes that row's result missing. Count helpers (\code{row_unique()},
-\code{row_nvals()}, \code{row_miss()}, \code{row_non_miss()}) reject \code{na.rm}.}
+\item{na.rm}{For arithmetic and extrema helpers, if \code{TRUE} (the default),
+omit missing values; if \code{FALSE}, any missing input makes that row's result
+missing. Count helpers (\code{row_unique()}, \code{row_nvals()}, \code{row_miss()},
+\code{row_non_miss()}) reject \code{na.rm}.}
 
 \item{.values}{For \code{row_min()} and \code{row_max()}, additional values to compare
 with selected columns: a vector, or a list of vectors. Each must have
 length one or the number of input rows (the current group size inside
 grouped \code{mutate()}). Values must have compatible supported types.}
 
-\item{.missing}{For \code{row_nvals()}, a single \code{TRUE} or \code{FALSE}. If \code{FALSE}
-(the default), missing values are not counted, as in egenmore's
-\code{rownvals()}; if \code{TRUE}, they count as one value, as in \code{row_unique()}.}
+\item{.missing}{For \code{row_nvals()}, if \code{FALSE} (the default), missing values
+are not counted, as in egenmore's \code{rownvals()}; if \code{TRUE}, they count as
+one value, as in \code{row_unique()}.}
 }
 \value{
 A vector with one value per input row. Extrema retain the compatible
 common type; arithmetic returns doubles or a supported class as described
-above; unique and missing-value counts return integers.
+under Arithmetic; unique and missing-value counts return integers. Zero-row
+inputs return typed empty vectors. All-missing rows return a typed \code{NA} for
+arithmetic and extrema, except \code{row_sum(na.rm = TRUE)} returns zero; an
+all-missing row's mean is \code{NA}, not \code{NaN}.
 }
 \description{
-\itemize{
-\item \code{row_mean()}, \code{row_sum()}, and \code{row_median()} calculate row arithmetic.
-\item \code{row_min()} and \code{row_max()} select the smallest and largest row values.
-\item \code{row_var()} and \code{row_sd()} calculate sample variance and standard deviation.
-\item \code{row_unique()} counts distinct values, including one missing category.
-\code{row_nvals()} follows egenmore's \verb{egen rownvals()} and ignores missing
-values unless \code{.missing = TRUE}, when it equals \code{row_unique()}.
-\item \code{row_miss()} and \code{row_non_miss()} count missing and observed values.
-}
+Summarize selected columns within each row using arithmetic, extrema,
+distinct-value counts, or missing-value counts. Use a data frame directly or
+select columns inside \code{\link[dplyr:mutate]{dplyr::mutate()}}.
 }
 \details{
 All helpers preserve the input. Missingness is determined from the original
-columns, including tagged and SPSS user-missing values. Arithmetic and extrema
-omit missing values by default. All-missing rows return a typed \code{NA}, except
-\code{row_sum(na.rm = TRUE)} returns zero. Variance and standard deviation use the
-sample denominator and require at least two observed values. Zero-row inputs
-return typed empty vectors; \code{NULL} and zero selected columns are rejected.
+columns, including tagged and SPSS user-missing values. Arithmetic and
+extrema omit missing values by default. Variance and standard deviation use
+the sample denominator and require at least two observed values. \code{NULL} and
+zero selected columns are rejected. Means and sums of observed numeric values
+agree with \code{\link[base:rowMeans]{base::rowMeans()}} and \code{\link[base:rowSums]{base::rowSums()}}. Undefined arithmetic on
+observed infinities can produce \code{NaN}, as in base R.
 }
 \section{Extrema}{
 
 \code{row_min()} and \code{row_max()} retain the compatible common type of the selected
-columns. Logical inputs return logical values, integer inputs return integers,
-and mixed logical/integer/double inputs use their common numeric type.
-Supported ordered types also include character vectors, ordered factors,
-\code{Date}, \code{POSIXct}, durations, measured vectors, \code{integer64}, and labelled
-vectors. Character values use C lexical ordering without numeric parsing;
-ordered factors use their level order and cannot be mixed with other types.
-Labelled values are compared by their underlying values. Compatible units
-are normalized before comparison.
-Unordered factors, lists, complex values, and incompatible combinations are
-rejected rather than assigned an arbitrary ordering.
-Like \code{\link[=pmin]{pmin()}} and \code{\link[=pmax]{pmax()}}, bare numeric constants in \code{row_min()} and
-\code{row_max()} are values, not column positions: \code{row_min(x, 0.5)} caps \code{x} at
-0.5. Inside \code{mutate()}, a symbol that is not a column but names a numeric
-vector in the calling environment is also used as values. Select columns by
-position with \code{c()} or a tidyselect helper, for example \code{row_min(c(1, 2))}.
-Length-one constants (including those in \code{.values}) never fill a row whose
-other inputs are all missing; such rows stay \code{NA}, as with \code{pmin()}.
-Direct column references remain columns in one-row groups; computed
+columns. Logical inputs return logical values, integer inputs return
+integers, and mixed logical/integer/double inputs use their common numeric
+type. Supported ordered types also include character vectors, ordered
+factors, \code{Date}, \code{POSIXct}, durations, measured vectors, \code{integer64}, and
+labelled vectors. Character values use C lexical ordering without numeric
+parsing; ordered factors use their level order and cannot be mixed with other
+types. Labelled values are compared by their underlying values. Compatible
+units are normalized before comparison. Unordered factors, lists, complex
+values, and incompatible combinations are rejected rather than assigned an
+arbitrary ordering. Like \code{\link[=pmin]{pmin()}} and \code{\link[=pmax]{pmax()}}, bare numeric constants in
+\code{row_min()} and \code{row_max()} are values, not column positions: \code{row_min(x, 0.5)} caps \code{x} at 0.5. Inside \code{mutate()}, a symbol that is not a column but
+names a numeric vector in the calling environment is also used as values.
+Select columns by position with \code{c()} or a tidyselect helper, for example
+\code{row_min(c(1, 2))}. Length-one constants (including those in \code{.values}) never
+fill a row whose other inputs are all missing; such rows stay \code{NA}, as with
+\code{pmin()}. Direct column references remain columns in one-row groups; computed
 length-one values are constants.
 }
 
@@ -115,8 +111,8 @@ Columns from the same calendar family (\code{Date} or \code{POSIXct}) support me
 median while retaining their common class and metadata. Calendar sums,
 variance, and standard deviation require explicit numeric conversion first.
 Durations support mean, median, sum, and standard deviation and return
-\code{difftime} vectors in a common unit. For duration variance, explicitly convert
-to one numeric unit first because variance has squared units.
+\code{difftime} vectors in a common unit. For duration variance, convert to one
+numeric unit first because variance has squared units.
 
 Compatible measured vectors on linear zero-origin scales are normalized to a
 common unit. Mean, median, sum, and standard deviation retain that unit;
@@ -132,38 +128,32 @@ combinations are rejected. Measured arithmetic requires units >= 1.0.0.
 \code{row_unique()} combines compatible column types and counts distinct values
 without dropping their identities through numeric conversion. This includes
 compatible factors, labelled vectors, calendar/measured vectors, \code{integer64},
-list columns, and complex vectors. Missing values count as one category.
-List elements are compared as whole values rather than flattened.
-For extrema and distinct counts, common-type conversion must preserve each
-original value's missingness. Conflicting SPSS missing-value definitions
-that would turn an observed value into a missing value produce an error;
-harmonize those definitions explicitly before combining the columns.
+list columns, and complex vectors. Missing values count as one category. List
+elements are compared as whole values rather than flattened. For extrema and
+distinct counts, common-type conversion must preserve each original value's
+missingness. Conflicting SPSS missing-value definitions that would turn an
+observed value into a missing value produce an error; harmonize those
+definitions explicitly before combining the columns.
 
-\code{row_miss()} and \code{row_non_miss()} use each original column's \code{is.na()} result.
-Scalar missing list elements are missing; \code{NULL} and empty list elements are
-observed. Count helpers return integer vectors.
-}
-
-\section{Implementation}{
-
-All row summaries and counts use native C++ kernels registered through
-cpp11, which read logical, integer and double columns directly and count
-missing values in the same pass. Means and sums of observed values match
-\code{\link[base:rowMeans]{base::rowMeans()}} and \code{\link[base:rowSums]{base::rowSums()}} without first copying the columns
-into a matrix; unlike those, an all-missing row's mean is \code{NA}, not \code{NaN}.
-Undefined arithmetic on observed infinities can produce \code{NaN}, as in base R.
+\code{row_miss()} and \code{row_non_miss()} use each original column's \code{is.na()}
+result. Scalar missing list elements are missing; \code{NULL} and empty list
+elements are observed.
 }
 
 \examples{
 tb <- tibble::tibble(x = c(1, 2, NA), y = c(3, NA, NA))
 row_mean(tb)
+
 row_sum(tb)
+
 row_non_miss(tb)
 
 tb |>
   dplyr::mutate(mean = row_mean(x, y), sum = row_sum(x, y))
+
 tb |>
   dplyr::mutate(capped = row_min(x, .values = 0.5))
+
 row_sum(tb, na.rm = FALSE)
 
 flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
@@ -174,6 +164,7 @@ dates <- tibble::tibble(
   end = as.Date(c("2024-01-03", "2024-01-05"))
 )
 row_min(dates)
+
 row_mean(dates)
 }
 \seealso{

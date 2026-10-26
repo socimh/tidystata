@@ -10,9 +10,9 @@ browse(.data, ...)
 \item{.data}{A data frame or tibble.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to browse.
-Omit to browse all columns. Selection and computed expressions follow
-\code{\link[=select_or_transmute]{select_or_transmute()}}.}
+<\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with
+\code{\link[=select_or_transmute]{select_or_transmute()}}. Existing columns, selection helpers, and named
+expressions can be mixed. Omit to browse all columns.}
 }
 \value{
 The viewed data, invisibly, with its data-frame class preserved.
@@ -26,14 +26,18 @@ interactive session, no viewer is opened.
 \details{
 Viewing uses \code{\link[tibble:view]{tibble::view()}}. Existing grouping and grouping-key retention
 follow \code{\link[=select_or_transmute]{select_or_transmute()}}. Assign the invisible return value to keep the
-viewed columns for subsequent analysis. Precompute expressions with side effects
-before passing them to the selection interface.
+viewed columns for subsequent analysis. Precompute expressions with side
+effects before passing them to the selection interface.
 }
 \examples{
 if (interactive()) {
   browse(lifeexp)
+
   browse(lifeexp, country:lexp)
+
   browse(lifeexp, varlist("*p*"))
+
+  browse(lifeexp, country, gnppc_thousands = gnppc / 1000)
 
   # Retain the viewed columns for the next pipeline stage.
   selected <- browse(lifeexp, country, lexp, gnppc)

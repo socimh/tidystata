@@ -1,16 +1,16 @@
 #' Select columns with a Stata varlist
 #'
 #' @description
-#' `varlist()` selects columns with a Stata-style varlist string such as
-#' `"inc* age? x[1-12]"`, as in Stata's `keep inc* age?`. It is a simpler
-#' version of `matches()` in <[`tidy-select`][dplyr_tidy_select]>.
+#' `varlist()` selects columns with a Stata-style varlist string such as `"inc*
+#' age? x[1-12]"`, as in Stata's `keep inc* age?`. It is a simpler version of
+#' `matches()` in <[`tidy-select`][dplyr_tidy_select]>.
 #'
 #' Use `varlist()` within a *selecting* function, such as `ds()`, `tab()` or
 #' `dplyr::across()`. Alternatively, provide `vars` explicitly to return
 #' matching positions in a standalone call.
 #'
 #' @param string A single character string containing patterns, separated by
-#' spaces, like selecting a varlist in Stata's `keep` command.
+#'   spaces, like selecting a varlist in Stata's `keep` command.
 #' @param ignore_case If `TRUE` (the default), matching ignores case.
 #' @returns An integer vector of positions in the available column names.
 #' @inheritParams tidyselect::starts_with
@@ -22,13 +22,13 @@
 #' * `?` matches one character.
 #' * `[a-h]` matches any character in the range from `a` to `h`.
 #' * `[1-12]` matches any number in the range from `1` to `12`.
-#' * `var1-var5` is NOT used to select a range of variables.
-#' Use `var1:var5` outside `varlist()` instead.
+#' * `var1-var5` does not select a range of variables. Use `var1:var5` outside
+#'   `varlist()` instead.
 #'
 #' Space-separated patterns are alternatives, each matched against complete
-#' column names. Numeric ranges expand within each pattern before matching.
-#' Each pattern can contain one bracketed range; separate patterns may each
-#' contain their own range.
+#' column names. Numeric ranges expand within each pattern before matching. Each
+#' pattern can contain one bracketed range; separate patterns may each contain
+#' their own range.
 #'
 #' @examples
 #' varlist("x[1-2] y", vars = c("x1", "x2", "x3", "y"))

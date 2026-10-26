@@ -9,39 +9,43 @@ ds(.data, ..., .type = c("vector", "table"))
 }
 \arguments{
 \item{.data}{A data frame, tibble, or data.table. \code{ds()} also accepts a
-character vector representing a name inventory, such as an earlier
-\code{ds()} result. Inventory entries must be unique, nonempty, and nonmissing;
-the vector's own names are ignored. An empty inventory is allowed.}
+character vector representing a name inventory, such as an earlier \code{ds()}
+result. Inventory entries must be unique, nonempty, and nonmissing; the
+vector's own names are ignored. An empty inventory is allowed.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Existing columns to
-select or rename. Omit to include all columns. Computed columns are not
-created by this argument.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Existing columns to select or
+rename. Omit to include all columns. Computed columns are not created by
+this argument.}
 
 \item{.type}{\code{"vector"} (the default) returns the names as a character
 vector, like Stata's \code{ds}; \code{"table"} returns them as a one-column table.}
 }
 \value{
 \code{ds()} returns a character vector. \code{ds(.type = "table")} returns a
-table with one character column, \code{name}. On ungrouped data, an empty
-selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
+table with one character column, \code{name}, and one row per selected name, in
+selection order. On ungrouped data, an empty selection returns a
+zero-length vector or zero-row table. Tables preserve the input's
 data.frame, tibble, or data.table container and supported preview settings,
-but do not recreate grouping or arbitrary subclasses on the new rows.
+without grouping or arbitrary subclasses; character inventories return a
+tibble in table mode.
 }
 \description{
 List column names by tidyselect
 }
 \details{
 Selection order and renamed column names follow \code{\link[dplyr:select]{dplyr::select()}}. On a
-grouped data frame, selection retains grouping columns and can emit a
-message when they were not explicitly selected. Ungroup first to select
-independently of grouping columns. The input data are not modified.
-For character inventories, select by names, positions, or name helpers and
-rename as usual. Data-type predicates such as \code{where(is.numeric)} are not
-available because an inventory contains no column data.
+grouped data frame, selection retains grouping columns and can emit a message
+when they were not explicitly selected. Ungroup first to select independently
+of grouping columns. The input data are not modified. For character
+inventories, select by names, positions, or name helpers and rename as usual.
+Data-type predicates such as \code{where(is.numeric)} are not available because an
+inventory contains no column data.
 }
 \examples{
 ds(lifeexp) # equivalent to names(lifeexp)
+
 ds(lifeexp, country:lexp)
+
 ds(lifeexp, where(is.character), .type = "table")
 
 starwars <- dplyr::starwars
@@ -50,6 +54,7 @@ ds(starwars, ends_with("color"), .type = "table")
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))
 dplyr::select(lifeexp, dplyr::all_of(numeric_names))
+
 ds(numeric_names, dplyr::starts_with("pop"))
 }
 \seealso{

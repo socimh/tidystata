@@ -2,165 +2,94 @@
 % Please edit documentation in R/findit.R
 \name{findit}
 \alias{findit}
-\title{Find the R equivalent of a Stata command}
+\title{Find R equivalents of Stata commands}
 \usage{
 findit(command = NULL, ...)
 }
 \arguments{
-\item{command}{A Stata command or an R function name, either one bare word
-(\code{findit(tab)}, \code{findit(left_join)}) or a quoted string
-(\code{findit("bysort g: egen m = mean(x)")}). R functions may also be written
-as \code{lm()} or \code{dplyr::left_join}. Use \verb{!!} to look up a string stored in a
-variable: \code{findit(!!cmd)}. \code{NULL} (default) returns every entry.}
+\item{command}{A Stata command, R function, or search phrase. Supply a bare
+name (\code{findit(reg)}, \code{findit(left_join)}) or a quoted string for full
+syntax (\code{findit("merge 1:1 id, keep(match)")}). R function names may
+include \verb{()} or a namespace prefix. Use \code{!!cmd} to look up a string stored
+in \code{cmd}. Defaults to \code{NULL} (all entries).}
 
-\item{...}{Unnamed variable names and command hints, captured without
-evaluation. Names customize examples in Stata operand order, including new
-output variables: \code{findit(xtile, quartile, income)}. A bare hint such as \code{gen}
-selects the \code{generate()} option. Hints match exactly or by an unambiguous
-prefix of at least three letters. Quote a name to use it literally when it
-conflicts with a hint, as in \code{findit(tab, "gen")}. Use \verb{!!} for a name stored
-in a string. Calls, numbers, missing arguments and named arguments are not
-accepted here.}
+\item{...}{Optional variable names or command hints, captured without
+evaluation. Names customize examples in Stata operand order, while hints
+prioritize examples (\code{findit(tab, gen)}). Hints accept exact or unambiguous
+prefixes of at least three letters. Quote names that conflict with hints
+(\code{findit(tab, "gen")}). Use \verb{!!} for stored strings. Only unnamed names and
+strings are accepted.}
 }
 \value{
-A tibble with one row per Stata idiom and the columns \code{match}
-(\code{"stata"} when the word is a Stata command, \code{"r"} when it is an R function
-used in the entry, \code{"keyword"} for a text match, \code{"nearest"} for the
-closest entries to a plain question, \code{"all"} for the whole list), \code{stata} (the Stata code), \code{r} (equivalent R code), \code{package} (where
-the R function lives) and \code{task} (what it does). It prints each entry as
-a short block: what it does, then the Stata code and the R code on lines
-labelled \verb{Stata:} and \verb{R:}, so the code is never cut off. The \code{package}
-column identifies the primary package; namespace-qualified helper calls may
-require additional packages. When one entry
-answers the query, only that entry is printed. Routine commands have a
-canonical default, such as \verb{tabulate x} for \code{findit(tab)}. Up to five examples
-are printed when different meanings or structural choices remain unresolved,
-such as the direction of \code{reshape}. Hidden examples are always counted, with
-a line to run for the rest, such as \code{findit(tab) |> print(n = Inf)}.
-The returned tibble
-always has every match, so it can be stored, filtered or opened with
-\code{View()}. Headings use a single \verb{#}, without an introductory summary.
-R-function notes already demonstrated or resolved by comma-separated inputs
-are omitted. Supplied names customize compatible
-examples; examples requiring different variables retain all their original
-placeholders. No matches are removed. A note identifies retained placeholders
-when those examples are displayed, or explains when no example fits. If
-nothing matches, a message suggests similar names and an empty tibble is
-returned invisibly.
+A tibble of class \code{tidystata_findit} with one row per matching Stata
+idiom and five columns: \code{match} (match type), \code{stata} (Stata code), \code{r}
+(equivalent R code), \code{package} (primary R package), and \code{task}
+(description). All matches are returned, even when fewer are printed. If
+nothing matches, an empty tibble is returned invisibly with an explanatory
+message.
 }
 \description{
-\code{findit()} looks up a Stata command and returns the R code that does the
-same job, whether a tidystata function or one from another package. It
-covers everyday data work (browsing, tabulating, generating, merging,
-reshaping) and points to the packages tidystata leaves to others, such as
-fixest for \code{reghdfe}, modelsummary for \code{esttab}, binsreg for \code{binscatter}
-and srvyr for \code{svy}.
-
-It also works the other way round: give it an R function, such as
-\code{findit(left_join)}, and it describes the function and lists the Stata
-commands it replaces. Beginners need not know which is which; a word that
-is both, such as \code{log} or \code{round}, shows both meanings.
-
-Type a single word bare, as in \code{findit(reg)}, add names and hints with commas,
-as in \code{findit(tab, sex, region)} or \code{findit(tab, gen)}, or quote full Stata
-syntax, as in \code{findit("merge 1:1 id, keep(match)")}. Call \code{findit()} with no
-argument for the whole list.
+\code{findit()} looks up Stata commands and their R equivalents, including
+functions from tidystata and other packages. It also supports reverse lookup
+from R functions, keyword searches, and plain-language questions. Omit the
+query to browse all entries.
 }
 \details{
-Matching follows fixed rules, without any guessing:
+\strong{Matching}
 \itemize{
-\item The first word is looked up both as a Stata command and as an R function.
-Stata's minimum abbreviations work: \code{reg}, \code{regr} and \code{regress} all find
-\code{regress}; \code{su} and \code{sum} find \code{summarize}; \code{ta} and \code{tab} find
-\code{tabulate}. R functions must be named in full (\code{lm} finds \code{lm()} but not
-\code{glm()}); upper and lower case are ignored only when no exact name
-matches.
-\item Entries found as a Stata command come first. Entries found only through
-the R function follow. A description is added only when the function does
-not appear in a displayed example. Hundreds of
-R functions are described, including many that no entry uses yet, such
-as \code{n_distinct()} or \code{fct_relevel()}; for those, \code{findit()} prints the
-description and the related Stata command.
-\item A leading \verb{by ...:} or \verb{bysort ...:} prefix is set aside, so
-\code{findit("bys g: sum x")} looks up \code{summarize} and lists the grouped
-entries first.
-\item The remaining words put the best-matching entries first. For example,
-\code{findit("merge keep(match)")} lists \code{inner_join()} before the other merge
-entries, and \code{findit("mutate egen")} lists the \code{egen} entries among the
-many that use \code{mutate()}. Among equally good entries, the one with the
-fewest further words comes first. All matching entries are still
-returned.
-\item Comma-separated names and hints select among these examples and fill their
-recorded variable roles. Variable lists can accept several names, while
-fixed roles must all be supplied. Dataset names, function names and unrelated
-constants are unchanged. Strings that represent column names or formulas
-are customized too. R names are quoted as needed; non-Stata names are shown
-with backticks in the reference Stata line. This is a lookup over existing
-examples, not a parser or executor for arbitrary Stata programs.
-\item If a hint prefix has several interpretations, competing examples are shown.
-If no example satisfies every hint, the closest alternatives are shown with
-an explanation. For plain questions a uniquely highest-ranked meaning is
-shown alone; tied meanings retain up to five representative examples.
-\item If neither matches, the text is searched for in the Stata code, the R
-code and the task, so \code{findit(winsor)} and \code{findit(dummy)} also work.
-\item Otherwise the text is read as a plain question, in English or Chinese,
-and the closest entries are listed under their own heading:
-\code{findit("how do I remove duplicate rows")}. The closest entries are
-the ones sharing the most informative words with the question, after
-common words are dropped and a short built-in list of synonyms is
-applied ("average" also means "mean"). A question of three or more
-words that happens to start with a command, such as
-\code{findit("count how many people in each category")}, lists the closest
-entries first. No language model is involved, so the same question
-always gives the same answer.
+\item Stata abbreviations are recognized (\code{reg}, \code{regr}, \code{regress}), while R
+functions require their full names. Exact-case matches take priority.
+Shared names, such as \code{log}, show both Stata and R interpretations.
+\item Stata command matches appear before R function matches. Keyword searches
+are used when neither matches. Additional syntax and hints refine the
+ranking without discarding matches. \code{by} and \code{bysort} prefixes prioritize
+grouped operations.
+\item Plain-language questions use deterministic keyword and synonym matching in
+English or Chinese, without a language model.
 }
 
-R reads a call before \code{findit()} runs, so anything that is not a single R
-name must be quoted: several words (\code{"merge 1:1 id"}), reserved words
-(\code{"if"}), and names starting with an underscore (\code{"_n"}).
+\strong{Output}
+\itemize{
+\item Results print as readable Stata/R code pairs. A single clear match is shown
+alone; otherwise, up to five representative examples appear. Use \code{print(n = Inf)} to display all matches.
+\item The \code{match} column identifies the lookup type: \code{"stata"}, \code{"r"},
+\code{"keyword"}, \code{"nearest"}, or \code{"all"}.
+\item Supplied variable names customize compatible examples. Unresolved
+placeholders and unsupported combinations are explained in notes.
+}
 
-When R runs in Chinese (the \code{LANGUAGE} environment variable or, if it is
-unset, the locale), the task and function descriptions are shown in
-Chinese, and Chinese keywords are searched in any language.
-\code{Sys.setenv(LANGUAGE = "en")} switches back to English, as it does for R's
-own messages.
-
-The list is curated rather than exhaustive. Longer explanations, in English
-and Chinese, are in the "Coming from Stata" articles on the package
-website.
-
-Nonempty notes and qualifications print with their examples, including legacy
-workflows. Explicit expansion also prints reference links. Reference
-packages are needed only when running their examples; lookup stays offline
-and does not load or install them. A qualification identifies supplied option
-combinations absent from the curated examples. Known unsupported queries are
-explained explicitly. The reference articles distinguish canonical commands,
-Stata functions and operators, Stata examples and alternative R approaches.
-Example metadata uses stable IDs, so several R implementations may share the
-same Stata syntax without losing their variable-role annotations.
-
-tidystata and statar can be attached together; only \code{tab()} and \code{xtile()}
-share names. Attach tidystata last, or write \code{tidystata::tab()}.
+\strong{Notes}
+\itemize{
+\item Quote multiword Stata syntax, reserved words (\code{"if"}), and names that are
+not valid R symbols (\code{"_n"}).
+\item Lookup works offline. External packages such as fixest, modelsummary, and
+srvyr are needed only when running their examples.
+\item Chinese descriptions follow R's language settings. Use \code{Sys.setenv(LANGUAGE = "en")} to switch to English.
+\item The reference is curated, not a parser or executor for arbitrary Stata
+programs. See the "Coming from Stata" articles for further guidance.
+}
 }
 \examples{
+# Look up a Stata command
 findit(reg)
-findit(su)
-findit(tab, sex, region)
-findit(tab, gen)
-findit(xtile, quartile, income)
-findit("merge 1:1 id, keep(match)")
-findit("bys g: egen m = mean(x)")
-findit(winsor)
 
-# Plain questions
+# Look up an R function
+findit(left_join)
+
+# Customize variables or select an option
+findit(tab, sex, region)
+
+findit(tab, gen)
+
+# Search Stata syntax or ask a question
+findit("merge 1:1 id, keep(match)")
+
 findit("how do I remove duplicate rows")
 
-# R functions work too, and words with both meanings show both
-findit(left_join)
-findit(log)
-
-# The whole list
-findit()
+# Filter the complete reference
+entries <- findit()
+entries |>
+  dplyr::filter(package == "tidystata")
 }
 \concept{Stata}
 \concept{Stata to R}

@@ -20,9 +20,8 @@ established by functions like \code{select()} or \code{pivot_longer()}).}
 An integer vector of positions in the available column names.
 }
 \description{
-\code{varlist()} selects columns with a Stata-style varlist string such as
-\code{"inc* age? x[1-12]"}, as in Stata's \verb{keep inc* age?}. It is a simpler
-version of \code{matches()} in <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}>.
+\code{varlist()} selects columns with a Stata-style varlist string such as \code{"inc* age? x[1-12]"}, as in Stata's \verb{keep inc* age?}. It is a simpler version of
+\code{matches()} in <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}>.
 
 Use \code{varlist()} within a \emph{selecting} function, such as \code{ds()}, \code{tab()} or
 \code{dplyr::across()}. Alternatively, provide \code{vars} explicitly to return
@@ -35,14 +34,14 @@ matching positions in a standalone call.
 \item \verb{?} matches one character.
 \item \verb{[a-h]} matches any character in the range from \code{a} to \code{h}.
 \item \verb{[1-12]} matches any number in the range from \code{1} to \code{12}.
-\item \code{var1-var5} is NOT used to select a range of variables.
-Use \code{var1:var5} outside \code{varlist()} instead.
+\item \code{var1-var5} does not select a range of variables. Use \code{var1:var5} outside
+\code{varlist()} instead.
 }
 
 Space-separated patterns are alternatives, each matched against complete
-column names. Numeric ranges expand within each pattern before matching.
-Each pattern can contain one bracketed range; separate patterns may each
-contain their own range.
+column names. Numeric ranges expand within each pattern before matching. Each
+pattern can contain one bracketed range; separate patterns may each contain
+their own range.
 }
 \examples{
 varlist("x[1-2] y", vars = c("x1", "x2", "x3", "y"))

@@ -1,25 +1,24 @@
 #' Assert that conditions hold
 #'
-#' @description
-#' Checks conditions on every row, like Stata's `assert`, and stops with the
-#' number of contradictions when any fails. It returns the data invisibly
-#' when all hold, so it can sit inside a pipeline.
+#' Check conditions on every row, like Stata's `assert`, and stop with the
+#' number of contradictions when any fails. It returns the data invisibly when
+#' all hold, so it can sit inside a pipeline.
 #'
 #' @inheritParams tidystata_args
 #' @param ... Conditions evaluated like [dplyr::mutate()] expressions, each
-#' giving `TRUE` or `FALSE` per row (or a single value). Group functions such
-#' as `n()` and `mean()` use the groups of `.data` or `.by`.
-#' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping
-#' variables, like Stata's `by g: assert`.
+#'   giving `TRUE` or `FALSE` per row (or a single value). Group functions such
+#'   as `n()` and `mean()` use the groups of `.data` or `.by`.
+#' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping variables,
+#'   like Stata's `by g: assert`.
 #'
 #' @returns `.data`, invisibly, when every condition holds.
 #'
 #' @details
-#' The error lists each failing condition with its number of contradictions
-#' and the first failing rows. A missing result (`NA`) counts as a
-#' contradiction and is reported separately. This differs from Stata, where
-#' a missing value is larger than every number, so `assert x > 0` holds when
-#' `x` is missing; write `is.na(x) | x > 0` for that behaviour.
+#' The error lists each failing condition with its number of contradictions and
+#' the first failing rows. A missing result (`NA`) counts as a contradiction and
+#' is reported separately. This differs from Stata, where a missing value is
+#' larger than every number, so `assert x > 0` holds when `x` is missing; write
+#' `is.na(x) | x > 0` for that behaviour.
 #'
 #' @examples
 #' lifeexp |>

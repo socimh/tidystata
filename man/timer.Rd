@@ -2,22 +2,22 @@
 % Please edit documentation in R/timer.R
 \name{timer}
 \alias{timer}
-\title{Time spent on a function}
+\title{Time an expression}
 \usage{
 timer(x, on_error = TRUE)
 }
 \arguments{
 \item{x}{An expression to evaluate and time.}
 
-\item{on_error}{A single \code{TRUE} or \code{FALSE}. If \code{TRUE} (the default), also
-report elapsed time when the expression fails, then let the original error
-propagate. Use \code{FALSE} to report elapsed time only on success.}
+\item{on_error}{If \code{TRUE} (the default), also report elapsed time when the
+expression fails, then let the original error propagate. Use \code{FALSE} to
+report elapsed time only on success.}
 }
 \value{
 The evaluated result, invisibly.
 }
 \description{
-\code{timer()} works like the \code{timer} command in Stata.
+Evaluate an expression and report its elapsed time, like Stata's \code{timer}.
 }
 \details{
 The expression is evaluated once. On success, elapsed time is emitted as a
@@ -26,12 +26,13 @@ message. Warnings and errors propagate normally. When the expression fails
 execution reports the elapsed time while the error unwinds; the original
 condition object, including its call, is not modified.
 
-Nested or repeated timers each measure everything evaluated inside them,
-so a later timer in a pipeline reports cumulative time from its own start.
+Nested or repeated timers each measure everything evaluated inside them, so a
+later timer in a pipeline reports cumulative time from its own start.
 }
 \examples{
 x <- seq_len(1e6)
 mean(x) |> timer()
+
 try(timer(stop("failure")))
 }
 \seealso{

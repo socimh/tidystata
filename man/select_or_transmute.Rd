@@ -14,30 +14,31 @@ select_or_transmute(.data, ...)
 unchanged.}
 }
 \value{
-The selected (and computed) columns. Data-frame classes and
-grouping follow \code{\link[dplyr:select]{dplyr::select()}}; a tibble input returns a tibble.
+A table containing the selected and computed columns in argument
+order. Data-frame classes and grouping follow \code{\link[dplyr:select]{dplyr::select()}}; a tibble
+input returns a tibble. Grouping columns are retained. Unnamed computed
+columns use their expression as the name.
 }
 \description{
-An enhanced \code{\link[dplyr:select]{dplyr::select()}} that also accepts data-masking expressions.
-As with \code{\link[dplyr:transmute]{dplyr::transmute()}}, only the selected and computed columns are
+An enhanced \code{\link[dplyr:select]{dplyr::select()}} that also accepts data-masking expressions. As
+with \code{\link[dplyr:transmute]{dplyr::transmute()}}, only the selected and computed columns are
 returned.
 }
 \details{
-Each argument is classified before evaluation. Column names, strings,
-numeric positions, selection syntax (\code{c()}, \code{:}, \code{!}, \code{&}, \code{|}, unary \code{-})
-and tidyselect helpers such as \code{starts_with()}, \code{where()}, \code{all_of()} or
+Each argument is classified before evaluation. Column names, strings, numeric
+positions, selection syntax (\code{c()}, \code{:}, \code{!}, \code{&}, \code{|}, unary \code{-}) and
+tidyselect helpers such as \code{starts_with()}, \code{where()}, \code{all_of()} or
 \code{\link[=varlist]{varlist()}} select existing columns, as do calls that use no column names
-(for example \code{all_of(vars)} or \code{seq_len(2)}). Any other expression that
-uses columns, such as \code{lexp >= 70} or \code{gnp_thousands = gnppc / 1000}, is computed
-with \code{\link[dplyr:mutate]{dplyr::mutate()}} and then selected, so arithmetic on columns is never
-misread as column positions. Selections and computed values can be mixed;
-output follows argument order. Unnamed computed columns are named by their
-expression.
+(for example \code{all_of(vars)} or \code{seq_len(2)}). Any other expression that uses
+columns, such as \code{lexp >= 70} or \code{gnp_thousands = gnppc / 1000}, is computed
+with \code{\link[dplyr:mutate]{dplyr::mutate()}} and then selected, so arithmetic is never misread as
+column positions. Selections and computed values can be mixed; output follows
+argument order.
 
-A named constant such as \code{one = 1}, \code{label = "x"} or \code{y = c(1, 2)} creates
-a constant column; it never selects or renames columns by position. Unnamed
-names, strings and positions must identify existing columns. If they do
-not, an error lists every unmatched name instead of evaluating them as
+A named constant such as \code{one = 1}, \code{label = "x"} or \code{y = c(1, 2)} creates a
+constant column; it never selects or renames columns by position. Unnamed
+names, strings and positions must identify existing columns. If they do not,
+an error lists every unmatched name instead of evaluating them as
 expressions, so a misspelled column is never replaced by an object of the
 same name in the calling environment. (A symbol naming a character vector in
 the calling environment is still passed to tidyselect, which deprecates that
@@ -45,17 +46,20 @@ form in favour of \code{all_of()}.)
 
 If selection itself fails for another reason (for example, duplicate output
 names), the arguments are evaluated sequentially with \code{\link[dplyr:transmute]{dplyr::transmute()}};
-if that also fails, the error reports both attempts. Computed expressions
-are evaluated once when selection succeeds. Grouping columns are retained
+if that also fails, the error reports both attempts. Computed expressions are
+evaluated once when selection succeeds. Grouping columns are retained
 according to dplyr's selection rules.
 }
 \examples{
 lifeexp |>
   select_or_transmute()
+
 lifeexp |>
   select_or_transmute(country, lexp)
+
 # Ordinary select() rejects this computed expression.
 try(dplyr::select(lifeexp, lexp >= 70))
+
 lifeexp |>
   select_or_transmute(lexp >= 70)
 }

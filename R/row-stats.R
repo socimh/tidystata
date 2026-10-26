@@ -1,57 +1,52 @@
 #' Calculate summaries across columns within each row
 #'
-#' @description
-#' * `row_mean()`, `row_sum()`, and `row_median()` calculate row arithmetic.
-#' * `row_min()` and `row_max()` select the smallest and largest row values.
-#' * `row_var()` and `row_sd()` calculate sample variance and standard deviation.
-#' * `row_unique()` counts distinct values, including one missing category.
-#'   `row_nvals()` follows egenmore's `egen rownvals()` and ignores missing
-#'   values unless `.missing = TRUE`, when it equals `row_unique()`.
-#' * `row_miss()` and `row_non_miss()` count missing and observed values.
+#' Summarize selected columns within each row using arithmetic, extrema,
+#' distinct-value counts, or missing-value counts. Use a data frame directly or
+#' select columns inside [dplyr::mutate()].
 #'
 #' @param ... A data frame or tibble, or
 #'   <[`tidy-select`][dplyr::dplyr_tidy_select]> expressions inside
 #'   [dplyr::mutate()]. Each selected column must be one-dimensional.
-#' @param na.rm For arithmetic and extrema helpers, a single logical value. If
-#'   `TRUE` (the default), omit missing values; if `FALSE`, any missing input
-#'   makes that row's result missing. Count helpers (`row_unique()`,
-#'   `row_nvals()`, `row_miss()`, `row_non_miss()`) reject `na.rm`.
+#' @param na.rm For arithmetic and extrema helpers, if `TRUE` (the default),
+#'   omit missing values; if `FALSE`, any missing input makes that row's result
+#'   missing. Count helpers (`row_unique()`, `row_nvals()`, `row_miss()`,
+#'   `row_non_miss()`) reject `na.rm`.
 #' @param .values For `row_min()` and `row_max()`, additional values to compare
 #'   with selected columns: a vector, or a list of vectors. Each must have
 #'   length one or the number of input rows (the current group size inside
 #'   grouped `mutate()`). Values must have compatible supported types.
-#' @param .missing For `row_nvals()`, a single `TRUE` or `FALSE`. If `FALSE`
-#'   (the default), missing values are not counted, as in egenmore's
-#'   `rownvals()`; if `TRUE`, they count as one value, as in `row_unique()`.
+#' @param .missing For `row_nvals()`, if `FALSE` (the default), missing values
+#'   are not counted, as in egenmore's `rownvals()`; if `TRUE`, they count as
+#'   one value, as in `row_unique()`.
 #'
 #' @details
 #' All helpers preserve the input. Missingness is determined from the original
-#' columns, including tagged and SPSS user-missing values. Arithmetic and extrema
-#' omit missing values by default. All-missing rows return a typed `NA`, except
-#' `row_sum(na.rm = TRUE)` returns zero. Variance and standard deviation use the
-#' sample denominator and require at least two observed values. Zero-row inputs
-#' return typed empty vectors; `NULL` and zero selected columns are rejected.
+#' columns, including tagged and SPSS user-missing values. Arithmetic and
+#' extrema omit missing values by default. Variance and standard deviation use
+#' the sample denominator and require at least two observed values. `NULL` and
+#' zero selected columns are rejected. Means and sums of observed numeric values
+#' agree with [base::rowMeans()] and [base::rowSums()]. Undefined arithmetic on
+#' observed infinities can produce `NaN`, as in base R.
 #'
 #' @section Extrema:
 #' `row_min()` and `row_max()` retain the compatible common type of the selected
-#' columns. Logical inputs return logical values, integer inputs return integers,
-#' and mixed logical/integer/double inputs use their common numeric type.
-#' Supported ordered types also include character vectors, ordered factors,
-#' `Date`, `POSIXct`, durations, measured vectors, `integer64`, and labelled
-#' vectors. Character values use C lexical ordering without numeric parsing;
-#' ordered factors use their level order and cannot be mixed with other types.
-#' Labelled values are compared by their underlying values. Compatible units
-#' are normalized before comparison.
-#' Unordered factors, lists, complex values, and incompatible combinations are
-#' rejected rather than assigned an arbitrary ordering.
-#' Like [pmin()] and [pmax()], bare numeric constants in `row_min()` and
-#' `row_max()` are values, not column positions: `row_min(x, 0.5)` caps `x` at
-#' 0.5. Inside `mutate()`, a symbol that is not a column but names a numeric
-#' vector in the calling environment is also used as values. Select columns by
-#' position with `c()` or a tidyselect helper, for example `row_min(c(1, 2))`.
-#' Length-one constants (including those in `.values`) never fill a row whose
-#' other inputs are all missing; such rows stay `NA`, as with `pmin()`.
-#' Direct column references remain columns in one-row groups; computed
+#' columns. Logical inputs return logical values, integer inputs return
+#' integers, and mixed logical/integer/double inputs use their common numeric
+#' type. Supported ordered types also include character vectors, ordered
+#' factors, `Date`, `POSIXct`, durations, measured vectors, `integer64`, and
+#' labelled vectors. Character values use C lexical ordering without numeric
+#' parsing; ordered factors use their level order and cannot be mixed with other
+#' types. Labelled values are compared by their underlying values. Compatible
+#' units are normalized before comparison. Unordered factors, lists, complex
+#' values, and incompatible combinations are rejected rather than assigned an
+#' arbitrary ordering. Like [pmin()] and [pmax()], bare numeric constants in
+#' `row_min()` and `row_max()` are values, not column positions: `row_min(x,
+#' 0.5)` caps `x` at 0.5. Inside `mutate()`, a symbol that is not a column but
+#' names a numeric vector in the calling environment is also used as values.
+#' Select columns by position with `c()` or a tidyselect helper, for example
+#' `row_min(c(1, 2))`. Length-one constants (including those in `.values`) never
+#' fill a row whose other inputs are all missing; such rows stay `NA`, as with
+#' `pmin()`. Direct column references remain columns in one-row groups; computed
 #' length-one values are constants.
 #'
 #' @section Arithmetic:
@@ -64,8 +59,8 @@
 #' median while retaining their common class and metadata. Calendar sums,
 #' variance, and standard deviation require explicit numeric conversion first.
 #' Durations support mean, median, sum, and standard deviation and return
-#' `difftime` vectors in a common unit. For duration variance, explicitly convert
-#' to one numeric unit first because variance has squared units.
+#' `difftime` vectors in a common unit. For duration variance, convert to one
+#' numeric unit first because variance has squared units.
 #'
 #' Compatible measured vectors on linear zero-origin scales are normalized to a
 #' common unit. Mean, median, sum, and standard deviation retain that unit;
@@ -79,40 +74,39 @@
 #' `row_unique()` combines compatible column types and counts distinct values
 #' without dropping their identities through numeric conversion. This includes
 #' compatible factors, labelled vectors, calendar/measured vectors, `integer64`,
-#' list columns, and complex vectors. Missing values count as one category.
-#' List elements are compared as whole values rather than flattened.
-#' For extrema and distinct counts, common-type conversion must preserve each
-#' original value's missingness. Conflicting SPSS missing-value definitions
-#' that would turn an observed value into a missing value produce an error;
-#' harmonize those definitions explicitly before combining the columns.
+#' list columns, and complex vectors. Missing values count as one category. List
+#' elements are compared as whole values rather than flattened. For extrema and
+#' distinct counts, common-type conversion must preserve each original value's
+#' missingness. Conflicting SPSS missing-value definitions that would turn an
+#' observed value into a missing value produce an error; harmonize those
+#' definitions explicitly before combining the columns.
 #'
-#' `row_miss()` and `row_non_miss()` use each original column's `is.na()` result.
-#' Scalar missing list elements are missing; `NULL` and empty list elements are
-#' observed. Count helpers return integer vectors.
-#'
-#' @section Implementation:
-#' All row summaries and counts use native C++ kernels registered through
-#' cpp11, which read logical, integer and double columns directly and count
-#' missing values in the same pass. Means and sums of observed values match
-#' [base::rowMeans()] and [base::rowSums()] without first copying the columns
-#' into a matrix; unlike those, an all-missing row's mean is `NA`, not `NaN`.
-#' Undefined arithmetic on observed infinities can produce `NaN`, as in base R.
+#' `row_miss()` and `row_non_miss()` use each original column's `is.na()`
+#' result. Scalar missing list elements are missing; `NULL` and empty list
+#' elements are observed.
 #'
 #' @returns A vector with one value per input row. Extrema retain the compatible
 #'   common type; arithmetic returns doubles or a supported class as described
-#'   above; unique and missing-value counts return integers.
+#'   under Arithmetic; unique and missing-value counts return integers. Zero-row
+#'   inputs return typed empty vectors. All-missing rows return a typed `NA` for
+#'   arithmetic and extrema, except `row_sum(na.rm = TRUE)` returns zero; an
+#'   all-missing row's mean is `NA`, not `NaN`.
 #' @name row_egen
 #'
 #' @examples
 #' tb <- tibble::tibble(x = c(1, 2, NA), y = c(3, NA, NA))
 #' row_mean(tb)
+#'
 #' row_sum(tb)
+#'
 #' row_non_miss(tb)
 #'
 #' tb |>
 #'   dplyr::mutate(mean = row_mean(x, y), sum = row_sum(x, y))
+#'
 #' tb |>
 #'   dplyr::mutate(capped = row_min(x, .values = 0.5))
+#'
 #' row_sum(tb, na.rm = FALSE)
 #'
 #' flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
@@ -123,6 +117,7 @@
 #'   end = as.Date(c("2024-01-03", "2024-01-05"))
 #' )
 #' row_min(dates)
+#'
 #' row_mean(dates)
 #' @family variable generation functions
 

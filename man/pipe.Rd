@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-pipe.R
 \name{\%>\%}
 \alias{\%>\%}
-\title{Pipe operator}
+\title{Pass a value through a pipeline}
 \usage{
 lhs \%>\% rhs
 }
@@ -12,7 +12,8 @@ lhs \%>\% rhs
 \item{rhs}{A function call using the magrittr semantics.}
 }
 \value{
-The result of calling \code{rhs(lhs)}.
+The result of evaluating \code{rhs} with \code{lhs} inserted according to
+magrittr's pipe and placeholder rules.
 }
 \description{
 See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.

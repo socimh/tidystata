@@ -1,27 +1,27 @@
 #' Show the variable list of a dataset
 #'
-#' @description
-#' * `variables()` works like the "Variables" tab in Stata.
-#' * `variables_search()` searches for variables by name or variable label,
-#'   rather than by the values stored in the columns.
+#' `variables()` lists column names and variable labels, like the "Variables"
+#' tab in Stata. `variables_search()` searches that list by name or label,
+#' rather than by the values stored in the columns.
 #'
 #' @param .data The input data frame, tibble, or data.table.
-#' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to
-#' select or rename before listing or searching. Omit to include all columns.
-#' Computed columns are not created by this argument.
-#' @param string A single non-missing character string to search for in names
-#' or labels. Search is case-insensitive and matches substrings by default.
-#' An empty string matches all selected variables. Wildcards `*`, `?`, and `~`
-#' represent zero or more, exactly one, and one or more characters, respectively.
-#' Use `^` and `$` anchors to require a complete name or label match.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to select or
+#'   rename before listing or searching. Omit to include all columns. Computed
+#'   columns are not created by this argument.
+#' @param string A single non-missing character string to search for in names or
+#'   labels. Search is case-insensitive and matches substrings by default. An
+#'   empty string matches all selected variables. Wildcards `*`, `?`, and `~`
+#'   mean zero or more, exactly one, and one or more characters, respectively.
+#'   Use `^` and `$` anchors to require a complete name or label match.
 #'
-#' @returns A table with a character `name` column. A character `label` column
-#' is added only when at least one selected variable has a usable label;
-#' unlabelled variables then have `NA` labels. Search returns only matching
-#' rows, in selection order, with the same columns as the selected variable list.
-#' Tables preserve the input's data.frame, tibble, or data.table container and
-#' supported preview settings. Results are ungrouped; arbitrary subclasses are
-#' not reconstructed on the inventory rows.
+#' @returns A table with one row per selected variable and a character `name`
+#'   column. A character `label` column is added only when at least one selected
+#'   variable has a usable label; unlabelled variables then have `NA` labels.
+#'   Search returns only matching rows in selection order, with the same columns
+#'   as the selected variable list. Tables preserve the input's data.frame,
+#'   tibble, or data.table container and supported preview settings. Results are
+#'   ungrouped; arbitrary subclasses are not reconstructed on the inventory
+#'   rows.
 #'
 #' @details
 #' Variable labels are read from each column's `label` attribute, including
@@ -35,8 +35,8 @@
 #' first to search only independently selected columns.
 #'
 #' Search patterns are translated before matching. One bracketed letter range
-#' such as `[a-h]`, or ascending nonnegative integer range such as `[1-12]`,
-#' is supported. Multiple bracketed ranges are unsupported. Numeric ranges are
+#' such as `[a-h]`, or ascending nonnegative integer range such as `[1-12]`, is
+#' supported. Multiple bracketed ranges are unsupported. Numeric ranges are
 #' expanded into alternatives, so use unanchored patterns such as `item[1-12]`
 #' for substring matching. This pattern language is not a general-purpose
 #' regular-expression interface; invalid patterns produce an error.
@@ -46,13 +46,16 @@
 #'
 #' @examples
 #' variables(lifeexp)
+#'
 #' variables_search(lifeexp, "n")
+#'
 #' variables_search(lifeexp, "^country$")
 #'
 #' # Inspect metadata before choosing columns for subsequent analysis.
 #' survey <- tibble::tibble(age = c(30, 45), income = c(2000, 3000))
 #' attr(survey$income, "label") <- "Monthly earnings"
 #' variables(survey, earnings = income, age)
+#'
 #' variables_search(survey, "earn")
 #' @family inspection functions
 
