@@ -48,8 +48,9 @@ are compared by whole periods, as with Stata's \verb{\%tw}, \verb{\%tm}, \verb{\
 \verb{\%ty} dates, so any day in March is one month after any day in February.
 Weeks follow Stata's \verb{\%tw}: each year has 52 weeks starting on 1 January,
 so the last week has 8 or 9 days (tsibble's \code{yearweek()} keeps its ISO
-weeks). Date-times use the local clock of their time zone. Must be \code{NULL}
-for numbers and period classes.}
+weeks). For date-times, seconds measure elapsed time; minute and larger
+periods use the local clock of their time zone. Must be \code{NULL} for numbers
+and period classes.}
 }
 \value{
 A vector with the length and row order of \code{x}, with \code{NA} where the
@@ -67,6 +68,12 @@ time-series operators after \code{xtset}. Values are found by time rather than r
 position, so gaps give missing values and row order does not matter. Use them
 in \code{\link[dplyr:mutate]{dplyr::mutate()}} with the panel identifier in \code{.by} or
 \code{\link[dplyr:group_by]{dplyr::group_by()}}.
+\itemize{
+\item \code{stata_lag()}: Retrieve the value from \code{n} periods earlier.
+\item \code{stata_lead()}: Retrieve the value from \code{n} periods later.
+\item \code{stata_diff()}: Calculate the \code{n}th difference; the default first
+difference subtracts the previous period's value from the current value.
+}
 }
 \details{
 \itemize{

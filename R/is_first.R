@@ -16,7 +16,7 @@
 #'   current data-mask group when no arguments are supplied.
 #'
 #' @details
-#' "First" follows the current row order; sort first to choose a particular row.
+#' "First" follows the current row order.
 #' Unlike [duplicates_tag()], which counts the other rows sharing the same
 #' values, `is_first()` marks one row per group. Missing values include tagged
 #' and SPSS user-missing values.
@@ -28,11 +28,15 @@
 #' )
 #' dplyr::mutate(panel, first = is_first(id))
 #'
-#' # Count panels, like Stata's egen tag() followed by count if tag
-#' sum(is_first(panel$id))
+#' # Including the missing group
+#' dplyr::mutate(panel, first = is_first(id, .missing = TRUE))
 #'
-#' # First row within each group
+#' # An alternative
 #' dplyr::mutate(panel, first = is_first(), .by = id)
+#'
+#' # Count panels
+#' is_first(panel$id) |> sum()
+#'
 #' @name is_first
 #' @family data checking functions
 NULL

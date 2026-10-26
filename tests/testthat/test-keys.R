@@ -24,14 +24,15 @@ test_that("isid() reports repeated keys and missing values", {
   )
   missing <- tibble::tibble(id = c(1, NA))
   expect_error(isid(missing, id), "should never be missing")
-  expect_invisible(isid(missing, id, .missok = TRUE))
+  expect_invisible(isid(missing, id, .missing = TRUE))
   expect_error(
-    isid(tibble::tibble(id = c(NA, NA)), id, .missok = TRUE),
+    isid(tibble::tibble(id = c(NA, NA)), id, .missing = TRUE),
     "does not uniquely identify"
   )
-  expect_true(capture(isid(panel[-4, ], id, wave)))
-  expect_false(capture(isid(panel, id)))
-  expect_error(isid(panel, id, .missok = NA), "must be `TRUE` or `FALSE`")
+  expect_identical(capture(isid(panel[-4, ], id, wave)), panel[-4, ])
+  expect_invisible(capture(isid(panel, id)))
+  expect_null(capture(isid(panel, id)))
+  expect_error(isid(panel, id, .missing = NA), "must be `TRUE` or `FALSE`")
   expect_error(isid(1:3), "must be a data frame")
 })
 
@@ -188,12 +189,154 @@ test_that("key functions keep data.frame and data.table containers", {
 test_that("key checks report invalid input and repeated keys", {
   d <- tibble::tibble(id = c(1, 1, NA), x = 1:3)
   expect_snapshot(error = TRUE, {
-    isid(d, id, .missok = NA)
+    isid(d, id, .missing = NA)
     isid(d, id)
-    isid(d, id, .missok = TRUE)
+    isid(d, id, .missing = TRUE)
     duplicates_tag(d, id, .name = "")
     duplicates_tag(d, id, .name = "x")
     duplicates_drop(d, id)
     isid(1:3)
+  })
+})
+
+
+test_that("isid() confirms a single or composite key and preserves its data", {
+  single <- tibble::tibble(id = c(3L, 1L, 2L), score = c(8, 5, 7))
+  expect_message(
+    checked <- withVisible(isid(single, id)),
+    "Variable `id` uniquely identifies the rows.",
+    fixed = TRUE
+  )
+  expect_identical(checked$value, single)
+  expect_false(checked$visible)
+  unique_panel <- dplyr::distinct(panel)
+  expect_message(
+    checked <- withVisible(isid(unique_panel, id, wave)),
+    "Variables `id`, `wave` together uniquely identify the rows.",
+    fixed = TRUE
+  )
+  expect_identical(checked$value, unique_panel)
+  expect_false(checked$visible)
+  expect_output(suppressMessages(isid(single, id)), NA)
+  expect_message(
+    silent <- withVisible(suppressMessages(isid(single, id))),
+    NA
+  )
+  expect_identical(silent$value, single)
+  expect_false(silent$visible)
+  expect_identical(
+    suppressMessages(
+      unique_panel |> isid(id, wave) |> dplyr::mutate(next_wave = wave + 1)
+    ),
+    dplyr::mutate(unique_panel, next_wave = wave + 1)
+  )
+  expect_identical(
+    suppressMessages(isid(unique_panel, dplyr::all_of(c("id", "wave")))),
+    unique_panel
+  )
+})
+
+test_that("isid() rejects empty string keys unless missing values are allowed", {
+  for (id in list(
+    c("a", ""),
+    factor(c("a", "")),
+    haven::labelled(c("a", ""))
+  )) {
+    data <- tibble::tibble(id = id)
+    before <- data
+    expect_error(isid(data, id), "should never be missing")
+    expect_identical(suppressMessages(isid(data, id, .missing = TRUE)), data)
+    expect_identical(data, before)
+  }
+  unused_empty_level <- tibble::tibble(
+    id = factor(c("a", "b"), levels = c("", "a", "b"))
+  )
+  expect_identical(
+    suppressMessages(isid(unused_empty_level, id)),
+    unused_empty_level
+  )
+  whitespace <- tibble::tibble(id = c("a", " ", "  "))
+  expect_identical(suppressMessages(isid(whitespace, id)), whitespace)
+  for (id in list(
+    c("", ""),
+    c(NA_character_, NA_character_),
+    c(NA_real_, NA_real_)
+  )) {
+    expect_error(
+      isid(tibble::tibble(id = id), id, .missing = TRUE),
+      "does not uniquely identify"
+    )
+  }
+  composite <- tibble::tibble(id = c("", ""), wave = 1:2)
+  expect_identical(
+    suppressMessages(isid(composite, id, wave, .missing = TRUE)),
+    composite
+  )
+  expect_error(isid(composite, id, wave), "should never be missing")
+})
+
+test_that("isid() keeps labelled missingness and validates the renamed option", {
+  for (id in list(
+    c(1, NA_real_),
+    c(1, NaN),
+    haven::labelled(c(1, haven::tagged_na("a"))),
+    haven::labelled_spss(c(1, 99), na_values = 99),
+    haven::labelled_spss(c(1, 98), na_range = c(97, 99))
+  )) {
+    data <- tibble::tibble(id = id)
+    expect_error(isid(data, id), "should never be missing")
+    expect_identical(suppressMessages(isid(data, id, .missing = TRUE)), data)
+  }
+  expect_identical(formals(isid)$.missing, FALSE)
+  expect_false(".missok" %in% names(formals(isid)))
+  expect_error(isid(tibble::tibble(id = 1:2), id, .missok = TRUE))
+  expect_error(
+    isid(tibble::tibble(id = 1:2), id, .missing = NA),
+    "must be `TRUE` or `FALSE`"
+  )
+  expect_message(
+    expect_error(isid(panel, id), "does not uniquely identify"),
+    NA
+  )
+  expect_message(
+    expect_error(isid(tibble::tibble(id = ""), id), "should never be missing"),
+    NA
+  )
+})
+
+test_that("isid() preserves grouped and empty inputs while checking globally", {
+  grouped <- dplyr::group_by(dplyr::distinct(panel), id)
+  before <- grouped
+  expect_identical(suppressMessages(isid(grouped, id, wave)), before)
+  expect_identical(grouped, before)
+  expect_error(
+    isid(dplyr::group_by(tibble::tibble(g = c("a", "b"), id = c(1, 1)), g), id),
+    "does not uniquely identify"
+  )
+  empty <- grouped[0, ]
+  expect_message(
+    checked <- withVisible(isid(empty, id, wave)),
+    "No rows to check.",
+    fixed = TRUE
+  )
+  expect_identical(checked$value, empty)
+  expect_false(checked$visible)
+  frame <- as.data.frame(dplyr::distinct(panel))
+  expect_identical(suppressMessages(isid(frame, id, wave)), frame)
+})
+
+test_that("isid() preserves data.table inputs without adding metadata", {
+  skip_if_not_installed("data.table")
+  data <- data.table::as.data.table(dplyr::distinct(panel))
+  before <- data.table::copy(data)
+  expect_identical(suppressMessages(isid(data, id, wave)), before)
+  expect_identical(data, before)
+})
+
+test_that("isid() success messages name the checked keys", {
+  expect_snapshot({
+    isid(tibble::tibble(id = 1:2), id)
+    isid(dplyr::distinct(panel), id, wave)
+    isid(panel[0, ], id, wave)
   })
 })

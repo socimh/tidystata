@@ -1,18 +1,23 @@
 #' Replace values with missing values or fill missing values
 #'
 #' @description
-#' `mvdecode()` replaces specified codes with `NA`, like Stata's `mvdecode x,
-#' mv(-98 -99)`. `mvencode()` fills missing values with a replacement, like
-#' `mvencode x, mv(0)`.
+#' Convert between missing values and explicit replacement codes:
 #'
-#' `na_if_value()` and `value_if_na()` are aliases of `mvdecode()` and
-#' `mvencode()`.
+#' * `mvdecode()` (`na_if_value()`): Replace specified codes with `NA`, like
+#'   Stata's `mvdecode x, mv(-98 -99)`.
+#' * `mvencode()` (`value_if_na()`): Fill missing values with one replacement,
+#'   like Stata's `mvencode x, mv(0)`.
+#'
+#' The aliases perform the same operations but name the replacement argument
+#' `value` instead of `mv`.
 #'
 #' @details
 #' Codes are matched with [dplyr::na_if()]; filling follows
 #' [tidyr::replace_na()]. Codes and replacements are cast to the type of `x`, so
-#' a lossy cast such as `1.5` for an integer vector is an error. Both the input
-#' vector and the codes or replacement must be supplied. For SPSS labelled
+#' a lossy cast such as `1.5` for an integer vector is an error when applied.
+#' Filling a non-SPSS vector with no missing values returns it unchanged without
+#' casting the replacement. Both the input vector and the codes or replacement
+#' must be supplied. For SPSS labelled
 #' vectors ([haven::labelled_spss()]), user-defined missing codes and ranges
 #' also count as missing, matching their `is.na()` method; labels and
 #' missing-value metadata are retained.
@@ -33,7 +38,7 @@
 #'
 #' mvdecode(x, c(-98, -99))
 #'
-#' mvencode(c(1, NA, 4), 0)
+#' mvencode(x, 0)
 #' @family conversion functions
 
 #' @rdname na_conversion

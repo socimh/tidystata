@@ -3,7 +3,7 @@
 \name{summ}
 \alias{summ}
 \alias{tabstat}
-\title{Summarise columns}
+\title{Summary statistics}
 \usage{
 summ(
   .data,
@@ -40,191 +40,177 @@ tabstat(
 )
 }
 \arguments{
-\item{.data}{A data frame, data frame extension (e.g. a tibble), or a vector.
-Matrix and data-frame columns are unsupported; use atomic or list columns.
-For \code{sf} input, summarise attribute data only: all geometry columns are
-removed before selection. Geometry columns cannot be selected or grouped.}
+\item{.data}{A data frame, tibble, data.table, or vector. For \code{sf} data,
+only attributes are summarised; geometry columns are excluded.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
-<\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with
-\code{\link[=select_or_transmute]{select_or_transmute()}}. Existing columns, selection helpers, and named
-expressions can be mixed. Omit to summarize all columns except grouping
-keys.}
+\item{...}{Variables selected with tidyselect, or named expressions such as
+\code{income_k = income / 1000}. Defaults to all nongrouping columns.}
 
-\item{.by}{Optional grouping columns, selected with tidyselect. An explicit
-selection overrides existing \code{group_by()} groups; when omitted, existing
-groups are used. Grouping columns are excluded from the measured variables.
-Select existing columns only; create new grouping columns with
-\code{\link[dplyr:mutate]{dplyr::mutate()}} first.}
+\item{.by}{Optional grouping columns, selected with tidyselect. Existing
+\code{\link[dplyr:group_by]{dplyr::group_by()}} groups are used unless \code{.by} is supplied. Grouping
+columns are excluded from the variables being summarised.}
 
-\item{.keep_all}{If \code{FALSE} (default), unsupported nonnumeric columns are
-removed with a warning; an error is raised if none of the selected columns
-can be summarised. If \code{TRUE}, character/list columns retain counts and
-unique values, with numeric statistics set to \code{NA}. Numeric-looking
-character values are not parsed.}
+\item{.keep_all}{If \code{TRUE}, retain character and list columns for counts and
+distinct values; other statistics for these columns are \code{NA}.
+By default, unsupported columns are omitted with a warning.}
 
-\item{.detail}{If \code{TRUE}, return all statistics available for each variable
-type unless \code{.stat} selects a subset. Defaults to \code{FALSE}.}
+\item{.detail}{If \code{TRUE}, report all supported statistics unless \code{.stat}
+specifies a subset. Defaults to \code{FALSE}.}
 
-\item{.stat}{A character vector. If nonempty, return only the listed
-statistics, plus variable names, types and any grouping columns. Supported
-names are \code{type}, \code{n}, \code{unique}, \code{miss_n}, \code{valid_pct}, \code{min}, \code{q1},
-\code{median}, \code{mean}, \code{mad}, \code{sd}, \code{q3}, \code{max}, \code{iqr}, \code{skew}, \code{kurtosis},
-\code{se}, and \code{sum}. Aliases \code{missing}, \code{p25}, \code{p50}, and \code{p75} select
-\code{miss_n}, \code{q1}, \code{median}, and \code{q3}; requested names and order are retained.
-Identical requested names are deduplicated; aliases and canonical names may
-coexist. \code{sum} applies to numeric summaries, not calendar dates or
-datetimes. Calendar summaries do not support \code{skew} or \code{kurtosis} either;
-when such a statistic is requested alongside numeric variables, calendar
-variables are skipped with a warning. Percentiles \code{p0} through \code{p100},
-including decimals such as \code{p2.5}, follow Stata's rule (see Details).}
+\item{.stat}{Character vector of statistics to report. See Details for the
+complete list and calculation methods. An explicit selection determines
+the statistics and their order. Use \code{p0} to \code{p100} for percentiles,
+including decimals such as \code{p2.5}.}
 
-\item{.missing}{If \code{TRUE} (default), rows with a missing grouping key form
-their own group, like Stata's \verb{tabstat, by() missing}. If \code{FALSE}, drop
-them before summarising. Missing measured values are always omitted from
-numeric statistics, regardless of this flag.}
+\item{.missing}{If \code{TRUE} (default), retain observations with missing
+grouping keys as a separate group. If \code{FALSE}, exclude them. Missing
+measured values are always omitted from numeric calculations.}
 
-\item{.name}{If \code{FALSE} (default), drop the \code{name} column when exactly one
-measured variable is summarised, including zero-row grouped output; with
-several variables it is always kept. If \code{TRUE}, always retain it.}
+\item{.name}{If \code{TRUE}, always include the \code{name} column. By default, it is
+omitted when exactly one variable is summarised.}
 
-\item{.type}{\code{"list"} (default) separates variable-type families when needed;
-\code{"table"} combines them in one table. See Value for the return structure
-and Details for calendar conversions.}
+\item{.type}{\code{"list"} (default) separates numeric and calendar variable
+families where necessary; \code{"table"} combines them into one table.}
 
-\item{.duration_format}{Retained for compatibility and no longer affects the
-output: calendar spreads are always \code{difftime} columns (see Details).}
+\item{.duration_format}{Retained for compatibility; no longer changes the
+output format of calendar spread statistics.}
 
-\item{.sort}{If \code{TRUE} (default), sort grouping keys ascending like \code{\link[=tab]{tab()}}
-(factor levels in their defined order, character keys in C-locale order),
-with ordinary missing keys last. SPSS user-missing codes retain their
-stored-value ordering. Within each group, preserve the selected variable
-order. If \code{FALSE}, groups follow first appearance.}
+\item{.sort}{If \code{TRUE} (default), sort groups by their keys. If \code{FALSE},
+preserve the order in which groups appear in the data.}
 
-\item{.drop_empty}{If \code{TRUE}, remove individual summary rows with no observed
-measured values (\code{n == 0}), even when \code{n} is not requested. This is
-independent of \code{.missing}. Default is \code{FALSE}.}
+\item{.drop_empty}{If \code{TRUE}, omit variable-group rows with \code{n = 0},
+including rows with no observed measured values or zero total weight.
+Defaults to \code{FALSE}.}
 
-\item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector with
-one value per row), like Stata's \code{summarize [fweight/aweight]}. Rows with a
-missing weight are excluded with a message; negative weights are an error.
-When \code{...} is omitted, the weight column is not summarised itself.}
+\item{.wt}{Optional numeric weights, supplied as a column or a vector.
+Rows with missing weights are excluded; negative weights are invalid.}
 
-\item{.wt_type}{\code{"frequency"} (default) or \code{"analytic"}. With frequency
-weights, \code{n} is the sum of the weights (non-integer weights are allowed).
-Analytic weights (Stata's \verb{[aweight]}) are rescaled within each group and
-variable to sum to the number of observed values, so \code{n} is the number of
-observations. Means, percentiles and \code{sum} are the same under both types;
-\code{sd} and \code{se} differ.}
+\item{.wt_type}{\code{"frequency"} (default) treats weights as frequencies;
+\code{"analytic"} rescales weights to the number of observed values within
+each variable and group. See Details for the calculation differences.}
 }
 \value{
-An ungrouped table with one row per measured variable and group, or
-a list of such tables:
-\itemize{
-\item With \code{.type = "list"}, one table for a single variable-type family;
-otherwise, a list named \code{numeric}, \code{date}, \code{datetime}, and/or \code{time}
-(\code{hms}). The numeric family includes columns retained by \code{.keep_all}.
-\item With \code{.type = "table"}, one combined table.
-}
+An ungrouped table, or a list of tables, with one row per variable
+and group. Each table contains grouping keys (if any), \code{name} (when
+applicable), \code{type}, and the selected statistics.
 
-Tables include grouping keys, \code{name} (subject to \code{.name}), \code{type}, and
-statistics. By default, \code{summ()} includes \code{n}, \code{unique}, \code{min}, \code{mean}, \code{sd},
-and \code{max}; \code{tabstat()} includes \code{mean}. \code{.detail} adds the available
-statistics listed under \code{.stat}, which can instead choose a subset and its
-column names/order. Calendar location columns are character; spreads are
-\code{difftime} in list mode and numeric in table mode. Entirely missing columns
-have zero observed/distinct counts and \code{NA} location/spread statistics,
-including \code{sum}; zero-row grouped inputs have no result rows.
-
-Tables preserve the input's data.frame, tibble, or data.table container and
-supported preview settings; other subclasses are not reconstructed. Vector
-input returns a tibble in list mode or a data.frame in table mode. Its
-expression supplies the variable name, falling back to \code{value} for multiline
-expressions or a magrittr pipe (\code{.}); a named tibble supplies a stable name.
+By default, \code{summ()} returns \code{n}, \code{unique}, \code{min}, \code{mean}, \code{sd}, and \code{max};
+\code{tabstat()} returns \code{mean}. With \code{.type = "list"}, results are split into
+\code{numeric}, \code{date}, \code{datetime}, and \code{time} tables only when multiple type
+families occur. With \code{.type = "table"}, all types are combined in one table.
+Results retain the input's usual table class where supported.
 }
 \description{
-Compute one row of summary statistics per selected variable and group.
-\code{tabstat()} uses \code{.stat = "mean"} by default; with \code{.detail = TRUE} and no
-explicit \code{.stat}, it returns all detail statistics.
+Summarise selected variables, with one row per variable and group:
+\itemize{
+\item \code{summ()}: Report counts, distinct-value counts, minimum, mean, standard
+deviation, and maximum by default.
+\item \code{tabstat()}: Report means by default, using the same calculations and
+options as \code{summ()}.
+}
+
+Both support \code{.detail = TRUE} for a fuller summary or \code{.stat} to select
+statistics.
 }
 \details{
-Computed columns are evaluated on ungrouped working data before statistics
-are calculated within groups. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}
-first when a calculation needs to run separately within each group.
+Statistics are calculated separately for each selected variable and group.
+The formulas below use non-missing measured values \verb{x1, ..., xn}, with
+\code{n} denoting their count and \code{xbar} their arithmetic mean. Unless weights
+are supplied, calculations are unweighted.
 
-\strong{Counts and missing values}
-
-\code{n} counts observed values and \code{unique} counts distinct observed values.
-\code{miss_n} counts missing values; \code{valid_pct} is the fraction observed, from
-zero to one, and is \code{NA} for zero-row inputs. Missingness follows the
-original vector's \code{is.na()} method, including SPSS user-missing
-values/ranges. Retained list columns count complete element identities
-without flattening. Columns with no observed values remain in the result: \code{n}
-and \code{unique} are zero and location/spread statistics, including \code{sum}, are
-\code{NA}. Zero-row grouped inputs do not create artificial groups.
-
-\strong{Numeric statistics}
-
-Numeric calculations use double precision. Large \code{integer64} values may lose
-precision during conversion, with a warning.
-
-Logical values are treated as zero/one. Factors and ordered factors use their
-underlying level codes with a warning. Numeric labelled vectors use
-underlying values, excluding user-missing codes; label metadata is flagged
-with a warning. Measured vectors and \code{difftime} use their original units. In
-variable names, \code{*} marks labelled vectors, \verb{**} marks factors and \verb{***}
-marks retained nonnumeric columns.
-
-Statistics follow Stata's \verb{summarize, detail}:
+\strong{Counts and completeness}
 \itemize{
-\item SD uses the sample denominator (\code{n - 1}); \code{se} is SD divided by \code{sqrt(n)}.
-\item Percentiles use Stata's rule, not R's default \code{\link[stats:quantile]{stats::quantile()}} type 7:
-with \code{n} sorted values, the \code{p}th percentile is the value at position
-\code{floor(n * p) + 1}, or the mean of the values at positions \code{n * p} and \code{n * p + 1} when \code{n * p} is whole. So \code{q1} of \code{1:4} is 1.5 (type 7 gives 1.75).
-\code{median}, \code{q1}, \code{q3} and \code{iqr} (\code{q3 - q1}) use the same rule.
-\item \code{skew} and \code{kurtosis} use population moments, \code{m3 / m2^1.5} and \code{m4 / m2^2}, so \code{kurtosis} is 3 for a normal distribution (not excess kurtosis).
-They are \code{NA} when the values are constant or fewer than two.
-\item \code{mad} has no Stata counterpart; it uses \code{\link[stats:mad]{stats::mad()}} with its default
-scaling.
+\item \code{type}: Variable type (metadata, not a calculated statistic).
+\item \code{n}: Number of non-missing values.
+\item \code{unique}: Number of distinct non-missing values.
+\item \code{miss_n}: Number of missing values (alias: \code{missing}).
+\item \code{valid_pct}: Proportion of rows with a non-missing value, between 0 and 1;
+\code{n / (n + miss_n)} without weights. It is \strong{not} multiplied by 100.
 }
 
-For singleton or constant inputs, undefined spread statistics are \code{NA}.
+\strong{Location and totals}
+\itemize{
+\item \code{min}, \code{max}: Smallest and largest observed values.
+\item \code{sum}: Arithmetic total, \code{sum(x)}. Available for numeric variables only.
+\item \code{mean}: Arithmetic mean, \code{sum(x) / n}.
+\item \code{q1} (\code{p25}), \code{median} (\code{p50}), \code{q3} (\code{p75}): 25th, 50th, and
+75th percentiles, respectively.
+\item \code{p0} to \code{p100}: Any requested percentile, including decimal percentages
+such as \code{p2.5}. Percentiles follow \strong{Stata's rule}, not R's default
+\code{\link[stats:quantile]{stats::quantile()}} type 7. For sorted observations and percentile \code{p},
+set \code{h = n * p / 100}. If \code{h} is not an integer, use the observation at
+position \code{ceiling(h)}; if \code{h} is an integer between 1 and \code{n - 1}, average
+the observations at positions \code{h} and \code{h + 1}. The endpoints are the
+minimum (\code{p0}) and maximum (\code{p100}). For example, the 25th percentile of
+\code{1:4} is 1.5, rather than 1.75 from type 7.
+}
 
-\strong{Weighted statistics}
+\strong{Variation and precision}
+\itemize{
+\item \code{sd}: Sample standard deviation,
+\code{sqrt(sum((x - xbar)^2) / (n - 1))}.
+\item \code{se}: Standard error of the mean, \code{sd / sqrt(n)}.
+\item \code{mad}: Median absolute deviation from the median, multiplied by 1.4826,
+as in \code{\link[stats:mad]{stats::mad()}}. This is not a statistic reported by Stata's
+\code{summarize} command.
+\item \code{iqr}: Interquartile range, \code{q3 - q1}, using the percentiles above.
+}
 
-With \code{.wt}, the mean is \code{sum(w * x) / W} and the variance is \code{sum(w * (x - mean)^2) / (W - 1)}, where \code{W} is the summed weight (after rescaling for
-analytic weights); \code{se} is \code{sd / sqrt(W)}, and \code{sum} is \code{sum(w * x)} with the
-weights as given, as Stata's \code{r(sum)}, even for analytic weights.
-Percentiles, \code{median}, \code{q1}, \code{q3}, \code{iqr} and \code{mad} use Stata's weighted
-percentile rule, the unweighted rule with cumulative weights in place of
-positions, so weights of 1 give the unweighted values. \code{min} and \code{max} ignore
-rows with zero weight. \code{unique}, \code{miss_n} and \code{valid_pct} remain unweighted
-row counts. These standard errors do not account for a survey design. Use
-\code{survey::svymean()} for inference with sampling weights, clusters or strata.
+\strong{Distribution shape}
 
-\strong{Calendar output and grouping names}
+Define \code{mk = sum((x - xbar)^k) / n}, the \code{k}th population central moment.
+\itemize{
+\item \code{skew}: Skewness, \code{m3 / m2^(3/2)}.
+\item \code{kurtosis}: Pearson kurtosis, \code{m4 / m2^2}. A normal distribution has
+kurtosis 3, not 0 (this is not excess kurtosis).
+}
 
-Date locations are displayed as \code{YYYY-MM-DD}; fractional days are not shown.
-Infinite Date locations are displayed as \code{-Inf} or \code{Inf}; missing locations
-remain \code{NA}. Datetime locations are displayed as \verb{YYYY-MM-DD HH:MM}, without
-seconds, in the variable's own time zone (the session time zone when none is
-set). \code{hms} time-of-day locations are displayed as \code{hh:mm:ss}.
+Undefined statistics are \code{NA} (for example, \code{sd} when \code{n < 2} and the
+shape statistics for constant variables). Columns with no observed values
+have \code{n = 0}, \code{unique = 0}, and \code{NA} for numeric statistics, including \code{sum}.
 
-Calendar spread statistics (\code{sd}, \code{se}, \code{mad}, \code{iqr}) are \code{difftime} columns,
-so they can be compared across rows and used in arithmetic. Each column has
-one unit: days for Dates; for datetimes and times, the unit (seconds,
-minutes, hours or days) that fits the column's median nonzero spread. Convert
-with, for example, \code{as.numeric(out$sd, units = "hours")}.
+\strong{When weights are supplied}
 
-With \code{.type = "table"}, calendar locations are text. A shared location column
-such as \code{mean} becomes character, with numeric values rounded to seven
-significant digits; counts remain numeric. Calendar spreads become numbers in
-days (Dates) or seconds (datetimes and times), with the unit appended to
-\code{type}, for example \code{"date [days]"}.
+Let \code{w} be the weights and \code{W = sum(w)} over non-missing measured values.
+\itemize{
+\item \strong{Frequency weights} (\code{.wt_type = "frequency"}) use weights as given.
+The reported \code{n} is \code{W}; non-integer weights are permitted.
+\item \strong{Analytic weights} (\code{.wt_type = "analytic"}) are rescaled within each
+variable and group so that \code{W} equals the number of observed values.
+Thus \code{n} remains on the sample-count scale.
+\item \strong{Mean and spread:} \code{mean = sum(w * x) / W},
+\code{sd = sqrt(sum(w * (x - mean)^2) / (W - 1))}, and
+\code{se = sd / sqrt(W)}. The two weight types give the same mean but can
+give different \code{sd} and \code{se} values.
+\item \strong{Quantiles and MAD:} Percentiles use Stata's weighted percentile rule,
+replacing positions with cumulative weights; weighted \code{mad} uses the
+corresponding weighted medians. \code{min} and \code{max} exclude zero-weight rows.
+\item \strong{Totals and counts:} \code{sum} is \code{sum(w * x)} using the \emph{original},
+unrescaled weights, even for analytic weights. \code{unique}, \code{miss_n}, and
+\code{valid_pct} continue to use unweighted row counts.
+}
 
-Grouping keys that collide with summary metadata or internal pivot names are
-renamed by prepending dots until unique among the input names, with a
-message. The input data are not modified.
+The reported \code{se} is descriptive and does not account for a complex survey
+design. For survey inference, use functions such as \code{\link[survey:svymean]{survey::svymean()}}.
+
+\strong{Data types and grouping}
+
+Missingness follows \code{is.na()}, including SPSS user-missing codes. Logical
+variables are treated as 0/1; factors use their underlying numeric codes;
+labelled numeric variables use their stored values. Warnings flag such
+conversions. Variable names are marked with \code{*} for labelled variables,
+\verb{**} for factors, and \verb{***} for retained nonnumeric variables. Numeric
+calculations use double precision, which may affect large \code{integer64} values.
+
+Dates and datetimes support location and spread statistics, but not \code{sum},
+\code{skew}, or \code{kurtosis}. Calendar locations are displayed as dates or times;
+their spreads (\code{sd}, \code{se}, \code{mad}, \code{iqr}) are \code{difftime} values in list mode.
+In combined table mode, calendar locations are text and spreads are numeric
+durations (days for Dates, seconds for datetimes and times of day).
+
+Expressions in \code{...} are evaluated before statistics are calculated by
+group. For group-specific expressions, first create columns with grouped
+\code{\link[dplyr:mutate]{dplyr::mutate()}}.
 }
 \examples{
 summ(lifeexp)
@@ -233,7 +219,7 @@ summ(lifeexp, .by = region)
 
 tabstat(lifeexp, .by = region)
 
-# Weighted summaries, like Stata's summarize [aweight = w]
+# Compare frequency and analytic weights
 survey <- tibble::tibble(income = c(10, 20, 40), w = c(3, 1, 1))
 summ(survey, income, .wt = w, .stat = c("n", "mean", "sd", "p50"))
 
@@ -246,19 +232,19 @@ lifeexp |>
     .stat = c("n", "mean", "sd", "p50")
   )
 
-# Remove rows missing a grouping key; measured NAs are always omitted
+# Exclude rows with missing group keys
 summ(lifeexp, .by = region, .missing = FALSE)
 
-# Summarize existing and computed columns together
+# Summarise existing and computed columns together
 summ(lifeexp, lexp, gnppc_thousands = gnppc / 1000, .by = region)
 
 tabstat(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
 
-# Keep numeric and calendar summaries in separate tables
+# Separate numeric and calendar summaries
 mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
 summ(mixed, .type = "list")
 
-# Choose a stable variable name when starting from a vector
+# Preserve a variable name when starting from a vector
 scores <- c(4, 6, NA, 8)
 tibble::tibble(score = scores) |> summ(.name = TRUE)
 }

@@ -1,18 +1,18 @@
 # key checks report invalid input and repeated keys
 
     Code
-      isid(d, id, .missok = NA)
+      isid(d, id, .missing = NA)
     Condition
       Error in `isid()`:
-      ! `.missok` must be `TRUE` or `FALSE`, not `NA`.
+      ! `.missing` must be `TRUE` or `FALSE`, not `NA`.
     Code
       isid(d, id)
     Condition
       Error in `isid()`:
       ! `id` should never be missing to identify rows.
-      i Use `.missok = TRUE` to allow missing key values.
+      i Use `.missing = TRUE` to allow missing key values.
     Code
-      isid(d, id, .missok = TRUE)
+      isid(d, id, .missing = TRUE)
     Condition
       Error in `isid()`:
       ! Variable `id` does not uniquely identify the rows: 1 value appears more than once (2 rows).
@@ -38,4 +38,19 @@
     Condition
       Error in `isid()`:
       ! `.data` must be a data frame, not an integer vector.
+
+# isid() success messages name the checked keys
+
+    Code
+      isid(tibble::tibble(id = 1:2), id)
+    Message
+      Variable `id` uniquely identifies the rows.
+    Code
+      isid(dplyr::distinct(panel), id, wave)
+    Message
+      Variables `id`, `wave` together uniquely identify the rows.
+    Code
+      isid(panel[0, ], id, wave)
+    Message
+      No rows to check.
 

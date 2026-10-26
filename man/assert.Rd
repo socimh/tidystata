@@ -9,37 +9,41 @@ assert(.data, ..., .by = NULL)
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
-\item{...}{Conditions evaluated like \code{\link[dplyr:mutate]{dplyr::mutate()}} expressions, each
-giving \code{TRUE} or \code{FALSE} per row (or a single value). Group functions such
-as \code{n()} and \code{mean()} use the groups of \code{.data} or \code{.by}.}
+\item{...}{Logical conditions using columns of \code{.data}. Every condition
+must be \code{TRUE} for every row.}
 
-\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables,
-like Stata's \verb{by g: assert}.}
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables.
+Summaries such as \code{mean(x)} are evaluated within each group.}
 }
 \value{
-\code{.data}, invisibly, when every condition holds.
+\code{.data}, unchanged and invisibly, if all conditions pass.
 }
 \description{
-Check conditions on every row, like Stata's \code{assert}, and stop with the
-number of contradictions when any fails. It returns the data invisibly when
-all hold, so it can sit inside a pipeline.
+Verify that every row satisfies all specified conditions, like Stata's
+\code{assert}. Stop with an error if any condition fails; otherwise, return
+the original data invisibly.
 }
 \details{
-The error lists each failing condition with its number of contradictions and
-the first failing rows. A missing result (\code{NA}) counts as a contradiction and
-is reported separately. This differs from Stata, where a missing value is
-larger than every number, so \verb{assert x > 0} holds when \code{x} is missing; write
-\code{is.na(x) | x > 0} for that behaviour.
+Both \code{FALSE} and \code{NA} count as failures. Errors report the number of
+failing rows for each condition, including missing results, and the first
+five failing row numbers. A failed group-level condition counts every
+row in that group.
+
+Unlike Stata, \code{x > 0} fails when \code{x} is missing. Use
+\code{is.na(x) | x > 0} to allow missing values.
 }
 \examples{
-lifeexp |>
-  assert(lexp > 0, popgrowth < 10) |>
-  summ(lexp)
+scores <- data.frame(
+  class = c("A", "A", "B", "B"),
+  score = c(80, 90, 55, NA_real_)
+)
 
-# Each country appears once per region
-assert(lifeexp, dplyr::n() == dplyr::n_distinct(country), .by = region)
+# Pass: every nonmissing score is at least 50
+assert(scores, is.na(score) | score >= 50)
 
-try(assert(lifeexp, safewater > 50))
+# Fail: row 3 is below 60, and row 4 is missing
+try(assert(scores, score >= 60))
+
 }
 \seealso{
 Other data checking functions:

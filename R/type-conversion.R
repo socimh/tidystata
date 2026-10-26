@@ -1,9 +1,14 @@
 #' Convert vectors for data preparation
 #'
-#' Convert text to numbers with `destring()`, labelled values to labels with
-#' `decode()`, or values to text with `tostring()`, following Stata's conversion
-#' commands. `as_numeric()` and `as_character()` are aliases of `destring()` and
-#' `decode()`.
+#' @description
+#' Prepare vectors using Stata-style conversion commands:
+#'
+#' * `destring()` (`as_numeric()`): Convert text to numbers; labelled numeric
+#'   vectors use their stored values.
+#' * `decode()` (`as_character()`): Convert values to text, using value labels
+#'   for labelled vectors and level text for factors.
+#' * `tostring()`: Convert stored values to text, using numeric codes for
+#'   labelled numeric vectors and factors rather than their labels.
 #'
 #' @name type_conversion
 #' @param x A vector or matrix; a vector for `tostring()`.

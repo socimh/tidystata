@@ -1,12 +1,13 @@
 #' Cut a numeric vector into groups
 #'
 #' @description
-#' * `xtile()` creates `n` quantile groups, following Stata's `xtile`.
-#' * `cut_length()` creates `n` intervals of equal length. Stata has no
-#'   equal-width command (`egen cut(), group()` is not equal-width).
-#' * `cut_breaks()` cuts at given cutpoints, like `egen cut(), at()`.
+#' Group numeric values using quantiles, equal widths, or chosen cutpoints:
 #'
-#' `cut_quantile()` is an alias of `xtile()`.
+#' * `xtile()` (`cut_quantile()`): Create `n` quantile groups, following
+#'   Stata's `xtile`.
+#' * `cut_length()`: Create `n` intervals of equal length. Stata has no
+#'   equal-width command (`egen cut(), group()` is not equal-width).
+#' * `cut_breaks()`: Cut at given cutpoints, like `egen cut(), at()`.
 #'
 #' @param x A numeric vector. `xtile()` also accepts a logical vector, treated
 #'   as 0/1. SPSS user-missing codes and ranges are omitted. Convert `integer64`
@@ -28,29 +29,35 @@
 #'   < b`), as in Stata's `egen cut()`; the last interval also includes its
 #'   upper end. If `TRUE`, they are closed on the right (`a < x <= b`), as in
 #'   [base::cut()].
-#' @inheritParams base::cut
+#' @param labels `NULL` (default) creates labels; `FALSE` returns integer
+#'   codes. Supply a character vector for custom labels. For `xtile()`, grouped
+#'   data masks default to integer codes, and `TRUE` explicitly requests labels.
 #'
 #' @details
-#' Quantile cutpoints are the percentiles at `1/n, 2/n, ...`, using Stata's
-#' percentile rule (see [summ()]), and each value joins the first group whose
-#' cutpoint is at least that value. Equal values stay in the same group;
+#' For `xtile(method = "quantile")`, cutpoints are the percentiles at
+#' `1/n, 2/n, ...`, using Stata's percentile rule (see [summ()]), and each value
+#' joins the first group whose cutpoint is at least that value. Equal values
+#' stay in the same group;
 #' different values may share a group. Ties can leave groups empty; as in Stata,
 #' their codes are skipped (codes 1, 3 and 4, say) and a warning is given.
 #' Factor levels are the occupied groups. Default labels describe the contiguous
 #' intervals covered by each group, for example `"[0,0]"` and `"(0,1]"`. Custom
-#' labels must match the effective number of groups. Empty and all-missing
-#' vectors are rejected. Constant vectors are rejected only by the default
-#' quantile method.
+#' labels must match the effective number of groups. `xtile()` rejects empty
+#' and all-missing vectors; it rejects constants in quantile mode but accepts
+#' them in rank mode. `cut_length()` and `cut_breaks()` reject constants and
+#' all-missing vectors.
 #'
 #' `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
 #' values outside the breaks (and at the last break) missing, while
 #' `cut_breaks()` extends the end intervals to the observed range.
 #'
-#' `labels = NULL` (the default) or `TRUE` gives interval labels; `FALSE` gives
-#' integer codes. Inside grouped [dplyr::mutate()], each group has its own
-#' cutpoints and interval labels, which cannot be combined, so the default
-#' returns integer codes within each group (like Stata's `xtile, by()`). Supply
-#' `labels = TRUE` to request labels there anyway.
+#' With `xtile()`, `labels = NULL` (default) or `TRUE` creates labels. Inside
+#' grouped [dplyr::mutate()], each group has its own cutpoints and interval
+#' labels, which cannot be combined, so `xtile()` defaults to integer codes
+#' within each group (like Stata's `xtile, by()`). Supply `labels = TRUE` to
+#' request labels there anyway. `cut_length()` and `cut_breaks()` keep their
+#' factor output inside grouped data masks; use a character vector for custom
+#' labels or `FALSE` for integer codes.
 #'
 #' Rank groups omit missing observations when ranking, then restore missing
 #' output positions. If `n` exceeds the observed count, use one group per
@@ -60,7 +67,9 @@
 #' @returns An ordered factor, or integer interval codes when `labels = FALSE`
 #'   or when `xtile()` runs in a grouped data mask with default labels. The
 #'   result has the same length and order as `x`, with missing inputs remaining
-#'   missing. Empty and all-missing inputs are rejected.
+#'   missing. All-missing inputs are rejected. Empty inputs are rejected by
+#'   `xtile()` and `cut_length()`; `cut_breaks(numeric(), breaks = 50)` returns
+#'   an empty ordered factor with range warnings.
 #'
 #' @name cut
 #' @examples

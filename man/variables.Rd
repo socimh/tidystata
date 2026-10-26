@@ -33,9 +33,13 @@ ungrouped; arbitrary subclasses are not reconstructed on the inventory
 rows.
 }
 \description{
-\code{variables()} lists column names and variable labels, like the "Variables"
-tab in Stata. \code{variables_search()} searches that list by name or label,
-rather than by the values stored in the columns.
+Inspect or search a dataset's variable list:
+\itemize{
+\item \code{variables()}: List column names and variable labels, like the "Variables"
+tab in Stata.
+\item \code{variables_search()}: Search that list by name or variable label, rather
+than by the values stored in the columns.
+}
 }
 \details{
 Variable labels are read from each column's \code{label} attribute, including
@@ -62,12 +66,6 @@ variables_search(lifeexp, "n")
 
 variables_search(lifeexp, "^country$")
 
-# Inspect metadata before choosing columns for subsequent analysis.
-survey <- tibble::tibble(age = c(30, 45), income = c(2000, 3000))
-attr(survey$income, "label") <- "Monthly earnings"
-variables(survey, earnings = income, age)
-
-variables_search(survey, "earn")
 }
 \seealso{
 \code{\link[=ds]{ds()}}, \code{\link[=codebook]{codebook()}}, \code{\link[=browse]{browse()}}

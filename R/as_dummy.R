@@ -1,8 +1,11 @@
 #' Create indicator (dummy) variables
 #'
-#' Add one 0/1 column per observed category of each selected variable, like
-#' Stata's `tabulate x, generate(x_)`. The new columns are placed right after
-#' their source variable. `tab_gen()` is an alias of `as_dummy()`.
+#' @description
+#' Expand categorical variables into indicator columns:
+#'
+#' * `as_dummy()` (`tab_gen()`): Add one 0/1 column per observed category of
+#'   each selected variable, like Stata's `tabulate x, generate(x_)`. Place
+#'   the new columns right after their source variable.
 #'
 #' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables to

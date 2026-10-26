@@ -1,8 +1,12 @@
 #' Show the variable list of a dataset
 #'
-#' `variables()` lists column names and variable labels, like the "Variables"
-#' tab in Stata. `variables_search()` searches that list by name or label,
-#' rather than by the values stored in the columns.
+#' @description
+#' Inspect or search a dataset's variable list:
+#'
+#' * `variables()`: List column names and variable labels, like the "Variables"
+#'   tab in Stata.
+#' * `variables_search()`: Search that list by name or variable label, rather
+#'   than by the values stored in the columns.
 #'
 #' @param .data The input data frame, tibble, or data.table.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to select or
@@ -51,12 +55,6 @@
 #'
 #' variables_search(lifeexp, "^country$")
 #'
-#' # Inspect metadata before choosing columns for subsequent analysis.
-#' survey <- tibble::tibble(age = c(30, 45), income = c(2000, 3000))
-#' attr(survey$income, "label") <- "Monthly earnings"
-#' variables(survey, earnings = income, age)
-#'
-#' variables_search(survey, "earn")
 #' @family inspection functions
 
 #' @rdname variables

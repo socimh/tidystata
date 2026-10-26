@@ -41,13 +41,7 @@ check_by_selection <- function(.data, by, call = rlang::caller_env()) {
 }
 
 has_group_vars <- function(.data, group_vars) {
-  contain <- .data |>
-    dplyr::ungroup() |>
-    dplyr::select(
-      tidyselect::all_of(group_vars)
-    ) |>
-    capture()
-  contain
+  all(group_vars %in% names(.data))
 }
 
 remove_group_vars <- function(.data, ..., group_vars) {

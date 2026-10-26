@@ -1,0 +1,13 @@
+case,rows,keys,missing,rc
+unique_numeric,1 3 6,id,0,0
+duplicate_numeric,1 2,id,0,459
+missing_numeric,1 5,id,0,459
+missing_numeric_allowed,1 5,id,1,0
+duplicate_missing_numeric,5 7,id,1,459
+composite,1 2 3 6,id wave,0,0
+duplicate_composite,3 4,id wave,0,459
+missing_composite_allowed,5 7,id wave,1,0
+empty_string,1 3,code,0,459
+empty_string_allowed,1 3,code,1,0
+duplicate_empty_string,3 4,code,1,459
+whitespace,1 6,code,0,0

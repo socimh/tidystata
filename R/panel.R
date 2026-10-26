@@ -7,6 +7,11 @@
 #' in [dplyr::mutate()] with the panel identifier in `.by` or
 #' [dplyr::group_by()].
 #'
+#' * `stata_lag()`: Retrieve the value from `n` periods earlier.
+#' * `stata_lead()`: Retrieve the value from `n` periods later.
+#' * `stata_diff()`: Calculate the `n`th difference; the default first
+#'   difference subtracts the previous period's value from the current value.
+#'
 #' @param x A vector. `stata_diff()` needs a numeric, logical, `Date`, date-time
 #'   or `difftime` vector.
 #' @param n A single non-negative whole number: the number of periods
@@ -35,8 +40,9 @@
 #'   `%ty` dates, so any day in March is one month after any day in February.
 #'   Weeks follow Stata's `%tw`: each year has 52 weeks starting on 1 January,
 #'   so the last week has 8 or 9 days (tsibble's `yearweek()` keeps its ISO
-#'   weeks). Date-times use the local clock of their time zone. Must be `NULL`
-#'   for numbers and period classes.
+#'   weeks). For date-times, seconds measure elapsed time; minute and larger
+#'   periods use the local clock of their time zone. Must be `NULL` for numbers
+#'   and period classes.
 #'
 #' @returns A vector with the length and row order of `x`, with `NA` where the
 #'   required period is absent or time is missing. Lags and leads retain the

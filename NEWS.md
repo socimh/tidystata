@@ -1,3 +1,26 @@
+# tidystata (development version)
+
+* Shared help pages compare related functions and aliases in opening bullets.
+  Grouping, labels, cutting edge cases and examples reflect current behavior.
+
+* `isid()` confirms successful key checks with a message while returning the
+  original data invisibly. Use `suppressMessages()` for silent execution.
+  `.missing` replaces `.missok` without an alias; update existing calls.
+  Empty strings, including empty-string factor values, are rejected by default;
+  `.missing = TRUE` allows them and other missing values but still requires
+  unique key combinations.
+
+* `capture()` returns the expression's result on success and invisible `NULL`
+  on error, replacing its previous `TRUE`/`FALSE` result. It preserves successful
+  visibility and evaluates once. Caught errors emit a failure message by default;
+  `quiet = TRUE` suppresses it along with warnings and messages from the expression.
+  Printed output is retained. Put assignments inside `capture()` to preserve
+  existing objects on failure. Existing Boolean uses must be updated.
+
+* `corr()` calculates Pearson correlations on a common complete-case sample,
+  like Stata's `corr` (`correlate`), with tidy selection, computed columns,
+  groups, weights, and long or wide tibble output.
+
 # tidystata 0.3.2
 
 * `assert()` protects input columns from internal-name collisions and rejects

@@ -138,7 +138,7 @@ tab2(lifeexp_tab, region:lexp_70)
 
 ## Learn more
 
-tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`pwcorr()`), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
+tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`corr()` for complete cases and `pwcorr()` for pairwise samples), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.

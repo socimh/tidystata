@@ -29,10 +29,9 @@ inputs and cutpoints explicitly to ordinary numeric values first.}
 
 \item{n}{A positive integer. The number of intervals.}
 
-\item{labels}{labels for the levels of the resulting category.  By default,
-    labels are constructed using \code{"(a,b]"} interval notation.  If
-    \code{labels = FALSE}, simple integer codes are returned instead of
-    a factor.}
+\item{labels}{\code{NULL} (default) creates labels; \code{FALSE} returns integer
+codes. Supply a character vector for custom labels. For \code{xtile()}, grouped
+data masks default to integer codes, and \code{TRUE} explicitly requests labels.}
 
 \item{method}{Quantile boundaries (\code{"quantile"}, the default), or balanced
 rank groups (\code{"rank"}, which has no Stata counterpart). Rank groups may
@@ -57,39 +56,45 @@ upper end. If \code{TRUE}, they are closed on the right (\verb{a < x <= b}), as 
 An ordered factor, or integer interval codes when \code{labels = FALSE}
 or when \code{xtile()} runs in a grouped data mask with default labels. The
 result has the same length and order as \code{x}, with missing inputs remaining
-missing. Empty and all-missing inputs are rejected.
+missing. All-missing inputs are rejected. Empty inputs are rejected by
+\code{xtile()} and \code{cut_length()}; \code{cut_breaks(numeric(), breaks = 50)} returns
+an empty ordered factor with range warnings.
 }
 \description{
+Group numeric values using quantiles, equal widths, or chosen cutpoints:
 \itemize{
-\item \code{xtile()} creates \code{n} quantile groups, following Stata's \code{xtile}.
-\item \code{cut_length()} creates \code{n} intervals of equal length. Stata has no
+\item \code{xtile()} (\code{cut_quantile()}): Create \code{n} quantile groups, following
+Stata's \code{xtile}.
+\item \code{cut_length()}: Create \code{n} intervals of equal length. Stata has no
 equal-width command (\verb{egen cut(), group()} is not equal-width).
-\item \code{cut_breaks()} cuts at given cutpoints, like \verb{egen cut(), at()}.
+\item \code{cut_breaks()}: Cut at given cutpoints, like \verb{egen cut(), at()}.
 }
-
-\code{cut_quantile()} is an alias of \code{xtile()}.
 }
 \details{
-Quantile cutpoints are the percentiles at \verb{1/n, 2/n, ...}, using Stata's
-percentile rule (see \code{\link[=summ]{summ()}}), and each value joins the first group whose
-cutpoint is at least that value. Equal values stay in the same group;
+For \code{xtile(method = "quantile")}, cutpoints are the percentiles at
+\verb{1/n, 2/n, ...}, using Stata's percentile rule (see \code{\link[=summ]{summ()}}), and each value
+joins the first group whose cutpoint is at least that value. Equal values
+stay in the same group;
 different values may share a group. Ties can leave groups empty; as in Stata,
 their codes are skipped (codes 1, 3 and 4, say) and a warning is given.
 Factor levels are the occupied groups. Default labels describe the contiguous
 intervals covered by each group, for example \code{"[0,0]"} and \code{"(0,1]"}. Custom
-labels must match the effective number of groups. Empty and all-missing
-vectors are rejected. Constant vectors are rejected only by the default
-quantile method.
+labels must match the effective number of groups. \code{xtile()} rejects empty
+and all-missing vectors; it rejects constants in quantile mode but accepts
+them in rank mode. \code{cut_length()} and \code{cut_breaks()} reject constants and
+all-missing vectors.
 
 \code{cut_breaks()} differs from \verb{egen cut(), at()} at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while
 \code{cut_breaks()} extends the end intervals to the observed range.
 
-\code{labels = NULL} (the default) or \code{TRUE} gives interval labels; \code{FALSE} gives
-integer codes. Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its own
-cutpoints and interval labels, which cannot be combined, so the default
-returns integer codes within each group (like Stata's \verb{xtile, by()}). Supply
-\code{labels = TRUE} to request labels there anyway.
+With \code{xtile()}, \code{labels = NULL} (default) or \code{TRUE} creates labels. Inside
+grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its own cutpoints and interval
+labels, which cannot be combined, so \code{xtile()} defaults to integer codes
+within each group (like Stata's \verb{xtile, by()}). Supply \code{labels = TRUE} to
+request labels there anyway. \code{cut_length()} and \code{cut_breaks()} keep their
+factor output inside grouped data masks; use a character vector for custom
+labels or \code{FALSE} for integer codes.
 
 Rank groups omit missing observations when ranking, then restore missing
 output positions. If \code{n} exceeds the observed count, use one group per

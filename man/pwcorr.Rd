@@ -72,8 +72,8 @@ For Pearson correlations it matches \code{cor.test()}; for Spearman correlations
 it is the same large-sample approximation that Stata uses. Correlations with
 a constant variable, and p-values with fewer than three observations, are
 \code{NA}. Labelled numeric columns are correlated on their codes, excluding
-tagged and SPSS user-missing values. For listwise deletion, as in Stata's
-\code{correlate}, drop incomplete rows first with \code{tidyr::drop_na()}.
+tagged and SPSS user-missing values. Use \code{\link[=corr]{corr()}} for listwise Pearson
+correlations, like Stata's \code{corr} (\code{correlate}).
 }
 \examples{
 pwcorr(lifeexp, lexp, gnppc, safewater)
@@ -89,6 +89,7 @@ pwcorr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
 }
 \seealso{
 Other tabulation functions:
+\code{\link[=corr]{corr()}},
 \code{\link[=tab]{tab()}}
 }
 \concept{tabulation functions}

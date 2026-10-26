@@ -2,37 +2,88 @@
 % Please edit documentation in R/capture.R
 \name{capture}
 \alias{capture}
-\title{Capture an error and report success}
+\title{Evaluate an expression without stopping on an error}
 \usage{
-capture(x)
+capture(x, quiet = FALSE)
 }
 \arguments{
 \item{x}{An expression to evaluate once.}
+
+\item{quiet}{If \code{TRUE}, suppress warnings and messages from \code{x} and the
+failure message from \code{capture()}. Printed output and the returned value
+are unchanged. Defaults to \code{FALSE}.}
 }
 \value{
-A single logical value: \code{TRUE} on success, \code{FALSE} on error or when
-the expression returns an object inheriting from \code{try-error}.
+The expression's result, preserving its visibility, class and
+attributes. On error, \code{NULL} invisibly.
 }
 \description{
-\code{capture()} works like Stata's \code{capture}: it evaluates an expression,
-suppresses any error, and returns \code{TRUE} if the expression succeeded and
-\code{FALSE} if it failed.
+\code{capture()} evaluates an expression once and returns its result. If the
+expression errors, it reports why evaluation did not complete and returns
+\code{NULL} invisibly. Use \code{quiet = TRUE} to suppress the failure message.
 }
 \details{
-Errors are caught without printing their messages; warnings and messages
-propagate normally. The \code{try-error} exception follows \code{\link[=try]{try()}} compatibility.
+When updating an existing object, put the assignment inside \code{capture()}:
+\code{capture(data <- update(data))}. Writing \code{data <- capture(update(data))}
+overwrites \code{data} with \code{NULL} if the update fails.
+
+Like Stata's \code{capture}, this lets a script continue after an error. Unlike
+Stata's command, it returns the successful value, keeps printed output and
+reports a caught error as a message by default. The failure notice is not a
+formal R warning and does not become an error under \code{options(warn = 2)}.
+Warnings and messages from \code{x} propagate unless \code{quiet = TRUE}; suppressing
+them does not stop evaluation. With \code{options(warn = 2)}, an unsuppressed
+warning from \code{x} becomes an error and is caught. User interrupts are not caught.
+
+A successful \code{FALSE}, \code{NA}, \code{NULL} or object inheriting from \code{try-error} is
+returned unchanged. A successful \code{NULL} and a caught error have the same
+value. Use \code{\link[=tryCatch]{tryCatch()}} when you need to distinguish them programmatically or
+retain the error object.
+This function no longer returns a success/failure flag, so do not use it as
+the condition in \verb{if (capture(...))}.
+
+An assignment inside \code{capture()} updates its target only after the right-hand
+side succeeds. A successful \code{NULL} is still assigned. A block of separate
+assignments retains the last completed update and skips steps after the first
+error, as Stata's capture blocks do. A single assignment around a pipeline
+retains its original target on error; intermediate pipeline results are not
+saved.
+
+Earlier effects are not rolled back. In particular, changes by reference
+(such as data.table updates) and printed output before an error remain.
+Invalid \code{quiet} values raise an error before \code{x} is evaluated.
 }
 \examples{
 capture(mean(1:10))
 
-# Warnings do not count as errors
-capture(mean(letters[1:10]))
+# Keep a successful result while suppressing warnings and messages
+capture({
+  message("Calculating")
+  mean(1:10)
+}, quiet = TRUE)
 
-# Errors return FALSE
-capture(means(1:10))
+# A new object receives NULL on error, with a failure message
+result <- capture(stop("Cannot calculate"))
 
-# Check a key without stopping the script
-capture(isid(lifeexp, country))
+# An existing object is kept if its replacement fails
+data <- tibble::tibble(x = 1:3)
+capture(data <- dplyr::mutate(data, y = x * 2))
+capture(data <- stop("Update failed"))
+data
+
+# Separate assignments keep the last completed update
+capture({
+  data <- dplyr::mutate(data, z = x + 1)
+  data <- stop("Second update failed")
+  data <- dplyr::mutate(data, later = TRUE)
+})
+data
+
+# A single assignment keeps the original target if any pipeline step fails
+capture(data <- data |>
+  dplyr::mutate(temporary = x * 10) |>
+  dplyr::mutate(failed = stop("Pipeline failed")))
+data
 }
 \seealso{
 Other utility functions:

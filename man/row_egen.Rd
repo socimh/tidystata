@@ -68,6 +68,21 @@ all-missing row's mean is \code{NA}, not \code{NaN}.
 Summarize selected columns within each row using arithmetic, extrema,
 distinct-value counts, or missing-value counts. Use a data frame directly or
 select columns inside \code{\link[dplyr:mutate]{dplyr::mutate()}}.
+\itemize{
+\item \code{row_mean()}: Calculate the arithmetic mean within each row.
+\item \code{row_sum()}: Add the values within each row.
+\item \code{row_max()}: Find the largest value within each row.
+\item \code{row_min()}: Find the smallest value within each row.
+\item \code{row_median()}: Find the median within each row.
+\item \code{row_var()}: Calculate the sample variance within each row.
+\item \code{row_sd()}: Calculate the sample standard deviation within each row.
+\item \code{row_unique()}: Count distinct values within each row, counting missing
+values as one category.
+\item \code{row_nvals()}: Count distinct non-missing values within each row by
+default; use \code{.missing = TRUE} to count missing values as one category.
+\item \code{row_miss()}: Count missing values within each row.
+\item \code{row_non_miss()}: Count non-missing values within each row.
+}
 }
 \details{
 All helpers preserve the input. Missingness is determined from the original
