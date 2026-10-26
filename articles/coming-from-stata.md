@@ -56,7 +56,7 @@ functions with the same name.
 This reference contains 514 command families, 181 Stata functions and 3
 operators, with 1716 distinct Stata examples and 1782 paired R examples.
 Abbreviations and alternative R implementations do not increase the
-command count. The R index describes 948 function/package pairs.
+command count. The R index describes 949 function/package pairs.
 
 ## Use the command tables
 
@@ -95,6 +95,9 @@ entries use dplyr, so attach it with
 
 ## Alphabetical command index
 
+[F](#example-ref-5c1a42b934cb6b4f) ·
+[Fden](#example-ref-04e11edb60d43424) ·
+[Ftail](#example-ref-a7f21b2b3b0647fb) ·
 [about](#example-ref-23457083a342d8a8) ·
 [ac](#example-ref-fa917324a24efd88) · [ado](#example-legacy-0282) ·
 [adopath](#example-ref-73ca091b91521ced) ·
@@ -216,12 +219,11 @@ entries use dplyr, so attach it with
 [exponential](#example-ref-5ef4b1a2dd10712f) ·
 [exponentialden](#example-ref-1fef28de83dba7b8) ·
 [exponentialtail](#example-ref-6cd8276eeaa5eec3) ·
-[export](#example-legacy-0020) · [F](#example-ref-5c1a42b934cb6b4f) ·
-[f.](#example-legacy-0359) · [factor](#example-legacy-0084) ·
+[export](#example-legacy-0020) · [f.](#example-legacy-0359) ·
+[factor](#example-legacy-0084) ·
 [factormat](#example-ref-a0421b00c54bf2a7) ·
 [fcast](#example-ref-a303bdc04fa81a48) ·
 [fcollapse](#example-ref-ff005b44b4bc06f9) ·
-[Fden](#example-ref-04e11edb60d43424) ·
 [file](#example-ref-db37147f74447ccd) ·
 [filefilter](#example-ref-1d589d51d8c70b62) ·
 [fillin](#example-legacy-0221) ·
@@ -238,7 +240,6 @@ entries use dplyr, so attach it with
 · [fre](#example-legacy-0042) · [frget](#example-ref-ece62cf14db3df86) ·
 [frlink](#example-ref-f25874e32f399df3) ·
 [frunalias](#example-ref-c431b0cad1da93c8) ·
-[Ftail](#example-ref-a7f21b2b3b0647fb) ·
 [ftools](#example-ref-289daa81773fd223) ·
 [gammaden](#example-ref-2ad06af7ddddaa94) ·
 [gammap](#example-ref-01f2d600d32ad31a) ·
@@ -283,6 +284,8 @@ entries use dplyr, so attach it with
 [insobs](#example-ref-4b82e73619fe09f5) ·
 [inspect](#example-legacy-0059) ·
 [intreg](#example-ref-4369e2ccad9e8d3f) ·
+[invF](#example-ref-7822f727ce3a3dfe) ·
+[invFtail](#example-ref-d4e72ece99ff3f05) ·
 [invbinomial](#example-ref-132aa6c600b88f03) ·
 [invbinomialtail](#example-ref-bc59ee2e9a87253e) ·
 [invcauchy](#example-ref-1e7da01122eba0c2) ·
@@ -291,20 +294,18 @@ entries use dplyr, so attach it with
 [invchi2tail](#example-ref-23306c7dbf504d73) ·
 [invexponential](#example-ref-29514def6e9ecbad) ·
 [invexponentialtail](#example-ref-7b571ba451d3e054) ·
-[invF](#example-ref-7822f727ce3a3dfe) ·
-[invFtail](#example-ref-d4e72ece99ff3f05) ·
 [invgammap](#example-ref-2265ddfe6d1a8f29) ·
 [invgammaptail](#example-ref-bf84d422d26193ae) ·
 [invibeta](#example-ref-8bc4b3768425541a) ·
 [invibetatail](#example-ref-88d1fec121a169d0) ·
 [invlogistic](#example-ref-62040f03f7fc4986) ·
 [invlogistictail](#example-ref-46db3a062f66d769) ·
+[invnF](#example-ref-f415a39bfdae4e2a) ·
+[invnFtail](#example-ref-d5ae4af1368a8f05) ·
 [invnbinomial](#example-ref-2549a0c3e9f10f22) ·
 [invnbinomialtail](#example-ref-e4993aa3c1347631) ·
 [invnchi2](#example-ref-047e7eddf232874f) ·
 [invnchi2tail](#example-ref-22999e358ff1bb18) ·
-[invnF](#example-ref-f415a39bfdae4e2a) ·
-[invnFtail](#example-ref-d5ae4af1368a8f05) ·
 [invnibeta](#example-ref-d701858fe7a31496) ·
 [invnormal](#example-ref-4eca2239aba08a06) ·
 [invnt](#example-ref-ce6c456fae75074b) ·
@@ -391,6 +392,9 @@ entries use dplyr, so attach it with
 [mvencode](#example-legacy-0124) ·
 [mvreg](#example-ref-84c8c53fd61de90e) ·
 [mvtest](#example-ref-3ecf635c5a04e393) ·
+[nF](#example-ref-aa746531f0a8f6c2) ·
+[nFden](#example-ref-ff8abb410d9cc40c) ·
+[nFtail](#example-ref-52cf941ab80e5328) ·
 [nbetaden](#example-ref-d59c43dd30954b2f) ·
 [nbinomial](#example-ref-12787c749e7717df) ·
 [nbinomialp](#example-ref-55d623f908e6e118) ·
@@ -400,15 +404,12 @@ entries use dplyr, so attach it with
 [nchi2tail](#example-ref-b77aba953ed51020) ·
 [nestreg](#example-ref-c0e97b6e48d38b6c) · [net](#example-legacy-0011) ·
 [newey](#example-ref-c263eba9cf3fb057) ·
-[nF](#example-ref-aa746531f0a8f6c2) ·
-[nFden](#example-ref-ff8abb410d9cc40c) ·
-[nFtail](#example-ref-52cf941ab80e5328) ·
 [nibeta](#example-ref-108f4c14a7573c1b) ·
 [nl](#example-ref-3366d57f680bc9fd) · [nlcom](#example-legacy-0330) ·
 [normal](#example-ref-34e7210a02898239) ·
 [normalden](#example-ref-493740d06c458ca9) ·
-[notes](#example-legacy-0107) · [npnchi2](#example-ref-5b19051b8727105b)
-· [npnF](#example-ref-6b33380e283b39a7) ·
+[notes](#example-legacy-0107) · [npnF](#example-ref-6b33380e283b39a7) ·
+[npnchi2](#example-ref-5b19051b8727105b) ·
 [npnt](#example-ref-18171672d2eba71f) ·
 [nptrend](#example-ref-2a51c04e2be7cab2) ·
 [nt](#example-ref-a7067a71f45672d1) ·
@@ -831,22 +832,60 @@ entries use dplyr, so attach it with
 |----|----|----|----|
 | `ivreg()` | AER | ivregress | Instrumental-Variable Regression |
 | `tobit()` | AER |  | Tobit (censored) regression |
+| `dbAppendTable()` | DBI | jdbc | Insert rows into a table |
+| `dbDisconnect()` | DBI | odbc | Disconnect (close) a connection |
+| `dbGetQuery()` | DBI | odbc | Retrieve results from a query |
+| `dbListFields()` | DBI | odbc | List field names of a remote table |
+| `dbListTables()` | DBI | odbc | List remote tables |
+| `dbReadTable()` | DBI | jdbc | Read database tables as data frames |
+| `oblimin()` | GPArotation | rotate | Rotations Functions Using Gradient Projection Algorithms |
+| `quartimax()` | GPArotation | rotate | Rotations Functions Using Gradient Projection Algorithms |
+| `boxcox()` | MASS | boxcox | Box-Cox Transformations for Linear Models |
+| `corresp()` | MASS | ca | Simple Correspondence Analysis |
+| `glm.nb()` | MASS |  | Negative binomial regression |
+| `isoMDS()` | MASS | mds | Kruskal's Non-metric Multidimensional Scaling |
+| `lda()` | MASS | discrim | Linear Discriminant Analysis |
+| `mca()` | MASS | mca | Multiple Correspondence Analysis |
+| `mvrnorm()` | MASS | drawnorm | Simulate from a Multivariate Normal Distribution |
+| `polr()` | MASS |  | Ordered logit or probit |
+| `qda()` | MASS | discrim | Quadratic Discriminant Analysis |
+| `rlm()` | MASS |  | Robust regression |
+| `MCMCregress()` | MCMCpack | bayesmh | Markov Chain Monte Carlo for Gaussian Linear Regression |
+| `match_data()` | MatchIt | psmatch2 | Construct a matched dataset from a matchit object |
+| `matchit()` | MatchIt |  | Matching for causal inference |
+| `synth()` | Synth |  | Synthetic control |
+| `SurvS4()` | VGAM | cpoisson | Create a Survival Object |
+| `binom2.rho()` | VGAM | biprobit | Bivariate Probit Regression |
+| `cens.poisson()` | VGAM | cpoisson | Censored Poisson Family Function |
+| `multinomial()` | VGAM | slogit | Multinomial Logit Model |
+| `posnegbinomial()` | VGAM | tnbreg | Positive Negative Binomial Distribution Family Function |
+| `posnormal()` | VGAM | truncreg | Positive Normal Distribution Family Function |
+| `pospoisson()` | VGAM | tpoisson | Positive Poisson Distribution Family Function |
+| `rrvglm()` | VGAM | slogit | Fitting Reduced-Rank Vector Generalized Linear Models (RR-VGLMs) and Doubly Constrained RR-VGLMs (DRR-VGLMs) |
+| `vglm()` | VGAM | tpoisson | Fitting Vector Generalized Linear Models |
+| `weightit()` | WeightIt |  | Balancing weights, such as inverse-probability weights |
 | [`.libPaths()`](https://rdrr.io/r/base/libPaths.html) | base | adopath | Search Paths for Packages |
+| [`I()`](https://rdrr.io/r/base/AsIs.html) | base | regress | Inhibit Interpretation/Conversion of Objects |
+| [`Mod()`](https://rdrr.io/r/base/complex.html) | base | psdensity | Complex Numbers and Basic Functionality |
+| [`R.home()`](https://rdrr.io/r/base/Rhome.html) | base | sysdir | Return the R Home Directory |
+| [`Sys.Date()`](https://rdrr.io/r/base/Sys.time.html) | base |  | Today's date |
+| [`Sys.sleep()`](https://rdrr.io/r/base/Sys.sleep.html) | base | sleep | Suspend Execution for a Time Interval |
+| [`Sys.time()`](https://rdrr.io/r/base/Sys.time.html) | base | c(current_time) | Current date and time |
 | [`abs()`](https://rdrr.io/r/base/MathFun.html) | base | abs() | Absolute value |
 | [`all()`](https://rdrr.io/r/base/all.html) | base | assert | Whether all values are TRUE |
 | [`any()`](https://rdrr.io/r/base/any.html) | base | count if | Whether any value is TRUE |
 | [`anyDuplicated()`](https://rdrr.io/r/base/duplicated.html) | base | gisid | Determine Duplicate Elements |
 | [`anyNA()`](https://rdrr.io/r/base/NA.html) | base | gisid | Not Available / Missing Values |
 | [`apply()`](https://rdrr.io/r/base/apply.html) | base | egen rowtotal() | Apply a function over rows or columns |
+| [`as.Date()`](https://rdrr.io/r/base/as.Date.html) | base |  | Convert to a date |
+| [`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html) | base | clock | Date-time Conversion Functions |
 | [`as.character()`](https://rdrr.io/r/base/character.html) | base |  | Convert to text |
 | [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) | base | getmata | Coerce to a Data Frame |
-| [`as.Date()`](https://rdrr.io/r/base/as.Date.html) | base |  | Convert to a date |
 | [`as.double()`](https://rdrr.io/r/base/double.html) | base |  | Convert to double-precision numbers |
 | [`as.factor()`](https://rdrr.io/r/base/factor.html) | base | encode | Convert to a factor |
 | [`as.integer()`](https://rdrr.io/r/base/integer.html) | base |  | Convert to whole numbers |
 | [`as.matrix()`](https://rdrr.io/r/base/matrix.html) | base | cf | Matrices |
 | [`as.numeric()`](https://rdrr.io/r/base/numeric.html) | base |  | Convert to numbers |
-| [`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html) | base | clock | Date-time Conversion Functions |
 | [`as.vector()`](https://rdrr.io/r/base/vector.html) | base | margins | Vectors - Creation, Coercion, etc |
 | [`attr()`](https://rdrr.io/r/base/attr.html) | base |  | Get or set an attribute of an object |
 | [`attributes()`](https://rdrr.io/r/base/attributes.html) | base | char | Object Attribute Lists |
@@ -855,15 +894,15 @@ entries use dplyr, so attach it with
 | [`cat()`](https://rdrr.io/r/base/cat.html) | base |  | Print text without quotes |
 | [`cbind()`](https://rdrr.io/r/base/cbind.html) | base | merge 1:1 \_n | Put side by side (base R) |
 | [`ceiling()`](https://rdrr.io/r/base/Round.html) | base |  | Round up |
-| [`character()`](https://rdrr.io/r/base/character.html) | base | tokenize | Character Vectors |
 | [`charToRaw()`](https://rdrr.io/r/base/rawConversion.html) | base | changeeol | Convert to or from (Bit/Packed) Raw Vectors |
+| [`character()`](https://rdrr.io/r/base/character.html) | base | tokenize | Character Vectors |
 | [`chol()`](https://rdrr.io/r/base/chol.html) | base | irf | The Cholesky Decomposition |
 | [`class()`](https://rdrr.io/r/base/class.html) | base | describe | Class of an object |
 | [`close()`](https://rdrr.io/r/base/connections.html) | base | file | Functions to Manipulate Connections (Files, URLs, ...) |
 | [`col()`](https://rdrr.io/r/base/col.html) | base | spmatrix | Column Indexes |
 | [`colMeans()`](https://rdrr.io/r/base/colSums.html) | base | margins | Form Row and Column Sums and Means |
-| [`colnames()`](https://rdrr.io/r/base/colnames.html) | base | ds | Column names |
 | [`colSums()`](https://rdrr.io/r/base/colSums.html) | base | missings | Form Row and Column Sums and Means |
+| [`colnames()`](https://rdrr.io/r/base/colnames.html) | base | ds | Column names |
 | [`crossprod()`](https://rdrr.io/r/base/crossprod.html) | base | tsfilter | Matrix Cross-Product |
 | [`cumprod()`](https://rdrr.io/r/base/cumsum.html) | base | generate | Running product |
 | [`cumsum()`](https://rdrr.io/r/base/cumsum.html) | base |  | Running sum |
@@ -897,7 +936,6 @@ entries use dplyr, so attach it with
 | [`grep()`](https://rdrr.io/r/base/grep.html) | base | unab | Pattern Matching and Replacement |
 | [`grepl()`](https://rdrr.io/r/base/grep.html) | base |  | Whether text matches a pattern |
 | [`gsub()`](https://rdrr.io/r/base/grep.html) | base | subinstr() | Replace every match |
-| [`I()`](https://rdrr.io/r/base/AsIs.html) | base | regress | Inhibit Interpretation/Conversion of Objects |
 | [`iconv()`](https://rdrr.io/r/base/iconv.html) | base | unicode | Convert Character Vector between Encodings |
 | [`identical()`](https://rdrr.io/r/base/identical.html) | base | cf | Test Objects for Exact Equality |
 | [`ifelse()`](https://rdrr.io/r/base/ifelse.html) | base | cond() | Vectorised if-else (base R) |
@@ -932,7 +970,6 @@ entries use dplyr, so attach it with
 | [`merge()`](https://rdrr.io/r/base/merge.html) | base | merge | Merge two data frames (base R) |
 | [`message()`](https://rdrr.io/r/base/message.html) | base | display | Print a message |
 | [`min()`](https://rdrr.io/r/base/Extremes.html) | base |  | Smallest value |
-| [`Mod()`](https://rdrr.io/r/base/complex.html) | base | psdensity | Complex Numbers and Basic Functionality |
 | [`names()`](https://socimh.github.io/tidystata/reference/names.md) | base |  | Names of an object, such as column names |
 | [`nchar()`](https://rdrr.io/r/base/nchar.html) | base | strlen() | Number of characters |
 | [`ncol()`](https://rdrr.io/r/base/nrow.html) | base | describe | Number of columns |
@@ -953,7 +990,6 @@ entries use dplyr, so attach it with
 | [`proportions()`](https://rdrr.io/r/base/proportions.html) | base | tabulate, row | Turn a table into proportions |
 | [`qr()`](https://rdrr.io/r/base/qr.html) | base | orthog | The QR Decomposition of a Matrix |
 | [`qr.Q()`](https://rdrr.io/r/base/qraux.html) | base | orthog | Reconstruct the Q, R, or X Matrices from a QR Object |
-| [`R.home()`](https://rdrr.io/r/base/Rhome.html) | base | sysdir | Return the R Home Directory |
 | [`range()`](https://rdrr.io/r/base/range.html) | base | summarize | Minimum and maximum |
 | [`rank()`](https://rdrr.io/r/base/rank.html) | base |  | Ranks, with ties averaged |
 | [`rbind()`](https://rdrr.io/r/base/cbind.html) | base | append | Stack rows (base R) |
@@ -1004,10 +1040,7 @@ entries use dplyr, so attach it with
 | [`substr()`](https://rdrr.io/r/base/substr.html) | base | substr() | Part of a string by position |
 | [`sum()`](https://rdrr.io/r/base/sum.html) | base |  | Sum |
 | [`summary()`](https://rdrr.io/r/base/summary.html) | base |  | Summary of an object, such as a model |
-| [`Sys.Date()`](https://rdrr.io/r/base/Sys.time.html) | base |  | Today's date |
-| [`Sys.sleep()`](https://rdrr.io/r/base/Sys.sleep.html) | base | sleep | Suspend Execution for a Time Interval |
 | [`sys.source()`](https://rdrr.io/r/base/sys.source.html) | base | include | Parse and Evaluate Expressions from a File |
-| [`Sys.time()`](https://rdrr.io/r/base/Sys.time.html) | base | c(current_time) | Current date and time |
 | [`t()`](https://rdrr.io/r/base/t.html) | base |  | Transpose a matrix |
 | [`table()`](https://rdrr.io/r/base/table.html) | base |  | Count values |
 | [`tapply()`](https://rdrr.io/r/base/tapply.html) | base | bysort g: egen | Apply a function within groups |
@@ -1049,17 +1082,11 @@ entries use dplyr, so attach it with
 | `vif()` | car |  | Variance inflation factors |
 | `knn()` | class | discrim | k-Nearest Neighbour Classification |
 | `bal.tab()` | cobalt | pstest | Display Balance Statistics in a Table |
-| `effectiveSize()` | coda | bayesstats | Effective sample size for estimating the mean |
 | `HPDinterval()` | coda | bayesstats | Highest Posterior Density intervals |
+| `effectiveSize()` | coda | bayesstats | Effective sample size for estimating the mean |
 | `fread()` | data.table | import delimited | Fast reading of large text files |
 | `fwrite()` | data.table | export delimited | Fast writing of large text files |
 | `winsorize()` | datawizard |  | Winsorise extreme values |
-| `dbAppendTable()` | DBI | jdbc | Insert rows into a table |
-| `dbDisconnect()` | DBI | odbc | Disconnect (close) a connection |
-| `dbGetQuery()` | DBI | odbc | Retrieve results from a query |
-| `dbListFields()` | DBI | odbc | List field names of a remote table |
-| `dbListTables()` | DBI | odbc | List remote tables |
-| `dbReadTable()` | DBI | jdbc | Read database tables as data frames |
 | `att_gt()` | did |  | Staggered difference in differences (Callaway-Sant'Anna) |
 | [`across()`](https://dplyr.tidyverse.org/reference/across.html) | dplyr |  | Apply the same calculation to several columns |
 | [`add_count()`](https://dplyr.tidyverse.org/reference/count.html) | dplyr | bysort g: generate n = \_N | Add a column with group counts |
@@ -1229,8 +1256,6 @@ entries use dplyr, so attach it with
 | `glmmTMB()` | glmmTMB | menbreg | Fit Models with TMB |
 | `nbinom2()` | glmmTMB | menbreg | Family functions for glmmTMB |
 | `cv.glmnet()` | glmnet | lasso | Cross-validation for glmnet |
-| `oblimin()` | GPArotation | rotate | Rotations Functions Using Gradient Projection Algorithms |
-| `quartimax()` | GPArotation | rotate | Rotations Functions Using Gradient Projection Algorithms |
 | [`pairs()`](https://rdrr.io/r/graphics/pairs.html) | graphics |  | Scatter-plot matrix |
 | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) | graphics | quantile | The Default Scatterplot Function |
 | [`stem()`](https://rdrr.io/r/graphics/stem.html) | graphics |  | Stem-and-leaf display |
@@ -1268,12 +1293,12 @@ entries use dplyr, so attach it with
 | `modindices()` | lavaan | estat | Modification Indices |
 | `sem()` | lavaan |  | Structural equation model |
 | `standardizedSolution()` | lavaan | sem | Standardized Solution |
+| `VarCorr()` | lme4 | estat sd | Variance components of a multilevel model |
 | `fixef()` | lme4 | quadchk | Extract fixed-effects estimates |
 | `glmer()` | lme4 |  | Multilevel generalised linear model |
 | `glmerControl()` | lme4 | melogit | Control of Mixed Model Fitting |
 | `lmer()` | lme4 |  | Multilevel linear model |
 | `ranef()` | lme4 | predict, reffects | Predicted random effects |
-| `VarCorr()` | lme4 | estat sd | Variance components of a multilevel model |
 | `bptest()` | lmtest |  | Breusch-Pagan test for heteroskedasticity |
 | `coeftest()` | lmtest |  | Coefficient tests with a chosen variance matrix |
 | `grangertest()` | lmtest | vargranger | Test for Granger Causality |
@@ -1313,19 +1338,6 @@ entries use dplyr, so attach it with
 | `plot_slopes()` | marginaleffects | marginsplot | Plot marginal effects |
 | `predictions()` | marginaleffects | margins | Predictions with standard errors |
 | `slopes()` | marginaleffects | margins, dydx(x) at() | Marginal effects for each observation |
-| `boxcox()` | MASS | boxcox | Box-Cox Transformations for Linear Models |
-| `corresp()` | MASS | ca | Simple Correspondence Analysis |
-| `glm.nb()` | MASS |  | Negative binomial regression |
-| `isoMDS()` | MASS | mds | Kruskal's Non-metric Multidimensional Scaling |
-| `lda()` | MASS | discrim | Linear Discriminant Analysis |
-| `mca()` | MASS | mca | Multiple Correspondence Analysis |
-| `mvrnorm()` | MASS | drawnorm | Simulate from a Multivariate Normal Distribution |
-| `polr()` | MASS |  | Ordered logit or probit |
-| `qda()` | MASS | discrim | Quadratic Discriminant Analysis |
-| `rlm()` | MASS |  | Robust regression |
-| `match_data()` | MatchIt | psmatch2 | Construct a matched dataset from a matchit object |
-| `matchit()` | MatchIt |  | Matching for causal inference |
-| `MCMCregress()` | MCMCpack | bayesmh | Markov Chain Monte Carlo for Gaussian Linear Regression |
 | `cumul()` | metafor | meta | Cumulative Meta-Analysis for 'rma' Objects |
 | `escalc()` | metafor | meta | Calculate Effect Sizes and Outcome Measures |
 | `leave1out()` | metafor | meta | Leave-One-Out Diagnostics for 'rma' Objects |
@@ -1333,9 +1345,9 @@ entries use dplyr, so attach it with
 | `regtest()` | metafor | meta | Regression Test for Funnel Plot Asymmetry |
 | `rma()` | metafor | meta | Meta-Analysis via Linear (Mixed-Effects) Models |
 | `trimfill()` | metafor | meta | Trim and Fill Analysis for 'rma.uni' Objects |
-| `complete()` | mice | mi | Extracts the completed data from a mids object |
 | `D1()` | mice | mi | Compare two nested models using D1-statistic |
 | `D2()` | mice | mi | Compare two nested models using D2-statistic |
+| `complete()` | mice | mi | Extracts the completed data from a mids object |
 | `make.predictorMatrix()` | mice | mi | Creates a predictorMatrix argument |
 | `mice()` | mice |  | Multiple imputation by chained equations |
 | `pool()` | mice |  | Combine results across imputations |
@@ -1358,6 +1370,9 @@ entries use dplyr, so attach it with
 | `multinom()` | nnet |  | Multinomial logit |
 | `oaxaca()` | oaxaca |  | Blinder-Oaxaca decomposition |
 | `clmm()` | ordinal | meologit | Cumulative Link Mixed Models |
+| `coords()` | pROC | roctab | Coordinates of a ROC curve |
+| `roc()` | pROC | roctab | Build a ROC curve |
+| `roc.test()` | pROC | roccomp | Compare two ROC curves |
 | `wrap_plots()` | patchwork |  | Combine several plots |
 | `pdata.frame()` | plm | xtset | Declare panel data for plm |
 | `pgmm()` | plm |  | Dynamic panel GMM (Arellano-Bond) |
@@ -1369,23 +1384,20 @@ entries use dplyr, so attach it with
 | `vcovHC()` | plm | xtreg | Robust Covariance Matrix Estimators |
 | `vcovSCC()` | plm | xtreg | Driscoll and Kraay (1998) Robust Covariance Matrix Estimator |
 | `polychor()` | polycor | tetrachoric | Polychoric Correlation |
-| `coords()` | pROC | roctab | Coordinates of a ROC curve |
-| `roc()` | pROC | roctab | Build a ROC curve |
-| `roc.test()` | pROC | roccomp | Compare two ROC curves |
 | `zeroinfl()` | pscl | zip | Zero-inflated Count Data Regression |
+| `ICC()` | psych | icc | Intraclass Correlations (ICC1, ICC2, ICC3 from Shrout and Fleiss) |
+| `KMO()` | psych | estat | Find the Kaiser, Meyer, Olkin Measure of Sampling Adequacy |
 | `alpha()` | psych | alpha | Cronbach's alpha |
 | `cohen.kappa()` | psych | kap | Find Cohen's kappa and weighted kappa coefficients for correlation of two raters |
 | `describe()` | psych | summarize | Summary statistics (unlike Stata's describe) |
 | `fa()` | psych | factor | Factor analysis with more methods |
-| `ICC()` | psych | icc | Intraclass Correlations (ICC1, ICC2, ICC3 from Shrout and Fleiss) |
-| `KMO()` | psych | estat | Find the Kaiser, Meyer, Olkin Measure of Sampling Adequacy |
 | `mardia()` | psych | mvtest | Calculate univariate or multivariate (Mardia's test) skew and kurtosis for a vector, matrix, or data.frame |
 | `principal()` | psych | factor | Principal components analysis (PCA) |
 | `list_rbind()` | purrr | append | Stack a list of data frames |
 | `map()` | purrr | foreach | Apply a function to each element, returning a list |
+| `map2()` | purrr | forvalues | Apply a function to pairs of elements |
 | `map_chr()` | purrr | foreach | Apply a function to each element, returning text |
 | `map_dbl()` | purrr | foreach | Apply a function to each element, returning numbers |
-| `map2()` | purrr | forvalues | Apply a function to pairs of elements |
 | `possibly()` | purrr | capture | Return a default value instead of an error |
 | `reduce()` | purrr | merge | Combine elements one after another, such as repeated merges |
 | `walk()` | purrr | foreach | Apply a function for its side effects, such as saving files |
@@ -1423,10 +1435,17 @@ entries use dplyr, so attach it with
 | `survey_prop()` | srvyr |  | Survey-weighted proportion |
 | `survey_quantile()` | srvyr | epctile | Survey-weighted quantiles |
 | `survey_total()` | srvyr | svy: total | Survey-weighted total |
+| [`AIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | Akaike information criterion |
+| [`BIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | Bayesian information criterion |
+| [`Box.test()`](https://rdrr.io/r/stats/box.test.html) | stats | wntestq | \#1BoxBox-#1PiercePierce and \#1LjungLjung-#1BoxBox Tests |
+| [`Gamma()`](https://rdrr.io/r/stats/family.html) | stats | glm | Family Objects for Models |
+| [`HoltWinters()`](https://rdrr.io/r/stats/HoltWinters.html) | stats | tssmooth | Holt-Winters Filtering |
+| [`IQR()`](https://rdrr.io/r/stats/IQR.html) | stats | egen iqr() | Interquartile range |
+| [`StructTS()`](https://rdrr.io/r/stats/StructTS.html) | stats | sspace | Fit Structural Time Series |
+| [`TukeyHSD()`](https://rdrr.io/r/stats/TukeyHSD.html) | stats | pwcompare, mcompare(tukey) | Tukey multiple comparisons |
 | [`acf()`](https://rdrr.io/r/stats/acf.html) | stats | corrgram | Autocorrelation function |
 | [`addmargins()`](https://rdrr.io/r/stats/addmargins.html) | stats | tabulate x1 x2 | Add totals to a table |
 | [`aggregate()`](https://rdrr.io/r/stats/aggregate.html) | stats | collapse | Group statistics (base R) |
-| [`AIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | Akaike information criterion |
 | [`anova()`](https://rdrr.io/r/stats/anova.html) | stats | anova | ANOVA table, or comparison of nested models |
 | [`aov()`](https://rdrr.io/r/stats/aov.html) | stats |  | Analysis of variance |
 | [`approx()`](https://rdrr.io/r/stats/approxfun.html) | stats | ipolate | Interpolation Functions |
@@ -1434,10 +1453,8 @@ entries use dplyr, so attach it with
 | [`as.dist()`](https://rdrr.io/r/stats/dist.html) | stats | mdsmat | Distance Matrix Computation |
 | [`ave()`](https://rdrr.io/r/stats/ave.html) | stats | stgen | Group Averages Over Level Combinations of Factors |
 | [`bartlett.test()`](https://rdrr.io/r/stats/bartlett.test.html) | stats | oneway | Bartlett test of equal variances |
-| [`BIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | Bayesian information criterion |
 | [`binom.test()`](https://rdrr.io/r/stats/binom.test.html) | stats | bitest | Exact binomial test |
 | [`binomial()`](https://rdrr.io/r/stats/family.html) | stats |  | Binomial family for logit and probit models |
-| [`Box.test()`](https://rdrr.io/r/stats/box.test.html) | stats | wntestq | \#1BoxBox-#1PiercePierce and \#1LjungLjung-#1BoxBox Tests |
 | [`cancor()`](https://rdrr.io/r/stats/cancor.html) | stats | canon | Canonical Correlations |
 | [`ccf()`](https://rdrr.io/r/stats/acf.html) | stats | xcorr | Auto- and Cross- Covariance and -Correlation Function Estimation |
 | [`chisq.test()`](https://rdrr.io/r/stats/chisq.test.html) | stats | tabulate x1 x2, chi2 | Chi-square test |
@@ -1476,14 +1493,11 @@ entries use dplyr, so attach it with
 | [`fisher.test()`](https://rdrr.io/r/stats/fisher.test.html) | stats |  | Fisher's exact test |
 | [`fitted()`](https://rdrr.io/r/stats/fitted.values.html) | stats |  | Fitted values of a model |
 | [`ftable()`](https://rdrr.io/r/stats/ftable.html) | stats | table | Flat multi-way table |
-| [`Gamma()`](https://rdrr.io/r/stats/family.html) | stats | glm | Family Objects for Models |
 | [`gaussian()`](https://rdrr.io/r/stats/family.html) | stats | glm | Family Objects for Models |
 | [`glm()`](https://rdrr.io/r/stats/glm.html) | stats |  | Generalised linear model, such as logit or Poisson |
 | [`hatvalues()`](https://rdrr.io/r/stats/influence.measures.html) | stats | predict | Regression Deletion Diagnostics |
 | [`hclust()`](https://rdrr.io/r/stats/hclust.html) | stats | cluster | Hierarchical Clustering |
-| [`HoltWinters()`](https://rdrr.io/r/stats/HoltWinters.html) | stats | tssmooth | Holt-Winters Filtering |
 | [`inverse.gaussian()`](https://rdrr.io/r/stats/family.html) | stats | glm | Family Objects for Models |
-| [`IQR()`](https://rdrr.io/r/stats/IQR.html) | stats | egen iqr() | Interquartile range |
 | [`kmeans()`](https://rdrr.io/r/stats/kmeans.html) | stats |  | K-means clustering |
 | [`kruskal.test()`](https://rdrr.io/r/stats/kruskal.test.html) | stats |  | Kruskal-Wallis test |
 | [`ks.test()`](https://rdrr.io/r/stats/ks.test.html) | stats |  | Kolmogorov-Smirnov test |
@@ -1573,10 +1587,8 @@ entries use dplyr, so attach it with
 | [`sigma()`](https://rdrr.io/r/stats/sigma.html) | stats | estat | Extract Residual Standard Deviation 'Sigma' |
 | [`spectrum()`](https://rdrr.io/r/stats/spectrum.html) | stats | pergram | Spectral Density Estimation |
 | [`step()`](https://rdrr.io/r/stats/step.html) | stats | stepwise | Stepwise model selection |
-| [`StructTS()`](https://rdrr.io/r/stats/StructTS.html) | stats | sspace | Fit Structural Time Series |
 | [`t.test()`](https://rdrr.io/r/stats/t.test.html) | stats |  | t test and confidence interval of a mean |
 | [`ts()`](https://rdrr.io/r/stats/ts.html) | stats | tsset | Time-series object |
-| [`TukeyHSD()`](https://rdrr.io/r/stats/TukeyHSD.html) | stats | pwcompare, mcompare(tukey) | Tukey multiple comparisons |
 | [`uniroot()`](https://rdrr.io/r/stats/uniroot.html) | stats | ciwidth | One Dimensional Root (Zero) Finding |
 | [`update()`](https://rdrr.io/r/stats/update.html) | stats | regress | Refit a model with changes |
 | [`var()`](https://rdrr.io/r/stats/cor.html) | stats | summarize, detail | Variance |
@@ -1636,6 +1648,7 @@ entries use dplyr, so attach it with
 | `svyratio()` | survey | svy | Ratio estimation |
 | `svytable()` | survey | svy: tabulate | Survey-weighted table |
 | `svytotal()` | survey | svy | Summary statistics for sample surveys |
+| `Surv()` | survival |  | Survival-time outcome for a model |
 | `basehaz()` | survival | predict | Alias for the survfit function |
 | `clogit()` | survival |  | Conditional logit |
 | `concordance()` | survival | estat | Compute the concordance statistic for data or a model |
@@ -1644,12 +1657,10 @@ entries use dplyr, so attach it with
 | `finegray()` | survival | stcrreg | Create data for a Fine-Gray model |
 | `frailty()` | survival | stcox | Random effects terms |
 | `strata()` | survival |  | Stratum term in a survival model formula |
-| `Surv()` | survival |  | Survival-time outcome for a model |
+| `survSplit()` | survival | stsplit | Split a survival data set at specified times |
 | `survdiff()` | survival |  | Log-rank test |
 | `survfit()` | survival |  | Kaplan-Meier survival curves |
 | `survreg()` | survival |  | Parametric survival model |
-| `survSplit()` | survival | stsplit | Split a survival data set at specified times |
-| `synth()` | Synth |  | Synthetic control |
 | [`add_row()`](https://tibble.tidyverse.org/reference/add_row.html) | tibble | set obs | Add rows to a table |
 | [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html) | tibble |  | Convert to a tibble |
 | `rownames_to_column()` | tibble | xpose | Turn row names into a column |
@@ -1677,8 +1688,9 @@ entries use dplyr, so attach it with
 | [`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | destring | Alias of destring() |
 | [`assert()`](https://socimh.github.io/tidystata/reference/assert.md) | tidystata |  | Stop and count the rows where a condition fails |
 | [`browse()`](https://socimh.github.io/tidystata/reference/browse.md) | tidystata |  | View data in a spreadsheet window |
-| [`capture()`](https://socimh.github.io/tidystata/reference/capture.md) | tidystata |  | Run code and return TRUE or FALSE instead of stopping on an error |
+| [`capture()`](https://socimh.github.io/tidystata/reference/capture.md) | tidystata |  | Return the result or report a caught error and return NULL; quiet suppresses warnings and messages |
 | [`codebook()`](https://socimh.github.io/tidystata/reference/codebook.md) | tidystata |  | Describe every variable: type, label, counts and values |
+| [`corr()`](https://socimh.github.io/tidystata/reference/corr.md) | tidystata |  | Complete-case Pearson correlations |
 | [`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md) | tidystata | xtile | Alias of xtile() |
 | [`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata |  | Convert to text, using value labels for labelled data |
 | [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata |  | Convert to numbers, dropping value labels |
@@ -1718,9 +1730,9 @@ entries use dplyr, so attach it with
 | [`std()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | Standardise to mean 0 and standard deviation 1 |
 | [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) | tidystata |  | Summary statistics for variables |
 | [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | Frequency table |
-| [`tab_gen()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata | tabulate, generate() | Alias of as_dummy() |
 | [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | One frequency table per variable |
 | [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | Two-way cross-tabulation, or every pairwise table |
+| [`tab_gen()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata | tabulate, generate() | Alias of as_dummy() |
 | [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md) | tidystata |  | Chosen statistics for variables, optionally by group |
 | [`timer()`](https://socimh.github.io/tidystata/reference/timer.md) | tidystata |  | Time how long code takes |
 | [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata |  | Convert to text, keeping codes rather than value labels |
@@ -1740,6 +1752,7 @@ entries use dplyr, so attach it with
 | `ur.df()` | urca | dfuller | Augmented-Dickey-Fuller Unit Root Test |
 | `ur.ers()` | urca | dfgls | Elliott, Rothenberg and Stock Unit Root Test |
 | `ur.pp()` | urca | pperron | Phillips and Perron Unit Root Test |
+| [`View()`](https://rdrr.io/r/utils/View.html) | utils | browse | Open the data viewer |
 | [`capture.output()`](https://rdrr.io/r/utils/capture.output.html) | utils | dataex | Send Output to a Character String or File |
 | [`combn()`](https://rdrr.io/r/utils/combn.html) | utils | tab2 | Generate All Combinations of n Elements, Taken m at a Time |
 | [`data()`](https://rdrr.io/r/utils/data.html) | utils |  | Load a built-in example dataset |
@@ -1760,19 +1773,8 @@ entries use dplyr, so attach it with
 | [`tail()`](https://rdrr.io/r/utils/head.html) | utils |  | Last rows |
 | [`unzip()`](https://rdrr.io/r/utils/unzip.html) | utils | unzipfile | Extract or List Zip Archives |
 | [`update.packages()`](https://rdrr.io/r/utils/update.packages.html) | utils |  | Update installed packages |
-| [`View()`](https://rdrr.io/r/utils/View.html) | utils | browse | Open the data viewer |
 | [`write.csv()`](https://rdrr.io/r/utils/write.table.html) | utils | export delimited | Write a CSV file (base R) |
 | [`write.table()`](https://rdrr.io/r/utils/write.table.html) | utils | outfile | Data Output |
-| `binom2.rho()` | VGAM | biprobit | Bivariate Probit Regression |
-| `cens.poisson()` | VGAM | cpoisson | Censored Poisson Family Function |
-| `multinomial()` | VGAM | slogit | Multinomial Logit Model |
-| `posnegbinomial()` | VGAM | tnbreg | Positive Negative Binomial Distribution Family Function |
-| `posnormal()` | VGAM | truncreg | Positive Normal Distribution Family Function |
-| `pospoisson()` | VGAM | tpoisson | Positive Poisson Distribution Family Function |
-| `rrvglm()` | VGAM | slogit | Fitting Reduced-Rank Vector Generalized Linear Models (RR-VGLMs) and Doubly Constrained RR-VGLMs (DRR-VGLMs) |
-| `SurvS4()` | VGAM | cpoisson | Create a Survival Object |
-| `vglm()` | VGAM | tpoisson | Fitting Vector Generalized Linear Models |
-| `weightit()` | WeightIt |  | Balancing weights, such as inverse-probability weights |
 | `write_xlsx()` | writexl |  | Write an Excel file |
 | `zipr()` | zip | zipfile | Compress Files into 'zip' Archives |
 | `na.locf()` | zoo | stfill | Last Observation Carried Forward |

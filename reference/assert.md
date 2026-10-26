@@ -1,8 +1,8 @@
 # Assert that conditions hold
 
-Check conditions on every row, like Stata's `assert`, and stop with the
-number of contradictions when any fails. It returns the data invisibly
-when all hold, so it can sit inside a pipeline.
+Verify that every row satisfies all specified conditions, like Stata's
+`assert`. Stop with an error if any condition fails; otherwise, return
+the original data invisibly.
 
 ## Usage
 
@@ -18,30 +18,28 @@ assert(.data, ..., .by = NULL)
 
 - ...:
 
-  Conditions evaluated like
-  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-  expressions, each giving `TRUE` or `FALSE` per row (or a single
-  value). Group functions such as
-  [`n()`](https://dplyr.tidyverse.org/reference/context.html) and
-  [`mean()`](https://rdrr.io/r/base/mean.html) use the groups of `.data`
-  or `.by`.
+  Logical conditions using columns of `.data`. Every condition must be
+  `TRUE` for every row.
 
 - .by:
 
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
-  Optional grouping variables, like Stata's `by g: assert`.
+  Optional grouping variables. Summaries such as `mean(x)` are evaluated
+  within each group.
 
 ## Value
 
-`.data`, invisibly, when every condition holds.
+`.data`, unchanged and invisibly, if all conditions pass.
 
 ## Details
 
-The error lists each failing condition with its number of contradictions
-and the first failing rows. A missing result (`NA`) counts as a
-contradiction and is reported separately. This differs from Stata, where
-a missing value is larger than every number, so `assert x > 0` holds
-when `x` is missing; write `is.na(x) | x > 0` for that behaviour.
+Both `FALSE` and `NA` count as failures. Errors report the number of
+failing rows for each condition, including missing results, and the
+first five failing row numbers. A failed group-level condition counts
+every row in that group.
+
+Unlike Stata, `x > 0` fails when `x` is missing. Use `is.na(x) | x > 0`
+to allow missing values.
 
 ## See also
 
@@ -53,19 +51,16 @@ Other data checking functions:
 ## Examples
 
 ``` r
-lifeexp |>
-  assert(lexp > 0, popgrowth < 10) |>
-  summ(lexp)
-#> # A tibble: 1 × 7
-#>   type      n unique   min  mean    sd   max
-#>   <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
-#> 1 dbl      68     20    57  71.7  5.16    79
+scores <- data.frame(
+  class = c("A", "A", "B", "B"),
+  score = c(80, 90, 55, NA_real_)
+)
 
-# Each country appears once per region
-assert(lifeexp, dplyr::n() == dplyr::n_distinct(country), .by = region)
+# Pass: every nonmissing score is at least 50
+assert(scores, is.na(score) | score >= 50)
 
-try(assert(lifeexp, safewater > 50))
-#> Error in assert(lifeexp, safewater > 50) : Assertion failed:
-#> • `safewater > 50`: 25 contradictions (14 missing) in 68 rows; rows 1, 4, 22,
-#>   26, 29, ...
+# Fail: row 3 is below 60, and row 4 is missing
+try(assert(scores, score >= 60))
+#> Error in assert(scores, score >= 60) : Assertion failed:
+#> * `score >= 60`: 2 contradictions (1 missing) in 4 rows; rows 3, 4
 ```

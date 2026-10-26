@@ -45,7 +45,7 @@ query to browse all entries."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Find R equivalents of Stata commands</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/findit.R" class="external-link"><code>R/findit.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/findit.R" class="external-link"><code>R/findit.R</code></a></small>
       <div class="d-none name"><code>findit.Rd</code></div>
     </div>
 
@@ -119,32 +119,13 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Look up a Stata command</span></span></span>
-<span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="va">reg</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="va">reg</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Linear regression</span><span style="color: #555555;"> [stats]</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">regress y x1 x2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">fit &lt;- lm(y ~ x1 + x2, data = data)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Note: summary(fit) shows the coefficient table; broom::tidy(fit) returns it as a data frame.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # 17 more examples. To see them all: findit(reg) |&gt; print(n = Inf)</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Look up an R function</span></span></span>
-<span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="va">left_join</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Keep all rows of the master data</span><span style="color: #555555;"> [dplyr]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">merge 1:1 id using data2, keep(master match)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">left_join(data1, data2, by = "id")</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # 3 more examples. To see them all: findit(left_join) |&gt; print(n = Inf)</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Customize variables or select an option</span></span></span>
-<span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="va">tab</span>, <span class="va">sex</span>, <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Two-way cross-tabulation</span><span style="color: #555555;"> [tidystata]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">tabulate sex region</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">tab2(data, sex, region)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # 20 more examples. To see them all: findit(tab, sex, region) |&gt; print(n = Inf)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="va">tab</span>, <span class="va">gen</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Dummy variables for every category</span><span style="color: #555555;"> [tidystata]</span></span>
@@ -154,7 +135,14 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # 20 more examples. To see them all: findit(tab, gen) |&gt; print(n = Inf)</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Search Stata syntax or ask a question</span></span></span>
+<span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="va">tab</span>, <span class="va">sex</span>, <span class="va">region</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Two-way cross-tabulation</span><span style="color: #555555;"> [tidystata]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">tabulate sex region</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">tab2(data, sex, region)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # 20 more examples. To see them all: findit(tab, sex, region) |&gt; print(n = Inf)</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="st">"merge 1:1 id, keep(match)"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Keep matched rows only</span><span style="color: #555555;"> [dplyr]</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">merge 1:1 id using data2, keep(match)</span></span>
@@ -175,6 +163,14 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # 9 more examples. To see them all: findit("how do I remove duplicate rows") |&gt; print(n = Inf)</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">findit</span><span class="op">(</span><span class="va">left_join</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Keep all rows of the master data</span><span style="color: #555555;"> [dplyr]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">merge 1:1 id using data2, keep(master match)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">left_join(data1, data2, by = "id")</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # 3 more examples. To see them all: findit(left_join) |&gt; print(n = Inf)</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Filter the complete reference</span></span></span>
 <span class="r-in"><span><span class="va">entries</span> <span class="op">&lt;-</span> <span class="fu">findit</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">entries</span> <span class="op">|&gt;</span></span></span>
@@ -184,7 +180,7 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">findit(command)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Note: Bare words and comma-separated names work: findit(tab, sex, region). Add hints such as findit(tab, gen), or quote full Stata syntax. One clear example is shown by default; print(n = Inf) reveals every match. findit() with no argument returns the whole list.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # 79 more examples. To see them all: findit() |&gt; print(n = Inf)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # 80 more examples. To see them all: findit() |&gt; print(n = Inf)</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -196,7 +192,7 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

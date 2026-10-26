@@ -35,8 +35,7 @@ data-mask group when no arguments are supplied.
 
 ## Details
 
-"First" follows the current row order; sort first to choose a particular
-row. Unlike
+"First" follows the current row order. Unlike
 [`duplicates_tag()`](https://socimh.github.io/tidystata/reference/keys.md),
 which counts the other rows sharing the same values, `is_first()` marks
 one row per group. Missing values include tagged and SPSS user-missing
@@ -57,7 +56,7 @@ panel <- tibble::tibble(
   year = c(2001, 2002, 2001, 2002, 2003, 2001)
 )
 dplyr::mutate(panel, first = is_first(id))
-#> # A tibble: 6 × 3
+#> # A tibble: 6 x 3
 #>      id  year first
 #>   <dbl> <dbl> <lgl>
 #> 1     1  2001 TRUE 
@@ -67,13 +66,9 @@ dplyr::mutate(panel, first = is_first(id))
 #> 5     2  2003 FALSE
 #> 6    NA  2001 FALSE
 
-# Count panels, like Stata's egen tag() followed by count if tag
-sum(is_first(panel$id))
-#> [1] 2
-
-# First row within each group
-dplyr::mutate(panel, first = is_first(), .by = id)
-#> # A tibble: 6 × 3
+# Including the missing group
+dplyr::mutate(panel, first = is_first(id, .missing = TRUE))
+#> # A tibble: 6 x 3
 #>      id  year first
 #>   <dbl> <dbl> <lgl>
 #> 1     1  2001 TRUE 
@@ -82,4 +77,20 @@ dplyr::mutate(panel, first = is_first(), .by = id)
 #> 4     2  2002 FALSE
 #> 5     2  2003 FALSE
 #> 6    NA  2001 TRUE 
+
+# An alternative
+dplyr::mutate(panel, first = is_first(), .by = id)
+#> # A tibble: 6 x 3
+#>      id  year first
+#>   <dbl> <dbl> <lgl>
+#> 1     1  2001 TRUE 
+#> 2     1  2002 FALSE
+#> 3     2  2001 TRUE 
+#> 4     2  2002 FALSE
+#> 5     2  2003 FALSE
+#> 6    NA  2001 TRUE 
+
+# Count panels
+is_first(panel$id) |> sum()
+#> [1] 2
 ```

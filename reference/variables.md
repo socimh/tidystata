@@ -1,8 +1,12 @@
 # Show the variable list of a dataset
 
-`variables()` lists column names and variable labels, like the
-"Variables" tab in Stata. `variables_search()` searches that list by
-name or label, rather than by the values stored in the columns.
+Inspect or search a dataset's variable list:
+
+- `variables()`: List column names and variable labels, like the
+  "Variables" tab in Stata.
+
+- `variables_search()`: Search that list by name or variable label,
+  rather than by the values stored in the columns.
 
 ## Usage
 
@@ -84,7 +88,7 @@ Other inspection functions:
 
 ``` r
 variables(lifeexp)
-#> # A tibble: 6 × 2
+#> # A tibble: 6 x 2
 #>   name      label                   
 #>   <chr>     <chr>                   
 #> 1 region    Region                  
@@ -95,7 +99,7 @@ variables(lifeexp)
 #> 6 safewater Safe water              
 
 variables_search(lifeexp, "n")
-#> # A tibble: 5 × 2
+#> # A tibble: 5 x 2
 #>   name      label                   
 #>   <chr>     <chr>                   
 #> 1 region    Region                  
@@ -105,24 +109,8 @@ variables_search(lifeexp, "n")
 #> 5 gnppc     GNP per capita          
 
 variables_search(lifeexp, "^country$")
-#> # A tibble: 1 × 2
+#> # A tibble: 1 x 2
 #>   name    label  
 #>   <chr>   <chr>  
 #> 1 country Country
-
-# Inspect metadata before choosing columns for subsequent analysis.
-survey <- tibble::tibble(age = c(30, 45), income = c(2000, 3000))
-attr(survey$income, "label") <- "Monthly earnings"
-variables(survey, earnings = income, age)
-#> # A tibble: 2 × 2
-#>   name     label           
-#>   <chr>    <chr>           
-#> 1 earnings Monthly earnings
-#> 2 age      NA              
-
-variables_search(survey, "earn")
-#> # A tibble: 1 × 2
-#>   name   label           
-#>   <chr>  <chr>           
-#> 1 income Monthly earnings
 ```

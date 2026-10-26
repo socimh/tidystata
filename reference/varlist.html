@@ -47,7 +47,7 @@ matching positions in a standalone call."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Select columns with a Stata varlist</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/varlist.R" class="external-link"><code>R/varlist.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/varlist.R" class="external-link"><code>R/varlist.R</code></a></small>
       <div class="d-none name"><code>varlist.Rd</code></div>
     </div>
 
@@ -118,11 +118,11 @@ their own range.</p>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, nrow <span class="op">=</span> <span class="fl">1</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">tb</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 15</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 15</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      x1    x2    x3    x4    x5    x6    x7    x8    x9   x10   x11   x12   x13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1     2     3     4     5     6     7     8     9    10    11    12    13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: x14 &lt;int&gt;, x15 &lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># i 2 more variables: x14 &lt;int&gt;, x15 &lt;int&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># List variable names by ds()</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="names.html">ds</a></span><span class="op">(</span><span class="va">tb</span><span class="op">)</span></span></span>
@@ -154,10 +154,6 @@ their own range.</p>
 <span class="r-in"><span>  <span class="fu"><a href="names.html">ds</a></span><span class="op">(</span><span class="fu">varlist</span><span class="op">(</span><span class="st">"x1-x5"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">tb</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="names.html">ds</a></span><span class="op">(</span><span class="va">x1</span><span class="op">:</span><span class="va">x5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "x1" "x2" "x3" "x4" "x5"</span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -169,7 +165,7 @@ their own range.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

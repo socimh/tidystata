@@ -45,7 +45,7 @@ in a .merge column (Stata's _merge)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Merge two tables with a Stata-style match report</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/merge.R" class="external-link"><code>R/merge.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/merge.R" class="external-link"><code>R/merge.R</code></a></small>
       <div class="d-none name"><code>stata_merge.Rd</code></div>
     </div>
 
@@ -153,7 +153,7 @@ shared columns; rename them first to keep both. Grouping is not retained.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matched                              2  (.merge == "matched")</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> --------------------------------------</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 x 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id   age income .merge     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1    30     <span style="color: #BB0000;">NA</span> master only</span>
@@ -177,7 +177,7 @@ shared columns; rename them first to keep both. Grouping is not retained.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Keep matched rows only</span></span></span>
 <span class="r-in"><span><span class="fu">stata_merge</span><span class="op">(</span><span class="va">people</span>, <span class="va">income</span>, <span class="st">"1:1"</span>, by <span class="op">=</span> <span class="st">"id"</span>, keep <span class="op">=</span> <span class="st">"match"</span>, report <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 x 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id   age income .merge </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     2    41     10 matched</span>
@@ -195,7 +195,7 @@ shared columns; rename them first to keep both. Grouping is not retained.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matched                              3  (.merge == "matched")</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> --------------------------------------</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      hh person region .merge </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1      1 north  matched</span>
@@ -212,7 +212,7 @@ shared columns; rename them first to keep both. Grouping is not retained.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

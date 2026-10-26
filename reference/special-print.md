@@ -1,9 +1,25 @@
 # Preview complete tables or select representative rows
 
-`preview_table()` keeps the complete data and remembers how to print it.
-The default shows the first five and last five rows. Interval previews
-show evenly spaced rows; separate helpers print once or select actual
-rows.
+Control how a complete table is printed, or select a smaller set of
+rows:
+
+- `preview_table()`: Keep the complete data and store a print
+  preference. By default, show the first five and last five rows;
+  interval previews show evenly spaced rows.
+
+- `unpreview_table()`: Remove the stored print preference, keeping all
+  data.
+
+- `print_headtail()`: Print the first and last rows once, keeping all
+  data.
+
+- `print_interval()`: Print evenly spaced rows once, keeping all data.
+
+- `print_all()`: Print every row and column, like Stata's `list`.
+
+- `slice_headtail()`: Return only the selected first and last rows.
+
+- `slice_interval()`: Return only the selected evenly spaced rows.
 
 ## Usage
 
@@ -92,12 +108,6 @@ unsupported.
 
 ## Details
 
-`unpreview_table()` removes the stored preference. `print_headtail()`
-and `print_interval()` print once; `print_all()` prints every row and
-column, like Stata's `list`. Use `slice_headtail()` or
-`slice_interval()` only when a smaller data set is wanted: they actually
-select rows.
-
 Preview settings survive table subsetting/replacement, dplyr mutation,
 filtering, sorting, column selection, renaming, relocation, distinct
 rows, slicing, grouping, rowwise operations, summaries and reframing, as
@@ -138,7 +148,7 @@ Other selection and preview functions:
 ``` r
 x <- preview_table(tibble::tibble(id = 1:30, value = (1:30)^2))
 x
-#> # A tibble: 30 × 2
+#> # A tibble: 30 x 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1
@@ -154,7 +164,7 @@ x
 #> # ... 20 rows omitted in the middle; use print(x, n = Inf) to show all rows.
 
 dplyr::filter(x, id > 10)
-#> # A tibble: 20 × 2
+#> # A tibble: 20 x 2
 #>       id value
 #>    <int> <dbl>
 #>  1    11   121
@@ -170,7 +180,7 @@ dplyr::filter(x, id > 10)
 #> # ... 10 rows omitted in the middle; use print(x, n = Inf) to show all rows.
 
 preview_table(x, style = "interval", n = 5)
-#> # A tibble: 30 × 2
+#> # A tibble: 30 x 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1
@@ -182,7 +192,7 @@ preview_table(x, style = "interval", n = 5)
 #> # show all rows.
 
 print(x, n = Inf)
-#> # A tibble: 30 × 2
+#> # A tibble: 30 x 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1
@@ -217,7 +227,7 @@ print(x, n = Inf)
 #> 30    30   900
 
 unpreview_table(x)
-#> # A tibble: 30 × 2
+#> # A tibble: 30 x 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1
@@ -230,10 +240,10 @@ unpreview_table(x)
 #>  8     8    64
 #>  9     9    81
 #> 10    10   100
-#> # ℹ 20 more rows
+#> # i 20 more rows
 
 print_headtail(lifeexp, n = 6)
-#> # A tibble: 68 × 6
+#> # A tibble: 68 x 6
 #>    region               country       popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
@@ -245,7 +255,7 @@ print_headtail(lifeexp, n = 6)
 #> # ... 62 rows omitted in the middle; use print(x, n = Inf) to show all rows.
 
 print_interval(lifeexp, n = 6)
-#> # A tibble: 68 × 6
+#> # A tibble: 68 x 6
 #>    region               country       popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
@@ -258,7 +268,7 @@ print_interval(lifeexp, n = 6)
 #> # show all rows.
 
 print_all(head(lifeexp, 12))
-#> # A tibble: 12 × 6
+#> # A tibble: 12 x 6
 #>    region               country                popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>                      <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania                     -0.6    74   870        49
@@ -275,7 +285,7 @@ print_all(head(lifeexp, 12))
 #> 12 1 [Europe & C. Asia] Estonia                     -1      69  3820        92
 
 slice_headtail(lifeexp, n = 6)
-#> # A tibble: 6 × 6
+#> # A tibble: 6 x 6
 #>   region               country       popgrowth  lexp gnppc safewater
 #>   <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
 #> 1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
@@ -286,7 +296,7 @@ slice_headtail(lifeexp, n = 6)
 #> 6 3 [South America]    Venezuela, RB       2      72  3380        NA
 
 slice_interval(lifeexp, n = 6)
-#> # A tibble: 6 × 6
+#> # A tibble: 6 x 6
 #>   region               country       popgrowth  lexp gnppc safewater
 #>   <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
 #> 1 1 [Europe & C. Asia] Albania            -0.6    74   870        49

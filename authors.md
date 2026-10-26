@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/socimh/tidystata/blob/master/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/socimh/tidystata/blob/HEAD/DESCRIPTION)
 
 Shen M (2026). *tidystata: Tidy Tools Inspired by 'Stata'*. R package
 version 0.3.2, <https://github.com/socimh/tidystata>.

@@ -75,7 +75,7 @@ Other inspection functions:
 ``` r
 # All variables
 codebook(lifeexp)
-#> # A tibble: 6 × 5
+#> # A tibble: 6 x 5
 #>   variable  label                    type             n unique
 #>   <chr>     <chr>                    <chr>        <int>  <int>
 #> 1 region    Region                   double+label    68      3
@@ -87,7 +87,7 @@ codebook(lifeexp)
 
 # Selected variables
 codebook(lifeexp, 1:4)
-#> # A tibble: 4 × 5
+#> # A tibble: 4 x 5
 #>   variable  label                    type             n unique
 #>   <chr>     <chr>                    <chr>        <int>  <int>
 #> 1 region    Region                   double+label    68      3
@@ -96,7 +96,7 @@ codebook(lifeexp, 1:4)
 #> 4 lexp      Life expectancy at birth double          68     20
 
 codebook(lifeexp, where(is.numeric))
-#> # A tibble: 5 × 5
+#> # A tibble: 5 x 5
 #>   variable  label                    type             n unique
 #>   <chr>     <chr>                    <chr>        <int>  <int>
 #> 1 region    Region                   double+label    68      3
@@ -107,7 +107,7 @@ codebook(lifeexp, where(is.numeric))
 
 # Inspect an existing column alongside a computed column
 codebook(lifeexp, country, gnppc_thousands = gnppc / 1000)
-#> # A tibble: 2 × 5
+#> # A tibble: 2 x 5
 #>   variable        label          type          n unique
 #>   <chr>           <chr>          <chr>     <int>  <int>
 #> 1 country         Country        character    68     68
@@ -115,7 +115,7 @@ codebook(lifeexp, country, gnppc_thousands = gnppc / 1000)
 
 starwars <- dplyr::starwars
 codebook(starwars, films:starships)
-#> # A tibble: 3 × 4
+#> # A tibble: 3 x 4
 #>   variable  type      n unique
 #>   <chr>     <chr> <int>  <int>
 #> 1 films     list     87     24
@@ -123,7 +123,7 @@ codebook(starwars, films:starships)
 #> 3 starships list     87     16
 
 codebook(starwars, ends_with("color"))
-#> # A tibble: 3 × 4
+#> # A tibble: 3 x 4
 #>   variable   type          n unique
 #>   <chr>      <chr>     <int>  <int>
 #> 1 hair_color character    82     11

@@ -1,8 +1,15 @@
-# Summarise columns
+# Summary statistics
 
-Compute one row of summary statistics per selected variable and group.
-`tabstat()` uses `.stat = "mean"` by default; with `.detail = TRUE` and
-no explicit `.stat`, it returns all detail statistics.
+Summarise selected variables, with one row per variable and group:
+
+- `summ()`: Report counts, distinct-value counts, minimum, mean,
+  standard deviation, and maximum by default.
+
+- `tabstat()`: Report means by default, using the same calculations and
+  options as `summ()`.
+
+Both support `.detail = TRUE` for a fuller summary or `.stat` to select
+statistics.
 
 ## Usage
 
@@ -46,240 +53,215 @@ tabstat(
 
 - .data:
 
-  A data frame, data frame extension (e.g. a tibble), or a vector.
-  Matrix and data-frame columns are unsupported; use atomic or list
-  columns. For `sf` input, summarise attribute data only: all geometry
-  columns are removed before selection. Geometry columns cannot be
-  selected or grouped.
+  A data frame, tibble, data.table, or vector. For `sf` data, only
+  attributes are summarised; geometry columns are excluded.
 
 - ...:
 
-  \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
-  or
-  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
-  Columns to select or compute with
-  [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md).
-  Existing columns, selection helpers, and named expressions can be
-  mixed. Omit to summarize all columns except grouping keys.
+  Variables selected with tidyselect, or named expressions such as
+  `income_k = income / 1000`. Defaults to all nongrouping columns.
 
 - .by:
 
-  Optional grouping columns, selected with tidyselect. An explicit
-  selection overrides existing
-  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  groups; when omitted, existing groups are used. Grouping columns are
-  excluded from the measured variables. Select existing columns only;
-  create new grouping columns with
-  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-  first.
+  Optional grouping columns, selected with tidyselect. Existing
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  groups are used unless `.by` is supplied. Grouping columns are
+  excluded from the variables being summarised.
 
 - .keep_all:
 
-  If `FALSE` (default), unsupported nonnumeric columns are removed with
-  a warning; an error is raised if none of the selected columns can be
-  summarised. If `TRUE`, character/list columns retain counts and unique
-  values, with numeric statistics set to `NA`. Numeric-looking character
-  values are not parsed.
+  If `TRUE`, retain character and list columns for counts and distinct
+  values; other statistics for these columns are `NA`. By default,
+  unsupported columns are omitted with a warning.
 
 - .detail:
 
-  If `TRUE`, return all statistics available for each variable type
-  unless `.stat` selects a subset. Defaults to `FALSE`.
+  If `TRUE`, report all supported statistics unless `.stat` specifies a
+  subset. Defaults to `FALSE`.
 
 - .stat:
 
-  A character vector. If nonempty, return only the listed statistics,
-  plus variable names, types and any grouping columns. Supported names
-  are `type`, `n`, `unique`, `miss_n`, `valid_pct`, `min`, `q1`,
-  `median`, `mean`, `mad`, `sd`, `q3`, `max`, `iqr`, `skew`, `kurtosis`,
-  `se`, and `sum`. Aliases `missing`, `p25`, `p50`, and `p75` select
-  `miss_n`, `q1`, `median`, and `q3`; requested names and order are
-  retained. Identical requested names are deduplicated; aliases and
-  canonical names may coexist. `sum` applies to numeric summaries, not
-  calendar dates or datetimes. Calendar summaries do not support `skew`
-  or `kurtosis` either; when such a statistic is requested alongside
-  numeric variables, calendar variables are skipped with a warning.
-  Percentiles `p0` through `p100`, including decimals such as `p2.5`,
-  follow Stata's rule (see Details).
+  Character vector of statistics to report. See Details for the complete
+  list and calculation methods. An explicit selection determines the
+  statistics and their order. Use `p0` to `p100` for percentiles,
+  including decimals such as `p2.5`.
 
 - .missing:
 
-  If `TRUE` (default), rows with a missing grouping key form their own
-  group, like Stata's `tabstat, by() missing`. If `FALSE`, drop them
-  before summarising. Missing measured values are always omitted from
-  numeric statistics, regardless of this flag.
+  If `TRUE` (default), retain observations with missing grouping keys as
+  a separate group. If `FALSE`, exclude them. Missing measured values
+  are always omitted from numeric calculations.
 
 - .name:
 
-  If `FALSE` (default), drop the `name` column when exactly one measured
-  variable is summarised, including zero-row grouped output; with
-  several variables it is always kept. If `TRUE`, always retain it.
+  If `TRUE`, always include the `name` column. By default, it is omitted
+  when exactly one variable is summarised.
 
 - .type:
 
-  `"list"` (default) separates variable-type families when needed;
-  `"table"` combines them in one table. See Value for the return
-  structure and Details for calendar conversions.
+  `"list"` (default) separates numeric and calendar variable families
+  where necessary; `"table"` combines them into one table.
 
 - .duration_format:
 
-  Retained for compatibility and no longer affects the output: calendar
-  spreads are always `difftime` columns (see Details).
+  Retained for compatibility; no longer changes the output format of
+  calendar spread statistics.
 
 - .sort:
 
-  If `TRUE` (default), sort grouping keys ascending like
-  [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) (factor
-  levels in their defined order, character keys in C-locale order), with
-  ordinary missing keys last. SPSS user-missing codes retain their
-  stored-value ordering. Within each group, preserve the selected
-  variable order. If `FALSE`, groups follow first appearance.
+  If `TRUE` (default), sort groups by their keys. If `FALSE`, preserve
+  the order in which groups appear in the data.
 
 - .drop_empty:
 
-  If `TRUE`, remove individual summary rows with no observed measured
-  values (`n == 0`), even when `n` is not requested. This is independent
-  of `.missing`. Default is `FALSE`.
+  If `TRUE`, omit variable-group rows with `n = 0`, including rows with
+  no observed measured values or zero total weight. Defaults to `FALSE`.
 
 - .wt:
 
-  Optional weights: a numeric column of `.data` (or a vector with one
-  value per row), like Stata's `summarize [fweight/aweight]`. Rows with
-  a missing weight are excluded with a message; negative weights are an
-  error. When `...` is omitted, the weight column is not summarised
-  itself.
+  Optional numeric weights, supplied as a column or a vector. Rows with
+  missing weights are excluded; negative weights are invalid.
 
 - .wt_type:
 
-  `"frequency"` (default) or `"analytic"`. With frequency weights, `n`
-  is the sum of the weights (non-integer weights are allowed). Analytic
-  weights (Stata's `[aweight]`) are rescaled within each group and
-  variable to sum to the number of observed values, so `n` is the number
-  of observations. Means, percentiles and `sum` are the same under both
-  types; `sd` and `se` differ.
+  `"frequency"` (default) treats weights as frequencies; `"analytic"`
+  rescales weights to the number of observed values within each variable
+  and group. See Details for the calculation differences.
 
 ## Value
 
-An ungrouped table with one row per measured variable and group, or a
-list of such tables:
+An ungrouped table, or a list of tables, with one row per variable and
+group. Each table contains grouping keys (if any), `name` (when
+applicable), `type`, and the selected statistics.
 
-- With `.type = "list"`, one table for a single variable-type family;
-  otherwise, a list named `numeric`, `date`, `datetime`, and/or `time`
-  (`hms`). The numeric family includes columns retained by `.keep_all`.
-
-- With `.type = "table"`, one combined table.
-
-Tables include grouping keys, `name` (subject to `.name`), `type`, and
-statistics. By default, `summ()` includes `n`, `unique`, `min`, `mean`,
-`sd`, and `max`; `tabstat()` includes `mean`. `.detail` adds the
-available statistics listed under `.stat`, which can instead choose a
-subset and its column names/order. Calendar location columns are
-character; spreads are `difftime` in list mode and numeric in table
-mode. Entirely missing columns have zero observed/distinct counts and
-`NA` location/spread statistics, including `sum`; zero-row grouped
-inputs have no result rows.
-
-Tables preserve the input's data.frame, tibble, or data.table container
-and supported preview settings; other subclasses are not reconstructed.
-Vector input returns a tibble in list mode or a data.frame in table
-mode. Its expression supplies the variable name, falling back to `value`
-for multiline expressions or a magrittr pipe (`.`); a named tibble
-supplies a stable name.
+By default, `summ()` returns `n`, `unique`, `min`, `mean`, `sd`, and
+`max`; `tabstat()` returns `mean`. With `.type = "list"`, results are
+split into `numeric`, `date`, `datetime`, and `time` tables only when
+multiple type families occur. With `.type = "table"`, all types are
+combined in one table. Results retain the input's usual table class
+where supported.
 
 ## Details
 
-Computed columns are evaluated on ungrouped working data before
-statistics are calculated within groups. Create columns with grouped
-[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-first when a calculation needs to run separately within each group.
+Statistics are calculated separately for each selected variable and
+group. The formulas below use non-missing measured values `x1, ..., xn`,
+with `n` denoting their count and `xbar` their arithmetic mean. Unless
+weights are supplied, calculations are unweighted.
 
-**Counts and missing values**
+**Counts and completeness**
 
-`n` counts observed values and `unique` counts distinct observed values.
-`miss_n` counts missing values; `valid_pct` is the fraction observed,
-from zero to one, and is `NA` for zero-row inputs. Missingness follows
-the original vector's [`is.na()`](https://rdrr.io/r/base/NA.html)
-method, including SPSS user-missing values/ranges. Retained list columns
-count complete element identities without flattening. Columns with no
-observed values remain in the result: `n` and `unique` are zero and
-location/spread statistics, including `sum`, are `NA`. Zero-row grouped
-inputs do not create artificial groups.
+- `type`: Variable type (metadata, not a calculated statistic).
 
-**Numeric statistics**
+- `n`: Number of non-missing values.
 
-Numeric calculations use double precision. Large `integer64` values may
-lose precision during conversion, with a warning.
+- `unique`: Number of distinct non-missing values.
 
-Logical values are treated as zero/one. Factors and ordered factors use
-their underlying level codes with a warning. Numeric labelled vectors
-use underlying values, excluding user-missing codes; label metadata is
-flagged with a warning. Measured vectors and `difftime` use their
-original units. In variable names, `*` marks labelled vectors, `**`
-marks factors and `***` marks retained nonnumeric columns.
+- `miss_n`: Number of missing values (alias: `missing`).
 
-Statistics follow Stata's `summarize, detail`:
+- `valid_pct`: Proportion of rows with a non-missing value, between 0
+  and 1; `n / (n + miss_n)` without weights. It is **not** multiplied by
+  100.
 
-- SD uses the sample denominator (`n - 1`); `se` is SD divided by
-  `sqrt(n)`.
+**Location and totals**
 
-- Percentiles use Stata's rule, not R's default
-  [`stats::quantile()`](https://rdrr.io/r/stats/quantile.html) type 7:
-  with `n` sorted values, the `p`th percentile is the value at position
-  `floor(n * p) + 1`, or the mean of the values at positions `n * p` and
-  `n * p + 1` when `n * p` is whole. So `q1` of `1:4` is 1.5 (type 7
-  gives 1.75). `median`, `q1`, `q3` and `iqr` (`q3 - q1`) use the same
-  rule.
+- `min`, `max`: Smallest and largest observed values.
 
-- `skew` and `kurtosis` use population moments, `m3 / m2^1.5` and
-  `m4 / m2^2`, so `kurtosis` is 3 for a normal distribution (not excess
-  kurtosis). They are `NA` when the values are constant or fewer than
-  two.
+- `sum`: Arithmetic total, `sum(x)`. Available for numeric variables
+  only.
 
-- `mad` has no Stata counterpart; it uses
-  [`stats::mad()`](https://rdrr.io/r/stats/mad.html) with its default
-  scaling.
+- `mean`: Arithmetic mean, `sum(x) / n`.
 
-For singleton or constant inputs, undefined spread statistics are `NA`.
+- `q1` (`p25`), `median` (`p50`), `q3` (`p75`): 25th, 50th, and 75th
+  percentiles, respectively.
 
-**Weighted statistics**
+- `p0` to `p100`: Any requested percentile, including decimal
+  percentages such as `p2.5`. Percentiles follow **Stata's rule**, not
+  R's default
+  [`stats::quantile()`](https://rdrr.io/r/stats/quantile.html) type 7.
+  For sorted observations and percentile `p`, set `h = n * p / 100`. If
+  `h` is not an integer, use the observation at position `ceiling(h)`;
+  if `h` is an integer between 1 and `n - 1`, average the observations
+  at positions `h` and `h + 1`. The endpoints are the minimum (`p0`) and
+  maximum (`p100`). For example, the 25th percentile of `1:4` is 1.5,
+  rather than 1.75 from type 7.
 
-With `.wt`, the mean is `sum(w * x) / W` and the variance is
-`sum(w * (x - mean)^2) / (W - 1)`, where `W` is the summed weight (after
-rescaling for analytic weights); `se` is `sd / sqrt(W)`, and `sum` is
-`sum(w * x)` with the weights as given, as Stata's `r(sum)`, even for
-analytic weights. Percentiles, `median`, `q1`, `q3`, `iqr` and `mad` use
-Stata's weighted percentile rule, the unweighted rule with cumulative
-weights in place of positions, so weights of 1 give the unweighted
-values. `min` and `max` ignore rows with zero weight. `unique`, `miss_n`
-and `valid_pct` remain unweighted row counts. These standard errors do
-not account for a survey design. Use `survey::svymean()` for inference
-with sampling weights, clusters or strata.
+**Variation and precision**
 
-**Calendar output and grouping names**
+- `sd`: Sample standard deviation, `sqrt(sum((x - xbar)^2) / (n - 1))`.
 
-Date locations are displayed as `YYYY-MM-DD`; fractional days are not
-shown. Infinite Date locations are displayed as `-Inf` or `Inf`; missing
-locations remain `NA`. Datetime locations are displayed as
-`YYYY-MM-DD HH:MM`, without seconds, in the variable's own time zone
-(the session time zone when none is set). `hms` time-of-day locations
-are displayed as `hh:mm:ss`.
+- `se`: Standard error of the mean, `sd / sqrt(n)`.
 
-Calendar spread statistics (`sd`, `se`, `mad`, `iqr`) are `difftime`
-columns, so they can be compared across rows and used in arithmetic.
-Each column has one unit: days for Dates; for datetimes and times, the
-unit (seconds, minutes, hours or days) that fits the column's median
-nonzero spread. Convert with, for example,
-`as.numeric(out$sd, units = "hours")`.
+- `mad`: Median absolute deviation from the median, multiplied by
+  1.4826, as in [`stats::mad()`](https://rdrr.io/r/stats/mad.html). This
+  is not a statistic reported by Stata's `summarize` command.
 
-With `.type = "table"`, calendar locations are text. A shared location
-column such as `mean` becomes character, with numeric values rounded to
-seven significant digits; counts remain numeric. Calendar spreads become
-numbers in days (Dates) or seconds (datetimes and times), with the unit
-appended to `type`, for example `"date [days]"`.
+- `iqr`: Interquartile range, `q3 - q1`, using the percentiles above.
 
-Grouping keys that collide with summary metadata or internal pivot names
-are renamed by prepending dots until unique among the input names, with
-a message. The input data are not modified.
+**Distribution shape**
+
+Define `mk = sum((x - xbar)^k) / n`, the `k`th population central
+moment.
+
+- `skew`: Skewness, `m3 / m2^(3/2)`.
+
+- `kurtosis`: Pearson kurtosis, `m4 / m2^2`. A normal distribution has
+  kurtosis 3, not 0 (this is not excess kurtosis).
+
+Undefined statistics are `NA` (for example, `sd` when `n < 2` and the
+shape statistics for constant variables). Columns with no observed
+values have `n = 0`, `unique = 0`, and `NA` for numeric statistics,
+including `sum`.
+
+**When weights are supplied**
+
+Let `w` be the weights and `W = sum(w)` over non-missing measured
+values.
+
+- **Frequency weights** (`.wt_type = "frequency"`) use weights as given.
+  The reported `n` is `W`; non-integer weights are permitted.
+
+- **Analytic weights** (`.wt_type = "analytic"`) are rescaled within
+  each variable and group so that `W` equals the number of observed
+  values. Thus `n` remains on the sample-count scale.
+
+- **Mean and spread:** `mean = sum(w * x) / W`,
+  `sd = sqrt(sum(w * (x - mean)^2) / (W - 1))`, and `se = sd / sqrt(W)`.
+  The two weight types give the same mean but can give different `sd`
+  and `se` values.
+
+- **Quantiles and MAD:** Percentiles use Stata's weighted percentile
+  rule, replacing positions with cumulative weights; weighted `mad` uses
+  the corresponding weighted medians. `min` and `max` exclude
+  zero-weight rows.
+
+- **Totals and counts:** `sum` is `sum(w * x)` using the *original*,
+  unrescaled weights, even for analytic weights. `unique`, `miss_n`, and
+  `valid_pct` continue to use unweighted row counts.
+
+The reported `se` is descriptive and does not account for a complex
+survey design. For survey inference, use functions such as
+[`survey::svymean()`](https://rdrr.io/pkg/survey/man/surveysummary.html).
+
+**Data types and grouping**
+
+Missingness follows [`is.na()`](https://rdrr.io/r/base/NA.html),
+including SPSS user-missing codes. Logical variables are treated as 0/1;
+factors use their underlying numeric codes; labelled numeric variables
+use their stored values. Warnings flag such conversions. Variable names
+are marked with `*` for labelled variables, `**` for factors, and `***`
+for retained nonnumeric variables. Numeric calculations use double
+precision, which may affect large `integer64` values.
+
+Dates and datetimes support location and spread statistics, but not
+`sum`, `skew`, or `kurtosis`. Calendar locations are displayed as dates
+or times; their spreads (`sd`, `se`, `mad`, `iqr`) are `difftime` values
+in list mode. In combined table mode, calendar locations are text and
+spreads are numeric durations (days for Dates, seconds for datetimes and
+times of day).
+
+Expressions in `...` are evaluated before statistics are calculated by
+group. For group-specific expressions, first create columns with grouped
+[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 
 ## Examples
 
@@ -287,7 +269,7 @@ a message. The input data are not modified.
 summ(lifeexp)
 #> Warning: country is non-numeric and thus removed.
 #> Warning: region is a labelled variable (*).
-#> # A tibble: 5 × 8
+#> # A tibble: 5 x 8
 #>   name      type        n unique   min     mean        sd     max
 #>   <chr>     <chr>   <int>  <int> <dbl>    <dbl>     <dbl>   <dbl>
 #> 1 *region   dbl+lbl    68      3   1      1.5       0.743     3  
@@ -298,25 +280,25 @@ summ(lifeexp)
 
 summ(lifeexp, .by = region)
 #> Warning: country is non-numeric and thus removed.
-#> # A tibble: 12 × 9
+#> # A tibble: 12 x 9
 #>    region               name     type      n unique   min    mean      sd    max
 #>    <dbl+lbl>            <chr>    <chr> <int>  <int> <dbl>   <dbl>   <dbl>  <dbl>
-#>  1 1 [Europe & C. Asia] popgrow… dbl      44     25  -2.5 7.05e-2 9.10e-1 1.8 e0
+#>  1 1 [Europe & C. Asia] popgrow~ dbl      44     25  -2.5 7.05e-2 9.10e-1 1.8 e0
 #>  2 1 [Europe & C. Asia] lexp     dbl      44     17  62   7.25e+1 4.95e+0 7.9 e1
 #>  3 1 [Europe & C. Asia] gnppc    dbl      43     42 170   1.13e+4 1.29e+4 4.66e4
-#>  4 1 [Europe & C. Asia] safewat… dbl      42     25  36   8.16e+1 1.86e+1 1   e2
-#>  5 2 [North America]    popgrow… dbl      14     11   0.3 1.33e+0 7.80e-1 2.6 e0
+#>  4 1 [Europe & C. Asia] safewat~ dbl      42     25  36   8.16e+1 1.86e+1 1   e2
+#>  5 2 [North America]    popgrow~ dbl      14     11   0.3 1.33e+0 7.80e-1 2.6 e0
 #>  6 2 [North America]    lexp     dbl      14     13  57   6.97e+1 6.14e+0 7.9 e1
 #>  7 2 [North America]    gnppc    dbl      14     14 410   6.29e+3 9.08e+3 3.20e4
-#>  8 2 [North America]    safewat… dbl       6      5  40   5.8 e+1 2.40e+1 9.9 e1
-#>  9 3 [South America]    popgrow… dbl      10      7   0.5 1.59e+0 4.89e-1 2.2 e0
+#>  8 2 [North America]    safewat~ dbl       6      5  40   5.8 e+1 2.40e+1 9.9 e1
+#>  9 3 [South America]    popgrow~ dbl      10      7   0.5 1.59e+0 4.89e-1 2.2 e0
 #> 10 3 [South America]    lexp     dbl      10      8  61   7.07e+1 4.06e+0 7.6 e1
 #> 11 3 [South America]    gnppc    dbl      10      9 960   3.88e+3 2.43e+3 7.96e3
-#> 12 3 [South America]    safewat… dbl       6      6  45   6.53e+1 1.70e+1 9.1 e1
+#> 12 3 [South America]    safewat~ dbl       6      6  45   6.53e+1 1.70e+1 9.1 e1
 
 tabstat(lifeexp, .by = region)
 #> Warning: country is non-numeric and thus removed.
-#> # A tibble: 12 × 4
+#> # A tibble: 12 x 4
 #>    region               name      type        mean
 #>    <dbl+lbl>            <chr>     <chr>      <dbl>
 #>  1 1 [Europe & C. Asia] popgrowth dbl       0.0705
@@ -332,16 +314,16 @@ tabstat(lifeexp, .by = region)
 #> 11 3 [South America]    gnppc     dbl    3881     
 #> 12 3 [South America]    safewater dbl      65.3   
 
-# Weighted summaries, like Stata's summarize [aweight = w]
+# Compare frequency and analytic weights
 survey <- tibble::tibble(income = c(10, 20, 40), w = c(3, 1, 1))
 summ(survey, income, .wt = w, .stat = c("n", "mean", "sd", "p50"))
-#> # A tibble: 1 × 5
+#> # A tibble: 1 x 5
 #>   type      n  mean    sd   p50
 #>   <chr> <dbl> <dbl> <dbl> <dbl>
 #> 1 dbl       5    18  13.0    10
 
 summ(survey, income, .wt = w, .wt_type = "analytic", .stat = c("n", "sd"))
-#> # A tibble: 1 × 3
+#> # A tibble: 1 x 3
 #>   type      n    sd
 #>   <chr> <dbl> <dbl>
 #> 1 dbl       3  14.3
@@ -352,7 +334,7 @@ lifeexp |>
     .by = region,
     .stat = c("n", "mean", "sd", "p50")
   )
-#> # A tibble: 12 × 7
+#> # A tibble: 12 x 7
 #>    region               name      type      n       mean        sd     p50
 #>    <dbl+lbl>            <chr>     <chr> <int>      <dbl>     <dbl>   <dbl>
 #>  1 1 [Europe & C. Asia] popgrowth dbl      44     0.0705     0.910    0.1 
@@ -368,65 +350,65 @@ lifeexp |>
 #> 11 3 [South America]    gnppc     dbl      10  3881       2432.    2990   
 #> 12 3 [South America]    safewater dbl       6    65.3       17.0     65   
 
-# Remove rows missing a grouping key; measured NAs are always omitted
+# Exclude rows with missing group keys
 summ(lifeexp, .by = region, .missing = FALSE)
 #> Warning: country is non-numeric and thus removed.
-#> # A tibble: 12 × 9
+#> # A tibble: 12 x 9
 #>    region               name     type      n unique   min    mean      sd    max
 #>    <dbl+lbl>            <chr>    <chr> <int>  <int> <dbl>   <dbl>   <dbl>  <dbl>
-#>  1 1 [Europe & C. Asia] popgrow… dbl      44     25  -2.5 7.05e-2 9.10e-1 1.8 e0
+#>  1 1 [Europe & C. Asia] popgrow~ dbl      44     25  -2.5 7.05e-2 9.10e-1 1.8 e0
 #>  2 1 [Europe & C. Asia] lexp     dbl      44     17  62   7.25e+1 4.95e+0 7.9 e1
 #>  3 1 [Europe & C. Asia] gnppc    dbl      43     42 170   1.13e+4 1.29e+4 4.66e4
-#>  4 1 [Europe & C. Asia] safewat… dbl      42     25  36   8.16e+1 1.86e+1 1   e2
-#>  5 2 [North America]    popgrow… dbl      14     11   0.3 1.33e+0 7.80e-1 2.6 e0
+#>  4 1 [Europe & C. Asia] safewat~ dbl      42     25  36   8.16e+1 1.86e+1 1   e2
+#>  5 2 [North America]    popgrow~ dbl      14     11   0.3 1.33e+0 7.80e-1 2.6 e0
 #>  6 2 [North America]    lexp     dbl      14     13  57   6.97e+1 6.14e+0 7.9 e1
 #>  7 2 [North America]    gnppc    dbl      14     14 410   6.29e+3 9.08e+3 3.20e4
-#>  8 2 [North America]    safewat… dbl       6      5  40   5.8 e+1 2.40e+1 9.9 e1
-#>  9 3 [South America]    popgrow… dbl      10      7   0.5 1.59e+0 4.89e-1 2.2 e0
+#>  8 2 [North America]    safewat~ dbl       6      5  40   5.8 e+1 2.40e+1 9.9 e1
+#>  9 3 [South America]    popgrow~ dbl      10      7   0.5 1.59e+0 4.89e-1 2.2 e0
 #> 10 3 [South America]    lexp     dbl      10      8  61   7.07e+1 4.06e+0 7.6 e1
 #> 11 3 [South America]    gnppc    dbl      10      9 960   3.88e+3 2.43e+3 7.96e3
-#> 12 3 [South America]    safewat… dbl       6      6  45   6.53e+1 1.70e+1 9.1 e1
+#> 12 3 [South America]    safewat~ dbl       6      6  45   6.53e+1 1.70e+1 9.1 e1
 
-# Summarize existing and computed columns together
+# Summarise existing and computed columns together
 summ(lifeexp, lexp, gnppc_thousands = gnppc / 1000, .by = region)
-#> # A tibble: 6 × 9
+#> # A tibble: 6 x 9
 #>   region               name           type      n unique   min  mean    sd   max
 #>   <dbl+lbl>            <chr>          <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
 #> 1 1 [Europe & C. Asia] lexp           dbl      44     17 62    72.5   4.95 79   
-#> 2 1 [Europe & C. Asia] gnppc_thousan… dbl      43     42  0.17 11.3  12.9  46.6 
+#> 2 1 [Europe & C. Asia] gnppc_thousan~ dbl      43     42  0.17 11.3  12.9  46.6 
 #> 3 2 [North America]    lexp           dbl      14     13 57    69.7   6.14 79   
-#> 4 2 [North America]    gnppc_thousan… dbl      14     14  0.41  6.29  9.08 32.0 
+#> 4 2 [North America]    gnppc_thousan~ dbl      14     14  0.41  6.29  9.08 32.0 
 #> 5 3 [South America]    lexp           dbl      10      8 61    70.7   4.06 76   
-#> 6 3 [South America]    gnppc_thousan… dbl      10      9  0.96  3.88  2.43  7.96
+#> 6 3 [South America]    gnppc_thousan~ dbl      10      9  0.96  3.88  2.43  7.96
 
 tabstat(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
-#> # A tibble: 2 × 3
+#> # A tibble: 2 x 3
 #>   name            type   mean
 #>   <chr>           <chr> <dbl>
 #> 1 lexp            dbl   71.7 
 #> 2 gnppc_thousands dbl    9.14
 
-# Keep numeric and calendar summaries in separate tables
+# Separate numeric and calendar summaries
 mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
 summ(mixed, .type = "list")
 #> A list is returned as statistics are heterogeneous.
 #> $numeric
-#> # A tibble: 1 × 8
+#> # A tibble: 1 x 8
 #>   name  type      n unique   min  mean    sd   max
 #>   <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
 #> 1 x     dbl       2      2     1     2  1.41     3
 #> 
 #> $date
-#> # A tibble: 1 × 8
+#> # A tibble: 1 x 8
 #>   name  type      n unique mean       sd             min        max       
 #>   <chr> <chr> <int>  <int> <chr>      <drtn>         <chr>      <chr>     
 #> 1 day   date      2      2 2024-01-01 0.7071068 days 2024-01-01 2024-01-02
 #> 
 
-# Choose a stable variable name when starting from a vector
+# Preserve a variable name when starting from a vector
 scores <- c(4, 6, NA, 8)
 tibble::tibble(score = scores) |> summ(.name = TRUE)
-#> # A tibble: 1 × 8
+#> # A tibble: 1 x 8
 #>   name  type      n unique   min  mean    sd   max
 #>   <chr> <chr> <int>  <int> <dbl> <dbl> <dbl> <dbl>
 #> 1 score dbl       3      3     4     6     2     8

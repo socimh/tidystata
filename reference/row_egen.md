@@ -5,6 +5,31 @@ distinct-value counts, or missing-value counts. Use a data frame
 directly or select columns inside
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 
+- `row_mean()`: Calculate the arithmetic mean within each row.
+
+- `row_sum()`: Add the values within each row.
+
+- `row_max()`: Find the largest value within each row.
+
+- `row_min()`: Find the smallest value within each row.
+
+- `row_median()`: Find the median within each row.
+
+- `row_var()`: Calculate the sample variance within each row.
+
+- `row_sd()`: Calculate the sample standard deviation within each row.
+
+- `row_unique()`: Count distinct values within each row, counting
+  missing values as one category.
+
+- `row_nvals()`: Count distinct non-missing values within each row by
+  default; use `.missing = TRUE` to count missing values as one
+  category.
+
+- `row_miss()`: Count missing values within each row.
+
+- `row_non_miss()`: Count non-missing values within each row.
+
 ## Usage
 
 ``` r
@@ -177,7 +202,7 @@ row_non_miss(tb)
 
 tb |>
   dplyr::mutate(mean = row_mean(x, y), sum = row_sum(x, y))
-#> # A tibble: 3 × 4
+#> # A tibble: 3 x 4
 #>       x     y  mean   sum
 #>   <dbl> <dbl> <dbl> <dbl>
 #> 1     1     3     2     4
@@ -186,7 +211,7 @@ tb |>
 
 tb |>
   dplyr::mutate(capped = row_min(x, .values = 0.5))
-#> # A tibble: 3 × 3
+#> # A tibble: 3 x 3
 #>       x     y capped
 #>   <dbl> <dbl>  <dbl>
 #> 1     1     3    0.5

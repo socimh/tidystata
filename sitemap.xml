@@ -1,8 +1,5 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://socimh.github.io/tidystata/404.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/LICENSE-text.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/LICENSE.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/README.zh.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/articles/coming-from-stata.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/articles/containers-and-missing-values.html</loc></url>
@@ -11,12 +8,16 @@
 <url><loc>https://socimh.github.io/tidystata/articles/migration.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/authors.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/index.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/LICENSE-text.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/LICENSE.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/news/index.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/reference/as_dummy.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/README.zh.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/assert.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/as_dummy.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/browse.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/capture.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/codebook.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/corr.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/cut.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/findit.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/index.html</loc></url>
@@ -24,8 +25,8 @@
 <url><loc>https://socimh.github.io/tidystata/reference/keys.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/lifeexp.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/misstable.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/reference/na_conversion.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/names.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/na_conversion.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/panel.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/pipe.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/pwcorr.html</loc></url>
@@ -41,8 +42,8 @@
 <url><loc>https://socimh.github.io/tidystata/reference/tidystata_args.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/timer.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/type_conversion.html</loc></url>
-<url><loc>https://socimh.github.io/tidystata/reference/var_type.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/variables.html</loc></url>
 <url><loc>https://socimh.github.io/tidystata/reference/varlist.html</loc></url>
+<url><loc>https://socimh.github.io/tidystata/reference/var_type.html</loc></url>
 </urlset>
 

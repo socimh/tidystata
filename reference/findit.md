@@ -84,7 +84,6 @@ explanatory message.
 ## Examples
 
 ``` r
-# Look up a Stata command
 findit(reg)
 #> # Linear regression [stats]
 #> Stata: regress y x1 x2
@@ -92,24 +91,6 @@ findit(reg)
 #> # Note: summary(fit) shows the coefficient table; broom::tidy(fit) returns it as a data frame.
 #> 
 #> # 17 more examples. To see them all: findit(reg) |> print(n = Inf)
-
-# Look up an R function
-findit(left_join)
-#> # Keep all rows of the master data [dplyr]
-#> Stata: merge 1:1 id using data2, keep(master match)
-#> R:     left_join(data1, data2, by = "id")
-#> # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.
-#> 
-#> # 3 more examples. To see them all: findit(left_join) |> print(n = Inf)
-
-# Customize variables or select an option
-findit(tab, sex, region)
-#> # Two-way cross-tabulation [tidystata]
-#> Stata: tabulate sex region
-#> R:     tab2(data, sex, region)
-#> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata.
-#> 
-#> # 20 more examples. To see them all: findit(tab, sex, region) |> print(n = Inf)
 
 findit(tab, gen)
 #> # Dummy variables for every category [tidystata]
@@ -119,7 +100,14 @@ findit(tab, gen)
 #> 
 #> # 20 more examples. To see them all: findit(tab, gen) |> print(n = Inf)
 
-# Search Stata syntax or ask a question
+findit(tab, sex, region)
+#> # Two-way cross-tabulation [tidystata]
+#> Stata: tabulate sex region
+#> R:     tab2(data, sex, region)
+#> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata.
+#> 
+#> # 20 more examples. To see them all: findit(tab, sex, region) |> print(n = Inf)
+
 findit("merge 1:1 id, keep(match)")
 #> # Keep matched rows only [dplyr]
 #> Stata: merge 1:1 id using data2, keep(match)
@@ -140,6 +128,14 @@ findit("how do I remove duplicate rows")
 #> 
 #> # 9 more examples. To see them all: findit("how do I remove duplicate rows") |> print(n = Inf)
 
+findit(left_join)
+#> # Keep all rows of the master data [dplyr]
+#> Stata: merge 1:1 id using data2, keep(master match)
+#> R:     left_join(data1, data2, by = "id")
+#> # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.
+#> 
+#> # 3 more examples. To see them all: findit(left_join) |> print(n = Inf)
+
 # Filter the complete reference
 entries <- findit()
 entries |>
@@ -149,5 +145,5 @@ entries |>
 #> R:     findit(command)
 #> # Note: Bare words and comma-separated names work: findit(tab, sex, region). Add hints such as findit(tab, gen), or quote full Stata syntax. One clear example is shown by default; print(n = Inf) reveals every match. findit() with no argument returns the whole list.
 #> 
-#> # 79 more examples. To see them all: findit() |> print(n = Inf)
+#> # 80 more examples. To see them all: findit() |> print(n = Inf)
 ```

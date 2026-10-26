@@ -20,16 +20,18 @@
 - [`ds()`](https://socimh.github.io/tidystata/reference/names.md) : List
   column names by tidyselect
 
-- [`var_type()`](https://socimh.github.io/tidystata/reference/var_type.md)
-  [`var_unit()`](https://socimh.github.io/tidystata/reference/var_type.md)
-  : Report an object's type or unit
-
 - [`variables()`](https://socimh.github.io/tidystata/reference/variables.md)
   [`variables_search()`](https://socimh.github.io/tidystata/reference/variables.md)
   : Show the variable list of a dataset
 
-## Tabulate
+- [`var_type()`](https://socimh.github.io/tidystata/reference/var_type.md)
+  [`var_unit()`](https://socimh.github.io/tidystata/reference/var_type.md)
+  : Report an object's type or unit
 
+## Tabulate and summarise
+
+- [`corr()`](https://socimh.github.io/tidystata/reference/corr.md) :
+  Calculate complete-case Pearson correlations
 - [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) :
   Calculate pairwise correlations
 - [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
@@ -38,13 +40,10 @@
   [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) :
-  Tabulate columns
-
-## Summarise
-
+  Frequency tables and cross-tabulations
 - [`summ()`](https://socimh.github.io/tidystata/reference/summ.md)
   [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md) :
-  Summarise columns
+  Summary statistics
 
 ## Check and combine data
 
@@ -124,7 +123,7 @@
 ## Small tools
 
 - [`capture()`](https://socimh.github.io/tidystata/reference/capture.md)
-  : Capture an error and report success
+  : Evaluate an expression without stopping on an error
 - [`set_seed()`](https://socimh.github.io/tidystata/reference/set_seed.md)
   : Set the random seed, in a pipeline or alone
 - [`timer()`](https://socimh.github.io/tidystata/reference/timer.md) :

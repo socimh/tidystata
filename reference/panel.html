@@ -3,11 +3,23 @@
 time-series operators after xtset. Values are found by time rather than row
 position, so gaps give missing values and row order does not matter. Use them
 in dplyr::mutate() with the panel identifier in .by or
-dplyr::group_by()."><meta property="og:description" content="Time-aware versions of dplyr::lag() and dplyr::lead(), following Stata's
+dplyr::group_by().
+stata_lag(): Retrieve the value from n periods earlier.
+stata_lead(): Retrieve the value from n periods later.
+stata_diff(): Calculate the nth difference; the default first
+difference subtracts the previous period's value from the current value.
+
+"><meta property="og:description" content="Time-aware versions of dplyr::lag() and dplyr::lead(), following Stata's
 time-series operators after xtset. Values are found by time rather than row
 position, so gaps give missing values and row order does not matter. Use them
 in dplyr::mutate() with the panel identifier in .by or
-dplyr::group_by()."></head><body>
+dplyr::group_by().
+stata_lag(): Retrieve the value from n periods earlier.
+stata_lead(): Retrieve the value from n periods later.
+stata_diff(): Calculate the nth difference; the default first
+difference subtracts the previous period's value from the current value.
+
+"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -47,7 +59,7 @@ dplyr::group_by()."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Calculate panel lags, leads and differences</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/panel.R" class="external-link"><code>R/panel.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/panel.R" class="external-link"><code>R/panel.R</code></a></small>
       <div class="d-none name"><code>panel.Rd</code></div>
     </div>
 
@@ -56,8 +68,11 @@ dplyr::group_by()."></head><body>
 time-series operators after <code>xtset</code>. Values are found by time rather than row
 position, so gaps give missing values and row order does not matter. Use them
 in <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> with the panel identifier in <code>.by</code> or
-<code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code>.</p>
-    </div>
+<code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code>.</p><ul><li><p><code>stata_lag()</code>: Retrieve the value from <code>n</code> periods earlier.</p></li>
+<li><p><code>stata_lead()</code>: Retrieve the value from <code>n</code> periods later.</p></li>
+<li><p><code>stata_diff()</code>: Calculate the <code>n</code>th difference; the default first
+difference subtracts the previous period's value from the current value.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
@@ -111,8 +126,9 @@ are compared by whole periods, as with Stata's <code>%tw</code>, <code>%tm</code
 <code>%ty</code> dates, so any day in March is one month after any day in February.
 Weeks follow Stata's <code>%tw</code>: each year has 52 weeks starting on 1 January,
 so the last week has 8 or 9 days (tsibble's <code>yearweek()</code> keeps its ISO
-weeks). Date-times use the local clock of their time zone. Must be <code>NULL</code>
-for numbers and period classes.</p></dd>
+weeks). For date-times, seconds measure elapsed time; minute and larger
+periods use the local clock of their time zone. Must be <code>NULL</code> for numbers
+and period classes.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -171,7 +187,7 @@ to whole numbers first.</p>
 <span class="r-in"><span>  d_x <span class="op">=</span> <span class="fu">stata_diff</span><span class="op">(</span><span class="va">x</span>, time <span class="op">=</span> <span class="va">year</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  .by <span class="op">=</span> <span class="va">id</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 x 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  year     x lag_x lead_x   d_x</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1  <span style="text-decoration: underline;">2</span>001    10    <span style="color: #BB0000;">NA</span>     12    <span style="color: #BB0000;">NA</span></span>
@@ -189,7 +205,7 @@ to whole numbers first.</p>
 <span class="r-in"><span>  <span class="va">sales</span>,</span></span>
 <span class="r-in"><span>  previous <span class="op">=</span> <span class="fu">stata_lag</span><span class="op">(</span><span class="va">amount</span>, time <span class="op">=</span> <span class="va">month</span>, unit <span class="op">=</span> <span class="st">"month"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   month      amount previous</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 2024-01-31      5       <span style="color: #BB0000;">NA</span></span>
@@ -206,7 +222,7 @@ to whole numbers first.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

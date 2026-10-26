@@ -163,7 +163,9 @@ tab2(lifeexp_tab, region:lexp_70)
 tidystata
 还提供按行计算（[`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md)
 等）、面板运算（[`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)
-等）、相关系数（[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)）、缺失值报告（[`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)）、主键检查与合并（[`isid()`](https://socimh.github.io/tidystata/reference/keys.md)、[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)）以及分组（[`xtile()`](https://socimh.github.io/tidystata/reference/cut.md)）等函数。示例和输出约定见以下指南（英文）。
+等）、相关系数（[`corr()`](https://socimh.github.io/tidystata/reference/corr.md)
+使用完整个案，[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)
+使用成对完整样本）、缺失值报告（[`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)）、主键检查与合并（[`isid()`](https://socimh.github.io/tidystata/reference/keys.md)、[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)）以及分组（[`xtile()`](https://socimh.github.io/tidystata/reference/cut.md)）等函数。示例和输出约定见以下指南（英文）。
 
 - [Getting
   started](https://socimh.github.io/tidystata/articles/getting-started.html)：简短的工作流程。

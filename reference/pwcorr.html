@@ -43,7 +43,7 @@ table reports the correlation, the number of observations and the p-value."></he
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Calculate pairwise correlations</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/pwcorr.R" class="external-link"><code>R/pwcorr.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/pwcorr.R" class="external-link"><code>R/pwcorr.R</code></a></small>
       <div class="d-none name"><code>pwcorr.Rd</code></div>
     </div>
 
@@ -133,19 +133,20 @@ For Pearson correlations it matches <code><a href="https://rdrr.io/r/stats/cor.t
 it is the same large-sample approximation that Stata uses. Correlations with
 a constant variable, and p-values with fewer than three observations, are
 <code>NA</code>. Labelled numeric columns are correlated on their codes, excluding
-tagged and SPSS user-missing values. For listwise deletion, as in Stata's
-<code>correlate</code>, drop incomplete rows first with <code><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">tidyr::drop_na()</a></code>.</p>
+tagged and SPSS user-missing values. Use <code><a href="corr.html">corr()</a></code> for listwise Pearson
+correlations, like Stata's <code>corr</code> (<code>correlate</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other tabulation functions:
+<code><a href="corr.html">corr()</a></code>,
 <code><a href="tab.html">tab()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, <span class="va">safewater</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   var1  var2          r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc     0.733    67 1.79<span style="color: #949494;">e</span><span style="color: #BB0000;">-12</span></span>
@@ -153,7 +154,7 @@ tagged and SPSS user-missing values. For listwise deletion, as in Stata's
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> gnppc safewater 0.657    53 8.95<span style="color: #949494;">e</span><span style="color: #BB0000;">- 8</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, <span class="va">safewater</span>, .wide <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   variable   lexp  gnppc safewater</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp      1     <span style="color: #BB0000;">NA</span>            <span style="color: #BB0000;">NA</span></span>
@@ -161,7 +162,7 @@ tagged and SPSS user-missing values. For listwise deletion, as in Stata's
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> safewater 0.760  0.657         1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   region               var1  var2      r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> lexp  gnppc 0.792    43 2.57<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
@@ -169,14 +170,14 @@ tagged and SPSS user-missing values. For listwise deletion, as in Stata's
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 3<span style="color: #949494;"> [South America]</span>    lexp  gnppc 0.640    10 4.60<span style="color: #949494;">e</span><span style="color: #BB0000;">- 2</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, .method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   var1  var2      r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc 0.861    67 9.53<span style="color: #949494;">e</span><span style="color: #BB0000;">-21</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Correlate an existing column with a computed column</span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, gnppc_thousands <span class="op">=</span> <span class="va">gnppc</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   var1  var2                r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc_thousands 0.733    67 1.79<span style="color: #949494;">e</span><span style="color: #BB0000;">-12</span></span>
@@ -191,7 +192,7 @@ tagged and SPSS user-missing values. For listwise deletion, as in Stata's
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

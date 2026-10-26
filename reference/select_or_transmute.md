@@ -80,7 +80,7 @@ Other selection and preview functions:
 ``` r
 lifeexp |>
   select_or_transmute()
-#> # A tibble: 68 × 6
+#> # A tibble: 68 x 6
 #>    region               country                popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>                      <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania                     -0.6    74   870        49
@@ -93,11 +93,11 @@ lifeexp |>
 #>  8 1 [Europe & C. Asia] Bulgaria                    -0.7    71  1440        90
 #>  9 1 [Europe & C. Asia] Croatia                     -0.1    72    NA        85
 #> 10 1 [Europe & C. Asia] Czechia                     -0.1    75  6140        95
-#> # ℹ 58 more rows
+#> # i 58 more rows
 
 lifeexp |>
   select_or_transmute(country, lexp)
-#> # A tibble: 68 × 2
+#> # A tibble: 68 x 2
 #>    country                 lexp
 #>    <chr>                  <dbl>
 #>  1 Albania                   74
@@ -110,18 +110,18 @@ lifeexp |>
 #>  8 Bulgaria                  71
 #>  9 Croatia                   72
 #> 10 Czechia                   75
-#> # ℹ 58 more rows
+#> # i 58 more rows
 
 # Ordinary select() rejects this computed expression.
 try(dplyr::select(lifeexp, lexp >= 70))
 #> Error in dplyr::select(lifeexp, lexp >= 70) : 
-#>   ℹ In argument: `lexp >= 70`.
+#>   i In argument: `lexp >= 70`.
 #> Caused by error:
 #> ! object 'lexp' not found
 
 lifeexp |>
   select_or_transmute(lexp >= 70)
-#> # A tibble: 68 × 1
+#> # A tibble: 68 x 1
 #>    `lexp >= 70`
 #>    <lgl>       
 #>  1 TRUE        
@@ -134,5 +134,5 @@ lifeexp |>
 #>  8 TRUE        
 #>  9 TRUE        
 #> 10 TRUE        
-#> # ℹ 58 more rows
+#> # i 58 more rows
 ```

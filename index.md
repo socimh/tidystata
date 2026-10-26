@@ -165,8 +165,10 @@ tidystata also covers row calculations
 panel operators
 ([`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)),
 correlations
-([`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)),
-missing values
+([`corr()`](https://socimh.github.io/tidystata/reference/corr.md) for
+complete cases and
+[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) for
+pairwise samples), missing values
 ([`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)),
 keys and merging
 ([`isid()`](https://socimh.github.io/tidystata/reference/keys.md),

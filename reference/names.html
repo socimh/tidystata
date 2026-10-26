@@ -39,7 +39,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>List column names by tidyselect</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/ds.R" class="external-link"><code>R/ds.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/ds.R" class="external-link"><code>R/ds.R</code></a></small>
       <div class="d-none name"><code>names.Rd</code></div>
     </div>
 
@@ -114,14 +114,14 @@ inventory contains no column data.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "country"   "popgrowth" "lexp"     </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ds</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.character</span><span class="op">)</span>, .type <span class="op">=</span> <span class="st">"table"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> country</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">starwars</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/starwars.html" class="external-link">starwars</a></span></span></span>
 <span class="r-in"><span><span class="fu">ds</span><span class="op">(</span><span class="va">starwars</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">ends_with</a></span><span class="op">(</span><span class="st">"color"</span><span class="op">)</span>, .type <span class="op">=</span> <span class="st">"table"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> hair_color</span>
@@ -131,7 +131,7 @@ inventory contains no column data.</p>
 <span class="r-in"><span><span class="co"># Save a programmatic selection for later stages of a pipeline.</span></span></span>
 <span class="r-in"><span><span class="va">numeric_names</span> <span class="op">&lt;-</span> <span class="fu">ds</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">lifeexp</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">numeric_names</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 68 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 68 x 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               popgrowth  lexp gnppc safewater</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>      -<span style="color: #BB0000;">0.6</span>    74   870        49</span>
@@ -144,7 +144,7 @@ inventory contains no column data.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>      -<span style="color: #BB0000;">0.7</span>    71  <span style="text-decoration: underline;">1</span>440        90</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>      -<span style="color: #BB0000;">0.1</span>    72    <span style="color: #BB0000;">NA</span>        85</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>      -<span style="color: #BB0000;">0.1</span>    75  <span style="text-decoration: underline;">6</span>140        95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 58 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># i 58 more rows</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ds</span><span class="op">(</span><span class="va">numeric_names</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"pop"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "popgrowth"</span>
@@ -159,7 +159,7 @@ inventory contains no column data.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

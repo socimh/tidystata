@@ -11,6 +11,14 @@ order does not matter. Use them in
 with the panel identifier in `.by` or
 [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html).
 
+- `stata_lag()`: Retrieve the value from `n` periods earlier.
+
+- `stata_lead()`: Retrieve the value from `n` periods later.
+
+- `stata_diff()`: Calculate the `n`th difference; the default first
+  difference subtracts the previous period's value from the current
+  value.
+
 ## Usage
 
 ``` r
@@ -71,8 +79,9 @@ stata_diff(x, n = 1L, time, delta = 1, unit = NULL)
   `%tq` and `%ty` dates, so any day in March is one month after any day
   in February. Weeks follow Stata's `%tw`: each year has 52 weeks
   starting on 1 January, so the last week has 8 or 9 days (tsibble's
-  `yearweek()` keeps its ISO weeks). Date-times use the local clock of
-  their time zone. Must be `NULL` for numbers and period classes.
+  `yearweek()` keeps its ISO weeks). For date-times, seconds measure
+  elapsed time; minute and larger periods use the local clock of their
+  time zone. Must be `NULL` for numbers and period classes.
 
 ## Value
 
@@ -139,7 +148,7 @@ dplyr::mutate(
   d_x = stata_diff(x, time = year),
   .by = id
 )
-#> # A tibble: 5 × 6
+#> # A tibble: 5 x 6
 #>      id  year     x lag_x lead_x   d_x
 #>   <dbl> <dbl> <dbl> <dbl>  <dbl> <dbl>
 #> 1     1  2001    10    NA     12    NA
@@ -157,7 +166,7 @@ dplyr::mutate(
   sales,
   previous = stata_lag(amount, time = month, unit = "month")
 )
-#> # A tibble: 3 × 3
+#> # A tibble: 3 x 3
 #>   month      amount previous
 #>   <date>      <dbl>    <dbl>
 #> 1 2024-01-31      5       NA

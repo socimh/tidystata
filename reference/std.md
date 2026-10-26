@@ -4,13 +4,13 @@ Vector helpers for
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
 following Stata's `egen`:
 
-- `std()` standardises to mean 0 and standard deviation 1, like
+- `std()`: Standardise to mean 0 and standard deviation 1, like
   `egen z = std(x)`. Unlike
   [`scale()`](https://rdrr.io/r/base/scale.html), it returns a plain
   vector.
 
-- `pc()` gives each value as a percentage of the total, like
-  `egen p = pc(x)`, or as a proportion with `prop = TRUE`.
+- `pc()` (`pct()`): Express each value as a percentage of the total,
+  like `egen p = pc(x)`, or as a proportion with `prop = TRUE`.
 
 ## Usage
 
@@ -48,8 +48,8 @@ zero or infinite, as Stata gives missing values there.
 
 ## Details
 
-`pct()` is an alias of `pc()`. The gt package also exports a `pct()`
-(for column widths), so prefer `pc()` when gt is attached. In grouped
+The gt package also exports a `pct()` (for column widths), so prefer
+`pc()` when gt is attached. In grouped
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
 (or with `.by`), the mean, standard deviation and total come from each
 group, like Stata's `by g: egen`.
@@ -80,7 +80,7 @@ lifeexp |>
     share = pc(popgrowth),
     .by = region
   )
-#> # A tibble: 68 × 8
+#> # A tibble: 68 x 8
 #>    region               country    popgrowth  lexp gnppc safewater      z  share
 #>    <dbl+lbl>            <chr>          <dbl> <dbl> <dbl>     <dbl>  <dbl>  <dbl>
 #>  1 1 [Europe & C. Asia] Albania         -0.6    74   870        49  0.303 -19.4 
@@ -89,9 +89,9 @@ lifeexp |>
 #>  4 1 [Europe & C. Asia] Azerbaijan       0.9    64   510        49 -1.72   29.0 
 #>  5 1 [Europe & C. Asia] Belarus         -0.5    68  1540        82 -0.909 -16.1 
 #>  6 1 [Europe & C. Asia] Belgium          0.2    77 26530       100  0.909   6.45
-#>  7 1 [Europe & C. Asia] Bosnia an…       1.8    74  1230        87  0.303  58.1 
+#>  7 1 [Europe & C. Asia] Bosnia an~       1.8    74  1230        87  0.303  58.1 
 #>  8 1 [Europe & C. Asia] Bulgaria        -0.7    71  1440        90 -0.303 -22.6 
 #>  9 1 [Europe & C. Asia] Croatia         -0.1    72    NA        85 -0.101  -3.23
 #> 10 1 [Europe & C. Asia] Czechia         -0.1    75  6140        95  0.505  -3.23
-#> # ℹ 58 more rows
+#> # i 58 more rows
 ```

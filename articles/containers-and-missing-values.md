@@ -96,7 +96,7 @@ if (requireNamespace("flextable", quietly = TRUE)) {
 
 grouped <- group_by(tbl, group)
 tab(grouped, answer)
-#> # A tibble: 4 × 7
+#> # A tibble: 4 x 7
 #>   group answer     n percent   cum valid valid_cum
 #>   <chr> <chr>  <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 A     yes        1      50    50   100       100
@@ -105,7 +105,7 @@ tab(grouped, answer)
 #> 4 NA    yes        1     100   100   100       100
 summary <- summ(grouped, score, .stat = c("n", "mean", "missing"))
 summary
-#> # A tibble: 3 × 5
+#> # A tibble: 3 x 5
 #>   group type      n  mean missing
 #>   <chr> <chr> <int> <dbl>   <int>
 #> 1 A     dbl       1     2       1
@@ -119,18 +119,20 @@ Summary and inventory results are ungrouped. Grouping keys remain
 ordinary columns where reported. For
 [`tab()`](https://socimh.github.io/tidystata/reference/tab.md),
 [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md),
-[`tab2()`](https://socimh.github.io/tidystata/reference/tab.md),
 [`fre()`](https://socimh.github.io/tidystata/reference/tab.md),
 [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md),
-[`fre2()`](https://socimh.github.io/tidystata/reference/tab.md),
 [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and
 [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md),
 `.by = NULL` inherits existing groups; an explicit `.by` replaces them.
+[`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) and
+[`fre2()`](https://socimh.github.io/tidystata/reference/tab.md) require
+explicit `.by` for grouped cross-tabulations; otherwise, they tabulate
+the whole input regardless of existing groups.
 
 ``` r
 
 summ(grouped, score, .by = answer, .stat = c("n", "mean"))
-#> # A tibble: 3 × 4
+#> # A tibble: 3 x 4
 #>   answer type      n  mean
 #>   <chr>  <chr> <int> <dbl>
 #> 1 no     dbl       1     6
@@ -160,19 +162,19 @@ calculations always omit missing measured values.
 ``` r
 
 tab(tbl, answer)
-#> # A tibble: 3 × 6
+#> # A tibble: 3 x 6
 #>   answer     n percent   cum valid valid_cum
 #>   <chr>  <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 no         1      25    25  33.3      33.3
 #> 2 yes        2      50    75  66.7     100  
 #> 3 NA         1      25   100  NA        NA
 summ(tbl, score, .stat = c("n", "miss_n", "valid_pct", "mean"))
-#> # A tibble: 1 × 5
+#> # A tibble: 1 x 5
 #>   type      n miss_n valid_pct  mean
 #>   <chr> <int>  <int>     <dbl> <dbl>
 #> 1 dbl       3      1      0.75  5.33
 summ(tbl, score, .by = group, .missing = FALSE, .stat = c("n", "mean"))
-#> # A tibble: 2 × 4
+#> # A tibble: 2 x 4
 #>   group type      n  mean
 #>   <chr> <chr> <int> <dbl>
 #> 1 A     dbl       1     2
@@ -185,7 +187,7 @@ summ(tbl, score, .by = group, .missing = FALSE, .stat = c("n", "mean"))
 
 empty <- tbl[0, ]
 summ(empty, score, .stat = c("n", "sum", "mean"))
-#> # A tibble: 1 × 4
+#> # A tibble: 1 x 4
 #>   type      n   sum  mean
 #>   <chr> <int> <dbl> <dbl>
 #> 1 dbl       0    NA    NA
@@ -195,7 +197,7 @@ tab1(tbl, starts_with("absent"))
 missing <- tibble(a = c(NA_real_, NA_real_), b = c(NA_real_, 4))
 summ(missing, a, .stat = c("n", "sum", "mean"))
 #> Warning: a is entirely missing; retained with n = 0.
-#> # A tibble: 1 × 4
+#> # A tibble: 1 x 4
 #>   type      n   sum  mean
 #>   <chr> <int> <dbl> <dbl>
 #> 1 dbl       0    NA    NA
@@ -230,17 +232,17 @@ labelled <- tibble(
   )
 )
 variables(labelled)
-#> # A tibble: 1 × 2
+#> # A tibble: 1 x 2
 #>   name     label             
 #>   <chr>    <chr>             
 #> 1 response Interview response
 codebook(labelled)
-#> # A tibble: 1 × 5
+#> # A tibble: 1 x 5
 #>   variable label              type             n unique
 #>   <chr>    <chr>              <chr>        <int>  <int>
 #> 1 response Interview response double+label     2      2
 tab(labelled, response)
-#> # A tibble: 4 × 6
+#> # A tibble: 4 x 6
 #>   response              n percent   cum valid valid_cum
 #>   <dbl+lbl>         <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1  1 [Yes]              1      25    25    50        50
@@ -269,12 +271,12 @@ separate <- summ(mixed, .stat = c("n", "min", "mean", "sd", "max"))
 names(separate)
 #> [1] "numeric" "date"
 separate$numeric
-#> # A tibble: 1 × 7
+#> # A tibble: 1 x 7
 #>   name  type      n   min  mean    sd   max
 #>   <chr> <chr> <int> <dbl> <dbl> <dbl> <dbl>
 #> 1 score dbl       2     2     3  1.41     4
 separate$date
-#> # A tibble: 1 × 7
+#> # A tibble: 1 x 7
 #>   name  type      n min        mean       sd            max       
 #>   <chr> <chr> <int> <chr>      <chr>      <drtn>        <chr>     
 #> 1 day   date      2 2024-01-01 2024-01-02 1.414214 days 2024-01-03
@@ -282,7 +284,7 @@ class(separate$date$sd)
 #> [1] "difftime"
 combined <- summ(mixed, .type = "table", .stat = c("n", "min", "mean", "sd", "max"))
 combined
-#> # A tibble: 2 × 7
+#> # A tibble: 2 x 7
 #>   name  type            n min        mean          sd max       
 #>   <chr> <chr>       <int> <chr>      <chr>      <dbl> <chr>     
 #> 1 score dbl             2 2          3           1.41 4         
@@ -311,7 +313,7 @@ formulas, weights and other statistics.
 long <- tibble(id = 1:12, value = (1:12)^2)
 preview <- preview_table(long, n = 4)
 preview
-#> # A tibble: 12 × 2
+#> # A tibble: 12 x 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1
@@ -326,7 +328,7 @@ sum(preview$value)
 
 subset <- slice_headtail(long, n = 4)
 subset
-#> # A tibble: 4 × 2
+#> # A tibble: 4 x 2
 #>      id value
 #>   <int> <dbl>
 #> 1     1     1
@@ -347,7 +349,7 @@ when position should represent a meaningful order.
 ``` r
 
 preview_table(long, style = "interval", n = 4)
-#> # A tibble: 12 × 2
+#> # A tibble: 12 x 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1

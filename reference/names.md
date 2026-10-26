@@ -73,14 +73,14 @@ ds(lifeexp, country:lexp)
 #> [1] "country"   "popgrowth" "lexp"     
 
 ds(lifeexp, where(is.character), .type = "table")
-#> # A tibble: 1 × 1
+#> # A tibble: 1 x 1
 #>   name   
 #>   <chr>  
 #> 1 country
 
 starwars <- dplyr::starwars
 ds(starwars, ends_with("color"), .type = "table")
-#> # A tibble: 3 × 1
+#> # A tibble: 3 x 1
 #>   name      
 #>   <chr>     
 #> 1 hair_color
@@ -90,7 +90,7 @@ ds(starwars, ends_with("color"), .type = "table")
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))
 dplyr::select(lifeexp, dplyr::all_of(numeric_names))
-#> # A tibble: 68 × 5
+#> # A tibble: 68 x 5
 #>    region               popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>                <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia]      -0.6    74   870        49
@@ -103,7 +103,7 @@ dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 #>  8 1 [Europe & C. Asia]      -0.7    71  1440        90
 #>  9 1 [Europe & C. Asia]      -0.1    72    NA        85
 #> 10 1 [Europe & C. Asia]      -0.1    75  6140        95
-#> # ℹ 58 more rows
+#> # i 58 more rows
 
 ds(numeric_names, dplyr::starts_with("pop"))
 #> [1] "popgrowth"

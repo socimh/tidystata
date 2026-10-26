@@ -98,20 +98,21 @@ degrees of freedom. For Pearson correlations it matches
 correlations it is the same large-sample approximation that Stata uses.
 Correlations with a constant variable, and p-values with fewer than
 three observations, are `NA`. Labelled numeric columns are correlated on
-their codes, excluding tagged and SPSS user-missing values. For listwise
-deletion, as in Stata's `correlate`, drop incomplete rows first with
-[`tidyr::drop_na()`](https://tidyr.tidyverse.org/reference/drop_na.html).
+their codes, excluding tagged and SPSS user-missing values. Use
+[`corr()`](https://socimh.github.io/tidystata/reference/corr.md) for
+listwise Pearson correlations, like Stata's `corr` (`correlate`).
 
 ## See also
 
 Other tabulation functions:
+[`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
 [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
 
 ## Examples
 
 ``` r
 pwcorr(lifeexp, lexp, gnppc, safewater)
-#> # A tibble: 3 × 5
+#> # A tibble: 3 x 5
 #>   var1  var2          r     n        p
 #>   <chr> <chr>     <dbl> <int>    <dbl>
 #> 1 lexp  gnppc     0.733    67 1.79e-12
@@ -119,7 +120,7 @@ pwcorr(lifeexp, lexp, gnppc, safewater)
 #> 3 gnppc safewater 0.657    53 8.95e- 8
 
 pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
-#> # A tibble: 3 × 4
+#> # A tibble: 3 x 4
 #>   variable   lexp  gnppc safewater
 #>   <chr>     <dbl>  <dbl>     <dbl>
 #> 1 lexp      1     NA            NA
@@ -127,7 +128,7 @@ pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
 #> 3 safewater 0.760  0.657         1
 
 pwcorr(lifeexp, lexp, gnppc, .by = region)
-#> # A tibble: 3 × 6
+#> # A tibble: 3 x 6
 #>   region               var1  var2      r     n        p
 #>   <dbl+lbl>            <chr> <chr> <dbl> <int>    <dbl>
 #> 1 1 [Europe & C. Asia] lexp  gnppc 0.792    43 2.57e-10
@@ -135,14 +136,14 @@ pwcorr(lifeexp, lexp, gnppc, .by = region)
 #> 3 3 [South America]    lexp  gnppc 0.640    10 4.60e- 2
 
 pwcorr(lifeexp, lexp, gnppc, .method = "spearman")
-#> # A tibble: 1 × 5
+#> # A tibble: 1 x 5
 #>   var1  var2      r     n        p
 #>   <chr> <chr> <dbl> <int>    <dbl>
 #> 1 lexp  gnppc 0.861    67 9.53e-21
 
 # Correlate an existing column with a computed column
 pwcorr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
-#> # A tibble: 1 × 5
+#> # A tibble: 1 x 5
 #>   var1  var2                r     n        p
 #>   <chr> <chr>           <dbl> <int>    <dbl>
 #> 1 lexp  gnppc_thousands 0.733    67 1.79e-12

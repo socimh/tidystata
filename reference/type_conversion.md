@@ -1,9 +1,15 @@
 # Convert vectors for data preparation
 
-Convert text to numbers with `destring()`, labelled values to labels
-with `decode()`, or values to text with `tostring()`, following Stata's
-conversion commands. `as_numeric()` and `as_character()` are aliases of
-`destring()` and `decode()`.
+Prepare vectors using Stata-style conversion commands:
+
+- `destring()` (`as_numeric()`): Convert text to numbers; labelled
+  numeric vectors use their stored values.
+
+- `decode()` (`as_character()`): Convert values to text, using value
+  labels for labelled vectors and level text for factors.
+
+- `tostring()`: Convert stored values to text, using numeric codes for
+  labelled numeric vectors and factors rather than their labels.
 
 ## Usage
 
@@ -60,7 +66,8 @@ Use `ignore` to remove other characters first, like Stata's `ignore()`:
 `destring(x, ignore = "kg")` reads `"10 kg"` as 10. Empty strings,
 `"NA"` and Stata's `"."` are missing without a warning; the text `"NaN"`
 becomes `NaN`. Date strings become `NA`; parse them with
-[`as.Date()`](https://rdrr.io/r/base/as.Date.html) or `lubridate::ymd()`
+[`as.Date()`](https://rdrr.io/r/base/as.Date.html) or
+[`lubridate::ymd()`](https://lubridate.tidyverse.org/reference/ymd.html)
 instead.
 
 A factor whose levels are all numbers, such as
@@ -115,7 +122,7 @@ lifeexp |>
     region_fct = haven::as_factor(region),
     .keep = "used"
   )
-#> # A tibble: 68 × 5
+#> # A tibble: 68 x 5
 #>    region               region_chr       region_code region_num region_fct      
 #>    <dbl+lbl>            <chr>            <chr>            <dbl> <fct>           
 #>  1 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
@@ -128,5 +135,5 @@ lifeexp |>
 #>  8 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
 #>  9 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
 #> 10 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
-#> # ℹ 58 more rows
+#> # i 58 more rows
 ```
