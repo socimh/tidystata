@@ -27,10 +27,11 @@ select_or_transmute(.data, ...)
 
 ## Value
 
-The selected (and computed) columns. Data-frame classes and grouping
-follow
+A table containing the selected and computed columns in argument order.
+Data-frame classes and grouping follow
 [`dplyr::select()`](https://dplyr.tidyverse.org/reference/select.html);
-a tibble input returns a tibble.
+a tibble input returns a tibble. Grouping columns are retained. Unnamed
+computed columns use their expression as the name.
 
 ## Details
 
@@ -47,9 +48,9 @@ example `all_of(vars)` or `seq_len(2)`). Any other expression that uses
 columns, such as `lexp >= 70` or `gnp_thousands = gnppc / 1000`, is
 computed with
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-and then selected, so arithmetic on columns is never misread as column
-positions. Selections and computed values can be mixed; output follows
-argument order. Unnamed computed columns are named by their expression.
+and then selected, so arithmetic is never misread as column positions.
+Selections and computed values can be mixed; output follows argument
+order.
 
 A named constant such as `one = 1`, `label = "x"` or `y = c(1, 2)`
 creates a constant column; it never selects or renames columns by
@@ -93,6 +94,7 @@ lifeexp |>
 #>  9 1 [Europe & C. Asia] Croatia                     -0.1    72    NA        85
 #> 10 1 [Europe & C. Asia] Czechia                     -0.1    75  6140        95
 #> # ℹ 58 more rows
+
 lifeexp |>
   select_or_transmute(country, lexp)
 #> # A tibble: 68 × 2
@@ -109,12 +111,14 @@ lifeexp |>
 #>  9 Croatia                   72
 #> 10 Czechia                   75
 #> # ℹ 58 more rows
+
 # Ordinary select() rejects this computed expression.
 try(dplyr::select(lifeexp, lexp >= 70))
 #> Error in dplyr::select(lifeexp, lexp >= 70) : 
 #>   ℹ In argument: `lexp >= 70`.
 #> Caused by error:
 #> ! object 'lexp' not found
+
 lifeexp |>
   select_or_transmute(lexp >= 70)
 #> # A tibble: 68 × 1

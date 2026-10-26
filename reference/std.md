@@ -36,8 +36,8 @@ pct(x, prop = FALSE)
 
 - prop:
 
-  A single `TRUE` or `FALSE`. If `TRUE`, `pc()` returns proportions
-  (summing to 1) instead of percentages (summing to 100).
+  If `TRUE`, `pc()` returns proportions (summing to 1) instead of
+  percentages (summing to 100). Defaults to `FALSE`.
 
 ## Value
 
@@ -67,8 +67,10 @@ Other variable generation functions:
 ``` r
 std(c(1, 2, 3, NA))
 #> [1] -1  0  1 NA
+
 pc(c(2, 3, 5))
 #> [1] 20 30 50
+
 pc(c(2, 3, 5), prop = TRUE)
 #> [1] 0.2 0.3 0.5
 

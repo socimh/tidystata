@@ -1,27 +1,15 @@
-# Panel lags, leads and differences
+# Calculate panel lags, leads and differences
 
 Time-aware versions of
 [`dplyr::lag()`](https://dplyr.tidyverse.org/reference/lead-lag.html)
 and
 [`dplyr::lead()`](https://dplyr.tidyverse.org/reference/lead-lag.html),
-following Stata's time-series operators after `xtset`:
-
-- `stata_lag(x, n, time = t)` is `Ln.x`: the value of `x` at time
-  `t - n`.
-
-- `stata_lead(x, n, time = t)` is `Fn.x`: the value of `x` at time
-  `t + n`.
-
-- `stata_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
-  `stata_diff(x, time = t)` is `x - L.x` and
-  `stata_diff(x, 2, time = t)` is `D.(D.x)`.
-
-Values are found by time, not by row position, so gaps in time give
-missing values and the row order does not matter. Use them in
+following Stata's time-series operators after `xtset`. Values are found
+by time rather than row position, so gaps give missing values and row
+order does not matter. Use them in
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
 with the panel identifier in `.by` or
-[`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
-as `xtset id year` would declare it.
+[`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html).
 
 ## Usage
 
@@ -43,7 +31,7 @@ stata_diff(x, n = 1L, time, delta = 1, unit = NULL)
 - n:
 
   A single non-negative whole number: the number of periods
-  (`stata_lag()`, `stata_lead()`) or the order of the difference
+  (`stata_lag()`, `stata_lead()`) or the difference order
   (`stata_diff()`).
 
 - time:
@@ -62,11 +50,11 @@ stata_diff(x, n = 1L, time, delta = 1, unit = NULL)
   - ordered factors, such as survey waves, where each level is one
     period in level order, so an unused level is a gap.
 
-  Missing times give missing results. Text and unordered factors are not
-  accepted, because their sorted order need not be the time order
-  (`"W10"` sorts before `"W2"`); convert them first, for example with
-  `as.numeric(as.character(year))` or
-  `factor(wave, levels, ordered = TRUE)`.
+  Missing times give missing results, except for zero-order differences.
+  Text and unordered factors are not accepted, because their sorted
+  order need not be the time order (`"W10"` sorts before `"W2"`);
+  convert them first, for example with `as.numeric(as.character(year))`
+  or `factor(wave, levels, ordered = TRUE)`.
 
 - delta:
 
@@ -88,11 +76,26 @@ stata_diff(x, n = 1L, time, delta = 1, unit = NULL)
 
 ## Value
 
-A vector like `x`, with `NA` where the required period is absent from
-the panel. `stata_diff()` returns a double vector, or a `difftime` for
-dates, date-times and `difftime` input.
+A vector with the length and row order of `x`, with `NA` where the
+required period is absent or time is missing. Lags and leads retain the
+type and attributes of `x`. Positive-order differences return doubles,
+or `difftime` for dates, date-times and `difftime` input.
+
+With `stata_diff(n = 0)`, numeric/logical inputs return doubles and
+calendar/duration inputs retain their class (`POSIXlt` becomes
+`POSIXct`). Missing times do not mask values in this case.
 
 ## Details
+
+- `stata_lag(x, n, time = t)` is `Ln.x`: the value at time
+  `t - n * delta`.
+
+- `stata_lead(x, n, time = t)` is `Fn.x`: the value at time
+  `t + n * delta`.
+
+- `stata_diff(x, n, time = t)` is `Dn.x`: the `n`th difference, so
+  `stata_diff(x, time = t)` is `x - L.x` and
+  `stata_diff(x, 2, time = t)` is `D.(D.x)`.
 
 Compared with
 [`dplyr::lag()`](https://dplyr.tidyverse.org/reference/lead-lag.html):
@@ -150,7 +153,10 @@ sales <- tibble::tibble(
   month = as.Date(c("2024-01-31", "2024-02-29", "2024-04-30")),
   amount = c(5, 7, 4)
 )
-dplyr::mutate(sales, previous = stata_lag(amount, time = month, unit = "month"))
+dplyr::mutate(
+  sales,
+  previous = stata_lag(amount, time = month, unit = "month")
+)
 #> # A tibble: 3 × 3
 #>   month      amount previous
 #>   <date>      <dbl>    <dbl>

@@ -58,15 +58,15 @@
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
 <dd><p>A data frame, tibble, or data.table. <code>ds()</code> also accepts a
-character vector representing a name inventory, such as an earlier
-<code>ds()</code> result. Inventory entries must be unique, nonempty, and nonmissing;
-the vector's own names are ignored. An empty inventory is allowed.</p></dd>
+character vector representing a name inventory, such as an earlier <code>ds()</code>
+result. Inventory entries must be unique, nonempty, and nonmissing; the
+vector's own names are ignored. An empty inventory is allowed.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; Existing columns to
-select or rename. Omit to include all columns. Computed columns are not
-created by this argument.</p></dd>
+<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; Existing columns to select or
+rename. Omit to include all columns. Computed columns are not created by
+this argument.</p></dd>
 
 
 <dt id="arg--type">.type<a class="anchor" aria-label="anchor" href="#arg--type"></a></dt>
@@ -77,20 +77,22 @@ vector, like Stata's <code>ds</code>; <code>"table"</code> returns them as a one
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>ds()</code> returns a character vector. <code>ds(.type = "table")</code> returns a
-table with one character column, <code>name</code>. On ungrouped data, an empty
-selection returns a zero-length vector or a zero-row table, respectively. Tables preserve the input's
+table with one character column, <code>name</code>, and one row per selected name, in
+selection order. On ungrouped data, an empty selection returns a
+zero-length vector or zero-row table. Tables preserve the input's
 data.frame, tibble, or data.table container and supported preview settings,
-but do not recreate grouping or arbitrary subclasses on the new rows.</p>
+without grouping or arbitrary subclasses; character inventories return a
+tibble in table mode.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Selection order and renamed column names follow <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">dplyr::select()</a></code>. On a
-grouped data frame, selection retains grouping columns and can emit a
-message when they were not explicitly selected. Ungroup first to select
-independently of grouping columns. The input data are not modified.
-For character inventories, select by names, positions, or name helpers and
-rename as usual. Data-type predicates such as <code>where(is.numeric)</code> are not
-available because an inventory contains no column data.</p>
+grouped data frame, selection retains grouping columns and can emit a message
+when they were not explicitly selected. Ungroup first to select independently
+of grouping columns. The input data are not modified. For character
+inventories, select by names, positions, or name helpers and rename as usual.
+Data-type predicates such as <code>where(is.numeric)</code> are not available because an
+inventory contains no column data.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -107,8 +109,10 @@ available because an inventory contains no column data.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">ds</span><span class="op">(</span><span class="va">lifeexp</span><span class="op">)</span> <span class="co"># equivalent to names(lifeexp)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "region"    "country"   "popgrowth" "lexp"      "gnppc"     "safewater"</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ds</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">country</span><span class="op">:</span><span class="va">lexp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "country"   "popgrowth" "lexp"     </span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ds</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.character</span><span class="op">)</span>, .type <span class="op">=</span> <span class="st">"table"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name   </span>
@@ -141,6 +145,7 @@ available because an inventory contains no column data.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>      -<span style="color: #BB0000;">0.1</span>    72    <span style="color: #BB0000;">NA</span>        85</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>      -<span style="color: #BB0000;">0.1</span>    75  <span style="text-decoration: underline;">6</span>140        95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 58 more rows</span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ds</span><span class="op">(</span><span class="va">numeric_names</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"pop"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "popgrowth"</span>
 </code></pre></div>

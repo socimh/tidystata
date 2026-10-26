@@ -1,4 +1,4 @@
-# Pipe operator
+# Pass a value through a pipeline
 
 See `magrittr::%>%` for details.
 
@@ -20,4 +20,5 @@ lhs %>% rhs
 
 ## Value
 
-The result of calling `rhs(lhs)`.
+The result of evaluating `rhs` with `lhs` inserted according to
+magrittr's pipe and placeholder rules.

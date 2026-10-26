@@ -31,11 +31,12 @@ ds(.data, ..., .type = c("vector", "table"))
 ## Value
 
 `ds()` returns a character vector. `ds(.type = "table")` returns a table
-with one character column, `name`. On ungrouped data, an empty selection
-returns a zero-length vector or a zero-row table, respectively. Tables
-preserve the input's data.frame, tibble, or data.table container and
-supported preview settings, but do not recreate grouping or arbitrary
-subclasses on the new rows.
+with one character column, `name`, and one row per selected name, in
+selection order. On ungrouped data, an empty selection returns a
+zero-length vector or zero-row table. Tables preserve the input's
+data.frame, tibble, or data.table container and supported preview
+settings, without grouping or arbitrary subclasses; character
+inventories return a tibble in table mode.
 
 ## Details
 
@@ -67,8 +68,10 @@ Other inspection functions:
 ``` r
 ds(lifeexp) # equivalent to names(lifeexp)
 #> [1] "region"    "country"   "popgrowth" "lexp"      "gnppc"     "safewater"
+
 ds(lifeexp, country:lexp)
 #> [1] "country"   "popgrowth" "lexp"     
+
 ds(lifeexp, where(is.character), .type = "table")
 #> # A tibble: 1 × 1
 #>   name   
@@ -101,6 +104,7 @@ dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 #>  9 1 [Europe & C. Asia]      -0.1    72    NA        85
 #> 10 1 [Europe & C. Asia]      -0.1    75  6140        95
 #> # ℹ 58 more rows
+
 ds(numeric_names, dplyr::starts_with("pop"))
 #> [1] "popgrowth"
 ```

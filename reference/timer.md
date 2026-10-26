@@ -1,6 +1,7 @@
-# Time spent on a function
+# Time an expression
 
-`timer()` works like the `timer` command in Stata.
+Evaluate an expression and report its elapsed time, like Stata's
+`timer`.
 
 ## Usage
 
@@ -16,9 +17,9 @@ timer(x, on_error = TRUE)
 
 - on_error:
 
-  A single `TRUE` or `FALSE`. If `TRUE` (the default), also report
-  elapsed time when the expression fails, then let the original error
-  propagate. Use `FALSE` to report elapsed time only on success.
+  If `TRUE` (the default), also report elapsed time when the expression
+  fails, then let the original error propagate. Use `FALSE` to report
+  elapsed time only on success.
 
 ## Value
 
@@ -47,7 +48,8 @@ Other utility functions:
 ``` r
 x <- seq_len(1e6)
 mean(x) |> timer()
-#> Time spent: 0.007s
+#> Time spent: 0.010s
+
 try(timer(stop("failure")))
 #> Failed execution. Time spent: 0.000s
 #> Error in timer(stop("failure")) : failure

@@ -20,9 +20,10 @@ browse(.data, ...)
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
   or
   \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
-  Variables to browse. Omit to browse all columns. Selection and
-  computed expressions follow
+  Columns to select or compute with
   [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md).
+  Existing columns, selection helpers, and named expressions can be
+  mixed. Omit to browse all columns.
 
 ## Value
 
@@ -59,8 +60,12 @@ Other inspection functions:
 ``` r
 if (interactive()) {
   browse(lifeexp)
+
   browse(lifeexp, country:lexp)
+
   browse(lifeexp, varlist("*p*"))
+
+  browse(lifeexp, country, gnppc_thousands = gnppc / 1000)
 
   # Retain the viewed columns for the next pipeline stage.
   selected <- browse(lifeexp, country, lexp, gnppc)

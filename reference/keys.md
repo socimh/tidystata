@@ -47,9 +47,9 @@ duplicates_drop(.data, ..., .force = FALSE)
 
 - .missok:
 
-  A single `TRUE` or `FALSE`. If `FALSE` (default), `isid()` errors when
-  an identifying column contains missing values, as Stata's `isid` does
-  without the `missok` option.
+  If `FALSE` (default), `isid()` errors when an identifying column
+  contains missing values, as Stata's `isid` does without the `missok`
+  option.
 
 - .name:
 
@@ -57,10 +57,10 @@ duplicates_drop(.data, ..., .force = FALSE)
 
 - .force:
 
-  A single `TRUE` or `FALSE`. When only some columns are selected, rows
-  that share those columns can still differ elsewhere, and
-  `duplicates_drop()` errors unless `.force = TRUE`, like Stata's
-  `duplicates drop varlist, force`.
+  If `TRUE`, allow `duplicates_drop()` to remove rows that match on the
+  selected columns but differ elsewhere, like Stata's
+  `duplicates drop varlist, force`. Defaults to `FALSE`; exact duplicate
+  rows can be dropped without this option.
 
 ## Value
 
@@ -75,11 +75,9 @@ duplicates_drop(.data, ..., .force = FALSE)
 
 - `duplicates_list()`: the duplicated rows, ordered by their identifying
   values, with `.dup_group` (set number) and `.row` (original position).
-  Existing columns with either metadata name cause an error; rename them
-  first.
 
-- `duplicates_drop()`: `.data` without the surplus rows, with a message
-  giving the number of rows removed.
+- `duplicates_drop()`: `.data` without surplus rows, keeping the first
+  row of each set in input order.
 
 The input's data.frame, tibble, data.table or grouped container is kept
 where rows or columns of `.data` are returned.
@@ -87,7 +85,11 @@ where rows or columns of `.data` are returned.
 ## Details
 
 Missing values count as equal to each other, as in Stata, so two rows
-that are both missing on every selected column are duplicates.
+that are both missing on every selected column are duplicates. Checks
+and duplicate counts use the whole input, regardless of grouping.
+`duplicates_list()` rejects existing `.dup_group` or `.row` columns;
+rename them first. `duplicates_drop()` reports the number of rows
+removed as a message. The input data are not modified.
 
 ## See also
 
@@ -110,8 +112,10 @@ try(isid(panel, id))
 #>   Variable `id` does not uniquely identify the rows: 2 values appear more
 #> than once (4 rows).
 #> ℹ See them with `duplicates_list()`.
+
 capture(isid(panel, id))
 #> [1] FALSE
+
 isid(panel[-4, ], id, wave)
 
 duplicates_report(panel, id, wave)
@@ -120,6 +124,7 @@ duplicates_report(panel, id, wave)
 #>    <int>        <int>   <int>
 #> 1      1            3       0
 #> 2      2            2       1
+
 duplicates_tag(panel, id, wave)
 #> # A tibble: 5 × 4
 #>      id  wave score   dup
@@ -129,12 +134,14 @@ duplicates_tag(panel, id, wave)
 #> 3     2     1     7     1
 #> 4     2     1     7     1
 #> 5     3     1     8     0
+
 duplicates_list(panel, id, wave)
 #> # A tibble: 2 × 5
 #>      id  wave score .dup_group  .row
 #>   <dbl> <dbl> <dbl>      <int> <int>
 #> 1     2     1     7          1     3
 #> 2     2     1     7          1     4
+
 duplicates_drop(panel)
 #> (1 row removed)
 #> # A tibble: 4 × 3

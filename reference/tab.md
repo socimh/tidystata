@@ -1,24 +1,9 @@
 # Tabulate columns
 
-Enhanced [`count()`](https://dplyr.tidyverse.org/reference/count.html).
-
-- `tab()` - Tabulates variable(s) simultaneously, similar to
-  [`count()`](https://dplyr.tidyverse.org/reference/count.html).
-
-- `tab1()` - Tabulates variable(s) one by one.
-
-- `tab2()` - Cross-tabulates two variables, like Stata's `tab x y`. With
-  three or more variables it returns every pairwise table, like Stata's
-  `tab2 x y z`.
-
-Each takes `.total = TRUE` to add "Total" rows (and, for `tab2()`, a
-"total" column). `fre()`, `fre1()` and `fre2()` are shortcuts for
-`tab(.total = TRUE)`, `tab1(.total = TRUE)` and `tab2(.total = TRUE)`,
-named after Stata's `fre`.
-
-The functions return data by default. With totals, rich output is
-available from `fre()`, `fre1()` and `fre2()` with `.type = "flextable"`
-when the optional flextable package is installed.
+Count joint categories with `tab()`, variables individually with
+`tab1()`, or every pair of variables with `tab2()`, following Stata's
+tabulation commands. The `fre()`, `fre1()`, and `fre2()` variants add
+totals and value labels.
 
 ## Usage
 
@@ -109,12 +94,11 @@ fre1(
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
   or
   \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
-  Variables to tabulate.
-
-  Both tidyselect (e.g.,
-  [`starts_with()`](https://tidyselect.r-lib.org/reference/starts_with.html))
-  and data masking (e.g., `x_sq = x^2`) are supported. See examples
-  below.
+  Columns to select or compute with
+  [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md).
+  Existing columns, selection helpers, and named expressions can be
+  mixed. Omit to tabulate all columns except grouping keys;
+  cross-tabulations require at least two measured columns.
 
 - .by:
 
@@ -125,7 +109,10 @@ fre1(
   measured variables. For `tab2()` and `fre2()`, `.by` returns a list
   with one cross-table per group, named like `"g = a"`, as Stata's
   `by g: tab x y`; grouped data are not split without `.by`. `tab2()`
-  does not accept `.desc` or `.group_order`.
+  does not accept `.desc` or `.group_order`. Select existing columns
+  only; create new grouping columns with
+  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+  first.
 
 - .desc:
 
@@ -139,14 +126,15 @@ fre1(
   order; `"frequency"` orders by descending observation count (summed
   frequency weights when `.wt` is used), including missing measured
   values. Missing grouping keys appear last and ties follow key order.
-  `.desc` controls categories within each group independently.
+  `.desc` controls categories within groups independently.
 
 - .total:
 
-  A single `TRUE` or `FALSE`. If `TRUE`, add "Total" rows:
-  `tab(.total = TRUE)` is `fre()` and `tab1(.total = TRUE)` is `fre1()`.
-  `tab2(.total = TRUE)` is `fre2()` and adds a total row and a total
-  column. Flextable output from `tab2()` requires totals.
+  If `TRUE`, add "Total" rows: `tab(.total = TRUE)` is `fre()` and
+  `tab1(.total = TRUE)` is `fre1()`. `tab2(.total = TRUE)` is `fre2()`
+  and adds a total row and a total column. Defaults to `FALSE` for
+  `tab()`, `tab1()`, and `tab2()`; the `fre()` family always adds
+  totals. Flextable output from `tab2()` requires totals.
 
 - .wt:
 
@@ -174,28 +162,65 @@ fre1(
 
 - .flip:
 
-  A single `TRUE` or `FALSE`. If `TRUE`, swap the rows and columns of
-  the cross-table.
+  If `TRUE`, swap the rows and columns of the cross-table. Defaults to
+  `FALSE`.
 
 - .chi2:
 
-  A single `TRUE` or `FALSE`. If `TRUE`, `tab2()` reports Pearson's
-  chi-square test of independence and Cramer's V, like Stata's
-  `tab x y, chi2 V`. See Details.
+  If `TRUE`, `tab2()` reports Pearson's chi-square test of independence
+  and Cramer's V, like Stata's `tab x y, chi2 V`. Defaults to `FALSE`.
+  See Details.
 
 ## Value
 
-A table, a list of tables, or an explicitly requested flextable. Default
-tables preserve the input's data.frame, tibble, or data.table container,
-including each table in a list. Results are ungrouped, with grouping
-keys retained as columns where applicable. Supported preview settings
-persist unless an explicit output type is requested. Other subclasses
-are not reconstructed on these newly shaped tables. Input data are not
-modified.
+A table, list of tables, or explicitly requested flextable:
+
+- `tab()` and `fre()` return one row per observed combination of
+  measured categories and grouping keys, with the selected columns, `n`
+  (count), `percent`, `cum`, `valid`, and `valid_cum` (percentages from
+  zero to 100). Totals add rows and can change category types or add a
+  `total` column (see Details).
+
+- `tab1()` and `fre1()` return a list named by measured variable. Each
+  table contains grouping keys, a `value` column, and the same
+  count/percentage columns. `.type = "tibble"` combines tables with a
+  `variable` column.
+
+- `tab2()` and `fre2()` return counts with one row per row category and
+  one column per column category, preceded by the row-category column.
+  Totals add a row and column. Three or more variables give a list of
+  pairwise tables named like `"x x y"`; explicit `.by` gives a list per
+  group, containing pairwise lists when needed.
+
+Selecting no measured variables returns zero rows with count/percentage
+columns and grouping keys for `tab()`/`fre()`, an empty list (or empty
+combined tibble) for `tab1()`/`fre1()`, and an empty table for
+`tab2()`/`fre2()`. Cross-tabulation rejects one selected variable;
+flextable cross-tabulation requires at least two.
+
+With `.chi2 = TRUE`, each data cross-table has a one-row tibble in its
+`chi2` attribute: `statistic`, `df`, `p_value`, `cramers_v`, and `n`.
+Undefined test statistics are `NA`. Flextables show the test in their
+footer instead.
+
+Default tables preserve the input's data.frame, tibble, or data.table
+container, including tables in lists. Results are ungrouped; supported
+preview settings persist unless an explicit output type is requested.
+Other subclasses are not reconstructed.
 
 ## Details
 
-### Counts and percentages
+**Selection and missing values**
+
+Computed columns are evaluated on ungrouped working data before counts
+are calculated within groups. Create columns with grouped
+[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+first when a calculation needs to run separately within each group.
+Missingness includes `NaN`, tagged missing values, and SPSS user-missing
+codes and ranges. Empty strings are observed values. List-column values
+are counted by their complete identities, without flattening.
+
+**Counts, percentages, and totals**
 
 For `tab()`, `tab1()`, `fre()` and `fre1()`, `n` counts observations.
 `percent` and `cum` are percentages from zero to 100 using all
@@ -207,8 +232,6 @@ valid percentages and appear last. So `percent` matches the user-written
 `fre` and `tabulate, missing`, and `valid` matches plain `tabulate`,
 which leaves missing values out.
 
-### Totals
-
 `fre()` and `fre1()` append a `"Total"` row within each group and may
 add `"Valid Total"` and `"Missing Total"` subtotals. In tables with up
 to five measured variables, the final measured column is converted to
@@ -218,57 +241,40 @@ underlying values, or with an observed `"Total"` category. Counts remain
 separate; use `tab()` or `tab1()` when original category values and
 types are needed.
 
-### List columns and empty selections
-
-`tab()` counts list-column values by their complete identities without
-flattening their contents. Selecting no measured variables returns no
-rows: `tab()` and `fre()` retain their count and percentage columns and
-any grouping keys; `tab1()` and `fre1()` return an empty list by default
-or an empty table with `.type = "tibble"`. `tab2()` returns an empty
-table when no variables are selected and errors when only one is. With
-three or more, it returns a list of every pairwise table, named like
-`"x x y"`, each with the same options. With no selected variables,
-`tab2(..., .type = "flextable")` errors because rich cross-tabulation
-requires two selected variables.
-
-### Cross-tabulation
+**Cross-tabulation**
 
 Cross-tabulation keeps category names unchanged. Categories may match
 the original variable names. Column categories follow their values:
 factor levels in order, other types ascending, with missing values last.
 A category matching the combined row-header name, or literal `"NA"`
-alongside a missing column category, causes a name-collision error. With
+alongside a missing column category, causes a name collision. With
 `tab2(.total = TRUE)`, the column category `"total"` is reserved for
 marginal totals; recode it first or omit the totals. The final row of
 `tab2(.total = TRUE)` is the marginal total, labelled `"total"`; an
-observed row category with the same label remains a separate row. Blank
+observed row category with that label remains a separate row. Blank
 column categories use `"<empty>"`, with the smallest unused numeric
 suffix when that header is already taken. Logical cross-tabulation axes
 follow `FALSE`, `TRUE`, then missing values.
-
-### Chi-square test
 
 With `.chi2 = TRUE`, `tab2()` tests the categories shown in the table,
 including missing ones (filter them out first to exclude them, as
 Stata's `tabulate, chi2` does without `missing`), and drops rows or
 columns with no observations. It prints Pearson's chi-square, its
-degrees of freedom, the p-value and Cramer's V as a message, and stores
-them as a one-row tibble in `attr(result, "chi2")` with columns
-`statistic`, `df`, `p_value`, `cramers_v` and `n`. Flextable output adds
-them as a footer. As in Stata, V keeps its sign in 2 x 2 tables. The
-statistic, p-value and V are tested against Stata's `tabulate, chi2 V`.
-Frequency weights are treated as counts; analytic weights are an error,
-because a design-based test such as `survey::svychisq()` is needed for
-sampling weights.
+degrees of freedom, the p-value and Cramer's V as a message; flextable
+output adds them as a footer. As in Stata, V keeps its sign in 2 x 2
+tables. Frequency weights are treated as counts; analytic weights are an
+error, because a design-based test such as `survey::svychisq()` is
+needed for sampling weights.
 
-### Combined output
+**Combined output and names**
 
 Combined `tab1()` output uses character values when factor types cannot
 be combined; each variable's category order is retained. List output
 preserves the original category classes.
 
-If the output tibble has many rows, consider using
-[`print()`](https://rdrr.io/r/base/print.html) to display the output.
+Input columns that clash with output names are renamed with a leading
+dot, with a message. If the new name is already taken, rename the input
+first. The input data are not modified.
 
 ## See also
 
@@ -296,15 +302,6 @@ tab(lifeexp, region)
 #> 2 2 [North America]       14    20.6  85.3  20.6      85.3
 #> 3 3 [South America]       10    14.7 100    14.7     100  
 
-# tabulate a condition
-tab(lifeexp, safewater > 50)
-#> # A tibble: 3 × 6
-#>   `safewater > 50`     n percent   cum valid valid_cum
-#>   <lgl>            <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 FALSE               11    16.2  16.2  20.4      20.4
-#> 2 TRUE                43    63.2  79.4  79.6     100  
-#> 3 NA                  14    20.6 100    NA        NA  
-
 # Tabulate a column by position, a condition, or a named expression.
 tab(lifeexp, 1)
 #> # A tibble: 3 × 6
@@ -313,6 +310,7 @@ tab(lifeexp, 1)
 #> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
 #> 2 2 [North America]       14    20.6  85.3  20.6      85.3
 #> 3 3 [South America]       10    14.7 100    14.7     100  
+
 tab(lifeexp, region, .desc = TRUE)
 #> # A tibble: 3 × 6
 #>   region                   n percent   cum valid valid_cum
@@ -320,26 +318,41 @@ tab(lifeexp, region, .desc = TRUE)
 #> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
 #> 2 2 [North America]       14    20.6  85.3  20.6      85.3
 #> 3 3 [South America]       10    14.7 100    14.7     100  
-fre(lifeexp, region, .desc = TRUE)
-#> # A tibble: 4 × 6
-#>   region               n percent   cum valid valid_cum
-#>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
-#> 2 North America       14    20.6  85.3  20.6      85.3
-#> 3 South America       10    14.7 100    14.7     100  
-#> 4 Total               68   100    NA    NA        NA  
+
 tab(lifeexp, lexp >= 70)
 #> # A tibble: 2 × 6
 #>   `lexp >= 70`     n percent   cum valid valid_cum
 #>   <lgl>        <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 FALSE           21    30.9  30.9  30.9      30.9
 #> 2 TRUE            47    69.1 100    69.1     100  
+
 tab(lifeexp, lexp_70 = lexp >= 70)
 #> # A tibble: 2 × 6
 #>   lexp_70     n percent   cum valid valid_cum
 #>   <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 FALSE      21    30.9  30.9  30.9      30.9
 #> 2 TRUE       47    69.1 100    69.1     100  
+
+# Mix an existing column and a computed category
+tab(lifeexp, region, lexp_70 = lexp >= 70)
+#> # A tibble: 6 × 7
+#>   region               lexp_70     n percent   cum valid valid_cum
+#>   <dbl+lbl>            <lgl>   <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 1 [Europe & C. Asia] FALSE      12   17.6   17.6 17.6       17.6
+#> 2 1 [Europe & C. Asia] TRUE       32   47.1   64.7 47.1       64.7
+#> 3 2 [North America]    FALSE       6    8.82  73.5  8.82      73.5
+#> 4 2 [North America]    TRUE        8   11.8   85.3 11.8       85.3
+#> 5 3 [South America]    FALSE       3    4.41  89.7  4.41      89.7
+#> 6 3 [South America]    TRUE        7   10.3  100   10.3      100  
+
+tab2(lifeexp, region, lexp_70 = lexp >= 70)
+#> # A tibble: 3 × 3
+#>   `region \\ lexp_70`  `FALSE` `TRUE`
+#>   <dbl+lbl>              <int>  <int>
+#> 1 1 [Europe & C. Asia]      12     32
+#> 2 2 [North America]          6      8
+#> 3 3 [South America]          3      7
+
 tab(lifeexp, varlist("*p*"))
 #> # A tibble: 68 × 8
 #>    popgrowth  lexp gnppc     n percent   cum valid valid_cum
@@ -355,6 +368,7 @@ tab(lifeexp, varlist("*p*"))
 #>  9      -0.6    74   870     1    1.47 13.2   1.49     13.4 
 #> 10      -0.5    68  1540     1    1.47 14.7   1.49     14.9 
 #> # ℹ 58 more rows
+
 tab(lifeexp)
 #> # A tibble: 68 × 11
 #>    region      country popgrowth  lexp gnppc safewater     n percent   cum valid
@@ -379,6 +393,7 @@ tab(c(1, 1, 2, NA))
 #> 1     1     2      50    50  66.7      66.7
 #> 2     2     1      25    75  33.3     100  
 #> 3    NA     1      25   100  NA        NA  
+
 fre(c(1, 1, 2, NA))
 #> # A tibble: 5 × 6
 #>   value           n percent   cum valid valid_cum
@@ -397,6 +412,7 @@ tab(survey, edu, .wt = w)
 #>   <chr> <dbl>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 high    2.5    55.6  55.6  55.6      55.6
 #> 2 low     2      44.4 100    44.4     100  
+
 tab(survey, edu, .wt = w, .wt_type = "analytic")
 #> # A tibble: 2 × 6
 #>   edu       n percent   cum valid valid_cum
@@ -420,6 +436,7 @@ tab(countries, region, lexp_70)
 #> 4 2 [North America]    TRUE        8   11.8   85.3 11.8       85.3
 #> 5 3 [South America]    FALSE       3    4.41  89.7  4.41      89.7
 #> 6 3 [South America]    TRUE        7   10.3  100   10.3      100  
+
 tab(countries, lexp_70, .by = region, .group_order = "frequency")
 #> # A tibble: 6 × 7
 #>   region               lexp_70     n percent   cum valid valid_cum
@@ -430,6 +447,7 @@ tab(countries, lexp_70, .by = region, .group_order = "frequency")
 #> 4 2 [North America]    TRUE        8    57.1 100    57.1     100  
 #> 5 3 [South America]    FALSE       3    30    30    30        30  
 #> 6 3 [South America]    TRUE        7    70   100    70       100  
+
 tab1(lifeexp, 1:3)
 #> $region
 #> # A tibble: 3 × 6
@@ -471,6 +489,7 @@ tab1(lifeexp, 1:3)
 #> 10  -0.2     4    5.88 22.1   5.88     22.1 
 #> # ℹ 22 more rows
 #> 
+
 tab1(countries, matches("^(region|lexp_70)$"))
 #> $region
 #> # A tibble: 3 × 6
@@ -487,6 +506,7 @@ tab1(countries, matches("^(region|lexp_70)$"))
 #> 1 FALSE    21    30.9  30.9  30.9      30.9
 #> 2 TRUE     47    69.1 100    69.1     100  
 #> 
+
 tab(lifeexp, region, .total = TRUE)
 #> # A tibble: 4 × 6
 #>   region               n percent   cum valid valid_cum
@@ -495,6 +515,7 @@ tab(lifeexp, region, .total = TRUE)
 #> 2 North America       14    20.6  85.3  20.6      85.3
 #> 3 South America       10    14.7 100    14.7     100  
 #> 4 Total               68   100    NA    NA        NA  
+
 tab2(countries, region, lexp_70)
 #> # A tibble: 3 × 3
 #>   `region \\ lexp_70`  `FALSE` `TRUE`
@@ -502,30 +523,7 @@ tab2(countries, region, lexp_70)
 #> 1 1 [Europe & C. Asia]      12     32
 #> 2 2 [North America]          6      8
 #> 3 3 [South America]          3      7
-tab2(countries, lexp, lexp_70)
-#> # A tibble: 20 × 3
-#>    `lexp \\ lexp_70` `FALSE` `TRUE`
-#>                <dbl>   <int>  <int>
-#>  1                57       1      0
-#>  2                61       1      0
-#>  3                62       2      0
-#>  4                63       1      0
-#>  5                64       3      0
-#>  6                65       1      0
-#>  7                66       1      0
-#>  8                67       4      0
-#>  9                68       3      0
-#> 10                69       4      0
-#> 11                70       0      5
-#> 12                71       0      6
-#> 13                72       0      6
-#> 14                73       0      4
-#> 15                74       0      3
-#> 16                75       0      4
-#> 17                76       0      4
-#> 18                77       0      5
-#> 19                78       0      4
-#> 20                79       0      6
+
 fre2(countries, lexp, lexp_70)
 #> # A tibble: 21 × 4
 #>    `lexp \\ lexp_70` `FALSE` `TRUE` total
@@ -612,6 +610,7 @@ tab(starwars, ends_with("color"))
 #>  9 black         light      brown         1    1.15 13.8   1.22     14.6 
 #> 10 black         tan        brown         2    2.30 16.1   2.44     17.1 
 #> # ℹ 57 more rows
+
 tab1(starwars, ends_with("color"))
 #> $hair_color
 #> # A tibble: 12 × 6
@@ -666,6 +665,7 @@ tab1(starwars, ends_with("color"))
 #> 14 white             1    1.15  87.4  1.15      87.4
 #> 15 yellow           11   12.6  100   12.6      100  
 #> 
+
 tab1(starwars, ends_with("color"), .type = "tibble")
 #> # A tibble: 58 × 7
 #>    variable   value             n percent   cum valid valid_cum
@@ -681,64 +681,8 @@ tab1(starwars, ends_with("color"), .type = "tibble")
 #>  9 hair_color grey              1    1.15 46.0   1.22     48.8 
 #> 10 hair_color none             38   43.7  89.7  46.3      95.1 
 #> # ℹ 48 more rows
+
 fre1(starwars, ends_with("color"))
-#> $hair_color
-#> # A tibble: 14 × 6
-#>    value             n percent    cum  valid valid_cum
-#>    <chr>         <int>   <dbl>  <dbl>  <dbl>     <dbl>
-#>  1 auburn            1    1.15   1.15   1.22      1.22
-#>  2 auburn, grey      1    1.15   2.30   1.22      2.44
-#>  3 auburn, white     1    1.15   3.45   1.22      3.66
-#>  4 black            13   14.9   18.4   15.9      19.5 
-#>  5 blond             3    3.45  21.8    3.66     23.2 
-#>  6 blonde            1    1.15  23.0    1.22     24.4 
-#>  7 brown            18   20.7   43.7   22.0      46.3 
-#>  8 brown, grey       1    1.15  44.8    1.22     47.6 
-#>  9 grey              1    1.15  46.0    1.22     48.8 
-#> 10 none             38   43.7   89.7   46.3      95.1 
-#> 11 white             4    4.60  94.3    4.88    100   
-#> 12 Valid Total      82   94.3   NA    100        NA   
-#> 13 NA                5    5.75 100     NA        NA   
-#> 14 Total            87  100     NA     NA        NA   
-#> 
-#> $skin_color
-#> # A tibble: 32 × 6
-#>    value                   n percent   cum valid valid_cum
-#>    <chr>               <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 blue                    2    2.30  2.30  2.30      2.30
-#>  2 blue, grey              2    2.30  4.60  2.30      4.60
-#>  3 brown                   4    4.60  9.20  4.60      9.20
-#>  4 brown mottle            1    1.15 10.3   1.15     10.3 
-#>  5 brown, white            1    1.15 11.5   1.15     11.5 
-#>  6 dark                    6    6.90 18.4   6.90     18.4 
-#>  7 fair                   17   19.5  37.9  19.5      37.9 
-#>  8 fair, green, yellow     1    1.15 39.1   1.15     39.1 
-#>  9 gold                    1    1.15 40.2   1.15     40.2 
-#> 10 green                   6    6.90 47.1   6.90     47.1 
-#> # ℹ 22 more rows
-#> 
-#> $eye_color
-#> # A tibble: 16 × 6
-#>    value             n percent   cum valid valid_cum
-#>    <chr>         <int>   <dbl> <dbl> <dbl>     <dbl>
-#>  1 black            10   11.5   11.5 11.5       11.5
-#>  2 blue             19   21.8   33.3 21.8       33.3
-#>  3 blue-gray         1    1.15  34.5  1.15      34.5
-#>  4 brown            21   24.1   58.6 24.1       58.6
-#>  5 dark              1    1.15  59.8  1.15      59.8
-#>  6 gold              1    1.15  60.9  1.15      60.9
-#>  7 green, yellow     1    1.15  62.1  1.15      62.1
-#>  8 hazel             3    3.45  65.5  3.45      65.5
-#>  9 orange            8    9.20  74.7  9.20      74.7
-#> 10 pink              1    1.15  75.9  1.15      75.9
-#> 11 red               5    5.75  81.6  5.75      81.6
-#> 12 red, blue         1    1.15  82.8  1.15      82.8
-#> 13 unknown           3    3.45  86.2  3.45      86.2
-#> 14 white             1    1.15  87.4  1.15      87.4
-#> 15 yellow           11   12.6  100   12.6      100  
-#> 16 Total            87  100     NA   NA         NA  
-#> 
-fre1(starwars, ends_with("color"), .type = "list")
 #> $hair_color
 #> # A tibble: 14 × 6
 #>    value             n percent    cum  valid valid_cum

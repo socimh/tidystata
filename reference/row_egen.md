@@ -1,19 +1,9 @@
 # Calculate summaries across columns within each row
 
-- `row_mean()`, `row_sum()`, and `row_median()` calculate row
-  arithmetic.
-
-- `row_min()` and `row_max()` select the smallest and largest row
-  values.
-
-- `row_var()` and `row_sd()` calculate sample variance and standard
-  deviation.
-
-- `row_unique()` counts distinct values, including one missing category.
-  `row_nvals()` follows egenmore's `egen rownvals()` and ignores missing
-  values unless `.missing = TRUE`, when it equals `row_unique()`.
-
-- `row_miss()` and `row_non_miss()` count missing and observed values.
+Summarize selected columns within each row using arithmetic, extrema,
+distinct-value counts, or missing-value counts. Use a data frame
+directly or select columns inside
+[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 
 ## Usage
 
@@ -53,10 +43,10 @@ row_non_miss(...)
 
 - na.rm:
 
-  For arithmetic and extrema helpers, a single logical value. If `TRUE`
-  (the default), omit missing values; if `FALSE`, any missing input
-  makes that row's result missing. Count helpers (`row_unique()`,
-  `row_nvals()`, `row_miss()`, `row_non_miss()`) reject `na.rm`.
+  For arithmetic and extrema helpers, if `TRUE` (the default), omit
+  missing values; if `FALSE`, any missing input makes that row's result
+  missing. Count helpers (`row_unique()`, `row_nvals()`, `row_miss()`,
+  `row_non_miss()`) reject `na.rm`.
 
 - .values:
 
@@ -69,26 +59,31 @@ row_non_miss(...)
 
 - .missing:
 
-  For `row_nvals()`, a single `TRUE` or `FALSE`. If `FALSE` (the
-  default), missing values are not counted, as in egenmore's
-  `rownvals()`; if `TRUE`, they count as one value, as in
-  `row_unique()`.
+  For `row_nvals()`, if `FALSE` (the default), missing values are not
+  counted, as in egenmore's `rownvals()`; if `TRUE`, they count as one
+  value, as in `row_unique()`.
 
 ## Value
 
 A vector with one value per input row. Extrema retain the compatible
 common type; arithmetic returns doubles or a supported class as
-described above; unique and missing-value counts return integers.
+described under Arithmetic; unique and missing-value counts return
+integers. Zero-row inputs return typed empty vectors. All-missing rows
+return a typed `NA` for arithmetic and extrema, except
+`row_sum(na.rm = TRUE)` returns zero; an all-missing row's mean is `NA`,
+not `NaN`.
 
 ## Details
 
 All helpers preserve the input. Missingness is determined from the
 original columns, including tagged and SPSS user-missing values.
-Arithmetic and extrema omit missing values by default. All-missing rows
-return a typed `NA`, except `row_sum(na.rm = TRUE)` returns zero.
-Variance and standard deviation use the sample denominator and require
-at least two observed values. Zero-row inputs return typed empty
-vectors; `NULL` and zero selected columns are rejected.
+Arithmetic and extrema omit missing values by default. Variance and
+standard deviation use the sample denominator and require at least two
+observed values. `NULL` and zero selected columns are rejected. Means
+and sums of observed numeric values agree with
+[`base::rowMeans()`](https://rdrr.io/r/base/colSums.html) and
+[`base::rowSums()`](https://rdrr.io/r/base/colSums.html). Undefined
+arithmetic on observed infinities can produce `NaN`, as in base R.
 
 ## Extrema
 
@@ -130,8 +125,8 @@ and median while retaining their common class and metadata. Calendar
 sums, variance, and standard deviation require explicit numeric
 conversion first. Durations support mean, median, sum, and standard
 deviation and return `difftime` vectors in a common unit. For duration
-variance, explicitly convert to one numeric unit first because variance
-has squared units.
+variance, convert to one numeric unit first because variance has squared
+units.
 
 Compatible measured vectors on linear zero-origin scales are normalized
 to a common unit. Mean, median, sum, and standard deviation retain that
@@ -157,19 +152,7 @@ before combining the columns.
 
 `row_miss()` and `row_non_miss()` use each original column's
 [`is.na()`](https://rdrr.io/r/base/NA.html) result. Scalar missing list
-elements are missing; `NULL` and empty list elements are observed. Count
-helpers return integer vectors.
-
-## Implementation
-
-All row summaries and counts use native C++ kernels registered through
-cpp11, which read logical, integer and double columns directly and count
-missing values in the same pass. Means and sums of observed values match
-[`base::rowMeans()`](https://rdrr.io/r/base/colSums.html) and
-[`base::rowSums()`](https://rdrr.io/r/base/colSums.html) without first
-copying the columns into a matrix; unlike those, an all-missing row's
-mean is `NA`, not `NaN`. Undefined arithmetic on observed infinities can
-produce `NaN`, as in base R.
+elements are missing; `NULL` and empty list elements are observed.
 
 ## See also
 
@@ -185,8 +168,10 @@ Other variable generation functions:
 tb <- tibble::tibble(x = c(1, 2, NA), y = c(3, NA, NA))
 row_mean(tb)
 #> [1]  2  2 NA
+
 row_sum(tb)
 #> [1] 4 2 0
+
 row_non_miss(tb)
 #> [1] 2 1 0
 
@@ -198,6 +183,7 @@ tb |>
 #> 1     1     3     2     4
 #> 2     2    NA     2     2
 #> 3    NA    NA    NA     0
+
 tb |>
   dplyr::mutate(capped = row_min(x, .values = 0.5))
 #> # A tibble: 3 × 3
@@ -206,6 +192,7 @@ tb |>
 #> 1     1     3    0.5
 #> 2     2    NA    0.5
 #> 3    NA    NA   NA  
+
 row_sum(tb, na.rm = FALSE)
 #> [1]  4 NA NA
 
@@ -219,6 +206,7 @@ dates <- tibble::tibble(
 )
 row_min(dates)
 #> [1] "2024-01-01" "2024-01-05"
+
 row_mean(dates)
 #> [1] "2024-01-02" "2024-01-05"
 ```

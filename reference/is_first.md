@@ -8,11 +8,6 @@ or
 [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html),
 for example to count or summarise each group once.
 
-Unlike
-[`duplicates_tag()`](https://socimh.github.io/tidystata/reference/keys.md),
-which counts the other rows sharing the same values, `is_first()` marks
-one row per group.
-
 ## Usage
 
 ``` r
@@ -29,14 +24,23 @@ is_first(..., .missing = FALSE)
 
 - .missing:
 
-  A single `TRUE` or `FALSE`. If `FALSE` (default), rows with a missing
-  value in any argument are `FALSE`, as Stata's `tag()` does without its
-  `missing` option. If `TRUE`, missing values form groups of their own.
+  If `FALSE` (default), rows with a missing value in any argument are
+  `FALSE`, as Stata's `tag()` does without its `missing` option. If
+  `TRUE`, missing values form groups of their own.
 
 ## Value
 
-A logical vector. "First" follows the current row order, so sort first
-when a particular row should be flagged.
+A logical vector with one value per input row, or per row in the current
+data-mask group when no arguments are supplied.
+
+## Details
+
+"First" follows the current row order; sort first to choose a particular
+row. Unlike
+[`duplicates_tag()`](https://socimh.github.io/tidystata/reference/keys.md),
+which counts the other rows sharing the same values, `is_first()` marks
+one row per group. Missing values include tagged and SPSS user-missing
+values.
 
 ## See also
 

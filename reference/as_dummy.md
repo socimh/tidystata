@@ -1,9 +1,8 @@
 # Create indicator (dummy) variables
 
-Adds one 0/1 column per observed category of each selected variable,
-like Stata's `tabulate x, generate(x_)`. The new columns are placed
-right after their source variable. `tab_gen()` is an alias of
-`as_dummy()`.
+Add one 0/1 column per observed category of each selected variable, like
+Stata's `tabulate x, generate(x_)`. The new columns are placed right
+after their source variable. `tab_gen()` is an alias of `as_dummy()`.
 
 ## Usage
 
@@ -32,26 +31,25 @@ tab_gen(.data, ..., .names = c("value", "index"), .remove = FALSE)
 
 - .remove:
 
-  A single `TRUE` or `FALSE`. If `TRUE`, drop the source variables.
+  If `TRUE`, drop the source variables. Defaults to `FALSE`.
 
 ## Value
 
 `.data` with integer indicator columns, keeping its data.frame, tibble,
-data.table, grouped or sf container. Each indicator is `1` when the row
-has that category, `0` otherwise, and `NA` when the source value is
-missing, as in Stata. Each new column has a `"label"` attribute such as
-`"sex==male"`, as Stata's variable labels do; for labelled vectors the
-label uses the value label.
+data.table, grouped or sf container and the original rows. Each
+indicator is `1` for its category, `0` otherwise, and `NA` for missing
+source values. New columns have a `"label"` attribute such as
+`"sex==male"`; for labelled vectors, this uses the value label.
 
 ## Details
 
 Categories are the observed, non-missing values: factor levels in level
 order (unused levels are skipped), and other values in ascending order.
 For labelled vectors, `.names = "value"` uses the codes, such as
-`region_1`. New names must not already exist in `.data`, and grouping
-keys cannot be removed. For model formulas, R's factors already expand
-to dummies; use `as_dummy()` when the indicator columns themselves are
-needed.
+`region_1`. Missing values include tagged and SPSS user-missing values.
+New names must not already exist in `.data`, and grouping keys cannot be
+removed. For model formulas, R's factors already expand to dummies; use
+`as_dummy()` when the indicator columns themselves are needed.
 
 ## See also
 
@@ -79,6 +77,7 @@ as_dummy(lifeexp, region)
 #>  9 1 [Europe…        1        0        0 Croatia      -0.1    72    NA        85
 #> 10 1 [Europe…        1        0        0 Czechia      -0.1    75  6140        95
 #> # ℹ 58 more rows
+
 as_dummy(lifeexp, region, .names = "index", .remove = TRUE)
 #> # A tibble: 68 × 8
 #>    region_1 region_2 region_3 country            popgrowth  lexp gnppc safewater

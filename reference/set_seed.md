@@ -51,9 +51,9 @@ sample(1:10, 8) |>
   set_seed(123)
 #> [1]  3 10  2  8  6  9  1  7
 
-# When we re-run the code, we will get the same result.
+# Repeating the seed reproduces the result
 sample(1:10, 8) |>
- set_seed(123)
+  set_seed(123)
 #> [1]  3 10  2  8  6  9  1  7
 
 # Alone, like Stata's set seed 123

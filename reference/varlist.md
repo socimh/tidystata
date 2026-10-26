@@ -55,8 +55,8 @@ An integer vector of positions in the available column names.
 
 - `[1-12]` matches any number in the range from `1` to `12`.
 
-- `var1-var5` is NOT used to select a range of variables. Use
-  `var1:var5` outside `varlist()` instead.
+- `var1-var5` does not select a range of variables. Use `var1:var5`
+  outside `varlist()` instead.
 
 Space-separated patterns are alternatives, each matched against complete
 column names. Numeric ranges expand within each pattern before matching.

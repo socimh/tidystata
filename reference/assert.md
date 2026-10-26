@@ -1,8 +1,8 @@
 # Assert that conditions hold
 
-Checks conditions on every row, like Stata's `assert`, and stops with
-the number of contradictions when any fails. It returns the data
-invisibly when all hold, so it can sit inside a pipeline.
+Check conditions on every row, like Stata's `assert`, and stop with the
+number of contradictions when any fails. It returns the data invisibly
+when all hold, so it can sit inside a pipeline.
 
 ## Usage
 

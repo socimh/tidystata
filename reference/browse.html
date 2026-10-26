@@ -65,9 +65,9 @@ interactive session, no viewer is opened.</p>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; or
-&lt;<code><a href="https://rlang.r-lib.org/reference/args_data_masking.html" class="external-link">data-masking</a></code>&gt; Variables to browse.
-Omit to browse all columns. Selection and computed expressions follow
-<code><a href="select_or_transmute.html">select_or_transmute()</a></code>.</p></dd>
+&lt;<code><a href="https://rlang.r-lib.org/reference/args_data_masking.html" class="external-link">data-masking</a></code>&gt; Columns to select or compute with
+<code><a href="select_or_transmute.html">select_or_transmute()</a></code>. Existing columns, selection helpers, and named
+expressions can be mixed. Omit to browse all columns.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -80,8 +80,8 @@ With no selection this is the input data; otherwise it is the result of
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Viewing uses <code><a href="https://tibble.tidyverse.org/reference/view.html" class="external-link">tibble::view()</a></code>. Existing grouping and grouping-key retention
 follow <code><a href="select_or_transmute.html">select_or_transmute()</a></code>. Assign the invisible return value to keep the
-viewed columns for subsequent analysis. Precompute expressions with side effects
-before passing them to the selection interface.</p>
+viewed columns for subsequent analysis. Precompute expressions with side
+effects before passing them to the selection interface.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -98,8 +98,12 @@ before passing them to the selection interface.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">browse</span><span class="op">(</span><span class="va">lifeexp</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu">browse</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">country</span><span class="op">:</span><span class="va">lexp</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu">browse</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="fu"><a href="varlist.html">varlist</a></span><span class="op">(</span><span class="st">"*p*"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu">browse</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">country</span>, gnppc_thousands <span class="op">=</span> <span class="va">gnppc</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Retain the viewed columns for the next pipeline stage.</span></span></span>
 <span class="r-in"><span>  <span class="va">selected</span> <span class="op">&lt;-</span> <span class="fu">browse</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">country</span>, <span class="va">lexp</span>, <span class="va">gnppc</span><span class="op">)</span></span></span>

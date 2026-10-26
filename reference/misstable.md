@@ -1,12 +1,8 @@
 # Tabulate missing values
 
-Missing-value summaries, like Stata's `misstable`.
-
-- By default, `misstable()` counts the missing values of each variable,
-  like `misstable summarize`.
-
-- With `.patterns = TRUE`, it counts the combinations of observed and
-  missing variables across rows, like `misstable patterns`.
+Summarize missing values by variable (`misstable summarize`) or tabulate
+missingness patterns across rows (`misstable patterns`), following
+Stata's `misstable` command.
 
 ## Usage
 
@@ -23,53 +19,74 @@ misstable(.data, ..., .by = NULL, .patterns = FALSE, .all = FALSE)
 - ...:
 
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
-  Variables to check. Omit to check every column except grouping keys.
+  or
+  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
+  Columns to select or compute with
+  [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md).
+  Existing columns, selection helpers, and named expressions can be
+  mixed. Omit to check all columns except grouping keys.
 
 - .by:
 
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
   Optional grouping variables. Grouped data use their groups unless
-  `.by` is supplied.
+  `.by` is supplied. Select existing columns only; create new grouping
+  columns with
+  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+  first.
 
 - .patterns:
 
-  A single `TRUE` or `FALSE`. If `TRUE`, tabulate missing patterns
-  instead of counting by variable.
+  If `TRUE`, tabulate missingness patterns instead of summarizing
+  individual variables.
 
 - .all:
 
-  A single `TRUE` or `FALSE`. If `FALSE` (default), only variables with
-  at least one missing value are shown, as in Stata; if `TRUE`, all
-  checked variables are shown.
+  If `TRUE`, include variables without missing values in either mode.
+  Defaults to `FALSE`, as in Stata.
 
 ## Value
 
-By default, a tibble with any grouping keys, `variable`, `miss_n`
-(missing values), `miss_pct` (percentage of rows, from zero to 100) and
-`valid_n` (observed values), one row per variable (and group).
+An ungrouped tibble with any grouping keys and:
 
-With `.patterns = TRUE`, a tibble with any grouping keys, one column per
-variable holding `1` (observed) or `0` (missing) as in Stata, `n` (rows
-with that pattern) and `percent` (of the rows in the group). Patterns
-are sorted by decreasing frequency within each group, so the first row
-is usually the complete cases.
+- By default, one row per checked variable and group, with `variable`,
+  `miss_n` (missing count), `miss_pct` (missing percentage), and
+  `valid_n` (observed count). No checked variables gives zero rows.
+
+- With `.patterns = TRUE`, one row per observed pattern and group, with
+  a `1` (observed) or `0` (missing) column per checked variable, plus
+  `n` (frequency) and `percent`. With no checked variables, each
+  nonempty group has one row containing only its keys, `n`, and
+  `percent`.
+
+Percentages range from zero to 100 within each group. Summary rows for
+zero-row ungrouped inputs have zero counts and `NA` percentages when
+`.all = TRUE`; empty inputs have no pattern rows.
 
 ## Details
 
-A value is missing when [`is.na()`](https://rdrr.io/r/base/NA.html) is
-`TRUE` for it, which includes `NaN` and haven's tagged missing values
-such as Stata's `.a`. In a list column, `NA` elements are missing and
-`NULL` elements are values, as in
-[`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and
-[`fre()`](https://socimh.github.io/tidystata/reference/tab.md). Matrix
-and data-frame columns follow vctrs row missingness: a row is missing
-only when every component is missing. Empty strings are observed values,
-unlike Stata's missing string; convert them first with
-[`na_if_value()`](https://socimh.github.io/tidystata/reference/na_conversion.md).
-When no checked variable has missing values and `.all = FALSE`, a
-message says so and the result has no variable rows or columns. Grouping
-names must not collide with result columns; rename those keys before
-calling `misstable()`.
+Atomic missingness follows [`is.na()`](https://rdrr.io/r/base/NA.html),
+including `NaN`, haven's tagged missing values, and SPSS user-missing
+codes and ranges. In list columns, `NA` is missing but `NULL` is
+observed. Matrix and data-frame columns are missing only when all
+components in a row are missing, following vctrs conventions.
+
+Computed columns are evaluated on ungrouped working data before
+missingness is summarized within groups. Create columns with grouped
+[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+first when a calculation needs to run separately within each group.
+
+Empty strings are treated as observed values, unlike in Stata. Use
+[`na_if_value()`](https://socimh.github.io/tidystata/reference/na_conversion.md)
+to convert them to missing values.
+
+With `.all = FALSE`, variables are checked only if they contain missing
+values anywhere in the input. A message is displayed when none do.
+Summary rows follow selection order within each group; patterns follow
+decreasing frequency, with ties preferring observed values column by
+column. Grouping keys must not conflict with output column names.
+Pattern variables must also differ from grouping keys and the names `n`
+and `percent`.
 
 ## See also
 
@@ -83,12 +100,14 @@ Other inspection functions:
 ## Examples
 
 ``` r
+# Summarize missing values
 misstable(lifeexp)
 #> # A tibble: 2 × 4
 #>   variable  miss_n miss_pct valid_n
 #>   <chr>      <int>    <dbl>   <int>
 #> 1 gnppc          1     1.47      67
 #> 2 safewater     14    20.6       54
+
 misstable(lifeexp, .all = TRUE)
 #> # A tibble: 6 × 4
 #>   variable  miss_n miss_pct valid_n
@@ -99,6 +118,8 @@ misstable(lifeexp, .all = TRUE)
 #> 4 lexp           0     0         68
 #> 5 gnppc          1     1.47      67
 #> 6 safewater     14    20.6       54
+
+# Tabulate missingness patterns
 misstable(lifeexp, .patterns = TRUE)
 #> # A tibble: 3 × 4
 #>   gnppc safewater     n percent
@@ -106,6 +127,8 @@ misstable(lifeexp, .patterns = TRUE)
 #> 1     1         1    53   77.9 
 #> 2     1         0    14   20.6 
 #> 3     0         1     1    1.47
+
+# Select variables and group observations
 misstable(lifeexp, gnppc, safewater, .by = region)
 #> # A tibble: 6 × 5
 #>   region               variable  miss_n miss_pct valid_n
@@ -116,13 +139,12 @@ misstable(lifeexp, gnppc, safewater, .by = region)
 #> 4 2 [North America]    safewater      8    57.1        6
 #> 5 3 [South America]    gnppc          0     0         10
 #> 6 3 [South America]    safewater      4    40          6
-misstable(dplyr::starwars, height, mass, birth_year, .patterns = TRUE)
-#> # A tibble: 5 × 5
-#>   height  mass birth_year     n percent
-#>    <int> <int>      <int> <int>   <dbl>
-#> 1      1     1          1    36   41.4 
-#> 2      1     1          0    23   26.4 
-#> 3      1     0          0    15   17.2 
-#> 4      1     0          1     7    8.05
-#> 5      0     0          0     6    6.90
+
+# Check an existing column alongside a computed column
+misstable(lifeexp, gnppc, water_share = safewater / 100, .all = TRUE)
+#> # A tibble: 2 × 4
+#>   variable    miss_n miss_pct valid_n
+#>   <chr>        <int>    <dbl>   <int>
+#> 1 gnppc            1     1.47      67
+#> 2 water_share     14    20.6       54
 ```

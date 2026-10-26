@@ -90,9 +90,9 @@ equal-width command (<code>egen cut(), group()</code> is not equal-width).</p></
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A numeric vector. <code>xtile()</code> also accepts a logical vector,
-treated as 0/1. SPSS user-missing codes and ranges are omitted. Convert
-<code>integer64</code> inputs and cutpoints explicitly to ordinary numeric values first.</p></dd>
+<dd><p>A numeric vector. <code>xtile()</code> also accepts a logical vector, treated
+as 0/1. SPSS user-missing codes and ranges are omitted. Convert <code>integer64</code>
+inputs and cutpoints explicitly to ordinary numeric values first.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -128,39 +128,38 @@ interior cutpoint, rather than the number of intervals.</p></dd>
 
 
 <dt id="arg-right">right<a class="anchor" aria-label="anchor" href="#arg-right"></a></dt>
-<dd><p>A single <code>TRUE</code> or <code>FALSE</code>. If <code>FALSE</code> (default), intervals are
-closed on the left (<code>a &lt;= x &lt; b</code>), as in Stata's <code>egen cut()</code>; the last
-interval also includes its upper end. If <code>TRUE</code>, they are closed on the
-right (<code>a &lt; x &lt;= b</code>), as in <code><a href="https://rdrr.io/r/base/cut.html" class="external-link">base::cut()</a></code>.</p></dd>
+<dd><p>If <code>FALSE</code> (default), intervals are closed on the left (<code>a &lt;= x &lt; b</code>), as in Stata's <code>egen cut()</code>; the last interval also includes its
+upper end. If <code>TRUE</code>, they are closed on the right (<code>a &lt; x &lt;= b</code>), as in
+<code><a href="https://rdrr.io/r/base/cut.html" class="external-link">base::cut()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An ordered factor, or integer interval codes when <code>labels = FALSE</code>
-or when <code>xtile()</code> runs in a grouped data mask with default labels.</p>
+or when <code>xtile()</code> runs in a grouped data mask with default labels. The
+result has the same length and order as <code>x</code>, with missing inputs remaining
+missing. Empty and all-missing inputs are rejected.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>xtile()</code> follows Stata's <code>xtile</code>, and its codes are tested against
-Stata's output. Cutpoints are the percentiles at <code>1/n, 2/n, ...</code>, using
-Stata's percentile rule (see <code><a href="summ.html">summ()</a></code>), and each value joins the first group
-whose cutpoint is at least that value. Equal values stay in the same group;
-different values may share a group. Ties can leave groups empty; as in
-Stata, their codes are skipped (codes 1, 3 and 4, say) and a warning is
-given. Factor levels are the
-occupied groups. Default labels are the
-contiguous intervals covered by each group, for example <code>"[0,0]"</code> and
-<code>"(0,1]"</code>. Custom labels must match the effective number of groups.
-Empty and all-missing vectors are rejected. Constant vectors are rejected
-only by the default quantile method.</p>
+    <p>Quantile cutpoints are the percentiles at <code>1/n, 2/n, ...</code>, using Stata's
+percentile rule (see <code><a href="summ.html">summ()</a></code>), and each value joins the first group whose
+cutpoint is at least that value. Equal values stay in the same group;
+different values may share a group. Ties can leave groups empty; as in Stata,
+their codes are skipped (codes 1, 3 and 4, say) and a warning is given.
+Factor levels are the occupied groups. Default labels describe the contiguous
+intervals covered by each group, for example <code>"[0,0]"</code> and <code>"(0,1]"</code>. Custom
+labels must match the effective number of groups. Empty and all-missing
+vectors are rejected. Constant vectors are rejected only by the default
+quantile method.</p>
 <p><code>cut_breaks()</code> differs from <code>egen cut(), at()</code> at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while
 <code>cut_breaks()</code> extends the end intervals to the observed range.</p>
-<p><code>labels = NULL</code> (the default) or <code>TRUE</code> gives interval labels; <code>FALSE</code>
-gives integer codes. Inside grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>, each group has its
-own cutpoints and interval labels, which cannot be combined, so the default
-returns integer codes within each group (like Stata's <code>xtile, by()</code>).
-Supply <code>labels = TRUE</code> to request labels there anyway.</p>
+<p><code>labels = NULL</code> (the default) or <code>TRUE</code> gives interval labels; <code>FALSE</code> gives
+integer codes. Inside grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>, each group has its own
+cutpoints and interval labels, which cannot be combined, so the default
+returns integer codes within each group (like Stata's <code>xtile, by()</code>). Supply
+<code>labels = TRUE</code> to request labels there anyway.</p>
 <p>Rank groups omit missing observations when ranking, then restore missing
 output positions. If <code>n</code> exceeds the observed count, use one group per
 observation and warn. Default rank labels are <code>"1"</code> through the effective
@@ -183,6 +182,7 @@ group count; custom labels must match that count.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] (10.5,15.5] (10.5,15.5] (10.5,15.5] (15.5,20]   (15.5,20]   (15.5,20]  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [19] (15.5,20]   (15.5,20]  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: [1,5.5] &lt; (5.5,10.5] &lt; (10.5,15.5] &lt; (15.5,20]</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">xtile</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] [0,0] [0,0] [0,0] (0,1] (0,1]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: [0,0] &lt; (0,1]</span>
@@ -199,6 +199,7 @@ group count; custom labels must match that count.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10] [5,15)  [5,15)  [5,15)  [5,15)  [5,15)  [15,20] [15,20] [15,20] [15,20]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [19] [15,20] [15,20]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: [1,5) &lt; [5,15) &lt; [15,20]</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">cut_breaks</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, breaks <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20]</span>

@@ -18,14 +18,14 @@ capture(x)
 
 ## Value
 
-A single logical value.
+A single logical value: `TRUE` on success, `FALSE` on error or when the
+expression returns an object inheriting from `try-error`.
 
 ## Details
 
 Errors are caught without printing their messages; warnings and messages
-propagate normally. For compatibility with
-[`try()`](https://rdrr.io/r/base/try.html), a successful expression that
-returns an object inheriting from `try-error` also yields `FALSE`.
+propagate normally. The `try-error` exception follows
+[`try()`](https://rdrr.io/r/base/try.html) compatibility.
 
 ## See also
 
@@ -39,12 +39,12 @@ Other utility functions:
 capture(mean(1:10))
 #> [1] TRUE
 
-# This gives a warning, but it is still working, so capture() returns TRUE
+# Warnings do not count as errors
 capture(mean(letters[1:10]))
 #> Warning: argument is not numeric or logical: returning NA
 #> [1] TRUE
 
-# This throws an error, so capture() returns FALSE
+# Errors return FALSE
 capture(means(1:10))
 #> [1] FALSE
 

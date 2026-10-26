@@ -3,7 +3,7 @@
 ## Coming from Stata
 
 - [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) :
-  Find the R equivalent of a Stata command
+  Find R equivalents of Stata commands
 
 ## Inspect variables
 
@@ -12,7 +12,7 @@
   Browse columns like Stata's `browse` command
 
 - [`codebook()`](https://socimh.github.io/tidystata/reference/codebook.md)
-  : View the codebook of a dataset or selected columns
+  : Inspect a dataset's codebook
 
 - [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
   : Tabulate missing values
@@ -31,7 +31,7 @@
 ## Tabulate
 
 - [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) :
-  Pairwise correlations
+  Calculate pairwise correlations
 - [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md)
@@ -74,7 +74,7 @@
 - [`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)
   [`stata_lead()`](https://socimh.github.io/tidystata/reference/panel.md)
   [`stata_diff()`](https://socimh.github.io/tidystata/reference/panel.md)
-  : Panel lags, leads and differences
+  : Calculate panel lags, leads and differences
 - [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   [`row_sum()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   [`row_max()`](https://socimh.github.io/tidystata/reference/row_egen.md)
@@ -117,7 +117,7 @@
   [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`slice_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`slice_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  : Persistent previews of complete tables
+  : Preview complete tables or select representative rows
 - [`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md)
   : Select columns with a Stata varlist
 
@@ -128,9 +128,9 @@
 - [`set_seed()`](https://socimh.github.io/tidystata/reference/set_seed.md)
   : Set the random seed, in a pipeline or alone
 - [`timer()`](https://socimh.github.io/tidystata/reference/timer.md) :
-  Time spent on a function
+  Time an expression
 - [`` `%>%` ``](https://socimh.github.io/tidystata/reference/pipe.md) :
-  Pipe operator
+  Pass a value through a pipeline
 
 ## Sample Data
 

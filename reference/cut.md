@@ -70,28 +70,28 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 
 - right:
 
-  A single `TRUE` or `FALSE`. If `FALSE` (default), intervals are closed
-  on the left (`a <= x < b`), as in Stata's `egen cut()`; the last
-  interval also includes its upper end. If `TRUE`, they are closed on
-  the right (`a < x <= b`), as in
+  If `FALSE` (default), intervals are closed on the left (`a <= x < b`),
+  as in Stata's `egen cut()`; the last interval also includes its upper
+  end. If `TRUE`, they are closed on the right (`a < x <= b`), as in
   [`base::cut()`](https://rdrr.io/r/base/cut.html).
 
 ## Value
 
 An ordered factor, or integer interval codes when `labels = FALSE` or
-when `xtile()` runs in a grouped data mask with default labels.
+when `xtile()` runs in a grouped data mask with default labels. The
+result has the same length and order as `x`, with missing inputs
+remaining missing. Empty and all-missing inputs are rejected.
 
 ## Details
 
-`xtile()` follows Stata's `xtile`, and its codes are tested against
-Stata's output. Cutpoints are the percentiles at `1/n, 2/n, ...`, using
-Stata's percentile rule (see
+Quantile cutpoints are the percentiles at `1/n, 2/n, ...`, using Stata's
+percentile rule (see
 [`summ()`](https://socimh.github.io/tidystata/reference/summ.md)), and
 each value joins the first group whose cutpoint is at least that value.
 Equal values stay in the same group; different values may share a group.
 Ties can leave groups empty; as in Stata, their codes are skipped (codes
 1, 3 and 4, say) and a warning is given. Factor levels are the occupied
-groups. Default labels are the contiguous intervals covered by each
+groups. Default labels describe the contiguous intervals covered by each
 group, for example `"[0,0]"` and `"(0,1]"`. Custom labels must match the
 effective number of groups. Empty and all-missing vectors are rejected.
 Constant vectors are rejected only by the default quantile method.
@@ -130,6 +130,7 @@ xtile(1:20)
 #> [13] (10.5,15.5] (10.5,15.5] (10.5,15.5] (15.5,20]   (15.5,20]   (15.5,20]  
 #> [19] (15.5,20]   (15.5,20]  
 #> Levels: [1,5.5] < (5.5,10.5] < (10.5,15.5] < (15.5,20]
+
 xtile(c(0, 0, 0, 1, 1), 2)
 #> [1] [0,0] [0,0] [0,0] (0,1] (0,1]
 #> Levels: [0,0] < (0,1]
@@ -146,6 +147,7 @@ cut_breaks(1:20, breaks = c(5, 15))
 #> [10] [5,15)  [5,15)  [5,15)  [5,15)  [5,15)  [15,20] [15,20] [15,20] [15,20]
 #> [19] [15,20] [15,20]
 #> Levels: [1,5) < [5,15) < [15,20]
+
 cut_breaks(1:20, breaks = 10)
 #>  [1] [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10)  [1,10) 
 #> [10] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20] [10,20]

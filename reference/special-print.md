@@ -1,14 +1,9 @@
-# Persistent previews of complete tables
+# Preview complete tables or select representative rows
 
 `preview_table()` keeps the complete data and remembers how to print it.
 The default shows the first five and last five rows. Interval previews
-show evenly spaced rows. `unpreview_table()` removes the preference.
-
-`print_headtail()` and `print_interval()` print once and invisibly
-return the unchanged input. `print_all()` prints every row and every
-column, like Stata's `list`, and also returns the input invisibly.
-`slice_headtail()` and `slice_interval()` actually select rows, so use
-them only when a smaller data set is wanted.
+show evenly spaced rows; separate helpers print once or select actual
+rows.
 
 ## Usage
 
@@ -60,8 +55,8 @@ slice_interval(.data, n = 10)
 
   Total number of rows to display or select: a positive whole number or
   `Inf` for all rows. An odd head/tail budget gives the head the extra
-  row. With `n = 1`, both styles select the first row. Short tables
-  never repeat rows.
+  row. With `n = 1`, both styles select the first row. Short tables do
+  not repeat rows.
 
 - width:
 
@@ -79,16 +74,29 @@ slice_interval(.data, n = 10)
 
 ## Value
 
-`preview_table()` returns the complete input container with an
-additional `tidystata_preview` class. `unpreview_table()` returns the
-table without that class or its settings, preserving grouping. The print
-helpers invisibly return their original input. The slice helpers return
-the selected rows in the input container, retaining valid grouping and
-existing preview settings. Explicit base data.frame row names are
-preserved. Slice helpers regenerate automatic row names following
-dplyr's row-slicing behavior. Other subclasses are unsupported.
+- `preview_table()`: the complete input container with an additional
+  `tidystata_preview` class and stored print settings.
+
+- `unpreview_table()`: the table without that class or its settings,
+  preserving grouping.
+
+- Print helpers: the original input, invisibly.
+
+- Slice helpers: the selected rows in the input container, retaining
+  valid grouping and existing preview settings. Explicit data.frame row
+  names are preserved; automatic row names are regenerated as in dplyr
+  slicing.
+
+Supported containers are listed under `.data`; other subclasses are
+unsupported.
 
 ## Details
+
+`unpreview_table()` removes the stored preference. `print_headtail()`
+and `print_interval()` print once; `print_all()` prints every row and
+column, like Stata's `list`. Use `slice_headtail()` or
+`slice_interval()` only when a smaller data set is wanted: they actually
+select rows.
 
 Preview settings survive table subsetting/replacement, dplyr mutation,
 filtering, sorting, column selection, renaming, relocation, distinct
@@ -111,10 +119,10 @@ budget per group.
 overrides do not change stored settings. Explicit
 [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
 or [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
-conversions remove the preview, as does extracting a column. This
-feature controls console printing, not HTML widgets or GUI viewers. Only
-the temporary display is converted to a tibble. Wrapping and unwrapping
-a data.table creates an independent copy; native operations such as `:=`
+conversions remove the preview, as does column extraction. This feature
+controls console printing, not HTML widgets or GUI viewers. Only the
+temporary display is converted to a tibble. Wrapping and unwrapping a
+data.table creates an independent copy; native operations such as `:=`
 on a wrapped data.table retain ordinary reference semantics. External
 dplyr/tidyr verbs determine their own result container and grouping,
 while preview settings follow the result.
@@ -144,6 +152,7 @@ x
 #> 29    29   841
 #> 30    30   900
 #> # ... 20 rows omitted in the middle; use print(x, n = Inf) to show all rows.
+
 dplyr::filter(x, id > 10)
 #> # A tibble: 20 × 2
 #>       id value
@@ -159,6 +168,7 @@ dplyr::filter(x, id > 10)
 #> 19    29   841
 #> 20    30   900
 #> # ... 10 rows omitted in the middle; use print(x, n = Inf) to show all rows.
+
 preview_table(x, style = "interval", n = 5)
 #> # A tibble: 30 × 2
 #>       id value
@@ -170,6 +180,7 @@ preview_table(x, style = "interval", n = 5)
 #> 30    30   900
 #> # ... 25 rows omitted between displayed positions; use print(x, n = Inf) to
 #> # show all rows.
+
 print(x, n = Inf)
 #> # A tibble: 30 × 2
 #>       id value
@@ -204,6 +215,7 @@ print(x, n = Inf)
 #> 28    28   784
 #> 29    29   841
 #> 30    30   900
+
 unpreview_table(x)
 #> # A tibble: 30 × 2
 #>       id value
@@ -219,6 +231,7 @@ unpreview_table(x)
 #>  9     9    81
 #> 10    10   100
 #> # ℹ 20 more rows
+
 print_headtail(lifeexp, n = 6)
 #> # A tibble: 68 × 6
 #>    region               country       popgrowth  lexp gnppc safewater
@@ -230,6 +243,7 @@ print_headtail(lifeexp, n = 6)
 #> 67 3 [South America]    Uruguay             0.5    74  7360        NA
 #> 68 3 [South America]    Venezuela, RB       2      72  3380        NA
 #> # ... 62 rows omitted in the middle; use print(x, n = Inf) to show all rows.
+
 print_interval(lifeexp, n = 6)
 #> # A tibble: 68 × 6
 #>    region               country       popgrowth  lexp gnppc safewater
@@ -242,6 +256,7 @@ print_interval(lifeexp, n = 6)
 #> 68 3 [South America]    Venezuela, RB       2      72  3380        NA
 #> # ... 62 rows omitted between displayed positions; use print(x, n = Inf) to
 #> # show all rows.
+
 print_all(head(lifeexp, 12))
 #> # A tibble: 12 × 6
 #>    region               country                popgrowth  lexp gnppc safewater
@@ -258,6 +273,7 @@ print_all(head(lifeexp, 12))
 #> 10 1 [Europe & C. Asia] Czechia                     -0.1    75  6140        95
 #> 11 1 [Europe & C. Asia] Denmark                      0.4    76 33440        95
 #> 12 1 [Europe & C. Asia] Estonia                     -1      69  3820        92
+
 slice_headtail(lifeexp, n = 6)
 #> # A tibble: 6 × 6
 #>   region               country       popgrowth  lexp gnppc safewater
@@ -268,6 +284,7 @@ slice_headtail(lifeexp, n = 6)
 #> 4 3 [South America]    Peru                1.8    69  2150        45
 #> 5 3 [South America]    Uruguay             0.5    74  7360        NA
 #> 6 3 [South America]    Venezuela, RB       2      72  3380        NA
+
 slice_interval(lifeexp, n = 6)
 #> # A tibble: 6 × 6
 #>   region               country       popgrowth  lexp gnppc safewater

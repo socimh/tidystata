@@ -1,9 +1,8 @@
 # Show the variable list of a dataset
 
-- `variables()` works like the "Variables" tab in Stata.
-
-- `variables_search()` searches for variables by name or variable label,
-  rather than by the values stored in the columns.
+`variables()` lists column names and variable labels, like the
+"Variables" tab in Stata. `variables_search()` searches that list by
+name or label, rather than by the values stored in the columns.
 
 ## Usage
 
@@ -31,19 +30,20 @@ variables_search(.data, string, ...)
   A single non-missing character string to search for in names or
   labels. Search is case-insensitive and matches substrings by default.
   An empty string matches all selected variables. Wildcards `*`, `?`,
-  and `~` represent zero or more, exactly one, and one or more
-  characters, respectively. Use `^` and `$` anchors to require a
-  complete name or label match.
+  and `~` mean zero or more, exactly one, and one or more characters,
+  respectively. Use `^` and `$` anchors to require a complete name or
+  label match.
 
 ## Value
 
-A table with a character `name` column. A character `label` column is
-added only when at least one selected variable has a usable label;
-unlabelled variables then have `NA` labels. Search returns only matching
-rows, in selection order, with the same columns as the selected variable
-list. Tables preserve the input's data.frame, tibble, or data.table
-container and supported preview settings. Results are ungrouped;
-arbitrary subclasses are not reconstructed on the inventory rows.
+A table with one row per selected variable and a character `name`
+column. A character `label` column is added only when at least one
+selected variable has a usable label; unlabelled variables then have
+`NA` labels. Search returns only matching rows in selection order, with
+the same columns as the selected variable list. Tables preserve the
+input's data.frame, tibble, or data.table container and supported
+preview settings. Results are ungrouped; arbitrary subclasses are not
+reconstructed on the inventory rows.
 
 ## Details
 
@@ -93,6 +93,7 @@ variables(lifeexp)
 #> 4 lexp      Life expectancy at birth
 #> 5 gnppc     GNP per capita          
 #> 6 safewater Safe water              
+
 variables_search(lifeexp, "n")
 #> # A tibble: 5 × 2
 #>   name      label                   
@@ -102,6 +103,7 @@ variables_search(lifeexp, "n")
 #> 3 popgrowth Avg. annual % growth    
 #> 4 lexp      Life expectancy at birth
 #> 5 gnppc     GNP per capita          
+
 variables_search(lifeexp, "^country$")
 #> # A tibble: 1 × 2
 #>   name    label  
@@ -117,6 +119,7 @@ variables(survey, earnings = income, age)
 #>   <chr>    <chr>           
 #> 1 earnings Monthly earnings
 #> 2 age      NA              
+
 variables_search(survey, "earn")
 #> # A tibble: 1 × 2
 #>   name   label           

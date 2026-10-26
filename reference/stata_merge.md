@@ -66,15 +66,15 @@ stata_merge(
 
 - report:
 
-  A single `TRUE` or `FALSE`. If `TRUE` (default), print the match
-  report as a message.
+  If `TRUE` (default), print the match report as a message.
 
 ## Value
 
-The merged table, in the container of `.data`. Rows from `.data` come
-first in their original order, followed by rows found only in `using`.
-The `.merge` column is a factor with levels `"master only"`,
-`"using only"` and `"matched"`.
+An ungrouped merged table in the data.frame, tibble, or data.table
+container of `.data`. Retained rows from `.data` come first in their
+original order, followed by rows found only in `using`. Unless
+`generate = NULL`, the match-status column (`.merge` by default) is a
+factor with levels `"master only"`, `"using only"`, and `"matched"`.
 
 ## Details
 
@@ -115,7 +115,7 @@ stata_merge(people, income, "1:1", by = "id")
 #> 3     3    25     20 matched    
 #> 4     4    NA     30 using only 
 
-# Keep matched rows only, and insist that every person is matched
+# Require every person to be matched
 try(stata_merge(people, income, "1:1", by = "id", assert = "match"))
 #> Result                            Rows
 #> --------------------------------------
@@ -128,6 +128,8 @@ try(stata_merge(people, income, "1:1", by = "id", assert = "match"))
 #> Error in stata_merge(people, income, "1:1", by = "id", assert = "match") : 
 #>   Merge assertion failed: found 1 master only row(s) and 1 using only
 #> row(s); `assert` allows only matched.
+
+# Keep matched rows only
 stata_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
 #> # A tibble: 2 × 4
 #>      id   age income .merge 

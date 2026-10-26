@@ -14,4 +14,7 @@ consistent.
 
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
   Optional grouping variables. Grouped data use their groups unless
-  `.by` is supplied.
+  `.by` is supplied. Select existing columns only; create new grouping
+  columns with
+  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+  first.
