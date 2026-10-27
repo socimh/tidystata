@@ -108,6 +108,11 @@ double pwcorr_weighted(const numeric_view& x, const numeric_view& y, const doubl
                        std::vector<double>& wx, std::vector<double>& xs,
                        std::vector<double>& ys)
 {
+    // R's separate vector operations round before accumulation. ARM Clang
+    // otherwise fuses products and additions, changing r and its p-value.
+#if defined(__clang__)
+#pragma clang fp contract(off)
+#endif
     wx.clear();
     xs.clear();
     ys.clear();
@@ -200,34 +205,41 @@ spearman_sums spearman_power_sums(const std::vector<double>& centered, spearman_
         for (double value : x) total += (value - mean) * (value - mean);
         out.sd2 = static_cast<double>(total / (n - 1));
     }
-    auto lag = [](const std::vector<double>& v, size_t i) { return i ? v[i - 1] : 0.0; };
-    std::vector<double>& term = s.term;
-    term.resize(n);
-    pwcorr_cumsum(x, s.s1);
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * x[i];
-    pwcorr_cumsum(term, s.s2);
-    for (size_t i = 0; i < n; ++i) term[i] = R_pow(x[i], 3);
-    pwcorr_cumsum(term, s.s3);
-    out.x3 = pwcorr_sum_of(term, n);
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * lag(s.s1, i);
-    pwcorr_cumsum(term, s.xx);
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * (lag(s.s2, i) + x[i] * lag(s.s1, i));
-    pwcorr_cumsum(term, s.x2x);
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * lag(s.xx, i);
-    pwcorr_cumsum(term, s.xxx);
-    for (size_t i = 0; i < n; ++i) term[i] = R_pow(x[i], 4);
-    out.x4 = pwcorr_sum_of(term, n);
-    out.x2x = s.x2x[n - 1];
-    out.xxx = s.xxx[n - 1];
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * (lag(s.s3, i) + x[i] * x[i] * lag(s.s1, i));
-    out.x3x = pwcorr_sum_of(term, n);
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * x[i] * lag(s.s2, i);
-    out.x2x2 = pwcorr_sum_of(term, n);
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * (lag(s.x2x, i) + x[i] * lag(s.xx, i));
-    out.x2xx = pwcorr_sum_of(term, n);
-    for (size_t i = 0; i < n; ++i) term[i] = x[i] * lag(s.xxx, i);
-    out.xxxx = pwcorr_sum_of(term, n);
-    return out;
+    {
+        // These terms correspond to separate R vector operations. Keep the
+        // native var() loop above on the compiler's default arithmetic path.
+#if defined(__clang__)
+#pragma clang fp contract(off)
+#endif
+        auto lag = [](const std::vector<double>& v, size_t i) { return i ? v[i - 1] : 0.0; };
+        std::vector<double>& term = s.term;
+        term.resize(n);
+        pwcorr_cumsum(x, s.s1);
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * x[i];
+        pwcorr_cumsum(term, s.s2);
+        for (size_t i = 0; i < n; ++i) term[i] = R_pow(x[i], 3);
+        pwcorr_cumsum(term, s.s3);
+        out.x3 = pwcorr_sum_of(term, n);
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * lag(s.s1, i);
+        pwcorr_cumsum(term, s.xx);
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * (lag(s.s2, i) + x[i] * lag(s.s1, i));
+        pwcorr_cumsum(term, s.x2x);
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * lag(s.xx, i);
+        pwcorr_cumsum(term, s.xxx);
+        for (size_t i = 0; i < n; ++i) term[i] = R_pow(x[i], 4);
+        out.x4 = pwcorr_sum_of(term, n);
+        out.x2x = s.x2x[n - 1];
+        out.xxx = s.xxx[n - 1];
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * (lag(s.s3, i) + x[i] * x[i] * lag(s.s1, i));
+        out.x3x = pwcorr_sum_of(term, n);
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * x[i] * lag(s.s2, i);
+        out.x2x2 = pwcorr_sum_of(term, n);
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * (lag(s.x2x, i) + x[i] * lag(s.xx, i));
+        out.x2xx = pwcorr_sum_of(term, n);
+        for (size_t i = 0; i < n; ++i) term[i] = x[i] * lag(s.xxx, i);
+        out.xxxx = pwcorr_sum_of(term, n);
+        return out;
+    }
 }
 
 // center() of spearman_beta_fit(): subtract the mean, or its integer part.
@@ -251,6 +263,10 @@ double pwcorr_max(double a, double b) { return ISNAN(a) || ISNAN(b) ? a + b : st
 double spearman_p(const std::vector<double>& cx, const std::vector<double>& cy,
                   const spearman_sums& sx, const spearman_sums& sy, double rho)
 {
+    // Preserve the intermediate rounding of the R reference expressions.
+#if defined(__clang__)
+#pragma clang fp contract(off)
+#endif
     const double n = cx.size();
     double lower = NA_REAL, upper = NA_REAL;
     bool fitted = false;

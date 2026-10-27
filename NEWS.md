@@ -13,6 +13,8 @@
   temporary allocation falls from gigabytes to megabytes. Integer, logical and
   labelled columns are read without conversion; SPSS-labelled columns are still
   converted so that their user-missing codes are excluded.
+  Native correlation calculations preserve R's intermediate rounding on
+  Apple Silicon builds.
 * Row functions such as `row_max()` and `row_sum()`, and `summ()`/`tabstat()`,
   read integer, logical and numeric labelled columns in place rather than
   copying them to doubles. Row functions also accept the same vector more than
