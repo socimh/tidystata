@@ -4,7 +4,7 @@
 #' with [dplyr::transmute()], only the selected and computed columns are
 #' returned.
 #'
-#' @param .data A data frame or tibble.
+#' @param .data A data frame, tibble, or data.table.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> selections or
 #'   <[`data-masking`][args_data_masking]> expressions. Omit to return the input
 #'   unchanged.

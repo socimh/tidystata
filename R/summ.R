@@ -13,16 +13,18 @@
 #'
 #' @param .data A data frame, tibble, data.table, or vector. For `sf` data,
 #'   only attributes are summarised; geometry columns are excluded.
-#' @param ... Variables selected with tidyselect, or named expressions such as
-#'   `income_k = income / 1000`. Defaults to all nongrouping columns.
-#' @param .by Optional grouping columns, selected with tidyselect. Existing
-#'   [dplyr::group_by()] groups are used unless `.by` is supplied. Grouping
-#'   columns are excluded from the variables being summarised.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> or
+#'   <[`data-masking`][args_data_masking]> Variables to summarise, or named
+#'   expressions such as `income_k = income / 1000`. Defaults to all
+#'   nongrouping columns.
+#' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping columns.
+#'   Existing [dplyr::group_by()] groups are used unless `.by` is supplied.
+#'   Grouping columns are excluded from the variables being summarised.
 #' @param .keep_all If `TRUE`, retain character and list columns for counts and
 #'   distinct values; other statistics for these columns are `NA`.
 #'   By default, unsupported columns are omitted with a warning.
 #' @param .detail If `TRUE`, report all supported statistics unless `.stat`
-#'   specifies a subset. Defaults to `FALSE`.
+#'   is supplied explicitly. Defaults to `FALSE`.
 #' @param .stat Character vector of statistics to report. See Details for the
 #'   complete list and calculation methods. An explicit selection determines
 #'   the statistics and their order. Use `p0` to `p100` for percentiles,
@@ -32,8 +34,11 @@
 #'   measured values are always omitted from numeric calculations.
 #' @param .name If `TRUE`, always include the `name` column. By default, it is
 #'   omitted when exactly one variable is summarised.
-#' @param .type `"list"` (default) separates numeric and calendar variable
-#'   families where necessary; `"table"` combines them into one table.
+#' @param .type Output form. `"list"` (default) returns separate tables when
+#'   multiple variable families are present, or a single table for one family.
+#'   `"table"` combines all families into one table, retaining the input's table
+#'   class where supported. `"tibble"` combines them into one tibble regardless
+#'   of the input's table class or preview settings.
 #' @param .duration_format Retained for compatibility; no longer changes the
 #'   output format of calendar spread statistics.
 #' @param .sort If `TRUE` (default), sort groups by their keys. If `FALSE`,
@@ -54,8 +59,9 @@
 #' By default, `summ()` returns `n`, `unique`, `min`, `mean`, `sd`, and `max`;
 #' `tabstat()` returns `mean`. With `.type = "list"`, results are split into
 #' `numeric`, `date`, `datetime`, and `time` tables only when multiple type
-#' families occur. With `.type = "table"`, all types are combined in one table.
-#' Results retain the input's usual table class where supported.
+#' families occur. With `.type = "table"` or `"tibble"`, all types are combined
+#' in one table. Results retain the input's usual table class where supported,
+#' except that `.type = "tibble"` always returns a tibble.
 #'
 #' @details
 #' Statistics are calculated separately for each selected variable and group.
@@ -122,7 +128,10 @@
 #' * **Mean and spread:** `mean = sum(w * x) / W`,
 #'   `sd = sqrt(sum(w * (x - mean)^2) / (W - 1))`, and
 #'   `se = sd / sqrt(W)`. The two weight types give the same mean but can
-#'   give different `sd` and `se` values.
+#'   give different `sd` and `se` values. Both are `NA` when `W <= 1`.
+#' * **Shape:** Skewness and kurtosis use weighted population central moments,
+#'   `mk = sum(w * (x - mean)^k) / W`. They remain defined for `W > 0` when
+#'   the population spread is nonzero, including fractional `W <= 1`.
 #' * **Quantiles and MAD:** Percentiles use Stata's weighted percentile rule,
 #'   replacing positions with cumulative weights; weighted `mad` uses the
 #'   corresponding weighted medians. `min` and `max` exclude zero-weight rows.
@@ -131,7 +140,7 @@
 #'   `valid_pct` continue to use unweighted row counts.
 #'
 #' The reported `se` is descriptive and does not account for a complex survey
-#' design. For survey inference, use functions such as [survey::svymean()].
+#' design. For survey inference, use functions such as `survey::svymean()`.
 #'
 #' **Data types and grouping**
 #'
@@ -145,8 +154,8 @@
 #' Dates and datetimes support location and spread statistics, but not `sum`,
 #' `skew`, or `kurtosis`. Calendar locations are displayed as dates or times;
 #' their spreads (`sd`, `se`, `mad`, `iqr`) are `difftime` values in list mode.
-#' In combined table mode, calendar locations are text and spreads are numeric
-#' durations (days for Dates, seconds for datetimes and times of day).
+#' With `.type = "table"` or `"tibble"`, calendar locations are text and spreads
+#' are numeric durations (days for Dates, seconds for datetimes and times of day).
 #'
 #' Expressions in `...` are evaluated before statistics are calculated by
 #' group. For group-specific expressions, first create columns with grouped
@@ -188,6 +197,9 @@
 #' mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
 #' summ(mixed, .type = "list")
 #'
+#' # Combine numeric and calendar summaries in one tibble
+#' summ(mixed, .type = "tibble")
+#'
 #' # Preserve a variable name when starting from a vector
 #' scores <- c(4, 6, NA, 8)
 #' tibble::tibble(score = scores) |> summ(.name = TRUE)
@@ -200,7 +212,7 @@ summ <- function(
   .stat = character(0),
   .missing = TRUE,
   .name = FALSE,
-  .type = c("list", "table"),
+  .type = c("list", "table", "tibble"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,
@@ -302,7 +314,7 @@ summ <- function(
     group_vars,
     .detail,
     working_stats,
-    .type,
+    if (.type == "tibble") "table" else .type,
     weights = weights,
     weight_type = .wt_type,
     metadata = metadata
@@ -320,7 +332,7 @@ summ <- function(
     }
   }
 
-  table_restore(out, template)
+  table_restore(out, template, if (.type == "tibble") "tibble" else "auto")
 }
 
 #' @rdname summ
@@ -334,7 +346,7 @@ tabstat <- function(
   .stat = "mean",
   .missing = TRUE,
   .name = FALSE,
-  .type = c("list", "table"),
+  .type = c("list", "table", "tibble"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,

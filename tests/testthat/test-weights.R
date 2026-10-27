@@ -246,3 +246,164 @@ test_that("grouping keys used as weights remain available for implicit selection
   expect_equal(sum(as.matrix(cross[[2L]][-1L])), 4)
   expect_equal(pwcorr(data, .by = g, .wt = g)$r, c(1, -1))
 })
+
+
+test_that("frequency-weighted shape does not depend on total weight", {
+  x <- c(1, 2, 5)
+  relative <- c(1, 2, 3) / 6
+  center <- sum(relative * x)
+  population <- sqrt(sum(relative * (x - center)^2))
+  expected <- c(
+    mean = center,
+    skew = sum(relative * ((x - center) / population)^3),
+    kurtosis = sum(relative * ((x - center) / population)^4)
+  )
+  for (weights in list(c(.1, .2, .3), c(1, 2, 3) / 6, c(1, 2, 3))) {
+    data <- data.frame(x = x, w = weights)
+    # Include both the per-group and vectorised grouped implementations.
+    grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+    expect_warning(
+      out <- summ(data, x, .wt = w, .stat = names(expected)),
+      NA
+    )
+    expect_warning(
+      by_group <- summ(grouped, x, .by = g, .wt = w, .stat = names(expected)),
+      NA
+    )
+    for (statistic in names(expected)) {
+      expect_equal(out[[statistic]], expected[[statistic]])
+      expect_equal(by_group[[statistic]], rep(expected[[statistic]], 2))
+    }
+    spread <- summ(data, x, .wt = w, .stat = c("sd", "se"))
+    if (sum(weights) <= 1) {
+      expect_true(is.na(spread$sd))
+      expect_true(is.na(spread$se))
+    }
+  }
+})
+
+test_that("frequency summary arithmetic survives overflowing weight totals", {
+  statistics <- c("n", "mean", "sd", "se", "sum", "skew", "kurtosis")
+  data <- data.frame(x = c(1, 2), w = c(1e308, 1e308))
+  grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+  out <- summ(data, x, .wt = w, .stat = statistics)
+  by_group <- summ(grouped, x, .by = g, .wt = w, .stat = statistics)
+  expected <- c(
+    n = Inf,
+    mean = 1.5,
+    sd = 0.5,
+    se = 0,
+    sum = Inf,
+    skew = 0,
+    kurtosis = 1
+  )
+  for (statistic in statistics) {
+    expect_equal(out[[statistic]], expected[[statistic]])
+    expect_equal(by_group[[statistic]], rep(expected[[statistic]], 2))
+  }
+  analytic <- summ(
+    grouped,
+    x,
+    .by = g,
+    .wt = w,
+    .wt_type = "analytic",
+    .stat = statistics
+  )
+  expected[c("n", "sd", "se")] <- c(2, sqrt(0.5), 0.5)
+  for (statistic in statistics) {
+    expect_equal(analytic[[statistic]], rep(expected[[statistic]], 2))
+  }
+})
+
+
+test_that("fractional weighted moments retain zero and constant behavior", {
+  statistics <- c("n", "mean", "sd", "skew", "kurtosis")
+  data <- data.frame(
+    g = rep(c("zero", "constant"), each = 3),
+    x = c(1, 2, 5, 7, 7, 7),
+    w = c(0, 0, 0, .1, .2, .3)
+  )
+  expect_warning(
+    out <- summ(data, x, .by = g, .wt = w, .stat = statistics),
+    NA
+  )
+  expect_equal(out$n, c(.6, 0))
+  expect_equal(out$mean, c(7, NA))
+  for (statistic in c("sd", "skew", "kurtosis")) {
+    expect_true(all(is.na(out[[statistic]])))
+  }
+  for (group in c("constant", "zero")) {
+    expect_warning(
+      single <- summ(data[data$g == group, ], x, .wt = w, .stat = statistics),
+      NA
+    )
+    for (statistic in statistics) {
+      expect_equal(single[[statistic]], out[[statistic]][out$g == group])
+    }
+  }
+})
+
+
+test_that("normalizing summary weights preserves means of large values", {
+  data <- data.frame(x = c(1e308, 1e308), w = c(1e-308, 1e-308))
+  grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+  expect_equal(summ(data, x, .wt = w, .stat = "mean")$mean, 1e308)
+  expect_equal(
+    summ(grouped, x, .by = g, .wt = w, .stat = "mean")$mean,
+    rep(1e308, 2)
+  )
+})
+
+
+test_that("weight normalization retains raw weighted sums and support", {
+  data <- data.frame(x = c(1e308, 0), w = c(1e-308, 1e308))
+  grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+  for (statistic in c("sum", "max", "p100")) {
+    expected <- if (statistic == "sum") 1 else 1e308
+    expect_equal(
+      summ(data, x, .wt = w, .stat = statistic)[[statistic]],
+      expected
+    )
+    expect_equal(
+      summ(grouped, x, .by = g, .wt = w, .stat = statistic)[[statistic]],
+      rep(expected, 2)
+    )
+  }
+  expect_equal(summ(data, x, .wt = w, .stat = "mean")$mean / 1e-308, 1)
+  expect_equal(
+    summ(grouped, x, .by = g, .wt = w, .stat = "mean")$mean / 1e-308,
+    c(1, 1)
+  )
+})
+
+
+test_that("weight normalization retains small population second moments", {
+  data <- data.frame(x = c(1e154, 0), w = c(1e-308, 1e308))
+  grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+  out <- summ(data, x, .wt = w, .stat = c("mean", "sd"))
+  by_group <- summ(grouped, x, .by = g, .wt = w, .stat = c("mean", "sd"))
+  expect_equal(out$sd / 1e-154, 1)
+  expect_equal(by_group$sd / 1e-154, c(1, 1))
+})
+
+
+test_that("bounded arithmetic retains small values and infinite support", {
+  small <- data.frame(x = c(0, 1e-100), w = c(1e-308, 1e-308))
+  huge <- data.frame(x = c(Inf, 0), w = c(1e-308, 1e308))
+  for (data in list(small, huge)) {
+    grouped <- rbind(transform(data, g = 1), transform(data, g = 2))
+    expected <- if (identical(data, small)) 5e-101 else Inf
+    out <- summ(data, x, .wt = w, .stat = "mean")$mean
+    if (is.finite(expected)) {
+      expect_equal(out / expected, 1)
+    } else {
+      expect_equal(out, Inf)
+    }
+    by_group <- summ(grouped, x, .by = g, .wt = w, .stat = "mean")$mean
+    if (is.finite(expected)) {
+      expect_equal(by_group / expected, c(1, 1))
+    } else {
+      expect_equal(by_group, c(Inf, Inf))
+    }
+  }
+})

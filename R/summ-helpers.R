@@ -953,9 +953,12 @@ summ_weighted <- function(
     w <- weights[kept]
     # Stata's r(sum) uses the weights as given, even analytic ones.
     raw <- w
-    if (weight_type == "analytic" && any(w > 0)) {
-      normalized <- w / max(w)
-      w <- normalized * (length(w) / sum(normalized))
+    # Arithmetic uses bounded weights even when the original total overflows.
+    normalized <- if (any(w > 0)) w / max(w) else w
+    mass <- sum(normalized)
+    probability <- normalized / mass
+    if (weight_type == "analytic" && mass > 0) {
+      w <- normalized * (length(w) / mass)
     }
     total <- sum(w)
     # Counts retain zero-weight observations, while arithmetic excludes them.
@@ -963,12 +966,38 @@ summ_weighted <- function(
     x <- if (is.null(numeric)) numeric() else numeric[kept][positive]
     w <- w[positive]
     raw <- raw[positive]
+    probability <- probability[positive]
     has <- length(x) > 0L && total > 0
-    center <- if (has && center_needed) sum(w * x) / total else NA_real_
-    spread <- if (has && spread_needed && total > 1) {
-      sqrt(sum(w * (x - center)^2) / (total - 1))
+    raw_total <- sum(raw)
+    weighted_average <- function(values) {
+      numerator <- sum(raw * values)
+      # Multiplying first retains small-weight, large-value contributions.
+      if (is.finite(numerator) && is.finite(raw_total) && numerator != 0) {
+        return(numerator / raw_total)
+      }
+      product <- probability * values
+      infinite <- is.infinite(values)
+      product[infinite] <- values[infinite]
+      sum(product)
+    }
+    center <- if (has && center_needed) weighted_average(x) else NA_real_
+    population <- if (has && spread_needed) {
+      if (is.finite(x[[1L]]) && all(x == x[[1L]])) {
+        0
+      } else {
+        sqrt(weighted_average((x - center)^2))
+      }
     } else {
       NA_real_
+    }
+    spread <- if (has && spread_needed && total > 1) {
+      correction <- if (is.infinite(total)) 1 else (total - 1) / total
+      population / sqrt(correction)
+    } else {
+      NA_real_
+    }
+    if (!is.na(population) && population == 0) {
+      population <- NA_real_
     }
     quantiles <- if (has && length(probabilities)) {
       weighted_quantile(x, w, probabilities)
@@ -1002,14 +1031,12 @@ summ_weighted <- function(
           max = if (has) max(positive) else NA_real_,
           iqr = unname(quantiles[["q3"]] - quantiles[["q1"]]),
           skew = if (has) {
-            sum(w * (x - center)^3) /
-              (total * summ_population_sd(spread, total)^3)
+            weighted_average((x - center)^3) / population^3
           } else {
             NA_real_
           },
           kurtosis = if (has) {
-            sum(w * (x - center)^4) /
-              (total * summ_population_sd(spread, total)^4)
+            weighted_average((x - center)^4) / population^4
           } else {
             NA_real_
           },
@@ -1057,14 +1084,18 @@ summ_weighted_groups <- function(
   rows <- unlist(kept, use.names = FALSE)
   group <- rep.int(seq_len(groups), n_val)
   w <- weights
+  maxima <- vapply(kept, function(loc) max(c(0, weights[loc])), numeric(1))
+  maxima[maxima == 0] <- 1
+  normalized <- weights
+  normalized[rows] <- weights[rows] / maxima[group]
+  mass <- group_sum_dbl(normalized, kept)
+  probability <- normalized
+  probability[rows] <- normalized[rows] / mass[group]
+  probability[rows[mass[group] == 0]] <- 0
   if (weight_type == "analytic") {
-    maxima <- vapply(kept, function(loc) max(c(0, weights[loc])), numeric(1))
-    maxima[maxima == 0] <- 1
-    w[rows] <- weights[rows] / maxima[group]
-    normalized <- group_sum_dbl(w, kept)
-    scaled <- normalized[group] > 0
-    w[rows[scaled]] <- w[rows[scaled]] *
-      (n_val[group[scaled]] / normalized[group[scaled]])
+    scaled <- mass[group] > 0
+    w[rows[scaled]] <- normalized[rows[scaled]] *
+      (n_val[group[scaled]] / mass[group[scaled]])
   }
   total <- group_sum_dbl(w, kept)
   has <- !is.null(numeric) & n_val > 0L & total > 0
@@ -1088,16 +1119,50 @@ summ_weighted_groups <- function(
   )
   if (!is.null(numeric)) {
     x <- numeric
-    if (any(c("mean", "sd", "se", "skew", "kurtosis") %in% statistics)) {
-      product <- w * x
+    positive <- w[rows] > 0
+    sizes <- tabulate(group[positive], nbins = groups)
+    spread_needed <- any(c("sd", "se", "skew", "kurtosis") %in% statistics)
+    minimum <- if (spread_needed || "min" %in% statistics) {
+      group_min_dbl(x[rows[positive]], sizes)
+    }
+    maximum <- if (spread_needed || "max" %in% statistics) {
+      group_max_dbl(x[rows[positive]], sizes)
+    }
+    raw_total <- group_sum_dbl(weights, kept)
+    weighted_average <- function(values) {
+      product <- weights * values
       product[w == 0] <- 0
-      center <- only_has(group_sum_dbl(product, kept) / total)
+      numerator <- group_sum_dbl(product, kept)
+      average <- numerator / raw_total
+      rescale <- has &
+        (!is.finite(numerator) | !is.finite(raw_total) | numerator == 0)
+      if (any(rescale)) {
+        product <- probability * values
+        infinite <- is.infinite(values) & w > 0
+        product[infinite] <- values[infinite]
+        product[w == 0] <- 0
+        average[rescale] <- group_sum_dbl(product, kept[rescale])
+      }
+      only_has(average)
+    }
+    if (any(c("mean", "sd", "se", "skew", "kurtosis") %in% statistics)) {
+      center <- weighted_average(x)
     }
     deviation <- x - spread_rows(center)
     deviation[w == 0] <- 0
-    if (any(c("sd", "se", "skew", "kurtosis") %in% statistics)) {
-      spread <- sqrt(group_sum_dbl(w * deviation^2, kept) / (total - 1))
-      spread[!(has & total > 1)] <- NA_real_
+    if (spread_needed) {
+      population <- sqrt(weighted_average(deviation^2))
+      constant <- is.finite(minimum) & minimum == maximum
+      population[constant] <- 0
+      valid_spread <- has & total > 1
+      correction <- rep(NA_real_, groups)
+      correction[valid_spread] <- ifelse(
+        is.infinite(total[valid_spread]),
+        1,
+        (total[valid_spread] - 1) / total[valid_spread]
+      )
+      spread <- population / sqrt(correction)
+      population[!is.na(population) & population == 0] <- NA_real_
     }
     # Values sorted within each group; weighted percentiles skip zero weights.
     group_quantiles <- function(values, probs) {
@@ -1113,11 +1178,8 @@ summ_weighted_groups <- function(
       quantiles[] <- group_quantiles(x[rows], probabilities)
       quantiles[!has, ] <- NA_real_
     }
-    positive <- w[rows] > 0
-    sizes <- tabulate(group[positive], nbins = groups)
     moment <- function(power) {
-      population <- summ_population_sd(spread, total)
-      group_sum_dbl(w * deviation^power, kept) / (total * population^power)
+      weighted_average(deviation^power) / population^power
     }
   }
   # Without numeric values, these are missing in every group.
@@ -1147,7 +1209,7 @@ summ_weighted_groups <- function(
           result[lengths(locs) == 0L] <- NA_real_
           result
         },
-        min = only_has(group_min_dbl(x[rows[positive]], sizes)),
+        min = only_has(minimum),
         mean = center,
         mad = {
           median <- quantiles[, "median"]
@@ -1155,7 +1217,7 @@ summ_weighted_groups <- function(
           only_has(1.4826 * typical)
         },
         sd = spread,
-        max = only_has(group_max_dbl(x[rows[positive]], sizes)),
+        max = only_has(maximum),
         iqr = quantiles[, "q3"] - quantiles[, "q1"],
         skew = only_has(moment(3)),
         kurtosis = only_has(moment(4)),

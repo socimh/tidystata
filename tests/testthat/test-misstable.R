@@ -126,3 +126,77 @@ test_that("misstable() rejects grouping names that collide with result columns",
     c("n", "variable", "miss_n", "miss_pct", "valid_n")
   )
 })
+
+test_that("misstable() aligns list-backed matrix missingness with rows", {
+  matrix_column <- matrix(list(NA, NA, 1, NA), nrow = 2)
+  expected_missing <- vctrs::vec_detect_missing(matrix_column)
+  # vctrs treats the non-NULL list cells as observed, including scalar NA.
+  expect_identical(expected_missing, c(FALSE, FALSE))
+  data <- tibble::tibble(
+    g = c("b", "a"),
+    x = c(NA_real_, 7),
+    matrix_column = matrix_column
+  )
+
+  summary <- misstable(data, matrix_column, x, .all = TRUE)
+  expect_identical(summary$variable, c("matrix_column", "x"))
+  expect_identical(summary$miss_n, c(sum(expected_missing), 1L))
+  expect_identical(summary$valid_n, c(2L, 1L))
+  expect_equal(summary$miss_pct, c(0, 50))
+  patterns <- misstable(data, matrix_column, x, .patterns = TRUE, .all = TRUE)
+  expect_identical(
+    patterns,
+    tibble::tibble(
+      matrix_column = c(1L, 1L),
+      x = c(1L, 0L),
+      n = c(1L, 1L),
+      percent = c(50, 50)
+    )
+  )
+  expect_message(
+    omitted <- misstable(data, matrix_column),
+    "No missing values"
+  )
+  expect_identical(nrow(omitted), 0L)
+
+  grouped <- misstable(data, matrix_column, x, .by = g, .all = TRUE)
+  expect_identical(grouped$g, c("a", "a", "b", "b"))
+  expect_identical(grouped$variable, rep(c("matrix_column", "x"), 2L))
+  expect_identical(grouped$miss_n, c(0L, 0L, 0L, 1L))
+  expect_identical(
+    misstable(dplyr::group_by(data, g), matrix_column, x, .all = TRUE),
+    grouped
+  )
+  grouped_patterns <- misstable(
+    data,
+    x,
+    matrix_column,
+    .by = g,
+    .patterns = TRUE,
+    .all = TRUE
+  )
+  expect_named(grouped_patterns, c("g", "x", "matrix_column", "n", "percent"))
+  expect_identical(grouped_patterns$g, c("a", "b"))
+  expect_identical(grouped_patterns$x, c(1L, 0L))
+  expect_identical(grouped_patterns$matrix_column, c(1L, 1L))
+  expect_identical(grouped_patterns$n, c(1L, 1L))
+  expect_identical(grouped_patterns$percent, c(100, 100))
+})
+
+test_that("misstable() keeps ordinary-list and structured-column missingness distinct", {
+  data <- tibble::tibble(
+    ordinary = list(NULL, NA),
+    numeric_matrix = matrix(c(NA_real_, NA_real_, 1, NA_real_), nrow = 2),
+    nested = tibble::tibble(a = c(NA_real_, 1), b = c(NA_real_, NA_real_))
+  )
+  summary <- misstable(data, .all = TRUE)
+  expect_identical(summary$variable, names(data))
+  expect_identical(summary$miss_n, c(1L, 1L, 1L))
+  expect_identical(summary$valid_n, c(1L, 1L, 1L))
+  patterns <- misstable(data, .patterns = TRUE, .all = TRUE)
+  expect_identical(patterns$ordinary, c(1L, 0L))
+  expect_identical(patterns$numeric_matrix, c(1L, 0L))
+  expect_identical(patterns$nested, c(0L, 1L))
+  expect_identical(patterns$n, c(1L, 1L))
+  expect_identical(patterns$percent, c(50, 50))
+})

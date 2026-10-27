@@ -1,5 +1,43 @@
 # tidystata (development version)
 
+* `summ()` and `tabstat()` retain defined weighted skewness and kurtosis when
+  fractional frequency weights total at most one, without grouped square-root
+  warnings. Weighted means and shape statistics avoid overflow from large
+  finite weights; reported frequency totals and weighted sums keep their scale.
+* `as_dummy()` preserves generated indicators that replace removed source
+  names in data.table inputs. It reports an error when removing every column
+  would discard rows from a data.table, with guidance to retain a column.
+* `misstable()` applies structured-column missingness to list-backed matrices
+  instead of indexing their cell masks as rows.
+* Function help and migration guidance clarify missing-key ordering, duplicate
+  identities, grouped assertions, panel units, binning boundaries and weights,
+  signed standardisation, and Spearman's small-sample p-values. Bilingual
+  `findit()` descriptions distinguish variable labels from value labels.
+
+* `pwcorr()` and `spearman()` preserve very small nonzero p-values under Sidak
+  adjustment. Weighted `pwcorr()` and `corr()` retain defined correlations when
+  unequal weights make the variance product underflow.
+
+* Rename the persistent preview helpers to `preview()` and `unpreview()`,
+  with `preview_headtail()` and `preview_interval()` shortcuts. Remove the
+  former preview names and row-slicing helpers without compatibility aliases.
+  Head/tail output marks an omitted middle with aligned dots; interval output
+  retains its compact layout. Persistent previews and one-time printers have
+  separate help topics.
+* New `spearman()` computes Spearman rank correlations like Stata's
+  `spearman`: one common complete sample by default, `.pairwise = TRUE` for
+  `spearman, pw`, and Stata 18's beta-approximation p-values. The Spearman
+  p-values of `pwcorr(.method = "spearman")` now use the same method instead of
+  the t approximation of earlier Stata versions, so they change slightly.
+* `pwcorr()` gains `.listwise` (Stata's `pwcorr, listwise`) and `.adjust`
+  (`"bonferroni"` or `"sidak"`, Stata's options of the same names).
+* `ds()`, `summ()`, and `tabstat()` accept `.type = "tibble"` to return one
+  tibble regardless of the input's table class or preview settings. Summary
+  families combine as in table output; existing defaults are unchanged.
+
+* `findit()` refreshes bilingual function descriptions and notes for current
+  contracts, with reverse lookup descriptions for every tidystata function.
+
 * Shared help pages compare related functions and aliases in opening bullets.
   Grouping, labels, cutting edge cases and examples reflect current behavior.
 
@@ -12,7 +50,8 @@
 
 * `capture()` returns the expression's result on success and invisible `NULL`
   on error, replacing its previous `TRUE`/`FALSE` result. It preserves successful
-  visibility and evaluates once. Caught errors emit a failure message by default;
+  visibility and evaluates once. Caught errors emit a failure message by default
+  that chains the original error, keeping its call and bullets;
   `quiet = TRUE` suppresses it along with warnings and messages from the expression.
   Printed output is retained. Put assignments inside `capture()` to preserve
   existing objects on failure. Existing Boolean uses must be updated.
@@ -58,7 +97,7 @@
   without `.by`, keep factor order around blank headers and compute Cramer's V
   for large 2 x 2 tables; `summ(.missing = FALSE)` accepts weight vectors;
   `as_dummy()` handles columns without observed values; `is_first()` accepts
-  `pick()`; `print_all()` accepts `width`; malformed `varlist()` ranges, `NA`
+  `pick()`; malformed `varlist()` ranges, `NA`
   positions and `var_type(abbr = NA)` give clear errors; `pc()` is missing for
   an infinite total; the timer no longer prints `60.00s`.
 

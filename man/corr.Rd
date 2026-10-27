@@ -32,8 +32,8 @@ columns only; create new grouping columns with \code{\link[dplyr:mutate]{dplyr::
 one row per variable, like Stata's display. The default is a long table.}
 
 \item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector with
-one value per row), like Stata's \code{pwcorr [fweight/aweight]}. Pearson
-correlations only. Rows with a missing weight are excluded with a message.}
+one value per row), like Stata's \code{corr [fweight/aweight]}. Rows with a
+missing weight are excluded with a message.}
 
 \item{.wt_type}{\code{"frequency"} (default) reports the sum of weights as \code{n};
 \code{"analytic"} reports the number of complete observations with positive
@@ -99,6 +99,7 @@ pwcorr(survey)
 
 Other tabulation functions:
 \code{\link[=pwcorr]{pwcorr()}},
+\code{\link[=spearman]{spearman()}},
 \code{\link[=tab]{tab()}}
 }
 \concept{tabulation functions}

@@ -21,3 +21,21 @@
       Error in `pwcorr()`:
       ! `.wt` is supported for Pearson correlations only.
 
+# pwcorr() validates .listwise and .adjust
+
+    Code
+      pwcorr(d, x, y, .listwise = "yes")
+    Condition
+      Error in `pwcorr()`:
+      ! `.listwise` must be `TRUE` or `FALSE`, not a string.
+    Code
+      pwcorr(d, x, y, .adjust = "holm")
+    Condition
+      Error in `pwcorr()`:
+      ! `.adjust` must be one of "none", "bonferroni", or "sidak", not "holm".
+    Code
+      pwcorr(d, x, y, .wide = TRUE, .adjust = "sidak")
+    Condition
+      Error in `pwcorr()`:
+      ! `.adjust` needs p-values, which `.wide = TRUE` omits.
+

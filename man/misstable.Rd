@@ -46,9 +46,12 @@ missingness patterns across rows (\verb{misstable patterns}), following Stata's
 }
 \details{
 Atomic missingness follows \code{is.na()}, including \code{NaN}, haven's tagged missing
-values, and SPSS user-missing codes and ranges. In list columns, \code{NA} is
-missing but \code{NULL} is observed. Matrix and data-frame columns are missing
-only when all components in a row are missing, following vctrs conventions.
+values, and SPSS user-missing codes and ranges. In ordinary list columns,
+scalar \code{NA} elements are missing but \code{NULL} elements are observed. Matrix
+and data-frame columns follow \code{\link[vctrs:vec_detect_missing]{vctrs::vec_detect_missing()}} row semantics:
+a row is missing only when all its components are missing. In a list-backed
+matrix, a component is missing when it is \code{NULL}; a scalar \code{NA} cell is
+observed, unlike an \code{NA} element in an ordinary list column.
 
 Computed columns are evaluated on ungrouped working data before missingness
 is summarized within groups. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}
@@ -78,7 +81,6 @@ misstable(lifeexp, gnppc, safewater, .by = region)
 
 # Check an existing column alongside a computed column
 misstable(lifeexp, gnppc, water_share = safewater / 100, .all = TRUE)
-
 }
 \seealso{
 Other inspection functions:

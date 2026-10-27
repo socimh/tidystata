@@ -64,7 +64,7 @@ test_that("own table results and list children preserve preview settings", {
   fixture <- data.frame(g = c("a", "a", "b"), x = c(1, 3, 5))
   fixture$day <- as.Date("2024-01-01") + 0:2
   for (input in edge_containers(fixture)) {
-    wrapped <- preview_table(input, style = "interval", n = 2)
+    wrapped <- preview(input, style = "interval", n = 2)
     settings <- attr(wrapped, "tidystata_preview")
     results <- c(
       list(
@@ -96,7 +96,7 @@ test_that("own table results and list children preserve preview settings", {
       expect_identical(class(result), c("tbl_df", "tbl", "data.frame"))
       expect_null(attr(result, "tidystata_preview"))
     }
-    expect_identical(unpreview_table(wrapped), input)
+    expect_identical(unpreview(wrapped), input)
   }
 })
 
@@ -104,7 +104,7 @@ test_that("data.table preview NSE and reference operations remain native", {
   skip_if_not_installed("data.table")
   input <- data.table::data.table(g = c("a", "a", "b"), x = c(1, 3, 5))
   before <- data.table::copy(input)
-  wrapped <- preview_table(input)
+  wrapped <- preview(input)
   columns <- "x"
   expect_equal(wrapped[, ..columns]$x, c(1, 3, 5))
   local_sum <- function(tbl, cutoff) tbl[x > cutoff, sum(x)]
@@ -120,7 +120,7 @@ test_that("data.table preview NSE and reference operations remain native", {
   wrapped[, x := x + 10]
   expect_equal(alias$x, c(11, 13, 15))
   expect_identical(input, before)
-  plain <- unpreview_table(wrapped)
+  plain <- unpreview(wrapped)
   plain[, x := 0]
   expect_equal(wrapped$x, c(11, 13, 15))
   expect_null(attr(plain, "tidystata_preview"))
@@ -139,15 +139,15 @@ test_that("downstream joins and pivots retain upstream container semantics", {
       dplyr::left_join(lookup, by = "g")
     expect_equal(pipeline$twice, c(4, 2))
     expect_equal(pipeline$label, c("First", "Second"))
-    wrapped <- preview_table(counts, n = 1)
+    wrapped <- preview(counts, n = 1)
     joined <- dplyr::left_join(wrapped, lookup, by = "g")
     expect_identical(
-      class(unpreview_table(joined)),
+      class(unpreview(joined)),
       class(dplyr::left_join(counts, lookup, by = "g"))
     )
     pivoted <- tidyr::pivot_longer(wrapped, c(n, percent))
     ordinary <- tidyr::pivot_longer(counts, c(n, percent))
-    expect_identical(unpreview_table(pivoted), ordinary)
+    expect_identical(unpreview(pivoted), ordinary)
     expect_identical(
       attr(pivoted, "tidystata_preview"),
       attr(wrapped, "tidystata_preview")

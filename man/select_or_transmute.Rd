@@ -7,7 +7,7 @@
 select_or_transmute(.data, ...)
 }
 \arguments{
-\item{.data}{A data frame or tibble.}
+\item{.data}{A data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> selections or
 <\code{\link[rlang:args_data_masking]{data-masking}}> expressions. Omit to return the input
@@ -65,7 +65,6 @@ lifeexp |>
 }
 \seealso{
 Other selection and preview functions:
-\code{\link{special-print}},
 \code{\link[=varlist]{varlist()}}
 }
 \concept{selection and preview functions}

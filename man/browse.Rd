@@ -7,7 +7,7 @@
 browse(.data, ...)
 }
 \arguments{
-\item{.data}{A data frame or tibble.}
+\item{.data}{A data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with

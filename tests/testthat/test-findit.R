@@ -224,8 +224,9 @@ test_that("every R function in the entries has a description", {
   described <- findit_functions()
   used <- unique(unlist(findit_entries()$functions))
   expect_true(all(used %in% described$`function`))
-  # Functions that no entry uses must point to a related Stata command.
-  unused <- !described$`function` %in% used
+  # External functions without examples must point to a related Stata command.
+  # Package helpers can be described without claiming a Stata equivalent.
+  unused <- !described$`function` %in% used & described$package != "tidystata"
   expect_true(all(nzchar(described$stata[unused])))
   expect_identical(anyDuplicated(described[c("function", "package")]), 0L)
   for (column in setdiff(names(described), "stata")) {
@@ -243,6 +244,7 @@ test_that("every R function in the entries has a description", {
   expect_true(all(one_line(described$description)))
   ours <- described$`function`[described$package == "tidystata"]
   expect_true(all(ours %in% getNamespaceExports("tidystata")))
+  expect_setequal(ours, setdiff(getNamespaceExports("tidystata"), "%>%"))
 })
 
 test_that("tidystata entries call functions that tidystata exports", {

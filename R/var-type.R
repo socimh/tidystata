@@ -34,7 +34,6 @@
 #' retains custom unit methods for classes describing themselves as `units`,
 #' `drtn` or `time`. Other objects return `NA_character_`.
 #' @family inspection functions
-#' @export
 #'
 #' @examples
 #' var_type(1:10)

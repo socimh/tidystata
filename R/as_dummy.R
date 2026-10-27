@@ -1,11 +1,10 @@
 #' Create indicator (dummy) variables
 #'
 #' @description
-#' Expand categorical variables into indicator columns:
-#'
-#' * `as_dummy()` (`tab_gen()`): Add one 0/1 column per observed category of
-#'   each selected variable, like Stata's `tabulate x, generate(x_)`. Place
-#'   the new columns right after their source variable.
+#' `as_dummy()` (`tab_gen()`) expands categorical variables into indicator
+#' columns, like Stata's `tabulate x, generate(x_)`. It adds one 0/1 column per
+#' observed category of each selected variable, placed right after its source
+#' variable.
 #'
 #' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables to
@@ -26,9 +25,12 @@
 #' (unused levels are skipped), and other values in ascending order. For
 #' labelled vectors, `.names = "value"` uses the codes, such as `region_1`.
 #' Missing values include tagged and SPSS user-missing values. New names must
-#' not already exist in `.data`, and grouping keys cannot be removed. For model
-#' formulas, R's factors already expand to dummies; use `as_dummy()` when the
-#' indicator columns themselves are needed.
+#' not collide with retained columns; source names may be reused when
+#' `.remove = TRUE`. Grouping keys cannot be removed. A positive-row data.table
+#' result must retain at least one column: if selected variables have no
+#' observed categories, retain a source variable or an identifier column.
+#' For model formulas, R's factors already expand to dummies; use `as_dummy()`
+#' when the indicator columns themselves are needed.
 #'
 #' @examples
 #' as_dummy(lifeexp, region)
@@ -96,12 +98,18 @@ as_dummy <- function(
   )
   columns <- unlist(unname(dummies), recursive = FALSE)
   if (inherits(.data, "data.table")) {
-    out <- data.table::copy(.data)
-    for (name in names(columns)) {
-      data.table::set(out, j = name, value = columns[[name]])
+    if (nrow(.data) > 0L && !length(order)) {
+      cli::cli_abort(c(
+        "A data.table result with rows must retain at least one column.",
+        i = "Use {.code .remove = FALSE} to retain the source variables, or keep an identifier column."
+      ))
     }
+    out <- data.table::copy(.data)
     if (.remove) {
       data.table::set(out, j = selected, value = NULL)
+    }
+    for (name in names(columns)) {
+      data.table::set(out, j = name, value = columns[[name]])
     }
     geometry <- setdiff(names(out), order)
     data.table::setcolorder(out, c(order, geometry))

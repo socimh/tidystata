@@ -7,7 +7,7 @@
 codebook(.data, ...)
 }
 \arguments{
-\item{.data}{The input data (data frame, tibble, or data.table).}
+\item{.data}{A data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Columns to select or compute with
@@ -63,7 +63,6 @@ starwars <- dplyr::starwars
 codebook(starwars, films:starships)
 
 codebook(starwars, ends_with("color"))
-
 }
 \seealso{
 \code{\link[=ds]{ds()}}, \code{\link[=variables]{variables()}}, \code{\link[=browse]{browse()}}

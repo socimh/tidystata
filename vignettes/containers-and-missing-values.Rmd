@@ -37,19 +37,40 @@ class(summ(tbl, score))
 New tables from the `tab`, `summ`, `codebook` and `variables` families preserve
 a base data frame, tibble or data.table input. A list result remains a list, and
 each table inside follows the same rule. An explicit output option takes
-precedence. `pwcorr()`, `misstable()` and `duplicates_report()` are exceptions:
-they always return tibbles.
+precedence. `corr()`, `pwcorr()`, `spearman()`, `misstable()` and
+`duplicates_report()` are exceptions: they always return tibbles.
+
+Where supported, `.type` selects an output form:
+
+| Value | Meaning |
+|-------|---------|
+| `"vector"` | A character vector of names from `ds()`. |
+| `"list"` | Separate tables for variables or summary families. `summ()` and `tabstat()` return one table when only one family is present. |
+| `"table"` | One table in the input's table class where supported, used by `ds()`, `summ()`, and `tabstat()`. |
+| `"auto"` | Retain the input's table class in `fre()`, `tab2()`, and `fre2()`. |
+| `"tibble"` | Make each returned table a tibble; combine variable tables in `tab1()` and `fre1()`, or summary families in `summ()` and `tabstat()`. Also supported by `ds()`. |
+| `"flextable"` | Format each returned table with the optional flextable package. |
+
+Not every function accepts every value. `tab2()` and `fre2()` still return
+lists for multiple pairs or explicit `.by` groups, even with
+`.type = "tibble"` or `.type = "flextable"`. `corr()`, `pwcorr()` and `spearman()`
+use `.wide` to choose a layout; both layouts return tibbles.
 
 ```{r list-and-override}
 base_tables <- tab1(df, answer, group)
 class(base_tables)
 class(base_tables$answer)
 class(fre(df, answer, .type = "tibble"))
+class(ds(df, .type = "tibble"))
+class(summ(df, score, .type = "tibble"))
+class(tabstat(df, score, .type = "tibble"))
 ```
 
 Other data-frame subclasses are not reconstructed on newly shaped tables.
 Vectors, such as the result of `ds()` or `row_mean()`, keep their intentional
 vector output. New data.table summaries do not retain input keys or indexes.
+`as_dummy(.remove = TRUE)` reports an error if its result would be a data.table
+with rows but no columns; retain a source or identifier column in that case.
 
 data.table inputs follow the same rule:
 
@@ -156,6 +177,12 @@ choose measurements deliberately instead of averaging category codes.
 `decode()` displays value labels when present, but does not itself recode
 every labelled refusal into an ordinary `NA`.
 
+`misstable()` also accepts matrix and nested data-frame columns, using vctrs
+missingness for complete rows. Ordinary list columns count scalar `NA` elements
+as missing and `NULL` as observed. Structured list-backed matrices instead
+follow vctrs cell rules: `NULL` cells are missing and scalar `NA` cells are
+observed. See [`misstable()`](../reference/misstable.html) for both output forms.
+
 ## Numeric and calendar summary tables
 
 ```{r calendar}
@@ -185,30 +212,26 @@ the quartiles of `1:4` are 1.5 and 3.5. See
 
 ```{r previews}
 long <- tibble(id = 1:12, value = (1:12)^2)
-preview <- preview_table(long, n = 4)
-preview
-nrow(preview)
-sum(preview$value)
-
-subset <- slice_headtail(long, n = 4)
-subset
-nrow(subset)
-sum(subset$value)
+view <- preview_headtail(long, n = 4)
+view
+nrow(view)
+sum(view$value)
 ```
 
-The preview still contains 12 rows; the slice contains four. `n` is the total
-display or selection budget, split between the beginning and end. Interval
-mode samples approximately evenly spaced positions; sort first when position
-should represent a meaningful order.
+The preview still contains all 12 rows. `n` is the total display budget,
+split between the beginning and end. A single row of dots marks an omitted
+middle. Interval previews show approximately evenly spaced positions without
+separator rows; sort first when position should represent a meaningful order.
+Both styles report how many rows are omitted from the display.
 
 ```{r remove-preview}
-preview_table(long, style = "interval", n = 4)
-ordinary <- unpreview_table(preview)
+preview_interval(long, n = 4)
+ordinary <- unpreview(view)
 identical(ordinary, long)
 ```
 
 `print_headtail()` and `print_interval()` print once and invisibly return the
-complete input. `unpreview_table()` removes the persistent display setting.
+complete input. `unpreview()` removes the persistent display setting.
 Supported dplyr/tidyr operations carry preview settings forward while following
 their own container and grouping rules. Wrapping and unwrapping a data.table
 copies it; later native data.table mutations retain ordinary reference semantics.

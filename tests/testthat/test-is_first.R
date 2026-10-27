@@ -41,6 +41,20 @@ test_that("is_first() without arguments flags the first row of each group", {
   )
 })
 
+test_that("no-argument is_first() includes groups with missing keys", {
+  data <- tibble::tibble(id = c(1, 1, NA, NA))
+  out <- dplyr::mutate(
+    data,
+    explicit = is_first(id),
+    shortcut = is_first(),
+    shortcut_missing = is_first(.missing = TRUE),
+    .by = id
+  )
+  expect_identical(out$explicit, c(TRUE, FALSE, FALSE, FALSE))
+  expect_identical(out$shortcut, c(TRUE, FALSE, TRUE, FALSE))
+  expect_identical(out$shortcut_missing, out$shortcut)
+})
+
 test_that("is_first() validates its input", {
   expect_error(is_first(), "Supply the variables")
   expect_error(is_first(1:2, 1:3), "same length")

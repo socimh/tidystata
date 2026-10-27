@@ -259,3 +259,91 @@ test_that("pwcorr() excludes matrix columns from vector selection", {
   expect_error(pwcorr(data, x, logical_matrix), "must be numeric or logical")
   expect_identical(pwcorr(data), pwcorr(data, x, y))
 })
+
+test_that("pwcorr(.listwise = TRUE) keeps p-values on one common sample", {
+  out <- pwcorr(lifeexp, lexp, gnppc, safewater, .listwise = TRUE)
+  expect_named(out, c("var1", "var2", "r", "n", "p"))
+  common <- corr(lifeexp, lexp, gnppc, safewater)
+  expect_identical(out[c("var1", "var2", "r", "n")], common)
+  ok <- stats::complete.cases(lifeexp[c("lexp", "gnppc", "safewater")])
+  reference <- stats::cor.test(lifeexp$lexp[ok], lifeexp$safewater[ok])
+  expect_equal(out$p[[2]], reference$p.value)
+
+  data <- dplyr::mutate(lifeexp, w = dplyr::row_number() %% 3 + 1)
+  weighted <- pwcorr(
+    data,
+    lexp,
+    gnppc,
+    safewater,
+    .wt = w,
+    .listwise = TRUE,
+    .by = region
+  )
+  expect_identical(
+    weighted[c("region", "var1", "var2", "r", "n")],
+    corr(data, lexp, gnppc, safewater, .wt = w, .by = region)
+  )
+})
+
+test_that("pwcorr(.adjust) counts every pair, as Stata does", {
+  d <- tibble::tibble(
+    x = c(1, 2, 3, 4, 5, 6),
+    y = c(2, 1, 4, 3, 6, 5),
+    z = c(1, 1, 1, 1, 1, 1)
+  )
+  raw <- pwcorr(d, x, y, z)
+  expect_true(all(is.na(raw$p[2:3])))
+  bonferroni <- pwcorr(d, x, y, z, .adjust = "bonferroni")
+  expect_equal(bonferroni$p, pmin(1, 3 * raw$p))
+  sidak <- pwcorr(d, x, y, z, .adjust = "sidak")
+  expect_equal(sidak$p, pmin(1, 1 - (1 - raw$p)^3))
+  expect_identical(bonferroni[c("var1", "var2", "r", "n")], raw[1:4])
+})
+
+test_that("pwcorr() validates .listwise and .adjust", {
+  d <- tibble::tibble(x = c(1, 2, 3), y = c(2, 1, 3))
+  expect_snapshot(error = TRUE, {
+    pwcorr(d, x, y, .listwise = "yes")
+    pwcorr(d, x, y, .adjust = "holm")
+    pwcorr(d, x, y, .wide = TRUE, .adjust = "sidak")
+  })
+})
+
+test_that("Sidak adjustment preserves very small nonzero p-values", {
+  data <- tibble::tibble(x = 1:30, y = 1:30 + rep(c(-1, 1), 15), z = 1)
+  raw <- pwcorr(data, x, y)$p
+  expect_gt(raw, 0)
+  expect_lt(raw, .Machine$double.eps)
+  # Adjusting one test is the identity, even below machine epsilon.
+  expect_equal(pwcorr(data, x, y, .adjust = "sidak")$p / raw, 1)
+
+  grouped <- dplyr::bind_rows(a = data, b = data, .id = "group")
+  out <- pwcorr(grouped, x, y, z, .by = group, .adjust = "sidak")
+  # For tiny p, the three-test adjustment is 3p to double precision.
+  # Each group includes the two undefined pairs in its own adjustment.
+  expect_equal(out$p[c(1, 4)] / raw, c(3, 3))
+  expect_true(all(is.na(out$p[c(2, 3, 5, 6)])))
+})
+
+test_that("Sidak adjustment retains zero and one p-values", {
+  data <- tibble::tibble(x = c(-1, 0, 1), y = c(1, -2, 1), z = x)
+  expect_equal(pwcorr(data, .adjust = "sidak")$p, c(1, 0, 1))
+})
+
+test_that("weighted correlations retain tiny nonzero variances", {
+  data <- tibble::tibble(x = c(0, 1, 2), y = c(1, 0, 2), w = c(1, 1e200, 1))
+  # The weighted centered sums tend to Sxx = 2, Syy = 5 and Sxy = 1.
+  # At this weight ratio, the correction is below double precision.
+  expected <- 1 / sqrt(10)
+  for (correlate in list(pwcorr, corr)) {
+    out <- correlate(data, x, y, .wt = w, .wt_type = "analytic")
+    expect_equal(out$r, expected)
+    expect_identical(out$n, 3L)
+    if ("p" %in% names(out)) {
+      # With n = 3, t = 1/3 has the standard Cauchy distribution.
+      expect_equal(out$p, 2 * atan(3) / pi)
+    }
+    wide <- correlate(data, x, y, .wt = w, .wide = TRUE)
+    expect_equal(wide$x[[2]], expected)
+  }
+})

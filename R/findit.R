@@ -41,8 +41,9 @@
 #' **Output**
 #'
 #' * Results print as readable Stata/R code pairs. A single clear match is shown
-#'   alone; otherwise, up to five representative examples appear. Use `print(n =
-#'   Inf)` to display all matches.
+#'   alone; otherwise, up to five representative examples appear. The print
+#'   method's `n` argument sets how many matches are printed; use
+#'   `print(n = Inf)` to display all matches.
 #' * The `match` column identifies the lookup type: `"stata"`, `"r"`,
 #'   `"keyword"`, `"nearest"`, or `"all"`.
 #' * Supplied variable names customize compatible examples. Unresolved

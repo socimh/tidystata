@@ -10,7 +10,7 @@ variables(.data, ...)
 variables_search(.data, string, ...)
 }
 \arguments{
-\item{.data}{The input data frame, tibble, or data.table.}
+\item{.data}{A data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Existing columns to select or
 rename before listing or searching. Omit to include all columns. Computed
@@ -65,7 +65,6 @@ variables(lifeexp)
 variables_search(lifeexp, "n")
 
 variables_search(lifeexp, "^country$")
-
 }
 \seealso{
 \code{\link[=ds]{ds()}}, \code{\link[=codebook]{codebook()}}, \code{\link[=browse]{browse()}}

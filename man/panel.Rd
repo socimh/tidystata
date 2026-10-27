@@ -25,17 +25,17 @@ or \code{difftime} vector.}
 \item numbers, including labelled numbers and Stata \verb{\%tm}, \verb{\%tq} or \verb{\%ty}
 variables read by haven, which arrive as plain numbers;
 \item \code{Date} and date-times (\code{POSIXct}/\code{POSIXlt}), with \code{unit};
-\item period classes, which need no \code{unit}: tsibble's \code{yearweek()}, \code{yearmonth()}
-and \code{yearquarter()}, and zoo's \code{yearmon} and \code{yearqtr};
+\item period classes, which need no \code{unit}: tsibble's \code{yearweek()},
+\code{yearmonth()} and \code{yearquarter()}, and zoo's \code{yearmon} and \code{yearqtr};
 \item ordered factors, such as survey waves, where each level is one period in
 level order, so an unused level is a gap.
 }
 
 Missing times give missing results, except for zero-order differences.
-Text and unordered factors are not
-accepted, because their sorted order need not be the time order (\code{"W10"}
-sorts before \code{"W2"}); convert them first, for example with
-\code{as.numeric(as.character(year))} or \code{factor(wave, levels, ordered = TRUE)}.}
+Text and unordered factors are not accepted, because their sorted order
+need not be the time order (\code{"W10"} sorts before \code{"W2"}); convert them
+first, for example with \code{as.numeric(as.character(year))} or
+\code{factor(wave, levels, ordered = TRUE)}.}
 
 \item{delta}{The length of one period in units of \code{time} (or of \code{unit}), like
 the \code{delta()} option of \code{xtset}. For example, \code{delta = 5} for data every
@@ -49,8 +49,9 @@ are compared by whole periods, as with Stata's \verb{\%tw}, \verb{\%tm}, \verb{\
 Weeks follow Stata's \verb{\%tw}: each year has 52 weeks starting on 1 January,
 so the last week has 8 or 9 days (tsibble's \code{yearweek()} keeps its ISO
 weeks). For date-times, seconds measure elapsed time; minute and larger
-periods use the local clock of their time zone. Must be \code{NULL} for numbers
-and period classes.}
+periods use the local clock of their time zone. Must be \code{NULL} for numbers.
+Period classes accept \code{NULL} or their exact natural unit (\code{"week"},
+\code{"month"} or \code{"quarter"}).}
 }
 \value{
 A vector with the length and row order of \code{x}, with \code{NA} where the

@@ -17,18 +17,21 @@
 #'   rank groups (`"rank"`, which has no Stata counterpart). Rank groups may
 #'   split ties, breaking them by original position. They differ in size by at
 #'   most one; earlier groups get extra rows.
-#' @param wt Optional weights for `xtile()`, one per element of `x`, like
-#'   Stata's `xtile ... [aweight = w]`. Cutpoints then follow Stata's weighted
-#'   percentile rule; elements with a missing weight get a missing code. Not
-#'   available with `method = "rank"`.
+#' @param wt Optional finite, non-negative weights for `xtile()`, one per
+#'   element of `x` or a scalar recycled to its length, like Stata's
+#'   `xtile ... [aweight = w]`. Cutpoints follow Stata's weighted percentile
+#'   rule. Zero-weight rows do not enter cutpoint estimation but still receive
+#'   codes; elements with a missing weight get a missing code. Not available
+#'   with `method = "rank"`.
 #' @param breaks Numeric cutpoints for `cut_breaks()`. The observed minimum and
 #'   maximum are added when values lie beyond the breaks. `NULL` uses the
 #'   observed median as an interior cutpoint. A single number supplies one
 #'   interior cutpoint, rather than the number of intervals.
 #' @param right If `FALSE` (default), intervals are closed on the left (`a <= x
 #'   < b`), as in Stata's `egen cut()`; the last interval also includes its
-#'   upper end. If `TRUE`, they are closed on the right (`a < x <= b`), as in
-#'   [base::cut()].
+#'   upper end. If `TRUE`, they are closed on the right (`a < x <= b`), and
+#'   the first interval also includes its lower end, as in
+#'   [base::cut()] with `include.lowest = TRUE`.
 #' @param labels `NULL` (default) creates labels; `FALSE` returns integer
 #'   codes. Supply a character vector for custom labels. For `xtile()`, grouped
 #'   data masks default to integer codes, and `TRUE` explicitly requests labels.
@@ -51,11 +54,10 @@
 #' values outside the breaks (and at the last break) missing, while
 #' `cut_breaks()` extends the end intervals to the observed range.
 #'
-#' With `xtile()`, `labels = NULL` (default) or `TRUE` creates labels. Inside
-#' grouped [dplyr::mutate()], each group has its own cutpoints and interval
-#' labels, which cannot be combined, so `xtile()` defaults to integer codes
-#' within each group (like Stata's `xtile, by()`). Supply `labels = TRUE` to
-#' request labels there anyway. `cut_length()` and `cut_breaks()` keep their
+#' Inside grouped [dplyr::mutate()], each group has its own cutpoints and
+#' interval labels, which cannot be combined, so `xtile()` defaults to integer
+#' codes within each group (like Stata's `xtile, by()`). Supply `labels = TRUE`
+#' to request labels there anyway. `cut_length()` and `cut_breaks()` keep their
 #' factor output inside grouped data masks; use a character vector for custom
 #' labels or `FALSE` for integer codes.
 #'

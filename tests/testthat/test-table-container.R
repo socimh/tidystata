@@ -27,7 +27,7 @@ test_that("vector summaries retain the caller expression after normalization", {
 
 test_that("data.table preview assignment returns the native alias", {
   skip_if_not_installed("data.table")
-  wrapped <- preview_table(data.table::data.table(x = 1:3))
+  wrapped <- preview(data.table::data.table(x = 1:3))
   alias <- wrapped[, x := x + 1L]
   alias[, x := 99L]
   expect_identical(wrapped$x, rep(99L, 3))
@@ -116,19 +116,14 @@ test_that("empty branches preserve containers", {
   }
 })
 
-test_that("previews and slices preserve data frames and row names", {
+test_that("previews preserve data frames and row names", {
   input <- data.frame(x = 1:6, row.names = letters[1:6])
-  wrapped <- preview_table(input, n = 2)
+  wrapped <- preview(input, n = 2)
   expect_identical(class(wrapped), c("tidystata_preview", "data.frame"))
-  expect_identical(unpreview_table(wrapped), input)
-  expect_identical(slice_headtail(input, n = 2), input[c(1, 6), , drop = FALSE])
-  expect_identical(
-    slice_interval(input, n = 3),
-    input[c(1, 4, 6), , drop = FALSE]
-  )
+  expect_identical(unpreview(wrapped), input)
   expect_output(print(wrapped), "rows omitted")
   expect_identical(
-    unpreview_table(dplyr::filter(wrapped, x > 3)),
+    unpreview(dplyr::filter(wrapped, x > 3)),
     input[4:6, , drop = FALSE]
   )
 })
@@ -138,7 +133,7 @@ test_that("data.table previews preserve native expressions and isolate inputs", 
   input <- data.table::data.table(g = c("a", "a", "b"), x = c(1, 3, 5))
   data.table::setkeyv(input, "g")
   before <- data.table::copy(input)
-  wrapped <- preview_table(input)
+  wrapped <- preview(input)
   expect_identical(
     class(wrapped),
     c("tidystata_preview", "data.table", "data.frame")
@@ -150,14 +145,10 @@ test_that("data.table previews preserve native expressions and isolate inputs", 
   wrapped[, x := x * 2]
   expect_equal(wrapped$x, c(2, 6, 10))
   expect_identical(input, before)
-  plain <- unpreview_table(wrapped)
+  plain <- unpreview(wrapped)
   expect_false(inherits(plain, "tidystata_preview"))
   expect_true(inherits(wrapped, "tidystata_preview"))
   expect_identical(data.table::key(plain), "g")
-  expect_identical(
-    class(slice_headtail(input, n = 2)),
-    c("data.table", "data.frame")
-  )
   expect_null(data.table::key(summ(input, x)))
 })
 
@@ -174,12 +165,88 @@ test_that("serialized data.table inputs explain the missing optional dependency"
     },
     .package = "base"
   )
-  expect_error(preview_table(x), "Install.*data.table")
-  expect_error(unpreview_table(x), "Install.*data.table")
-  expect_error(slice_headtail(x), "Install.*data.table")
+  expect_error(preview(x), "Install.*data.table")
+  expect_error(unpreview(x), "Install.*data.table")
   expect_error(summ(x, x), "Install.*data.table")
   expect_error(
     table_restore(data.frame(x = 1), x),
     "Install.*data.table"
   )
+})
+
+test_that("ds tibble output overrides containers and keeps selected names", {
+  for (input in container_inputs()) {
+    wrapped <- preview(input, n = 1)
+    out <- ds(wrapped, renamed = x, g, .type = "tibble")
+    expect_identical(out, tibble::tibble(name = c("renamed", "g")))
+    empty <- ds(wrapped, tidyselect::starts_with("absent"), .type = "tibble")
+    expect_identical(empty, tibble::tibble(name = character()))
+    expect_identical(unpreview(wrapped), input)
+  }
+  expect_identical(
+    ds(c("x", "y"), renamed = y, .type = "tibble"),
+    tibble::tibble(name = "renamed")
+  )
+  expect_identical(
+    ds(character(), .type = "tibble"),
+    tibble::tibble(name = character())
+  )
+})
+
+test_that("summary tibble output combines families and overrides previews", {
+  expected <- tibble::tibble(
+    name = c("x", "day"),
+    type = c("dbl", "date [days]"),
+    n = c(3L, 3L),
+    sd = c(2, 1)
+  )
+  for (input in container_inputs()) {
+    input$day <- as.Date("2024-01-01") + 0:2
+    wrapped <- preview(input, n = 1)
+    for (fn in list(summ, tabstat)) {
+      out <- fn(wrapped, x, day, .type = "tibble", .stat = c("n", "sd"))
+      expect_identical(out, expected)
+      expect_identical(unpreview(wrapped), input)
+    }
+  }
+})
+
+test_that("summary tibble output retains groups, vector names and empty schemas", {
+  input <- tibble::tibble(g = c("a", "a", "b"), x = c(1, NA, 5))
+  observations <- c(1, 3, NA)
+  for (fn in list(summ, tabstat)) {
+    grouped <- fn(
+      dplyr::group_by(input, g),
+      x,
+      .type = "tibble",
+      .stat = c("n", "mean")
+    )
+    expect_identical(class(grouped), c("tbl_df", "tbl", "data.frame"))
+    expect_identical(grouped$g, c("a", "b"))
+    expect_identical(grouped$n, c(1L, 1L))
+    expect_equal(grouped$mean, c(1, 5))
+    vector <- fn(
+      observations,
+      .type = "tibble",
+      .stat = c("n", "mean"),
+      .name = TRUE
+    )
+    expect_identical(vector$name, "observations")
+    expect_identical(vector$n, 2L)
+    expect_equal(vector$mean, 2)
+    expect_identical(class(vector), c("tbl_df", "tbl", "data.frame"))
+    empty <- fn(
+      data.frame(x = numeric()),
+      x,
+      .type = "tibble",
+      .stat = c("n", "mean"),
+      .drop_empty = TRUE
+    )
+    expect_identical(
+      empty,
+      tibble::tibble(type = character(), n = integer(), mean = double())
+    )
+    expect_error(fn(input, x, .type = "tib"), "[.]type")
+  }
+  expect_error(ds(input, .type = "tib"), "[.]type")
 })

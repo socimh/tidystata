@@ -83,22 +83,26 @@ fre1(
 selectors or \code{.by}). Collect lazy tables first. Spatial geometry columns
 are excluded.}
 
-\item{...}{Variables selected with tidyselect, or named expressions such as
-\code{high = score >= 70}. Defaults to all columns except active grouping keys.
-Without explicit \code{.by}, \code{tab2()} and \code{fre2()} treat inherited grouping
-columns as ordinary variables. Select at least two variables for
-cross-tabulation.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to tabulate, or named
+expressions such as \code{high = score >= 70}. Defaults to all columns except
+active grouping keys. Without explicit \code{.by}, \code{tab2()} and \code{fre2()} treat
+inherited grouping columns as ordinary variables. Select at least two
+variables for cross-tabulation.}
 
-\item{.by}{Optional grouping columns selected with tidyselect. For one-way
-and joint tables, existing \code{\link[dplyr:group_by]{dplyr::group_by()}} groups are inherited unless
-\code{.by} is supplied. \code{tab2()} and \code{fre2()} require explicit \code{.by} to create
-separate cross-tables for each group. Grouping keys are not tabulated.}
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping columns.
+For one-way and joint tables, existing \code{\link[dplyr:group_by]{dplyr::group_by()}} groups are
+inherited unless \code{.by} is supplied. \code{tab2()} and \code{fre2()} require
+explicit \code{.by} to create separate cross-tables for each group. Grouping
+keys are not tabulated.}
 
 \item{.desc}{If \code{TRUE}, sort categories by decreasing frequency within each
 group; missing categories remain last. Defaults to \code{FALSE}.}
 
 \item{.group_order}{Order group blocks by \code{"keys"} (default) or decreasing
-\code{"frequency"}. Does not change category order within groups.}
+\code{"frequency"} (weighted totals when weights are supplied). Groups with
+any missing key follow complete-key groups; within each set, frequency
+ties follow key order. Does not change category order within groups.}
 
 \item{.total}{If \code{TRUE}, add totals, as in the corresponding \code{fre()} family
 function. Defaults to \code{FALSE} for \code{tab()}, \code{tab1()}, and \code{tab2()}; the
@@ -111,11 +115,21 @@ row. Missing weights exclude rows; negative weights are invalid.}
 are summed as counts; analytic weights are normalized within groups.
 See Details for the formulas.}
 
-\item{.type}{Output format, where supported. \code{tab1()} and \code{fre1()} default
-to \code{"list"}; \code{fre()}, \code{tab2()}, and \code{fre2()} default to \code{"auto"}, preserving
-the input table class. \code{"tibble"} requests a tibble; \code{"flextable"}
-requires the optional flextable package. \code{tab2()} needs totals for
-flextable output. \code{tab()} has no \code{.type} argument.}
+\item{.type}{Output form, where supported. \code{tab()} has no \code{.type} argument.
+\itemize{
+\item \code{"list"} is the default for \code{tab1()} and \code{fre1()}: one table per selected
+variable, retaining the input's table class where supported.
+\item \code{"auto"} is the default for \code{fre()}, \code{tab2()}, and \code{fre2()}: retain the
+input's table class where supported.
+\item \code{"tibble"} returns tibbles regardless of the input's table class. For
+\code{tab1()} and \code{fre1()}, it also combines the variable tables into one.
+\item \code{"flextable"} returns formatted tables and requires the optional
+flextable package. It is available for \code{fre()}, \code{fre1()}, \code{tab2()}, and
+\code{fre2()}; \code{tab2()} also requires \code{.total = TRUE}.
+}
+
+For \code{tab2()} and \code{fre2()}, multiple pairs or explicit \code{.by} groups still
+produce lists; \code{.type} controls each table inside the list.}
 
 \item{.flip}{If \code{TRUE}, exchange the row and column variables in a
 cross-tabulation. Defaults to \code{FALSE}.}
@@ -145,9 +159,9 @@ three or more variables, \code{tab()} counts their joint combinations, while
 \code{tab2()} produces a separate table for each variable pair.
 
 Results are ungrouped and retain the input table class where supported.
-Chi-square results for data tables are stored in the \code{"chi2"} attribute,
-with \code{statistic}, \code{df}, \code{p_value}, \code{cramers_v}, and \code{n}. Flextables display
-these results in a footer instead.
+For non-flextable output, chi-square results are stored in the \code{"chi2"}
+attribute, with \code{statistic}, \code{df}, \code{p_value}, \code{cramers_v}, and \code{n}.
+Flextables display these results in a footer instead.
 }
 \description{
 Create Stata-style frequency tables using joint counts, separate one-way
@@ -243,12 +257,13 @@ columns, and \code{N} the total count:
 \item \strong{Degrees of freedom:} \code{df = (r - 1) * (c - 1)}.
 \item \strong{p-value:} Upper-tail probability of a chi-square distribution with
 \code{df} degrees of freedom.
-\item \strong{Cramer's V:} \code{sqrt(X^2 / (N * min(r - 1, c - 1)))}; for 2-by-2 tables,
-the reported value retains the sign used by the implementation.
+\item \strong{Cramer's V:} \code{sqrt(X^2 / (N * min(r - 1, c - 1)))}. For 2-by-2 tables,
+it is the signed phi coefficient, as in Stata, with the sign of
+\code{O_11 * O_22 - O_12 * O_21}.
 }
 
 Frequency weights act as cell counts for the test. Analytic weights are
-not supported; for complex survey designs, use \code{\link[survey:svychisq]{survey::svychisq()}}.
+not supported; for complex survey designs, use \code{survey::svychisq()}.
 Cross-tabulation category values become column names, so conflicts with
 reserved names such as \code{"total"} may require recoding.
 
@@ -294,6 +309,7 @@ tab(survey, response, .wt = w)
 \seealso{
 Other tabulation functions:
 \code{\link[=corr]{corr()}},
-\code{\link[=pwcorr]{pwcorr()}}
+\code{\link[=pwcorr]{pwcorr()}},
+\code{\link[=spearman]{spearman()}}
 }
 \concept{tabulation functions}

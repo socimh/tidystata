@@ -13,7 +13,9 @@ assert(.data, ..., .by = NULL)
 must be \code{TRUE} for every row.}
 
 \item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables.
-Summaries such as \code{mean(x)} are evaluated within each group.}
+Summaries such as \code{mean(x)} are evaluated within each group. Existing
+groups are used when omitted. To supply \code{.by} for grouped data, first call
+\code{\link[dplyr:ungroup]{dplyr::ungroup()}}, as required by \code{\link[dplyr:mutate]{dplyr::mutate()}}.}
 }
 \value{
 \code{.data}, unchanged and invisibly, if all conditions pass.
@@ -43,7 +45,6 @@ assert(scores, is.na(score) | score >= 50)
 
 # Fail: row 3 is below 60, and row 4 is missing
 try(assert(scores, score >= 60))
-
 }
 \seealso{
 Other data checking functions:

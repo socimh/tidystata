@@ -51,7 +51,9 @@ English or Chinese, without a language model.
 \strong{Output}
 \itemize{
 \item Results print as readable Stata/R code pairs. A single clear match is shown
-alone; otherwise, up to five representative examples appear. Use \code{print(n = Inf)} to display all matches.
+alone; otherwise, up to five representative examples appear. The print
+method's \code{n} argument sets how many matches are printed; use
+\code{print(n = Inf)} to display all matches.
 \item The \code{match} column identifies the lookup type: \code{"stata"}, \code{"r"},
 \code{"keyword"}, \code{"nearest"}, or \code{"all"}.
 \item Supplied variable names customize compatible examples. Unresolved

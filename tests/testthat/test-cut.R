@@ -888,3 +888,19 @@ test_that("binning requires deliberate conversion of integer64 payloads", {
     "integer64.*explicitly|explicitly.*integer64"
   )
 })
+
+test_that("xtile() recycles scalar weights and codes zero-weight rows", {
+  expect_identical(
+    xtile(1:4, 2, wt = 2, labels = FALSE),
+    c(1L, 1L, 2L, 2L)
+  )
+  # The positive-weight values 0 and 10 set the median at 5. Values with
+  # zero weight still receive codes on either side of that boundary.
+  expect_identical(
+    xtile(c(0, 1, 3, 4, 10), 2, wt = c(1, 0, 0, 0, 1), labels = FALSE),
+    c(1L, 1L, 1L, 1L, 2L)
+  )
+  for (weight in c(Inf, -Inf)) {
+    expect_error(xtile(1:4, 2, wt = weight), "must be finite")
+  }
+})

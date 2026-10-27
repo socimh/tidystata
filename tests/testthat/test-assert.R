@@ -50,6 +50,15 @@ test_that("assert() evaluates group functions within groups", {
   )
 })
 
+test_that("assert() requires ungrouping before supplying explicit .by", {
+  data <- tibble::tibble(g = c("a", "a", "b"), x = 1:3)
+  grouped <- dplyr::group_by(data, g)
+  expect_error(assert(grouped, x > 0, .by = g), "is a grouped data frame")
+  expect_invisible(out <- assert(dplyr::ungroup(grouped), x > 0, .by = g))
+  expect_identical(out, data)
+  expect_identical(dplyr::group_vars(grouped), "g")
+})
+
 test_that("assert() validates its input", {
   expect_error(assert(lifeexp), "at least one condition")
   expect_error(

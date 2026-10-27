@@ -21,19 +21,23 @@
 #'   `tab1()`, `fre()`, and `fre1()` also accept an atomic vector (without
 #'   selectors or `.by`). Collect lazy tables first. Spatial geometry columns
 #'   are excluded.
-#' @param ... Variables selected with tidyselect, or named expressions such as
-#'   `high = score >= 70`. Defaults to all columns except active grouping keys.
-#'   Without explicit `.by`, `tab2()` and `fre2()` treat inherited grouping
-#'   columns as ordinary variables. Select at least two variables for
-#'   cross-tabulation.
-#' @param .by Optional grouping columns selected with tidyselect. For one-way
-#'   and joint tables, existing [dplyr::group_by()] groups are inherited unless
-#'   `.by` is supplied. `tab2()` and `fre2()` require explicit `.by` to create
-#'   separate cross-tables for each group. Grouping keys are not tabulated.
+#' @param ... <[`tidy-select`][dplyr_tidy_select]> or
+#'   <[`data-masking`][args_data_masking]> Variables to tabulate, or named
+#'   expressions such as `high = score >= 70`. Defaults to all columns except
+#'   active grouping keys. Without explicit `.by`, `tab2()` and `fre2()` treat
+#'   inherited grouping columns as ordinary variables. Select at least two
+#'   variables for cross-tabulation.
+#' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping columns.
+#'   For one-way and joint tables, existing [dplyr::group_by()] groups are
+#'   inherited unless `.by` is supplied. `tab2()` and `fre2()` require
+#'   explicit `.by` to create separate cross-tables for each group. Grouping
+#'   keys are not tabulated.
 #' @param .desc If `TRUE`, sort categories by decreasing frequency within each
 #'   group; missing categories remain last. Defaults to `FALSE`.
 #' @param .group_order Order group blocks by `"keys"` (default) or decreasing
-#'   `"frequency"`. Does not change category order within groups.
+#'   `"frequency"` (weighted totals when weights are supplied). Groups with
+#'   any missing key follow complete-key groups; within each set, frequency
+#'   ties follow key order. Does not change category order within groups.
 #' @param .total If `TRUE`, add totals, as in the corresponding `fre()` family
 #'   function. Defaults to `FALSE` for `tab()`, `tab1()`, and `tab2()`; the
 #'   `fre()` family always includes totals.
@@ -42,11 +46,20 @@
 #' @param .wt_type `"frequency"` (default) or `"analytic"`. Frequency weights
 #'   are summed as counts; analytic weights are normalized within groups.
 #'   See Details for the formulas.
-#' @param .type Output format, where supported. `tab1()` and `fre1()` default
-#'   to `"list"`; `fre()`, `tab2()`, and `fre2()` default to `"auto"`, preserving
-#'   the input table class. `"tibble"` requests a tibble; `"flextable"`
-#'   requires the optional flextable package. `tab2()` needs totals for
-#'   flextable output. `tab()` has no `.type` argument.
+#' @param .type Output form, where supported. `tab()` has no `.type` argument.
+#'
+#'   * `"list"` is the default for `tab1()` and `fre1()`: one table per selected
+#'     variable, retaining the input's table class where supported.
+#'   * `"auto"` is the default for `fre()`, `tab2()`, and `fre2()`: retain the
+#'     input's table class where supported.
+#'   * `"tibble"` returns tibbles regardless of the input's table class. For
+#'     `tab1()` and `fre1()`, it also combines the variable tables into one.
+#'   * `"flextable"` returns formatted tables and requires the optional
+#'     flextable package. It is available for `fre()`, `fre1()`, `tab2()`, and
+#'     `fre2()`; `tab2()` also requires `.total = TRUE`.
+#'
+#'   For `tab2()` and `fre2()`, multiple pairs or explicit `.by` groups still
+#'   produce lists; `.type` controls each table inside the list.
 #' @param .flip If `TRUE`, exchange the row and column variables in a
 #'   cross-tabulation. Defaults to `FALSE`.
 #' @param .chi2 If `TRUE`, report Pearson's chi-square test and Cramer's V for
@@ -72,9 +85,9 @@
 #' `tab2()` produces a separate table for each variable pair.
 #'
 #' Results are ungrouped and retain the input table class where supported.
-#' Chi-square results for data tables are stored in the `"chi2"` attribute,
-#' with `statistic`, `df`, `p_value`, `cramers_v`, and `n`. Flextables display
-#' these results in a footer instead.
+#' For non-flextable output, chi-square results are stored in the `"chi2"`
+#' attribute, with `statistic`, `df`, `p_value`, `cramers_v`, and `n`.
+#' Flextables display these results in a footer instead.
 #'
 #' @details
 #' **Counts and percentages**
@@ -150,11 +163,12 @@
 #' * **Degrees of freedom:** `df = (r - 1) * (c - 1)`.
 #' * **p-value:** Upper-tail probability of a chi-square distribution with
 #'   `df` degrees of freedom.
-#' * **Cramer's V:** `sqrt(X^2 / (N * min(r - 1, c - 1)))`; for 2-by-2 tables,
-#'   the reported value retains the sign used by the implementation.
+#' * **Cramer's V:** `sqrt(X^2 / (N * min(r - 1, c - 1)))`. For 2-by-2 tables,
+#'   it is the signed phi coefficient, as in Stata, with the sign of
+#'   `O_11 * O_22 - O_12 * O_21`.
 #'
 #' Frequency weights act as cell counts for the test. Analytic weights are
-#' not supported; for complex survey designs, use [survey::svychisq()].
+#' not supported; for complex survey designs, use `survey::svychisq()`.
 #' Cross-tabulation category values become column names, so conflicts with
 #' reserved names such as `"total"` may require recoding.
 #'

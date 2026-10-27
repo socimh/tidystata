@@ -46,13 +46,17 @@
 #' Unlike Stata's silent success, `isid()` names the columns that form a valid
 #' key. This confirms uniqueness without storing an ID declaration or adding
 #' metadata. Use [suppressMessages()] for silent execution. An empty input
-#' reports that there are no rows to check. Checks preserve row order; use
-#' [dplyr::arrange()] separately to sort, or [haven::read_dta()] to read a file.
+#' reports that there are no rows to check. Checks preserve row order. Instead
+#' of Stata's `sort` and `using` options, use [dplyr::arrange()] to sort or
+#' [haven::read_dta()] to read a file first.
 #' Factor values equal to `""` are empty strings; whitespace is not trimmed.
 #'
-#' Missing values count as equal to each other, as in Stata, so two rows that
-#' are both missing on every selected column are duplicates. Checks and
-#' duplicate counts use the whole input, regardless of grouping.
+#' Duplicate identity follows stored values: ordinary and tagged `NA` values
+#' count as equal, `NaN` is a separate value, and distinct stored SPSS
+#' user-missing codes remain distinct. This differs from `isid()`'s default
+#' validation, which rejects all of these missing values; `.missing = TRUE`
+#' permits them while still checking uniqueness by stored-value identity.
+#' Checks and duplicate counts use the whole input, regardless of grouping.
 #' `duplicates_list()` rejects existing `.dup_group` or `.row` columns; rename
 #' them first. `duplicates_drop()` reports the number of rows removed as a
 #' message. The input data are not modified.

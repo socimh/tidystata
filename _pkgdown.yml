@@ -19,8 +19,8 @@ navbar:
     right: [search, github, lightswitch]
   components:
     stata_to_r:
-      text: "Stata → R"
-      href: https://www.socimh.com/stata-to-r/
+      text: "Stata to R"
+      href: articles/coming-from-stata.html
 
 articles:
 - title: "Learn tidystata"
@@ -54,9 +54,15 @@ reference:
 - title: "Convert types"
   contents:
   - has_concept("conversion functions")
-- title: "Select and preview"
+- title: "Select columns"
   contents:
   - has_concept("selection and preview functions")
+- title: "Preview tables"
+  contents:
+  - has_concept("persistent preview functions")
+- title: "Print tables once"
+  contents:
+  - has_concept("one-time printing functions")
 - title: "Small tools"
   contents:
   - has_concept("utility functions")

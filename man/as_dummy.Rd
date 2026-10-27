@@ -29,21 +29,22 @@ source values. New columns have a \code{"label"} attribute such as
 \code{"sex==male"}; for labelled vectors, this uses the value label.
 }
 \description{
-Expand categorical variables into indicator columns:
-\itemize{
-\item \code{as_dummy()} (\code{tab_gen()}): Add one 0/1 column per observed category of
-each selected variable, like Stata's \verb{tabulate x, generate(x_)}. Place
-the new columns right after their source variable.
-}
+\code{as_dummy()} (\code{tab_gen()}) expands categorical variables into indicator
+columns, like Stata's \verb{tabulate x, generate(x_)}. It adds one 0/1 column per
+observed category of each selected variable, placed right after its source
+variable.
 }
 \details{
 Categories are the observed, non-missing values: factor levels in level order
 (unused levels are skipped), and other values in ascending order. For
 labelled vectors, \code{.names = "value"} uses the codes, such as \code{region_1}.
 Missing values include tagged and SPSS user-missing values. New names must
-not already exist in \code{.data}, and grouping keys cannot be removed. For model
-formulas, R's factors already expand to dummies; use \code{as_dummy()} when the
-indicator columns themselves are needed.
+not collide with retained columns; source names may be reused when
+\code{.remove = TRUE}. Grouping keys cannot be removed. A positive-row data.table
+result must retain at least one column: if selected variables have no
+observed categories, retain a source variable or an identifier column.
+For model formulas, R's factors already expand to dummies; use \code{as_dummy()}
+when the indicator columns themselves are needed.
 }
 \examples{
 as_dummy(lifeexp, region)

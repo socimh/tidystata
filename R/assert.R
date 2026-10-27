@@ -8,7 +8,9 @@
 #' @param ... Logical conditions using columns of `.data`. Every condition
 #'   must be `TRUE` for every row.
 #' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping variables.
-#'   Summaries such as `mean(x)` are evaluated within each group.
+#'   Summaries such as `mean(x)` are evaluated within each group. Existing
+#'   groups are used when omitted. To supply `.by` for grouped data, first call
+#'   [dplyr::ungroup()], as required by [dplyr::mutate()].
 #'
 #' @returns `.data`, unchanged and invisibly, if all conditions pass.
 #'
@@ -32,7 +34,6 @@
 #'
 #' # Fail: row 3 is below 60, and row 4 is missing
 #' try(assert(scores, score >= 60))
-#'
 #' @family data checking functions
 #' @export
 assert <- function(.data, ..., .by = NULL) {

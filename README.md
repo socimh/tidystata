@@ -9,9 +9,9 @@
 
 <!-- badges: end -->
 
-[中文版](https://github.com/socimh/tidystata/blob/master/README.zh.md)
-
 [tidystata](https://socimh.github.io/tidystata/) brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with `.by`. The resulting tables work with ordinary R tools for filtering, joining and plotting.
+
+[中文介绍](https://github.com/socimh/tidystata/blob/master/README.zh.md)
 
 ## Installation
 
@@ -37,6 +37,7 @@ findit("reg, robust")
 #> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
 #> # 17 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
+
 findit("egen rowmean")
 #> # Average available values across columns [base]
 #> Stata: egen z = rowmean(x y)

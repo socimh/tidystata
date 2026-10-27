@@ -5,7 +5,7 @@
 \alias{ds}
 \title{List column names by tidyselect}
 \usage{
-ds(.data, ..., .type = c("vector", "table"))
+ds(.data, ..., .type = c("vector", "table", "tibble"))
 }
 \arguments{
 \item{.data}{A data frame, tibble, or data.table. \code{ds()} also accepts a
@@ -17,17 +17,20 @@ vector's own names are ignored. An empty inventory is allowed.}
 rename. Omit to include all columns. Computed columns are not created by
 this argument.}
 
-\item{.type}{\code{"vector"} (the default) returns the names as a character
-vector, like Stata's \code{ds}; \code{"table"} returns them as a one-column table.}
+\item{.type}{Output form. \code{"vector"} (default) returns the selected names as
+a character vector, like Stata's \code{ds}. \code{"table"} returns a one-column table
+in the input's table class, or a tibble for a character inventory.
+\code{"tibble"} always returns a one-column tibble.}
 }
 \value{
-\code{ds()} returns a character vector. \code{ds(.type = "table")} returns a
-table with one character column, \code{name}, and one row per selected name, in
-selection order. On ungrouped data, an empty selection returns a
-zero-length vector or zero-row table. Tables preserve the input's
+\code{ds()} returns a character vector. With \code{.type = "table"} or
+\code{"tibble"}, it returns one character column, \code{name}, and one row per
+selected name, in selection order. On ungrouped data, an empty selection
+returns a zero-length vector or zero-row table. Tables preserve the input's
 data.frame, tibble, or data.table container and supported preview settings,
 without grouping or arbitrary subclasses; character inventories return a
-tibble in table mode.
+tibble in table mode. Explicit \code{.type = "tibble"} overrides the input's
+table class and preview settings.
 }
 \description{
 List column names by tidyselect
@@ -50,6 +53,8 @@ ds(lifeexp, where(is.character), .type = "table")
 
 starwars <- dplyr::starwars
 ds(starwars, ends_with("color"), .type = "table")
+
+ds(starwars, ends_with("color"), .type = "tibble")
 
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))

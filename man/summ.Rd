@@ -14,7 +14,7 @@ summ(
   .stat = character(0),
   .missing = TRUE,
   .name = FALSE,
-  .type = c("list", "table"),
+  .type = c("list", "table", "tibble"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,
@@ -31,7 +31,7 @@ tabstat(
   .stat = "mean",
   .missing = TRUE,
   .name = FALSE,
-  .type = c("list", "table"),
+  .type = c("list", "table", "tibble"),
   .duration_format = c("long", "compact"),
   .sort = TRUE,
   .drop_empty = FALSE,
@@ -43,19 +43,21 @@ tabstat(
 \item{.data}{A data frame, tibble, data.table, or vector. For \code{sf} data,
 only attributes are summarised; geometry columns are excluded.}
 
-\item{...}{Variables selected with tidyselect, or named expressions such as
-\code{income_k = income / 1000}. Defaults to all nongrouping columns.}
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
+<\code{\link[rlang:args_data_masking]{data-masking}}> Variables to summarise, or named
+expressions such as \code{income_k = income / 1000}. Defaults to all
+nongrouping columns.}
 
-\item{.by}{Optional grouping columns, selected with tidyselect. Existing
-\code{\link[dplyr:group_by]{dplyr::group_by()}} groups are used unless \code{.by} is supplied. Grouping
-columns are excluded from the variables being summarised.}
+\item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping columns.
+Existing \code{\link[dplyr:group_by]{dplyr::group_by()}} groups are used unless \code{.by} is supplied.
+Grouping columns are excluded from the variables being summarised.}
 
 \item{.keep_all}{If \code{TRUE}, retain character and list columns for counts and
 distinct values; other statistics for these columns are \code{NA}.
 By default, unsupported columns are omitted with a warning.}
 
 \item{.detail}{If \code{TRUE}, report all supported statistics unless \code{.stat}
-specifies a subset. Defaults to \code{FALSE}.}
+is supplied explicitly. Defaults to \code{FALSE}.}
 
 \item{.stat}{Character vector of statistics to report. See Details for the
 complete list and calculation methods. An explicit selection determines
@@ -69,8 +71,11 @@ measured values are always omitted from numeric calculations.}
 \item{.name}{If \code{TRUE}, always include the \code{name} column. By default, it is
 omitted when exactly one variable is summarised.}
 
-\item{.type}{\code{"list"} (default) separates numeric and calendar variable
-families where necessary; \code{"table"} combines them into one table.}
+\item{.type}{Output form. \code{"list"} (default) returns separate tables when
+multiple variable families are present, or a single table for one family.
+\code{"table"} combines all families into one table, retaining the input's table
+class where supported. \code{"tibble"} combines them into one tibble regardless
+of the input's table class or preview settings.}
 
 \item{.duration_format}{Retained for compatibility; no longer changes the
 output format of calendar spread statistics.}
@@ -97,8 +102,9 @@ applicable), \code{type}, and the selected statistics.
 By default, \code{summ()} returns \code{n}, \code{unique}, \code{min}, \code{mean}, \code{sd}, and \code{max};
 \code{tabstat()} returns \code{mean}. With \code{.type = "list"}, results are split into
 \code{numeric}, \code{date}, \code{datetime}, and \code{time} tables only when multiple type
-families occur. With \code{.type = "table"}, all types are combined in one table.
-Results retain the input's usual table class where supported.
+families occur. With \code{.type = "table"} or \code{"tibble"}, all types are combined
+in one table. Results retain the input's usual table class where supported,
+except that \code{.type = "tibble"} always returns a tibble.
 }
 \description{
 Summarise selected variables, with one row per variable and group:
@@ -181,7 +187,10 @@ Thus \code{n} remains on the sample-count scale.
 \item \strong{Mean and spread:} \code{mean = sum(w * x) / W},
 \code{sd = sqrt(sum(w * (x - mean)^2) / (W - 1))}, and
 \code{se = sd / sqrt(W)}. The two weight types give the same mean but can
-give different \code{sd} and \code{se} values.
+give different \code{sd} and \code{se} values. Both are \code{NA} when \code{W <= 1}.
+\item \strong{Shape:} Skewness and kurtosis use weighted population central moments,
+\code{mk = sum(w * (x - mean)^k) / W}. They remain defined for \code{W > 0} when
+the population spread is nonzero, including fractional \code{W <= 1}.
 \item \strong{Quantiles and MAD:} Percentiles use Stata's weighted percentile rule,
 replacing positions with cumulative weights; weighted \code{mad} uses the
 corresponding weighted medians. \code{min} and \code{max} exclude zero-weight rows.
@@ -191,7 +200,7 @@ unrescaled weights, even for analytic weights. \code{unique}, \code{miss_n}, and
 }
 
 The reported \code{se} is descriptive and does not account for a complex survey
-design. For survey inference, use functions such as \code{\link[survey:svymean]{survey::svymean()}}.
+design. For survey inference, use functions such as \code{survey::svymean()}.
 
 \strong{Data types and grouping}
 
@@ -205,8 +214,8 @@ calculations use double precision, which may affect large \code{integer64} value
 Dates and datetimes support location and spread statistics, but not \code{sum},
 \code{skew}, or \code{kurtosis}. Calendar locations are displayed as dates or times;
 their spreads (\code{sd}, \code{se}, \code{mad}, \code{iqr}) are \code{difftime} values in list mode.
-In combined table mode, calendar locations are text and spreads are numeric
-durations (days for Dates, seconds for datetimes and times of day).
+With \code{.type = "table"} or \code{"tibble"}, calendar locations are text and spreads
+are numeric durations (days for Dates, seconds for datetimes and times of day).
 
 Expressions in \code{...} are evaluated before statistics are calculated by
 group. For group-specific expressions, first create columns with grouped
@@ -243,6 +252,9 @@ tabstat(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
 # Separate numeric and calendar summaries
 mixed <- tibble::tibble(x = c(1, 3), day = as.Date("2024-01-01") + 0:1)
 summ(mixed, .type = "list")
+
+# Combine numeric and calendar summaries in one tibble
+summ(mixed, .type = "tibble")
 
 # Preserve a variable name when starting from a vector
 scores <- c(4, 6, NA, 8)

@@ -59,7 +59,6 @@
 #' # A literal hyphen pattern selects no columns here; it is not a range.
 #' tb |>
 #'   ds(varlist("x1-x5"))
-#'
 #' @family selection and preview functions
 #' @export
 varlist <- function(

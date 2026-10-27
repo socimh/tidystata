@@ -3,7 +3,7 @@
 #' Open all or selected columns in an interactive data viewer. Outside an
 #' interactive session, no viewer is opened.
 #'
-#' @param .data A data frame or tibble.
+#' @param .data A data frame, tibble, or data.table.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> or
 #'   <[`data-masking`][args_data_masking]> Columns to select or compute with
 #'   [select_or_transmute()]. Existing columns, selection helpers, and named

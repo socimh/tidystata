@@ -35,7 +35,7 @@ table_restore <- function(
 # Avoid reference semantics and preview dispatch in internal calculations.
 table_working_data <- function(data, call = rlang::caller_env()) {
   if (inherits(data, "tidystata_preview")) {
-    data <- unpreview_table(data)
+    data <- unpreview(data)
   }
   if (inherits(data, "data.table")) {
     table_check_data_table(call)
