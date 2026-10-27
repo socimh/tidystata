@@ -428,3 +428,11 @@ test_that("large signed integer64 extrema retain exact order and identity", {
   expect_identical(row_unique(data), c(2L, 2L))
   expect_identical(serialize(data, NULL), before)
 })
+
+test_that("the same vector can be passed more than once", {
+  x <- c(1L, NA, 3L)
+  y <- c(2L, 5L, NA)
+  expect_identical(row_max(x, x), x)
+  expect_identical(row_sum(x, x, y), c(4, 5, 6))
+  expect_identical(row_miss(x, x), c(0L, 2L, 0L))
+})

@@ -47,7 +47,7 @@ mvdecode <- function(x, mv) {
   if (missing(x) || missing(mv)) {
     na_conversion_missing(if (missing(x)) "x" else "mv", "mvdecode", "mv")
   }
-  na_decode(x, mv)
+  na_decode(x, mv, "mv")
 }
 
 #' @rdname na_conversion
@@ -69,7 +69,7 @@ na_if_value <- function(x, value) {
       "value"
     )
   }
-  na_decode(x, value)
+  na_decode(x, value, "value")
 }
 
 #' @rdname na_conversion
@@ -98,7 +98,14 @@ na_conversion_missing <- function(
 }
 
 # Each code is matched separately, so `mv` is a set of codes, as in Stata.
-na_decode <- function(x, mv) {
+na_decode <- function(x, mv, argument, call = rlang::caller_env()) {
+  # Cast once with the caller's argument names; dplyr::na_if() would report
+  # an incompatible value as its internal `y`.
+  mv <- na_type_guard(
+    vctrs::vec_cast(mv, vctrs::vec_ptype(x), x_arg = argument, to_arg = "x"),
+    argument,
+    call
+  )
   for (i in seq_along(mv)) {
     x <- dplyr::na_if(x, mv[i])
   }
@@ -108,7 +115,11 @@ na_decode <- function(x, mv) {
 na_encode <- function(x, mv, argument, call = rlang::caller_env()) {
   if (inherits(x, "haven_labelled_spss")) {
     # User-missing codes are missing under is.na(), but not for vctrs/tidyr.
-    replacement <- vctrs::vec_cast(mv, vctrs::vec_ptype(x))
+    replacement <- na_type_guard(
+      vctrs::vec_cast(mv, vctrs::vec_ptype(x), x_arg = argument, to_arg = "x"),
+      argument,
+      call
+    )
     if (length(replacement) != 1L) {
       cli::cli_abort(
         "{.arg {argument}} must be a single replacement value.",
@@ -118,7 +129,20 @@ na_encode <- function(x, mv, argument, call = rlang::caller_env()) {
     x[is.na(x)] <- replacement
     return(x)
   }
-  replace_missing(x, mv, argument, call = call)
+  na_type_guard(replace_missing(x, mv, argument, call = call), argument, call)
+}
+
+na_type_guard <- function(code, argument, call) {
+  withCallingHandlers(
+    code,
+    vctrs_error_incompatible_type = function(cnd) {
+      cli::cli_abort(
+        "{.arg {argument}} must have a type compatible with {.arg x}.",
+        parent = cnd,
+        call = call
+      )
+    }
+  )
 }
 
 # Missing values (including NaN) replaced by one value cast to the type of

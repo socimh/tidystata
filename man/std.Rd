@@ -62,6 +62,7 @@ Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
 \code{\link{cut}},
 \code{\link{panel}},
-\code{\link{row_egen}}
+\code{\link{row_egen}},
+\code{\link[=stata_recode]{stata_recode()}}
 }
 \concept{variable generation functions}

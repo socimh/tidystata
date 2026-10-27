@@ -231,7 +231,21 @@ identical(ordinary, long)
 ```
 
 `print_headtail()` and `print_interval()` print once and invisibly return the
-complete input. `unpreview()` removes the persistent display setting.
+complete input. They are useful when tabulating a continuous variable with many
+distinct values. `tab()` counts each distinct value separately and sorts values
+in ascending order by default:
+
+```{r continuous-tabulation}
+lifeexp_counts <- tab(lifeexp, lexp)
+print_interval(lifeexp_counts, n = 6)
+print_headtail(lifeexp_counts, n = 6)
+```
+
+`print_interval()` shows evenly spaced rows across the sorted table;
+`print_headtail()` shows its beginning and end. Neither helper bins values,
+removes rows from the returned table, or changes counts and percentages.
+
+`unpreview()` removes the persistent display setting.
 Supported dplyr/tidyr operations carry preview settings forward while following
 their own container and grouping rules. Wrapping and unwrapping a data.table
 copies it; later native data.table mutations retain ordinary reference semantics.

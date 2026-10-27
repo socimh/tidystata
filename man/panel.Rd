@@ -130,6 +130,7 @@ Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
 \code{\link{cut}},
 \code{\link{row_egen}},
+\code{\link[=stata_recode]{stata_recode()}},
 \code{\link[=std]{std()}}
 }
 \concept{variable generation functions}

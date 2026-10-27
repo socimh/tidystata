@@ -895,6 +895,36 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-c29c81cf865f0843" = list(
+      variables = c("x", "binary"),
+      meaning = "recode: Recode ranges of values with Stata rules",
+      priority = 100L,
+      hints = c("generate"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-a7de10888c5776cf" = list(
+      variables = c("x", "z"),
+      meaning = "recode: Recode selected values with Stata rules",
+      priority = 100L,
+      hints = c("generate"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-733efa11762fe2c5" = list(
+      variables = c("x", "level"),
+      meaning = "recode: Recode values and label the new codes",
+      priority = 100L,
+      hints = c("generate"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-f017d7d27b2c46a0" = list(
       variables = c("x"),
       meaning = "mvdecode: Convert multiple sentinel codes to missing",

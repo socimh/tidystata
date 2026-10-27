@@ -57,6 +57,7 @@
 #' @family inspection functions
 #' @export
 codebook <- function(.data, ...) {
+  check_data_frame(.data)
   template <- .data
   .data <- table_working_data(.data)
   .data <- dplyr::ungroup(.data)

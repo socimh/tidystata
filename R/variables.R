@@ -59,6 +59,7 @@
 #' @rdname variables
 #' @export
 variables <- function(.data, ...) {
+  check_data_frame(.data)
   if (!missing(...)) {
     .data <- dplyr::select(.data, ...)
   }
@@ -76,6 +77,7 @@ variables <- function(.data, ...) {
 #' @rdname variables
 #' @export
 variables_search <- function(.data, string, ...) {
+  check_data_frame(.data)
   check_string(string)
   if (is.character(string)) {
     string <- varlist_wildcards(string) |>

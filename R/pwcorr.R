@@ -187,8 +187,10 @@ pwcorr_data <- function(
   groups <- group_locations(.data, group_vars)
   out <- lapply(seq_along(groups$locs), function(i) {
     loc <- groups$locs[[i]]
-    w <- if (is.null(weights)) NULL else weights[loc]
-    columns <- lapply(values, `[`, loc)
+    # A single group spanning every row needs no subset copies.
+    whole <- length(groups$locs) == 1L && length(loc) == nrow(.data)
+    w <- if (is.null(weights) || whole) weights else weights[loc]
+    columns <- if (whole) values else lapply(values, `[`, loc)
     if (.listwise) {
       complete <- Reduce(`&`, lapply(columns, Negate(is.na)))
       if (!is.null(w)) {
@@ -229,14 +231,14 @@ pwcorr_values <- function(data, selected, call = rlang::caller_env()) {
     if (!is.null(dim(x))) {
       return(NULL)
     }
-    if (is.logical(x) && !is.object(x)) {
-      return(as.numeric(x))
+    # The native kernels read logical, integer and double storage in place,
+    # treating only NA and NaN (including tagged NA) as missing. SPSS codes
+    # declared missing must first become NA, which needs a copy.
+    if ((is.logical(x) || is.numeric(x)) && !is.object(x)) {
+      return(x)
     }
     if (inherits(x, "haven_labelled") && is.numeric(vctrs::vec_data(x))) {
-      return(labelled_numeric(x))
-    }
-    if (is.numeric(x) && !is.object(x)) {
-      return(as.numeric(x))
+      return(if (inherits(x, "haven_labelled_spss")) labelled_numeric(x) else x)
     }
     NULL
   })
@@ -257,8 +259,10 @@ pwcorr_values <- function(data, selected, call = rlang::caller_env()) {
   numeric
 }
 
-# Correlation, observation count and p-value for one pair of columns. `ok`
-# marks complete pairs; callers pass it to reuse each column's missing mask.
+# Correlation, observation count and p-value for one pair of columns: the
+# reference definition that the native pwcorr_pearson() and pwcorr_spearman()
+# kernels reproduce exactly, kept for their regression tests. `ok` marks
+# complete pairs.
 pwcorr_pair <- function(
   x,
   y,
@@ -436,18 +440,18 @@ pwcorr_rescale <- function(x) {
 pwcorr_long <- function(columns, w, method, weight_type, adjust = "none") {
   variables <- names(columns)
   pairs <- utils::combn(length(variables), 2L)
-  observed <- lapply(columns, Negate(is.na))
-  results <- lapply(seq_len(ncol(pairs)), function(k) {
-    i <- pairs[1L, k]
-    j <- pairs[2L, k]
-    ok <- observed[[i]] & observed[[j]]
-    pwcorr_pair(columns[[i]], columns[[j]], w, method, weight_type, ok)
-  })
-  n <- vapply(results, `[[`, numeric(1), "n")
+  if (method == "pearson") {
+    results <- pwcorr_pearson_pairs(columns, w, weight_type)
+    p <- pwcorr_pearson_p(results$r, results$n)
+  } else {
+    results <- pwcorr_spearman(unname(columns))
+    p <- results$p
+  }
+  r <- results$r
+  n <- results$n
   if (is.null(w) || weight_type == "analytic") {
     n <- as.integer(n)
   }
-  p <- vapply(results, `[[`, numeric(1), "p")
   # Like Stata, adjust for every pair in the table, not only defined p-values.
   k <- ncol(pairs)
   p <- switch(
@@ -459,25 +463,50 @@ pwcorr_long <- function(columns, w, method, weight_type, adjust = "none") {
   tibble::tibble(
     var1 = variables[pairs[1L, ]],
     var2 = variables[pairs[2L, ]],
-    r = vapply(results, `[[`, numeric(1), "r"),
+    r = r,
     n = n,
     p = p
   )
+}
+
+# Pearson correlations and sample sizes for every pair, in combn() order,
+# from one native pass per pair. Arithmetic matches pwcorr_pair().
+pwcorr_pearson_pairs <- function(columns, w, weight_type) {
+  if (length(columns) < 2L) {
+    return(list(r = double(), n = double()))
+  }
+  pwcorr_pearson(
+    unname(columns),
+    if (is.null(w)) NULL else as.double(w),
+    weight_type == "frequency"
+  )
+}
+
+# Two-sided t-test p-values, as pwcorr_pair() gives for Pearson pairs.
+pwcorr_pearson_p <- function(r, n) {
+  p <- rep(NA_real_, length(r))
+  defined <- !is.na(r) & n >= 3
+  perfect <- defined & abs(r) >= 1
+  p[perfect] <- 0
+  tested <- defined & !perfect
+  statistic <- r[tested] * sqrt((n[tested] - 2) / (1 - r[tested]^2))
+  p[tested] <- 2 *
+    stats::pt(abs(statistic), df = n[tested] - 2, lower.tail = FALSE)
+  p
 }
 
 pwcorr_wide <- function(columns, w, method) {
   variables <- names(columns)
   size <- length(variables)
   matrix <- matrix(NA_real_, size, size)
-  observed <- lapply(columns, Negate(is.na))
-  for (i in seq_len(size)) {
-    for (j in seq_len(i)) {
-      matrix[i, j] <- if (i == j) {
-        1
-      } else {
-        ok <- observed[[i]] & observed[[j]]
-        pwcorr_pair(columns[[i]], columns[[j]], w, method, "frequency", ok)$r
-      }
+  diag(matrix) <- 1
+  if (size > 1L) {
+    pairs <- utils::combn(size, 2L)
+    # Pairs (i, j) with i < j fill the lower triangle at [j, i].
+    matrix[cbind(pairs[2L, ], pairs[1L, ])] <- if (method == "pearson") {
+      pwcorr_pearson_pairs(columns, w, "frequency")$r
+    } else {
+      pwcorr_spearman(unname(columns))$r
     }
   }
   colnames(matrix) <- variables

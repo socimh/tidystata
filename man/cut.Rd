@@ -61,7 +61,7 @@ or when \code{xtile()} runs in a grouped data mask with default labels. The
 result has the same length and order as \code{x}, with missing inputs remaining
 missing. All-missing inputs are rejected. Empty inputs are rejected by
 \code{xtile()} and \code{cut_length()}; \code{cut_breaks(numeric(), breaks = 50)} returns
-an empty ordered factor with range warnings.
+an empty ordered factor.
 }
 \description{
 Group numeric values using quantiles, equal widths, or chosen cutpoints:
@@ -85,7 +85,11 @@ intervals covered by each group, for example \code{"[0,0]"} and \code{"(0,1]"}. 
 labels must match the effective number of groups. \code{xtile()} rejects empty
 and all-missing vectors; it rejects constants in quantile mode but accepts
 them in rank mode. \code{cut_length()} and \code{cut_breaks()} reject constants and
-all-missing vectors.
+all-missing vectors; \code{cut_length()} also rejects infinite values, because
+equal-width intervals need a finite range.
+
+Interval labels always use a decimal point, whatever \code{options(OutDec)}
+says, so that \code{"[2.8,6.6]"} cannot be read as four numbers.
 
 \code{cut_breaks()} differs from \verb{egen cut(), at()} at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while
@@ -119,6 +123,7 @@ Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
 \code{\link{panel}},
 \code{\link{row_egen}},
+\code{\link[=stata_recode]{stata_recode()}},
 \code{\link[=std]{std()}}
 }
 \concept{variable generation functions}

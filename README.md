@@ -137,6 +137,44 @@ tab2(lifeexp_tab, region:lexp_70)
 #> 3 3 [South America]          3      7
 ```
 
+You can also tabulate continuous variables. When there are many distinct values, use `print_headtail()` to see the beginning and end or `print_interval()` to inspect evenly spaced rows. These helpers shorten the display while retaining the complete table.
+
+``` r
+tab(lifeexp, lexp) |> print_headtail()
+#> # A tibble: 20 x 6
+#>     lexp     n percent    cum valid valid_cum
+#>    <dbl> <int>   <dbl>  <dbl> <dbl>     <dbl>
+#>  1    57     1    1.47   1.47  1.47      1.47
+#>  2    61     1    1.47   2.94  1.47      2.94
+#>  3    62     2    2.94   5.88  2.94      5.88
+#>  4    63     1    1.47   7.35  1.47      7.35
+#>  5    64     3    4.41  11.8   4.41     11.8 
+#>  .     .     .      .     .      .        .  
+#> 16    75     4    5.88  72.1   5.88     72.1 
+#> 17    76     4    5.88  77.9   5.88     77.9 
+#> 18    77     5    7.35  85.3   7.35     85.3 
+#> 19    78     4    5.88  91.2   5.88     91.2 
+#> 20    79     6    8.82 100     8.82    100   
+#> # ... 10 rows omitted in the middle; use print(x, n = Inf) to show all rows.
+
+tab(lifeexp, lexp) |> print_interval()
+#> # A tibble: 20 x 6
+#>     lexp     n percent    cum valid valid_cum
+#>    <dbl> <int>   <dbl>  <dbl> <dbl>     <dbl>
+#>  1    57     1    1.47   1.47  1.47      1.47
+#>  3    62     2    2.94   5.88  2.94      5.88
+#>  5    64     3    4.41  11.8   4.41     11.8 
+#>  7    66     1    1.47  14.7   1.47     14.7 
+#>  9    68     3    4.41  25     4.41     25   
+#> 12    71     6    8.82  47.1   8.82     47.1 
+#> 14    73     4    5.88  61.8   5.88     61.8 
+#> 16    75     4    5.88  72.1   5.88     72.1 
+#> 18    77     5    7.35  85.3   7.35     85.3 
+#> 20    79     6    8.82 100     8.82    100   
+#> # ... 10 rows omitted between displayed positions; use print(x, n = Inf) to
+#> # show all rows.
+```
+
 ## Learn more
 
 tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`corr()` for complete cases and `pwcorr()` for pairwise samples), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.

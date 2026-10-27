@@ -38,6 +38,7 @@
 #'   summ(selected, lexp, gnppc)
 #' }
 browse <- function(.data, ...) {
+  check_data_frame(.data)
   if (missing(...)) {
     tibble::view(.data)
   } else {

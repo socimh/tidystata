@@ -229,168 +229,64 @@ summ_variable <- function(
   weight_type = "frequency",
   metadata
 ) {
-  missing <- metadata$missing
-  type <- summ_type_label(metadata, calendar)
-  ids <- if ("unique" %in% requested && length(locs) > 1L) {
-    vctrs::vec_group_id(var)
-  } else {
-    NULL
-  }
-
-  probabilities <- summ_probabilities(requested)
-  mean_needed <- any(requested %in% c("mean", "skew", "kurtosis"))
-  sd_needed <- any(requested %in% c("sd", "se", "skew", "kurtosis"))
-  statistics <- setdiff(requested, "type")
-  if (!is.null(weights)) {
-    return(summ_weighted(
-      var,
-      numeric,
-      missing,
-      locs,
-      requested,
-      statistics,
-      probabilities,
-      type,
-      weights,
-      weight_type,
-      ids
-    ))
-  }
-
-  # Slice each group once, then dispatch each requested statistic once per
-  # variable. The numerical routines and original missingness semantics stay R's.
-  kept <- lapply(locs, function(loc) loc[!missing[loc]])
+  kept <- lapply(locs, function(loc) loc[!metadata$missing[loc]])
   n_val <- lengths(kept)
-  nonempty <- if (is.null(numeric)) integer() else which(n_val > 0L)
-  # Observed values of every group, one after another, and as a list of
-  # per-group vectors only when a per-group call needs them.
-  segments <- if (!is.null(numeric)) numeric[unlist(kept, use.names = FALSE)]
-  observed <- NULL
-  observed_list <- function() {
-    if (is.null(observed)) {
-      observed <<- if (is.null(numeric)) {
-        rep(list(numeric()), length(locs))
-      } else {
-        lapply(kept, function(loc) numeric[loc])
-      }
-    }
-    observed
-  }
-  # Per-group calls dominate for many small groups; there, statistics are
-  # computed across all groups at once. Larger groups keep per-group calls.
   many_small <- length(locs) > 1L && sum(n_val) <= 1000 * length(locs)
-  apply_observed <- function(fn) {
-    result <- rep(NA_real_, length(locs))
-    result[nonempty] <- vapply(observed_list()[nonempty], fn, numeric(1))
-    result
+  weighted <- !is.null(weights)
+  statistics <- setdiff(
+    requested,
+    c("type", "unique", "miss_n", "valid_pct", if (!weighted) "n")
+  )
+  probabilities <- summ_probabilities(requested)
+  if (weighted && any(c("median", "mad") %in% requested)) {
+    probabilities["median"] <- 0.5
   }
-  # Native group means and sums reproduce mean() and sum() exactly.
-  apply_native <- function(kernel) {
-    result <- rep(NA_real_, length(locs))
-    result[nonempty] <- kernel(as.double(numeric), kept[nonempty])
-    result
-  }
-  # Native min(), max() and var() of each group's segment, with NA for
-  # groups without observed values.
-  apply_segments <- function(kernel) {
-    if (is.null(numeric)) {
-      return(rep(NA_real_, length(locs)))
-    }
-    kernel(as.double(segments), n_val)
-  }
-  center <- if (mean_needed) apply_native(group_mean_dbl) else NULL
-  # As stats::sd(): the square root of var().
-  spread <- if (sd_needed) sqrt(apply_segments(group_var_dbl)) else NULL
-  # Sort all observed values once by group and read quantiles, medians and
-  # MADs by position rather than per group.
-  sorted <- if (
-    many_small &&
-      !is.null(numeric) &&
-      any(c(names(probabilities), "median", "mad") %in% requested)
-  ) {
-    summ_sorted_groups(segments, rep.int(seq_along(kept), n_val), n_val)
-  }
-  quantiles <- if (!length(probabilities)) {
-    NULL
-  } else if (!is.null(sorted)) {
-    lapply(probabilities, function(p) summ_sorted_quantile(sorted, p))
-  } else {
-    lapply(observed_list(), function(x) {
-      if (length(x)) {
-        stata_quantile(x, probabilities)
-      } else {
-        rep(NA_real_, length(probabilities))
-      }
-    })
-  }
-  quantile_column <- function(name) {
-    if (!is.null(sorted)) {
-      return(quantiles[[name]])
-    }
-    vapply(quantiles, `[[`, numeric(1), match(name, names(probabilities)))
-  }
-  median_column <- function() {
-    if (is.null(sorted)) {
-      apply_observed(stats::median)
-    } else {
-      summ_sorted_median(sorted)
-    }
-  }
-  mad_column <- function() {
-    if (is.null(sorted)) {
-      apply_observed(stats::mad)
-    } else {
-      summ_sorted_mad(sorted, nonempty)
-    }
-  }
-  # Stata's moments: m_k / m_2^(k/2), with the population SD sqrt(m_2).
-  moment <- function(power) {
-    population <- summ_population_sd(spread, n_val)
-    if (many_small) {
-      return(summ_group_moment(
-        numeric,
-        kept,
-        nonempty,
-        center,
-        population,
-        power
-      ))
-    }
-    result <- rep(NA_real_, length(locs))
-    result[nonempty] <- vapply(
-      nonempty,
-      function(i) {
-        sum((observed_list()[[i]] - center[[i]])^power) /
-          (n_val[[i]] * population[[i]]^power)
-      },
-      numeric(1)
+  indices <- match(statistics, names(probabilities), nomatch = 0L)
+  values <- if (!length(statistics)) {
+    list()
+  } else if (weighted) {
+    group_weighted_summary_dbl(
+      numeric,
+      weights,
+      kept,
+      weight_type == "analytic",
+      many_small,
+      statistics,
+      unname(probabilities),
+      indices
     )
-    result
+  } else if (is.null(numeric)) {
+    rep(list(rep(NA_real_, length(locs))), length(statistics))
+  } else {
+    group_summary_dbl(
+      numeric,
+      kept,
+      statistics,
+      unname(probabilities),
+      indices,
+      many_small
+    )
   }
-  out <- list(type = rep(type, length(locs)))
-  for (statistic in statistics) {
-    out[[statistic]] <- if (statistic %in% names(probabilities)) {
-      quantile_column(statistic)
+  names(values) <- statistics
+  out <- c(
+    list(type = rep(summ_type_label(metadata, calendar), length(locs))),
+    values
+  )
+  if (!weighted && "n" %in% requested) {
+    out$n <- as.integer(n_val)
+  }
+  if ("unique" %in% requested) {
+    out$unique <- if (length(locs) == 1L) {
+      vctrs::vec_unique_count(vctrs::vec_slice(var, kept[[1L]]))
     } else {
-      switch(
-        statistic,
-        n = as.integer(n_val),
-        unique = summ_unique_counts(var, ids, kept, n_val, many_small),
-        miss_n = as.integer(lengths(locs) - n_val),
-        valid_pct = summ_valid_pct(n_val, lengths(locs)),
-        min = apply_segments(group_min_dbl),
-        median = median_column(),
-        mean = center,
-        mad = mad_column(),
-        sd = spread,
-        max = apply_segments(group_max_dbl),
-        iqr = quantile_column("q3") - quantile_column("q1"),
-        skew = moment(3),
-        kurtosis = moment(4),
-        se = spread / sqrt(n_val),
-        sum = apply_native(group_sum_dbl)
-      )
+      group_unique_id(vctrs::vec_group_id(var), kept)
     }
+  }
+  if ("miss_n" %in% requested) {
+    out$miss_n <- as.integer(lengths(locs) - n_val)
+  }
+  if ("valid_pct" %in% requested) {
+    out$valid_pct <- summ_valid_pct(n_val, lengths(locs))
   }
   out[requested]
 }
@@ -422,138 +318,11 @@ summ_probabilities <- function(requested) {
   probabilities
 }
 
-# Distinct values per group. `ids` holds vctrs group identities of `var`.
-summ_unique_counts <- function(var, ids, kept, n_val, many_small) {
-  if (length(kept) == 1L) {
-    vctrs::vec_unique_count(vctrs::vec_slice(var, kept[[1L]]))
-  } else if (many_small) {
-    summ_group_unique(ids, kept, n_val)
-  } else {
-    vapply(kept, function(loc) length(unique(ids[loc])), integer(1))
-  }
-}
-
 # Share of observed values in each group, NA for empty groups.
 summ_valid_pct <- function(n_val, sizes) {
   result <- n_val / sizes
   result[sizes == 0L] <- NA_real_
   result
-}
-
-# As mad() for every group: 1.4826 times the median absolute deviation from
-# the median, read from values already sorted by group.
-summ_sorted_mad <- function(sorted, nonempty) {
-  deviation <- abs(sorted$values - summ_sorted_median(sorted)[sorted$group])
-  typical <- summ_sorted_median(summ_sorted_groups(
-    deviation,
-    sorted$group,
-    sorted$n
-  ))
-  # median() returns NA when a deviation is NaN, such as Inf - Inf.
-  undefined <- tabulate(
-    sorted$group[is.na(deviation)],
-    nbins = length(sorted$n)
-  )
-  typical[undefined > 0L] <- NA_real_
-  result <- rep(NA_real_, length(sorted$n))
-  result[nonempty] <- 1.4826 * typical[nonempty]
-  result
-}
-
-# The population SD, sqrt(m_2), from the sample SD of `n` values (or a
-# summed weight `n`). It is NA when m_2 is zero, where Stata's skewness and
-# kurtosis are missing.
-summ_population_sd <- function(spread, n) {
-  population <- rep(NA_real_, length(spread))
-  ok <- !is.na(spread) & n > 1
-  n <- rep_len(n, length(spread))[ok]
-  population[ok] <- spread[ok] * sqrt((n - 1) / n)
-  population[ok & population == 0] <- NA_real_
-  population
-}
-
-# Standardized central moment of every group at once, for many small groups.
-summ_group_moment <- function(numeric, kept, nonempty, center, spread, power) {
-  n_val <- lengths(kept)
-  result <- rep(NA_real_, length(kept))
-  if (!length(nonempty)) {
-    return(result)
-  }
-  rows <- unlist(kept, use.names = FALSE)
-  deviation <- rep(NA_real_, length(numeric))
-  deviation[rows] <- (numeric[rows] - rep.int(center, n_val))^power
-  result[nonempty] <- group_sum_dbl(deviation, kept[nonempty]) /
-    (n_val[nonempty] * spread[nonempty]^power)
-  result
-}
-
-# Observed values sorted by group, then by value. `values` and `group` are in
-# group order with `n` values per group.
-summ_sorted_groups <- function(values, group, n) {
-  order <- order(group, values, method = "radix")
-  list(
-    values = values[order],
-    group = group,
-    n = n,
-    start = c(0L, cumsum(n))[seq_along(n)]
-  )
-}
-
-# stata_quantile(x, p) for every group: the value after position n * p, or the
-# mean of the values at and after it when n * p is a whole number.
-summ_sorted_quantile <- function(sorted, p) {
-  result <- rep(NA_real_, length(sorted$n))
-  ok <- sorted$n > 0L
-  n <- sorted$n[ok]
-  start <- sorted$start[ok]
-  if (p <= 0) {
-    result[ok] <- sorted$values[start + 1L]
-    return(result)
-  }
-  if (p >= 1) {
-    result[ok] <- sorted$values[start + n]
-    return(result)
-  }
-  target <- n * p
-  whole <- round(target)
-  # The same tolerance as weighted_quantile().
-  exact <- abs(target - whole) <= sqrt(.Machine$double.eps) * n &
-    whole >= 1 &
-    whole < n
-  position <- ifelse(exact, whole, floor(target) + 1)
-  qs <- sorted$values[start + position]
-  i <- which(exact)
-  qs[i] <- weights_midpoint(qs[i], sorted$values[start[i] + whole[i] + 1L])
-  result[ok] <- qs
-  result
-}
-
-# median() for every group: the middle value, or mean() of the two middle ones.
-summ_sorted_median <- function(sorted) {
-  n <- sorted$n
-  result <- rep(NA_real_, length(n))
-  lower <- sorted$start + (n + 1L) %/% 2L
-  odd <- n %% 2L == 1L
-  result[odd] <- sorted$values[lower[odd]]
-  even <- which(n > 0L & !odd)
-  if (length(even)) {
-    pairs <- split(
-      c(lower[even], lower[even] + 1L),
-      rep(seq_along(even), 2L)
-    )
-    result[even] <- group_mean_dbl(sorted$values, unname(pairs))
-  }
-  result
-}
-
-# Distinct identities among each group's observed rows.
-summ_group_unique <- function(ids, kept, n) {
-  group <- rep.int(seq_along(kept), n)
-  pairs <- vctrs::new_data_frame(list(
-    group = group,
-    id = ids[unlist(kept, use.names = FALSE)]
-  ))
-  tabulate(group[vctrs::vec_unique_loc(pairs)], nbins = length(kept))
 }
 
 # Format calendar locations: Dates as days, datetimes in their own time zone
@@ -682,7 +451,15 @@ summ_data <- function(
   blocks <- lapply(summ_vars, function(column) {
     var <- .data[[column]]
     numeric <- if (needs_numeric && metadata[[column]]$summable) {
-      as_numeric(var)
+      # The kernels read logical, integer and double storage in place. Only
+      # observed rows are summarised, and is.na() already marks SPSS
+      # user-missing and tagged values, so labelled codes need no conversion.
+      stored <- typeof(var) %in% c("logical", "integer", "double")
+      if (stored && (!is.object(var) || inherits(var, "haven_labelled"))) {
+        var
+      } else {
+        as_numeric(var)
+      }
     } else {
       NULL
     }
@@ -903,332 +680,4 @@ summ_table_text <- function(x) {
     x <- signif(x, 7)
   }
   as.character(x)
-}
-
-# Weighted statistics for one variable in every group. Frequency weights use
-# the summed weight W as the number of observations; analytic weights are first
-# rescaled within the group so that W equals the number of observed values.
-# Mean, variance (W - 1 denominator), moments and sums follow Stata's
-# `summarize [fweight/aweight]`; percentiles follow Stata's weighted rule.
-# `unique`, `miss_n` and `valid_pct` remain row counts.
-summ_weighted <- function(
-  var,
-  numeric,
-  missing,
-  locs,
-  requested,
-  statistics,
-  probabilities,
-  type,
-  weights,
-  weight_type,
-  ids = NULL
-) {
-  spread_needed <- any(statistics %in% c("sd", "se", "skew", "kurtosis"))
-  center_needed <- spread_needed || "mean" %in% statistics
-  median_needed <- any(statistics %in% c("median", "mad"))
-  if (median_needed) {
-    probabilities["median"] <- 0.5
-  }
-  kept <- lapply(locs, function(loc) loc[!missing[loc]])
-  n_val <- lengths(kept)
-  # As in summ_variable(), many small groups are computed all at once.
-  if (length(locs) > 1L && sum(n_val) <= 1000 * length(locs)) {
-    return(summ_weighted_groups(
-      var,
-      numeric,
-      kept,
-      locs,
-      requested,
-      statistics,
-      probabilities,
-      type,
-      weights,
-      weight_type,
-      ids
-    ))
-  }
-  one_group <- function(loc) {
-    kept <- loc[!missing[loc]]
-    w <- weights[kept]
-    # Stata's r(sum) uses the weights as given, even analytic ones.
-    raw <- w
-    # Arithmetic uses bounded weights even when the original total overflows.
-    normalized <- if (any(w > 0)) w / max(w) else w
-    mass <- sum(normalized)
-    probability <- normalized / mass
-    if (weight_type == "analytic" && mass > 0) {
-      w <- normalized * (length(w) / mass)
-    }
-    total <- sum(w)
-    # Counts retain zero-weight observations, while arithmetic excludes them.
-    positive <- w > 0
-    x <- if (is.null(numeric)) numeric() else numeric[kept][positive]
-    w <- w[positive]
-    raw <- raw[positive]
-    probability <- probability[positive]
-    has <- length(x) > 0L && total > 0
-    raw_total <- sum(raw)
-    weighted_average <- function(values) {
-      numerator <- sum(raw * values)
-      # Multiplying first retains small-weight, large-value contributions.
-      if (is.finite(numerator) && is.finite(raw_total) && numerator != 0) {
-        return(numerator / raw_total)
-      }
-      product <- probability * values
-      infinite <- is.infinite(values)
-      product[infinite] <- values[infinite]
-      sum(product)
-    }
-    center <- if (has && center_needed) weighted_average(x) else NA_real_
-    population <- if (has && spread_needed) {
-      if (is.finite(x[[1L]]) && all(x == x[[1L]])) {
-        0
-      } else {
-        sqrt(weighted_average((x - center)^2))
-      }
-    } else {
-      NA_real_
-    }
-    spread <- if (has && spread_needed && total > 1) {
-      correction <- if (is.infinite(total)) 1 else (total - 1) / total
-      population / sqrt(correction)
-    } else {
-      NA_real_
-    }
-    if (!is.na(population) && population == 0) {
-      population <- NA_real_
-    }
-    quantiles <- if (has && length(probabilities)) {
-      weighted_quantile(x, w, probabilities)
-    } else {
-      rep(NA_real_, length(probabilities))
-    }
-    names(quantiles) <- names(probabilities)
-    positive <- if (any(statistics %in% c("min", "max"))) x[w > 0] else NULL
-    median <- if (median_needed) unname(quantiles[["median"]]) else NULL
-    vapply(
-      statistics,
-      function(statistic) {
-        if (statistic %in% names(quantiles)) {
-          return(unname(quantiles[[statistic]]))
-        }
-        switch(
-          statistic,
-          n = total,
-          unique = vctrs::vec_unique_count(vctrs::vec_slice(var, kept)),
-          miss_n = length(loc) - length(kept),
-          valid_pct = if (length(loc)) length(kept) / length(loc) else NA_real_,
-          min = if (has) min(positive) else NA_real_,
-          median = median,
-          mean = center,
-          mad = if (has) {
-            1.4826 * weighted_quantile(abs(x - median), w, 0.5)
-          } else {
-            NA_real_
-          },
-          sd = spread,
-          max = if (has) max(positive) else NA_real_,
-          iqr = unname(quantiles[["q3"]] - quantiles[["q1"]]),
-          skew = if (has) {
-            weighted_average((x - center)^3) / population^3
-          } else {
-            NA_real_
-          },
-          kurtosis = if (has) {
-            weighted_average((x - center)^4) / population^4
-          } else {
-            NA_real_
-          },
-          se = spread / sqrt(total),
-          sum = if (has) sum(raw * x) else NA_real_
-        )
-      },
-      numeric(1)
-    )
-  }
-  values <- matrix(
-    as.numeric(unlist(lapply(locs, one_group), use.names = FALSE)),
-    ncol = length(statistics),
-    byrow = TRUE
-  )
-  out <- list(type = rep(type, length(locs)))
-  for (j in seq_along(statistics)) {
-    column <- values[, j]
-    if (statistics[[j]] %in% c("unique", "miss_n")) {
-      column <- as.integer(column)
-    }
-    out[[statistics[[j]]]] <- column
-  }
-  out[requested]
-}
-
-# summ_weighted() for many groups at once, repeating its per-group arithmetic
-# elementwise: group_sum_dbl() reproduces sum() over each group's rows, and
-# percentiles read each group's values sorted once by group and value.
-summ_weighted_groups <- function(
-  var,
-  numeric,
-  kept,
-  locs,
-  requested,
-  statistics,
-  probabilities,
-  type,
-  weights,
-  weight_type,
-  ids
-) {
-  groups <- length(locs)
-  n_val <- lengths(kept)
-  rows <- unlist(kept, use.names = FALSE)
-  group <- rep.int(seq_len(groups), n_val)
-  w <- weights
-  maxima <- vapply(kept, function(loc) max(c(0, weights[loc])), numeric(1))
-  maxima[maxima == 0] <- 1
-  normalized <- weights
-  normalized[rows] <- weights[rows] / maxima[group]
-  mass <- group_sum_dbl(normalized, kept)
-  probability <- normalized
-  probability[rows] <- normalized[rows] / mass[group]
-  probability[rows[mass[group] == 0]] <- 0
-  if (weight_type == "analytic") {
-    scaled <- mass[group] > 0
-    w[rows[scaled]] <- normalized[rows[scaled]] *
-      (n_val[group[scaled]] / mass[group[scaled]])
-  }
-  total <- group_sum_dbl(w, kept)
-  has <- !is.null(numeric) & n_val > 0L & total > 0
-  # Each group's value at each of its rows.
-  spread_rows <- function(value) {
-    out <- rep(NA_real_, length(w))
-    out[rows] <- value[group]
-    out
-  }
-  only_has <- function(value) {
-    value[!has] <- NA_real_
-    value
-  }
-  center <- rep(NA_real_, groups)
-  spread <- rep(NA_real_, groups)
-  quantiles <- matrix(
-    NA_real_,
-    groups,
-    length(probabilities),
-    dimnames = list(NULL, names(probabilities))
-  )
-  if (!is.null(numeric)) {
-    x <- numeric
-    positive <- w[rows] > 0
-    sizes <- tabulate(group[positive], nbins = groups)
-    spread_needed <- any(c("sd", "se", "skew", "kurtosis") %in% statistics)
-    minimum <- if (spread_needed || "min" %in% statistics) {
-      group_min_dbl(x[rows[positive]], sizes)
-    }
-    maximum <- if (spread_needed || "max" %in% statistics) {
-      group_max_dbl(x[rows[positive]], sizes)
-    }
-    raw_total <- group_sum_dbl(weights, kept)
-    weighted_average <- function(values) {
-      product <- weights * values
-      product[w == 0] <- 0
-      numerator <- group_sum_dbl(product, kept)
-      average <- numerator / raw_total
-      rescale <- has &
-        (!is.finite(numerator) | !is.finite(raw_total) | numerator == 0)
-      if (any(rescale)) {
-        product <- probability * values
-        infinite <- is.infinite(values) & w > 0
-        product[infinite] <- values[infinite]
-        product[w == 0] <- 0
-        average[rescale] <- group_sum_dbl(product, kept[rescale])
-      }
-      only_has(average)
-    }
-    if (any(c("mean", "sd", "se", "skew", "kurtosis") %in% statistics)) {
-      center <- weighted_average(x)
-    }
-    deviation <- x - spread_rows(center)
-    deviation[w == 0] <- 0
-    if (spread_needed) {
-      population <- sqrt(weighted_average(deviation^2))
-      constant <- is.finite(minimum) & minimum == maximum
-      population[constant] <- 0
-      valid_spread <- has & total > 1
-      correction <- rep(NA_real_, groups)
-      correction[valid_spread] <- ifelse(
-        is.infinite(total[valid_spread]),
-        1,
-        (total[valid_spread] - 1) / total[valid_spread]
-      )
-      spread <- population / sqrt(correction)
-      population[!is.na(population) & population == 0] <- NA_real_
-    }
-    # Values sorted within each group; weighted percentiles skip zero weights.
-    group_quantiles <- function(values, probs) {
-      order <- order(group, values, method = "radix")
-      group_weighted_quantile_dbl(
-        values[order],
-        w[rows][order],
-        n_val,
-        as.double(probs)
-      )
-    }
-    if (length(probabilities)) {
-      quantiles[] <- group_quantiles(x[rows], probabilities)
-      quantiles[!has, ] <- NA_real_
-    }
-    moment <- function(power) {
-      weighted_average(deviation^power) / population^power
-    }
-  }
-  # Without numeric values, these are missing in every group.
-  value_statistics <- c("min", "mad", "max", "skew", "kurtosis", "sum")
-  out <- list(type = rep(type, groups))
-  for (statistic in statistics) {
-    out[[statistic]] <- if (statistic %in% names(probabilities)) {
-      quantiles[, statistic]
-    } else if (is.null(numeric) && statistic %in% value_statistics) {
-      rep(NA_real_, groups)
-    } else {
-      switch(
-        statistic,
-        n = total,
-        unique = if (is.null(ids)) {
-          vapply(
-            kept,
-            function(loc) vctrs::vec_unique_count(vctrs::vec_slice(var, loc)),
-            integer(1)
-          )
-        } else {
-          summ_group_unique(ids, kept, n_val)
-        },
-        miss_n = as.integer(lengths(locs) - n_val),
-        valid_pct = {
-          result <- n_val / lengths(locs)
-          result[lengths(locs) == 0L] <- NA_real_
-          result
-        },
-        min = only_has(minimum),
-        mean = center,
-        mad = {
-          median <- quantiles[, "median"]
-          typical <- group_quantiles(abs(x[rows] - median[group]), 0.5)
-          only_has(1.4826 * typical)
-        },
-        sd = spread,
-        max = only_has(maximum),
-        iqr = quantiles[, "q3"] - quantiles[, "q1"],
-        skew = only_has(moment(3)),
-        kurtosis = only_has(moment(4)),
-        se = spread / sqrt(total),
-        sum = {
-          product <- weights * x
-          product[weights == 0] <- 0
-          only_has(group_sum_dbl(product, kept))
-        }
-      )
-    }
-  }
-  out[requested]
 }

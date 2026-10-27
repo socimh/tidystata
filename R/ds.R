@@ -55,6 +55,9 @@
 #' @rdname names
 #' @export
 ds <- function(.data, ..., .type = c("vector", "table", "tibble")) {
+  if (!is.data.frame(.data) && !(is.character(.data) && is.null(dim(.data)))) {
+    stop_input_type(.data, "a data frame or a character vector")
+  }
   .type <- rlang::arg_match(.type)
   if (.type != "vector") {
     out <- tibble::as_tibble_col(ds(table_working_data(.data), ...), "name")

@@ -134,7 +134,11 @@ dummy_columns <- function(x, var, names, call = rlang::caller_env()) {
   missing <- detect_missing(x)
   values <- vctrs::vec_unique(vctrs::vec_slice(x, !missing))
   if (is.factor(x)) {
-    values <- factor(intersect(levels(x), as.character(values)), levels(x))
+    values <- factor(
+      intersect(levels(x), as.character(values)),
+      levels(x),
+      ordered = is.ordered(x)
+    )
   } else {
     values <- vctrs::vec_sort(values)
   }

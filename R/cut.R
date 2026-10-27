@@ -48,7 +48,11 @@
 #' labels must match the effective number of groups. `xtile()` rejects empty
 #' and all-missing vectors; it rejects constants in quantile mode but accepts
 #' them in rank mode. `cut_length()` and `cut_breaks()` reject constants and
-#' all-missing vectors.
+#' all-missing vectors; `cut_length()` also rejects infinite values, because
+#' equal-width intervals need a finite range.
+#'
+#' Interval labels always use a decimal point, whatever `options(OutDec)`
+#' says, so that `"[2.8,6.6]"` cannot be read as four numbers.
 #'
 #' `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
 #' values outside the breaks (and at the last break) missing, while
@@ -71,7 +75,7 @@
 #'   result has the same length and order as `x`, with missing inputs remaining
 #'   missing. All-missing inputs are rejected. Empty inputs are rejected by
 #'   `xtile()` and `cut_length()`; `cut_breaks(numeric(), breaks = 50)` returns
-#'   an empty ordered factor with range warnings.
+#'   an empty ordered factor.
 #'
 #' @name cut
 #' @examples
@@ -96,6 +100,8 @@ xtile <- function(
   wt = NULL
 ) {
   method <- rlang::arg_match(method)
+  # Interval labels use a decimal point: "[2,8,6,6]" would be ambiguous.
+  rlang::local_options(OutDec = ".")
   x <- cut_numeric_input(x)
   if (is.logical(x) && is.null(dim(x))) {
     x <- as.integer(x)
@@ -265,17 +271,31 @@ cut_length <- function(x, n = 4, labels = NULL) {
   check_number_whole(n, min = 1)
   x <- cut_numeric_input(x)
   cut_check_x(x)
-  breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = n + 1)
+  observed <- x[!is.na(x)]
+  if (!length(observed)) {
+    cli::cli_abort("{.arg x} must contain non-missing observations.")
+  }
+  if (!all(is.finite(observed))) {
+    cli::cli_abort(c(
+      "{.arg x} must contain only finite values for equal-width bins.",
+      i = "Use {.fn cut_breaks} to place infinite values in open intervals."
+    ))
+  }
+  breaks <- seq(min(observed), max(observed), length.out = n + 1)
   cut_breaks(x, breaks = breaks, labels = labels)
 }
 
 #' @rdname cut
 #' @export
 cut_breaks <- function(x, breaks = NULL, labels = NULL, right = FALSE) {
+  # Interval labels use a decimal point: "[0,5,1,25)" would be ambiguous.
+  rlang::local_options(OutDec = ".")
   x <- cut_numeric_input(x)
   cut_check_x(x)
-  x_min <- min(x, na.rm = TRUE)
-  x_max <- max(x, na.rm = TRUE)
+  # An empty x has no observed range, as min() and max() of nothing.
+  observed <- x[!is.na(x)]
+  x_min <- if (length(observed)) min(observed) else Inf
+  x_max <- if (length(observed)) max(observed) else -Inf
   if (x_min == x_max) {
     cli::cli_abort("Can't cut a vector with only one unique value.")
   }

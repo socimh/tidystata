@@ -347,3 +347,119 @@ test_that("weighted correlations retain tiny nonzero variances", {
     expect_equal(wide$x[[2]], expected)
   }
 })
+
+test_that("native Pearson pairs reproduce the per-pair calculation exactly", {
+  set.seed(20261027)
+  x <- c(rnorm(30) * 1e-4 + 1e12, NA, 3, Inf)
+  y <- c(rnorm(30), 2, NA, 5)
+  z <- c(1.7e308, -1.7e308, runif(31))
+  constant <- rep(2, 33)
+  columns <- list(x = x, y = y, z = z, constant = constant)
+  weights <- list(NULL, c(0, runif(31), 0), rep(c(0, 1, 2.5), 11))
+  pairs <- utils::combn(length(columns), 2L)
+  for (w in weights) {
+    for (type in c("frequency", "analytic")) {
+      got <- pwcorr_pearson_pairs(columns, w, type)
+      expected <- lapply(seq_len(ncol(pairs)), function(k) {
+        pwcorr_pair(
+          columns[[pairs[1L, k]]],
+          columns[[pairs[2L, k]]],
+          w,
+          "pearson",
+          type
+        )
+      })
+      expect_identical(got$r, vapply(expected, `[[`, numeric(1), "r"))
+      expect_identical(
+        got$n,
+        vapply(expected, function(e) as.double(e$n), numeric(1))
+      )
+      expect_identical(
+        pwcorr_pearson_p(got$r, got$n),
+        vapply(expected, `[[`, numeric(1), "p")
+      )
+    }
+  }
+  empty <- pwcorr_pearson_pairs(
+    list(a = double(), b = double()),
+    NULL,
+    "frequency"
+  )
+  expect_identical(empty, list(r = NA_real_, n = 0))
+})
+
+test_that("native Spearman pairs reproduce the per-pair calculation exactly", {
+  set.seed(20261027)
+  columns <- list(
+    x = c(rnorm(20), NA, 1, 1),
+    ties = c(rep(1:3, 7), 2, NA),
+    binary = c(rep(c(0, 1, 1), 7), NA, 0),
+    big = c(rnorm(22) * 1e10 + 1e15, Inf),
+    constant = rep(2, 23)
+  )
+  pairs <- utils::combn(length(columns), 2L)
+  got <- pwcorr_spearman(unname(columns))
+  expected <- lapply(seq_len(ncol(pairs)), function(k) {
+    pwcorr_pair(
+      columns[[pairs[1L, k]]],
+      columns[[pairs[2L, k]]],
+      NULL,
+      "spearman",
+      "frequency"
+    )
+  })
+  expect_identical(got$r, vapply(expected, `[[`, numeric(1), "r"))
+  expect_identical(
+    got$n,
+    vapply(expected, function(e) as.double(e$n), numeric(1))
+  )
+  expect_identical(got$p, vapply(expected, `[[`, numeric(1), "p"))
+  small <- pwcorr_spearman(list(c(1, 2, NA, 4), c(2, NA, 3, 1)))
+  expect_identical(small$n, 2)
+  expect_identical(small$p, NA_real_)
+})
+
+test_that("integer and logical columns correlate in place like their doubles", {
+  data <- tibble::tibble(
+    i = c(3L, 1L, NA, 4L, 1L, 5L, 9L, 2L),
+    l = c(TRUE, FALSE, TRUE, NA, TRUE, FALSE, FALSE, TRUE),
+    x = c(2.5, 1, 3, 4, NA, 6, 1, 0),
+    w = c(1, 2, 1, 3, 1, 2, 1, 0.5)
+  )
+  doubles <- dplyr::mutate(data, i = as.double(i), l = as.double(l))
+  for (args in list(
+    list(),
+    list(.method = "spearman"),
+    list(.wt = quote(w)),
+    list(.wt = quote(w), .wt_type = "analytic", .listwise = TRUE),
+    list(.wide = TRUE, .method = "spearman")
+  )) {
+    call <- function(d) rlang::inject(pwcorr(d, i, l, x, !!!args))
+    expect_identical(call(data), call(doubles))
+  }
+  expect_identical(corr(data, i, l, x), corr(doubles, i, l, x))
+})
+
+test_that("labelled columns correlate by their codes, with SPSS missing as NA", {
+  codes <- c(1L, 2L, 9L, NA, 3L, -1L, 2L, 8L, 4L)
+  data <- tibble::tibble(
+    spss = haven::labelled_spss(codes, c(Yes = 1L), na_values = 9L),
+    tagged = haven::labelled(
+      c(1.5, haven::tagged_na("a"), 2, 4, NA, 3, 2.5, 7, 1),
+      c(Low = 1.5)
+    ),
+    x = c(2, 1, 3, 5, 4, 6, 1, 0, 2)
+  )
+  reference <- dplyr::mutate(
+    data,
+    spss = labelled_numeric(spss),
+    tagged = labelled_numeric(tagged)
+  )
+  for (method in c("pearson", "spearman")) {
+    expect_identical(
+      pwcorr(data, .method = method),
+      pwcorr(reference, .method = method)
+    )
+  }
+  expect_identical(corr(data), corr(reference))
+})

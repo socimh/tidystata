@@ -12,7 +12,9 @@ var_unit(x)
 \arguments{
 \item{x}{An object.}
 
-\item{abbr}{If \code{TRUE}, return an abbreviated type. Defaults to \code{FALSE}.}
+\item{abbr}{If \code{TRUE}, return an abbreviated type. Defaults to \code{FALSE},
+expanding known abbreviations and retaining full class names for default
+class abbreviations. Custom display labels may remain abbreviated.}
 }
 \value{
 A character string. \code{var_type()} gives the type description,
@@ -31,6 +33,40 @@ when the object has no unit.
 }
 }
 \details{
+\subsection{Comparison with other type inspectors}{
+
+\code{var_type()} gives one readable label per object, useful for column audits
+with \code{vapply(data, var_type, character(1))} or
+\code{dplyr::summarise(data, dplyr::across(dplyr::everything(), var_type))}.
+It combines storage and class information in a display label:
+\itemize{
+\item \code{\link[=typeof]{typeof()}} reports the internal storage type. Factors are \code{"integer"},
+while ordinary double vectors, POSIXct date-times and double-backed
+haven-labelled vectors are all \code{"double"}. \code{var_type()} distinguishes
+\code{"factor"}, \code{"double"}, \code{"datetime"} and \code{"double+label"}.
+\item \code{\link[=class]{class()}} reports the class names used for method dispatch and may return
+several strings, such as \code{c("ordered", "factor")}. \code{var_type()} reduces
+this to one label, \code{"ordered"}. Use \code{class()} to inspect the full class
+vector and \code{\link[=inherits]{inherits()}} to test class membership in program logic.
+\item \code{\link[=mode]{mode()}} reports a broader category: both integer and double vectors have
+mode \code{"numeric"}. \code{var_type()} keeps that storage distinction.
+\item \code{\link[utils:str]{utils::str()}} displays structure and example values. \code{var_type()} returns
+a character string that can be collected into an audit table.
+\item \code{\link[pillar:type_sum]{pillar::type_sum()}} supplies compact display labels for classed objects.
+\code{var_type()} builds on those labels, expands recognized abbreviations by
+default, marks haven value labels and omits container dimensions.
+}
+
+Custom classes can provide a \code{pillar::type_sum()} method to control their
+display label without changes to \code{var_type()}.
+
+Use \code{var_type()} for reporting; use storage or class inspectors when exact
+R type information is needed. Its display label does not retain the full
+class hierarchy, attributes or structure.
+}
+
+\subsection{Type and unit metadata}{
+
 Types describe storage and class metadata, not the observed values: empty and
 all-missing vectors retain their type. Known scalar abbreviations expand
 exactly, including \code{int64} to \code{integer64}. Haven-labelled vectors append
@@ -38,15 +74,20 @@ exactly, including \code{int64} to \code{integer64}. Haven-labelled vectors appe
 
 Plain matrices and arrays retain their element-type description, and data
 frames retain their container name without dimensions. Other classed objects
-use their pillar type description, preserving punctuation and structured
-labels such as \verb{I<int>} and \verb{list<int>} in both modes. An empty or missing
-custom description falls back to the first class name; errors in custom
-methods are propagated. A numeric-looking type description does not imply
-support for numeric summaries.
+use their pillar type description. With \code{abbr = FALSE}, a default class-name
+abbreviation is replaced by the full primary class name, for example
+\code{"dgCMatrix"} for a sparse matrix of that class. Registered or inherited
+display methods and explicit pillar labels take precedence. Custom labels,
+including punctuation and structured descriptions such as \verb{I<int>} and
+\verb{list<int>}, are preserved in both modes. An empty or missing custom
+description falls back to the first class name; errors in custom methods are
+propagated. A numeric-looking type description does not imply support for
+numeric summaries.
 
 \code{var_unit()} reads actual units/difftime metadata (including hms times), and
 retains custom unit methods for classes describing themselves as \code{units},
 \code{drtn} or \code{time}. Other objects return \code{NA_character_}.
+}
 }
 \examples{
 var_type(1:10)
@@ -54,6 +95,25 @@ var_type(1:10)
 var_type(1:10, abbr = TRUE)
 
 var_type(letters)
+
+# Compare storage, dispatch classes and readable type labels
+objects <- list(
+  score = 1.5,
+  grade = ordered(c("low", "high"), levels = c("low", "high")),
+  recorded = as.POSIXct("2026-01-01", tz = "UTC"),
+  answer = haven::labelled(c(1, 2), labels = c(Yes = 1, No = 2))
+)
+t(vapply(objects, function(x) {
+  c(
+    typeof = typeof(x), class = paste(class(x), collapse = ", "),
+    var_type = var_type(x)
+  )
+}, character(3)))
+
+# Full fallback class names, with compact display available separately
+measurement <- structure(c(1, 2, NA), class = "survey_measurement")
+c(compact = var_type(measurement, abbr = TRUE),
+  descriptive = var_type(measurement))
 
 # Type and unit describe different properties of the same object
 elapsed <- as.difftime(c(1, 2, 3), units = "hours")

@@ -220,6 +220,7 @@ summ <- function(
   .wt_type = c("frequency", "analytic")
 ) {
   local_wrapper_error_call()
+  check_data_frame_or_vector(.data)
   # Validate controls before data-dependent branching.
   summ_check_flags(list(
     .keep_all = .keep_all,
@@ -353,6 +354,7 @@ tabstat <- function(
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
 ) {
+  check_data_frame_or_vector(.data)
   .type <- rlang::arg_match(.type)
   # Detailed output replaces the default mean-only request.
   if (isTRUE(.detail) && missing(.stat)) {

@@ -293,7 +293,7 @@ fre2(lifeexp, region, high = lexp >= 70)
 # Frequencies within groups
 tab(lifeexp, high = lexp >= 70, .by = region)
 
-# Many distinct values of a continuous variable: preview the table compactly
+# Continuous variables: count each distinct value, then shorten the display
 tab(lifeexp, lexp) |> print_headtail(n = 6)
 
 tab(lifeexp, lexp) |> print_interval(n = 6)

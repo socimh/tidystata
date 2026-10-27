@@ -201,7 +201,7 @@
 #' # Frequencies within groups
 #' tab(lifeexp, high = lexp >= 70, .by = region)
 #'
-#' # Many distinct values of a continuous variable: preview the table compactly
+#' # Continuous variables: count each distinct value, then shorten the display
 #' tab(lifeexp, lexp) |> print_headtail(n = 6)
 #'
 #' tab(lifeexp, lexp) |> print_interval(n = 6)
@@ -430,6 +430,7 @@ tab2 <- function(
   .chi2 = FALSE
 ) {
   local_wrapper_error_call()
+  check_data_frame(.data)
   reject_cross_controls(..., function_name = "tab2()")
   check_bool(.flip)
   check_bool(.total)

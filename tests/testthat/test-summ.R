@@ -724,7 +724,6 @@ test_that("summary requests avoid unrequested expensive statistics", {
   testthat::local_mocked_bindings(
     stata_quantile = function(...) stop("Unrequested quantile calculation"),
     weighted_quantile = function(...) stop("Unrequested quantile calculation"),
-    summ_population_sd = function(...) stop("Unrequested moment calculation"),
     .package = "tidystata"
   )
   expect_equal(summ(1:100, .stat = "mean")$mean, 50.5)

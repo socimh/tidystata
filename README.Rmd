@@ -94,6 +94,14 @@ tab1(lifeexp_tab, region:lexp_70)
 tab2(lifeexp_tab, region:lexp_70)
 ```
 
+You can also tabulate continuous variables. When there are many distinct values, use `print_headtail()` to see the beginning and end or `print_interval()` to inspect evenly spaced rows. These helpers shorten the display while retaining the complete table.
+
+```{r}
+tab(lifeexp, lexp) |> print_headtail()
+
+tab(lifeexp, lexp) |> print_interval()
+```
+
 ## Learn more
 
 tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`corr()` for complete cases and `pwcorr()` for pairwise samples), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.

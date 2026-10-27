@@ -6,6 +6,48 @@
 #include <R_ext/Visibility.h>
 
 // group_stat.cpp
+writable::list group_summary_dbl(SEXP x, list locs, strings statistics, doubles probs, integers quantile_index, bool grouped);
+extern "C" SEXP _tidystata_group_summary_dbl(SEXP x, SEXP locs, SEXP statistics, SEXP probs, SEXP quantile_index, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_summary_dbl(cpp11::as_cpp<cpp11::decay_t<SEXP>>(x), cpp11::as_cpp<cpp11::decay_t<list>>(locs), cpp11::as_cpp<cpp11::decay_t<strings>>(statistics), cpp11::as_cpp<cpp11::decay_t<doubles>>(probs), cpp11::as_cpp<cpp11::decay_t<integers>>(quantile_index), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::integers group_unique_id(integers ids, list locs);
+extern "C" SEXP _tidystata_group_unique_id(SEXP ids, SEXP locs) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_unique_id(cpp11::as_cpp<cpp11::decay_t<integers>>(ids), cpp11::as_cpp<cpp11::decay_t<list>>(locs)));
+  END_CPP11
+}
+// group_stat.cpp
+writable::list group_weighted_summary_dbl(SEXP x, doubles weights, list locs, bool analytic, bool grouped, strings statistics, doubles probs, integers quantile_index);
+extern "C" SEXP _tidystata_group_weighted_summary_dbl(SEXP x, SEXP weights, SEXP locs, SEXP analytic, SEXP grouped, SEXP statistics, SEXP probs, SEXP quantile_index) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(group_weighted_summary_dbl(cpp11::as_cpp<cpp11::decay_t<SEXP>>(x), cpp11::as_cpp<cpp11::decay_t<doubles>>(weights), cpp11::as_cpp<cpp11::decay_t<list>>(locs), cpp11::as_cpp<cpp11::decay_t<bool>>(analytic), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped), cpp11::as_cpp<cpp11::decay_t<strings>>(statistics), cpp11::as_cpp<cpp11::decay_t<doubles>>(probs), cpp11::as_cpp<cpp11::decay_t<integers>>(quantile_index)));
+  END_CPP11
+}
+// group_stat.cpp
+SEXP tab_integer_range(SEXP x);
+extern "C" SEXP _tidystata_tab_integer_range(SEXP x) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(tab_integer_range(cpp11::as_cpp<cpp11::decay_t<SEXP>>(x)));
+  END_CPP11
+}
+// group_stat.cpp
+SEXP tab_character_id(strings x, int maximum);
+extern "C" SEXP _tidystata_tab_character_id(SEXP x, SEXP maximum) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(tab_character_id(cpp11::as_cpp<cpp11::decay_t<strings>>(x), cpp11::as_cpp<cpp11::decay_t<int>>(maximum)));
+  END_CPP11
+}
+// group_stat.cpp
+SEXP tab_count_dense(SEXP x, integers range, SEXP other, integers other_range, integers order, SEXP weights, bool integer_first);
+extern "C" SEXP _tidystata_tab_count_dense(SEXP x, SEXP range, SEXP other, SEXP other_range, SEXP order, SEXP weights, SEXP integer_first) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(tab_count_dense(cpp11::as_cpp<cpp11::decay_t<SEXP>>(x), cpp11::as_cpp<cpp11::decay_t<integers>>(range), cpp11::as_cpp<cpp11::decay_t<SEXP>>(other), cpp11::as_cpp<cpp11::decay_t<integers>>(other_range), cpp11::as_cpp<cpp11::decay_t<integers>>(order), cpp11::as_cpp<cpp11::decay_t<SEXP>>(weights), cpp11::as_cpp<cpp11::decay_t<bool>>(integer_first)));
+  END_CPP11
+}
+// group_stat.cpp
 writable::doubles group_sum_dbl(doubles x, list locs);
 extern "C" SEXP _tidystata_group_sum_dbl(SEXP x, SEXP locs) {
   BEGIN_CPP11
@@ -59,6 +101,27 @@ SEXP panel_lag_index(doubles period, SEXP order, double shift);
 extern "C" SEXP _tidystata_panel_lag_index(SEXP period, SEXP order, SEXP shift) {
   BEGIN_CPP11
     return cpp11::as_sexp(panel_lag_index(cpp11::as_cpp<cpp11::decay_t<doubles>>(period), cpp11::as_cpp<cpp11::decay_t<SEXP>>(order), cpp11::as_cpp<cpp11::decay_t<double>>(shift)));
+  END_CPP11
+}
+// pwcorr.cpp
+writable::list pwcorr_pearson(list columns, SEXP weights, bool frequency);
+extern "C" SEXP _tidystata_pwcorr_pearson(SEXP columns, SEXP weights, SEXP frequency) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(pwcorr_pearson(cpp11::as_cpp<cpp11::decay_t<list>>(columns), cpp11::as_cpp<cpp11::decay_t<SEXP>>(weights), cpp11::as_cpp<cpp11::decay_t<bool>>(frequency)));
+  END_CPP11
+}
+// pwcorr.cpp
+writable::list pwcorr_spearman(list columns);
+extern "C" SEXP _tidystata_pwcorr_spearman(SEXP columns) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(pwcorr_spearman(cpp11::as_cpp<cpp11::decay_t<list>>(columns)));
+  END_CPP11
+}
+// recode.cpp
+SEXP recode_apply(SEXP x, list rules, SEXP fallback, SEXP ptype);
+extern "C" SEXP _tidystata_recode_apply(SEXP x, SEXP rules, SEXP fallback, SEXP ptype) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(recode_apply(cpp11::as_cpp<cpp11::decay_t<SEXP>>(x), cpp11::as_cpp<cpp11::decay_t<list>>(rules), cpp11::as_cpp<cpp11::decay_t<SEXP>>(fallback), cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptype)));
   END_CPP11
 }
 // row_stat.cpp
@@ -132,9 +195,15 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidystata_group_mean_dbl",              (DL_FUNC) &_tidystata_group_mean_dbl,              2},
     {"_tidystata_group_min_dbl",               (DL_FUNC) &_tidystata_group_min_dbl,               2},
     {"_tidystata_group_sum_dbl",               (DL_FUNC) &_tidystata_group_sum_dbl,               2},
+    {"_tidystata_group_summary_dbl",           (DL_FUNC) &_tidystata_group_summary_dbl,           6},
+    {"_tidystata_group_unique_id",             (DL_FUNC) &_tidystata_group_unique_id,             2},
     {"_tidystata_group_var_dbl",               (DL_FUNC) &_tidystata_group_var_dbl,               2},
     {"_tidystata_group_weighted_quantile_dbl", (DL_FUNC) &_tidystata_group_weighted_quantile_dbl, 4},
+    {"_tidystata_group_weighted_summary_dbl",  (DL_FUNC) &_tidystata_group_weighted_summary_dbl,  8},
     {"_tidystata_panel_lag_index",             (DL_FUNC) &_tidystata_panel_lag_index,             3},
+    {"_tidystata_pwcorr_pearson",              (DL_FUNC) &_tidystata_pwcorr_pearson,              3},
+    {"_tidystata_pwcorr_spearman",             (DL_FUNC) &_tidystata_pwcorr_spearman,             1},
+    {"_tidystata_recode_apply",                (DL_FUNC) &_tidystata_recode_apply,                4},
     {"_tidystata_row_max_dbl",                 (DL_FUNC) &_tidystata_row_max_dbl,                 1},
     {"_tidystata_row_mean_dbl",                (DL_FUNC) &_tidystata_row_mean_dbl,                2},
     {"_tidystata_row_median_dbl",              (DL_FUNC) &_tidystata_row_median_dbl,              2},
@@ -144,6 +213,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidystata_row_sum_dbl",                 (DL_FUNC) &_tidystata_row_sum_dbl,                 2},
     {"_tidystata_row_unique_dbl",              (DL_FUNC) &_tidystata_row_unique_dbl,              1},
     {"_tidystata_row_var_dbl",                 (DL_FUNC) &_tidystata_row_var_dbl,                 2},
+    {"_tidystata_tab_character_id",            (DL_FUNC) &_tidystata_tab_character_id,            2},
+    {"_tidystata_tab_count_dense",             (DL_FUNC) &_tidystata_tab_count_dense,             7},
+    {"_tidystata_tab_integer_range",           (DL_FUNC) &_tidystata_tab_integer_range,           1},
     {NULL, NULL, 0}
 };
 }

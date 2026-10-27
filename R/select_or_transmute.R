@@ -55,6 +55,7 @@
 #' lifeexp |>
 #'   select_or_transmute(lexp >= 70)
 select_or_transmute <- function(.data, ...) {
+  check_data_frame(.data)
   if (missing(...)) {
     return(.data)
   }
