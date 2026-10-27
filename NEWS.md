@@ -1,4 +1,4 @@
-# tidystata (development version)
+# tidystata 0.4.0
 
 * `summ()` and `tabstat()` reuse native scratch storage for numerical summaries,
   weighted statistics and grouped distinct counts, reducing temporary allocation.
