@@ -11,7 +11,7 @@ the original data invisibly."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@ the original data invisibly."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -43,7 +43,7 @@ the original data invisibly."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Assert that conditions hold</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/assert.R" class="external-link"><code>R/assert.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/assert.R" class="external-link"><code>R/assert.R</code></a></small>
       <div class="d-none name"><code>assert.Rd</code></div>
     </div>
 
@@ -73,7 +73,9 @@ must be <code>TRUE</code> for every row.</p></dd>
 
 <dt id="arg--by">.by<a class="anchor" aria-label="anchor" href="#arg--by"></a></dt>
 <dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; Optional grouping variables.
-Summaries such as <code>mean(x)</code> are evaluated within each group.</p></dd>
+Summaries such as <code>mean(x)</code> are evaluated within each group. Existing
+groups are used when omitted. To supply <code>.by</code> for grouped data, first call
+<code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::ungroup()</a></code>, as required by <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -110,8 +112,7 @@ row in that group.</p>
 <span class="r-in"><span><span class="co"># Fail: row 3 is below 60, and row 4 is missing</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu">assert</span><span class="op">(</span><span class="va">scores</span>, <span class="va">score</span> <span class="op">&gt;=</span> <span class="fl">60</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Error in assert(scores, score &gt;= 60) : Assertion failed:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">*</span> `score &gt;= 60`: 2 contradictions (1 missing) in 4 rows; rows 3, 4</span>
-<span class="r-in"><span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> `score &gt;= 60`: 2 contradictions (1 missing) in 4 rows; rows 3, 4</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -123,7 +124,7 @@ row in that group.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -20,7 +20,7 @@ variables_search(.data, string, ...)
 
 - .data:
 
-  The input data frame, tibble, or data.table.
+  A data frame, tibble, or data.table.
 
 - ...:
 
@@ -88,7 +88,7 @@ Other inspection functions:
 
 ``` r
 variables(lifeexp)
-#> # A tibble: 6 x 2
+#> # A tibble: 6 × 2
 #>   name      label                   
 #>   <chr>     <chr>                   
 #> 1 region    Region                  
@@ -99,7 +99,7 @@ variables(lifeexp)
 #> 6 safewater Safe water              
 
 variables_search(lifeexp, "n")
-#> # A tibble: 5 x 2
+#> # A tibble: 5 × 2
 #>   name      label                   
 #>   <chr>     <chr>                   
 #> 1 region    Region                  
@@ -109,7 +109,7 @@ variables_search(lifeexp, "n")
 #> 5 gnppc     GNP per capita          
 
 variables_search(lifeexp, "^country$")
-#> # A tibble: 1 x 2
+#> # A tibble: 1 × 2
 #>   name    label  
 #>   <chr>   <chr>  
 #> 1 country Country

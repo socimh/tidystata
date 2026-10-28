@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
@@ -68,7 +68,7 @@
       <h1>Containers, grouping and missing values</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/vignettes/containers-and-missing-values.Rmd" class="external-link"><code>vignettes/containers-and-missing-values.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/vignettes/containers-and-missing-values.Rmd" class="external-link"><code>vignettes/containers-and-missing-values.Rmd</code></a></small>
       <div class="d-none name"><code>containers-and-missing-values.Rmd</code></div>
     </div>
 
@@ -86,6 +86,9 @@ workflow.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:tidystata':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     recode</span></span>
 <span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     filter, lag</span></span>
@@ -112,9 +115,60 @@ workflow.</p>
 <code>codebook</code> and <code>variables</code> families preserve a
 base data frame, tibble or data.table input. A list result remains a
 list, and each table inside follows the same rule. An explicit output
-option takes precedence. <code><a href="../reference/pwcorr.html">pwcorr()</a></code>, <code><a href="../reference/misstable.html">misstable()</a></code>
-and <code><a href="../reference/keys.html">duplicates_report()</a></code> are exceptions: they always return
+option takes precedence. <code><a href="../reference/corr.html">corr()</a></code>, <code><a href="../reference/pwcorr.html">pwcorr()</a></code>,
+<code><a href="../reference/spearman.html">spearman()</a></code>, <code><a href="../reference/misstable.html">misstable()</a></code> and
+<code><a href="../reference/keys.html">duplicates_report()</a></code> are exceptions: they always return
 tibbles.</p>
+<p>Where supported, <code>.type</code> selects an output form:</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Value</th>
+<th>Meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>"vector"</code></td>
+<td>A character vector of names from <code><a href="../reference/names.html">ds()</a></code>.</td>
+</tr>
+<tr class="even">
+<td><code>"list"</code></td>
+<td>Separate tables for variables or summary families.
+<code><a href="../reference/summ.html">summ()</a></code> and <code><a href="../reference/summ.html">tabstat()</a></code> return one table when
+only one family is present.</td>
+</tr>
+<tr class="odd">
+<td><code>"table"</code></td>
+<td>One table in the input’s table class where supported, used by
+<code><a href="../reference/names.html">ds()</a></code>, <code><a href="../reference/summ.html">summ()</a></code>, and <code><a href="../reference/summ.html">tabstat()</a></code>.</td>
+</tr>
+<tr class="even">
+<td><code>"auto"</code></td>
+<td>Retain the input’s table class in <code><a href="../reference/tab.html">fre()</a></code>,
+<code><a href="../reference/tab.html">tab2()</a></code>, and <code><a href="../reference/tab.html">fre2()</a></code>.</td>
+</tr>
+<tr class="odd">
+<td><code>"tibble"</code></td>
+<td>Make each returned table a tibble; combine variable tables in
+<code><a href="../reference/tab.html">tab1()</a></code> and <code><a href="../reference/tab.html">fre1()</a></code>, or summary families in
+<code><a href="../reference/summ.html">summ()</a></code> and <code><a href="../reference/summ.html">tabstat()</a></code>. Also supported by
+<code><a href="../reference/names.html">ds()</a></code>.</td>
+</tr>
+<tr class="even">
+<td><code>"flextable"</code></td>
+<td>Format each returned table with the optional flextable package.</td>
+</tr>
+</tbody>
+</table>
+<p>Not every function accepts every value. <code><a href="../reference/tab.html">tab2()</a></code> and
+<code><a href="../reference/tab.html">fre2()</a></code> still return lists for multiple pairs or explicit
+<code>.by</code> groups, even with <code>.type = "tibble"</code> or
+<code>.type = "flextable"</code>. <code><a href="../reference/corr.html">corr()</a></code>,
+<code><a href="../reference/pwcorr.html">pwcorr()</a></code> and <code><a href="../reference/spearman.html">spearman()</a></code> use <code>.wide</code>
+to choose a layout; both layouts return tibbles.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">base_tables</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tab.html">tab1</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">answer</span>, <span class="va">group</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">base_tables</span><span class="op">)</span></span>
@@ -122,11 +176,20 @@ tibbles.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">base_tables</span><span class="op">$</span><span class="va">answer</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "data.frame"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="fu"><a href="../reference/tab.html">fre</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">answer</span>, .type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="fu"><a href="../reference/names.html">ds</a></span><span class="op">(</span><span class="va">df</span>, .type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">score</span>, .type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">score</span>, .type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "tbl_df"     "tbl"        "data.frame"</span></span></code></pre></div>
 <p>Other data-frame subclasses are not reconstructed on newly shaped
 tables. Vectors, such as the result of <code><a href="../reference/names.html">ds()</a></code> or
 <code><a href="../reference/row_egen.html">row_mean()</a></code>, keep their intentional vector output. New
-data.table summaries do not retain input keys or indexes.</p>
+data.table summaries do not retain input keys or indexes.
+<code>as_dummy(.remove = TRUE)</code> reports an error if its result
+would be a data.table with rows but no columns; retain a source or
+identifier column in that case.</p>
 <p>data.table inputs follow the same rule:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"data.table"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -150,7 +213,7 @@ data.table summaries do not retain input keys or indexes.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grouped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tbl</span>, <span class="va">group</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">grouped</span>, <span class="va">answer</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 x 7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 7</span></span></span>
 <span><span class="co">#&gt;   group answer     n percent   cum valid valid_cum</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A     yes        1      50    50   100       100</span></span>
@@ -159,7 +222,7 @@ data.table summaries do not retain input keys or indexes.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #BB0000;">NA</span>    yes        1     100   100   100       100</span></span>
 <span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">grouped</span>, <span class="va">score</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span>, <span class="st">"missing"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">summary</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 x 5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
 <span><span class="co">#&gt;   group type      n  mean missing</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A     dbl       1     2       1</span></span>
@@ -177,7 +240,7 @@ inherits existing groups; an explicit <code>.by</code> replaces them.
 the whole input regardless of existing groups.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">grouped</span>, <span class="va">score</span>, .by <span class="op">=</span> <span class="va">answer</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 x 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 4</span></span></span>
 <span><span class="co">#&gt;   answer type      n  mean</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> no     dbl       1     6</span></span>
@@ -198,19 +261,19 @@ values. Missing grouping keys are ordinary groups. In summaries,
 numeric calculations always omit missing measured values.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">tbl</span>, <span class="va">answer</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 x 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 6</span></span></span>
 <span><span class="co">#&gt;   answer     n percent   cum valid valid_cum</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> no         1      25    25  33.3      33.3</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> yes        2      50    75  66.7     100  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #BB0000;">NA</span>         1      25   100  <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span></span></span>
 <span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">tbl</span>, <span class="va">score</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"miss_n"</span>, <span class="st">"valid_pct"</span>, <span class="st">"mean"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 x 5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 5</span></span></span>
 <span><span class="co">#&gt;   type      n miss_n valid_pct  mean</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> dbl       3      1      0.75  5.33</span></span>
 <span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">tbl</span>, <span class="va">score</span>, .by <span class="op">=</span> <span class="va">group</span>, .missing <span class="op">=</span> <span class="cn">FALSE</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 x 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
 <span><span class="co">#&gt;   group type      n  mean</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A     dbl       1     2</span></span>
@@ -222,7 +285,7 @@ numeric calculations always omit missing measured values.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">empty</span> <span class="op">&lt;-</span> <span class="va">tbl</span><span class="op">[</span><span class="fl">0</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">empty</span>, <span class="va">score</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"sum"</span>, <span class="st">"mean"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 x 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">#&gt;   type      n   sum  mean</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> dbl       0    <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span>
@@ -232,7 +295,7 @@ numeric calculations always omit missing measured values.</p>
 <span><span class="va">missing</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA_real_</span>, <span class="cn">NA_real_</span><span class="op">)</span>, b <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA_real_</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">missing</span>, <span class="va">a</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"sum"</span>, <span class="st">"mean"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: a is entirely missing; retained with n = 0.</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 x 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">#&gt;   type      n   sum  mean</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> dbl       0    <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span>
@@ -264,17 +327,17 @@ observed values.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/variables.html">variables</a></span><span class="op">(</span><span class="va">labelled</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 x 2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
 <span><span class="co">#&gt;   name     label             </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> response Interview response</span></span>
 <span><span class="fu"><a href="../reference/codebook.html">codebook</a></span><span class="op">(</span><span class="va">labelled</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 x 5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 5</span></span></span>
 <span><span class="co">#&gt;   variable label              type             n unique</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> response Interview response double+label     2      2</span></span>
 <span><span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">labelled</span>, <span class="va">response</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 x 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
 <span><span class="co">#&gt;   response              n percent   cum valid valid_cum</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  1<span style="color: #949494;"> [Yes]</span>              1      25    25    50        50</span></span>
@@ -289,6 +352,13 @@ codes and warn; choose measurements deliberately instead of averaging
 category codes. <code><a href="../reference/type_conversion.html">decode()</a></code> displays value labels when
 present, but does not itself recode every labelled refusal into an
 ordinary <code>NA</code>.</p>
+<p><code><a href="../reference/misstable.html">misstable()</a></code> also accepts matrix and nested data-frame
+columns, using vctrs missingness for complete rows. Ordinary list
+columns count scalar <code>NA</code> elements as missing and
+<code>NULL</code> as observed. Structured list-backed matrices instead
+follow vctrs cell rules: <code>NULL</code> cells are missing and scalar
+<code>NA</code> cells are observed. See <a href="../reference/misstable.html"><code>misstable()</code></a> for both
+output forms.</p>
 </div>
 <div class="section level2">
 <h2 id="numeric-and-calendar-summary-tables">Numeric and calendar summary tables<a class="anchor" aria-label="anchor" href="#numeric-and-calendar-summary-tables"></a>
@@ -300,12 +370,12 @@ ordinary <code>NA</code>.</p>
 <span><span class="fu"><a href="../reference/names.html">names</a></span><span class="op">(</span><span class="va">separate</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "numeric" "date"</span></span>
 <span><span class="va">separate</span><span class="op">$</span><span class="va">numeric</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 x 7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
 <span><span class="co">#&gt;   name  type      n   min  mean    sd   max</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> score dbl       2     2     3  1.41     4</span></span>
 <span><span class="va">separate</span><span class="op">$</span><span class="va">date</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 x 7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
 <span><span class="co">#&gt;   name  type      n min        mean       sd            max       </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;drtn&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> day   date      2 2024-01-01 2024-01-02 1.414214 days 2024-01-03</span></span>
@@ -313,7 +383,7 @@ ordinary <code>NA</code>.</p>
 <span><span class="co">#&gt; [1] "difftime"</span></span>
 <span><span class="va">combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">mixed</span>, .type <span class="op">=</span> <span class="st">"table"</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"min"</span>, <span class="st">"mean"</span>, <span class="st">"sd"</span>, <span class="st">"max"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">combined</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 x 7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
 <span><span class="co">#&gt;   name  type            n min        mean          sd max       </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> score dbl             2 2          3           1.41 4         </span></span>
@@ -337,42 +407,30 @@ weights and other statistics.</p>
 </h2>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">long</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, value <span class="op">=</span> <span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">preview</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/special-print.html">preview_table</a></span><span class="op">(</span><span class="va">long</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="va">preview</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 x 2</span></span></span>
+<span><span class="va">view</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preview.html">preview_headtail</a></span><span class="op">(</span><span class="va">long</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">view</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 2</span></span></span>
 <span><span class="co">#&gt;       id value</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt;  1     1     1</span></span>
 <span><span class="co">#&gt;  2     2     4</span></span>
+<span><span class="co">#&gt;  <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>    <span style="color: #949494;">⋮</span> </span></span>
 <span><span class="co">#&gt; 11    11   121</span></span>
 <span><span class="co">#&gt; 12    12   144</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ... 8 rows omitted in the middle; use print(x, n = Inf) to show all rows.</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">preview</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">view</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 12</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">preview</span><span class="op">$</span><span class="va">value</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 650</span></span>
-<span></span>
-<span><span class="va">subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/special-print.html">slice_headtail</a></span><span class="op">(</span><span class="va">long</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="va">subset</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 x 2</span></span></span>
-<span><span class="co">#&gt;      id value</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1     1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2     4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    11   121</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    12   144</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">subset</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">subset</span><span class="op">$</span><span class="va">value</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 270</span></span></code></pre></div>
-<p>The preview still contains 12 rows; the slice contains four.
-<code>n</code> is the total display or selection budget, split between
-the beginning and end. Interval mode samples approximately evenly spaced
-positions; sort first when position should represent a meaningful
-order.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">view</span><span class="op">$</span><span class="va">value</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 650</span></span></code></pre></div>
+<p>The preview still contains all 12 rows. <code>n</code> is the total
+display budget, split between the beginning and end. A single row of
+dots marks an omitted middle. Interval previews show approximately
+evenly spaced positions without separator rows; sort first when position
+should represent a meaningful order. Both styles report how many rows
+are omitted from the display.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/special-print.html">preview_table</a></span><span class="op">(</span><span class="va">long</span>, style <span class="op">=</span> <span class="st">"interval"</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 x 2</span></span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/preview.html">preview_interval</a></span><span class="op">(</span><span class="va">long</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 2</span></span></span>
 <span><span class="co">#&gt;       id value</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt;  1     1     1</span></span>
@@ -381,12 +439,45 @@ order.</p>
 <span><span class="co">#&gt; 12    12   144</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ... 8 rows omitted between displayed positions; use print(x, n = Inf) to show</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># all rows.</span></span></span>
-<span><span class="va">ordinary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/special-print.html">unpreview_table</a></span><span class="op">(</span><span class="va">preview</span><span class="op">)</span></span>
+<span><span class="va">ordinary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preview.html">unpreview</a></span><span class="op">(</span><span class="va">view</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">ordinary</span>, <span class="va">long</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p><code><a href="../reference/special-print.html">print_headtail()</a></code> and <code><a href="../reference/special-print.html">print_interval()</a></code> print
-once and invisibly return the complete input.
-<code><a href="../reference/special-print.html">unpreview_table()</a></code> removes the persistent display setting.
+once and invisibly return the complete input. They are useful when
+tabulating a continuous variable with many distinct values.
+<code><a href="../reference/tab.html">tab()</a></code> counts each distinct value separately and sorts
+values in ascending order by default:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lifeexp_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/special-print.html">print_interval</a></span><span class="op">(</span><span class="va">lifeexp_counts</span>, n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20 × 6</span></span></span>
+<span><span class="co">#&gt;     lexp     n percent    cum valid valid_cum</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt;  1    57     1    1.47   1.47  1.47      1.47</span></span>
+<span><span class="co">#&gt;  5    64     3    4.41  11.8   4.41     11.8 </span></span>
+<span><span class="co">#&gt;  9    68     3    4.41  25     4.41     25   </span></span>
+<span><span class="co">#&gt; 12    71     6    8.82  47.1   8.82     47.1 </span></span>
+<span><span class="co">#&gt; 16    75     4    5.88  72.1   5.88     72.1 </span></span>
+<span><span class="co">#&gt; 20    79     6    8.82 100     8.82    100   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ... 14 rows omitted between displayed positions; use print(x, n = Inf) to</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># show all rows.</span></span></span>
+<span><span class="fu"><a href="../reference/special-print.html">print_headtail</a></span><span class="op">(</span><span class="va">lifeexp_counts</span>, n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20 × 6</span></span></span>
+<span><span class="co">#&gt;     lexp     n percent    cum valid valid_cum</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt;  1    57     1    1.47   1.47  1.47      1.47</span></span>
+<span><span class="co">#&gt;  2    61     1    1.47   2.94  1.47      2.94</span></span>
+<span><span class="co">#&gt;  3    62     2    2.94   5.88  2.94      5.88</span></span>
+<span><span class="co">#&gt;  <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>      <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>      <span style="color: #949494;">⋮</span>        <span style="color: #949494;">⋮</span>  </span></span>
+<span><span class="co">#&gt; 18    77     5    7.35  85.3   7.35     85.3 </span></span>
+<span><span class="co">#&gt; 19    78     4    5.88  91.2   5.88     91.2 </span></span>
+<span><span class="co">#&gt; 20    79     6    8.82 100     8.82    100   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ... 14 rows omitted in the middle; use print(x, n = Inf) to show all rows.</span></span></span></code></pre></div>
+<p><code><a href="../reference/special-print.html">print_interval()</a></code> shows evenly spaced rows across the
+sorted table; <code><a href="../reference/special-print.html">print_headtail()</a></code> shows its beginning and end.
+Neither helper bins values, removes rows from the returned table, or
+changes counts and percentages.</p>
+<p><code><a href="../reference/preview.html">unpreview()</a></code> removes the persistent display setting.
 Supported dplyr/tidyr operations carry preview settings forward while
 following their own container and grouping rules. Wrapping and
 unwrapping a data.table copies it; later native data.table mutations
@@ -403,7 +494,7 @@ retain ordinary reference semantics.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

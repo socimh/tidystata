@@ -14,6 +14,9 @@ library(tidystata)
 library(dplyr)
 #> 
 #> Attaching package: 'dplyr'
+#> The following object is masked from 'package:tidystata':
+#> 
+#>     recode
 #> The following objects are masked from 'package:stats':
 #> 
 #>     filter, lag
@@ -42,11 +45,34 @@ New tables from the `tab`, `summ`, `codebook` and `variables` families
 preserve a base data frame, tibble or data.table input. A list result
 remains a list, and each table inside follows the same rule. An explicit
 output option takes precedence.
+[`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
 [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
+[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md),
 [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
 and
 [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md)
 are exceptions: they always return tibbles.
+
+Where supported, `.type` selects an output form:
+
+| Value | Meaning |
+|----|----|
+| `"vector"` | A character vector of names from [`ds()`](https://socimh.github.io/tidystata/reference/names.md). |
+| `"list"` | Separate tables for variables or summary families. [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md) return one table when only one family is present. |
+| `"table"` | One table in the input’s table class where supported, used by [`ds()`](https://socimh.github.io/tidystata/reference/names.md), [`summ()`](https://socimh.github.io/tidystata/reference/summ.md), and [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md). |
+| `"auto"` | Retain the input’s table class in [`fre()`](https://socimh.github.io/tidystata/reference/tab.md), [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md), and [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md). |
+| `"tibble"` | Make each returned table a tibble; combine variable tables in [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md) and [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md), or summary families in [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md). Also supported by [`ds()`](https://socimh.github.io/tidystata/reference/names.md). |
+| `"flextable"` | Format each returned table with the optional flextable package. |
+
+Not every function accepts every value.
+[`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) and
+[`fre2()`](https://socimh.github.io/tidystata/reference/tab.md) still
+return lists for multiple pairs or explicit `.by` groups, even with
+`.type = "tibble"` or `.type = "flextable"`.
+[`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
+[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) and
+[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
+use `.wide` to choose a layout; both layouts return tibbles.
 
 ``` r
 
@@ -57,6 +83,12 @@ class(base_tables$answer)
 #> [1] "data.frame"
 class(fre(df, answer, .type = "tibble"))
 #> [1] "tbl_df"     "tbl"        "data.frame"
+class(ds(df, .type = "tibble"))
+#> [1] "tbl_df"     "tbl"        "data.frame"
+class(summ(df, score, .type = "tibble"))
+#> [1] "tbl_df"     "tbl"        "data.frame"
+class(tabstat(df, score, .type = "tibble"))
+#> [1] "tbl_df"     "tbl"        "data.frame"
 ```
 
 Other data-frame subclasses are not reconstructed on newly shaped
@@ -64,7 +96,9 @@ tables. Vectors, such as the result of
 [`ds()`](https://socimh.github.io/tidystata/reference/names.md) or
 [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md),
 keep their intentional vector output. New data.table summaries do not
-retain input keys or indexes.
+retain input keys or indexes. `as_dummy(.remove = TRUE)` reports an
+error if its result would be a data.table with rows but no columns;
+retain a source or identifier column in that case.
 
 data.table inputs follow the same rule:
 
@@ -96,7 +130,7 @@ if (requireNamespace("flextable", quietly = TRUE)) {
 
 grouped <- group_by(tbl, group)
 tab(grouped, answer)
-#> # A tibble: 4 x 7
+#> # A tibble: 4 × 7
 #>   group answer     n percent   cum valid valid_cum
 #>   <chr> <chr>  <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 A     yes        1      50    50   100       100
@@ -105,7 +139,7 @@ tab(grouped, answer)
 #> 4 NA    yes        1     100   100   100       100
 summary <- summ(grouped, score, .stat = c("n", "mean", "missing"))
 summary
-#> # A tibble: 3 x 5
+#> # A tibble: 3 × 5
 #>   group type      n  mean missing
 #>   <chr> <chr> <int> <dbl>   <int>
 #> 1 A     dbl       1     2       1
@@ -132,7 +166,7 @@ the whole input regardless of existing groups.
 ``` r
 
 summ(grouped, score, .by = answer, .stat = c("n", "mean"))
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>   answer type      n  mean
 #>   <chr>  <chr> <int> <dbl>
 #> 1 no     dbl       1     6
@@ -162,19 +196,19 @@ calculations always omit missing measured values.
 ``` r
 
 tab(tbl, answer)
-#> # A tibble: 3 x 6
+#> # A tibble: 3 × 6
 #>   answer     n percent   cum valid valid_cum
 #>   <chr>  <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 no         1      25    25  33.3      33.3
 #> 2 yes        2      50    75  66.7     100  
 #> 3 NA         1      25   100  NA        NA
 summ(tbl, score, .stat = c("n", "miss_n", "valid_pct", "mean"))
-#> # A tibble: 1 x 5
+#> # A tibble: 1 × 5
 #>   type      n miss_n valid_pct  mean
 #>   <chr> <int>  <int>     <dbl> <dbl>
 #> 1 dbl       3      1      0.75  5.33
 summ(tbl, score, .by = group, .missing = FALSE, .stat = c("n", "mean"))
-#> # A tibble: 2 x 4
+#> # A tibble: 2 × 4
 #>   group type      n  mean
 #>   <chr> <chr> <int> <dbl>
 #> 1 A     dbl       1     2
@@ -187,7 +221,7 @@ summ(tbl, score, .by = group, .missing = FALSE, .stat = c("n", "mean"))
 
 empty <- tbl[0, ]
 summ(empty, score, .stat = c("n", "sum", "mean"))
-#> # A tibble: 1 x 4
+#> # A tibble: 1 × 4
 #>   type      n   sum  mean
 #>   <chr> <int> <dbl> <dbl>
 #> 1 dbl       0    NA    NA
@@ -197,7 +231,7 @@ tab1(tbl, starts_with("absent"))
 missing <- tibble(a = c(NA_real_, NA_real_), b = c(NA_real_, 4))
 summ(missing, a, .stat = c("n", "sum", "mean"))
 #> Warning: a is entirely missing; retained with n = 0.
-#> # A tibble: 1 x 4
+#> # A tibble: 1 × 4
 #>   type      n   sum  mean
 #>   <chr> <int> <dbl> <dbl>
 #> 1 dbl       0    NA    NA
@@ -232,17 +266,17 @@ labelled <- tibble(
   )
 )
 variables(labelled)
-#> # A tibble: 1 x 2
+#> # A tibble: 1 × 2
 #>   name     label             
 #>   <chr>    <chr>             
 #> 1 response Interview response
 codebook(labelled)
-#> # A tibble: 1 x 5
+#> # A tibble: 1 × 5
 #>   variable label              type             n unique
 #>   <chr>    <chr>              <chr>        <int>  <int>
 #> 1 response Interview response double+label     2      2
 tab(labelled, response)
-#> # A tibble: 4 x 6
+#> # A tibble: 4 × 6
 #>   response              n percent   cum valid valid_cum
 #>   <dbl+lbl>         <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1  1 [Yes]              1      25    25    50        50
@@ -261,6 +295,15 @@ category codes.
 displays value labels when present, but does not itself recode every
 labelled refusal into an ordinary `NA`.
 
+[`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
+also accepts matrix and nested data-frame columns, using vctrs
+missingness for complete rows. Ordinary list columns count scalar `NA`
+elements as missing and `NULL` as observed. Structured list-backed
+matrices instead follow vctrs cell rules: `NULL` cells are missing and
+scalar `NA` cells are observed. See
+[`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
+for both output forms.
+
 ## Numeric and calendar summary tables
 
 ``` r
@@ -271,12 +314,12 @@ separate <- summ(mixed, .stat = c("n", "min", "mean", "sd", "max"))
 names(separate)
 #> [1] "numeric" "date"
 separate$numeric
-#> # A tibble: 1 x 7
+#> # A tibble: 1 × 7
 #>   name  type      n   min  mean    sd   max
 #>   <chr> <chr> <int> <dbl> <dbl> <dbl> <dbl>
 #> 1 score dbl       2     2     3  1.41     4
 separate$date
-#> # A tibble: 1 x 7
+#> # A tibble: 1 × 7
 #>   name  type      n min        mean       sd            max       
 #>   <chr> <chr> <int> <chr>      <chr>      <drtn>        <chr>     
 #> 1 day   date      2 2024-01-01 2024-01-02 1.414214 days 2024-01-03
@@ -284,7 +327,7 @@ class(separate$date$sd)
 #> [1] "difftime"
 combined <- summ(mixed, .type = "table", .stat = c("n", "min", "mean", "sd", "max"))
 combined
-#> # A tibble: 2 x 7
+#> # A tibble: 2 × 7
 #>   name  type            n min        mean          sd max       
 #>   <chr> <chr>       <int> <chr>      <chr>      <dbl> <chr>     
 #> 1 score dbl             2 2          3           1.41 4         
@@ -311,45 +354,34 @@ formulas, weights and other statistics.
 ``` r
 
 long <- tibble(id = 1:12, value = (1:12)^2)
-preview <- preview_table(long, n = 4)
-preview
-#> # A tibble: 12 x 2
+view <- preview_headtail(long, n = 4)
+view
+#> # A tibble: 12 × 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1
 #>  2     2     4
+#>  ⋮     ⋮    ⋮ 
 #> 11    11   121
 #> 12    12   144
 #> # ... 8 rows omitted in the middle; use print(x, n = Inf) to show all rows.
-nrow(preview)
+nrow(view)
 #> [1] 12
-sum(preview$value)
+sum(view$value)
 #> [1] 650
-
-subset <- slice_headtail(long, n = 4)
-subset
-#> # A tibble: 4 x 2
-#>      id value
-#>   <int> <dbl>
-#> 1     1     1
-#> 2     2     4
-#> 3    11   121
-#> 4    12   144
-nrow(subset)
-#> [1] 4
-sum(subset$value)
-#> [1] 270
 ```
 
-The preview still contains 12 rows; the slice contains four. `n` is the
-total display or selection budget, split between the beginning and end.
-Interval mode samples approximately evenly spaced positions; sort first
-when position should represent a meaningful order.
+The preview still contains all 12 rows. `n` is the total display budget,
+split between the beginning and end. A single row of dots marks an
+omitted middle. Interval previews show approximately evenly spaced
+positions without separator rows; sort first when position should
+represent a meaningful order. Both styles report how many rows are
+omitted from the display.
 
 ``` r
 
-preview_table(long, style = "interval", n = 4)
-#> # A tibble: 12 x 2
+preview_interval(long, n = 4)
+#> # A tibble: 12 × 2
 #>       id value
 #>    <int> <dbl>
 #>  1     1     1
@@ -358,7 +390,7 @@ preview_table(long, style = "interval", n = 4)
 #> 12    12   144
 #> # ... 8 rows omitted between displayed positions; use print(x, n = Inf) to show
 #> # all rows.
-ordinary <- unpreview_table(preview)
+ordinary <- unpreview(view)
 identical(ordinary, long)
 #> [1] TRUE
 ```
@@ -366,8 +398,48 @@ identical(ordinary, long)
 [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
 and
 [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
-print once and invisibly return the complete input.
-[`unpreview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
+print once and invisibly return the complete input. They are useful when
+tabulating a continuous variable with many distinct values.
+[`tab()`](https://socimh.github.io/tidystata/reference/tab.md) counts
+each distinct value separately and sorts values in ascending order by
+default:
+
+``` r
+
+lifeexp_counts <- tab(lifeexp, lexp)
+print_interval(lifeexp_counts, n = 6)
+#> # A tibble: 20 × 6
+#>     lexp     n percent    cum valid valid_cum
+#>    <dbl> <int>   <dbl>  <dbl> <dbl>     <dbl>
+#>  1    57     1    1.47   1.47  1.47      1.47
+#>  5    64     3    4.41  11.8   4.41     11.8 
+#>  9    68     3    4.41  25     4.41     25   
+#> 12    71     6    8.82  47.1   8.82     47.1 
+#> 16    75     4    5.88  72.1   5.88     72.1 
+#> 20    79     6    8.82 100     8.82    100   
+#> # ... 14 rows omitted between displayed positions; use print(x, n = Inf) to
+#> # show all rows.
+print_headtail(lifeexp_counts, n = 6)
+#> # A tibble: 20 × 6
+#>     lexp     n percent    cum valid valid_cum
+#>    <dbl> <int>   <dbl>  <dbl> <dbl>     <dbl>
+#>  1    57     1    1.47   1.47  1.47      1.47
+#>  2    61     1    1.47   2.94  1.47      2.94
+#>  3    62     2    2.94   5.88  2.94      5.88
+#>  ⋮     ⋮     ⋮      ⋮     ⋮      ⋮        ⋮  
+#> 18    77     5    7.35  85.3   7.35     85.3 
+#> 19    78     4    5.88  91.2   5.88     91.2 
+#> 20    79     6    8.82 100     8.82    100   
+#> # ... 14 rows omitted in the middle; use print(x, n = Inf) to show all rows.
+```
+
+[`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
+shows evenly spaced rows across the sorted table;
+[`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
+shows its beginning and end. Neither helper bins values, removes rows
+from the returned table, or changes counts and percentages.
+
+[`unpreview()`](https://socimh.github.io/tidystata/reference/preview.md)
 removes the persistent display setting. Supported dplyr/tidyr operations
 carry preview settings forward while following their own container and
 grouping rules. Wrapping and unwrapping a data.table copies it; later

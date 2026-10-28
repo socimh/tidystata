@@ -55,9 +55,8 @@ corr(
 - .wt:
 
   Optional weights: a numeric column of `.data` (or a vector with one
-  value per row), like Stata's `pwcorr [fweight/aweight]`. Pearson
-  correlations only. Rows with a missing weight are excluded with a
-  message.
+  value per row), like Stata's `corr [fweight/aweight]`. Rows with a
+  missing weight are excluded with a message.
 
 - .wt_type:
 
@@ -115,13 +114,14 @@ matrix.
 
 Other tabulation functions:
 [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
+[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md),
 [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
 
 ## Examples
 
 ``` r
 corr(lifeexp, lexp, gnppc, safewater)
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>   var1  var2          r     n
 #>   <chr> <chr>     <dbl> <int>
 #> 1 lexp  gnppc     0.777    53
@@ -129,7 +129,7 @@ corr(lifeexp, lexp, gnppc, safewater)
 #> 3 gnppc safewater 0.657    53
 
 corr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>   variable   lexp  gnppc safewater
 #>   <chr>     <dbl>  <dbl>     <dbl>
 #> 1 lexp      1     NA            NA
@@ -137,7 +137,7 @@ corr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
 #> 3 safewater 0.761  0.657         1
 
 corr(lifeexp, lexp, gnppc, safewater, .by = region)
-#> # A tibble: 9 x 5
+#> # A tibble: 9 × 5
 #>   region               var1  var2          r     n
 #>   <dbl+lbl>            <chr> <chr>     <dbl> <int>
 #> 1 1 [Europe & C. Asia] lexp  gnppc     0.796    41
@@ -151,7 +151,7 @@ corr(lifeexp, lexp, gnppc, safewater, .by = region)
 #> 9 3 [South America]    gnppc safewater 0.897     6
 
 corr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
-#> # A tibble: 1 x 4
+#> # A tibble: 1 × 4
 #>   var1  var2                r     n
 #>   <chr> <chr>           <dbl> <int>
 #> 1 lexp  gnppc_thousands 0.733    67
@@ -161,7 +161,7 @@ survey <- tibble::tibble(
   x = c(1, 2, 3, 4), y = c(2, 3, NA, 5), z = c(1, NA, 4, 3)
 )
 corr(survey)
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>   var1  var2      r     n
 #>   <chr> <chr> <dbl> <int>
 #> 1 x     y         1     2
@@ -169,7 +169,7 @@ corr(survey)
 #> 3 y     z         1     2
 
 pwcorr(survey)
-#> # A tibble: 3 x 5
+#> # A tibble: 3 × 5
 #>   var1  var2      r     n      p
 #>   <chr> <chr> <dbl> <int>  <dbl>
 #> 1 x     y     1         3  0    

@@ -83,18 +83,20 @@ capture({
 # A new object receives NULL on error, with a failure message
 result <- capture(stop("Cannot calculate"))
 #> Captured expression did not complete.
-#> i Reason: Cannot calculate
-#> i Earlier changes, if any, were not undone.
+#> ℹ Earlier changes, if any, were not undone.
+#> Caused by error:
+#> ! Cannot calculate
 
 # An existing object is kept if its replacement fails
 data <- tibble::tibble(x = 1:3)
 capture(data <- dplyr::mutate(data, y = x * 2))
 capture(data <- stop("Update failed"))
 #> Captured expression did not complete.
-#> i Reason: Update failed
-#> i Earlier changes, if any, were not undone.
+#> ℹ Earlier changes, if any, were not undone.
+#> Caused by error:
+#> ! Update failed
 data
-#> # A tibble: 3 x 2
+#> # A tibble: 3 × 2
 #>       x     y
 #>   <int> <dbl>
 #> 1     1     2
@@ -108,10 +110,11 @@ capture({
   data <- dplyr::mutate(data, later = TRUE)
 })
 #> Captured expression did not complete.
-#> i Reason: Second update failed
-#> i Earlier changes, if any, were not undone.
+#> ℹ Earlier changes, if any, were not undone.
+#> Caused by error:
+#> ! Second update failed
 data
-#> # A tibble: 3 x 3
+#> # A tibble: 3 × 3
 #>       x     y     z
 #>   <int> <dbl> <dbl>
 #> 1     1     2     2
@@ -123,11 +126,13 @@ capture(data <- data |>
   dplyr::mutate(temporary = x * 10) |>
   dplyr::mutate(failed = stop("Pipeline failed")))
 #> Captured expression did not complete.
-#> i Reason: i In argument: `failed = stop("Pipeline failed")`. Caused by error: !
-#>   Pipeline failed
-#> i Earlier changes, if any, were not undone.
+#> ℹ Earlier changes, if any, were not undone.
+#> Caused by error in `dplyr::mutate()`:
+#> ℹ In argument: `failed = stop("Pipeline failed")`.
+#> Caused by error:
+#> ! Pipeline failed
 data
-#> # A tibble: 3 x 3
+#> # A tibble: 3 × 3
 #>       x     y     z
 #>   <int> <dbl> <dbl>
 #> 1     1     2     2

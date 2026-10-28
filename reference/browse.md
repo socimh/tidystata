@@ -13,7 +13,7 @@ browse(.data, ...)
 
 - .data:
 
-  A data frame or tibble.
+  A data frame, tibble, or data.table.
 
 - ...:
 

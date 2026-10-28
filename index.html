@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
@@ -67,8 +67,8 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p><a href="https://github.com/socimh/tidystata/blob/master/README.zh.md" class="external-link">中文版</a></p>
 <p><a href="https://socimh.github.io/tidystata/">tidystata</a> brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with <code>.by</code>. The resulting tables work with ordinary R tools for filtering, joining and plotting.</p>
+<p><a href="https://github.com/socimh/tidystata/blob/master/README.zh.md" class="external-link">中文介绍</a></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -93,6 +93,7 @@
 <span><span class="co">#&gt; # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; # 17 more examples. To see them all: findit("reg, robust") |&gt; print(n = Inf)</span></span>
+<span></span>
 <span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"egen rowmean"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Average available values across columns [base]</span></span>
 <span><span class="co">#&gt; Stata: egen z = rowmean(x y)</span></span>
@@ -180,6 +181,41 @@
 <span><span class="co">#&gt; 1 1 [Europe &amp; C. Asia]      12     32</span></span>
 <span><span class="co">#&gt; 2 2 [North America]          6      8</span></span>
 <span><span class="co">#&gt; 3 3 [South America]          3      7</span></span></code></pre></div>
+<p>You can also tabulate continuous variables. When there are many distinct values, use <code><a href="reference/special-print.html">print_headtail()</a></code> to see the beginning and end or <code><a href="reference/special-print.html">print_interval()</a></code> to inspect evenly spaced rows. These helpers shorten the display while retaining the complete table.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">tab</a></span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/special-print.html">print_headtail</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 20 x 6</span></span>
+<span><span class="co">#&gt;     lexp     n percent    cum valid valid_cum</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1    57     1    1.47   1.47  1.47      1.47</span></span>
+<span><span class="co">#&gt;  2    61     1    1.47   2.94  1.47      2.94</span></span>
+<span><span class="co">#&gt;  3    62     2    2.94   5.88  2.94      5.88</span></span>
+<span><span class="co">#&gt;  4    63     1    1.47   7.35  1.47      7.35</span></span>
+<span><span class="co">#&gt;  5    64     3    4.41  11.8   4.41     11.8 </span></span>
+<span><span class="co">#&gt;  .     .     .      .     .      .        .  </span></span>
+<span><span class="co">#&gt; 16    75     4    5.88  72.1   5.88     72.1 </span></span>
+<span><span class="co">#&gt; 17    76     4    5.88  77.9   5.88     77.9 </span></span>
+<span><span class="co">#&gt; 18    77     5    7.35  85.3   7.35     85.3 </span></span>
+<span><span class="co">#&gt; 19    78     4    5.88  91.2   5.88     91.2 </span></span>
+<span><span class="co">#&gt; 20    79     6    8.82 100     8.82    100   </span></span>
+<span><span class="co">#&gt; # ... 10 rows omitted in the middle; use print(x, n = Inf) to show all rows.</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tab.html">tab</a></span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/special-print.html">print_interval</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 20 x 6</span></span>
+<span><span class="co">#&gt;     lexp     n percent    cum valid valid_cum</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1    57     1    1.47   1.47  1.47      1.47</span></span>
+<span><span class="co">#&gt;  3    62     2    2.94   5.88  2.94      5.88</span></span>
+<span><span class="co">#&gt;  5    64     3    4.41  11.8   4.41     11.8 </span></span>
+<span><span class="co">#&gt;  7    66     1    1.47  14.7   1.47     14.7 </span></span>
+<span><span class="co">#&gt;  9    68     3    4.41  25     4.41     25   </span></span>
+<span><span class="co">#&gt; 12    71     6    8.82  47.1   8.82     47.1 </span></span>
+<span><span class="co">#&gt; 14    73     4    5.88  61.8   5.88     61.8 </span></span>
+<span><span class="co">#&gt; 16    75     4    5.88  72.1   5.88     72.1 </span></span>
+<span><span class="co">#&gt; 18    77     5    7.35  85.3   7.35     85.3 </span></span>
+<span><span class="co">#&gt; 20    79     6    8.82 100     8.82    100   </span></span>
+<span><span class="co">#&gt; # ... 10 rows omitted between displayed positions; use print(x, n = Inf) to</span></span>
+<span><span class="co">#&gt; # show all rows.</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -250,7 +286,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

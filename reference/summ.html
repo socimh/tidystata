@@ -23,7 +23,7 @@ statistics."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@ statistics."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -55,7 +55,7 @@ statistics."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Summary statistics</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/summ.R" class="external-link"><code>R/summ.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/summ.R" class="external-link"><code>R/summ.R</code></a></small>
       <div class="d-none name"><code>summ.Rd</code></div>
     </div>
 
@@ -79,7 +79,7 @@ statistics.</p>
 <span>  .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  .missing <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  .name <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  .type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="st">"table"</span><span class="op">)</span>,</span>
+<span>  .type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="st">"table"</span>, <span class="st">"tibble"</span><span class="op">)</span>,</span>
 <span>  .duration_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"long"</span>, <span class="st">"compact"</span><span class="op">)</span>,</span>
 <span>  .sort <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  .drop_empty <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -96,7 +96,7 @@ statistics.</p>
 <span>  .stat <span class="op">=</span> <span class="st">"mean"</span>,</span>
 <span>  .missing <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  .name <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  .type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="st">"table"</span><span class="op">)</span>,</span>
+<span>  .type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="st">"table"</span>, <span class="st">"tibble"</span><span class="op">)</span>,</span>
 <span>  .duration_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"long"</span>, <span class="st">"compact"</span><span class="op">)</span>,</span>
 <span>  .sort <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  .drop_empty <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -115,14 +115,16 @@ only attributes are summarised; geometry columns are excluded.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Variables selected with tidyselect, or named expressions such as
-<code>income_k = income / 1000</code>. Defaults to all nongrouping columns.</p></dd>
+<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; or
+&lt;<code><a href="https://rlang.r-lib.org/reference/args_data_masking.html" class="external-link">data-masking</a></code>&gt; Variables to summarise, or named
+expressions such as <code>income_k = income / 1000</code>. Defaults to all
+nongrouping columns.</p></dd>
 
 
 <dt id="arg--by">.by<a class="anchor" aria-label="anchor" href="#arg--by"></a></dt>
-<dd><p>Optional grouping columns, selected with tidyselect. Existing
-<code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> groups are used unless <code>.by</code> is supplied. Grouping
-columns are excluded from the variables being summarised.</p></dd>
+<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; Optional grouping columns.
+Existing <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> groups are used unless <code>.by</code> is supplied.
+Grouping columns are excluded from the variables being summarised.</p></dd>
 
 
 <dt id="arg--keep-all">.keep_all<a class="anchor" aria-label="anchor" href="#arg--keep-all"></a></dt>
@@ -133,7 +135,7 @@ By default, unsupported columns are omitted with a warning.</p></dd>
 
 <dt id="arg--detail">.detail<a class="anchor" aria-label="anchor" href="#arg--detail"></a></dt>
 <dd><p>If <code>TRUE</code>, report all supported statistics unless <code>.stat</code>
-specifies a subset. Defaults to <code>FALSE</code>.</p></dd>
+is supplied explicitly. Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg--stat">.stat<a class="anchor" aria-label="anchor" href="#arg--stat"></a></dt>
@@ -155,8 +157,11 @@ omitted when exactly one variable is summarised.</p></dd>
 
 
 <dt id="arg--type">.type<a class="anchor" aria-label="anchor" href="#arg--type"></a></dt>
-<dd><p><code>"list"</code> (default) separates numeric and calendar variable
-families where necessary; <code>"table"</code> combines them into one table.</p></dd>
+<dd><p>Output form. <code>"list"</code> (default) returns separate tables when
+multiple variable families are present, or a single table for one family.
+<code>"table"</code> combines all families into one table, retaining the input's table
+class where supported. <code>"tibble"</code> combines them into one tibble regardless
+of the input's table class or preview settings.</p></dd>
 
 
 <dt id="arg--duration-format">.duration_format<a class="anchor" aria-label="anchor" href="#arg--duration-format"></a></dt>
@@ -194,8 +199,9 @@ applicable), <code>type</code>, and the selected statistics.</p>
 <p>By default, <code>summ()</code> returns <code>n</code>, <code>unique</code>, <code>min</code>, <code>mean</code>, <code>sd</code>, and <code>max</code>;
 <code>tabstat()</code> returns <code>mean</code>. With <code>.type = "list"</code>, results are split into
 <code>numeric</code>, <code>date</code>, <code>datetime</code>, and <code>time</code> tables only when multiple type
-families occur. With <code>.type = "table"</code>, all types are combined in one table.
-Results retain the input's usual table class where supported.</p>
+families occur. With <code>.type = "table"</code> or <code>"tibble"</code>, all types are combined
+in one table. Results retain the input's usual table class where supported,
+except that <code>.type = "tibble"</code> always returns a tibble.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -245,7 +251,10 @@ Thus <code>n</code> remains on the sample-count scale.</p></li>
 <li><p><strong>Mean and spread:</strong> <code>mean = sum(w * x) / W</code>,
 <code>sd = sqrt(sum(w * (x - mean)^2) / (W - 1))</code>, and
 <code>se = sd / sqrt(W)</code>. The two weight types give the same mean but can
-give different <code>sd</code> and <code>se</code> values.</p></li>
+give different <code>sd</code> and <code>se</code> values. Both are <code>NA</code> when <code>W &lt;= 1</code>.</p></li>
+<li><p><strong>Shape:</strong> Skewness and kurtosis use weighted population central moments,
+<code>mk = sum(w * (x - mean)^k) / W</code>. They remain defined for <code>W &gt; 0</code> when
+the population spread is nonzero, including fractional <code>W &lt;= 1</code>.</p></li>
 <li><p><strong>Quantiles and MAD:</strong> Percentiles use Stata's weighted percentile rule,
 replacing positions with cumulative weights; weighted <code>mad</code> uses the
 corresponding weighted medians. <code>min</code> and <code>max</code> exclude zero-weight rows.</p></li>
@@ -253,7 +262,7 @@ corresponding weighted medians. <code>min</code> and <code>max</code> exclude ze
 unrescaled weights, even for analytic weights. <code>unique</code>, <code>miss_n</code>, and
 <code>valid_pct</code> continue to use unweighted row counts.</p></li>
 </ul><p>The reported <code>se</code> is descriptive and does not account for a complex survey
-design. For survey inference, use functions such as <code><a href="https://rdrr.io/pkg/survey/man/surveysummary.html" class="external-link">survey::svymean()</a></code>.</p>
+design. For survey inference, use functions such as <code>survey::svymean()</code>.</p>
 <p><strong>Data types and grouping</strong></p>
 <p>Missingness follows <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code>, including SPSS user-missing codes. Logical
 variables are treated as 0/1; factors use their underlying numeric codes;
@@ -264,8 +273,8 @@ calculations use double precision, which may affect large <code>integer64</code>
 <p>Dates and datetimes support location and spread statistics, but not <code>sum</code>,
 <code>skew</code>, or <code>kurtosis</code>. Calendar locations are displayed as dates or times;
 their spreads (<code>sd</code>, <code>se</code>, <code>mad</code>, <code>iqr</code>) are <code>difftime</code> values in list mode.
-In combined table mode, calendar locations are text and spreads are numeric
-durations (days for Dates, seconds for datetimes and times of day).</p>
+With <code>.type = "table"</code> or <code>"tibble"</code>, calendar locations are text and spreads
+are numeric durations (days for Dates, seconds for datetimes and times of day).</p>
 <p>Expressions in <code>...</code> are evaluated before statistics are calculated by
 group. For group-specific expressions, first create columns with grouped
 <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>.</p>
@@ -276,7 +285,7 @@ group. For group-specific expressions, first create columns with grouped
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">lifeexp</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>region is a labelled variable (*).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 x 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name      type        n unique   min     mean        sd     max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> *region   dbl+lbl    68      3   1      1.5       0.743     3  </span>
@@ -287,25 +296,25 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">lifeexp</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 x 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               name     type      n unique   min    mean      sd    max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> popgrow~ dbl      44     25  -<span style="color: #BB0000;">2.5</span> 7.05<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> 9.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 1.8 <span style="color: #949494;">e</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> popgrow… dbl      44     25  -<span style="color: #BB0000;">2.5</span> 7.05<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> 9.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 1.8 <span style="color: #949494;">e</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> lexp     dbl      44     17  62   7.25<span style="color: #949494;">e</span>+1 4.95<span style="color: #949494;">e</span>+0 7.9 <span style="color: #949494;">e</span>1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> gnppc    dbl      43     42 170   1.13<span style="color: #949494;">e</span>+4 1.29<span style="color: #949494;">e</span>+4 4.66<span style="color: #949494;">e</span>4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> safewat~ dbl      42     25  36   8.16<span style="color: #949494;">e</span>+1 1.86<span style="color: #949494;">e</span>+1 1   <span style="color: #949494;">e</span>2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2<span style="color: #949494;"> [North America]</span>    popgrow~ dbl      14     11   0.3 1.33<span style="color: #949494;">e</span>+0 7.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.6 <span style="color: #949494;">e</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> safewat… dbl      42     25  36   8.16<span style="color: #949494;">e</span>+1 1.86<span style="color: #949494;">e</span>+1 1   <span style="color: #949494;">e</span>2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2<span style="color: #949494;"> [North America]</span>    popgrow… dbl      14     11   0.3 1.33<span style="color: #949494;">e</span>+0 7.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.6 <span style="color: #949494;">e</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2<span style="color: #949494;"> [North America]</span>    lexp     dbl      14     13  57   6.97<span style="color: #949494;">e</span>+1 6.14<span style="color: #949494;">e</span>+0 7.9 <span style="color: #949494;">e</span>1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 2<span style="color: #949494;"> [North America]</span>    gnppc    dbl      14     14 410   6.29<span style="color: #949494;">e</span>+3 9.08<span style="color: #949494;">e</span>+3 3.20<span style="color: #949494;">e</span>4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 2<span style="color: #949494;"> [North America]</span>    safewat~ dbl       6      5  40   5.8 <span style="color: #949494;">e</span>+1 2.40<span style="color: #949494;">e</span>+1 9.9 <span style="color: #949494;">e</span>1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 3<span style="color: #949494;"> [South America]</span>    popgrow~ dbl      10      7   0.5 1.59<span style="color: #949494;">e</span>+0 4.89<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.2 <span style="color: #949494;">e</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 2<span style="color: #949494;"> [North America]</span>    safewat… dbl       6      5  40   5.8 <span style="color: #949494;">e</span>+1 2.40<span style="color: #949494;">e</span>+1 9.9 <span style="color: #949494;">e</span>1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 3<span style="color: #949494;"> [South America]</span>    popgrow… dbl      10      7   0.5 1.59<span style="color: #949494;">e</span>+0 4.89<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.2 <span style="color: #949494;">e</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 3<span style="color: #949494;"> [South America]</span>    lexp     dbl      10      8  61   7.07<span style="color: #949494;">e</span>+1 4.06<span style="color: #949494;">e</span>+0 7.6 <span style="color: #949494;">e</span>1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 3<span style="color: #949494;"> [South America]</span>    gnppc    dbl      10      9 960   3.88<span style="color: #949494;">e</span>+3 2.43<span style="color: #949494;">e</span>+3 7.96<span style="color: #949494;">e</span>3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> 3<span style="color: #949494;"> [South America]</span>    safewat~ dbl       6      6  45   6.53<span style="color: #949494;">e</span>+1 1.70<span style="color: #949494;">e</span>+1 9.1 <span style="color: #949494;">e</span>1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> 3<span style="color: #949494;"> [South America]</span>    safewat… dbl       6      6  45   6.53<span style="color: #949494;">e</span>+1 1.70<span style="color: #949494;">e</span>+1 9.1 <span style="color: #949494;">e</span>1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tabstat</span><span class="op">(</span><span class="va">lifeexp</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 x 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               name      type        mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> popgrowth dbl       0.070<span style="text-decoration: underline;">5</span></span>
@@ -324,13 +333,13 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-in"><span><span class="co"># Compare frequency and analytic weights</span></span></span>
 <span class="r-in"><span><span class="va">survey</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>income <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">40</span><span class="op">)</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">survey</span>, <span class="va">income</span>, .wt <span class="op">=</span> <span class="va">w</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span>, <span class="st">"sd"</span>, <span class="st">"p50"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   type      n  mean    sd   p50</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> dbl       5    18  13.0    10</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">survey</span>, <span class="va">income</span>, .wt <span class="op">=</span> <span class="va">w</span>, .wt_type <span class="op">=</span> <span class="st">"analytic"</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"sd"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   type      n    sd</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> dbl       3  14.3</span>
@@ -341,7 +350,7 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-in"><span>    .by <span class="op">=</span> <span class="va">region</span>,</span></span>
 <span class="r-in"><span>    .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span>, <span class="st">"sd"</span>, <span class="st">"p50"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 x 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               name      type      n       mean        sd     p50</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> popgrowth dbl      44     0.070<span style="text-decoration: underline;">5</span>     0.910    0.1 </span>
@@ -360,36 +369,36 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-in"><span><span class="co"># Exclude rows with missing group keys</span></span></span>
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">lifeexp</span>, .by <span class="op">=</span> <span class="va">region</span>, .missing <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 x 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               name     type      n unique   min    mean      sd    max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> popgrow~ dbl      44     25  -<span style="color: #BB0000;">2.5</span> 7.05<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> 9.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 1.8 <span style="color: #949494;">e</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> popgrow… dbl      44     25  -<span style="color: #BB0000;">2.5</span> 7.05<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> 9.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 1.8 <span style="color: #949494;">e</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> lexp     dbl      44     17  62   7.25<span style="color: #949494;">e</span>+1 4.95<span style="color: #949494;">e</span>+0 7.9 <span style="color: #949494;">e</span>1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> gnppc    dbl      43     42 170   1.13<span style="color: #949494;">e</span>+4 1.29<span style="color: #949494;">e</span>+4 4.66<span style="color: #949494;">e</span>4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> safewat~ dbl      42     25  36   8.16<span style="color: #949494;">e</span>+1 1.86<span style="color: #949494;">e</span>+1 1   <span style="color: #949494;">e</span>2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2<span style="color: #949494;"> [North America]</span>    popgrow~ dbl      14     11   0.3 1.33<span style="color: #949494;">e</span>+0 7.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.6 <span style="color: #949494;">e</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> safewat… dbl      42     25  36   8.16<span style="color: #949494;">e</span>+1 1.86<span style="color: #949494;">e</span>+1 1   <span style="color: #949494;">e</span>2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2<span style="color: #949494;"> [North America]</span>    popgrow… dbl      14     11   0.3 1.33<span style="color: #949494;">e</span>+0 7.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.6 <span style="color: #949494;">e</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2<span style="color: #949494;"> [North America]</span>    lexp     dbl      14     13  57   6.97<span style="color: #949494;">e</span>+1 6.14<span style="color: #949494;">e</span>+0 7.9 <span style="color: #949494;">e</span>1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 2<span style="color: #949494;"> [North America]</span>    gnppc    dbl      14     14 410   6.29<span style="color: #949494;">e</span>+3 9.08<span style="color: #949494;">e</span>+3 3.20<span style="color: #949494;">e</span>4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 2<span style="color: #949494;"> [North America]</span>    safewat~ dbl       6      5  40   5.8 <span style="color: #949494;">e</span>+1 2.40<span style="color: #949494;">e</span>+1 9.9 <span style="color: #949494;">e</span>1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 3<span style="color: #949494;"> [South America]</span>    popgrow~ dbl      10      7   0.5 1.59<span style="color: #949494;">e</span>+0 4.89<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.2 <span style="color: #949494;">e</span>0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 2<span style="color: #949494;"> [North America]</span>    safewat… dbl       6      5  40   5.8 <span style="color: #949494;">e</span>+1 2.40<span style="color: #949494;">e</span>+1 9.9 <span style="color: #949494;">e</span>1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 3<span style="color: #949494;"> [South America]</span>    popgrow… dbl      10      7   0.5 1.59<span style="color: #949494;">e</span>+0 4.89<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> 2.2 <span style="color: #949494;">e</span>0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 3<span style="color: #949494;"> [South America]</span>    lexp     dbl      10      8  61   7.07<span style="color: #949494;">e</span>+1 4.06<span style="color: #949494;">e</span>+0 7.6 <span style="color: #949494;">e</span>1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 3<span style="color: #949494;"> [South America]</span>    gnppc    dbl      10      9 960   3.88<span style="color: #949494;">e</span>+3 2.43<span style="color: #949494;">e</span>+3 7.96<span style="color: #949494;">e</span>3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> 3<span style="color: #949494;"> [South America]</span>    safewat~ dbl       6      6  45   6.53<span style="color: #949494;">e</span>+1 1.70<span style="color: #949494;">e</span>+1 9.1 <span style="color: #949494;">e</span>1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> 3<span style="color: #949494;"> [South America]</span>    safewat… dbl       6      6  45   6.53<span style="color: #949494;">e</span>+1 1.70<span style="color: #949494;">e</span>+1 9.1 <span style="color: #949494;">e</span>1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Summarise existing and computed columns together</span></span></span>
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, gnppc_thousands <span class="op">=</span> <span class="va">gnppc</span> <span class="op">/</span> <span class="fl">1000</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   region               name           type      n unique   min  mean    sd   max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> lexp           dbl      44     17 62    72.5   4.95 79   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> gnppc_thousan~ dbl      43     42  0.17 11.3  12.9  46.6 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> gnppc_thousan… dbl      43     42  0.17 11.3  12.9  46.6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 2<span style="color: #949494;"> [North America]</span>    lexp           dbl      14     13 57    69.7   6.14 79   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 2<span style="color: #949494;"> [North America]</span>    gnppc_thousan~ dbl      14     14  0.41  6.29  9.08 32.0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 2<span style="color: #949494;"> [North America]</span>    gnppc_thousan… dbl      14     14  0.41  6.29  9.08 32.0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 3<span style="color: #949494;"> [South America]</span>    lexp           dbl      10      8 61    70.7   4.06 76   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 3<span style="color: #949494;"> [South America]</span>    gnppc_thousan~ dbl      10      9  0.96  3.88  2.43  7.96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 3<span style="color: #949494;"> [South America]</span>    gnppc_thousan… dbl      10      9  0.96  3.88  2.43  7.96</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tabstat</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, gnppc_thousands <span class="op">=</span> <span class="va">gnppc</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name            type   mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp            dbl   71.7 </span>
@@ -400,22 +409,30 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">mixed</span>, .type <span class="op">=</span> <span class="st">"list"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> A list is returned as statistics are heterogeneous.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $numeric</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name  type      n unique   min  mean    sd   max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> x     dbl       2      2     1     2  1.41     3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name  type      n unique mean       sd             min        max       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;drtn&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> day   date      2      2 2024-01-01 0.7071068 days 2024-01-01 2024-01-02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Combine numeric and calendar summaries in one tibble</span></span></span>
+<span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">mixed</span>, .type <span class="op">=</span> <span class="st">"tibble"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   name  type            n unique min        mean          sd max       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> x     dbl             2      2 1          2          1.41  3         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> day   date [days]     2      2 2024-01-01 2024-01-01 0.707 2024-01-02</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Preserve a variable name when starting from a vector</span></span></span>
 <span class="r-in"><span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">6</span>, <span class="cn">NA</span>, <span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>score <span class="op">=</span> <span class="va">scores</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">summ</span><span class="op">(</span>.name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name  type      n unique   min  mean    sd   max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> score dbl       3      3     4     6     2     8</span>
@@ -430,7 +447,7 @@ group. For group-specific expressions, first create columns with grouped
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

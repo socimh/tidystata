@@ -3,9 +3,9 @@
 [English
 version](https://socimh.github.io/tidystata/articles/coming-from-stata.md)
 
-需要按章节浏览、搜索或展开替代实现时，请打开 **[Stata 转 R
-参考手册](https://www.socimh.com/stata-to-r/zh/)**。
-手册提供中英文两个版本，每章均可切换语言。本页继续保留完整的单页对照表。
+本完整参考指南属于 tidystata
+网站。可通过顶部导航返回函数文档或其他文章，
+通过目录跳转到所需章节。上方语言链接可在中英文版本之间切换。
 
 熟悉 Stata 的用户已经知道自己想做什么，需要的只是知道在 R
 中怎么写。本页把 Stata 命令和完成同样任务的 R 代码并列：tidystata 中有
@@ -52,9 +52,9 @@ findit("merge 1:1 id, keep(match)")
 R 实现、 差异说明和参考链接。`findit(dplyr::filter)`
 这样的包限定查询可以区分同名函数。
 
-本指南包含 514 个命令族、181 个 Stata 函数和 3 个运算符，共有 1716
-个不同的 Stata 示例和 1782 条 R 对照示例。缩写及同一任务的其他 R
-实现不会增加命令数量。 R 函数索引包含 949 个函数与包的组合。
+本指南包含 514 个命令族、181 个 Stata 函数和 3 个运算符，共有 1719
+个不同的 Stata 示例和 1785 条 R 对照示例。缩写及同一任务的其他 R
+实现不会增加命令数量。 R 函数索引包含 964 个函数与包的组合。
 
 ## 使用命令对照表
 
@@ -86,9 +86,6 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 
 ## 命令字母索引
 
-[F](#example-ref-5c1a42b934cb6b4f) ·
-[Fden](#example-ref-04e11edb60d43424) ·
-[Ftail](#example-ref-a7f21b2b3b0647fb) ·
 [about](#example-ref-23457083a342d8a8) ·
 [ac](#example-ref-fa917324a24efd88) · [ado](#example-legacy-0282) ·
 [adopath](#example-ref-73ca091b91521ced) ·
@@ -210,11 +207,12 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 [exponential](#example-ref-5ef4b1a2dd10712f) ·
 [exponentialden](#example-ref-1fef28de83dba7b8) ·
 [exponentialtail](#example-ref-6cd8276eeaa5eec3) ·
-[export](#example-legacy-0020) · [f.](#example-legacy-0359) ·
-[factor](#example-legacy-0084) ·
+[export](#example-legacy-0020) · [F](#example-ref-5c1a42b934cb6b4f) ·
+[f.](#example-legacy-0359) · [factor](#example-legacy-0084) ·
 [factormat](#example-ref-a0421b00c54bf2a7) ·
 [fcast](#example-ref-a303bdc04fa81a48) ·
 [fcollapse](#example-ref-ff005b44b4bc06f9) ·
+[Fden](#example-ref-04e11edb60d43424) ·
 [file](#example-ref-db37147f74447ccd) ·
 [filefilter](#example-ref-1d589d51d8c70b62) ·
 [fillin](#example-legacy-0221) ·
@@ -231,6 +229,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 · [fre](#example-legacy-0042) · [frget](#example-ref-ece62cf14db3df86) ·
 [frlink](#example-ref-f25874e32f399df3) ·
 [frunalias](#example-ref-c431b0cad1da93c8) ·
+[Ftail](#example-ref-a7f21b2b3b0647fb) ·
 [ftools](#example-ref-289daa81773fd223) ·
 [gammaden](#example-ref-2ad06af7ddddaa94) ·
 [gammap](#example-ref-01f2d600d32ad31a) ·
@@ -275,8 +274,6 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 [insobs](#example-ref-4b82e73619fe09f5) ·
 [inspect](#example-legacy-0059) ·
 [intreg](#example-ref-4369e2ccad9e8d3f) ·
-[invF](#example-ref-7822f727ce3a3dfe) ·
-[invFtail](#example-ref-d4e72ece99ff3f05) ·
 [invbinomial](#example-ref-132aa6c600b88f03) ·
 [invbinomialtail](#example-ref-bc59ee2e9a87253e) ·
 [invcauchy](#example-ref-1e7da01122eba0c2) ·
@@ -285,18 +282,20 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 [invchi2tail](#example-ref-23306c7dbf504d73) ·
 [invexponential](#example-ref-29514def6e9ecbad) ·
 [invexponentialtail](#example-ref-7b571ba451d3e054) ·
+[invF](#example-ref-7822f727ce3a3dfe) ·
+[invFtail](#example-ref-d4e72ece99ff3f05) ·
 [invgammap](#example-ref-2265ddfe6d1a8f29) ·
 [invgammaptail](#example-ref-bf84d422d26193ae) ·
 [invibeta](#example-ref-8bc4b3768425541a) ·
 [invibetatail](#example-ref-88d1fec121a169d0) ·
 [invlogistic](#example-ref-62040f03f7fc4986) ·
 [invlogistictail](#example-ref-46db3a062f66d769) ·
-[invnF](#example-ref-f415a39bfdae4e2a) ·
-[invnFtail](#example-ref-d5ae4af1368a8f05) ·
 [invnbinomial](#example-ref-2549a0c3e9f10f22) ·
 [invnbinomialtail](#example-ref-e4993aa3c1347631) ·
 [invnchi2](#example-ref-047e7eddf232874f) ·
 [invnchi2tail](#example-ref-22999e358ff1bb18) ·
+[invnF](#example-ref-f415a39bfdae4e2a) ·
+[invnFtail](#example-ref-d5ae4af1368a8f05) ·
 [invnibeta](#example-ref-d701858fe7a31496) ·
 [invnormal](#example-ref-4eca2239aba08a06) ·
 [invnt](#example-ref-ce6c456fae75074b) ·
@@ -383,9 +382,6 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 [mvencode](#example-legacy-0124) ·
 [mvreg](#example-ref-84c8c53fd61de90e) ·
 [mvtest](#example-ref-3ecf635c5a04e393) ·
-[nF](#example-ref-aa746531f0a8f6c2) ·
-[nFden](#example-ref-ff8abb410d9cc40c) ·
-[nFtail](#example-ref-52cf941ab80e5328) ·
 [nbetaden](#example-ref-d59c43dd30954b2f) ·
 [nbinomial](#example-ref-12787c749e7717df) ·
 [nbinomialp](#example-ref-55d623f908e6e118) ·
@@ -395,12 +391,15 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 [nchi2tail](#example-ref-b77aba953ed51020) ·
 [nestreg](#example-ref-c0e97b6e48d38b6c) · [net](#example-legacy-0011) ·
 [newey](#example-ref-c263eba9cf3fb057) ·
+[nF](#example-ref-aa746531f0a8f6c2) ·
+[nFden](#example-ref-ff8abb410d9cc40c) ·
+[nFtail](#example-ref-52cf941ab80e5328) ·
 [nibeta](#example-ref-108f4c14a7573c1b) ·
 [nl](#example-ref-3366d57f680bc9fd) · [nlcom](#example-legacy-0330) ·
 [normal](#example-ref-34e7210a02898239) ·
 [normalden](#example-ref-493740d06c458ca9) ·
-[notes](#example-legacy-0107) · [npnF](#example-ref-6b33380e283b39a7) ·
-[npnchi2](#example-ref-5b19051b8727105b) ·
+[notes](#example-legacy-0107) · [npnchi2](#example-ref-5b19051b8727105b)
+· [npnF](#example-ref-6b33380e283b39a7) ·
 [npnt](#example-ref-18171672d2eba71f) ·
 [nptrend](#example-ref-2a51c04e2be7cab2) ·
 [nt](#example-ref-a7067a71f45672d1) ·
@@ -823,60 +822,22 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 |----|----|----|----|
 | `ivreg()` | AER | ivregress | 示例用途：公式式工具变量回归 |
 | `tobit()` | AER |  | Tobit（删失）回归 |
-| `dbAppendTable()` | DBI | jdbc | 示例用途：将受控行追加到已有 SQL 表 |
-| `dbDisconnect()` | DBI | odbc | 示例用途：通过 SQL 查询载入所选行 |
-| `dbGetQuery()` | DBI | odbc | 示例用途：通过 SQL 查询载入所选行 |
-| `dbListFields()` | DBI | odbc | 示例用途：查看数据库表字段名 |
-| `dbListTables()` | DBI | odbc | 示例用途：查看数据库中的可用表 |
-| `dbReadTable()` | DBI | jdbc | 示例用途：通过 DBI 后端载入完整 SQL 表 |
-| `oblimin()` | GPArotation | rotate | 示例用途：使用斜交oblimin载荷旋转准则 |
-| `quartimax()` | GPArotation | rotate | 示例用途：使用正交quartimax载荷旋转准则 |
-| `boxcox()` | MASS | boxcox | 示例用途：剖面估计Box-Cox响应变换参数 |
-| `corresp()` | MASS | ca | 示例用途：对列联表进行简单对应分析 |
-| `glm.nb()` | MASS |  | 负二项回归 |
-| `isoMDS()` | MASS | mds | 示例用途：拟合非度量多维尺度分析 |
-| `lda()` | MASS | discrim | 示例用途：拟合线性判别分析 |
-| `mca()` | MASS | mca | 示例用途：通过指示矩阵MCA分析多个分类变量 |
-| `mvrnorm()` | MASS | drawnorm | 示例用途：联合生成独立标准正态变量列 |
-| `polr()` | MASS |  | 有序 logit 或 probit 模型 |
-| `qda()` | MASS | discrim | 示例用途：拟合二次判别分析 |
-| `rlm()` | MASS |  | 稳健回归 |
-| `MCMCregress()` | MCMCpack | bayesmh | 示例用途：正态及逆Gamma先验的贝叶斯高斯回归 |
-| `match_data()` | MatchIt | psmatch2 | 示例用途：倾向得分匹配后的ATT点对比 |
-| `matchit()` | MatchIt |  | 用于因果推断的匹配 |
-| `synth()` | Synth |  | 合成控制法 |
-| `SurvS4()` | VGAM | cpoisson | 示例用途：拟合右删失泊松计数模型 |
-| `binom2.rho()` | VGAM | biprobit | 示例用途：联合拟合相关的二元probit方程 |
-| `cens.poisson()` | VGAM | cpoisson | 示例用途：拟合右删失泊松计数模型 |
-| `multinomial()` | VGAM | slogit | 示例用途：拟合秩一刻板多项logit模型 |
-| `posnegbinomial()` | VGAM | tnbreg | 示例用途：拟合零截断NB2回归 |
-| `posnormal()` | VGAM | truncreg | 示例用途：拟合在零处左截断的正态回归 |
-| `pospoisson()` | VGAM | tpoisson | 示例用途：拟合零截断泊松回归 |
-| `rrvglm()` | VGAM | slogit | 示例用途：拟合秩一刻板多项logit模型 |
-| `vglm()` | VGAM | tpoisson | 示例用途：拟合零截断泊松回归 |
-| `weightit()` | WeightIt |  | 平衡权重，如逆概率权重 |
 | [`.libPaths()`](https://rdrr.io/r/base/libPaths.html) | base | adopath | 示例用途：查看 R 包库搜索路径 |
-| [`I()`](https://rdrr.io/r/base/AsIs.html) | base | regress | 示例用途：拟合二次项回归 |
-| [`Mod()`](https://rdrr.io/r/base/complex.html) | base | psdensity | 示例用途：参数化AR(1)谱密度 |
-| [`R.home()`](https://rdrr.io/r/base/Rhome.html) | base | sysdir | 示例用途：查看 R 安装与临时文件夹 |
-| [`Sys.Date()`](https://rdrr.io/r/base/Sys.time.html) | base |  | 今天的日期 |
-| [`Sys.sleep()`](https://rdrr.io/r/base/Sys.sleep.html) | base | sleep | 示例用途：将毫秒转为秒后暂停执行 |
-| [`Sys.time()`](https://rdrr.io/r/base/Sys.time.html) | base | c(current_time) | 当前日期和时间 |
 | [`abs()`](https://rdrr.io/r/base/MathFun.html) | base | abs() | 绝对值 |
 | [`all()`](https://rdrr.io/r/base/all.html) | base | assert | 是否所有值都为 TRUE |
 | [`any()`](https://rdrr.io/r/base/any.html) | base | count if | 是否有任一值为 TRUE |
 | [`anyDuplicated()`](https://rdrr.io/r/base/duplicated.html) | base | gisid | 示例用途：使用 gisid 验证编号唯一且完整 |
 | [`anyNA()`](https://rdrr.io/r/base/NA.html) | base | gisid | 示例用途：使用 gisid 验证编号唯一且完整 |
 | [`apply()`](https://rdrr.io/r/base/apply.html) | base | egen rowtotal() | 对行或列应用函数 |
-| [`as.Date()`](https://rdrr.io/r/base/as.Date.html) | base |  | 转为日期 |
-| [`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html) | base | clock | 示例用途：使用显式 UTC 时区解析日期时间 |
 | [`as.character()`](https://rdrr.io/r/base/character.html) | base |  | 转为文本 |
 | [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) | base | getmata | 示例用途：将矩阵转换为具名数据列 |
+| [`as.Date()`](https://rdrr.io/r/base/as.Date.html) | base |  | 转为日期 |
 | [`as.double()`](https://rdrr.io/r/base/double.html) | base |  | 转为双精度数值 |
 | [`as.factor()`](https://rdrr.io/r/base/factor.html) | base | encode | 转为因子 |
 | [`as.integer()`](https://rdrr.io/r/base/integer.html) | base |  | 转为整数 |
 | [`as.matrix()`](https://rdrr.io/r/base/matrix.html) | base | cf | 示例用途：验证两个数据表指定列的值一致 |
 | [`as.numeric()`](https://rdrr.io/r/base/numeric.html) | base |  | 转为数值 |
+| [`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html) | base | clock | 示例用途：使用显式 UTC 时区解析日期时间 |
 | [`as.vector()`](https://rdrr.io/r/base/vector.html) | base | margins | 示例用途：计算连续解释变量的平均边际效应 |
 | [`attr()`](https://rdrr.io/r/base/attr.html) | base |  | 读取或设定对象的属性 |
 | [`attributes()`](https://rdrr.io/r/base/attributes.html) | base | char | 示例用途：查看自定义列特征 |
@@ -885,15 +846,15 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`cat()`](https://rdrr.io/r/base/cat.html) | base |  | 打印不带引号的文本 |
 | [`cbind()`](https://rdrr.io/r/base/cbind.html) | base | merge 1:1 \_n | 左右拼接（base R） |
 | [`ceiling()`](https://rdrr.io/r/base/Round.html) | base |  | 向上取整 |
-| [`charToRaw()`](https://rdrr.io/r/base/rawConversion.html) | base | changeeol | 示例用途：将文本文件换行统一为 Unix 格式 |
 | [`character()`](https://rdrr.io/r/base/character.html) | base | tokenize | 示例用途：拆分带引号短语与单词 |
+| [`charToRaw()`](https://rdrr.io/r/base/rawConversion.html) | base | changeeol | 示例用途：将文本文件换行统一为 Unix 格式 |
 | [`chol()`](https://rdrr.io/r/base/chol.html) | base | irf | 示例用途：Cholesky正交化VAR响应 |
 | [`class()`](https://rdrr.io/r/base/class.html) | base | describe | 对象的类 |
 | [`close()`](https://rdrr.io/r/base/connections.html) | base | file | 示例用途：写入并关闭 UTF-8 文本连接 |
 | [`col()`](https://rdrr.io/r/base/col.html) | base | spmatrix | 示例用途：行标准化逆距离空间权重 |
 | [`colMeans()`](https://rdrr.io/r/base/colSums.html) | base | margins | 示例用途：计算连续解释变量的平均边际效应 |
-| [`colSums()`](https://rdrr.io/r/base/colSums.html) | base | missings | 示例用途：按数值变量报告缺失值数 |
 | [`colnames()`](https://rdrr.io/r/base/colnames.html) | base | ds | 列名 |
+| [`colSums()`](https://rdrr.io/r/base/colSums.html) | base | missings | 示例用途：按数值变量报告缺失值数 |
 | [`crossprod()`](https://rdrr.io/r/base/crossprod.html) | base | tsfilter | 示例用途：Hodrick-Prescott趋势周期分解 |
 | [`cumprod()`](https://rdrr.io/r/base/cumsum.html) | base | generate | 累计乘积 |
 | [`cumsum()`](https://rdrr.io/r/base/cumsum.html) | base |  | 累计求和 |
@@ -927,6 +888,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`grep()`](https://rdrr.io/r/base/grep.html) | base | unab | 示例用途：展开列名前缀通配符 |
 | [`grepl()`](https://rdrr.io/r/base/grep.html) | base |  | 文本是否匹配某个模式 |
 | [`gsub()`](https://rdrr.io/r/base/grep.html) | base | subinstr() | 替换所有匹配 |
+| [`I()`](https://rdrr.io/r/base/AsIs.html) | base | regress | 示例用途：拟合二次项回归 |
 | [`iconv()`](https://rdrr.io/r/base/iconv.html) | base | unicode | 示例用途：将 Latin-1 文本转换为 UTF-8 |
 | [`identical()`](https://rdrr.io/r/base/identical.html) | base | cf | 示例用途：验证两个数据表指定列的值一致 |
 | [`ifelse()`](https://rdrr.io/r/base/ifelse.html) | base | cond() | 向量化的条件判断（base R） |
@@ -961,6 +923,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`merge()`](https://rdrr.io/r/base/merge.html) | base | merge | 合并两个数据框（base R） |
 | [`message()`](https://rdrr.io/r/base/message.html) | base | display | 打印消息 |
 | [`min()`](https://rdrr.io/r/base/Extremes.html) | base |  | 最小值 |
+| [`Mod()`](https://rdrr.io/r/base/complex.html) | base | psdensity | 示例用途：参数化AR(1)谱密度 |
 | [`names()`](https://socimh.github.io/tidystata/reference/names.md) | base |  | 对象的名称，例如列名 |
 | [`nchar()`](https://rdrr.io/r/base/nchar.html) | base | strlen() | 字符个数 |
 | [`ncol()`](https://rdrr.io/r/base/nrow.html) | base | describe | 列数 |
@@ -981,6 +944,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`proportions()`](https://rdrr.io/r/base/proportions.html) | base | tabulate, row | 把表格转为比例 |
 | [`qr()`](https://rdrr.io/r/base/qr.html) | base | orthog | 示例用途：按指定顺序对中心化解释变量列正交化 |
 | [`qr.Q()`](https://rdrr.io/r/base/qraux.html) | base | orthog | 示例用途：按指定顺序对中心化解释变量列正交化 |
+| [`R.home()`](https://rdrr.io/r/base/Rhome.html) | base | sysdir | 示例用途：查看 R 安装与临时文件夹 |
 | [`range()`](https://rdrr.io/r/base/range.html) | base | summarize | 最小值和最大值 |
 | [`rank()`](https://rdrr.io/r/base/rank.html) | base |  | 秩（相同取值取平均秩） |
 | [`rbind()`](https://rdrr.io/r/base/cbind.html) | base | append | 上下拼接（base R） |
@@ -1031,7 +995,10 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`substr()`](https://rdrr.io/r/base/substr.html) | base | substr() | 按位置截取字符串 |
 | [`sum()`](https://rdrr.io/r/base/sum.html) | base |  | 求和 |
 | [`summary()`](https://rdrr.io/r/base/summary.html) | base |  | 对象（如模型）的概要 |
+| [`Sys.Date()`](https://rdrr.io/r/base/Sys.time.html) | base |  | 今天的日期 |
+| [`Sys.sleep()`](https://rdrr.io/r/base/Sys.sleep.html) | base | sleep | 示例用途：将毫秒转为秒后暂停执行 |
 | [`sys.source()`](https://rdrr.io/r/base/sys.source.html) | base | include | 示例用途：在当前求值环境执行辅助代码 |
+| [`Sys.time()`](https://rdrr.io/r/base/Sys.time.html) | base | c(current_time) | 当前日期和时间 |
 | [`t()`](https://rdrr.io/r/base/t.html) | base |  | 矩阵转置 |
 | [`table()`](https://rdrr.io/r/base/table.html) | base |  | 统计各取值的个数 |
 | [`tapply()`](https://rdrr.io/r/base/tapply.html) | base | bysort g: egen | 分组应用函数 |
@@ -1073,11 +1040,17 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `vif()` | car |  | 方差膨胀因子 |
 | `knn()` | class | discrim | 示例用途：使用五个最近邻进行分类 |
 | `bal.tab()` | cobalt | pstest | 示例用途：匹配前后标准化协变量平衡 |
-| `HPDinterval()` | coda | bayesstats | 示例用途：90%最高后验密度区间 |
 | `effectiveSize()` | coda | bayesstats | 示例用途：MCMC有效样本量 |
+| `HPDinterval()` | coda | bayesstats | 示例用途：90%最高后验密度区间 |
 | `fread()` | data.table | import delimited | 快速读取大型文本文件 |
 | `fwrite()` | data.table | export delimited | 快速写出大型文本文件 |
 | `winsorize()` | datawizard |  | 对极端值缩尾 |
+| `dbAppendTable()` | DBI | jdbc | 示例用途：将受控行追加到已有 SQL 表 |
+| `dbDisconnect()` | DBI | odbc | 示例用途：通过 SQL 查询载入所选行 |
+| `dbGetQuery()` | DBI | odbc | 示例用途：通过 SQL 查询载入所选行 |
+| `dbListFields()` | DBI | odbc | 示例用途：查看数据库表字段名 |
+| `dbListTables()` | DBI | odbc | 示例用途：查看数据库中的可用表 |
+| `dbReadTable()` | DBI | jdbc | 示例用途：通过 DBI 后端载入完整 SQL 表 |
 | `att_gt()` | did |  | 交错双重差分（Callaway-Sant'Anna） |
 | [`across()`](https://dplyr.tidyverse.org/reference/across.html) | dplyr |  | 对多列进行相同的计算 |
 | [`add_count()`](https://dplyr.tidyverse.org/reference/count.html) | dplyr | bysort g: generate n = \_N | 添加分组计数列 |
@@ -1247,6 +1220,8 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `glmmTMB()` | glmmTMB | menbreg | 示例用途：二次均值方差负二项混合模型 |
 | `nbinom2()` | glmmTMB | menbreg | 示例用途：二次均值方差负二项混合模型 |
 | `cv.glmnet()` | glmnet | lasso | 示例用途：拟合交叉验证的lasso线性预测模型 |
+| `oblimin()` | GPArotation | rotate | 示例用途：使用斜交oblimin载荷旋转准则 |
+| `quartimax()` | GPArotation | rotate | 示例用途：使用正交quartimax载荷旋转准则 |
 | [`pairs()`](https://rdrr.io/r/graphics/pairs.html) | graphics |  | 散点图矩阵 |
 | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) | graphics | quantile | 示例用途：绘制有序观测与累计比例的关系 |
 | [`stem()`](https://rdrr.io/r/graphics/stem.html) | graphics |  | 茎叶图 |
@@ -1284,12 +1259,12 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `modindices()` | lavaan | estat | 示例用途：检查结构方程模型修正指数 |
 | `sem()` | lavaan |  | 结构方程模型 |
 | `standardizedSolution()` | lavaan | sem | 示例用途：报告标准化结构方程模型参数 |
-| `VarCorr()` | lme4 | estat sd | 多层模型的方差成分 |
 | `fixef()` | lme4 | quadchk | 示例用途：混合Logit估计对求积点数的敏感性 |
 | `glmer()` | lme4 |  | 多层广义线性模型 |
 | `glmerControl()` | lme4 | melogit | 示例用途：Logistic随机截距模型：Laplace近似 |
 | `lmer()` | lme4 |  | 多层线性模型 |
 | `ranef()` | lme4 | predict, reffects | 随机效应的预测值 |
+| `VarCorr()` | lme4 | estat sd | 多层模型的方差成分 |
 | `bptest()` | lmtest |  | Breusch-Pagan 异方差检验 |
 | `coeftest()` | lmtest |  | 使用指定方差矩阵的系数检验 |
 | `grangertest()` | lmtest | vargranger | 示例用途：检验x是否Granger预测y |
@@ -1329,6 +1304,19 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `plot_slopes()` | marginaleffects | marginsplot | 绘制边际效应 |
 | `predictions()` | marginaleffects | margins | 带标准误的预测值 |
 | `slopes()` | marginaleffects | margins, dydx(x) at() | 每个观测的边际效应 |
+| `boxcox()` | MASS | boxcox | 示例用途：剖面估计Box-Cox响应变换参数 |
+| `corresp()` | MASS | ca | 示例用途：对列联表进行简单对应分析 |
+| `glm.nb()` | MASS |  | 负二项回归 |
+| `isoMDS()` | MASS | mds | 示例用途：拟合非度量多维尺度分析 |
+| `lda()` | MASS | discrim | 示例用途：拟合线性判别分析 |
+| `mca()` | MASS | mca | 示例用途：通过指示矩阵MCA分析多个分类变量 |
+| `mvrnorm()` | MASS | drawnorm | 示例用途：联合生成独立标准正态变量列 |
+| `polr()` | MASS |  | 有序 logit 或 probit 模型 |
+| `qda()` | MASS | discrim | 示例用途：拟合二次判别分析 |
+| `rlm()` | MASS |  | 稳健回归 |
+| `match_data()` | MatchIt | psmatch2 | 示例用途：倾向得分匹配后的ATT点对比 |
+| `matchit()` | MatchIt |  | 用于因果推断的匹配 |
+| `MCMCregress()` | MCMCpack | bayesmh | 示例用途：正态及逆Gamma先验的贝叶斯高斯回归 |
 | `cumul()` | metafor | meta | 示例用途：按年份累积的固定效应元分析 |
 | `escalc()` | metafor | meta | 示例用途：声明通用效应量与抽样方差 |
 | `leave1out()` | metafor | meta | 示例用途：逐一剔除研究的合并估计 |
@@ -1336,9 +1324,9 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `regtest()` | metafor | meta | 示例用途：Egger回归不对称检验 |
 | `rma()` | metafor | meta | 示例用途：逆方差元分析方法：FE |
 | `trimfill()` | metafor | meta | 示例用途：剪补法敏感性分析 |
+| `complete()` | mice | mi | 示例用途：提取第一个完整数据集 |
 | `D1()` | mice | mi | 示例用途：合并多变量Wald比较 |
 | `D2()` | mice | mi | 示例用途：合并重复完整数据Wald检验 |
-| `complete()` | mice | mi | 示例用途：提取第一个完整数据集 |
 | `make.predictorMatrix()` | mice | mi | 示例用途：自定义插补预测矩阵 |
 | `mice()` | mice |  | 链式方程多重插补 |
 | `pool()` | mice |  | 合并多个插补数据的结果 |
@@ -1361,9 +1349,6 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `multinom()` | nnet |  | 多项 logit 模型 |
 | `oaxaca()` | oaxaca |  | Blinder-Oaxaca 分解 |
 | `clmm()` | ordinal | meologit | 示例用途：随机截距累积Logit模型 |
-| `coords()` | pROC | roctab | 示例用途：列出不同ROC阈值的敏感度与特异度 |
-| `roc()` | pROC | roctab | 示例用途：估计诊断标记的非参数ROC曲线下面积 |
-| `roc.test()` | pROC | roccomp | 示例用途：使用DeLong推断比较配对标记的ROC面积 |
 | `wrap_plots()` | patchwork |  | 组合多张图 |
 | `pdata.frame()` | plm | xtset | 为 plm 声明面板数据 |
 | `pgmm()` | plm |  | 动态面板 GMM（Arellano-Bond） |
@@ -1375,20 +1360,23 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `vcovHC()` | plm | xtreg | 示例用途：按个体聚类的面板稳健标准误 |
 | `vcovSCC()` | plm | xtreg | 示例用途：Driscoll-Kraay协方差 |
 | `polychor()` | polycor | tetrachoric | 示例用途：使用最大似然估计四分相关 |
+| `coords()` | pROC | roctab | 示例用途：列出不同ROC阈值的敏感度与特异度 |
+| `roc()` | pROC | roctab | 示例用途：估计诊断标记的非参数ROC曲线下面积 |
+| `roc.test()` | pROC | roccomp | 示例用途：使用DeLong推断比较配对标记的ROC面积 |
 | `zeroinfl()` | pscl | zip | 示例用途：拟合采用logit零膨胀部分的零膨胀泊松模型 |
-| `ICC()` | psych | icc | 示例用途：估计单向模型单次测量组内相关 |
-| `KMO()` | psych | estat | 示例用途：使用KMO指标评估因子分析适用性 |
 | `alpha()` | psych | alpha | Cronbach α 系数 |
 | `cohen.kappa()` | psych | kap | 示例用途：估计两名评分者的非加权Cohen kappa |
 | `describe()` | psych | summarize | 描述统计（与 Stata 的 describe 不同） |
 | `fa()` | psych | factor | 方法更多的因子分析 |
+| `ICC()` | psych | icc | 示例用途：估计单向模型单次测量组内相关 |
+| `KMO()` | psych | estat | 示例用途：使用KMO指标评估因子分析适用性 |
 | `mardia()` | psych | mvtest | 示例用途：计算Mardia多变量偏度与峰度检验 |
 | `principal()` | psych | factor | 示例用途：拟合主成分因子解 |
 | `list_rbind()` | purrr | append | 把数据框列表上下拼接 |
 | `map()` | purrr | foreach | 对每个元素应用函数，返回列表 |
-| `map2()` | purrr | forvalues | 对成对的元素应用函数 |
 | `map_chr()` | purrr | foreach | 对每个元素应用函数，返回文本 |
 | `map_dbl()` | purrr | foreach | 对每个元素应用函数，返回数值 |
+| `map2()` | purrr | forvalues | 对成对的元素应用函数 |
 | `possibly()` | purrr | capture | 出错时返回默认值 |
 | `reduce()` | purrr | merge | 依次合并元素（如多次合并） |
 | `walk()` | purrr | foreach | 为副作用（如保存文件）应用函数 |
@@ -1426,17 +1414,10 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `survey_prop()` | srvyr |  | 考虑抽样设计的加权比例 |
 | `survey_quantile()` | srvyr | epctile | 加权分位数 |
 | `survey_total()` | srvyr | svy: total | 加权总和 |
-| [`AIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | 赤池信息准则（AIC） |
-| [`BIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | 贝叶斯信息准则（BIC） |
-| [`Box.test()`](https://rdrr.io/r/stats/box.test.html) | stats | wntestq | 示例用途：Ljung-Box 序列相关联合检验 |
-| [`Gamma()`](https://rdrr.io/r/stats/family.html) | stats | glm | 示例用途：为正值结果拟合伽马对数连接模型 |
-| [`HoltWinters()`](https://rdrr.io/r/stats/HoltWinters.html) | stats | tssmooth | 示例用途：简单指数平滑 |
-| [`IQR()`](https://rdrr.io/r/stats/IQR.html) | stats | egen iqr() | 四分位距 |
-| [`StructTS()`](https://rdrr.io/r/stats/StructTS.html) | stats | sspace | 示例用途：局部水平状态空间模型 |
-| [`TukeyHSD()`](https://rdrr.io/r/stats/TukeyHSD.html) | stats | pwcompare, mcompare(tukey) | Tukey 多重比较 |
 | [`acf()`](https://rdrr.io/r/stats/acf.html) | stats | corrgram | 自相关函数 |
 | [`addmargins()`](https://rdrr.io/r/stats/addmargins.html) | stats | tabulate x1 x2 | 给表格加合计 |
 | [`aggregate()`](https://rdrr.io/r/stats/aggregate.html) | stats | collapse | 分组统计（base R） |
+| [`AIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | 赤池信息准则（AIC） |
 | [`anova()`](https://rdrr.io/r/stats/anova.html) | stats | anova | 方差分析表，或嵌套模型的比较 |
 | [`aov()`](https://rdrr.io/r/stats/aov.html) | stats |  | 方差分析 |
 | [`approx()`](https://rdrr.io/r/stats/approxfun.html) | stats | ipolate | 示例用途：线性插值内部缺失结果值 |
@@ -1444,8 +1425,10 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`as.dist()`](https://rdrr.io/r/stats/dist.html) | stats | mdsmat | 示例用途：对给定相异性矩阵进行尺度分析 |
 | [`ave()`](https://rdrr.io/r/stats/ave.html) | stats | stgen | 示例用途：标记生存观察史中曾经暴露的受试者 |
 | [`bartlett.test()`](https://rdrr.io/r/stats/bartlett.test.html) | stats | oneway | Bartlett 方差齐性检验 |
+| [`BIC()`](https://rdrr.io/r/stats/AIC.html) | stats |  | 贝叶斯信息准则（BIC） |
 | [`binom.test()`](https://rdrr.io/r/stats/binom.test.html) | stats | bitest | 精确二项检验 |
 | [`binomial()`](https://rdrr.io/r/stats/family.html) | stats |  | logit 和 probit 模型的二项分布族 |
+| [`Box.test()`](https://rdrr.io/r/stats/box.test.html) | stats | wntestq | 示例用途：Ljung-Box 序列相关联合检验 |
 | [`cancor()`](https://rdrr.io/r/stats/cancor.html) | stats | canon | 示例用途：估计两组变量间的典型相关 |
 | [`ccf()`](https://rdrr.io/r/stats/acf.html) | stats | xcorr | 示例用途：正负滞后的互相关 |
 | [`chisq.test()`](https://rdrr.io/r/stats/chisq.test.html) | stats | tabulate x1 x2, chi2 | 卡方检验 |
@@ -1484,11 +1467,14 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`fisher.test()`](https://rdrr.io/r/stats/fisher.test.html) | stats |  | Fisher 精确检验 |
 | [`fitted()`](https://rdrr.io/r/stats/fitted.values.html) | stats |  | 模型的拟合值 |
 | [`ftable()`](https://rdrr.io/r/stats/ftable.html) | stats | table | 扁平化的多维表 |
+| [`Gamma()`](https://rdrr.io/r/stats/family.html) | stats | glm | 示例用途：为正值结果拟合伽马对数连接模型 |
 | [`gaussian()`](https://rdrr.io/r/stats/family.html) | stats | glm | 示例用途：拟合高斯恒等连接广义线性模型 |
 | [`glm()`](https://rdrr.io/r/stats/glm.html) | stats |  | 广义线性模型，如 logit 或泊松模型 |
 | [`hatvalues()`](https://rdrr.io/r/stats/influence.measures.html) | stats | predict | 示例用途：计算杠杆值 |
 | [`hclust()`](https://rdrr.io/r/stats/hclust.html) | stats | cluster | 示例用途：对标准化变量进行单连接层次聚类 |
+| [`HoltWinters()`](https://rdrr.io/r/stats/HoltWinters.html) | stats | tssmooth | 示例用途：简单指数平滑 |
 | [`inverse.gaussian()`](https://rdrr.io/r/stats/family.html) | stats | glm | 示例用途：拟合逆高斯对数连接模型 |
+| [`IQR()`](https://rdrr.io/r/stats/IQR.html) | stats | egen iqr() | 四分位距 |
 | [`kmeans()`](https://rdrr.io/r/stats/kmeans.html) | stats |  | K 均值聚类 |
 | [`kruskal.test()`](https://rdrr.io/r/stats/kruskal.test.html) | stats |  | Kruskal-Wallis 检验 |
 | [`ks.test()`](https://rdrr.io/r/stats/ks.test.html) | stats |  | Kolmogorov-Smirnov 检验 |
@@ -1578,8 +1564,10 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`sigma()`](https://rdrr.io/r/stats/sigma.html) | stats | estat | 示例用途：随机截距组内相关 |
 | [`spectrum()`](https://rdrr.io/r/stats/spectrum.html) | stats | pergram | 示例用途：原始周期图 |
 | [`step()`](https://rdrr.io/r/stats/step.html) | stats | stepwise | 逐步回归选择 |
+| [`StructTS()`](https://rdrr.io/r/stats/StructTS.html) | stats | sspace | 示例用途：局部水平状态空间模型 |
 | [`t.test()`](https://rdrr.io/r/stats/t.test.html) | stats |  | t 检验和均值的置信区间 |
 | [`ts()`](https://rdrr.io/r/stats/ts.html) | stats | tsset | 时间序列对象 |
+| [`TukeyHSD()`](https://rdrr.io/r/stats/TukeyHSD.html) | stats | pwcompare, mcompare(tukey) | Tukey 多重比较 |
 | [`uniroot()`](https://rdrr.io/r/stats/uniroot.html) | stats | ciwidth | 示例用途：按目标均值区间宽度设计样本量 |
 | [`update()`](https://rdrr.io/r/stats/update.html) | stats | regress | 修改后重新拟合模型 |
 | [`var()`](https://rdrr.io/r/stats/cor.html) | stats | summarize, detail | 方差 |
@@ -1639,7 +1627,6 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `svyratio()` | survey | svy | 示例用途：调查总体总量比 |
 | `svytable()` | survey | svy: tabulate | 加权频数表 |
 | `svytotal()` | survey | svy | 示例用途：调查加权总体总量 |
-| `Surv()` | survival |  | 模型中的生存时间结局变量 |
 | `basehaz()` | survival | predict | 示例用途：零协变量处基线累积风险 |
 | `clogit()` | survival |  | 条件 logit 模型 |
 | `concordance()` | survival | estat | 示例用途：Cox回归后删失结局一致性 |
@@ -1648,10 +1635,12 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `finegray()` | survival | stcrreg | 示例用途：Fine-Gray亚分布风险流程 |
 | `frailty()` | survival | stcox | 示例用途：共享Gamma脆弱性Cox模型 |
 | `strata()` | survival |  | 生存模型公式中的分层项 |
-| `survSplit()` | survival | stsplit | 示例用途：在固定切点拆分风险区间 |
+| `Surv()` | survival |  | 模型中的生存时间结局变量 |
 | `survdiff()` | survival |  | Log-rank 检验 |
 | `survfit()` | survival |  | Kaplan-Meier 生存曲线 |
 | `survreg()` | survival |  | 参数生存模型 |
+| `survSplit()` | survival | stsplit | 示例用途：在固定切点拆分风险区间 |
+| `synth()` | Synth |  | 合成控制法 |
 | [`add_row()`](https://tibble.tidyverse.org/reference/add_row.html) | tibble | set obs | 给数据添加行 |
 | [`as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html) | tibble |  | 转为 tibble |
 | `rownames_to_column()` | tibble | xpose | 把行名转为一列 |
@@ -1677,11 +1666,13 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | decode | decode() 的别名 |
 | [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata |  | 为每个类别生成虚拟变量 |
 | [`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | destring | destring() 的别名 |
-| [`assert()`](https://socimh.github.io/tidystata/reference/assert.md) | tidystata |  | 条件不成立时报错，并报告不成立的行数 |
+| [`assert()`](https://socimh.github.io/tidystata/reference/assert.md) | tidystata |  | 逐行验证所有条件；不满足时报告失败行并停止 |
 | [`browse()`](https://socimh.github.io/tidystata/reference/browse.md) | tidystata |  | 在表格窗口中查看数据 |
-| [`capture()`](https://socimh.github.io/tidystata/reference/capture.md) | tidystata |  | 成功时返回结果，出错时显示失败消息并返回 NULL；quiet 抑制警告和消息 |
-| [`codebook()`](https://socimh.github.io/tidystata/reference/codebook.md) | tidystata |  | 描述每个变量：类型、标签、个数和取值 |
-| [`corr()`](https://socimh.github.io/tidystata/reference/corr.md) | tidystata |  | 完整个案 Pearson 相关系数 |
+| [`capture()`](https://socimh.github.io/tidystata/reference/capture.md) | tidystata |  | 保留成功结果及其可见性；出错时提示并不可见地返回 NULL；quiet 抑制警告和消息 |
+| [`codebook()`](https://socimh.github.io/tidystata/reference/codebook.md) | tidystata |  | 描述每个变量：类型、变量标签、非缺失个数和不同取值个数 |
+| [`corr()`](https://socimh.github.io/tidystata/reference/corr.md) | tidystata |  | 使用同一完整样本计算 Pearson 相关系数及样本量，可分组或加权，不返回 p 值 |
+| [`cut_breaks()`](https://socimh.github.io/tidystata/reference/cut.md) | tidystata |  | 按指定切点划分区间，并将两端区间扩展到观测范围 |
+| [`cut_length()`](https://socimh.github.io/tidystata/reference/cut.md) | tidystata |  | 将数值划分为等宽区间；labels = FALSE 返回整数代码 |
 | [`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md) | tidystata | xtile | xtile() 的别名 |
 | [`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata |  | 转为文本，带标签的数据使用数值标签 |
 | [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata |  | 转为数值，并去掉数值标签 |
@@ -1691,18 +1682,24 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | 统计重复行 |
 | [`duplicates_tag()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | 标记重复行 |
 | [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) | tidystata |  | 查找 Stata 命令对应的 R 函数 |
-| [`fre()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 带合计行的频数表 |
-| [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata | tabulate | 带行合计和列合计的交叉表 |
+| [`fre()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 与 tab() 相同的联合频数表，增加合计并显示值标签 |
+| [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata | tab1 | 与 tab1() 相同，每个变量一张单向表，增加合计并显示值标签 |
+| [`fre2()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata | tabulate | 与 tab2() 相同的两两交叉表，增加合计和行标签；列标题保留类别代码 |
 | [`is_first()`](https://socimh.github.io/tidystata/reference/is_first.md) | tidystata |  | 标记每组的第一行 |
-| [`isid()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | 检查变量能否唯一识别每一行 |
+| [`isid()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | 用消息确认键的唯一性并不可见地返回数据；.missing 允许缺失键值和空字符串 |
 | [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md) | tidystata |  | 每个变量的缺失值，或缺失值模式 |
 | [`mvdecode()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata |  | 把指定代码改为缺失值 |
 | [`mvencode()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata |  | 把缺失值替换为指定代码 |
 | [`na_if_value()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata | mvdecode | mvdecode() 的别名 |
 | [`pc()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | 占总和的百分比 |
 | [`pct()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata | egen pc() | pc() 的别名 |
-| [`print_all()`](https://socimh.github.io/tidystata/reference/special-print.md) | tidystata |  | 打印所有行和列 |
-| [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) | tidystata |  | 两两相关系数，附样本数和 p 值 |
+| [`preview()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | 保存首尾行或等间隔控制台预览（默认显示 10 行数据），保留全部行和列 |
+| [`preview_headtail()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | 保存首尾行预览，用一行省略号标记省略的中间部分，保留全部数据 |
+| [`preview_interval()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | 保存近似等间隔行预览，不插入分隔行，保留全部数据 |
+| [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md) | tidystata |  | 单次打印首尾行，用一行省略号标记省略部分；不可见地返回完整输入，不改变已有预览偏好 |
+| [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md) | tidystata |  | 单次打印近似等间隔行，不插入分隔行；不可见地返回完整输入，不改变已有预览偏好 |
+| [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) | tidystata |  | 默认使用成对完整样本计算 Pearson 或 Spearman 相关；.listwise 使用同一完整样本并保留 p 值，可在各组内做 Bonferroni 或 Sidak 校正 |
+| [`recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md) | tidystata | recode | stata_recode() 的别名 |
 | [`row_max()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行求多个变量的最大值 |
 | [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行求多个变量的均值 |
 | [`row_median()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行求多个变量的中位数 |
@@ -1713,25 +1710,32 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`row_sd()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行求多个变量的标准差 |
 | [`row_sum()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行求多个变量的和 |
 | [`row_unique()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata | egen rownvals() | 每行不同取值的个数，缺失值算作一个取值 |
+| [`row_var()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行计算各变量的样本方差 |
+| [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md) | tidystata |  | 返回选定列和计算列，同时保留分组列 |
 | [`set_seed()`](https://socimh.github.io/tidystata/reference/set_seed.md) | tidystata |  | 设定随机数种子，可单独使用或放在管道末尾 |
+| [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md) | tidystata |  | 默认使用同一完整样本计算不加权的 Spearman 秩相关；.pairwise 改用各对变量的完整样本；返回 r、n 和 Stata 18 起的 p 值，可在各组内校正 |
 | [`stata_diff()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | 与上一期的差分（考虑时间间隔） |
 | [`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | 前若干期的值（考虑时间间隔） |
 | [`stata_lead()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | 后若干期的值（考虑时间间隔） |
 | [`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md) | tidystata |  | 合并两个数据并报告匹配结果，类似 Stata 的 merge |
+| [`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md) | tidystata |  | 按 Stata 风格的区间、取值集合和值标签重编码数值；未匹配的取值保持不变 |
 | [`std()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | 标准化为均值 0、标准差 1 |
 | [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) | tidystata |  | 变量的描述统计 |
-| [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 频数表 |
-| [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 每个变量一张频数表 |
-| [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 两个变量的交叉表，或每一对变量的交叉表 |
+| [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 在一张长表中统计类别组合的频数和百分比 |
 | [`tab_gen()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata | tabulate, generate() | as_dummy() 的别名 |
+| [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 每个变量一张单向频数表；默认返回列表 |
+| [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 每对变量一张宽格式交叉表；显式指定 .by 才生成分组表 |
 | [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md) | tidystata |  | 变量的指定统计量，可分组 |
 | [`timer()`](https://socimh.github.io/tidystata/reference/timer.md) | tidystata |  | 计算代码运行时间 |
 | [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata |  | 转换为文本，保留数值代码而不是数值标签 |
+| [`unpreview()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | 移除预览偏好并恢复普通打印，保留全部数据和分组 |
 | [`value_if_na()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata | mvencode | mvencode() 的别名 |
+| [`var_type()`](https://socimh.github.io/tidystata/reference/var_type.md) | tidystata |  | 描述存储类型或类，可使用缩写 |
+| [`var_unit()`](https://socimh.github.io/tidystata/reference/var_type.md) | tidystata |  | 读取测量或时长单位；无单位时返回 NA_character\_ |
 | [`variables()`](https://socimh.github.io/tidystata/reference/variables.md) | tidystata |  | 列出变量及其类型和标签 |
 | [`variables_search()`](https://socimh.github.io/tidystata/reference/variables.md) | tidystata |  | 按变量名或标签查找变量 |
 | [`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md) | tidystata |  | 用 x\* 等 Stata 通配符选择变量 |
-| [`xtile()`](https://socimh.github.io/tidystata/reference/cut.md) | tidystata |  | 按分位数分组，与 Stata 的 xtile 一致 |
+| [`xtile()`](https://socimh.github.io/tidystata/reference/cut.md) | tidystata |  | 按 Stata 规则生成分位数组，相同值不拆分；在分组数据环境中默认返回整数代码 |
 | `md5sum()` | tools | checksum | 示例用途：计算文件完整性摘要 |
 | `garch()` | tseries | arch | 示例用途：ARCH(1)条件方差模型 |
 | `as_tsibble()` | tsibble |  | 声明时间序列或面板数据 |
@@ -1743,7 +1747,6 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `ur.df()` | urca | dfuller | 示例用途：ADF单位根检验：none，0阶增广滞后 |
 | `ur.ers()` | urca | dfgls | 示例用途：DF-GLS单位根检验：constant |
 | `ur.pp()` | urca | pperron | 示例用途：Phillips-Perron Z-tau检验：constant |
-| [`View()`](https://rdrr.io/r/utils/View.html) | utils | browse | 打开数据查看器 |
 | [`capture.output()`](https://rdrr.io/r/utils/capture.output.html) | utils | dataex | 示例用途：为小型数据示例生成可复现 R 代码 |
 | [`combn()`](https://rdrr.io/r/utils/combn.html) | utils | tab2 | 示例用途：生成各变量对的列联表 |
 | [`data()`](https://rdrr.io/r/utils/data.html) | utils |  | 载入内置的示例数据 |
@@ -1764,9 +1767,27 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`tail()`](https://rdrr.io/r/utils/head.html) | utils |  | 最后几行 |
 | [`unzip()`](https://rdrr.io/r/utils/unzip.html) | utils | unzipfile | 示例用途：将 ZIP 包解压到指定临时文件夹 |
 | [`update.packages()`](https://rdrr.io/r/utils/update.packages.html) | utils |  | 更新已安装的包 |
+| [`View()`](https://rdrr.io/r/utils/View.html) | utils | browse | 打开数据查看器 |
 | [`write.csv()`](https://rdrr.io/r/utils/write.table.html) | utils | export delimited | 写出 CSV 文件（base R） |
 | [`write.table()`](https://rdrr.io/r/utils/write.table.html) | utils | outfile | 示例用途：导出纯数值字段并使用 Stata 缺失文本 |
+| `binom2.rho()` | VGAM | biprobit | 示例用途：联合拟合相关的二元probit方程 |
+| `cens.poisson()` | VGAM | cpoisson | 示例用途：拟合右删失泊松计数模型 |
+| `multinomial()` | VGAM | slogit | 示例用途：拟合秩一刻板多项logit模型 |
+| `posnegbinomial()` | VGAM | tnbreg | 示例用途：拟合零截断NB2回归 |
+| `posnormal()` | VGAM | truncreg | 示例用途：拟合在零处左截断的正态回归 |
+| `pospoisson()` | VGAM | tpoisson | 示例用途：拟合零截断泊松回归 |
+| `rrvglm()` | VGAM | slogit | 示例用途：拟合秩一刻板多项logit模型 |
+| `SurvS4()` | VGAM | cpoisson | 示例用途：拟合右删失泊松计数模型 |
+| `vglm()` | VGAM | tpoisson | 示例用途：拟合零截断泊松回归 |
+| `weightit()` | WeightIt |  | 平衡权重，如逆概率权重 |
 | `write_xlsx()` | writexl |  | 写出 Excel 文件 |
 | `zipr()` | zip | zipfile | 示例用途：创建含文本文件的 ZIP 压缩包 |
 | `na.locf()` | zoo | stfill | 示例用途：在生存分析受试者内向前携带已观察协变量 |
 | `rollapply()` | zoo | rolling | 示例用途：滚动窗口回归系数 |
+
+## 分章版本
+
+如需按独立章节浏览，可打开 [独立的 Stata 转 R
+参考手册](https://www.socimh.com/stata-to-r/zh/)，
+其中提供章节导航和可展开的替代实现。该版本位于另一网站，会在新标签页打开，
+保留当前的 tidystata 网站供继续查阅。

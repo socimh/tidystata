@@ -13,7 +13,7 @@ summarise each group once."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,7 +22,7 @@ summarise each group once."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -45,7 +45,7 @@ summarise each group once."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Flag the first row of each group</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/is_first.R" class="external-link"><code>R/is_first.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/is_first.R" class="external-link"><code>R/is_first.R</code></a></small>
       <div class="d-none name"><code>is_first.Rd</code></div>
     </div>
 
@@ -73,8 +73,10 @@ group.</p></dd>
 
 <dt id="arg--missing">.missing<a class="anchor" aria-label="anchor" href="#arg--missing"></a></dt>
 <dd><p>If <code>FALSE</code> (default), rows with a missing value in any
-argument are <code>FALSE</code>, as Stata's <code>tag()</code> does without its <code>missing</code> option.
-If <code>TRUE</code>, missing values form groups of their own.</p></dd>
+explicitly supplied argument are <code>FALSE</code>, as Stata's <code>tag()</code> does without
+its <code>missing</code> option. If <code>TRUE</code>, missing values form groups of their own.
+With no arguments, flag the first row of every current data-mask group,
+including groups with missing keys, regardless of <code>.missing</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -104,7 +106,7 @@ and SPSS user-missing values.</p>
 <span class="r-in"><span>  year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2001</span>, <span class="fl">2002</span>, <span class="fl">2001</span>, <span class="fl">2002</span>, <span class="fl">2003</span>, <span class="fl">2001</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">panel</span>, first <span class="op">=</span> <span class="fu">is_first</span><span class="op">(</span><span class="va">id</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  year first</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1  <span style="text-decoration: underline;">2</span>001 TRUE </span>
@@ -116,7 +118,7 @@ and SPSS user-missing values.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Including the missing group</span></span></span>
 <span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">panel</span>, first <span class="op">=</span> <span class="fu">is_first</span><span class="op">(</span><span class="va">id</span>, .missing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  year first</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1  <span style="text-decoration: underline;">2</span>001 TRUE </span>
@@ -126,9 +128,9 @@ and SPSS user-missing values.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>     2  <span style="text-decoration: underline;">2</span>003 FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>    <span style="color: #BB0000;">NA</span>  <span style="text-decoration: underline;">2</span>001 TRUE </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># An alternative</span></span></span>
+<span class="r-in"><span><span class="co"># The no-argument shortcut also includes the missing id group</span></span></span>
 <span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">panel</span>, first <span class="op">=</span> <span class="fu">is_first</span><span class="op">(</span><span class="op">)</span>, .by <span class="op">=</span> <span class="va">id</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  year first</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1  <span style="text-decoration: underline;">2</span>001 TRUE </span>
@@ -141,7 +143,6 @@ and SPSS user-missing values.</p>
 <span class="r-in"><span><span class="co"># Count panels</span></span></span>
 <span class="r-in"><span><span class="fu">is_first</span><span class="op">(</span><span class="va">panel</span><span class="op">$</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -153,7 +154,7 @@ and SPSS user-missing values.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

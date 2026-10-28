@@ -31,7 +31,7 @@ duplicates drop.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,7 @@ duplicates drop.
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -63,7 +63,7 @@ duplicates drop.
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Check keys and duplicate rows</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/keys.R" class="external-link"><code>R/keys.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/keys.R" class="external-link"><code>R/keys.R</code></a></small>
       <div class="d-none name"><code>keys.Rd</code></div>
     </div>
 
@@ -144,12 +144,16 @@ rows or columns of <code>.data</code> are returned.</p>
     <p>Unlike Stata's silent success, <code>isid()</code> names the columns that form a valid
 key. This confirms uniqueness without storing an ID declaration or adding
 metadata. Use <code><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages()</a></code> for silent execution. An empty input
-reports that there are no rows to check. Checks preserve row order; use
-<code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">dplyr::arrange()</a></code> separately to sort, or <code><a href="https://haven.tidyverse.org/reference/read_dta.html" class="external-link">haven::read_dta()</a></code> to read a file.
+reports that there are no rows to check. Checks preserve row order. Instead
+of Stata's <code>sort</code> and <code>using</code> options, use <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">dplyr::arrange()</a></code> to sort or
+<code><a href="https://haven.tidyverse.org/reference/read_dta.html" class="external-link">haven::read_dta()</a></code> to read a file first.
 Factor values equal to <code>""</code> are empty strings; whitespace is not trimmed.</p>
-<p>Missing values count as equal to each other, as in Stata, so two rows that
-are both missing on every selected column are duplicates. Checks and
-duplicate counts use the whole input, regardless of grouping.
+<p>Duplicate identity follows stored values: ordinary and tagged <code>NA</code> values
+count as equal, <code>NaN</code> is a separate value, and distinct stored SPSS
+user-missing codes remain distinct. This differs from <code>isid()</code>'s default
+validation, which rejects all of these missing values; <code>.missing = TRUE</code>
+permits them while still checking uniqueness by stored-value identity.
+Checks and duplicate counts use the whole input, regardless of grouping.
 <code>duplicates_list()</code> rejects existing <code>.dup_group</code> or <code>.row</code> columns; rename
 them first. <code>duplicates_drop()</code> reports the number of rows removed as a
 message. The input data are not modified.</p>
@@ -174,7 +178,7 @@ message. The input data are not modified.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Error in isid(panel, id) : </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Variable `id` does not uniquely identify the rows: 2 values appear more</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> than once (4 rows).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">i</span> See them with `duplicates_list()`.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> See them with `duplicates_list()`.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Remove the duplicate row so id + wave uniquely identify observations</span></span></span>
 <span class="r-in"><span><span class="va">unique_panel</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">panel</span><span class="op">)</span></span></span>
@@ -183,14 +187,14 @@ message. The input data are not modified.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variables `id`, `wave` together uniquely identify the rows.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">duplicates_report</span><span class="op">(</span><span class="va">panel</span>, <span class="va">id</span>, <span class="va">wave</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   copies observations surplus</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      1            3       0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>      2            2       1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">duplicates_tag</span><span class="op">(</span><span class="va">panel</span>, <span class="va">id</span>, <span class="va">wave</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 x 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  wave score   dup</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1     1     5     0</span>
@@ -200,7 +204,7 @@ message. The input data are not modified.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>     3     1     8     0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">duplicates_list</span><span class="op">(</span><span class="va">panel</span>, <span class="va">id</span>, <span class="va">wave</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 x 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  wave score .dup_group  .row</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     2     1     7          1     3</span>
@@ -208,7 +212,7 @@ message. The input data are not modified.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">duplicates_drop</span><span class="op">(</span><span class="va">panel</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> (1 row removed)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  wave score</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1     1     5</span>
@@ -226,7 +230,7 @@ message. The input data are not modified.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

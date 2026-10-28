@@ -66,8 +66,7 @@ contain their own range.
 ## See also
 
 Other selection and preview functions:
-[`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md),
-[`special-print`](https://socimh.github.io/tidystata/reference/special-print.md)
+[`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md)
 
 ## Examples
 
@@ -79,11 +78,11 @@ tb <- tibble::as_tibble(
   matrix(1:15, nrow = 1, dimnames = list(NULL, paste0("x", 1:15)))
 )
 tb
-#> # A tibble: 1 x 15
+#> # A tibble: 1 × 15
 #>      x1    x2    x3    x4    x5    x6    x7    x8    x9   x10   x11   x12   x13
 #>   <int> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int>
 #> 1     1     2     3     4     5     6     7     8     9    10    11    12    13
-#> # i 2 more variables: x14 <int>, x15 <int>
+#> # ℹ 2 more variables: x14 <int>, x15 <int>
 
 # List variable names by ds()
 ds(tb)

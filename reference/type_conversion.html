@@ -23,7 +23,7 @@ labelled numeric vectors and factors rather than their labels.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@ labelled numeric vectors and factors rather than their labels.
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -55,7 +55,7 @@ labelled numeric vectors and factors rather than their labels.
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Convert vectors for data preparation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/type-conversion.R" class="external-link"><code>R/type-conversion.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/type-conversion.R" class="external-link"><code>R/type-conversion.R</code></a></small>
       <div class="d-none name"><code>type_conversion.Rd</code></div>
     </div>
 
@@ -119,7 +119,7 @@ or a date, becomes <code>NA</code> with a warning, like Stata's <code>force</cod
 positions and original values are kept in <code><a href="https://readr.tidyverse.org/reference/problems.html" class="external-link">readr::problems()</a></code>. Use <code>ignore</code>
 to remove other characters first, like Stata's <code>ignore()</code>: <code>destring(x, ignore = "kg")</code> reads <code>"10 kg"</code> as 10. Empty strings, <code>"NA"</code> and Stata's
 <code>"."</code> are missing without a warning; the text <code>"NaN"</code> becomes <code>NaN</code>. Date
-strings become <code>NA</code>; parse them with <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> or <code><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">lubridate::ymd()</a></code>
+strings become <code>NA</code>; parse them with <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> or <code>lubridate::ymd()</code>
 instead.</p>
 <p>A factor whose levels are all numbers, such as <code>factor(c("1990", "2000"))</code>,
 gives those numbers (1990, 2000). Other factors give their level codes.
@@ -140,8 +140,9 @@ the underlying conversion warning.</p>
 their codes. For non-character input, values flagged by <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code>, including
 <code>NaN</code>, tagged missing values, and SPSS user-missing codes, become <code>NA</code>.
 Character input is returned unchanged. Numbers are written in full, so 100000
-gives <code>"100000"</code>, not <code>"1e+05"</code>. Dates use <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>, giving
-<code>"2024-01-31"</code> rather than day numbers.</p>
+gives <code>"100000"</code>, not <code>"1e+05"</code>, with at most 15 significant digits and a
+decimal point whatever <code>options(OutDec)</code> says. Dates use <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>,
+giving <code>"2024-01-31"</code> rather than day numbers.</p>
 <p>The sjlabelled package also exports <code>as_numeric()</code> and <code>as_character()</code>. They
 differ: sjlabelled's <code>as_numeric()</code> turns non-numeric text into factor codes,
 and its <code>as_character()</code> gives <code>NA</code> for unlabelled values. Whichever package
@@ -164,7 +165,7 @@ explicit, or use <code>destring()</code> and <code>decode()</code>, which do not
 <span class="r-in"><span>    region_fct <span class="op">=</span> <span class="fu">haven</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="va">region</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    .keep <span class="op">=</span> <span class="st">"used"</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 68 x 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 68 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               region_chr       region_code region_num region_fct      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Europe &amp; C. Asia 1                    1 Europe &amp; C. Asia</span>
@@ -177,7 +178,7 @@ explicit, or use <code>destring()</code> and <code>decode()</code>, which do not
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Europe &amp; C. Asia 1                    1 Europe &amp; C. Asia</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Europe &amp; C. Asia 1                    1 Europe &amp; C. Asia</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Europe &amp; C. Asia 1                    1 Europe &amp; C. Asia</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># i 58 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 58 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -189,7 +190,7 @@ explicit, or use <code>destring()</code> and <code>decode()</code>, which do not
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -13,6 +13,9 @@ library(tidystata)
 library(dplyr)
 #> 
 #> Attaching package: 'dplyr'
+#> The following object is masked from 'package:tidystata':
+#> 
+#>     recode
 #> The following objects are masked from 'package:stats':
 #> 
 #>     filter, lag
@@ -30,7 +33,7 @@ survey <- tibble(
 attr(survey$score1, "label") <- "First assessment score"
 
 codebook(survey)
-#> # A tibble: 5 x 5
+#> # A tibble: 5 × 5
 #>   variable label                  type          n unique
 #>   <chr>    <chr>                  <chr>     <int>  <int>
 #> 1 id       NA                     integer       6      6
@@ -39,7 +42,7 @@ codebook(survey)
 #> 4 score1   First assessment score double        5      5
 #> 5 score2   NA                     double        4      4
 variables(survey)
-#> # A tibble: 5 x 2
+#> # A tibble: 5 × 2
 #>   name     label                 
 #>   <chr>    <chr>                 
 #> 1 id       NA                    
@@ -64,12 +67,12 @@ description:
 ``` r
 
 variables_search(survey, "assessment")
-#> # A tibble: 1 x 2
+#> # A tibble: 1 × 2
 #>   name   label                 
 #>   <chr>  <chr>                 
 #> 1 score1 First assessment score
 select_or_transmute(survey, id, starts_with("score"))
-#> # A tibble: 6 x 3
+#> # A tibble: 6 × 3
 #>      id score1 score2
 #>   <int>  <dbl>  <dbl>
 #> 1     1      2      4
@@ -86,7 +89,7 @@ select_or_transmute(survey, id, starts_with("score"))
 
 counts <- tab(survey, response)
 counts
-#> # A tibble: 3 x 6
+#> # A tibble: 3 × 6
 #>   response     n percent   cum valid valid_cum
 #>   <chr>    <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 no           2    33.3  33.3    40        40
@@ -96,7 +99,7 @@ sum(counts$n)
 #> [1] 6
 
 fre(survey, response)
-#> # A tibble: 5 x 6
+#> # A tibble: 5 × 6
 #>   response        n percent   cum valid valid_cum
 #>   <chr>       <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 no              2    33.3  33.3    40        40
@@ -105,7 +108,7 @@ fre(survey, response)
 #> 4 NA              1    16.7 100      NA        NA
 #> 5 Total           6   100    NA      NA        NA
 tab2(survey, group, response)
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>   `group \\ response`    no   yes  `NA`
 #>   <chr>               <int> <int> <int>
 #> 1 A                       1     1     1
@@ -127,7 +130,7 @@ want separate one-way tables instead of a joint table:
 
 tables <- tab1(survey, group, response)
 tables$response
-#> # A tibble: 3 x 6
+#> # A tibble: 3 × 6
 #>   value     n percent   cum valid valid_cum
 #>   <chr> <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 no        2    33.3  33.3    40        40
@@ -142,7 +145,7 @@ occurring more than once with an ordinary pipeline:
 
 tab(survey, response) |>
   filter(n > 1)
-#> # A tibble: 2 x 6
+#> # A tibble: 2 × 6
 #>   response     n percent   cum valid valid_cum
 #>   <chr>    <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 no           2    33.3  33.3    40        40
@@ -157,13 +160,13 @@ are not automatically meaningful measurements.
 ``` r
 
 summ(survey, score1, score2, .stat = c("n", "mean", "sd", "missing"))
-#> # A tibble: 2 x 6
+#> # A tibble: 2 × 6
 #>   name   type      n  mean    sd missing
 #>   <chr>  <chr> <int> <dbl> <dbl>   <int>
 #> 1 score1 dbl       5   6    3.16       1
 #> 2 score2 dbl       4   8.5  3.42       2
 tabstat(survey, score1, score2, .by = group)
-#> # A tibble: 6 x 4
+#> # A tibble: 6 × 4
 #>   group name   type   mean
 #>   <chr> <chr>  <chr> <dbl>
 #> 1 A     score1 dbl       3
@@ -186,7 +189,7 @@ calculations. Missing grouping keys remain as a group unless you request
 ``` r
 
 summ(survey, score1, .by = group, .missing = FALSE, .stat = c("n", "mean"))
-#> # A tibble: 2 x 4
+#> # A tibble: 2 × 4
 #>   group type      n  mean
 #>   <chr> <chr> <int> <dbl>
 #> 1 A     dbl       2     3
@@ -214,7 +217,7 @@ prepared <- survey |>
     observed = row_non_miss(pick(score1, score2))
   )
 prepared
-#> # A tibble: 6 x 7
+#> # A tibble: 6 × 7
 #>      id group response score1 score2 average observed
 #>   <int> <chr> <chr>     <dbl>  <dbl>   <dbl>    <int>
 #> 1     1 A     yes           2      4       3        2
@@ -242,6 +245,8 @@ xtile(1:8, 4)
 #> [1] [1,2.5]   [1,2.5]   (2.5,4.5] (2.5,4.5] (4.5,6.5] (4.5,6.5] (6.5,8]  
 #> [8] (6.5,8]  
 #> Levels: [1,2.5] < (2.5,4.5] < (4.5,6.5] < (6.5,8]
+stata_recode(c(2, 4.5, 7, 12), 1:5 ~ 1, 6:10 ~ 2)
+#> [1]  1  1  2 12
 ```
 
 [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
@@ -251,6 +256,9 @@ you remove it with `ignore = "kg"`.
 [`xtile()`](https://socimh.github.io/tidystata/reference/cut.md) uses
 Stata’s percentile cutpoints and keeps tied values together; ties can
 leave some groups empty.
+[`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)
+follows Stata’s `recode`: `1:5` is the range from 1 to 5, including
+decimals, and values that no rule matches are kept.
 
 ## Next steps
 

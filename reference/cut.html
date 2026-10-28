@@ -21,7 +21,7 @@ cut_breaks(): Cut at given cutpoints, like egen cut(), at().
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,7 +30,7 @@ cut_breaks(): Cut at given cutpoints, like egen cut(), at().
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -53,7 +53,7 @@ cut_breaks(): Cut at given cutpoints, like egen cut(), at().
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Cut a numeric vector into groups</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/cut.R" class="external-link"><code>R/cut.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/cut.R" class="external-link"><code>R/cut.R</code></a></small>
       <div class="d-none name"><code>cut.Rd</code></div>
     </div>
 
@@ -110,10 +110,12 @@ most one; earlier groups get extra rows.</p></dd>
 
 
 <dt id="arg-wt">wt<a class="anchor" aria-label="anchor" href="#arg-wt"></a></dt>
-<dd><p>Optional weights for <code>xtile()</code>, one per element of <code>x</code>, like
-Stata's <code>xtile ... [aweight = w]</code>. Cutpoints then follow Stata's weighted
-percentile rule; elements with a missing weight get a missing code. Not
-available with <code>method = "rank"</code>.</p></dd>
+<dd><p>Optional finite, non-negative weights for <code>xtile()</code>, one per
+element of <code>x</code> or a scalar recycled to its length, like Stata's
+<code>xtile ... [aweight = w]</code>. Cutpoints follow Stata's weighted percentile
+rule. Zero-weight rows do not enter cutpoint estimation but still receive
+codes; elements with a missing weight get a missing code. Not available
+with <code>method = "rank"</code>.</p></dd>
 
 
 <dt id="arg-breaks">breaks<a class="anchor" aria-label="anchor" href="#arg-breaks"></a></dt>
@@ -125,8 +127,9 @@ interior cutpoint, rather than the number of intervals.</p></dd>
 
 <dt id="arg-right">right<a class="anchor" aria-label="anchor" href="#arg-right"></a></dt>
 <dd><p>If <code>FALSE</code> (default), intervals are closed on the left (<code>a &lt;= x &lt; b</code>), as in Stata's <code>egen cut()</code>; the last interval also includes its
-upper end. If <code>TRUE</code>, they are closed on the right (<code>a &lt; x &lt;= b</code>), as in
-<code><a href="https://rdrr.io/r/base/cut.html" class="external-link">base::cut()</a></code>.</p></dd>
+upper end. If <code>TRUE</code>, they are closed on the right (<code>a &lt; x &lt;= b</code>), and
+the first interval also includes its lower end, as in
+<code><a href="https://rdrr.io/r/base/cut.html" class="external-link">base::cut()</a></code> with <code>include.lowest = TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -136,7 +139,7 @@ or when <code>xtile()</code> runs in a grouped data mask with default labels. Th
 result has the same length and order as <code>x</code>, with missing inputs remaining
 missing. All-missing inputs are rejected. Empty inputs are rejected by
 <code>xtile()</code> and <code>cut_length()</code>; <code>cut_breaks(numeric(), breaks = 50)</code> returns
-an empty ordered factor with range warnings.</p>
+an empty ordered factor.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -151,15 +154,17 @@ intervals covered by each group, for example <code>"[0,0]"</code> and <code>"(0,
 labels must match the effective number of groups. <code>xtile()</code> rejects empty
 and all-missing vectors; it rejects constants in quantile mode but accepts
 them in rank mode. <code>cut_length()</code> and <code>cut_breaks()</code> reject constants and
-all-missing vectors.</p>
+all-missing vectors; <code>cut_length()</code> also rejects infinite values, because
+equal-width intervals need a finite range.</p>
+<p>Interval labels always use a decimal point, whatever <code>options(OutDec)</code>
+says, so that <code>"[2.8,6.6]"</code> cannot be read as four numbers.</p>
 <p><code>cut_breaks()</code> differs from <code>egen cut(), at()</code> at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while
 <code>cut_breaks()</code> extends the end intervals to the observed range.</p>
-<p>With <code>xtile()</code>, <code>labels = NULL</code> (default) or <code>TRUE</code> creates labels. Inside
-grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>, each group has its own cutpoints and interval
-labels, which cannot be combined, so <code>xtile()</code> defaults to integer codes
-within each group (like Stata's <code>xtile, by()</code>). Supply <code>labels = TRUE</code> to
-request labels there anyway. <code>cut_length()</code> and <code>cut_breaks()</code> keep their
+<p>Inside grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>, each group has its own cutpoints and
+interval labels, which cannot be combined, so <code>xtile()</code> defaults to integer
+codes within each group (like Stata's <code>xtile, by()</code>). Supply <code>labels = TRUE</code>
+to request labels there anyway. <code>cut_length()</code> and <code>cut_breaks()</code> keep their
 factor output inside grouped data masks; use a character vector for custom
 labels or <code>FALSE</code> for integer codes.</p>
 <p>Rank groups omit missing observations when ranking, then restore missing
@@ -173,6 +178,7 @@ group count; custom labels must match that count.</p>
 <code><a href="as_dummy.html">as_dummy()</a></code>,
 <code><a href="panel.html">panel</a></code>,
 <code><a href="row_egen.html">row_egen</a></code>,
+<code><a href="stata_recode.html">stata_recode()</a></code>,
 <code><a href="std.html">std()</a></code></p></div>
     </div>
 
@@ -218,7 +224,7 @@ group count; custom labels must match that count.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

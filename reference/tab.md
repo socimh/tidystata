@@ -105,7 +105,10 @@ fre1(
 
 - ...:
 
-  Variables selected with tidyselect, or named expressions such as
+  \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
+  or
+  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
+  Variables to tabulate, or named expressions such as
   `high = score >= 70`. Defaults to all columns except active grouping
   keys. Without explicit `.by`, `tab2()` and `fre2()` treat inherited
   grouping columns as ordinary variables. Select at least two variables
@@ -113,8 +116,8 @@ fre1(
 
 - .by:
 
-  Optional grouping columns selected with tidyselect. For one-way and
-  joint tables, existing
+  \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
+  Optional grouping columns. For one-way and joint tables, existing
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
   groups are inherited unless `.by` is supplied. `tab2()` and `fre2()`
   require explicit `.by` to create separate cross-tables for each group.
@@ -127,8 +130,10 @@ fre1(
 
 - .group_order:
 
-  Order group blocks by `"keys"` (default) or decreasing `"frequency"`.
-  Does not change category order within groups.
+  Order group blocks by `"keys"` (default) or decreasing `"frequency"`
+  (weighted totals when weights are supplied). Groups with any missing
+  key follow complete-key groups; within each set, frequency ties follow
+  key order. Does not change category order within groups.
 
 - .total:
 
@@ -149,11 +154,25 @@ fre1(
 
 - .type:
 
-  Output format, where supported. `tab1()` and `fre1()` default to
-  `"list"`; `fre()`, `tab2()`, and `fre2()` default to `"auto"`,
-  preserving the input table class. `"tibble"` requests a tibble;
-  `"flextable"` requires the optional flextable package. `tab2()` needs
-  totals for flextable output. `tab()` has no `.type` argument.
+  Output form, where supported. `tab()` has no `.type` argument.
+
+  - `"list"` is the default for `tab1()` and `fre1()`: one table per
+    selected variable, retaining the input's table class where
+    supported.
+
+  - `"auto"` is the default for `fre()`, `tab2()`, and `fre2()`: retain
+    the input's table class where supported.
+
+  - `"tibble"` returns tibbles regardless of the input's table class.
+    For `tab1()` and `fre1()`, it also combines the variable tables into
+    one.
+
+  - `"flextable"` returns formatted tables and requires the optional
+    flextable package. It is available for `fre()`, `fre1()`, `tab2()`,
+    and `fre2()`; `tab2()` also requires `.total = TRUE`.
+
+  For `tab2()` and `fre2()`, multiple pairs or explicit `.by` groups
+  still produce lists; `.type` controls each table inside the list.
 
 - .flip:
 
@@ -189,9 +208,9 @@ With three or more variables, `tab()` counts their joint combinations,
 while `tab2()` produces a separate table for each variable pair.
 
 Results are ungrouped and retain the input table class where supported.
-Chi-square results for data tables are stored in the `"chi2"` attribute,
-with `statistic`, `df`, `p_value`, `cramers_v`, and `n`. Flextables
-display these results in a footer instead.
+For non-flextable output, chi-square results are stored in the `"chi2"`
+attribute, with `statistic`, `df`, `p_value`, `cramers_v`, and `n`.
+Flextables display these results in a footer instead.
 
 ## Details
 
@@ -282,13 +301,12 @@ nonempty columns, and `N` the total count:
 - **p-value:** Upper-tail probability of a chi-square distribution with
   `df` degrees of freedom.
 
-- **Cramer's V:** `sqrt(X^2 / (N * min(r - 1, c - 1)))`; for 2-by-2
-  tables, the reported value retains the sign used by the
-  implementation.
+- **Cramer's V:** `sqrt(X^2 / (N * min(r - 1, c - 1)))`. For 2-by-2
+  tables, it is the signed phi coefficient, as in Stata, with the sign
+  of `O_11 * O_22 - O_12 * O_21`.
 
 Frequency weights act as cell counts for the test. Analytic weights are
-not supported; for complex survey designs, use
-[`survey::svychisq()`](https://rdrr.io/pkg/survey/man/svychisq.html).
+not supported; for complex survey designs, use `survey::svychisq()`.
 Cross-tabulation category values become column names, so conflicts with
 reserved names such as `"total"` may require recoding.
 
@@ -305,7 +323,8 @@ unchanged.
 
 Other tabulation functions:
 [`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
-[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)
+[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
+[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
 
 ## Examples
 
@@ -313,7 +332,7 @@ Other tabulation functions:
 # Compare the three approaches using the same variables
 # Joint frequencies: one long table
 tab(lifeexp, region, high = lexp >= 70)
-#> # A tibble: 6 x 7
+#> # A tibble: 6 × 7
 #>   region               high      n percent   cum valid valid_cum
 #>   <dbl+lbl>            <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 1 [Europe & C. Asia] FALSE    12   17.6   17.6 17.6       17.6
@@ -326,7 +345,7 @@ tab(lifeexp, region, high = lexp >= 70)
 # Separate one-way tables: one for region and one for high
 tab1(lifeexp, region, high = lexp >= 70)
 #> $region
-#> # A tibble: 3 x 6
+#> # A tibble: 3 × 6
 #>   value                    n percent   cum valid valid_cum
 #>   <dbl+lbl>            <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 1 [Europe & C. Asia]    44    64.7  64.7  64.7      64.7
@@ -334,7 +353,7 @@ tab1(lifeexp, region, high = lexp >= 70)
 #> 3 3 [South America]       10    14.7 100    14.7     100  
 #> 
 #> $high
-#> # A tibble: 2 x 6
+#> # A tibble: 2 × 6
 #>   value     n percent   cum valid valid_cum
 #>   <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 FALSE    21    30.9  30.9  30.9      30.9
@@ -343,7 +362,7 @@ tab1(lifeexp, region, high = lexp >= 70)
 
 # Two-way cross-tabulation: region by high
 tab2(lifeexp, region, high = lexp >= 70)
-#> # A tibble: 3 x 3
+#> # A tibble: 3 × 3
 #>   `region \\ high`     `FALSE` `TRUE`
 #>   <dbl+lbl>              <int>  <int>
 #> 1 1 [Europe & C. Asia]      12     32
@@ -352,7 +371,7 @@ tab2(lifeexp, region, high = lexp >= 70)
 
 # Add totals and display value labels
 fre(lifeexp, region)
-#> # A tibble: 4 x 6
+#> # A tibble: 4 × 6
 #>   region               n percent   cum valid valid_cum
 #>   <chr>            <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 Europe & C. Asia    44    64.7  64.7  64.7      64.7
@@ -361,7 +380,7 @@ fre(lifeexp, region)
 #> 4 Total               68   100    NA    NA        NA  
 
 fre2(lifeexp, region, high = lexp >= 70)
-#> # A tibble: 4 x 4
+#> # A tibble: 4 × 4
 #>   `region \\ high` `FALSE` `TRUE` total
 #>   <chr>              <int>  <int> <int>
 #> 1 Europe & C. Asia      12     32    44
@@ -371,7 +390,7 @@ fre2(lifeexp, region, high = lexp >= 70)
 
 # Frequencies within groups
 tab(lifeexp, high = lexp >= 70, .by = region)
-#> # A tibble: 6 x 7
+#> # A tibble: 6 × 7
 #>   region               high      n percent   cum valid valid_cum
 #>   <dbl+lbl>            <lgl> <int>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 1 [Europe & C. Asia] FALSE    12    27.3  27.3  27.3      27.3
@@ -381,21 +400,22 @@ tab(lifeexp, high = lexp >= 70, .by = region)
 #> 5 3 [South America]    FALSE     3    30    30    30        30  
 #> 6 3 [South America]    TRUE      7    70   100    70       100  
 
-# Many distinct values of a continuous variable: preview the table compactly
+# Continuous variables: count each distinct value, then shorten the display
 tab(lifeexp, lexp) |> print_headtail(n = 6)
-#> # A tibble: 20 x 6
+#> # A tibble: 20 × 6
 #>     lexp     n percent    cum valid valid_cum
 #>    <dbl> <int>   <dbl>  <dbl> <dbl>     <dbl>
 #>  1    57     1    1.47   1.47  1.47      1.47
 #>  2    61     1    1.47   2.94  1.47      2.94
 #>  3    62     2    2.94   5.88  2.94      5.88
+#>  ⋮     ⋮     ⋮      ⋮     ⋮      ⋮        ⋮  
 #> 18    77     5    7.35  85.3   7.35     85.3 
 #> 19    78     4    5.88  91.2   5.88     91.2 
 #> 20    79     6    8.82 100     8.82    100   
 #> # ... 14 rows omitted in the middle; use print(x, n = Inf) to show all rows.
 
 tab(lifeexp, lexp) |> print_interval(n = 6)
-#> # A tibble: 20 x 6
+#> # A tibble: 20 × 6
 #>     lexp     n percent    cum valid valid_cum
 #>    <dbl> <int>   <dbl>  <dbl> <dbl>     <dbl>
 #>  1    57     1    1.47   1.47  1.47      1.47
@@ -412,7 +432,7 @@ result <- tab2(lifeexp, region, high = lexp >= 70, .chi2 = TRUE)
 #> Pearson chi2(2) = 1.2127   Pr = 0.545
 #> Cramer's V = 0.1335
 attr(result, "chi2")
-#> # A tibble: 1 x 5
+#> # A tibble: 1 × 5
 #>   statistic    df p_value cramers_v     n
 #>       <dbl> <int>   <dbl>     <dbl> <int>
 #> 1      1.21     2   0.545     0.134    68
@@ -420,7 +440,7 @@ attr(result, "chi2")
 # Frequency weights
 survey <- tibble::tibble(response = c("yes", "no", "yes"), w = c(2, 1, 3))
 tab(survey, response, .wt = w)
-#> # A tibble: 2 x 6
+#> # A tibble: 2 × 6
 #>   response     n percent   cum valid valid_cum
 #>   <chr>    <dbl>   <dbl> <dbl> <dbl>     <dbl>
 #> 1 no           1    16.7  16.7  16.7      16.7

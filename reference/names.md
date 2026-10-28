@@ -5,7 +5,7 @@ List column names by tidyselect
 ## Usage
 
 ``` r
-ds(.data, ..., .type = c("vector", "table"))
+ds(.data, ..., .type = c("vector", "table", "tibble"))
 ```
 
 ## Arguments
@@ -25,18 +25,21 @@ ds(.data, ..., .type = c("vector", "table"))
 
 - .type:
 
-  `"vector"` (the default) returns the names as a character vector, like
-  Stata's `ds`; `"table"` returns them as a one-column table.
+  Output form. `"vector"` (default) returns the selected names as a
+  character vector, like Stata's `ds`. `"table"` returns a one-column
+  table in the input's table class, or a tibble for a character
+  inventory. `"tibble"` always returns a one-column tibble.
 
 ## Value
 
-`ds()` returns a character vector. `ds(.type = "table")` returns a table
-with one character column, `name`, and one row per selected name, in
-selection order. On ungrouped data, an empty selection returns a
+`ds()` returns a character vector. With `.type = "table"` or `"tibble"`,
+it returns one character column, `name`, and one row per selected name,
+in selection order. On ungrouped data, an empty selection returns a
 zero-length vector or zero-row table. Tables preserve the input's
 data.frame, tibble, or data.table container and supported preview
 settings, without grouping or arbitrary subclasses; character
-inventories return a tibble in table mode.
+inventories return a tibble in table mode. Explicit `.type = "tibble"`
+overrides the input's table class and preview settings.
 
 ## Details
 
@@ -73,14 +76,22 @@ ds(lifeexp, country:lexp)
 #> [1] "country"   "popgrowth" "lexp"     
 
 ds(lifeexp, where(is.character), .type = "table")
-#> # A tibble: 1 x 1
+#> # A tibble: 1 × 1
 #>   name   
 #>   <chr>  
 #> 1 country
 
 starwars <- dplyr::starwars
 ds(starwars, ends_with("color"), .type = "table")
-#> # A tibble: 3 x 1
+#> # A tibble: 3 × 1
+#>   name      
+#>   <chr>     
+#> 1 hair_color
+#> 2 skin_color
+#> 3 eye_color 
+
+ds(starwars, ends_with("color"), .type = "tibble")
+#> # A tibble: 3 × 1
 #>   name      
 #>   <chr>     
 #> 1 hair_color
@@ -90,7 +101,7 @@ ds(starwars, ends_with("color"), .type = "table")
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))
 dplyr::select(lifeexp, dplyr::all_of(numeric_names))
-#> # A tibble: 68 x 5
+#> # A tibble: 68 × 5
 #>    region               popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>                <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia]      -0.6    74   870        49
@@ -103,7 +114,7 @@ dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 #>  8 1 [Europe & C. Asia]      -0.7    71  1440        90
 #>  9 1 [Europe & C. Asia]      -0.1    72    NA        85
 #> 10 1 [Europe & C. Asia]      -0.1    75  6140        95
-#> # i 58 more rows
+#> # ℹ 58 more rows
 
 ds(numeric_names, dplyr::starts_with("pop"))
 #> [1] "popgrowth"

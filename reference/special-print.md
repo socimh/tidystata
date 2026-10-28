@@ -1,33 +1,14 @@
-# Preview complete tables or select representative rows
+# Print selected rows once
 
-Control how a complete table is printed, or select a smaller set of
-rows:
+Display selected rows in the console without storing print preferences.
 
-- `preview_table()`: Keep the complete data and store a print
-  preference. By default, show the first five and last five rows;
-  interval previews show evenly spaced rows.
+- `print_headtail()`: Print the first and last rows.
 
-- `unpreview_table()`: Remove the stored print preference, keeping all
-  data.
-
-- `print_headtail()`: Print the first and last rows once, keeping all
-  data.
-
-- `print_interval()`: Print evenly spaced rows once, keeping all data.
-
-- `print_all()`: Print every row and column, like Stata's `list`.
-
-- `slice_headtail()`: Return only the selected first and last rows.
-
-- `slice_interval()`: Return only the selected evenly spaced rows.
+- `print_interval()`: Print evenly spaced rows.
 
 ## Usage
 
 ``` r
-preview_table(.data, style = c("headtail", "interval"), n = 10)
-
-unpreview_table(.data)
-
 print_headtail(
   .data,
   n = 10,
@@ -37,8 +18,6 @@ print_headtail(
   max_footer_lines = NULL
 )
 
-print_all(.data, ..., width = Inf)
-
 print_interval(
   .data,
   n = 10,
@@ -47,38 +26,26 @@ print_interval(
   max_extra_cols = NULL,
   max_footer_lines = NULL
 )
-
-slice_headtail(.data, n = 10)
-
-slice_interval(.data, n = 10)
 ```
 
 ## Arguments
 
 - .data:
 
-  An in-memory data frame, data.table, ordinary tibble, grouped tibble,
-  rowwise tibble, or `sf` data frame (geometry is kept when slicing and
-  printed as a column). Convert other subclasses explicitly before
-  wrapping; collect lazy tables first. Apply the wrapper separately to
-  lists of tables.
-
-- style:
-
-  Either `"headtail"` or `"interval"`.
+  An in-memory data frame, data.table, ordinary/grouped/rowwise tibble,
+  or `sf` data frame. Collect lazy tables and convert other subclasses
+  explicitly first. Apply previews separately to lists of tables.
 
 - n:
 
-  Total number of rows to display or select: a positive whole number or
-  `Inf` for all rows. An odd head/tail budget gives the head the extra
-  row. With `n = 1`, both styles select the first row. Short tables do
-  not repeat rows.
+  Total number of data rows to display, defaulting to 10. Supply a
+  positive whole number or `Inf` for all rows; omission markers do not
+  count.
 
 - width:
 
-  Console width, passed to tibble formatting. `NULL` uses the current
-  console width; `Inf` (the default for `print_all()`) shows all
-  columns.
+  Console width passed to tibble formatting. `NULL` (default) uses the
+  current console width; `Inf` shows every column.
 
 - ...:
 
@@ -86,176 +53,45 @@ slice_interval(.data, n = 10)
 
 - max_extra_cols, max_footer_lines:
 
-  Tibble formatting controls.
+  Maximum number of additional columns to describe and footer lines to
+  print, respectively. `NULL` uses tibble's defaults.
 
 ## Value
 
-- `preview_table()`: the complete input container with an additional
-  `tidystata_preview` class and stored print settings.
-
-- `unpreview_table()`: the table without that class or its settings,
-  preserving grouping.
-
-- Print helpers: the original input, invisibly.
-
-- Slice helpers: the selected rows in the input container, retaining
-  valid grouping and existing preview settings. Explicit data.frame row
-  names are preserved; automatic row names are regenerated as in dplyr
-  slicing.
-
-Supported containers are listed under `.data`; other subclasses are
-unsupported.
+`.data`, unchanged and invisibly, including all rows, columns, classes,
+grouping, and any existing preview preferences.
 
 ## Details
 
-Preview settings survive table subsetting/replacement, dplyr mutation,
-filtering, sorting, column selection, renaming, relocation, distinct
-rows, slicing, grouping, rowwise operations, summaries and reframing, as
-well as tidyr's `pivot_longer()` and `pivot_wider()`. Grouping follows
-the underlying operation. Joins inherit the left input's settings;
-[`bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
-inherits the first input's settings. Arbitrary third-party
-transformations and direct
-[`vctrs::vec_rbind()`](https://vctrs.r-lib.org/reference/vec_bind.html)
-are not covered by this guarantee.
-
-Positions shown in the margin refer to the current table, not the
-original data before filtering or sorting. Previewing does not change
-column values, classes, labels, or the data used in subsequent
-calculations. Grouped tables use a global row budget, not a separate
-budget per group.
-
-`print(x, n = Inf)` displays the entire table. Per-call formatting
-overrides do not change stored settings. Explicit
-[`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
-or [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
-conversions remove the preview, as does column extraction. This feature
-controls console printing, not HTML widgets or GUI viewers. Only the
-temporary display is converted to a tibble. Wrapping and unwrapping a
-data.table creates an independent copy; native operations such as `:=`
-on a wrapped data.table retain ordinary reference semantics. External
-dplyr/tidyr verbs determine their own result container and grouping,
-while preview settings follow the result.
+Row budgets and omission markers follow
+[`preview()`](https://socimh.github.io/tidystata/reference/preview.md):
+head/tail output marks an omitted middle with one row of dots; interval
+output has no separator rows. Use `n = Inf` and `width = Inf` to print
+every row and column.
 
 ## See also
 
-Other selection and preview functions:
-[`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md),
-[`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md)
+[`preview()`](https://socimh.github.io/tidystata/reference/preview.md)
+for persistent print preferences.
 
 ## Examples
 
 ``` r
-x <- preview_table(tibble::tibble(id = 1:30, value = (1:30)^2))
-x
-#> # A tibble: 30 x 2
-#>       id value
-#>    <int> <dbl>
-#>  1     1     1
-#>  2     2     4
-#>  3     3     9
-#>  4     4    16
-#>  5     5    25
-#> 26    26   676
-#> 27    27   729
-#> 28    28   784
-#> 29    29   841
-#> 30    30   900
-#> # ... 20 rows omitted in the middle; use print(x, n = Inf) to show all rows.
-
-dplyr::filter(x, id > 10)
-#> # A tibble: 20 x 2
-#>       id value
-#>    <int> <dbl>
-#>  1    11   121
-#>  2    12   144
-#>  3    13   169
-#>  4    14   196
-#>  5    15   225
-#> 16    26   676
-#> 17    27   729
-#> 18    28   784
-#> 19    29   841
-#> 20    30   900
-#> # ... 10 rows omitted in the middle; use print(x, n = Inf) to show all rows.
-
-preview_table(x, style = "interval", n = 5)
-#> # A tibble: 30 x 2
-#>       id value
-#>    <int> <dbl>
-#>  1     1     1
-#>  8     8    64
-#> 16    16   256
-#> 23    23   529
-#> 30    30   900
-#> # ... 25 rows omitted between displayed positions; use print(x, n = Inf) to
-#> # show all rows.
-
-print(x, n = Inf)
-#> # A tibble: 30 x 2
-#>       id value
-#>    <int> <dbl>
-#>  1     1     1
-#>  2     2     4
-#>  3     3     9
-#>  4     4    16
-#>  5     5    25
-#>  6     6    36
-#>  7     7    49
-#>  8     8    64
-#>  9     9    81
-#> 10    10   100
-#> 11    11   121
-#> 12    12   144
-#> 13    13   169
-#> 14    14   196
-#> 15    15   225
-#> 16    16   256
-#> 17    17   289
-#> 18    18   324
-#> 19    19   361
-#> 20    20   400
-#> 21    21   441
-#> 22    22   484
-#> 23    23   529
-#> 24    24   576
-#> 25    25   625
-#> 26    26   676
-#> 27    27   729
-#> 28    28   784
-#> 29    29   841
-#> 30    30   900
-
-unpreview_table(x)
-#> # A tibble: 30 x 2
-#>       id value
-#>    <int> <dbl>
-#>  1     1     1
-#>  2     2     4
-#>  3     3     9
-#>  4     4    16
-#>  5     5    25
-#>  6     6    36
-#>  7     7    49
-#>  8     8    64
-#>  9     9    81
-#> 10    10   100
-#> # i 20 more rows
-
 print_headtail(lifeexp, n = 6)
-#> # A tibble: 68 x 6
+#> # A tibble: 68 × 6
 #>    region               country       popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
 #>  2 1 [Europe & C. Asia] Armenia            -1.2    70   570        83
 #>  3 1 [Europe & C. Asia] Austria             0.1    78 27810        97
+#>  ⋮           ⋮                ⋮              ⋮      ⋮   ⋮           ⋮
 #> 66 3 [South America]    Peru                1.8    69  2150        45
 #> 67 3 [South America]    Uruguay             0.5    74  7360        NA
 #> 68 3 [South America]    Venezuela, RB       2      72  3380        NA
 #> # ... 62 rows omitted in the middle; use print(x, n = Inf) to show all rows.
 
 print_interval(lifeexp, n = 6)
-#> # A tibble: 68 x 6
+#> # A tibble: 68 × 6
 #>    region               country       popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
@@ -267,8 +103,8 @@ print_interval(lifeexp, n = 6)
 #> # ... 62 rows omitted between displayed positions; use print(x, n = Inf) to
 #> # show all rows.
 
-print_all(head(lifeexp, 12))
-#> # A tibble: 12 x 6
+print_headtail(lifeexp, n = Inf, width = Inf)
+#> # A tibble: 68 × 6
 #>    region               country                popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>                      <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania                     -0.6    74   870        49
@@ -283,26 +119,60 @@ print_all(head(lifeexp, 12))
 #> 10 1 [Europe & C. Asia] Czechia                     -0.1    75  6140        95
 #> 11 1 [Europe & C. Asia] Denmark                      0.4    76 33440        95
 #> 12 1 [Europe & C. Asia] Estonia                     -1      69  3820        92
-
-slice_headtail(lifeexp, n = 6)
-#> # A tibble: 6 x 6
-#>   region               country       popgrowth  lexp gnppc safewater
-#>   <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
-#> 1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
-#> 2 1 [Europe & C. Asia] Armenia            -1.2    70   570        83
-#> 3 1 [Europe & C. Asia] Austria             0.1    78 27810        97
-#> 4 3 [South America]    Peru                1.8    69  2150        45
-#> 5 3 [South America]    Uruguay             0.5    74  7360        NA
-#> 6 3 [South America]    Venezuela, RB       2      72  3380        NA
-
-slice_interval(lifeexp, n = 6)
-#> # A tibble: 6 x 6
-#>   region               country       popgrowth  lexp gnppc safewater
-#>   <dbl+lbl>            <chr>             <dbl> <dbl> <dbl>     <dbl>
-#> 1 1 [Europe & C. Asia] Albania            -0.6    74   870        49
-#> 2 1 [Europe & C. Asia] France              0.4    79 25740        97
-#> 3 1 [Europe & C. Asia] Norway              0.6    78 36120       100
-#> 4 1 [Europe & C. Asia] Ukraine            -0.8    68   840        66
-#> 5 2 [North America]    Panama              2      73  3510        NA
-#> 6 3 [South America]    Venezuela, RB       2      72  3380        NA
+#> 13 1 [Europe & C. Asia] Finland                      0.3    77 25810        94
+#> 14 1 [Europe & C. Asia] France                       0.4    79 25740        97
+#> 15 1 [Europe & C. Asia] Georgia                     -2.5    70   870        59
+#> 16 1 [Europe & C. Asia] Germany                      0      77 28070       100
+#> 17 1 [Europe & C. Asia] Greece                       0.6    78 13540        99
+#> 18 1 [Europe & C. Asia] Hungary                     -0.2    71  4420        83
+#> 19 1 [Europe & C. Asia] Ireland                      1      76 21430        75
+#> 20 1 [Europe & C. Asia] Italy                        0      79 22270        95
+#> 21 1 [Europe & C. Asia] Kazakhstan                  -2.5    63  1340        63
+#> 22 1 [Europe & C. Asia] Kyrgyz Republic              1.5    67   360        46
+#> 23 1 [Europe & C. Asia] Latvia                      -0.9    69  2790        93
+#> 24 1 [Europe & C. Asia] Lithuania                   -0.7    71  2870        70
+#> 25 1 [Europe & C. Asia] North Macedonia              0.5    72  2010        80
+#> 26 1 [Europe & C. Asia] Moldova                      0      67   580        40
+#> 27 1 [Europe & C. Asia] Netherlands                  0.6    78 27840       100
+#> 28 1 [Europe & C. Asia] Norway                       0.6    78 36120       100
+#> 29 1 [Europe & C. Asia] Poland                       0      73  4390        NA
+#> 30 1 [Europe & C. Asia] Portugal                     0.5    76 12190        94
+#> 31 1 [Europe & C. Asia] Romania                     -0.2    70  1580        82
+#> 32 1 [Europe & C. Asia] Russian Federation          -0.2    67  2130        75
+#> 33 1 [Europe & C. Asia] Slovak Republic              0.1    73  4230        92
+#> 34 1 [Europe & C. Asia] Slovenia                    -0.2    75 10970        92
+#> 35 1 [Europe & C. Asia] Spain                        0.4    79 15410        99
+#> 36 1 [Europe & C. Asia] Sweden                       0.1    79 31100        99
+#> 37 1 [Europe & C. Asia] Switzerland                  0.3    79 46650        97
+#> 38 1 [Europe & C. Asia] Tajikistan                   0.6    62   170        36
+#> 39 1 [Europe & C. Asia] Turkiye                      1.4    71  4150        NA
+#> 40 1 [Europe & C. Asia] Turkmenistan                 1.7    64   560        69
+#> 41 1 [Europe & C. Asia] Ukraine                     -0.8    68   840        66
+#> 42 1 [Europe & C. Asia] United Kingdom               0.3    77 27040       100
+#> 43 1 [Europe & C. Asia] Uzbekistan                   1.6    65   610        54
+#> 44 1 [Europe & C. Asia] Serbia                      -0.4    72  3250        74
+#> 45 2 [North America]    Canada                       0.8    79 20900        99
+#> 46 2 [North America]    Cuba                         0.3    75  2240        NA
+#> 47 2 [North America]    Dominican Republic           1.7    70  2420        42
+#> 48 2 [North America]    El Salvador                  0.6    67  1730        NA
+#> 49 2 [North America]    Guatemala                    2.6    66  1600        50
+#> 50 2 [North America]    Haiti                        1.9    57   410        NA
+#> 51 2 [North America]    Honduras                     2.6    62   960        42
+#> 52 2 [North America]    Jamaica                      0.9    71  2940        NA
+#> 53 2 [North America]    Mexico                       1.6    72  5340        40
+#> 54 2 [North America]    Nicaragua                    1.5    64   890        NA
+#> 55 2 [North America]    Panama                       2      73  3510        NA
+#> 56 2 [North America]    Puerto Rico (US)             0.6    75  8690        75
+#> 57 2 [North America]    Trinidad and Tobago          0.3    68  4450        NA
+#> 58 2 [North America]    United States                1.2    77 32040        NA
+#> 59 3 [South America]    Argentina                    1.2    73  7960        NA
+#> 60 3 [South America]    Bolivia                      1.8    61   960        NA
+#> 61 3 [South America]    Brazil                       1.5    69  4980        76
+#> 62 3 [South America]    Chile                        1.3    76  5470        91
+#> 63 3 [South America]    Colombia                     1.8    71  2600        68
+#> 64 3 [South America]    Ecuador                      1.8    72  2150        62
+#> 65 3 [South America]    Paraguay                     2.2    70  1800        50
+#> 66 3 [South America]    Peru                         1.8    69  2150        45
+#> 67 3 [South America]    Uruguay                      0.5    74  7360        NA
+#> 68 3 [South America]    Venezuela, RB                2      72  3380        NA
 ```

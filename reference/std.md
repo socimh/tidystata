@@ -31,8 +31,10 @@ pct(x, prop = FALSE)
 
 - mean, sd:
 
-  The mean and standard deviation of the result, like Stata's
-  `egen std(x), mean() std()` options.
+  The target mean and signed scale multiplier, like Stata's
+  `egen std(x), mean() std()` options. The result has standard deviation
+  `abs(sd)`; a negative `sd` reverses the ordering and zero makes all
+  observed values equal to `mean` when the input spread is defined.
 
 - prop:
 
@@ -60,7 +62,8 @@ Other variable generation functions:
 [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
 [`cut`](https://socimh.github.io/tidystata/reference/cut.md),
 [`panel`](https://socimh.github.io/tidystata/reference/panel.md),
-[`row_egen`](https://socimh.github.io/tidystata/reference/row_egen.md)
+[`row_egen`](https://socimh.github.io/tidystata/reference/row_egen.md),
+[`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)
 
 ## Examples
 
@@ -80,7 +83,7 @@ lifeexp |>
     share = pc(popgrowth),
     .by = region
   )
-#> # A tibble: 68 x 8
+#> # A tibble: 68 × 8
 #>    region               country    popgrowth  lexp gnppc safewater      z  share
 #>    <dbl+lbl>            <chr>          <dbl> <dbl> <dbl>     <dbl>  <dbl>  <dbl>
 #>  1 1 [Europe & C. Asia] Albania         -0.6    74   870        49  0.303 -19.4 
@@ -89,9 +92,9 @@ lifeexp |>
 #>  4 1 [Europe & C. Asia] Azerbaijan       0.9    64   510        49 -1.72   29.0 
 #>  5 1 [Europe & C. Asia] Belarus         -0.5    68  1540        82 -0.909 -16.1 
 #>  6 1 [Europe & C. Asia] Belgium          0.2    77 26530       100  0.909   6.45
-#>  7 1 [Europe & C. Asia] Bosnia an~       1.8    74  1230        87  0.303  58.1 
+#>  7 1 [Europe & C. Asia] Bosnia an…       1.8    74  1230        87  0.303  58.1 
 #>  8 1 [Europe & C. Asia] Bulgaria        -0.7    71  1440        90 -0.303 -22.6 
 #>  9 1 [Europe & C. Asia] Croatia         -0.1    72    NA        85 -0.101  -3.23
 #> 10 1 [Europe & C. Asia] Czechia         -0.1    75  6140        95  0.505  -3.23
-#> # i 58 more rows
+#> # ℹ 58 more rows
 ```

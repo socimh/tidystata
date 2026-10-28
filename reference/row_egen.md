@@ -185,6 +185,7 @@ Other variable generation functions:
 [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
 [`cut`](https://socimh.github.io/tidystata/reference/cut.md),
 [`panel`](https://socimh.github.io/tidystata/reference/panel.md),
+[`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md),
 [`std()`](https://socimh.github.io/tidystata/reference/std.md)
 
 ## Examples
@@ -202,7 +203,7 @@ row_non_miss(tb)
 
 tb |>
   dplyr::mutate(mean = row_mean(x, y), sum = row_sum(x, y))
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>       x     y  mean   sum
 #>   <dbl> <dbl> <dbl> <dbl>
 #> 1     1     3     2     4
@@ -211,7 +212,7 @@ tb |>
 
 tb |>
   dplyr::mutate(capped = row_min(x, .values = 0.5))
-#> # A tibble: 3 x 3
+#> # A tibble: 3 × 3
 #>       x     y capped
 #>   <dbl> <dbl>  <dbl>
 #> 1     1     3    0.5

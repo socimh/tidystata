@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,7 +16,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/getting-started.html">Getting started with tidystata</a></li>
@@ -39,7 +39,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>tidystata</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/README.zh.md" class="external-link"><code>README.zh.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/README.zh.md" class="external-link"><code>README.zh.md</code></a></small>
     </div>
 
 <div id="tidystata" class="section level1">
@@ -154,6 +154,20 @@
 <span><span class="co">#&gt; 1 1 [Europe &amp; C. Asia]      12     32</span></span>
 <span><span class="co">#&gt; 2 2 [North America]          6      8</span></span>
 <span><span class="co">#&gt; 3 3 [South America]          3      7</span></span></code></pre></div>
+<p>也可以对连续变量制表。当不同取值较多时，用 <code><a href="reference/special-print.html">print_interval()</a></code> 查看等间隔选取的行，或用 <code><a href="reference/special-print.html">print_headtail()</a></code> 查看开头和结尾。这些函数只缩短显示内容，仍保留完整的频数表。</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tab.html">tab</a></span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/special-print.html">print_interval</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 20 x 6</span></span>
+<span><span class="co">#&gt;     lexp     n percent    cum valid valid_cum</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1    57     1    1.47   1.47  1.47      1.47</span></span>
+<span><span class="co">#&gt;  5    64     3    4.41  11.8   4.41     11.8 </span></span>
+<span><span class="co">#&gt;  9    68     3    4.41  25     4.41     25   </span></span>
+<span><span class="co">#&gt; 12    71     6    8.82  47.1   8.82     47.1 </span></span>
+<span><span class="co">#&gt; 16    75     4    5.88  72.1   5.88     72.1 </span></span>
+<span><span class="co">#&gt; 20    79     6    8.82 100     8.82    100   </span></span>
+<span><span class="co">#&gt; # ... 14 rows omitted between displayed positions; use print(x, n = Inf) to</span></span>
+<span><span class="co">#&gt; # show all rows.</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -181,7 +195,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

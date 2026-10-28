@@ -13,7 +13,7 @@ query to browse all entries."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,7 +22,7 @@ query to browse all entries."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -45,7 +45,7 @@ query to browse all entries."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Find R equivalents of Stata commands</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/findit.R" class="external-link"><code>R/findit.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/findit.R" class="external-link"><code>R/findit.R</code></a></small>
       <div class="d-none name"><code>findit.Rd</code></div>
     </div>
 
@@ -103,7 +103,9 @@ grouped operations.</p></li>
 <li><p>Plain-language questions use deterministic keyword and synonym matching in
 English or Chinese, without a language model.</p></li>
 </ul><p><strong>Output</strong></p><ul><li><p>Results print as readable Stata/R code pairs. A single clear match is shown
-alone; otherwise, up to five representative examples appear. Use <code>print(n = Inf)</code> to display all matches.</p></li>
+alone; otherwise, up to five representative examples appear. The print
+method's <code>n</code> argument sets how many matches are printed; use
+<code>print(n = Inf)</code> to display all matches.</p></li>
 <li><p>The <code>match</code> column identifies the lookup type: <code>"stata"</code>, <code>"r"</code>,
 <code>"keyword"</code>, <code>"nearest"</code>, or <code>"all"</code>.</p></li>
 <li><p>Supplied variable names customize compatible examples. Unresolved
@@ -139,7 +141,7 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;"># Two-way cross-tabulation</span><span style="color: #555555;"> [tidystata]</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">tabulate sex region</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">tab2(data, sex, region)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata. tab2() and fre2() need explicit .by for grouped tables; inherited grouping columns otherwise remain ordinary variables. fre2() displays row value labels, while column headers retain category codes.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # 20 more examples. To see them all: findit(tab, sex, region) |&gt; print(n = Inf)</span>
 <span class="r-in"><span></span></span>
@@ -180,7 +182,7 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">findit(command)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Note: Bare words and comma-separated names work: findit(tab, sex, region). Add hints such as findit(tab, gen), or quote full Stata syntax. One clear example is shown by default; print(n = Inf) reveals every match. findit() with no argument returns the whole list.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # 80 more examples. To see them all: findit() |&gt; print(n = Inf)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # 84 more examples. To see them all: findit() |&gt; print(n = Inf)</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -192,7 +194,7 @@ programs. See the "Coming from Stata" articles for further guidance.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

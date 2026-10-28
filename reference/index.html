@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,7 +16,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -97,17 +97,17 @@
 
         <dt>
 
-          <code><a href="variables.html">variables()</a></code> <code><a href="variables.html">variables_search()</a></code>
-
-        </dt>
-        <dd>Show the variable list of a dataset</dd>
-
-        <dt>
-
           <code><a href="var_type.html">var_type()</a></code> <code><a href="var_type.html">var_unit()</a></code>
 
         </dt>
         <dd>Report an object's type or unit</dd>
+
+        <dt>
+
+          <code><a href="variables.html">variables()</a></code> <code><a href="variables.html">variables_search()</a></code>
+
+        </dt>
+        <dd>Show the variable list of a dataset</dd>
       </dl></div><div class="section level2">
       <h2 id="tabulate-and-summarise">Tabulate and summarise<a class="anchor" aria-label="anchor" href="#tabulate-and-summarise"></a></h2>
 
@@ -131,6 +131,13 @@
 
         </dt>
         <dd>Calculate pairwise correlations</dd>
+
+        <dt>
+
+          <code><a href="spearman.html">spearman()</a></code>
+
+        </dt>
+        <dd>Calculate Spearman rank correlations</dd>
 
         <dt>
 
@@ -222,6 +229,13 @@
 
         <dt>
 
+          <code><a href="stata_recode.html">stata_recode()</a></code> <code><a href="stata_recode.html">recode()</a></code>
+
+        </dt>
+        <dd>Recode numeric values with Stata-style rules</dd>
+
+        <dt>
+
           <code><a href="std.html">std()</a></code> <code><a href="std.html">pc()</a></code> <code><a href="std.html">pct()</a></code>
 
         </dt>
@@ -250,7 +264,7 @@
         </dt>
         <dd>Convert vectors for data preparation</dd>
       </dl></div><div class="section level2">
-      <h2 id="select-and-preview">Select and preview<a class="anchor" aria-label="anchor" href="#select-and-preview"></a></h2>
+      <h2 id="select-columns">Select columns<a class="anchor" aria-label="anchor" href="#select-columns"></a></h2>
 
 
 
@@ -268,17 +282,42 @@
 
         <dt>
 
-          <code><a href="special-print.html">preview_table()</a></code> <code><a href="special-print.html">unpreview_table()</a></code> <code><a href="special-print.html">print_headtail()</a></code> <code><a href="special-print.html">print_all()</a></code> <code><a href="special-print.html">print_interval()</a></code> <code><a href="special-print.html">slice_headtail()</a></code> <code><a href="special-print.html">slice_interval()</a></code>
-
-        </dt>
-        <dd>Preview complete tables or select representative rows</dd>
-
-        <dt>
-
           <code><a href="varlist.html">varlist()</a></code>
 
         </dt>
         <dd>Select columns with a Stata varlist</dd>
+      </dl></div><div class="section level2">
+      <h2 id="preview-tables">Preview tables<a class="anchor" aria-label="anchor" href="#preview-tables"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="preview.html">preview()</a></code> <code><a href="preview.html">preview_headtail()</a></code> <code><a href="preview.html">preview_interval()</a></code> <code><a href="preview.html">unpreview()</a></code>
+
+        </dt>
+        <dd>Set persistent table previews</dd>
+      </dl></div><div class="section level2">
+      <h2 id="print-tables-once">Print tables once<a class="anchor" aria-label="anchor" href="#print-tables-once"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="special-print.html">print_headtail()</a></code> <code><a href="special-print.html">print_interval()</a></code>
+
+        </dt>
+        <dd>Print selected rows once</dd>
       </dl></div><div class="section level2">
       <h2 id="small-tools">Small tools<a class="anchor" aria-label="anchor" href="#small-tools"></a></h2>
 
@@ -342,7 +381,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

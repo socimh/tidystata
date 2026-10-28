@@ -17,7 +17,7 @@ egen p = pc(x), or as a proportion with prop = TRUE.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,7 @@ egen p = pc(x), or as a proportion with prop = TRUE.
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -49,7 +49,7 @@ egen p = pc(x), or as a proportion with prop = TRUE.
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Standardise a variable or scale it to a percentage</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/std.R" class="external-link"><code>R/std.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/std.R" class="external-link"><code>R/std.R</code></a></small>
       <div class="d-none name"><code>std.Rd</code></div>
     </div>
 
@@ -78,8 +78,10 @@ through their codes.</p></dd>
 
 
 <dt id="arg-mean-sd">mean, sd<a class="anchor" aria-label="anchor" href="#arg-mean-sd"></a></dt>
-<dd><p>The mean and standard deviation of the result, like Stata's
-<code>egen std(x), mean() std()</code> options.</p></dd>
+<dd><p>The target mean and signed scale multiplier, like Stata's
+<code>egen std(x), mean() std()</code> options. The result has standard deviation
+<code>abs(sd)</code>; a negative <code>sd</code> reverses the ordering and zero makes all
+observed values equal to <code>mean</code> when the input spread is defined.</p></dd>
 
 
 <dt id="arg-prop">prop<a class="anchor" aria-label="anchor" href="#arg-prop"></a></dt>
@@ -106,7 +108,8 @@ standard deviation and total come from each group, like Stata's <code>by g: egen
 <code><a href="as_dummy.html">as_dummy()</a></code>,
 <code><a href="cut.html">cut</a></code>,
 <code><a href="panel.html">panel</a></code>,
-<code><a href="row_egen.html">row_egen</a></code></p></div>
+<code><a href="row_egen.html">row_egen</a></code>,
+<code><a href="stata_recode.html">stata_recode()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -126,7 +129,7 @@ standard deviation and total come from each group, like Stata's <code>by g: egen
 <span class="r-in"><span>    share <span class="op">=</span> <span class="fu">pc</span><span class="op">(</span><span class="va">popgrowth</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    .by <span class="op">=</span> <span class="va">region</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 68 x 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 68 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               country    popgrowth  lexp gnppc safewater      z  share</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Albania         -<span style="color: #BB0000;">0.6</span>    74   870        49  0.303 -<span style="color: #BB0000;">19.4</span> </span>
@@ -135,11 +138,11 @@ standard deviation and total come from each group, like Stata's <code>by g: egen
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Azerbaijan       0.9    64   510        49 -<span style="color: #BB0000;">1.72</span>   29.0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Belarus         -<span style="color: #BB0000;">0.5</span>    68  <span style="text-decoration: underline;">1</span>540        82 -<span style="color: #BB0000;">0.909</span> -<span style="color: #BB0000;">16.1</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Belgium          0.2    77 <span style="text-decoration: underline;">26</span>530       100  0.909   6.45</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Bosnia an~       1.8    74  <span style="text-decoration: underline;">1</span>230        87  0.303  58.1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Bosnia an…       1.8    74  <span style="text-decoration: underline;">1</span>230        87  0.303  58.1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Bulgaria        -<span style="color: #BB0000;">0.7</span>    71  <span style="text-decoration: underline;">1</span>440        90 -<span style="color: #BB0000;">0.303</span> -<span style="color: #BB0000;">22.6</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Croatia         -<span style="color: #BB0000;">0.1</span>    72    <span style="color: #BB0000;">NA</span>        85 -<span style="color: #BB0000;">0.101</span>  -<span style="color: #BB0000;">3.23</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> Czechia         -<span style="color: #BB0000;">0.1</span>    75  <span style="text-decoration: underline;">6</span>140        95  0.505  -<span style="color: #BB0000;">3.23</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># i 58 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 58 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -151,7 +154,7 @@ standard deviation and total come from each group, like Stata's <code>by g: egen
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

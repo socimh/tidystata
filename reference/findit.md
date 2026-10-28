@@ -58,7 +58,8 @@ explanatory message.
 **Output**
 
 - Results print as readable Stata/R code pairs. A single clear match is
-  shown alone; otherwise, up to five representative examples appear. Use
+  shown alone; otherwise, up to five representative examples appear. The
+  print method's `n` argument sets how many matches are printed; use
   `print(n = Inf)` to display all matches.
 
 - The `match` column identifies the lookup type: `"stata"`, `"r"`,
@@ -104,7 +105,7 @@ findit(tab, sex, region)
 #> # Two-way cross-tabulation [tidystata]
 #> Stata: tabulate sex region
 #> R:     tab2(data, sex, region)
-#> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata.
+#> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata. tab2() and fre2() need explicit .by for grouped tables; inherited grouping columns otherwise remain ordinary variables. fre2() displays row value labels, while column headers retain category codes.
 #> 
 #> # 20 more examples. To see them all: findit(tab, sex, region) |> print(n = Inf)
 
@@ -145,5 +146,5 @@ entries |>
 #> R:     findit(command)
 #> # Note: Bare words and comma-separated names work: findit(tab, sex, region). Add hints such as findit(tab, gen), or quote full Stata syntax. One clear example is shown by default; print(n = Inf) reveals every match. findit() with no argument returns the whole list.
 #> 
-#> # 80 more examples. To see them all: findit() |> print(n = Inf)
+#> # 84 more examples. To see them all: findit() |> print(n = Inf)
 ```

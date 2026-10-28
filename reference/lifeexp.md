@@ -54,7 +54,7 @@ installed `DATA-PROVENANCE.md` for the retrieval date and build script.
 
 ``` r
 lifeexp
-#> # A tibble: 68 x 6
+#> # A tibble: 68 × 6
 #>    region               country                popgrowth  lexp gnppc safewater
 #>    <dbl+lbl>            <chr>                      <dbl> <dbl> <dbl>     <dbl>
 #>  1 1 [Europe & C. Asia] Albania                     -0.6    74   870        49
@@ -67,5 +67,5 @@ lifeexp
 #>  8 1 [Europe & C. Asia] Bulgaria                    -0.7    71  1440        90
 #>  9 1 [Europe & C. Asia] Croatia                     -0.1    72    NA        85
 #> 10 1 [Europe & C. Asia] Czechia                     -0.1    75  6140        95
-#> # i 58 more rows
+#> # ℹ 58 more rows
 ```

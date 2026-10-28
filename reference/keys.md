@@ -91,19 +91,24 @@ valid key. This confirms uniqueness without storing an ID declaration or
 adding metadata. Use
 [`suppressMessages()`](https://rdrr.io/r/base/message.html) for silent
 execution. An empty input reports that there are no rows to check.
-Checks preserve row order; use
+Checks preserve row order. Instead of Stata's `sort` and `using`
+options, use
 [`dplyr::arrange()`](https://dplyr.tidyverse.org/reference/arrange.html)
-separately to sort, or
+to sort or
 [`haven::read_dta()`](https://haven.tidyverse.org/reference/read_dta.html)
-to read a file. Factor values equal to `""` are empty strings;
+to read a file first. Factor values equal to `""` are empty strings;
 whitespace is not trimmed.
 
-Missing values count as equal to each other, as in Stata, so two rows
-that are both missing on every selected column are duplicates. Checks
-and duplicate counts use the whole input, regardless of grouping.
-`duplicates_list()` rejects existing `.dup_group` or `.row` columns;
-rename them first. `duplicates_drop()` reports the number of rows
-removed as a message. The input data are not modified.
+Duplicate identity follows stored values: ordinary and tagged `NA`
+values count as equal, `NaN` is a separate value, and distinct stored
+SPSS user-missing codes remain distinct. This differs from `isid()`'s
+default validation, which rejects all of these missing values;
+`.missing = TRUE` permits them while still checking uniqueness by
+stored-value identity. Checks and duplicate counts use the whole input,
+regardless of grouping. `duplicates_list()` rejects existing
+`.dup_group` or `.row` columns; rename them first. `duplicates_drop()`
+reports the number of rows removed as a message. The input data are not
+modified.
 
 ## See also
 
@@ -125,7 +130,7 @@ try(isid(panel, id))
 #> Error in isid(panel, id) : 
 #>   Variable `id` does not uniquely identify the rows: 2 values appear more
 #> than once (4 rows).
-#> i See them with `duplicates_list()`.
+#> ℹ See them with `duplicates_list()`.
 
 # Remove the duplicate row so id + wave uniquely identify observations
 unique_panel <- dplyr::distinct(panel)
@@ -134,14 +139,14 @@ isid(unique_panel, id, wave)
 #> Variables `id`, `wave` together uniquely identify the rows.
 
 duplicates_report(panel, id, wave)
-#> # A tibble: 2 x 3
+#> # A tibble: 2 × 3
 #>   copies observations surplus
 #>    <int>        <int>   <int>
 #> 1      1            3       0
 #> 2      2            2       1
 
 duplicates_tag(panel, id, wave)
-#> # A tibble: 5 x 4
+#> # A tibble: 5 × 4
 #>      id  wave score   dup
 #>   <dbl> <dbl> <dbl> <int>
 #> 1     1     1     5     0
@@ -151,7 +156,7 @@ duplicates_tag(panel, id, wave)
 #> 5     3     1     8     0
 
 duplicates_list(panel, id, wave)
-#> # A tibble: 2 x 5
+#> # A tibble: 2 × 5
 #>      id  wave score .dup_group  .row
 #>   <dbl> <dbl> <dbl>      <int> <int>
 #> 1     2     1     7          1     3
@@ -159,7 +164,7 @@ duplicates_list(panel, id, wave)
 
 duplicates_drop(panel)
 #> (1 row removed)
-#> # A tibble: 4 x 3
+#> # A tibble: 4 × 3
 #>      id  wave score
 #>   <dbl> <dbl> <dbl>
 #> 1     1     1     5

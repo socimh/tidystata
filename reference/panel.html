@@ -27,7 +27,7 @@ difference subtracts the previous period's value from the current value.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ difference subtracts the previous period's value from the current value.
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -59,7 +59,7 @@ difference subtracts the previous period's value from the current value.
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Calculate panel lags, leads and differences</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/panel.R" class="external-link"><code>R/panel.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/panel.R" class="external-link"><code>R/panel.R</code></a></small>
       <div class="d-none name"><code>panel.Rd</code></div>
     </div>
 
@@ -101,15 +101,15 @@ or <code>difftime</code> vector.</p></dd>
 <dd><p>The time variable, unique within each panel. Supported types:</p><ul><li><p>numbers, including labelled numbers and Stata <code>%tm</code>, <code>%tq</code> or <code>%ty</code>
 variables read by haven, which arrive as plain numbers;</p></li>
 <li><p><code>Date</code> and date-times (<code>POSIXct</code>/<code>POSIXlt</code>), with <code>unit</code>;</p></li>
-<li><p>period classes, which need no <code>unit</code>: tsibble's <code>yearweek()</code>, <code>yearmonth()</code>
-and <code>yearquarter()</code>, and zoo's <code>yearmon</code> and <code>yearqtr</code>;</p></li>
+<li><p>period classes, which need no <code>unit</code>: tsibble's <code>yearweek()</code>,
+<code>yearmonth()</code> and <code>yearquarter()</code>, and zoo's <code>yearmon</code> and <code>yearqtr</code>;</p></li>
 <li><p>ordered factors, such as survey waves, where each level is one period in
 level order, so an unused level is a gap.</p></li>
 </ul><p>Missing times give missing results, except for zero-order differences.
-Text and unordered factors are not
-accepted, because their sorted order need not be the time order (<code>"W10"</code>
-sorts before <code>"W2"</code>); convert them first, for example with
-<code>as.numeric(as.character(year))</code> or <code>factor(wave, levels, ordered = TRUE)</code>.</p></dd>
+Text and unordered factors are not accepted, because their sorted order
+need not be the time order (<code>"W10"</code> sorts before <code>"W2"</code>); convert them
+first, for example with <code>as.numeric(as.character(year))</code> or
+<code>factor(wave, levels, ordered = TRUE)</code>.</p></dd>
 
 
 <dt id="arg-delta">delta<a class="anchor" aria-label="anchor" href="#arg-delta"></a></dt>
@@ -127,8 +127,9 @@ are compared by whole periods, as with Stata's <code>%tw</code>, <code>%tm</code
 Weeks follow Stata's <code>%tw</code>: each year has 52 weeks starting on 1 January,
 so the last week has 8 or 9 days (tsibble's <code>yearweek()</code> keeps its ISO
 weeks). For date-times, seconds measure elapsed time; minute and larger
-periods use the local clock of their time zone. Must be <code>NULL</code> for numbers
-and period classes.</p></dd>
+periods use the local clock of their time zone. Must be <code>NULL</code> for numbers.
+Period classes accept <code>NULL</code> or their exact natural unit (<code>"week"</code>,
+<code>"month"</code> or <code>"quarter"</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -169,6 +170,7 @@ to whole numbers first.</p>
 <code><a href="as_dummy.html">as_dummy()</a></code>,
 <code><a href="cut.html">cut</a></code>,
 <code><a href="row_egen.html">row_egen</a></code>,
+<code><a href="stata_recode.html">stata_recode()</a></code>,
 <code><a href="std.html">std()</a></code></p></div>
     </div>
 
@@ -187,7 +189,7 @@ to whole numbers first.</p>
 <span class="r-in"><span>  d_x <span class="op">=</span> <span class="fu">stata_diff</span><span class="op">(</span><span class="va">x</span>, time <span class="op">=</span> <span class="va">year</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  .by <span class="op">=</span> <span class="va">id</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      id  year     x lag_x lead_x   d_x</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1  <span style="text-decoration: underline;">2</span>001    10    <span style="color: #BB0000;">NA</span>     12    <span style="color: #BB0000;">NA</span></span>
@@ -205,7 +207,7 @@ to whole numbers first.</p>
 <span class="r-in"><span>  <span class="va">sales</span>,</span></span>
 <span class="r-in"><span>  previous <span class="op">=</span> <span class="fu">stata_lag</span><span class="op">(</span><span class="va">amount</span>, time <span class="op">=</span> <span class="va">month</span>, unit <span class="op">=</span> <span class="st">"month"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   month      amount previous</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 2024-01-31      5       <span style="color: #BB0000;">NA</span></span>
@@ -222,7 +224,7 @@ to whole numbers first.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

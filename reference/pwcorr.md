@@ -15,7 +15,9 @@ pwcorr(
   .method = c("pearson", "spearman"),
   .wide = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic")
+  .wt_type = c("frequency", "analytic"),
+  .listwise = FALSE,
+  .adjust = c("none", "bonferroni", "sidak")
 )
 ```
 
@@ -50,7 +52,9 @@ pwcorr(
 - .method:
 
   `"pearson"` (default) or `"spearman"`, like Stata's `pwcorr` and
-  `spearman`.
+  `spearman, pw`.
+  [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
+  gives Spearman correlations with Stata's default casewise deletion.
 
 - .wide:
 
@@ -68,7 +72,22 @@ pwcorr(
 
   `"frequency"` (default) or `"analytic"`. The correlation is the same
   under both; with frequency weights, `n` and the p-value use the summed
-  weight, and with analytic weights the number of rows.
+  weight, and with analytic weights the number of observed rows. See
+  Details for zero-weight handling.
+
+- .listwise:
+
+  If `TRUE`, use only rows where every selected variable is observed,
+  like Stata's `pwcorr, listwise`. Every pair then has the same `n`.
+  Unlike
+  [`corr()`](https://socimh.github.io/tidystata/reference/corr.md), `p`
+  is kept.
+
+- .adjust:
+
+  `"none"` (default), `"bonferroni"` or `"sidak"`, like Stata's
+  `bonferroni` and `sidak` options. Adjust p-values separately within
+  each group; not available with `.wide = TRUE`.
 
 ## Value
 
@@ -91,28 +110,51 @@ correlations are calculated within groups. Create columns with grouped
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
 first when a calculation needs to run separately within each group.
 
-The p-value is the two-sided test of zero correlation that Stata
-reports, based on `t = r * sqrt((n - 2) / (1 - r^2))` with `n - 2`
-degrees of freedom. For Pearson correlations it matches
-[`cor.test()`](https://rdrr.io/r/stats/cor.test.html); for Spearman
-correlations it is the same large-sample approximation that Stata uses.
-Correlations with a constant variable, and p-values with fewer than
-three observations, are `NA`. Labelled numeric columns are correlated on
-their codes, excluding tagged and SPSS user-missing values. Use
+Labelled numeric columns are correlated on their codes, excluding tagged
+and SPSS user-missing values. Use
 [`corr()`](https://socimh.github.io/tidystata/reference/corr.md) for
 listwise Pearson correlations, like Stata's `corr` (`correlate`).
+
+Weights must be finite and nonnegative. Fractional frequency weights are
+accepted, extending Stata's integer frequency-weight convention.
+Zero-weight rows do not contribute to the correlation. With pairwise
+deletion, analytic `n` includes complete zero-weight rows; with
+`.listwise = TRUE`, these rows are excluded from the common sample and
+from `n`. This also affects p-values.
+
+The p-value is the two-sided test of zero correlation that Stata
+reports. For Pearson correlations it is based on
+`t = r * sqrt((n - 2) / (1 - r^2))` with `n - 2` degrees of freedom and
+matches [`cor.test()`](https://rdrr.io/r/stats/cor.test.html). For
+Spearman correlations it is the beta approximation of Stata 18 and
+later; see
+[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md).
+Correlations with a constant variable, and p-values with fewer than
+three observations, are `NA`.
+
+With `k` distinct variable pairs within a group, Bonferroni and Sidak
+adjustments are `min(1, k * p)` and `min(1, 1 - (1 - p)^k)`,
+respectively. Each group's `k` includes pairs whose p-value is `NA`;
+adjustment does not combine tests across groups.
+
+Stata's display options `star()` and
+[`print()`](https://rdrr.io/r/base/print.html) are not implemented,
+because the result is a data frame: filter it instead, for example with
+`dplyr::filter(p < 0.05)`. Use `.listwise = TRUE` for Stata's
+`casewise`.
 
 ## See also
 
 Other tabulation functions:
 [`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
+[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md),
 [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
 
 ## Examples
 
 ``` r
 pwcorr(lifeexp, lexp, gnppc, safewater)
-#> # A tibble: 3 x 5
+#> # A tibble: 3 × 5
 #>   var1  var2          r     n        p
 #>   <chr> <chr>     <dbl> <int>    <dbl>
 #> 1 lexp  gnppc     0.733    67 1.79e-12
@@ -120,7 +162,7 @@ pwcorr(lifeexp, lexp, gnppc, safewater)
 #> 3 gnppc safewater 0.657    53 8.95e- 8
 
 pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>   variable   lexp  gnppc safewater
 #>   <chr>     <dbl>  <dbl>     <dbl>
 #> 1 lexp      1     NA            NA
@@ -128,7 +170,7 @@ pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
 #> 3 safewater 0.760  0.657         1
 
 pwcorr(lifeexp, lexp, gnppc, .by = region)
-#> # A tibble: 3 x 6
+#> # A tibble: 3 × 6
 #>   region               var1  var2      r     n        p
 #>   <dbl+lbl>            <chr> <chr> <dbl> <int>    <dbl>
 #> 1 1 [Europe & C. Asia] lexp  gnppc 0.792    43 2.57e-10
@@ -136,14 +178,26 @@ pwcorr(lifeexp, lexp, gnppc, .by = region)
 #> 3 3 [South America]    lexp  gnppc 0.640    10 4.60e- 2
 
 pwcorr(lifeexp, lexp, gnppc, .method = "spearman")
-#> # A tibble: 1 x 5
+#> # A tibble: 1 × 5
 #>   var1  var2      r     n        p
 #>   <chr> <chr> <dbl> <int>    <dbl>
-#> 1 lexp  gnppc 0.861    67 9.53e-21
+#> 1 lexp  gnppc 0.861    67 3.37e-17
+
+# One common sample, with Bonferroni-adjusted p-values
+pwcorr(
+  lifeexp, lexp, gnppc, safewater,
+  .listwise = TRUE, .adjust = "bonferroni"
+)
+#> # A tibble: 3 × 5
+#>   var1  var2          r     n        p
+#>   <chr> <chr>     <dbl> <int>    <dbl>
+#> 1 lexp  gnppc     0.777    53 2.27e-11
+#> 2 lexp  safewater 0.761    53 1.13e-10
+#> 3 gnppc safewater 0.657    53 2.69e- 7
 
 # Correlate an existing column with a computed column
 pwcorr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
-#> # A tibble: 1 x 5
+#> # A tibble: 1 × 5
 #>   var1  var2                r     n        p
 #>   <chr> <chr>           <dbl> <int>    <dbl>
 #> 1 lexp  gnppc_thousands 0.733    67 1.79e-12

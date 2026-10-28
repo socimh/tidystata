@@ -11,7 +11,7 @@ table reports the correlation, the number of observations and the p-value."></he
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@ table reports the correlation, the number of observations and the p-value."></he
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -43,7 +43,7 @@ table reports the correlation, the number of observations and the p-value."></he
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Calculate pairwise correlations</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/pwcorr.R" class="external-link"><code>R/pwcorr.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/pwcorr.R" class="external-link"><code>R/pwcorr.R</code></a></small>
       <div class="d-none name"><code>pwcorr.Rd</code></div>
     </div>
 
@@ -62,7 +62,9 @@ table reports the correlation, the number of observations and the p-value.</p>
 <span>  .method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"spearman"</span><span class="op">)</span>,</span>
 <span>  .wide <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  .wt <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  .wt_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"frequency"</span>, <span class="st">"analytic"</span><span class="op">)</span></span>
+<span>  .wt_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"frequency"</span>, <span class="st">"analytic"</span><span class="op">)</span>,</span>
+<span>  .listwise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  .adjust <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"bonferroni"</span>, <span class="st">"sidak"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,7 +94,8 @@ columns only; create new grouping columns with <code><a href="https://dplyr.tidy
 
 <dt id="arg--method">.method<a class="anchor" aria-label="anchor" href="#arg--method"></a></dt>
 <dd><p><code>"pearson"</code> (default) or <code>"spearman"</code>, like Stata's <code>pwcorr</code>
-and <code>spearman</code>.</p></dd>
+and <code>spearman, pw</code>. <code><a href="spearman.html">spearman()</a></code> gives Spearman correlations with Stata's
+default casewise deletion.</p></dd>
 
 
 <dt id="arg--wide">.wide<a class="anchor" aria-label="anchor" href="#arg--wide"></a></dt>
@@ -109,7 +112,20 @@ correlations only. Rows with a missing weight are excluded with a message.</p></
 <dt id="arg--wt-type">.wt_type<a class="anchor" aria-label="anchor" href="#arg--wt-type"></a></dt>
 <dd><p><code>"frequency"</code> (default) or <code>"analytic"</code>. The correlation is
 the same under both; with frequency weights, <code>n</code> and the p-value use the
-summed weight, and with analytic weights the number of rows.</p></dd>
+summed weight, and with analytic weights the number of observed rows.
+See Details for zero-weight handling.</p></dd>
+
+
+<dt id="arg--listwise">.listwise<a class="anchor" aria-label="anchor" href="#arg--listwise"></a></dt>
+<dd><p>If <code>TRUE</code>, use only rows where every selected variable is
+observed, like Stata's <code>pwcorr, listwise</code>. Every pair then has the same
+<code>n</code>. Unlike <code><a href="corr.html">corr()</a></code>, <code>p</code> is kept.</p></dd>
+
+
+<dt id="arg--adjust">.adjust<a class="anchor" aria-label="anchor" href="#arg--adjust"></a></dt>
+<dd><p><code>"none"</code> (default), <code>"bonferroni"</code> or <code>"sidak"</code>, like Stata's
+<code>bonferroni</code> and <code>sidak</code> options. Adjust p-values separately within each
+group; not available with <code>.wide = TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -127,26 +143,40 @@ the upper triangle is <code>NA</code>; <code>n</code> and <code>p</code> are omi
     <p>Computed columns are evaluated on ungrouped working data before correlations
 are calculated within groups. Create columns with grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>
 first when a calculation needs to run separately within each group.</p>
-<p>The p-value is the two-sided test of zero correlation that Stata reports,
-based on <code>t = r * sqrt((n - 2) / (1 - r^2))</code> with <code>n - 2</code> degrees of freedom.
-For Pearson correlations it matches <code><a href="https://rdrr.io/r/stats/cor.test.html" class="external-link">cor.test()</a></code>; for Spearman correlations
-it is the same large-sample approximation that Stata uses. Correlations with
-a constant variable, and p-values with fewer than three observations, are
-<code>NA</code>. Labelled numeric columns are correlated on their codes, excluding
-tagged and SPSS user-missing values. Use <code><a href="corr.html">corr()</a></code> for listwise Pearson
-correlations, like Stata's <code>corr</code> (<code>correlate</code>).</p>
+<p>Labelled numeric columns are correlated on their codes, excluding tagged
+and SPSS user-missing values. Use <code><a href="corr.html">corr()</a></code> for listwise Pearson correlations,
+like Stata's <code>corr</code> (<code>correlate</code>).</p>
+<p>Weights must be finite and nonnegative. Fractional frequency weights are
+accepted, extending Stata's integer frequency-weight convention. Zero-weight
+rows do not contribute to the correlation. With pairwise deletion, analytic
+<code>n</code> includes complete zero-weight rows; with <code>.listwise = TRUE</code>, these rows
+are excluded from the common sample and from <code>n</code>. This also affects p-values.</p>
+<p>The p-value is the two-sided test of zero correlation that Stata reports.
+For Pearson correlations it is based on <code>t = r * sqrt((n - 2) / (1 - r^2))</code>
+with <code>n - 2</code> degrees of freedom and matches <code><a href="https://rdrr.io/r/stats/cor.test.html" class="external-link">cor.test()</a></code>. For Spearman
+correlations it is the beta approximation of Stata 18 and later; see
+<code><a href="spearman.html">spearman()</a></code>. Correlations with a constant variable, and p-values with fewer
+than three observations, are <code>NA</code>.</p>
+<p>With <code>k</code> distinct variable pairs within a group, Bonferroni and Sidak
+adjustments are <code>min(1, k * p)</code> and <code>min(1, 1 - (1 - p)^k)</code>, respectively.
+Each group's <code>k</code> includes pairs whose p-value is <code>NA</code>; adjustment does not
+combine tests across groups.</p>
+<p>Stata's display options <code>star()</code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> are not implemented, because
+the result is a data frame: filter it instead, for example with
+<code>dplyr::filter(p &lt; 0.05)</code>. Use <code>.listwise = TRUE</code> for Stata's <code>casewise</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other tabulation functions:
 <code><a href="corr.html">corr()</a></code>,
+<code><a href="spearman.html">spearman()</a></code>,
 <code><a href="tab.html">tab()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, <span class="va">safewater</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   var1  var2          r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc     0.733    67 1.79<span style="color: #949494;">e</span><span style="color: #BB0000;">-12</span></span>
@@ -154,7 +184,7 @@ correlations, like Stata's <code>corr</code> (<code>correlate</code>).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> gnppc safewater 0.657    53 8.95<span style="color: #949494;">e</span><span style="color: #BB0000;">- 8</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, <span class="va">safewater</span>, .wide <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   variable   lexp  gnppc safewater</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp      1     <span style="color: #BB0000;">NA</span>            <span style="color: #BB0000;">NA</span></span>
@@ -162,7 +192,7 @@ correlations, like Stata's <code>corr</code> (<code>correlate</code>).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> safewater 0.760  0.657         1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   region               var1  var2      r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> lexp  gnppc 0.792    43 2.57<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
@@ -170,14 +200,26 @@ correlations, like Stata's <code>corr</code> (<code>correlate</code>).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 3<span style="color: #949494;"> [South America]</span>    lexp  gnppc 0.640    10 4.60<span style="color: #949494;">e</span><span style="color: #BB0000;">- 2</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, .method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   var1  var2      r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc 0.861    67 9.53<span style="color: #949494;">e</span><span style="color: #BB0000;">-21</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc 0.861    67 3.37<span style="color: #949494;">e</span><span style="color: #BB0000;">-17</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># One common sample, with Bonferroni-adjusted p-values</span></span></span>
+<span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">lifeexp</span>, <span class="va">lexp</span>, <span class="va">gnppc</span>, <span class="va">safewater</span>,</span></span>
+<span class="r-in"><span>  .listwise <span class="op">=</span> <span class="cn">TRUE</span>, .adjust <span class="op">=</span> <span class="st">"bonferroni"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   var1  var2          r     n        p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc     0.777    53 2.27<span style="color: #949494;">e</span><span style="color: #BB0000;">-11</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> lexp  safewater 0.761    53 1.13<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> gnppc safewater 0.657    53 2.69<span style="color: #949494;">e</span><span style="color: #BB0000;">- 7</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Correlate an existing column with a computed column</span></span></span>
 <span class="r-in"><span><span class="fu">pwcorr</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span>, gnppc_thousands <span class="op">=</span> <span class="va">gnppc</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   var1  var2                r     n        p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> lexp  gnppc_thousands 0.733    67 1.79<span style="color: #949494;">e</span><span style="color: #BB0000;">-12</span></span>
@@ -192,7 +234,7 @@ correlations, like Stata's <code>corr</code> (<code>correlate</code>).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -24,9 +24,11 @@ is_first(..., .missing = FALSE)
 
 - .missing:
 
-  If `FALSE` (default), rows with a missing value in any argument are
-  `FALSE`, as Stata's `tag()` does without its `missing` option. If
-  `TRUE`, missing values form groups of their own.
+  If `FALSE` (default), rows with a missing value in any explicitly
+  supplied argument are `FALSE`, as Stata's `tag()` does without its
+  `missing` option. If `TRUE`, missing values form groups of their own.
+  With no arguments, flag the first row of every current data-mask
+  group, including groups with missing keys, regardless of `.missing`.
 
 ## Value
 
@@ -56,7 +58,7 @@ panel <- tibble::tibble(
   year = c(2001, 2002, 2001, 2002, 2003, 2001)
 )
 dplyr::mutate(panel, first = is_first(id))
-#> # A tibble: 6 x 3
+#> # A tibble: 6 × 3
 #>      id  year first
 #>   <dbl> <dbl> <lgl>
 #> 1     1  2001 TRUE 
@@ -68,7 +70,7 @@ dplyr::mutate(panel, first = is_first(id))
 
 # Including the missing group
 dplyr::mutate(panel, first = is_first(id, .missing = TRUE))
-#> # A tibble: 6 x 3
+#> # A tibble: 6 × 3
 #>      id  year first
 #>   <dbl> <dbl> <lgl>
 #> 1     1  2001 TRUE 
@@ -78,9 +80,9 @@ dplyr::mutate(panel, first = is_first(id, .missing = TRUE))
 #> 5     2  2003 FALSE
 #> 6    NA  2001 TRUE 
 
-# An alternative
+# The no-argument shortcut also includes the missing id group
 dplyr::mutate(panel, first = is_first(), .by = id)
-#> # A tibble: 6 x 3
+#> # A tibble: 6 × 3
 #>      id  year first
 #>   <dbl> <dbl> <lgl>
 #> 1     1  2001 TRUE 

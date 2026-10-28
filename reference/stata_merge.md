@@ -107,7 +107,7 @@ stata_merge(people, income, "1:1", by = "id")
 #> 
 #> Matched                              2  (.merge == "matched")
 #> --------------------------------------
-#> # A tibble: 4 x 4
+#> # A tibble: 4 × 4
 #>      id   age income .merge     
 #>   <dbl> <dbl>  <dbl> <fct>      
 #> 1     1    30     NA master only
@@ -131,7 +131,7 @@ try(stata_merge(people, income, "1:1", by = "id", assert = "match"))
 
 # Keep matched rows only
 stata_merge(people, income, "1:1", by = "id", keep = "match", report = FALSE)
-#> # A tibble: 2 x 4
+#> # A tibble: 2 × 4
 #>      id   age income .merge 
 #>   <dbl> <dbl>  <dbl> <fct>  
 #> 1     2    41     10 matched
@@ -149,7 +149,7 @@ stata_merge(members, households, "m:1", by = "hh")
 #> 
 #> Matched                              3  (.merge == "matched")
 #> --------------------------------------
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>      hh person region .merge 
 #>   <dbl>  <int> <chr>  <fct>  
 #> 1     1      1 north  matched

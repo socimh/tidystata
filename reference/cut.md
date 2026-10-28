@@ -56,10 +56,12 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 
 - wt:
 
-  Optional weights for `xtile()`, one per element of `x`, like Stata's
-  `xtile ... [aweight = w]`. Cutpoints then follow Stata's weighted
-  percentile rule; elements with a missing weight get a missing code.
-  Not available with `method = "rank"`.
+  Optional finite, non-negative weights for `xtile()`, one per element
+  of `x` or a scalar recycled to its length, like Stata's
+  `xtile ... [aweight = w]`. Cutpoints follow Stata's weighted
+  percentile rule. Zero-weight rows do not enter cutpoint estimation but
+  still receive codes; elements with a missing weight get a missing
+  code. Not available with `method = "rank"`.
 
 - breaks:
 
@@ -72,8 +74,10 @@ cut_breaks(x, breaks = NULL, labels = NULL, right = FALSE)
 
   If `FALSE` (default), intervals are closed on the left (`a <= x < b`),
   as in Stata's `egen cut()`; the last interval also includes its upper
-  end. If `TRUE`, they are closed on the right (`a < x <= b`), as in
-  [`base::cut()`](https://rdrr.io/r/base/cut.html).
+  end. If `TRUE`, they are closed on the right (`a < x <= b`), and the
+  first interval also includes its lower end, as in
+  [`base::cut()`](https://rdrr.io/r/base/cut.html) with
+  `include.lowest = TRUE`.
 
 ## Value
 
@@ -82,8 +86,7 @@ when `xtile()` runs in a grouped data mask with default labels. The
 result has the same length and order as `x`, with missing inputs
 remaining missing. All-missing inputs are rejected. Empty inputs are
 rejected by `xtile()` and `cut_length()`;
-`cut_breaks(numeric(), breaks = 50)` returns an empty ordered factor
-with range warnings.
+`cut_breaks(numeric(), breaks = 50)` returns an empty ordered factor.
 
 ## Details
 
@@ -99,13 +102,16 @@ group, for example `"[0,0]"` and `"(0,1]"`. Custom labels must match the
 effective number of groups. `xtile()` rejects empty and all-missing
 vectors; it rejects constants in quantile mode but accepts them in rank
 mode. `cut_length()` and `cut_breaks()` reject constants and all-missing
-vectors.
+vectors; `cut_length()` also rejects infinite values, because
+equal-width intervals need a finite range.
+
+Interval labels always use a decimal point, whatever `options(OutDec)`
+says, so that `"[2.8,6.6]"` cannot be read as four numbers.
 
 `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while
 `cut_breaks()` extends the end intervals to the observed range.
 
-With `xtile()`, `labels = NULL` (default) or `TRUE` creates labels.
 Inside grouped
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
 each group has its own cutpoints and interval labels, which cannot be
@@ -126,6 +132,7 @@ Other variable generation functions:
 [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
 [`panel`](https://socimh.github.io/tidystata/reference/panel.md),
 [`row_egen`](https://socimh.github.io/tidystata/reference/row_egen.md),
+[`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md),
 [`std()`](https://socimh.github.io/tidystata/reference/std.md)
 
 ## Examples

@@ -25,7 +25,11 @@ assert(.data, ..., .by = NULL)
 
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
   Optional grouping variables. Summaries such as `mean(x)` are evaluated
-  within each group.
+  within each group. Existing groups are used when omitted. To supply
+  `.by` for grouped data, first call
+  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  as required by
+  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 
 ## Value
 
@@ -62,5 +66,5 @@ assert(scores, is.na(score) | score >= 50)
 # Fail: row 3 is below 60, and row 4 is missing
 try(assert(scores, score >= 60))
 #> Error in assert(scores, score >= 60) : Assertion failed:
-#> * `score >= 60`: 2 contradictions (1 missing) in 4 rows; rows 3, 4
+#> • `score >= 60`: 2 contradictions (1 missing) in 4 rows; rows 3, 4
 ```

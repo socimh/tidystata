@@ -66,8 +66,7 @@ Use `ignore` to remove other characters first, like Stata's `ignore()`:
 `destring(x, ignore = "kg")` reads `"10 kg"` as 10. Empty strings,
 `"NA"` and Stata's `"."` are missing without a warning; the text `"NaN"`
 becomes `NaN`. Date strings become `NA`; parse them with
-[`as.Date()`](https://rdrr.io/r/base/as.Date.html) or
-[`lubridate::ymd()`](https://lubridate.tidyverse.org/reference/ymd.html)
+[`as.Date()`](https://rdrr.io/r/base/as.Date.html) or `lubridate::ymd()`
 instead.
 
 A factor whose levels are all numbers, such as
@@ -95,7 +94,8 @@ give their codes. For non-character input, values flagged by
 [`is.na()`](https://rdrr.io/r/base/NA.html), including `NaN`, tagged
 missing values, and SPSS user-missing codes, become `NA`. Character
 input is returned unchanged. Numbers are written in full, so 100000
-gives `"100000"`, not `"1e+05"`. Dates use
+gives `"100000"`, not `"1e+05"`, with at most 15 significant digits and
+a decimal point whatever `options(OutDec)` says. Dates use
 [`as.character()`](https://rdrr.io/r/base/character.html), giving
 `"2024-01-31"` rather than day numbers.
 
@@ -122,7 +122,7 @@ lifeexp |>
     region_fct = haven::as_factor(region),
     .keep = "used"
   )
-#> # A tibble: 68 x 5
+#> # A tibble: 68 × 5
 #>    region               region_chr       region_code region_num region_fct      
 #>    <dbl+lbl>            <chr>            <chr>            <dbl> <fct>           
 #>  1 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
@@ -135,5 +135,5 @@ lifeexp |>
 #>  8 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
 #>  9 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
 #> 10 1 [Europe & C. Asia] Europe & C. Asia 1                    1 Europe & C. Asia
-#> # i 58 more rows
+#> # ℹ 58 more rows
 ```

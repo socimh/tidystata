@@ -20,13 +20,13 @@
 - [`ds()`](https://socimh.github.io/tidystata/reference/names.md) : List
   column names by tidyselect
 
-- [`variables()`](https://socimh.github.io/tidystata/reference/variables.md)
-  [`variables_search()`](https://socimh.github.io/tidystata/reference/variables.md)
-  : Show the variable list of a dataset
-
 - [`var_type()`](https://socimh.github.io/tidystata/reference/var_type.md)
   [`var_unit()`](https://socimh.github.io/tidystata/reference/var_type.md)
   : Report an object's type or unit
+
+- [`variables()`](https://socimh.github.io/tidystata/reference/variables.md)
+  [`variables_search()`](https://socimh.github.io/tidystata/reference/variables.md)
+  : Show the variable list of a dataset
 
 ## Tabulate and summarise
 
@@ -34,6 +34,8 @@
   Calculate complete-case Pearson correlations
 - [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) :
   Calculate pairwise correlations
+- [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
+  : Calculate Spearman rank correlations
 - [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md)
@@ -86,6 +88,9 @@
   [`row_miss()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   [`row_non_miss()`](https://socimh.github.io/tidystata/reference/row_egen.md)
   : Calculate summaries across columns within each row
+- [`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)
+  [`recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)
+  : Recode numeric values with Stata-style rules
 - [`std()`](https://socimh.github.io/tidystata/reference/std.md)
   [`pc()`](https://socimh.github.io/tidystata/reference/std.md)
   [`pct()`](https://socimh.github.io/tidystata/reference/std.md) :
@@ -105,20 +110,26 @@
   [`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
   : Convert vectors for data preparation
 
-## Select and preview
+## Select columns
 
 - [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md)
   : Select and compute columns
-- [`preview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`unpreview_table()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`print_all()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`slice_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  [`slice_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
-  : Preview complete tables or select representative rows
 - [`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md)
   : Select columns with a Stata varlist
+
+## Preview tables
+
+- [`preview()`](https://socimh.github.io/tidystata/reference/preview.md)
+  [`preview_headtail()`](https://socimh.github.io/tidystata/reference/preview.md)
+  [`preview_interval()`](https://socimh.github.io/tidystata/reference/preview.md)
+  [`unpreview()`](https://socimh.github.io/tidystata/reference/preview.md)
+  : Set persistent table previews
+
+## Print tables once
+
+- [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
+  [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
+  : Print selected rows once
 
 ## Small tools
 

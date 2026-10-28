@@ -37,7 +37,7 @@ and displaying row-category labels. Column headers retain category codes.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@ and displaying row-category labels. Column headers retain category codes.
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://www.socimh.com/stata-to-r/">Stata → R</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/coming-from-stata.html">Stata to R</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
@@ -69,7 +69,7 @@ and displaying row-category labels. Column headers retain category codes.
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Frequency tables and cross-tabulations</h1>
-      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/HEAD/R/tab.R" class="external-link"><code>R/tab.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/socimh/tidystata/blob/master/R/tab.R" class="external-link"><code>R/tab.R</code></a></small>
       <div class="d-none name"><code>tab.Rd</code></div>
     </div>
 
@@ -172,18 +172,20 @@ are excluded.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Variables selected with tidyselect, or named expressions such as
-<code>high = score &gt;= 70</code>. Defaults to all columns except active grouping keys.
-Without explicit <code>.by</code>, <code>tab2()</code> and <code>fre2()</code> treat inherited grouping
-columns as ordinary variables. Select at least two variables for
-cross-tabulation.</p></dd>
+<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; or
+&lt;<code><a href="https://rlang.r-lib.org/reference/args_data_masking.html" class="external-link">data-masking</a></code>&gt; Variables to tabulate, or named
+expressions such as <code>high = score &gt;= 70</code>. Defaults to all columns except
+active grouping keys. Without explicit <code>.by</code>, <code>tab2()</code> and <code>fre2()</code> treat
+inherited grouping columns as ordinary variables. Select at least two
+variables for cross-tabulation.</p></dd>
 
 
 <dt id="arg--by">.by<a class="anchor" aria-label="anchor" href="#arg--by"></a></dt>
-<dd><p>Optional grouping columns selected with tidyselect. For one-way
-and joint tables, existing <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> groups are inherited unless
-<code>.by</code> is supplied. <code>tab2()</code> and <code>fre2()</code> require explicit <code>.by</code> to create
-separate cross-tables for each group. Grouping keys are not tabulated.</p></dd>
+<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; Optional grouping columns.
+For one-way and joint tables, existing <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> groups are
+inherited unless <code>.by</code> is supplied. <code>tab2()</code> and <code>fre2()</code> require
+explicit <code>.by</code> to create separate cross-tables for each group. Grouping
+keys are not tabulated.</p></dd>
 
 
 <dt id="arg--desc">.desc<a class="anchor" aria-label="anchor" href="#arg--desc"></a></dt>
@@ -193,7 +195,9 @@ group; missing categories remain last. Defaults to <code>FALSE</code>.</p></dd>
 
 <dt id="arg--group-order">.group_order<a class="anchor" aria-label="anchor" href="#arg--group-order"></a></dt>
 <dd><p>Order group blocks by <code>"keys"</code> (default) or decreasing
-<code>"frequency"</code>. Does not change category order within groups.</p></dd>
+<code>"frequency"</code> (weighted totals when weights are supplied). Groups with
+any missing key follow complete-key groups; within each set, frequency
+ties follow key order. Does not change category order within groups.</p></dd>
 
 
 <dt id="arg--total">.total<a class="anchor" aria-label="anchor" href="#arg--total"></a></dt>
@@ -214,11 +218,17 @@ See Details for the formulas.</p></dd>
 
 
 <dt id="arg--type">.type<a class="anchor" aria-label="anchor" href="#arg--type"></a></dt>
-<dd><p>Output format, where supported. <code>tab1()</code> and <code>fre1()</code> default
-to <code>"list"</code>; <code>fre()</code>, <code>tab2()</code>, and <code>fre2()</code> default to <code>"auto"</code>, preserving
-the input table class. <code>"tibble"</code> requests a tibble; <code>"flextable"</code>
-requires the optional flextable package. <code>tab2()</code> needs totals for
-flextable output. <code>tab()</code> has no <code>.type</code> argument.</p></dd>
+<dd><p>Output form, where supported. <code>tab()</code> has no <code>.type</code> argument.</p><ul><li><p><code>"list"</code> is the default for <code>tab1()</code> and <code>fre1()</code>: one table per selected
+variable, retaining the input's table class where supported.</p></li>
+<li><p><code>"auto"</code> is the default for <code>fre()</code>, <code>tab2()</code>, and <code>fre2()</code>: retain the
+input's table class where supported.</p></li>
+<li><p><code>"tibble"</code> returns tibbles regardless of the input's table class. For
+<code>tab1()</code> and <code>fre1()</code>, it also combines the variable tables into one.</p></li>
+<li><p><code>"flextable"</code> returns formatted tables and requires the optional
+flextable package. It is available for <code>fre()</code>, <code>fre1()</code>, <code>tab2()</code>, and
+<code>fre2()</code>; <code>tab2()</code> also requires <code>.total = TRUE</code>.</p></li>
+</ul><p>For <code>tab2()</code> and <code>fre2()</code>, multiple pairs or explicit <code>.by</code> groups still
+produce lists; <code>.type</code> controls each table inside the list.</p></dd>
 
 
 <dt id="arg--flip">.flip<a class="anchor" aria-label="anchor" href="#arg--flip"></a></dt>
@@ -249,9 +259,9 @@ percentages, whereas <code>tab2()</code> shows cell counts in a two-way table. W
 three or more variables, <code>tab()</code> counts their joint combinations, while
 <code>tab2()</code> produces a separate table for each variable pair.</p>
 <p>Results are ungrouped and retain the input table class where supported.
-Chi-square results for data tables are stored in the <code>"chi2"</code> attribute,
-with <code>statistic</code>, <code>df</code>, <code>p_value</code>, <code>cramers_v</code>, and <code>n</code>. Flextables display
-these results in a footer instead.</p>
+For non-flextable output, chi-square results are stored in the <code>"chi2"</code>
+attribute, with <code>statistic</code>, <code>df</code>, <code>p_value</code>, <code>cramers_v</code>, and <code>n</code>.
+Flextables display these results in a footer instead.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -310,10 +320,11 @@ columns, and <code>N</code> the total count:</p><ul><li><p><strong>Expected coun
 <li><p><strong>Degrees of freedom:</strong> <code>df = (r - 1) * (c - 1)</code>.</p></li>
 <li><p><strong>p-value:</strong> Upper-tail probability of a chi-square distribution with
 <code>df</code> degrees of freedom.</p></li>
-<li><p><strong>Cramer's V:</strong> <code>sqrt(X^2 / (N * min(r - 1, c - 1)))</code>; for 2-by-2 tables,
-the reported value retains the sign used by the implementation.</p></li>
+<li><p><strong>Cramer's V:</strong> <code>sqrt(X^2 / (N * min(r - 1, c - 1)))</code>. For 2-by-2 tables,
+it is the signed phi coefficient, as in Stata, with the sign of
+<code>O_11 * O_22 - O_12 * O_21</code>.</p></li>
 </ul><p>Frequency weights act as cell counts for the test. Analytic weights are
-not supported; for complex survey designs, use <code><a href="https://rdrr.io/pkg/survey/man/svychisq.html" class="external-link">survey::svychisq()</a></code>.
+not supported; for complex survey designs, use <code>survey::svychisq()</code>.
 Cross-tabulation category values become column names, so conflicts with
 reserved names such as <code>"total"</code> may require recoding.</p>
 <p><strong>Computed variables and groups</strong></p>
@@ -326,7 +337,8 @@ columns are renamed in the result; the input data are unchanged.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other tabulation functions:
 <code><a href="corr.html">corr()</a></code>,
-<code><a href="pwcorr.html">pwcorr()</a></code></p></div>
+<code><a href="pwcorr.html">pwcorr()</a></code>,
+<code><a href="spearman.html">spearman()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -334,7 +346,7 @@ columns are renamed in the result; the input data are unchanged.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Compare the three approaches using the same variables</span></span></span>
 <span class="r-in"><span><span class="co"># Joint frequencies: one long table</span></span></span>
 <span class="r-in"><span><span class="fu">tab</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">region</span>, high <span class="op">=</span> <span class="va">lexp</span> <span class="op">&gt;=</span> <span class="fl">70</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   region               high      n percent   cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> FALSE    12   17.6   17.6 17.6       17.6</span>
@@ -347,7 +359,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-in"><span><span class="co"># Separate one-way tables: one for region and one for high</span></span></span>
 <span class="r-in"><span><span class="fu">tab1</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">region</span>, high <span class="op">=</span> <span class="va">lexp</span> <span class="op">&gt;=</span> <span class="fl">70</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $region</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   value                    n percent   cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>    44    64.7  64.7  64.7      64.7</span>
@@ -355,7 +367,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 3<span style="color: #949494;"> [South America]</span>       10    14.7 100    14.7     100  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $high</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   value     n percent   cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> FALSE    21    30.9  30.9  30.9      30.9</span>
@@ -364,7 +376,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Two-way cross-tabulation: region by high</span></span></span>
 <span class="r-in"><span><span class="fu">tab2</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">region</span>, high <span class="op">=</span> <span class="va">lexp</span> <span class="op">&gt;=</span> <span class="fl">70</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 x 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   `region \\ high`     `FALSE` `TRUE`</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span>      12     32</span>
@@ -373,7 +385,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add totals and display value labels</span></span></span>
 <span class="r-in"><span><span class="fu">fre</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   region               n percent   cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Europe &amp; C. Asia    44    64.7  64.7  64.7      64.7</span>
@@ -382,7 +394,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Total               68   100    <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span>  </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">fre2</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">region</span>, high <span class="op">=</span> <span class="va">lexp</span> <span class="op">&gt;=</span> <span class="fl">70</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 x 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   `region \\ high` `FALSE` `TRUE` total</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Europe &amp; C. Asia      12     32    44</span>
@@ -392,7 +404,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Frequencies within groups</span></span></span>
 <span class="r-in"><span><span class="fu">tab</span><span class="op">(</span><span class="va">lifeexp</span>, high <span class="op">=</span> <span class="va">lexp</span> <span class="op">&gt;=</span> <span class="fl">70</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   region               high      n percent   cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1<span style="color: #949494;"> [Europe &amp; C. Asia]</span> FALSE    12    27.3  27.3  27.3      27.3</span>
@@ -402,21 +414,22 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 3<span style="color: #949494;"> [South America]</span>    FALSE     3    30    30    30        30  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 3<span style="color: #949494;"> [South America]</span>    TRUE      7    70   100    70       100  </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Many distinct values of a continuous variable: preview the table compactly</span></span></span>
+<span class="r-in"><span><span class="co"># Continuous variables: count each distinct value, then shorten the display</span></span></span>
 <span class="r-in"><span><span class="fu">tab</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="special-print.html">print_headtail</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 20 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 20 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     lexp     n percent    cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1    57     1    1.47   1.47  1.47      1.47</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  2    61     1    1.47   2.94  1.47      2.94</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  3    62     2    2.94   5.88  2.94      5.88</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>      <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>      <span style="color: #949494;">⋮</span>        <span style="color: #949494;">⋮</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18    77     5    7.35  85.3   7.35     85.3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 19    78     4    5.88  91.2   5.88     91.2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 20    79     6    8.82 100     8.82    100   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ... 14 rows omitted in the middle; use print(x, n = Inf) to show all rows.</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tab</span><span class="op">(</span><span class="va">lifeexp</span>, <span class="va">lexp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="special-print.html">print_interval</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 20 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 20 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     lexp     n percent    cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1    57     1    1.47   1.47  1.47      1.47</span>
@@ -433,7 +446,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Pearson chi2(2) = 1.2127   Pr = 0.545</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Cramer's V = 0.1335</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"chi2"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 x 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   statistic    df p_value cramers_v     n</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      1.21     2   0.545     0.134    68</span>
@@ -441,7 +454,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 <span class="r-in"><span><span class="co"># Frequency weights</span></span></span>
 <span class="r-in"><span><span class="va">survey</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"yes"</span>, <span class="st">"no"</span>, <span class="st">"yes"</span><span class="op">)</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">tab</span><span class="op">(</span><span class="va">survey</span>, <span class="va">response</span>, .wt <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 x 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   response     n percent   cum valid valid_cum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> no           1    16.7  16.7  16.7      16.7</span>
@@ -457,7 +470,7 @@ columns are renamed in the result; the input data are unchanged.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -67,9 +67,14 @@ zero-row ungrouped inputs have zero counts and `NA` percentages when
 
 Atomic missingness follows [`is.na()`](https://rdrr.io/r/base/NA.html),
 including `NaN`, haven's tagged missing values, and SPSS user-missing
-codes and ranges. In list columns, `NA` is missing but `NULL` is
-observed. Matrix and data-frame columns are missing only when all
-components in a row are missing, following vctrs conventions.
+codes and ranges. In ordinary list columns, scalar `NA` elements are
+missing but `NULL` elements are observed. Matrix and data-frame columns
+follow
+[`vctrs::vec_detect_missing()`](https://vctrs.r-lib.org/reference/missing.html)
+row semantics: a row is missing only when all its components are
+missing. In a list-backed matrix, a component is missing when it is
+`NULL`; a scalar `NA` cell is observed, unlike an `NA` element in an
+ordinary list column.
 
 Computed columns are evaluated on ungrouped working data before
 missingness is summarized within groups. Create columns with grouped
@@ -102,14 +107,14 @@ Other inspection functions:
 ``` r
 # Summarize missing values
 misstable(lifeexp)
-#> # A tibble: 2 x 4
+#> # A tibble: 2 × 4
 #>   variable  miss_n miss_pct valid_n
 #>   <chr>      <int>    <dbl>   <int>
 #> 1 gnppc          1     1.47      67
 #> 2 safewater     14    20.6       54
 
 misstable(lifeexp, .all = TRUE)
-#> # A tibble: 6 x 4
+#> # A tibble: 6 × 4
 #>   variable  miss_n miss_pct valid_n
 #>   <chr>      <int>    <dbl>   <int>
 #> 1 region         0     0         68
@@ -121,7 +126,7 @@ misstable(lifeexp, .all = TRUE)
 
 # Tabulate missingness patterns
 misstable(lifeexp, .patterns = TRUE)
-#> # A tibble: 3 x 4
+#> # A tibble: 3 × 4
 #>   gnppc safewater     n percent
 #>   <int>     <int> <int>   <dbl>
 #> 1     1         1    53   77.9 
@@ -130,7 +135,7 @@ misstable(lifeexp, .patterns = TRUE)
 
 # Select variables and group observations
 misstable(lifeexp, gnppc, safewater, .by = region)
-#> # A tibble: 6 x 5
+#> # A tibble: 6 × 5
 #>   region               variable  miss_n miss_pct valid_n
 #>   <dbl+lbl>            <chr>      <int>    <dbl>   <int>
 #> 1 1 [Europe & C. Asia] gnppc          1     2.27      43
@@ -142,7 +147,7 @@ misstable(lifeexp, gnppc, safewater, .by = region)
 
 # Check an existing column alongside a computed column
 misstable(lifeexp, gnppc, water_share = safewater / 100, .all = TRUE)
-#> # A tibble: 2 x 4
+#> # A tibble: 2 × 4
 #>   variable    miss_n miss_pct valid_n
 #>   <chr>        <int>    <dbl>   <int>
 #> 1 gnppc            1     1.47      67
