@@ -10,6 +10,7 @@ findit_recipe_eval <- function(id, data) {
 }
 
 test_that("moving-average lookups retain partial and nonmissing windows", {
+  skip_if_not_installed("zoo")
   queries <- c(
     "tssmooth ma smooth = y, window(2 1 2)",
     "tssmooth ma smooth = y, window(3 1 0)"

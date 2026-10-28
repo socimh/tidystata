@@ -170,6 +170,7 @@ test_that("legacy margins standardize over the full covariate distribution", {
 })
 
 test_that("moving averages retain partial windows and exclude missing values", {
+  skip_if_not_installed("zoo")
   y <- stats::ts(c(1, NA, 5, 7))
   centered <- findit_advanced_eval("ref-908b5fac4a37b64e", y = y)
   trailing <- findit_advanced_eval("ref-c8c11e9696fed69b", y = y)
