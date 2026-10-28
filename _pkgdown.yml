@@ -54,7 +54,6 @@ reference:
 - title: "Coming from Stata"
   contents:
   - findit
-  - findit_selection
 - title: "Inspect variables"
   contents:
   - codebook

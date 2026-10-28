@@ -58,64 +58,59 @@
 #' Empty grouped inputs return zero rows. The input is not modified.
 #'
 #' @details
-#' **Selection, samples and groups**
+#' **Samples and groups**
 #'
 #' Select at least two numeric or logical vector columns. Labelled numeric
-#' columns use their codes; tagged and SPSS user-missing values are excluded
-#' before determining samples. Missing values in unselected columns do not
-#' affect the sample.
-#' Grouping keys must not conflict with output column names; wide output also
-#' reserves `variable` and the selected variable names for its columns.
+#' columns use their codes; tagged and SPSS user-missing values are excluded.
+#' Missingness in unselected columns does not affect the sample.
 #'
-#' Listwise deletion excludes rows missing any selected variable, so every
-#' pair within a group uses the same sample and has the same `n`. Pairwise
-#' deletion uses every row where both variables in that pair are observed.
-#' Groups with fewer than two observations retain their pairs with undefined
-#' correlations (`NA`).
+#' Listwise deletion uses rows complete on every selected variable, giving
+#' all pairs within a group the same sample and `n`. Pairwise deletion uses
+#' rows complete for each pair. Groups with fewer than two observations keep
+#' their pairs with `NA` correlations.
 #'
-#' Computed columns are evaluated on ungrouped working data before samples and
-#' groups are processed. Create columns with grouped [dplyr::mutate()] first for
-#' calculations that need to run separately within each group.
-#'
-#' With the same selections and weights, Pearson `pwcorr(.listwise = TRUE)`
-#' gives the same correlations and counts as `corr()`, retaining p-values.
-#' `spearman()` is equivalent to
-#' `pwcorr(.method = "spearman", .listwise = TRUE)`; with `.pairwise = TRUE`,
-#' it is equivalent to `pwcorr(.method = "spearman")`.
+#' Computed columns are evaluated before grouping and sample selection.
+#' Use grouped [dplyr::mutate()] first for group-specific calculations.
+#' With identical selections and weights, Pearson `pwcorr(.listwise = TRUE)`
+#' matches `corr()` correlations and counts, and adds p-values. `spearman()`
+#' matches `pwcorr(.method = "spearman", .listwise = TRUE)`;
+#' `spearman(.pairwise = TRUE)` matches `pwcorr(.method = "spearman")`.
 #'
 #' **Weights**
 #'
 #' Weights must be finite and nonnegative. Fractional frequency weights are
-#' accepted, extending Stata's integer frequency-weight convention. Zero-weight
-#' rows do not contribute to the correlation. With pairwise Pearson samples,
-#' analytic `n` includes complete zero-weight rows; with a common sample, these
-#' rows are excluded from both the sample and `n`. This also affects p-values.
+#' accepted, extending Stata's integer-only convention. Zero-weight rows never
+#' contribute to correlations. For pairwise Pearson samples, analytic `n` counts
+#' complete zero-weight rows; common samples exclude them from both the sample
+#' and `n`. This difference also affects p-values.
 #'
 #' **Inference**
 #'
 #' Pearson p-values use `t = r * sqrt((n - 2) / (1 - r^2))` with `n - 2`
-#' degrees of freedom. For unweighted data this matches [stats::cor.test()].
+#' degrees of freedom, matching [stats::cor.test()] for unweighted data.
 #'
-#' Spearman ties receive average ranks, computed within each sample used for
-#' a correlation. P-values test independence as Stata 18 and later do: a beta
-#' distribution is fitted to the first four exact permutation moments of the
-#' statistic, with a normal approximation, `sqrt(n - 1) * r`, when `n = 3` or
-#' no valid fit exists. Earlier Stata versions and [stats::cor.test()] use
-#' other approximations, so their p-values can differ. A constant variable
-#' gives `NA`, where Stata's `spearman` reports a correlation of 1.
+#' Spearman ranks are calculated within each pair's sample, with average ranks
+#' for ties. P-values test independence using the Stata 18-and-later method:
+#' a beta distribution fitted to the first four exact permutation moments.
+#' For `n = 3`, or when no valid fit exists, the normal approximation uses
+#' `sqrt(n - 1) * r`. Earlier Stata versions and [stats::cor.test()] use other
+#' approximations and can give different p-values. Constant variables produce
+#' `NA`; Stata's `spearman` instead reports a correlation of 1.
 #'
-#' With `k` distinct variable pairs within a group, Bonferroni and Sidak
-#' adjustments are `min(1, k * p)` and `min(1, 1 - (1 - p)^k)`, respectively.
-#' Each group's `k` includes pairs whose p-value is `NA`; adjustment does not
-#' combine tests across groups.
+#' Bonferroni and Sidak adjustments are `min(1, k * p)` and
+#' `min(1, 1 - (1 - p)^k)`, where `k` counts distinct pairs within each group,
+#' including pairs with `NA` p-values. Tests are not combined across groups.
 #'
-#' **Stata options**
+#' **Output names and Stata options**
 #'
-#' Stata's `covariance`, `means`, and display-formatting options are not
-#' implemented. Use [stats::cov()] for covariance and [summ()] for summaries.
-#' The tidy long table is an R interface choice; Stata prints a matrix.
-#' Display options `star()` and `print()` are also omitted: filter the result
-#' instead, for example with `dplyr::filter(p < 0.05)`.
+#' Grouping keys must not conflict with output column names. Wide output also
+#' reserves `variable` and the selected variable names.
+#'
+#' Stata's `covariance`, `means` and display-formatting options are omitted.
+#' Use [stats::cov()] for covariance, [summ()] for summaries, and filter the
+#' returned table instead of using `star()` or `print()` (for example,
+#' `dplyr::filter(p < 0.05)`). The default long table is an R interface choice;
+#' Stata prints a matrix.
 #'
 #' @seealso [stats::cor()], [stats::cor.test()]
 #' @references [Stata correlate manual](https://www.stata.com/manuals/rcorrelate.pdf),

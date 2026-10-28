@@ -1,3 +1,14 @@
+# tidystata 0.4.1
+
+* `findit()`, `findit_selection()` and `findit_clip()` share one help topic,
+  including editor and clipboard guidance.
+
+* `capture()` and the preparation, summary, correlation and preview helpers
+  have shorter help organized around practical tasks.
+
+* Both READMEs use the bare-command form `findit(reg, robust)` and simpler
+  frequency-table headings.
+
 # tidystata 0.4.0
 
 * `findit()` and the bilingual Stata-to-R reference correct advanced statistical

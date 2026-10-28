@@ -20,58 +20,47 @@
 #'   empty or all-missing measured vectors, or `NA_character_` when no unit is
 #'   available.
 #' @details
-#' ## Comparison with other type inspectors
+#' **Reading types and units**
 #'
-#' `var_type()` gives one readable label per object, useful for column audits
-#' with `vapply(data, var_type, character(1))` or
-#' `dplyr::summarise(data, dplyr::across(dplyr::everything(), var_type))`.
-#' It combines storage and class information in a display label:
+#' `var_type()` returns one display label per object, useful for column audits
+#' such as `vapply(data, var_type, character(1))`. It describes storage and class
+#' metadata, so empty and all-missing vectors retain their type. Haven-labelled
+#' vectors add `+lbl` in abbreviation mode and `+label` otherwise.
 #'
-#' * [typeof()] reports the internal storage type. Factors are `"integer"`,
-#'   while ordinary double vectors, POSIXct date-times and double-backed
-#'   haven-labelled vectors are all `"double"`. `var_type()` distinguishes
-#'   `"factor"`, `"double"`, `"datetime"` and `"double+label"`.
-#' * [class()] reports the class names used for method dispatch and may return
-#'   several strings, such as `c("ordered", "factor")`. `var_type()` reduces
-#'   this to one label, `"ordered"`. Use `class()` to inspect the full class
-#'   vector and [inherits()] to test class membership in program logic.
-#' * [mode()] reports a broader category: both integer and double vectors have
-#'   mode `"numeric"`. `var_type()` keeps that storage distinction.
-#' * [utils::str()] displays structure and example values. `var_type()` returns
-#'   a character string that can be collected into an audit table.
-#' * [pillar::type_sum()] supplies compact display labels for classed objects.
-#'   `var_type()` builds on those labels, expands recognized abbreviations by
-#'   default, marks haven value labels and omits container dimensions.
+#' Plain matrices and arrays report their element type; data frames report their
+#' container name. Dimensions are omitted. `var_unit()` reads units or duration
+#' metadata, including hms times, and returns `NA_character_` otherwise. It also
+#' respects custom unit methods for classes described as `units`, `drtn` or `time`.
 #'
-#' Custom classes can provide a `pillar::type_sum()` method to control their
-#' display label without changes to `var_type()`.
+#' **Choosing an inspector**
 #'
-#' Use `var_type()` for reporting; use storage or class inspectors when exact
-#' R type information is needed. Its display label does not retain the full
-#' class hierarchy, attributes or structure.
+#' Use `var_type()` for readable reports. For exact type information in code:
 #'
-#' ## Type and unit metadata
+#' * [typeof()] gives storage type: factors, for example, are `"integer"`.
+#'   `var_type()` distinguishes doubles, date-times and labelled doubles even
+#'   though all three can have `"double"` storage.
+#' * [class()] gives the full class vector; [inherits()] tests membership.
+#'   `var_type()` reduces `c("ordered", "factor")` to `"ordered"`.
+#' * [mode()] combines integers and doubles as `"numeric"`; `var_type()` keeps
+#'   them distinct. [utils::str()] shows structure and example values rather
+#'   than returning a single label.
 #'
-#' Types describe storage and class metadata, not the observed values: empty and
-#' all-missing vectors retain their type. Known scalar abbreviations expand
-#' exactly, including `int64` to `integer64`. Haven-labelled vectors append
-#' `+lbl` in abbreviation mode and `+label` otherwise.
+#' A display label does not retain full classes, attributes or structure.
+#' A numeric-looking label alone does not imply support for numeric summaries.
 #'
-#' Plain matrices and arrays retain their element-type description, and data
-#' frames retain their container name without dimensions. Other classed objects
-#' use their pillar type description. With `abbr = FALSE`, a default class-name
-#' abbreviation is replaced by the full primary class name, for example
-#' `"dgCMatrix"` for a sparse matrix of that class. Registered or inherited
-#' display methods and explicit pillar labels take precedence. Custom labels,
-#' including punctuation and structured descriptions such as `I<int>` and
-#' `list<int>`, are preserved in both modes. An empty or missing custom
-#' description falls back to the first class name; errors in custom methods are
-#' propagated. A numeric-looking type description does not imply support for
-#' numeric summaries.
+#' **Custom classes**
 #'
-#' `var_unit()` reads actual units/difftime metadata (including hms times), and
-#' retains custom unit methods for classes describing themselves as `units`,
-#' `drtn` or `time`. Other objects return `NA_character_`.
+#' Classed objects use [pillar::type_sum()] labels. With `abbr = FALSE`, known
+#' abbreviations expand exactly (`int64` becomes `integer64`), and default class
+#' abbreviations become full primary class names, such as `"dgCMatrix"`.
+#' Registered or inherited display methods and explicit pillar labels take
+#' precedence. Custom labels, including `I<int>`, `list<int>` and punctuation,
+#' are preserved in both modes.
+#'
+#' A custom `pillar::type_sum()` method can control the label. An empty or
+#' missing description falls back to the first class name; method errors
+#' propagate.
+#'
 #' @family inspection functions
 #'
 #' @examples

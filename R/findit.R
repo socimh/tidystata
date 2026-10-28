@@ -1,9 +1,12 @@
 #' Find R equivalents of Stata commands
 #'
-#' `findit()` looks up Stata commands and their R equivalents, including
-#' functions from tidystata and other packages. It also supports reverse lookup
-#' from R functions, keyword searches, and plain-language questions. Omit the
-#' query to browse all entries.
+#' @description
+#' Look up Stata commands and their R equivalents in tidystata and other packages.
+#'
+#' * `findit()`: Search by Stata command, R function, keyword or plain-language
+#'   question. Omit the query to browse all entries.
+#' * `findit_selection()`: Look up highlighted Stata text in the source editor.
+#' * `findit_clip()`: Look up Stata text copied to the clipboard.
 #'
 #' @param command A Stata command, R function, or search phrase. Supply a bare
 #'   name (`findit(reg)`, `findit(left_join)`) or a quoted string for full
@@ -26,64 +29,67 @@
 #'   (description). The returned object contains every selected match, including
 #'   any hidden by printing. If nothing matches, a zero-row result with the same
 #'   columns and class is returned invisibly with an explanatory message.
+#'   `findit_selection()` and `findit_clip()` print the result once and return
+#'   it invisibly.
 #'
 #' @details
-#' **Matching**
+#' **Choosing a match**
 #'
-#' A clear specific query returns one preferred answer; ambiguous queries
-#' return up to ten relevant candidates. Bare Stata commands return the
-#' complete command family, and an omitted query returns the whole reference.
+#' Bare Stata commands return their whole command family. A specific query
+#' returns one preferred answer when the match is clear, or up to ten relevant
+#' candidates when ambiguous. An omitted query returns the full reference.
 #'
-#' * Stata abbreviations are recognized (`reg`, `regr`, `regress`), while R
-#'   functions require their full names. Exact-case matches take priority.
-#'   Shared names, such as `log`, show both Stata and R interpretations.
-#' * Stata command matches appear before R function matches. Keyword searches
-#'   are used when neither matches. Additional syntax and hints refine the
-#'   ranking. Within the relevant operation, tidystata functions take priority,
-#'   followed by tidyverse functions, then other packages or base R.
-#'   `by` and `bysort` prefixes prioritize grouped operations.
-#' * Plain-language questions match curated keywords and synonyms in English
-#'   or Chinese.
+#' Stata abbreviations (`reg`, `regr`, `regress`) are accepted; R functions
+#' need their full names. Exact-case matches take priority. Shared names such
+#' as `log` include both interpretations, with Stata matches first. When neither
+#' matches, lookup searches keywords. Plain-language questions use curated
+#' English and Chinese keywords and synonyms.
 #'
-#' **Output**
+#' Syntax and hints refine the ranking; `by` and `bysort` favor grouped
+#' operations. Within the same operation, tidystata examples come first,
+#' followed by tidyverse, then other packages or base R. Supplied variable
+#' names customize compatible examples. Unfamiliar syntax keeps generic
+#' examples; notes explain unresolved placeholders or unsupported combinations.
 #'
-#' * Results print as readable Stata/R code pairs. A single clear match is shown
-#'   alone; otherwise, up to five representative examples appear. Bare commands
-#'   browse their whole family; specific queries omit unrelated family entries.
-#'   Footers distinguish hidden relevant candidates from broader family examples
-#'   and report when the ten-candidate limit applies. The print method's `n`
-#'   argument sets how many matches are printed; use
-#'   `print(n = Inf)` to display all matches.
-#' * Printing omits package labels and unnecessary namespace prefixes for R's
-#'   default packages. Conflicting names, such as `stats::filter()`, remain
-#'   qualified. The returned code and package metadata retain their originals.
-#' * The `match` column identifies the lookup type: `"stata"`, `"r"`,
-#'   `"keyword"`, `"nearest"`, or `"all"`.
-#' * Supplied variable names customize compatible examples. Unresolved
-#'   placeholders and unsupported combinations are explained in notes.
+#' **Reading the result**
 #'
-#' **Notes**
+#' Results print as Stata/R code pairs: one clear match or up to five
+#' representative examples. Use `print(n = Inf)` to show every returned match.
+#' Footers distinguish hidden candidates from broader command-family examples
+#' and indicate when the ten-candidate limit applies. Specific queries exclude
+#' unrelated family entries.
 #'
-#' * Quote multiword Stata syntax, reserved words (`"if"`), and names that are
-#'   not valid R symbols (`"_n"`).
-#' * Backticks and strings accept the same Stata text. Supported syntax uses
-#'   catalogue variable annotations; unfamiliar syntax retains generic examples.
-#'   Internal Stata quotation marks are preserved. Use an R string or raw string
-#'   when the Stata text itself contains backticks.
-#' * [findit_selection()] and [findit_clip()] read one command from the source
-#'   editor or clipboard and print the equivalent lookup result.
-#' * Lookup works offline. External packages such as fixest, modelsummary, and
-#'   srvyr are needed only when running their examples.
-#' * Chinese descriptions follow R's language settings. Use `Sys.setenv(LANGUAGE
-#'   = "en")` to switch to English.
-#' * The reference is curated, not a parser or executor for arbitrary Stata
-#'   programs. See the "Coming from Stata" articles for further guidance.
+#' Printing omits package labels and unnecessary prefixes for R's default
+#' packages, but keeps ambiguous names such as `stats::filter()` qualified.
+#' Returned code and package metadata are unchanged. The `match` column records
+#' `"stata"`, `"r"`, `"keyword"`, `"nearest"` or `"all"`.
+#'
+#' **Editor and clipboard**
+#'
+#' Select or copy one nonempty Stata command. `findit_selection()` also runs
+#' through the **Find Stata equivalent** addin; it needs rstudioapi and a
+#' source-selection API, as in RStudio or a compatible Positron session.
+#' `findit_clip()` needs clipr and access to a text clipboard. Both preserve
+#' the original text and print the lookup result without executing any code.
+#'
+#' **Text input and language**
+#'
+#' Quote multiword syntax, reserved words (`"if"`) and non-R names (`"_n"`).
+#' Backticks accept the same Stata text as strings, preserving internal quotes.
+#' If the Stata text itself contains backticks, use an R string or raw string.
+#'
+#' Lookup works offline; external packages are needed only to run their examples.
+#' Descriptions follow R's language settings; `Sys.setenv(LANGUAGE = "en")`
+#' switches Chinese descriptions to English. This curated reference does not
+#' parse or execute arbitrary Stata programs. See the "Coming from Stata"
+#' articles for guidance.
 #'
 #' @concept Stata
 #' @concept Stata to R
 #' @concept cheat sheet
 #' @concept search
 #' @concept help
+#' @order 1
 #' @export
 #'
 #' @examples
@@ -107,6 +113,14 @@
 #' entries <- findit()
 #' entries |>
 #'   dplyr::filter(package == "tidystata")
+#'
+#' \dontrun{
+#' # Highlight tab sex region, row in the source editor, then run:
+#' findit_selection()
+#'
+#' # Copy tab sex region, row to the clipboard, then run:
+#' findit_clip()
+#' }
 findit <- function(command = NULL, ...) {
   expr <- rlang::enexpr(command)
   extra <- rlang::enexprs(..., .ignore_empty = "none")

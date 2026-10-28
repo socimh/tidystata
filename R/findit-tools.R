@@ -1,33 +1,12 @@
-#' Look up Stata text from the editor or clipboard
-#'
-#' Look up one Stata command using the same catalogue and variable customization
-#' as [findit()]. The result is printed in the console. Source text and clipboard
-#' contents are preserved; no command or returned example is executed.
-#'
-#' `findit_selection()` reads highlighted text in the source editor. It is also
-#' registered as the **Find Stata equivalent** addin. It requires the optional
-#' rstudioapi package and an editor providing its source-selection API, such as
-#' RStudio or a compatible Positron session.
-#'
-#' `findit_clip()` reads text copied to the clipboard, for example from a
-#' do-file. It requires the optional clipr package and access to a text clipboard.
-#'
-#' @returns The [findit()] result, invisibly, after printing it once.
-#' @seealso [findit()]
-#' @examples
-#' \dontrun{
-#' # Highlight tab sex region, row in the source editor, then run:
-#' findit_selection()
-#'
-#' # Copy tab sex region, row to the clipboard, then run:
-#' findit_clip()
-#' }
+#' @rdname findit
+#' @order 2
 #' @export
 findit_selection <- function() {
   findit_text_result(findit_editor_selection())
 }
 
-#' @rdname findit_selection
+#' @rdname findit
+#' @order 3
 #' @export
 findit_clip <- function() {
   findit_text_result(findit_clipboard_text())

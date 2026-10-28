@@ -25,30 +25,32 @@ with \code{\link[dplyr:transmute]{dplyr::transmute()}}, only the selected and co
 returned.
 }
 \details{
-Each argument is classified before evaluation. Column names, strings, numeric
-positions, selection syntax (\code{c()}, \code{:}, \code{!}, \code{&}, \code{|}, unary \code{-}) and
-tidyselect helpers such as \code{starts_with()}, \code{where()}, \code{all_of()} or
-\code{\link[=varlist]{varlist()}} select existing columns, as do calls that use no column names
-(for example \code{all_of(vars)} or \code{seq_len(2)}). Any other expression that uses
-columns, such as \code{lexp >= 70} or \code{gnp_thousands = gnppc / 1000}, is computed
-with \code{\link[dplyr:mutate]{dplyr::mutate()}} and then selected, so arithmetic is never misread as
-column positions. Selections and computed values can be mixed; output follows
-argument order.
+\strong{Selecting and computing}
 
-A named constant such as \code{one = 1}, \code{label = "x"} or \code{y = c(1, 2)} creates a
-constant column; it never selects or renames columns by position. Unnamed
-names, strings and positions must identify existing columns. If they do not,
-an error lists every unmatched name instead of evaluating them as
-expressions, so a misspelled column is never replaced by an object of the
-same name in the calling environment. (A symbol naming a character vector in
-the calling environment is still passed to tidyselect, which deprecates that
-form in favour of \code{all_of()}.)
+Selections and computations can be mixed; columns follow argument order.
+Column names, strings, positions, tidyselect helpers and \code{\link[=varlist]{varlist()}} select
+existing columns. Selection syntax includes \code{c()}, \code{:}, \code{!}, \code{&}, \code{|} and
+unary \code{-}. Calls without column names, such as \code{all_of(vars)} or \code{seq_len(2)},
+also act as selections.
 
-If selection itself fails for another reason (for example, duplicate output
-names), the arguments are evaluated sequentially with \code{\link[dplyr:transmute]{dplyr::transmute()}};
-if that also fails, the error reports both attempts. Computed expressions are
-evaluated once when selection succeeds. Grouping columns are retained
-according to dplyr's selection rules.
+Other expressions using columns, such as \code{lexp >= 70} or
+\code{gnp_thousands = gnppc / 1000}, are computed with \code{\link[dplyr:mutate]{dplyr::mutate()}} and then
+selected. Arithmetic is therefore not interpreted as column positions.
+Named constants (\code{one = 1}, \code{label = "x"}, \code{y = c(1, 2)}) create columns;
+they do not select or rename existing columns by position.
+
+\strong{Names and fallback evaluation}
+
+Unnamed names, strings and positions must identify existing columns. An
+error lists unmatched names; a misspelling never falls back to a same-named
+object in the calling environment. A symbol holding a character vector is
+still passed to tidyselect, which deprecates this use; write \code{all_of(vars)}.
+
+If selection fails for another reason, such as duplicate output names, the
+arguments are retried sequentially with \code{\link[dplyr:transmute]{dplyr::transmute()}}. If both attempts
+fail, the error reports both. Computations run once when selection succeeds;
+a fallback can evaluate them again. Grouping columns follow dplyr's selection
+rules.
 }
 \examples{
 lifeexp |>

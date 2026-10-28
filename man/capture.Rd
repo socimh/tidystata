@@ -23,37 +23,34 @@ expression errors, it reports why evaluation did not complete and returns
 \code{NULL} invisibly. Use \code{quiet = TRUE} to suppress the failure message.
 }
 \details{
-Like Stata's \code{capture}, this lets a script continue after an error. Unlike
-Stata's command, it returns the successful value, keeps printed output and
-reports a caught error as a message by default. The failure notice is not a
-formal R warning and does not become an error under \code{options(warn = 2)}.
-Warnings and messages from \code{x} propagate unless \code{quiet = TRUE}; suppressing
-them does not stop evaluation. With \code{options(warn = 2)}, an unsuppressed
-warning from \code{x} becomes an error and is caught. User interrupts are not
-caught.
+Like Stata's \code{capture}, this lets a script continue after an error. It also
+returns successful results and, by default, reports errors as messages.
 
-A successful \code{FALSE}, \code{NA}, \code{NULL} or object inheriting from \code{try-error} is
-returned unchanged. A successful \code{NULL} and a caught error have the same
-value. Use \code{\link[=tryCatch]{tryCatch()}} when you need to distinguish them programmatically or
-retain the error object.
-The return value is not a success/failure flag and cannot reliably serve as
-the condition in \verb{if (capture(...))}.
+\strong{Updating objects}
 
-When updating an existing object, put the assignment inside \code{capture()}:
-\code{capture(data <- update(data))}. Writing \code{data <- capture(update(data))}
-overwrites \code{data} with \code{NULL} if the update fails.
+Put an assignment inside \code{capture()} to keep the existing object if the
+right-hand side fails: \code{capture(data <- update(data))}. Assigning outside,
+as in \code{data <- capture(update(data))}, replaces \code{data} with \code{NULL} on error.
+A successful \code{NULL} result is assigned in either case.
 
-An assignment inside \code{capture()} updates its target only after the right-hand
-side succeeds. A successful \code{NULL} is still assigned. A block of separate
-assignments retains the last completed update and skips steps after the first
-error, as Stata's capture blocks do. A single assignment around a pipeline
-retains its original target on error; intermediate pipeline results are not
-saved.
+In a block, completed assignments remain and the first error skips the
+remaining steps. A single assignment around a pipeline saves only the final
+result, so a failed pipeline leaves its target unchanged. Earlier side
+effects are never undone: changes by reference (such as data.table or
+environment updates), written files and printed output remain.
 
-\code{capture()} is not all-or-nothing: earlier effects are not rolled back. In
-particular, changes by reference (such as data.table updates or modified
-environments), files written and printed output before an error remain.
-Invalid \code{quiet} values raise an error before \code{x} is evaluated.
+\strong{Errors, warnings and return values}
+
+\code{quiet = TRUE} suppresses warnings and messages without stopping evaluation;
+printed output remains. Under \code{options(warn = 2)}, an unsuppressed warning
+becomes an error and is caught. The failure notice from \code{capture()} is a
+message, so this option does not turn it into an error. User interrupts
+are never caught. Invalid \code{quiet} values fail before \code{x} is evaluated.
+
+Successful values, including \code{FALSE}, \code{NA}, \code{NULL} and \code{try-error} objects,
+are returned unchanged. The result is therefore unsuitable as a success
+flag in \verb{if (capture(...))}. Use \code{\link[=tryCatch]{tryCatch()}} to retain the error object or
+distinguish an error from a successful \code{NULL} result.
 }
 \examples{
 # Keep a successful result

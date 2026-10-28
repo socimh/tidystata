@@ -41,36 +41,37 @@ Keep a compact console display while retaining every row and column.
 }
 }
 \details{
-\strong{Display}
+\strong{Reading a preview}
 
-Head/tail previews split \code{n} between the beginning and end, giving an odd
-row to the beginning. One row of vertical dots marks an omitted middle,
-using periods without Unicode output. Numeric markers align with printed
-decimal points, or the last significand digit when no decimal is shown.
-Row-number markers align with the last digit. Other columns, including
-dates, times, factors, logicals and lists, use centered markers. Numeric
-columns without displayed numbers also use centered markers.
-Interval previews show approximately evenly spaced positions without
-separator rows. An omission footer counts undisplayed rows.
-With \code{n = 1}, both styles show the first row; short tables do not repeat rows.
+Head/tail previews divide \code{n} between the first and last rows, giving any
+extra row to the beginning. Dots mark an omitted middle. Interval previews
+show approximately evenly spaced rows without separators. Both styles show
+the first row when \code{n = 1}, avoid repeating rows in short tables, and report
+the number of omitted rows in a footer.
 
 Row numbers refer to the current table after filtering or sorting. Grouped
-tables use one display budget across all groups. \code{print(x, n = Inf, width = Inf)} shows every row and column without changing stored preferences.
-Previews control console printing, not HTML widgets or GUI viewers.
+tables share one display budget. Use \code{print(x, n = Inf, width = Inf)} to show
+all rows and columns without changing preferences. Previews affect console
+printing, not HTML widgets or GUI viewers.
 
-\strong{Working with previews}
+Omission dots align with numeric decimal points (or the last significand
+digit when no decimal is shown) and the last row-number digit. Other columns,
+including numeric columns without displayed numbers, use centered dots.
+Without Unicode output, the markers use periods.
+
+\strong{Keeping or removing preferences}
 
 Settings follow supported base subsetting/replacement, dplyr row and column
-operations, grouping (including rowwise operations), summaries and reframing,
-and tidyr pivots. These operations determine the result's container and
-grouping. Joins inherit the left input's settings; \code{bind_rows()} inherits the
-first input's settings. Arbitrary third-party transformations and direct
-\code{vctrs::vec_rbind()} are not covered by this guarantee.
+operations, grouping (including rowwise), summaries, reframing and tidyr
+pivots. Those operations determine the resulting container and groups.
+Joins use the left input's settings; \code{bind_rows()} uses the first input's.
+Arbitrary third-party transformations and direct \code{vctrs::vec_rbind()} calls
+are not covered.
 
-Converting with \code{tibble::as_tibble()} or \code{as.data.frame()}, or extracting a
-column, removes the preview. Wrapping and unwrapping a data.table makes an
-independent copy; subsequent native operations such as \verb{:=} retain ordinary
-reference semantics. Column classes and labels are preserved.
+\code{tibble::as_tibble()}, \code{as.data.frame()} and column extraction remove the
+preview. Wrapping or unwrapping a data.table creates an independent copy;
+subsequent native operations such as \verb{:=} keep ordinary reference semantics.
+Column classes and labels are preserved.
 }
 \examples{
 tb <- tibble::tibble(id = 1:30, value = (1:30)^2)

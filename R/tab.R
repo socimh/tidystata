@@ -92,10 +92,10 @@
 #' @details
 #' **Counts and percentages**
 #'
-#' The following five columns are produced by `tab()`, `tab1()`, `fre()`, and
-#' `fre1()`. For each group, let `n_i` be the count for category (or category
-#' combination) `i`, `N` the count across all categories, and `N_valid` the
-#' count excluding observations missing any measured variable. All percentages
+#' `tab()`, `tab1()`, `fre()` and `fre1()` report the five statistics below.
+#' Within each group, `n_i` counts category (or combination) `i`, `N` counts
+#' all observations, and `N_valid` counts those complete on every measured
+#' variable. All percentages
 #' are on a **0–100 scale**.
 #'
 #' * `n`: Number of observations in the category, or sum of weights if weighted.
@@ -107,9 +107,9 @@
 #' * `valid_cum`: Cumulative `valid`, in displayed order, omitting missing
 #'   measured categories.
 #'
-#' Thus `percent` corresponds to Stata's `tabulate, missing`, while `valid`
-#' uses the denominator from `tabulate` without `missing`. A missing grouping
-#' key does not by itself make a measured value invalid.
+#' `percent` uses Stata's `tabulate, missing` denominator; `valid` uses the
+#' denominator from `tabulate` without `missing`. Missing grouping keys do
+#' not make otherwise complete measured values invalid.
 #'
 #' **Missing values and category order**
 #'
@@ -121,7 +121,7 @@
 #'
 #' **Weighted counts and percentages**
 #'
-#' Let `w_j` be the weight for observation `j` in a group.
+#' With weight `w_j` for observation `j`:
 #'
 #' * **Frequency weights** (`.wt_type = "frequency"`): Category counts are
 #'   `n_i = sum(w_j)` over observations in that category. Weights need not be
@@ -174,10 +174,9 @@
 #'
 #' **Computed variables and groups**
 #'
-#' Named expressions in `...` are evaluated on ungrouped data, before counts
-#' are calculated within groups. Use grouped [dplyr::mutate()] first for
-#' group-specific computations. Input column names that conflict with output
-#' columns are renamed in the result; the input data are unchanged.
+#' Named expressions in `...` are evaluated before grouping. Use grouped
+#' [dplyr::mutate()] first for group-specific computations. Names that conflict
+#' with output columns are renamed in the result; the input is unchanged.
 #'
 #' @name tab
 #' @family tabulation functions

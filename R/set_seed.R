@@ -39,9 +39,7 @@
 #'
 #' # Set seeds without a pipeline
 #' set_seed(123)
-#' result <- sample(1:10, 8)
-#' set_seed(456)
-#' sample(result, 5)
+#' sample(1:10, 8)
 set_seed <- function(x, seed) {
   if (missing(seed)) {
     if (missing(x)) {

@@ -48,7 +48,7 @@ library(dplyr)
 ### findit(): find the R equivalent of a Stata command
 
 ```{r}
-findit("reg, robust")
+findit(reg, robust)
 
 findit("egen rowmean")
 ```
@@ -82,7 +82,7 @@ codebook(lifeexp)
 summ(lifeexp, lexp:safewater, .by = region)
 ```
 
-### tab(), tab1() and tab2(): compare frequency tables
+### tab(), tab1() and tab2(): frequency tables
 
 Use region and a second category derived from `lifeexp`: whether life expectancy is at least 70 years. `region:lexp_70` selects these two columns.
 
