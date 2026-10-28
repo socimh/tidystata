@@ -3,7 +3,7 @@
 #' Inspect the types, observed counts, distinct observed values, and variable
 #' labels of a dataset or selected columns.
 #'
-#' @param .data The input data (data frame, tibble, or data.table).
+#' @param .data A data frame, tibble, or data.table.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> or
 #'   <[`data-masking`][args_data_masking]> Columns to select or compute with
 #'   [select_or_transmute()]. Existing columns, selection helpers, and named
@@ -54,11 +54,10 @@
 #' codebook(starwars, films:starships)
 #'
 #' codebook(starwars, ends_with("color"))
-#'
 #' @family inspection functions
-#' @rdname codebook
 #' @export
 codebook <- function(.data, ...) {
+  check_data_frame(.data)
   template <- .data
   .data <- table_working_data(.data)
   .data <- dplyr::ungroup(.data)

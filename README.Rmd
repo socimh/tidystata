@@ -27,9 +27,9 @@ invisible(loadNamespace("haven"))
 
 <!-- badges: end -->
 
-[中文版](https://github.com/socimh/tidystata/blob/master/README.zh.md)
-
 [tidystata](https://socimh.github.io/tidystata/) brings Stata-style data exploration and preparation to R. Inspect variables, summarise measurements, tabulate categories and prepare new columns. Select variables with tidyselect helpers and calculate by group with `.by`. The resulting tables work with ordinary R tools for filtering, joining and plotting.
+
+[中文介绍](https://github.com/socimh/tidystata/blob/master/README.zh.md)
 
 ## Installation
 
@@ -49,6 +49,7 @@ library(dplyr)
 
 ```{r}
 findit("reg, robust")
+
 findit("egen rowmean")
 ```
 
@@ -91,6 +92,14 @@ tab1(lifeexp_tab, region:lexp_70)
 
 ```{r}
 tab2(lifeexp_tab, region:lexp_70)
+```
+
+You can also tabulate continuous variables. When there are many distinct values, use `print_headtail()` to see the beginning and end or `print_interval()` to inspect evenly spaced rows. These helpers shorten the display while retaining the complete table.
+
+```{r}
+tab(lifeexp, lexp) |> print_headtail()
+
+tab(lifeexp, lexp) |> print_interval()
 ```
 
 ## Learn more

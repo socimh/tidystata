@@ -72,11 +72,9 @@ tb |>
 # A literal hyphen pattern selects no columns here; it is not a range.
 tb |>
   ds(varlist("x1-x5"))
-
 }
 \seealso{
 Other selection and preview functions:
-\code{\link[=select_or_transmute]{select_or_transmute()}},
-\code{\link{special-print}}
+\code{\link[=select_or_transmute]{select_or_transmute()}}
 }
 \concept{selection and preview functions}

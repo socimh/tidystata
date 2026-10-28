@@ -136,6 +136,23 @@ tab2(lifeexp_tab, region:lexp_70)
 #> 3 3 [South America]          3      7
 ```
 
+也可以对连续变量制表。当不同取值较多时，用 `print_interval()` 查看等间隔选取的行，或用 `print_headtail()` 查看开头和结尾。这些函数只缩短显示内容，仍保留完整的频数表。
+
+``` r
+tab(lifeexp, lexp) |> print_interval(n = 6)
+#> # A tibble: 20 x 6
+#>     lexp     n percent    cum valid valid_cum
+#>    <dbl> <int>   <dbl>  <dbl> <dbl>     <dbl>
+#>  1    57     1    1.47   1.47  1.47      1.47
+#>  5    64     3    4.41  11.8   4.41     11.8 
+#>  9    68     3    4.41  25     4.41     25   
+#> 12    71     6    8.82  47.1   8.82     47.1 
+#> 16    75     4    5.88  72.1   5.88     72.1 
+#> 20    79     6    8.82 100     8.82    100   
+#> # ... 14 rows omitted between displayed positions; use print(x, n = Inf) to
+#> # show all rows.
+```
+
 ## 了解更多
 
 tidystata 还提供按行计算（`row_mean()` 等）、面板运算（`stata_lag()` 等）、相关系数（`corr()` 使用完整个案，`pwcorr()` 使用成对完整样本）、缺失值报告（`misstable()`）、主键检查与合并（`isid()`、`stata_merge()`）以及分组（`xtile()`）等函数。示例和输出约定见以下指南（英文）。

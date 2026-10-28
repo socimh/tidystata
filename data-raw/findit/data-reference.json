@@ -1742,6 +1742,105 @@
     "id": "ref-526ffac483d9466e"
   },
   {
+    "command": "recode",
+    "kind": "command",
+    "abbrev": "recode",
+    "stata": "recode x (1/2 = 0) (3/6 = 1) (else = .), generate(binary)",
+    "r": "data <- dplyr::mutate(data, binary = tidystata::stata_recode(x, 1:2 ~ 0, 3:6 ~ 1, .default = NA))",
+    "package": "tidystata",
+    "section": "Data management",
+    "section_zh": "数据管理",
+    "task": "Recode ranges of values with Stata rules",
+    "task_zh": "按 Stata 规则重编码取值区间",
+    "detail": "In stata_recode() (alias recode()), 1:2 is the closed range 1 <= x <= 2, including decimals, like 1/2 in Stata. The first matching rule wins. .default = NA plays the role of else = .; without it, unmatched values are kept, as in Stata.",
+    "detail_zh": "在 stata_recode()（别名 recode()）中，1:2 表示闭区间 1 <= x <= 2（含小数），相当于 Stata 的 1/2。按第一条匹配的规则重编码。.default = NA 相当于 else = .；不指定时保留未匹配的取值，与 Stata 相同。",
+    "approach": "preferred",
+    "equivalence": "equivalent",
+    "source": "https://www.stata.com/manuals/drecode.pdf",
+    "r_source": "https://socimh.github.io/tidystata/reference/stata_recode.html",
+    "setup": "data <- data.frame(id=1:6, g=c(1,1,2,2,3,3), x=c(1,2,NA,4,5,6), y=c(2,4,6,8,10,12), s=c(\" a \",\"B\",\"c\",\"a\",\"\",NA), stringsAsFactors=FALSE)",
+    "check": "stopifnot(identical(data$binary,c(0,0,NA,1,1,1)))",
+    "variables": [
+      "x",
+      "binary"
+    ],
+    "hints": [
+      "generate"
+    ],
+    "priority": 0,
+    "meaning": "recode: Recode ranges of values with Stata rules",
+    "strings": [],
+    "aliases": {},
+    "derived": {},
+    "varlist": null
+  },
+  {
+    "command": "recode",
+    "kind": "command",
+    "abbrev": "recode",
+    "stata": "recode x (1 = 10) (2 = 20), generate(z)",
+    "r": "data <- dplyr::mutate(data, z = tidystata::stata_recode(x, 1 ~ 10, 2 ~ 20))",
+    "package": "tidystata",
+    "section": "Data management",
+    "section_zh": "数据管理",
+    "task": "Recode selected values with Stata rules",
+    "task_zh": "按 Stata 规则重编码指定取值",
+    "detail": "Unmatched values, including missing values, are kept. Rules are compared with the original values, so stata_recode(x, 1 ~ 2, 2 ~ 1) swaps codes. NA ~ 0 recodes missing values, like (missing = 0).",
+    "detail_zh": "未匹配的取值（包括缺失值）保持不变。规则与原始取值比较，因此 stata_recode(x, 1 ~ 2, 2 ~ 1) 可交换代码。NA ~ 0 重编码缺失值，相当于 (missing = 0)。",
+    "approach": "preferred",
+    "equivalence": "equivalent",
+    "source": "https://www.stata.com/manuals/drecode.pdf",
+    "r_source": "https://socimh.github.io/tidystata/reference/stata_recode.html",
+    "setup": "data <- data.frame(id=1:6, g=c(1,1,2,2,3,3), x=c(1,2,NA,4,5,6), y=c(2,4,6,8,10,12), s=c(\" a \",\"B\",\"c\",\"a\",\"\",NA), stringsAsFactors=FALSE)",
+    "check": "stopifnot(identical(data$z,c(10,20,NA,4,5,6)))",
+    "variables": [
+      "x",
+      "z"
+    ],
+    "hints": [
+      "generate"
+    ],
+    "priority": 0,
+    "meaning": "recode: Recode selected values with Stata rules",
+    "strings": [],
+    "aliases": {},
+    "derived": {},
+    "varlist": null
+  },
+  {
+    "command": "recode",
+    "kind": "command",
+    "abbrev": "recode",
+    "stata": "recode x (min/2 = 0 \"Low\") (3/max = 1 \"High\"), generate(level)",
+    "r": "data <- dplyr::mutate(data, level = tidystata::stata_recode(x, Low = min:2 ~ 0, High = 3:max ~ 1))",
+    "package": "tidystata",
+    "section": "Data management",
+    "section_zh": "数据管理",
+    "task": "Recode values and label the new codes",
+    "task_zh": "重编码取值并为新代码添加值标签",
+    "detail": "Named rules give the new codes value labels, and the result is a haven_labelled vector. Old value labels are dropped; the variable label is kept. Stata attaches a new value label set named after the variable.",
+    "detail_zh": "命名的规则为新代码添加值标签，结果为 haven_labelled 向量。原有值标签被移除，变量标签保留。Stata 会附加一个以变量命名的新值标签集。",
+    "approach": "preferred",
+    "equivalence": "qualified",
+    "source": "https://www.stata.com/manuals/drecode.pdf",
+    "r_source": "https://socimh.github.io/tidystata/reference/stata_recode.html",
+    "setup": "data <- data.frame(id=1:6, g=c(1,1,2,2,3,3), x=c(1,2,NA,4,5,6), y=c(2,4,6,8,10,12), s=c(\" a \",\"B\",\"c\",\"a\",\"\",NA), stringsAsFactors=FALSE)",
+    "check": "stopifnot(identical(as.numeric(data$level),c(0,0,NA,1,1,1)), identical(attr(data$level,\"labels\"),c(Low=0,High=1)))",
+    "variables": [
+      "x",
+      "level"
+    ],
+    "hints": [
+      "generate"
+    ],
+    "priority": 0,
+    "meaning": "recode: Recode values and label the new codes",
+    "strings": [],
+    "aliases": {},
+    "derived": {},
+    "varlist": null
+  },
+  {
     "command": "mvdecode",
     "kind": "command",
     "abbrev": "mvdecode",

@@ -697,7 +697,8 @@ row_input <- function(...) {
   # Dots hold user columns, so report errors through the caller's frame.
   rlang::local_error_call(rlang::caller_env())
   if (dots_is_tibble(...)) {
-    data <- tibble::tibble(...)
+    # The same vector may be passed twice, as Stata allows `rowmax(x x)`.
+    data <- tibble::tibble(..., .name_repair = "unique_quiet")
   } else {
     # Capture selectors before probing a single data-frame expression, so their
     # original expressions/environments survive evaluation of the promise.

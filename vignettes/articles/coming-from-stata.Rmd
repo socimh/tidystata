@@ -11,10 +11,9 @@ counts <- tidystata:::findit_reference_counts()
 
 [中文版](coming-from-stata-zh.html)
 
-For chapter navigation, search and expandable alternatives, open the
-**[Stata to R Reference](https://www.socimh.com/stata-to-r/)**.
-The book has English and Chinese editions with a language switch on each chapter.
-This page remains available as the single-page reference.
+This complete reference is part of the tidystata website. Use the header to
+return to function help or other articles, and the contents to jump to a section.
+The language link above switches between the English and Chinese editions.
 
 If you know Stata, you already know what you want to do; the question is how
 to say it in R. This page lists Stata commands next to the R code that does the
@@ -77,3 +76,10 @@ so attach it with `library(dplyr)` or `library(tidyverse)`.
 ```{r, echo = FALSE, results = "asis"}
 cat(tidystata:::findit_reference_html(FALSE), sep = "\n")
 ```
+
+## Chaptered edition
+
+Prefer separate chapters? The
+[standalone Stata to R reference](https://www.socimh.com/stata-to-r/){target="_blank" rel="noopener"}
+provides chapter navigation and expandable alternatives on a separate website.
+It opens in a new tab, keeping the tidystata website available here.

@@ -11,7 +11,9 @@ pwcorr(
   .method = c("pearson", "spearman"),
   .wide = FALSE,
   .wt = NULL,
-  .wt_type = c("frequency", "analytic")
+  .wt_type = c("frequency", "analytic"),
+  .listwise = FALSE,
+  .adjust = c("none", "bonferroni", "sidak")
 )
 }
 \arguments{
@@ -30,7 +32,8 @@ Grouped data use their groups unless \code{.by} is supplied. Select existing
 columns only; create new grouping columns with \code{\link[dplyr:mutate]{dplyr::mutate()}} first.}
 
 \item{.method}{\code{"pearson"} (default) or \code{"spearman"}, like Stata's \code{pwcorr}
-and \code{spearman}.}
+and \verb{spearman, pw}. \code{\link[=spearman]{spearman()}} gives Spearman correlations with Stata's
+default casewise deletion.}
 
 \item{.wide}{If \code{TRUE}, return the correlation matrix as Stata prints it: one
 row per variable and the lower triangle filled, without \code{n} or \code{p}.}
@@ -41,7 +44,16 @@ correlations only. Rows with a missing weight are excluded with a message.}
 
 \item{.wt_type}{\code{"frequency"} (default) or \code{"analytic"}. The correlation is
 the same under both; with frequency weights, \code{n} and the p-value use the
-summed weight, and with analytic weights the number of rows.}
+summed weight, and with analytic weights the number of observed rows.
+See Details for zero-weight handling.}
+
+\item{.listwise}{If \code{TRUE}, use only rows where every selected variable is
+observed, like Stata's \verb{pwcorr, listwise}. Every pair then has the same
+\code{n}. Unlike \code{\link[=corr]{corr()}}, \code{p} is kept.}
+
+\item{.adjust}{\code{"none"} (default), \code{"bonferroni"} or \code{"sidak"}, like Stata's
+\code{bonferroni} and \code{sidak} options. Adjust p-values separately within each
+group; not available with \code{.wide = TRUE}.}
 }
 \value{
 An ungrouped tibble with:
@@ -66,14 +78,31 @@ Computed columns are evaluated on ungrouped working data before correlations
 are calculated within groups. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}
 first when a calculation needs to run separately within each group.
 
-The p-value is the two-sided test of zero correlation that Stata reports,
-based on \code{t = r * sqrt((n - 2) / (1 - r^2))} with \code{n - 2} degrees of freedom.
-For Pearson correlations it matches \code{cor.test()}; for Spearman correlations
-it is the same large-sample approximation that Stata uses. Correlations with
-a constant variable, and p-values with fewer than three observations, are
-\code{NA}. Labelled numeric columns are correlated on their codes, excluding
-tagged and SPSS user-missing values. Use \code{\link[=corr]{corr()}} for listwise Pearson
-correlations, like Stata's \code{corr} (\code{correlate}).
+Labelled numeric columns are correlated on their codes, excluding tagged
+and SPSS user-missing values. Use \code{\link[=corr]{corr()}} for listwise Pearson correlations,
+like Stata's \code{corr} (\code{correlate}).
+
+Weights must be finite and nonnegative. Fractional frequency weights are
+accepted, extending Stata's integer frequency-weight convention. Zero-weight
+rows do not contribute to the correlation. With pairwise deletion, analytic
+\code{n} includes complete zero-weight rows; with \code{.listwise = TRUE}, these rows
+are excluded from the common sample and from \code{n}. This also affects p-values.
+
+The p-value is the two-sided test of zero correlation that Stata reports.
+For Pearson correlations it is based on \code{t = r * sqrt((n - 2) / (1 - r^2))}
+with \code{n - 2} degrees of freedom and matches \code{cor.test()}. For Spearman
+correlations it is the beta approximation of Stata 18 and later; see
+\code{\link[=spearman]{spearman()}}. Correlations with a constant variable, and p-values with fewer
+than three observations, are \code{NA}.
+
+With \code{k} distinct variable pairs within a group, Bonferroni and Sidak
+adjustments are \code{min(1, k * p)} and \code{min(1, 1 - (1 - p)^k)}, respectively.
+Each group's \code{k} includes pairs whose p-value is \code{NA}; adjustment does not
+combine tests across groups.
+
+Stata's display options \code{star()} and \code{print()} are not implemented, because
+the result is a data frame: filter it instead, for example with
+\code{dplyr::filter(p < 0.05)}. Use \code{.listwise = TRUE} for Stata's \code{casewise}.
 }
 \examples{
 pwcorr(lifeexp, lexp, gnppc, safewater)
@@ -84,12 +113,19 @@ pwcorr(lifeexp, lexp, gnppc, .by = region)
 
 pwcorr(lifeexp, lexp, gnppc, .method = "spearman")
 
+# One common sample, with Bonferroni-adjusted p-values
+pwcorr(
+  lifeexp, lexp, gnppc, safewater,
+  .listwise = TRUE, .adjust = "bonferroni"
+)
+
 # Correlate an existing column with a computed column
 pwcorr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
 }
 \seealso{
 Other tabulation functions:
 \code{\link[=corr]{corr()}},
+\code{\link[=spearman]{spearman()}},
 \code{\link[=tab]{tab()}}
 }
 \concept{tabulation functions}

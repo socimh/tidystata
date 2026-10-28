@@ -15,8 +15,10 @@
 #'
 #' @param x A numeric or logical vector. Labelled numeric vectors are used
 #'   through their codes.
-#' @param mean,sd The mean and standard deviation of the result, like Stata's
-#'   `egen std(x), mean() std()` options.
+#' @param mean,sd The target mean and signed scale multiplier, like Stata's
+#'   `egen std(x), mean() std()` options. The result has standard deviation
+#'   `abs(sd)`; a negative `sd` reverses the ordering and zero makes all
+#'   observed values equal to `mean` when the input spread is defined.
 #' @param prop If `TRUE`, `pc()` returns proportions (summing to 1) instead of
 #'   percentages (summing to 100). Defaults to `FALSE`.
 #'

@@ -5,6 +5,9 @@
 #' correlation. Use [pwcorr()] to use a separate sample for each pair instead.
 #'
 #' @inheritParams pwcorr
+#' @param .wt Optional weights: a numeric column of `.data` (or a vector with
+#'   one value per row), like Stata's `corr [fweight/aweight]`. Rows with a
+#'   missing weight are excluded with a message.
 #' @param .wide If `TRUE`, return a lower-triangular correlation table with
 #'   one row per variable, like Stata's display. The default is a long table.
 #' @param .wt_type `"frequency"` (default) reports the sum of weights as `n`;
@@ -77,6 +80,7 @@ corr <- function(
     .wide = .wide,
     .wt = {{ .wt }},
     .wt_type = .wt_type,
-    .listwise = TRUE
+    .listwise = TRUE,
+    .p = FALSE
   )
 }

@@ -29,9 +29,12 @@
 #'
 #' @details
 #' Atomic missingness follows `is.na()`, including `NaN`, haven's tagged missing
-#' values, and SPSS user-missing codes and ranges. In list columns, `NA` is
-#' missing but `NULL` is observed. Matrix and data-frame columns are missing
-#' only when all components in a row are missing, following vctrs conventions.
+#' values, and SPSS user-missing codes and ranges. In ordinary list columns,
+#' scalar `NA` elements are missing but `NULL` elements are observed. Matrix
+#' and data-frame columns follow [vctrs::vec_detect_missing()] row semantics:
+#' a row is missing only when all its components are missing. In a list-backed
+#' matrix, a component is missing when it is `NULL`; a scalar `NA` cell is
+#' observed, unlike an `NA` element in an ordinary list column.
 #'
 #' Computed columns are evaluated on ungrouped working data before missingness
 #' is summarized within groups. Create columns with grouped [dplyr::mutate()]
@@ -61,7 +64,6 @@
 #'
 #' # Check an existing column alongside a computed column
 #' misstable(lifeexp, gnppc, water_share = safewater / 100, .all = TRUE)
-#'
 #' @family inspection functions
 #' @export
 misstable <- function(
@@ -96,10 +98,13 @@ misstable <- function(
   }
   .data <- dplyr::ungroup(.data)
   values <- remove_group_vars(.data, ..., group_vars = group_vars)
-  # List columns follow is.na(), as in summ() and fre(): `NA` elements are
-  # missing and `NULL` elements are values.
+  # Ordinary lists follow is.na(); structured columns need one mask per row.
   missing <- lapply(values, function(x) {
-    if (is.list(x) && !is.data.frame(x)) unname(is.na(x)) else detect_missing(x)
+    if (is.list(x) && !is.data.frame(x) && is.null(dim(x))) {
+      unname(is.na(x))
+    } else {
+      detect_missing(x)
+    }
   })
   if (!.all) {
     missing <- missing[vapply(missing, any, logical(1))]

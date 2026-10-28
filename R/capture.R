@@ -84,11 +84,18 @@ capture <- function(x, quiet = FALSE) {
     if (quiet) suppressWarnings(suppressMessages(x)) else x,
     error = function(e) {
       if (!quiet) {
-        cli::cli_inform(c(
-          "Captured expression did not complete.",
-          i = "Reason: {conditionMessage(e)}",
-          i = "Earlier changes, if any, were not undone."
-        ))
+        # A top-level stop() in `x` reports tryCatch()'s internal frame.
+        call <- conditionCall(e)
+        if (is.call(call) && identical(call[[1L]], quote(doTryCatch))) {
+          e$call <- NULL
+        }
+        cli::cli_inform(
+          c(
+            "Captured expression did not complete.",
+            i = "Earlier changes, if any, were not undone."
+          ),
+          parent = e
+        )
       }
       invisible(NULL)
     }

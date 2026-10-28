@@ -38,10 +38,12 @@ rank groups (\code{"rank"}, which has no Stata counterpart). Rank groups may
 split ties, breaking them by original position. They differ in size by at
 most one; earlier groups get extra rows.}
 
-\item{wt}{Optional weights for \code{xtile()}, one per element of \code{x}, like
-Stata's \verb{xtile ... [aweight = w]}. Cutpoints then follow Stata's weighted
-percentile rule; elements with a missing weight get a missing code. Not
-available with \code{method = "rank"}.}
+\item{wt}{Optional finite, non-negative weights for \code{xtile()}, one per
+element of \code{x} or a scalar recycled to its length, like Stata's
+\verb{xtile ... [aweight = w]}. Cutpoints follow Stata's weighted percentile
+rule. Zero-weight rows do not enter cutpoint estimation but still receive
+codes; elements with a missing weight get a missing code. Not available
+with \code{method = "rank"}.}
 
 \item{breaks}{Numeric cutpoints for \code{cut_breaks()}. The observed minimum and
 maximum are added when values lie beyond the breaks. \code{NULL} uses the
@@ -49,8 +51,9 @@ observed median as an interior cutpoint. A single number supplies one
 interior cutpoint, rather than the number of intervals.}
 
 \item{right}{If \code{FALSE} (default), intervals are closed on the left (\verb{a <= x < b}), as in Stata's \verb{egen cut()}; the last interval also includes its
-upper end. If \code{TRUE}, they are closed on the right (\verb{a < x <= b}), as in
-\code{\link[base:cut]{base::cut()}}.}
+upper end. If \code{TRUE}, they are closed on the right (\verb{a < x <= b}), and
+the first interval also includes its lower end, as in
+\code{\link[base:cut]{base::cut()}} with \code{include.lowest = TRUE}.}
 }
 \value{
 An ordered factor, or integer interval codes when \code{labels = FALSE}
@@ -58,7 +61,7 @@ or when \code{xtile()} runs in a grouped data mask with default labels. The
 result has the same length and order as \code{x}, with missing inputs remaining
 missing. All-missing inputs are rejected. Empty inputs are rejected by
 \code{xtile()} and \code{cut_length()}; \code{cut_breaks(numeric(), breaks = 50)} returns
-an empty ordered factor with range warnings.
+an empty ordered factor.
 }
 \description{
 Group numeric values using quantiles, equal widths, or chosen cutpoints:
@@ -82,17 +85,20 @@ intervals covered by each group, for example \code{"[0,0]"} and \code{"(0,1]"}. 
 labels must match the effective number of groups. \code{xtile()} rejects empty
 and all-missing vectors; it rejects constants in quantile mode but accepts
 them in rank mode. \code{cut_length()} and \code{cut_breaks()} reject constants and
-all-missing vectors.
+all-missing vectors; \code{cut_length()} also rejects infinite values, because
+equal-width intervals need a finite range.
+
+Interval labels always use a decimal point, whatever \code{options(OutDec)}
+says, so that \code{"[2.8,6.6]"} cannot be read as four numbers.
 
 \code{cut_breaks()} differs from \verb{egen cut(), at()} at the ends: Stata leaves
 values outside the breaks (and at the last break) missing, while
 \code{cut_breaks()} extends the end intervals to the observed range.
 
-With \code{xtile()}, \code{labels = NULL} (default) or \code{TRUE} creates labels. Inside
-grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its own cutpoints and interval
-labels, which cannot be combined, so \code{xtile()} defaults to integer codes
-within each group (like Stata's \verb{xtile, by()}). Supply \code{labels = TRUE} to
-request labels there anyway. \code{cut_length()} and \code{cut_breaks()} keep their
+Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its own cutpoints and
+interval labels, which cannot be combined, so \code{xtile()} defaults to integer
+codes within each group (like Stata's \verb{xtile, by()}). Supply \code{labels = TRUE}
+to request labels there anyway. \code{cut_length()} and \code{cut_breaks()} keep their
 factor output inside grouped data masks; use a character vector for custom
 labels or \code{FALSE} for integer codes.
 
@@ -117,6 +123,7 @@ Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
 \code{\link{panel}},
 \code{\link{row_egen}},
+\code{\link[=stata_recode]{stata_recode()}},
 \code{\link[=std]{std()}}
 }
 \concept{variable generation functions}

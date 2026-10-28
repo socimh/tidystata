@@ -302,3 +302,57 @@ test_that("tabstat forwards grouped selections, weights and output controls", {
   expect_true(is.na(out$mean))
   expect_identical(data, before)
 })
+
+test_that("integer and logical columns summarise in place like their doubles", {
+  set.seed(20261027)
+  int <- sample(c(-5:20, NA, .Machine$integer.max), 60, TRUE)
+  data <- tibble::tibble(
+    int = int,
+    lgl = int > 3,
+    g = rep(c("a", "b", "c"), 20),
+    w = runif(60)
+  )
+  doubles <- dplyr::mutate(data, int = as.double(int), lgl = as.double(lgl))
+  before <- serialize(data, NULL)
+  drop_type <- function(out) out[setdiff(names(out), "type")]
+  for (args in list(
+    list(),
+    list(.detail = TRUE),
+    list(.by = quote(g), .detail = TRUE),
+    list(.wt = quote(w), .detail = TRUE),
+    list(.wt = quote(w), .by = quote(g), .wt_type = "analytic"),
+    list(.stat = c("sum", "p10", "iqr", "skew", "kurtosis"))
+  )) {
+    call <- function(d) rlang::inject(summ(d, int, lgl, !!!args))
+    expect_identical(drop_type(call(data)), drop_type(call(doubles)))
+  }
+  expect_identical(serialize(data, NULL), before)
+})
+
+test_that("labelled columns summarise their codes in place", {
+  codes <- c(1L, 2L, 9L, NA, 3L, -1L, 2L, 8L)
+  spss <- haven::labelled_spss(
+    codes,
+    c(Yes = 1L),
+    na_values = 9L,
+    na_range = c(-9L, -1L)
+  )
+  tagged <- haven::labelled(
+    c(1.5, haven::tagged_na("a"), 2, 4, NA, 3, 2.5, 7),
+    c(Low = 1.5)
+  )
+  data <- tibble::tibble(spss = spss, tagged = tagged, g = rep(c("a", "b"), 4))
+  reference <- tibble::tibble(
+    spss = labelled_numeric(spss),
+    tagged = labelled_numeric(tagged),
+    g = data$g
+  )
+  # Only the name marker and type label distinguish labelled variables.
+  drop_type <- function(out) out[setdiff(names(out), c("name", "type"))]
+  for (args in list(list(.detail = TRUE), list(.by = quote(g)))) {
+    call <- function(d) rlang::inject(summ(d, spss, tagged, !!!args))
+    # summ() notes that labelled variables are summarised by their codes.
+    expect_warning(out <- call(data), "labelled")
+    expect_identical(drop_type(out), drop_type(call(reference)))
+  }
+})

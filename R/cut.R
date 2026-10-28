@@ -17,18 +17,21 @@
 #'   rank groups (`"rank"`, which has no Stata counterpart). Rank groups may
 #'   split ties, breaking them by original position. They differ in size by at
 #'   most one; earlier groups get extra rows.
-#' @param wt Optional weights for `xtile()`, one per element of `x`, like
-#'   Stata's `xtile ... [aweight = w]`. Cutpoints then follow Stata's weighted
-#'   percentile rule; elements with a missing weight get a missing code. Not
-#'   available with `method = "rank"`.
+#' @param wt Optional finite, non-negative weights for `xtile()`, one per
+#'   element of `x` or a scalar recycled to its length, like Stata's
+#'   `xtile ... [aweight = w]`. Cutpoints follow Stata's weighted percentile
+#'   rule. Zero-weight rows do not enter cutpoint estimation but still receive
+#'   codes; elements with a missing weight get a missing code. Not available
+#'   with `method = "rank"`.
 #' @param breaks Numeric cutpoints for `cut_breaks()`. The observed minimum and
 #'   maximum are added when values lie beyond the breaks. `NULL` uses the
 #'   observed median as an interior cutpoint. A single number supplies one
 #'   interior cutpoint, rather than the number of intervals.
 #' @param right If `FALSE` (default), intervals are closed on the left (`a <= x
 #'   < b`), as in Stata's `egen cut()`; the last interval also includes its
-#'   upper end. If `TRUE`, they are closed on the right (`a < x <= b`), as in
-#'   [base::cut()].
+#'   upper end. If `TRUE`, they are closed on the right (`a < x <= b`), and
+#'   the first interval also includes its lower end, as in
+#'   [base::cut()] with `include.lowest = TRUE`.
 #' @param labels `NULL` (default) creates labels; `FALSE` returns integer
 #'   codes. Supply a character vector for custom labels. For `xtile()`, grouped
 #'   data masks default to integer codes, and `TRUE` explicitly requests labels.
@@ -45,17 +48,20 @@
 #' labels must match the effective number of groups. `xtile()` rejects empty
 #' and all-missing vectors; it rejects constants in quantile mode but accepts
 #' them in rank mode. `cut_length()` and `cut_breaks()` reject constants and
-#' all-missing vectors.
+#' all-missing vectors; `cut_length()` also rejects infinite values, because
+#' equal-width intervals need a finite range.
+#'
+#' Interval labels always use a decimal point, whatever `options(OutDec)`
+#' says, so that `"[2.8,6.6]"` cannot be read as four numbers.
 #'
 #' `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
 #' values outside the breaks (and at the last break) missing, while
 #' `cut_breaks()` extends the end intervals to the observed range.
 #'
-#' With `xtile()`, `labels = NULL` (default) or `TRUE` creates labels. Inside
-#' grouped [dplyr::mutate()], each group has its own cutpoints and interval
-#' labels, which cannot be combined, so `xtile()` defaults to integer codes
-#' within each group (like Stata's `xtile, by()`). Supply `labels = TRUE` to
-#' request labels there anyway. `cut_length()` and `cut_breaks()` keep their
+#' Inside grouped [dplyr::mutate()], each group has its own cutpoints and
+#' interval labels, which cannot be combined, so `xtile()` defaults to integer
+#' codes within each group (like Stata's `xtile, by()`). Supply `labels = TRUE`
+#' to request labels there anyway. `cut_length()` and `cut_breaks()` keep their
 #' factor output inside grouped data masks; use a character vector for custom
 #' labels or `FALSE` for integer codes.
 #'
@@ -69,7 +75,7 @@
 #'   result has the same length and order as `x`, with missing inputs remaining
 #'   missing. All-missing inputs are rejected. Empty inputs are rejected by
 #'   `xtile()` and `cut_length()`; `cut_breaks(numeric(), breaks = 50)` returns
-#'   an empty ordered factor with range warnings.
+#'   an empty ordered factor.
 #'
 #' @name cut
 #' @examples
@@ -94,6 +100,8 @@ xtile <- function(
   wt = NULL
 ) {
   method <- rlang::arg_match(method)
+  # Interval labels use a decimal point: "[2,8,6,6]" would be ambiguous.
+  rlang::local_options(OutDec = ".")
   x <- cut_numeric_input(x)
   if (is.logical(x) && is.null(dim(x))) {
     x <- as.integer(x)
@@ -263,17 +271,31 @@ cut_length <- function(x, n = 4, labels = NULL) {
   check_number_whole(n, min = 1)
   x <- cut_numeric_input(x)
   cut_check_x(x)
-  breaks <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = n + 1)
+  observed <- x[!is.na(x)]
+  if (!length(observed)) {
+    cli::cli_abort("{.arg x} must contain non-missing observations.")
+  }
+  if (!all(is.finite(observed))) {
+    cli::cli_abort(c(
+      "{.arg x} must contain only finite values for equal-width bins.",
+      i = "Use {.fn cut_breaks} to place infinite values in open intervals."
+    ))
+  }
+  breaks <- seq(min(observed), max(observed), length.out = n + 1)
   cut_breaks(x, breaks = breaks, labels = labels)
 }
 
 #' @rdname cut
 #' @export
 cut_breaks <- function(x, breaks = NULL, labels = NULL, right = FALSE) {
+  # Interval labels use a decimal point: "[0,5,1,25)" would be ambiguous.
+  rlang::local_options(OutDec = ".")
   x <- cut_numeric_input(x)
   cut_check_x(x)
-  x_min <- min(x, na.rm = TRUE)
-  x_max <- max(x, na.rm = TRUE)
+  # An empty x has no observed range, as min() and max() of nothing.
+  observed <- x[!is.na(x)]
+  x_min <- if (length(observed)) min(observed) else Inf
+  x_max <- if (length(observed)) max(observed) else -Inf
   if (x_min == x_max) {
     cli::cli_abort("Can't cut a vector with only one unique value.")
   }

@@ -1,102 +1,79 @@
-#' Preview complete tables or select representative rows
+#' Set persistent table previews
 #'
 #' @description
-#' Control how a complete table is printed, or select a smaller set of rows:
+#' Keep a compact console display while retaining every row and column.
 #'
-#' * `preview_table()`: Keep the complete data and store a print preference.
-#'   By default, show the first five and last five rows; interval previews
-#'   show evenly spaced rows.
-#' * `unpreview_table()`: Remove the stored print preference, keeping all data.
-#' * `print_headtail()`: Print the first and last rows once, keeping all data.
-#' * `print_interval()`: Print evenly spaced rows once, keeping all data.
-#' * `print_all()`: Print every row and column, like Stata's `list`.
-#' * `slice_headtail()`: Return only the selected first and last rows.
-#' * `slice_interval()`: Return only the selected evenly spaced rows.
+#' * `preview()`: Choose a head/tail or interval display.
+#' * `preview_headtail()`: Show the first and last rows.
+#' * `preview_interval()`: Show evenly spaced rows.
+#' * `unpreview()`: Restore ordinary printing.
 #'
-#' @param .data An in-memory data frame, data.table, ordinary tibble, grouped
-#'   tibble, rowwise tibble, or `sf` data frame (geometry is kept when slicing
-#'   and printed as a column). Convert other subclasses explicitly before
-#'   wrapping; collect lazy tables first. Apply the wrapper separately to lists
-#'   of tables.
-#' @param style Either `"headtail"` or `"interval"`.
-#' @param n Total number of rows to display or select: a positive whole number
-#'   or `Inf` for all rows. An odd head/tail budget gives the head the extra
-#'   row. With `n = 1`, both styles select the first row. Short tables do not
-#'   repeat rows.
-#' @param width Console width, passed to tibble formatting. `NULL` uses the
-#'   current console width; `Inf` (the default for `print_all()`) shows all
-#'   columns.
-#' @param ... Additional arguments passed to tibble formatting.
-#' @param max_extra_cols,max_footer_lines Tibble formatting controls.
+#' @param .data An in-memory data frame, data.table, ordinary/grouped/rowwise
+#'   tibble, or `sf` data frame. Collect lazy tables and convert other subclasses
+#'   explicitly first. Apply previews separately to lists of tables.
+#' @param style Either `"headtail"` (default) or `"interval"`.
+#' @param n Total number of data rows to display, defaulting to 10. Supply a
+#'   positive whole number or `Inf` for all rows; omission markers do not count.
+#'
+#' @returns A data frame, tibble, data.table, or `sf` data frame with the same
+#'   rows, columns, values, and grouping as `.data`. The preview functions add a
+#'   `tidystata_preview` class and print preferences; `unpreview()` removes them.
 #'
 #' @details
-#' Preview settings survive table subsetting/replacement, dplyr mutation,
-#' filtering, sorting, column selection, renaming, relocation, distinct rows,
-#' slicing, grouping, rowwise operations, summaries and reframing, as well as
-#' tidyr's `pivot_longer()` and `pivot_wider()`. Grouping follows the underlying
-#' operation. Joins inherit the left input's settings; `bind_rows()` inherits
-#' the first input's settings. Arbitrary third-party transformations and direct
+#' **Display**
+#'
+#' Head/tail previews split `n` between the beginning and end, giving an odd
+#' row to the beginning. One row of vertical dots marks an omitted middle,
+#' using periods without Unicode output. Interval previews show approximately
+#' evenly spaced positions without separator rows. An omission footer counts
+#' undisplayed rows.
+#' With `n = 1`, both styles show the first row; short tables do not repeat rows.
+#'
+#' Row numbers refer to the current table after filtering or sorting. Grouped
+#' tables use one display budget across all groups. `print(x, n = Inf,
+#' width = Inf)` shows every row and column without changing stored preferences.
+#' Previews control console printing, not HTML widgets or GUI viewers.
+#'
+#' **Working with previews**
+#'
+#' Settings follow supported base subsetting/replacement, dplyr row and column
+#' operations, grouping (including rowwise operations), summaries and reframing,
+#' and tidyr pivots. These operations determine the result's container and
+#' grouping. Joins inherit the left input's settings; `bind_rows()` inherits the
+#' first input's settings. Arbitrary third-party transformations and direct
 #' `vctrs::vec_rbind()` are not covered by this guarantee.
 #'
-#' Positions shown in the margin refer to the current table, not the original
-#' data before filtering or sorting. Previewing does not change column values,
-#' classes, labels, or the data used in subsequent calculations. Grouped tables
-#' use a global row budget, not a separate budget per group.
+#' Converting with `tibble::as_tibble()` or `as.data.frame()`, or extracting a
+#' column, removes the preview. Wrapping and unwrapping a data.table makes an
+#' independent copy; subsequent native operations such as `:=` retain ordinary
+#' reference semantics. Column classes and labels are preserved.
 #'
-#' `print(x, n = Inf)` displays the entire table. Per-call formatting overrides
-#' do not change stored settings. Explicit `tibble::as_tibble()` or
-#' `as.data.frame()` conversions remove the preview, as does column extraction.
-#' This feature controls console printing, not HTML widgets or GUI viewers. Only
-#' the temporary display is converted to a tibble. Wrapping and unwrapping a
-#' data.table creates an independent copy; native operations such as `:=` on a
-#' wrapped data.table retain ordinary reference semantics. External dplyr/tidyr
-#' verbs determine their own result container and grouping, while preview
-#' settings follow the result.
+#' @seealso [print_headtail()] for one-time printing.
 #'
-#' @returns
-#' * `preview_table()`: the complete input container with an additional
-#'   `tidystata_preview` class and stored print settings.
-#' * `unpreview_table()`: the table without that class or its settings,
-#'   preserving grouping.
-#' * Print helpers: the original input, invisibly.
-#' * Slice helpers: the selected rows in the input container, retaining valid
-#'   grouping and existing preview settings. Explicit data.frame row names are
-#'   preserved; automatic row names are regenerated as in dplyr slicing.
-#'
-#' Supported containers are listed under `.data`; other subclasses are
-#' unsupported.
 #' @examples
-#' x <- preview_table(tibble::tibble(id = 1:30, value = (1:30)^2))
-#' x
+#' tb <- tibble::tibble(id = 1:30, value = (1:30)^2)
+#' tb
 #'
-#' dplyr::filter(x, id > 10)
+#' ht <- preview_headtail(tb)
+#' ht
 #'
-#' preview_table(x, style = "interval", n = 5)
+#' dplyr::filter(ht, id > 10)
 #'
-#' print(x, n = Inf)
+#' preview_interval(ht, n = 5)
 #'
-#' unpreview_table(x)
+#' unpreview(ht)
 #'
-#' print_headtail(lifeexp, n = 6)
-#'
-#' print_interval(lifeexp, n = 6)
-#'
-#' print_all(head(lifeexp, 12))
-#'
-#' slice_headtail(lifeexp, n = 6)
-#'
-#' slice_interval(lifeexp, n = 6)
-#' @name special-print
-#' @family selection and preview functions
+#' @name preview
+#' @family persistent preview functions
 NULL
 
-#' @rdname special-print
+#' @rdname preview
 #' @export
-preview_table <- function(.data, style = c("headtail", "interval"), n = 10) {
+preview <- function(.data, style = c("headtail", "interval"), n = 10) {
   preview_check_data(.data)
   style <- rlang::arg_match(style)
   preview_check_n(n)
-  out <- unpreview_table(.data)
+  out <- unpreview(.data)
   if (inherits(out, "data.table")) {
     data.table::setattr(out, "tidystata_preview", list(style = style, n = n))
     data.table::setattr(out, "class", c("tidystata_preview", class(out)))
@@ -107,9 +84,21 @@ preview_table <- function(.data, style = c("headtail", "interval"), n = 10) {
   out
 }
 
-#' @rdname special-print
+#' @rdname preview
 #' @export
-unpreview_table <- function(.data) {
+preview_headtail <- function(.data, n = 10) {
+  preview(.data, style = "headtail", n = n)
+}
+
+#' @rdname preview
+#' @export
+preview_interval <- function(.data, n = 10) {
+  preview(.data, style = "interval", n = n)
+}
+
+#' @rdname preview
+#' @export
+unpreview <- function(.data) {
   preview_check_data(.data)
   if (inherits(.data, "data.table")) {
     .data <- data.table::copy(.data)
@@ -218,7 +207,7 @@ format.tidystata_preview <- function(
     n <- settings$n
   }
   rows <- preview_rows(nrow(x), n, settings$style)
-  plain <- unpreview_table(x)
+  plain <- unpreview(x)
   view <- tibble::as_tibble(plain, .name_repair = "minimal")[
     rows,
     ,
@@ -228,6 +217,11 @@ format.tidystata_preview <- function(
   attr(view, "preview_rows") <- rows
   attr(view, "preview_omitted") <- nrow(x) - length(rows)
   attr(view, "preview_style") <- settings$style
+  attr(view, "preview_gap_after") <- if (settings$style == "headtail") {
+    which(diff(rows) > 1L)
+  } else {
+    integer()
+  }
   class(view) <- c("tidystata_preview_view", class(view))
   format(
     view,
@@ -289,9 +283,66 @@ ctl_new_rowid_pillar.tidystata_preview_view <- function(
     list(
       title = out$title,
       type = out$type,
-      data = pillar::pillar_component(shaft)
+      data = preview_gap_component(
+        pillar::pillar_component(shaft),
+        attr(controller, "preview_gap_after", exact = TRUE)
+      )
     ),
     width = id_width
+  )
+}
+
+#' @exportS3Method pillar::ctl_new_pillar
+ctl_new_pillar.tidystata_preview_view <- function(
+  controller,
+  x,
+  width,
+  ...,
+  title = NULL
+) {
+  out <- NextMethod()
+  if (!is.null(out)) {
+    out$data <- preview_gap_component(
+      out$data,
+      attr(controller, "preview_gap_after", exact = TRUE)
+    )
+  }
+  out
+}
+
+preview_gap_component <- function(component, after) {
+  if (length(after) == 0L) {
+    return(component)
+  }
+  content <- structure(
+    list(shaft = component[[1L]], after = after),
+    class = "tidystata_preview_gap"
+  )
+  pillar::new_pillar_component(
+    list(content),
+    width = attr(component, "width", exact = TRUE),
+    min_width = attr(component, "min_width", exact = TRUE)
+  )
+}
+
+#' @export
+format.tidystata_preview_gap <- function(x, width, ...) {
+  original <- format(x$shaft, width = width, ...)
+  alignment <- attr(original, "align", exact = TRUE)
+  if (is.null(alignment)) {
+    alignment <- "left"
+  }
+  lines <- cli::ansi_align(as.character(original), width, align = alignment)
+  marker <- if (cli::is_utf8_output()) "\u22ee" else "."
+  marker <- cli::ansi_align(
+    pillar::style_subtle(marker),
+    width,
+    align = "center"
+  )
+  pillar::new_ornament(
+    append(lines, marker, after = x$after),
+    width = width,
+    align = alignment
   )
 }
 
@@ -328,6 +379,42 @@ tbl_format_footer.tidystata_preview_view <- function(x, setup, ...) {
   utils::head(c(omission, footer), setup$max_footer_lines)
 }
 
+#' Print selected rows once
+#'
+#' @description
+#' Display selected rows in the console without storing print preferences.
+#'
+#' * `print_headtail()`: Print the first and last rows.
+#' * `print_interval()`: Print evenly spaced rows.
+#'
+#' @inheritParams preview
+#' @param width Console width passed to tibble formatting. `NULL` (default)
+#'   uses the current console width; `Inf` shows every column.
+#' @param ... Additional arguments passed to tibble formatting.
+#' @param max_extra_cols,max_footer_lines Maximum number of additional columns
+#'   to describe and footer lines to print, respectively. `NULL` uses tibble's
+#'   defaults.
+#'
+#' @returns `.data`, unchanged and invisibly, including all rows, columns,
+#'   classes, grouping, and any existing preview preferences.
+#'
+#' @details
+#' Row budgets and omission markers follow [preview()]: head/tail output marks
+#' an omitted middle with one row of dots; interval output has no separator
+#' rows. Use `n = Inf` and `width = Inf` to print every row and column.
+#'
+#' @seealso [preview()] for persistent print preferences.
+#'
+#' @examples
+#' print_headtail(lifeexp, n = 6)
+#'
+#' print_interval(lifeexp, n = 6)
+#'
+#' print_headtail(lifeexp, n = Inf, width = Inf)
+#' @name special-print
+#' @family one-time printing functions
+NULL
+
 #' @rdname special-print
 #' @export
 print_headtail <- function(
@@ -339,19 +426,12 @@ print_headtail <- function(
   max_footer_lines = NULL
 ) {
   print(
-    preview_table(.data, "headtail", n),
+    preview(.data, "headtail", n),
     width = width,
     ...,
     max_extra_cols = max_extra_cols,
     max_footer_lines = max_footer_lines
   )
-  invisible(.data)
-}
-
-#' @rdname special-print
-#' @export
-print_all <- function(.data, ..., width = Inf) {
-  print(preview_table(.data, "headtail", Inf), width = width, ...)
   invisible(.data)
 }
 
@@ -366,38 +446,13 @@ print_interval <- function(
   max_footer_lines = NULL
 ) {
   print(
-    preview_table(.data, "interval", n),
+    preview(.data, "interval", n),
     width = width,
     ...,
     max_extra_cols = max_extra_cols,
     max_footer_lines = max_footer_lines
   )
   invisible(.data)
-}
-
-#' @rdname special-print
-#' @export
-slice_headtail <- function(.data, n = 10) {
-  preview_slice(.data, n, "headtail")
-}
-
-#' @rdname special-print
-#' @export
-slice_interval <- function(.data, n = 10) {
-  preview_slice(.data, n, "interval")
-}
-
-preview_slice <- function(.data, n, style, call = rlang::caller_env()) {
-  preview_check_data(.data, call)
-  rows <- preview_rows(nrow(.data), n, style, call)
-  if (inherits(.data, "data.table")) {
-    out <- unpreview_table(.data)[rows]
-    if (inherits(.data, "tidystata_preview")) {
-      out <- preview_restore(out, .data)
-    }
-    return(out)
-  }
-  dplyr::dplyr_row_slice(.data, rows)
 }
 
 #' @export
@@ -427,12 +482,12 @@ preview_slice <- function(.data, n, style, call = rlang::caller_env()) {
 
 #' @exportS3Method tibble::as_tibble
 as_tibble.tidystata_preview <- function(x, ...) {
-  tibble::as_tibble(unpreview_table(x), ...)
+  tibble::as_tibble(unpreview(x), ...)
 }
 
 #' @export
 as.data.frame.tidystata_preview <- function(x, ...) {
-  as.data.frame(unpreview_table(x), ...)
+  as.data.frame(unpreview(x), ...)
 }
 
 #' @exportS3Method dplyr::dplyr_reconstruct
@@ -479,7 +534,7 @@ reframe.tidystata_preview <- function(.data, ...) {
 pivot_longer.tidystata_preview <- function(data, cols, ...) {
   # Inject the selector in its original environment instead of forwarding the
   # method's promise through NextMethod(), which can lose tidy selection scope.
-  out <- tidyr::pivot_longer(unpreview_table(data), cols = {{ cols }}, ...)
+  out <- tidyr::pivot_longer(unpreview(data), cols = {{ cols }}, ...)
   preview_restore(out, data)
 }
 

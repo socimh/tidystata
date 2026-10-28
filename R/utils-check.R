@@ -127,6 +127,26 @@ check_data_frame <- function(
   stop_input_type(x, "a data frame", ..., arg = arg, call = call)
 }
 
+# Summaries and one-way tables also take one atomic vector, such as a
+# column; lazy and arrow tables are rejected before any data handling.
+check_data_frame_or_vector <- function(
+  x,
+  ...,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (is.data.frame(x) || (is.atomic(x) && !is.null(x) && is.null(dim(x)))) {
+    return(invisible(NULL))
+  }
+  stop_input_type(
+    x,
+    "a data frame or an atomic vector",
+    ...,
+    arg = arg,
+    call = call
+  )
+}
+
 stop_input_type <- function(
   x,
   what,

@@ -87,8 +87,9 @@ the underlying conversion warning.
 their codes. For non-character input, values flagged by \code{is.na()}, including
 \code{NaN}, tagged missing values, and SPSS user-missing codes, become \code{NA}.
 Character input is returned unchanged. Numbers are written in full, so 100000
-gives \code{"100000"}, not \code{"1e+05"}. Dates use \code{\link[=as.character]{as.character()}}, giving
-\code{"2024-01-31"} rather than day numbers.
+gives \code{"100000"}, not \code{"1e+05"}, with at most 15 significant digits and a
+decimal point whatever \code{options(OutDec)} says. Dates use \code{\link[=as.character]{as.character()}},
+giving \code{"2024-01-31"} rather than day numbers.
 
 The sjlabelled package also exports \code{as_numeric()} and \code{as_character()}. They
 differ: sjlabelled's \code{as_numeric()} turns non-numeric text into factor codes,

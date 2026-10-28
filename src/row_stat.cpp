@@ -3,6 +3,7 @@
 #include "cpp11/doubles.hpp"
 #include "cpp11/list.hpp"
 #include "cpp11/logicals.hpp"
+#include "numeric_view.h"
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -14,11 +15,10 @@ using namespace std;
 
 // Read each column's data pointer once. Constructing a cpp11 vector per cell
 // costs a protection-list insertion, which dominated every kernel. Logical
-// and integer columns are converted here, NA to NA_real_, as as.double()
-// would, so R need not copy them first.
+// and integer columns are read in place, so neither R nor the kernel copies
+// them.
 struct row_data {
-    std::vector<const double*> columns;
-    std::vector<std::vector<double>> converted;
+    std::vector<numeric_view> columns;
     R_xlen_t nrow = 0;
 };
 
@@ -27,25 +27,12 @@ row_data row_columns(const list& tb)
     R_xlen_t ncol = tb.size();
     if (ncol == 0) stop("Select at least one column.");
     row_data data;
-    data.columns.resize(ncol);
-    data.converted.reserve(ncol);
+    data.columns.reserve(ncol);
     data.nrow = Rf_xlength(VECTOR_ELT(tb, 0));
     for (R_xlen_t j = 0; j < ncol; ++j) {
         SEXP column = VECTOR_ELT(tb, j);
         if (Rf_xlength(column) != data.nrow) stop("Row kernels require equal-length columns.");
-        if (TYPEOF(column) == REALSXP) {
-            data.columns[j] = REAL_RO(column);
-        } else if (TYPEOF(column) == INTSXP || TYPEOF(column) == LGLSXP) {
-            const int* values = TYPEOF(column) == INTSXP ? INTEGER_RO(column) : LOGICAL_RO(column);
-            std::vector<double> doubles(data.nrow);
-            for (R_xlen_t i = 0; i < data.nrow; ++i) {
-                doubles[i] = values[i] == NA_INTEGER ? NA_REAL : values[i];
-            }
-            data.converted.push_back(std::move(doubles));
-            data.columns[j] = data.converted.back().data();
-        } else {
-            stop("Row kernels require logical, integer or double columns.");
-        }
+        data.columns.emplace_back(column);
     }
     return data;
 }
@@ -62,13 +49,13 @@ inline bool row_defined(size_t observed, size_t minimum, bool na_rm, size_t ncol
 writable::doubles row_extreme(list tb, bool maximum)
 {
     row_data data = row_columns(tb);
-    const std::vector<const double*>& columns = data.columns;
+    const std::vector<numeric_view>& columns = data.columns;
     R_xlen_t nrow = data.nrow;
     writable::doubles out(nrow);
     double* best = REAL(out);
     std::vector<char> observed(nrow, 0);
     std::fill(best, best + nrow, NA_REAL);
-    for (const double* column : columns) {
+    for (const numeric_view& column : columns) {
         for (R_xlen_t i = 0; i < nrow; ++i) {
             double value = column[i];
             if (std::isnan(value)) continue;
@@ -100,7 +87,7 @@ writable::doubles row_total(list tb, bool average, bool na_rm)
     R_xlen_t nrow = data.nrow;
     std::vector<long double> total(nrow, 0.0L);
     std::vector<int> observed(nrow, 0);
-    for (const double* column : data.columns) {
+    for (const numeric_view& column : data.columns) {
         for (R_xlen_t i = 0; i < nrow; ++i) {
             if (std::isnan(column[i])) continue;
             total[i] += column[i];
@@ -166,7 +153,7 @@ writable::doubles row_total(list tb, bool average, bool na_rm)
 [[cpp11::register]] writable::integers row_unique_dbl(list tb)
 {
     row_data data = row_columns(tb);
-    const std::vector<const double*>& columns = data.columns;
+    const std::vector<numeric_view>& columns = data.columns;
     R_xlen_t nrow = data.nrow;
     writable::integers out(nrow);
     int* counts = INTEGER(out);
@@ -175,7 +162,7 @@ writable::doubles row_total(list tb, bool average, bool na_rm)
     for (R_xlen_t i = 0; i < nrow; ++i) {
         values.clear();
         bool missing = false;
-        for (const double* column : columns) {
+        for (const numeric_view& column : columns) {
             double value = column[i];
             if (std::isnan(value)) missing = true;
             else values.push_back(value);
@@ -193,7 +180,7 @@ writable::doubles row_total(list tb, bool average, bool na_rm)
 [[cpp11::register]] writable::doubles row_median_dbl(list tb, bool na_rm)
 {
     row_data data = row_columns(tb);
-    const std::vector<const double*>& columns = data.columns;
+    const std::vector<numeric_view>& columns = data.columns;
     R_xlen_t nrow = data.nrow;
     writable::doubles out(nrow);
     double* median = REAL(out);
@@ -201,7 +188,7 @@ writable::doubles row_total(list tb, bool average, bool na_rm)
     values.reserve(columns.size());
     for (R_xlen_t i = 0; i < nrow; ++i) {
         values.clear();
-        for (const double* column : columns) {
+        for (const numeric_view& column : columns) {
             if (!std::isnan(column[i])) values.push_back(column[i]);
         }
         if (!row_defined(values.size(), 1, na_rm, columns.size())) {
@@ -229,7 +216,7 @@ writable::doubles row_total(list tb, bool average, bool na_rm)
 writable::doubles row_dispersion(list tb, bool standard_deviation, bool na_rm)
 {
     row_data data = row_columns(tb);
-    const std::vector<const double*>& columns = data.columns;
+    const std::vector<numeric_view>& columns = data.columns;
     R_xlen_t nrow = data.nrow;
     writable::doubles out(nrow);
     double* result = REAL(out);
@@ -239,7 +226,7 @@ writable::doubles row_dispersion(list tb, bool standard_deviation, bool na_rm)
         values.clear();
         bool finite = true;
         double largest = 0;
-        for (const double* column : columns) {
+        for (const numeric_view& column : columns) {
             double value = column[i];
             if (std::isnan(value)) continue;
             values.push_back(value);

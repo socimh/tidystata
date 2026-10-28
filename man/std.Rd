@@ -16,8 +16,10 @@ pct(x, prop = FALSE)
 \item{x}{A numeric or logical vector. Labelled numeric vectors are used
 through their codes.}
 
-\item{mean, sd}{The mean and standard deviation of the result, like Stata's
-\verb{egen std(x), mean() std()} options.}
+\item{mean, sd}{The target mean and signed scale multiplier, like Stata's
+\verb{egen std(x), mean() std()} options. The result has standard deviation
+\code{abs(sd)}; a negative \code{sd} reverses the ordering and zero makes all
+observed values equal to \code{mean} when the input spread is defined.}
 
 \item{prop}{If \code{TRUE}, \code{pc()} returns proportions (summing to 1) instead of
 percentages (summing to 100). Defaults to \code{FALSE}.}
@@ -60,6 +62,7 @@ Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
 \code{\link{cut}},
 \code{\link{panel}},
-\code{\link{row_egen}}
+\code{\link{row_egen}},
+\code{\link[=stata_recode]{stata_recode()}}
 }
 \concept{variable generation functions}

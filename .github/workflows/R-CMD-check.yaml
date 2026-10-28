@@ -9,6 +9,10 @@ on:
 
 name: R-CMD-check
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -43,9 +47,11 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+          Ncpus: '2'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          cache: always
           extra-packages: any::rcmdcheck
           needs: check
 

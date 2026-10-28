@@ -12,8 +12,10 @@ grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}) to flag
 group.}
 
 \item{.missing}{If \code{FALSE} (default), rows with a missing value in any
-argument are \code{FALSE}, as Stata's \code{tag()} does without its \code{missing} option.
-If \code{TRUE}, missing values form groups of their own.}
+explicitly supplied argument are \code{FALSE}, as Stata's \code{tag()} does without
+its \code{missing} option. If \code{TRUE}, missing values form groups of their own.
+With no arguments, flag the first row of every current data-mask group,
+including groups with missing keys, regardless of \code{.missing}.}
 }
 \value{
 A logical vector with one value per input row, or per row in the
@@ -41,12 +43,11 @@ dplyr::mutate(panel, first = is_first(id))
 # Including the missing group
 dplyr::mutate(panel, first = is_first(id, .missing = TRUE))
 
-# An alternative
+# The no-argument shortcut also includes the missing id group
 dplyr::mutate(panel, first = is_first(), .by = id)
 
 # Count panels
 is_first(panel$id) |> sum()
-
 }
 \seealso{
 Other data checking functions:

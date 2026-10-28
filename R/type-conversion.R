@@ -66,8 +66,9 @@
 #' their codes. For non-character input, values flagged by `is.na()`, including
 #' `NaN`, tagged missing values, and SPSS user-missing codes, become `NA`.
 #' Character input is returned unchanged. Numbers are written in full, so 100000
-#' gives `"100000"`, not `"1e+05"`. Dates use [as.character()], giving
-#' `"2024-01-31"` rather than day numbers.
+#' gives `"100000"`, not `"1e+05"`, with at most 15 significant digits and a
+#' decimal point whatever `options(OutDec)` says. Dates use [as.character()],
+#' giving `"2024-01-31"` rather than day numbers.
 #'
 #' The sjlabelled package also exports `as_numeric()` and `as_character()`. They
 #' differ: sjlabelled's `as_numeric()` turns non-numeric text into factor codes,
@@ -200,6 +201,8 @@ tostring <- function(x) {
   if (is.character(x)) {
     return(x)
   }
+  # Text uses a decimal point whatever the display option, as in Stata.
+  rlang::local_options(OutDec = ".")
   missing_value <- is.na(x)
   if (is.factor(x)) {
     x <- as.integer(x)
@@ -210,16 +213,35 @@ tostring <- function(x) {
   if (is.numeric(x) && !is.object(x)) {
     # Rewrite exponents with the same 15 significant digits as as.character().
     exponent <- which(is.finite(x) & grepl("e", out, fixed = TRUE))
-    out[exponent] <- vapply(
-      x[exponent],
-      function(value) {
-        format(value, digits = 15, scientific = FALSE, trim = TRUE)
-      },
-      character(1)
-    )
+    out[exponent] <- tostring_fixed(x[exponent])
   }
   out[missing_value] <- NA_character_
   out
+}
+
+# Fixed notation from the 15 significant digits of "%.14e", padding with
+# zeros. format(scientific = FALSE) prints platform-dependent digits beyond
+# double precision for large magnitudes.
+tostring_fixed <- function(x) {
+  if (!length(x)) {
+    return(character())
+  }
+  scientific <- sprintf("%.14e", abs(x))
+  mantissa <- sub("e.*$", "", scientific)
+  digits <- sub("0+$", "", sub(".", "", mantissa, fixed = TRUE))
+  # Position of the decimal point after the leading digit.
+  point <- as.integer(sub("^.*e", "", scientific)) + 1L
+  size <- nchar(digits)
+  body <- ifelse(
+    point >= size,
+    paste0(digits, strrep("0", pmax(point - size, 0L))),
+    ifelse(
+      point > 0L,
+      paste0(substr(digits, 1L, point), ".", substr(digits, point + 1L, size)),
+      paste0("0.", strrep("0", pmax(-point, 0L)), digits)
+    )
+  )
+  paste0(ifelse(x < 0, "-", ""), body)
 }
 
 #' @export

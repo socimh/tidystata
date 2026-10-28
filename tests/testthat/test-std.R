@@ -73,3 +73,12 @@ test_that("std() and pct() treat SPSS user-missing values as missing", {
 test_that("pc() is missing when the total is infinite", {
   expect_identical(pc(c(1, Inf)), c(NA_real_, NA_real_))
 })
+
+
+test_that("std() uses a signed scale multiplier", {
+  out <- std(c(1, 2, 3, NA), mean = 10, sd = -2)
+  expect_equal(out, c(12, 10, 8, NA))
+  expect_equal(mean(out, na.rm = TRUE), 10)
+  expect_equal(stats::sd(out, na.rm = TRUE), 2)
+  expect_equal(std(c(1, 2, 3, NA), mean = 10, sd = 0), c(10, 10, 10, NA))
+})

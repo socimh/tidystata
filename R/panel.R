@@ -17,19 +17,19 @@
 #' @param n A single non-negative whole number: the number of periods
 #'   (`stata_lag()`, `stata_lead()`) or the difference order (`stata_diff()`).
 #' @param time The time variable, unique within each panel. Supported types:
-#' * numbers, including labelled numbers and Stata `%tm`, `%tq` or `%ty`
-#'   variables read by haven, which arrive as plain numbers;
-#' * `Date` and date-times (`POSIXct`/`POSIXlt`), with `unit`;
-#' * period classes, which need no `unit`: tsibble's `yearweek()`, `yearmonth()`
-#'   and `yearquarter()`, and zoo's `yearmon` and `yearqtr`;
-#' * ordered factors, such as survey waves, where each level is one period in
-#'   level order, so an unused level is a gap.
+#'   * numbers, including labelled numbers and Stata `%tm`, `%tq` or `%ty`
+#'     variables read by haven, which arrive as plain numbers;
+#'   * `Date` and date-times (`POSIXct`/`POSIXlt`), with `unit`;
+#'   * period classes, which need no `unit`: tsibble's `yearweek()`,
+#'     `yearmonth()` and `yearquarter()`, and zoo's `yearmon` and `yearqtr`;
+#'   * ordered factors, such as survey waves, where each level is one period in
+#'     level order, so an unused level is a gap.
 #'
-#' Missing times give missing results, except for zero-order differences.
-#' Text and unordered factors are not
-#' accepted, because their sorted order need not be the time order (`"W10"`
-#' sorts before `"W2"`); convert them first, for example with
-#' `as.numeric(as.character(year))` or `factor(wave, levels, ordered = TRUE)`.
+#'   Missing times give missing results, except for zero-order differences.
+#'   Text and unordered factors are not accepted, because their sorted order
+#'   need not be the time order (`"W10"` sorts before `"W2"`); convert them
+#'   first, for example with `as.numeric(as.character(year))` or
+#'   `factor(wave, levels, ordered = TRUE)`.
 #' @param delta The length of one period in units of `time` (or of `unit`), like
 #'   the `delta()` option of `xtset`. For example, `delta = 5` for data every
 #'   five years.
@@ -41,8 +41,9 @@
 #'   Weeks follow Stata's `%tw`: each year has 52 weeks starting on 1 January,
 #'   so the last week has 8 or 9 days (tsibble's `yearweek()` keeps its ISO
 #'   weeks). For date-times, seconds measure elapsed time; minute and larger
-#'   periods use the local clock of their time zone. Must be `NULL` for numbers
-#'   and period classes.
+#'   periods use the local clock of their time zone. Must be `NULL` for numbers.
+#'   Period classes accept `NULL` or their exact natural unit (`"week"`,
+#'   `"month"` or `"quarter"`).
 #'
 #' @returns A vector with the length and row order of `x`, with `NA` where the
 #'   required period is absent or time is missing. Lags and leads retain the

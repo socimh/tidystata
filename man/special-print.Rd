@@ -2,19 +2,10 @@
 % Please edit documentation in R/preview.R
 \name{special-print}
 \alias{special-print}
-\alias{preview_table}
-\alias{unpreview_table}
 \alias{print_headtail}
-\alias{print_all}
 \alias{print_interval}
-\alias{slice_headtail}
-\alias{slice_interval}
-\title{Preview complete tables or select representative rows}
+\title{Print selected rows once}
 \usage{
-preview_table(.data, style = c("headtail", "interval"), n = 10)
-
-unpreview_table(.data)
-
 print_headtail(
   .data,
   n = 10,
@@ -24,8 +15,6 @@ print_headtail(
   max_footer_lines = NULL
 )
 
-print_all(.data, ..., width = Inf)
-
 print_interval(
   .data,
   n = 10,
@@ -34,111 +23,48 @@ print_interval(
   max_extra_cols = NULL,
   max_footer_lines = NULL
 )
-
-slice_headtail(.data, n = 10)
-
-slice_interval(.data, n = 10)
 }
 \arguments{
-\item{.data}{An in-memory data frame, data.table, ordinary tibble, grouped
-tibble, rowwise tibble, or \code{sf} data frame (geometry is kept when slicing
-and printed as a column). Convert other subclasses explicitly before
-wrapping; collect lazy tables first. Apply the wrapper separately to lists
-of tables.}
+\item{.data}{An in-memory data frame, data.table, ordinary/grouped/rowwise
+tibble, or \code{sf} data frame. Collect lazy tables and convert other subclasses
+explicitly first. Apply previews separately to lists of tables.}
 
-\item{style}{Either \code{"headtail"} or \code{"interval"}.}
+\item{n}{Total number of data rows to display, defaulting to 10. Supply a
+positive whole number or \code{Inf} for all rows; omission markers do not count.}
 
-\item{n}{Total number of rows to display or select: a positive whole number
-or \code{Inf} for all rows. An odd head/tail budget gives the head the extra
-row. With \code{n = 1}, both styles select the first row. Short tables do not
-repeat rows.}
-
-\item{width}{Console width, passed to tibble formatting. \code{NULL} uses the
-current console width; \code{Inf} (the default for \code{print_all()}) shows all
-columns.}
+\item{width}{Console width passed to tibble formatting. \code{NULL} (default)
+uses the current console width; \code{Inf} shows every column.}
 
 \item{...}{Additional arguments passed to tibble formatting.}
 
-\item{max_extra_cols, max_footer_lines}{Tibble formatting controls.}
+\item{max_extra_cols, max_footer_lines}{Maximum number of additional columns
+to describe and footer lines to print, respectively. \code{NULL} uses tibble's
+defaults.}
 }
 \value{
-\itemize{
-\item \code{preview_table()}: the complete input container with an additional
-\code{tidystata_preview} class and stored print settings.
-\item \code{unpreview_table()}: the table without that class or its settings,
-preserving grouping.
-\item Print helpers: the original input, invisibly.
-\item Slice helpers: the selected rows in the input container, retaining valid
-grouping and existing preview settings. Explicit data.frame row names are
-preserved; automatic row names are regenerated as in dplyr slicing.
-}
-
-Supported containers are listed under \code{.data}; other subclasses are
-unsupported.
+\code{.data}, unchanged and invisibly, including all rows, columns,
+classes, grouping, and any existing preview preferences.
 }
 \description{
-Control how a complete table is printed, or select a smaller set of rows:
+Display selected rows in the console without storing print preferences.
 \itemize{
-\item \code{preview_table()}: Keep the complete data and store a print preference.
-By default, show the first five and last five rows; interval previews
-show evenly spaced rows.
-\item \code{unpreview_table()}: Remove the stored print preference, keeping all data.
-\item \code{print_headtail()}: Print the first and last rows once, keeping all data.
-\item \code{print_interval()}: Print evenly spaced rows once, keeping all data.
-\item \code{print_all()}: Print every row and column, like Stata's \code{list}.
-\item \code{slice_headtail()}: Return only the selected first and last rows.
-\item \code{slice_interval()}: Return only the selected evenly spaced rows.
+\item \code{print_headtail()}: Print the first and last rows.
+\item \code{print_interval()}: Print evenly spaced rows.
 }
 }
 \details{
-Preview settings survive table subsetting/replacement, dplyr mutation,
-filtering, sorting, column selection, renaming, relocation, distinct rows,
-slicing, grouping, rowwise operations, summaries and reframing, as well as
-tidyr's \code{pivot_longer()} and \code{pivot_wider()}. Grouping follows the underlying
-operation. Joins inherit the left input's settings; \code{bind_rows()} inherits
-the first input's settings. Arbitrary third-party transformations and direct
-\code{vctrs::vec_rbind()} are not covered by this guarantee.
-
-Positions shown in the margin refer to the current table, not the original
-data before filtering or sorting. Previewing does not change column values,
-classes, labels, or the data used in subsequent calculations. Grouped tables
-use a global row budget, not a separate budget per group.
-
-\code{print(x, n = Inf)} displays the entire table. Per-call formatting overrides
-do not change stored settings. Explicit \code{tibble::as_tibble()} or
-\code{as.data.frame()} conversions remove the preview, as does column extraction.
-This feature controls console printing, not HTML widgets or GUI viewers. Only
-the temporary display is converted to a tibble. Wrapping and unwrapping a
-data.table creates an independent copy; native operations such as \verb{:=} on a
-wrapped data.table retain ordinary reference semantics. External dplyr/tidyr
-verbs determine their own result container and grouping, while preview
-settings follow the result.
+Row budgets and omission markers follow \code{\link[=preview]{preview()}}: head/tail output marks
+an omitted middle with one row of dots; interval output has no separator
+rows. Use \code{n = Inf} and \code{width = Inf} to print every row and column.
 }
 \examples{
-x <- preview_table(tibble::tibble(id = 1:30, value = (1:30)^2))
-x
-
-dplyr::filter(x, id > 10)
-
-preview_table(x, style = "interval", n = 5)
-
-print(x, n = Inf)
-
-unpreview_table(x)
-
 print_headtail(lifeexp, n = 6)
 
 print_interval(lifeexp, n = 6)
 
-print_all(head(lifeexp, 12))
-
-slice_headtail(lifeexp, n = 6)
-
-slice_interval(lifeexp, n = 6)
+print_headtail(lifeexp, n = Inf, width = Inf)
 }
 \seealso{
-Other selection and preview functions:
-\code{\link[=select_or_transmute]{select_or_transmute()}},
-\code{\link[=varlist]{varlist()}}
+\code{\link[=preview]{preview()}} for persistent print preferences.
 }
-\concept{selection and preview functions}
+\concept{one-time printing functions}

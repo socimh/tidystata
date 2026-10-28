@@ -41,6 +41,65 @@ aggregation_percentages <- function(n, missing, locs) {
 }
 
 aggregation_counts <- function(data, weights) {
+  compact <- nrow(data) >= 100000L &&
+    ncol(data) == 2L &&
+    all(vapply(
+      data,
+      function(x) {
+        (!is.object(x) &&
+          typeof(x) %in% c("logical", "integer", "character")) ||
+          identical(class(x), "factor") ||
+          identical(class(x), c("ordered", "factor"))
+      },
+      logical(1)
+    ))
+  if (compact) {
+    integer_column <- which(vapply(
+      data,
+      function(x) typeof(x) %in% c("integer", "logical"),
+      logical(1)
+    ))[1L]
+    if (!is.na(integer_column)) {
+      range <- tab_integer_range(data[[integer_column]])
+      other <- data[[3L - integer_column]]
+      if (!is.null(range)) {
+        order <- integer()
+        if (is.character(other)) {
+          dictionary <- tab_character_id(other, nrow(data) %/% sum(range[2:3]))
+          other_range <- integer()
+          if (!is.null(dictionary)) {
+            keys <- vctrs::vec_locate_sorted_groups(
+              vctrs::vec_slice(other, dictionary[[2L]]),
+              nan_distinct = TRUE
+            )
+            order <- integer(length(dictionary[[2L]]))
+            order[vapply(keys$loc, `[[`, integer(1), 1L)] <- seq_along(order) -
+              1L
+            other <- dictionary[[1L]]
+          }
+        } else {
+          other_range <- tab_integer_range(other)
+          dictionary <- other_range
+        }
+        if (!is.null(dictionary)) {
+          counts <- tab_count_dense(
+            data[[integer_column]],
+            range,
+            other,
+            other_range,
+            order,
+            weights,
+            integer_column == 1L
+          )
+          if (!is.null(counts)) {
+            out <- as.list(vctrs::vec_slice(data, counts[[1L]]))
+            out$n <- counts[[2L]]
+            return(out)
+          }
+        }
+      }
+    }
+  }
   groups <- vctrs::vec_locate_sorted_groups(data, nan_distinct = TRUE)
   out <- as.list(groups$key)
   out$n <- if (is.null(weights)) {

@@ -214,7 +214,7 @@ test_that("capture gives one failure notice with the cause and partial-effect ca
   expect_identical(result, list(value = NULL, visible = FALSE))
   expect_length(messages, 1L)
   expect_match(messages, "Captured expression did not complete.", fixed = TRUE)
-  expect_match(messages, "Reason: missing {score}", fixed = TRUE)
+  expect_match(messages, "missing {score}", fixed = TRUE)
   expect_match(
     messages,
     "Earlier changes, if any, were not undone.",
@@ -223,6 +223,20 @@ test_that("capture gives one failure notice with the cause and partial-effect ca
   expect_no_message(capture(stop("hidden failure"), quiet = TRUE))
   expect_no_message(capture(FALSE))
   expect_no_message(capture(NULL))
+})
+
+test_that("capture keeps the call and bullets of the original error", {
+  fail_with_bullets <- function() {
+    cli::cli_abort(c("Can't compute.", x = "Column not found."))
+  }
+  message <- testthat::capture_messages(capture(fail_with_bullets()))
+  expect_length(message, 1L)
+  expect_match(message, "fail_with_bullets()", fixed = TRUE)
+  expect_match(message, "Can't compute.\n", fixed = TRUE)
+  expect_match(message, "Column not found.", fixed = TRUE)
+  message <- testthat::capture_messages(capture(stop("plain failure")))
+  expect_no_match(message, "doTryCatch", fixed = TRUE)
+  expect_match(message, "plain failure", fixed = TRUE)
 })
 
 test_that("nested captures report a failure once and respect quiet", {

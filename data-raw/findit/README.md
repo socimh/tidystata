@@ -5,6 +5,9 @@ their stable IDs. `*-reference.json` files are the authoritative sources for
 new examples: code, bilingual explanations, variable roles, source references,
 fixture setup and independently stated checks live together. `functions.csv`
 maintains the R function/package dictionary.
+Keep its English and Chinese descriptions current for every exported tidystata
+function, including helpers without a direct Stata equivalent. The re-exported
+pipe is excluded. Refresh affected example notes when a function contract changes.
 
 Run `python data-raw/findit/build-reference.py` from the repository root to
 regenerate the distributed CSVs, additional R template annotations and execution

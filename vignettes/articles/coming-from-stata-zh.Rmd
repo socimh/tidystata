@@ -11,9 +11,8 @@ counts <- tidystata:::findit_reference_counts()
 
 [English version](coming-from-stata.html)
 
-需要按章节浏览、搜索或展开替代实现时，请打开
-**[Stata 转 R 参考手册](https://www.socimh.com/stata-to-r/zh/)**。
-手册提供中英文两个版本，每章均可切换语言。本页继续保留完整的单页对照表。
+本完整参考指南属于 tidystata 网站。可通过顶部导航返回函数文档或其他文章，
+通过目录跳转到所需章节。上方语言链接可在中英文版本之间切换。
 
 熟悉 Stata 的用户已经知道自己想做什么，需要的只是知道在 R 中怎么写。本页把 Stata
 命令和完成同样任务的 R 代码并列：tidystata 中有 Stata 风格函数的，使用 tidystata；其他情况使用常用的
@@ -62,3 +61,10 @@ R 函数索引包含 `r counts$r_functions` 个函数与包的组合。
 ```{r, echo = FALSE, results = "asis"}
 cat(tidystata:::findit_reference_html(TRUE), sep = "\n")
 ```
+
+## 分章版本
+
+如需按独立章节浏览，可打开
+[独立的 Stata 转 R 参考手册](https://www.socimh.com/stata-to-r/zh/){target="_blank" rel="noopener"}，
+其中提供章节导航和可展开的替代实现。该版本位于另一网站，会在新标签页打开，
+保留当前的 tidystata 网站供继续查阅。

@@ -9,8 +9,10 @@
 #'   grouped [dplyr::mutate()] (or with `.by`) to flag the first row of each
 #'   group.
 #' @param .missing If `FALSE` (default), rows with a missing value in any
-#'   argument are `FALSE`, as Stata's `tag()` does without its `missing` option.
-#'   If `TRUE`, missing values form groups of their own.
+#'   explicitly supplied argument are `FALSE`, as Stata's `tag()` does without
+#'   its `missing` option. If `TRUE`, missing values form groups of their own.
+#'   With no arguments, flag the first row of every current data-mask group,
+#'   including groups with missing keys, regardless of `.missing`.
 #'
 #' @returns A logical vector with one value per input row, or per row in the
 #'   current data-mask group when no arguments are supplied.
@@ -31,12 +33,11 @@
 #' # Including the missing group
 #' dplyr::mutate(panel, first = is_first(id, .missing = TRUE))
 #'
-#' # An alternative
+#' # The no-argument shortcut also includes the missing id group
 #' dplyr::mutate(panel, first = is_first(), .by = id)
 #'
 #' # Count panels
 #' is_first(panel$id) |> sum()
-#'
 #' @name is_first
 #' @family data checking functions
 NULL

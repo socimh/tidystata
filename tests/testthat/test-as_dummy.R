@@ -135,3 +135,50 @@ test_that("values that format alike name the collision", {
   )
   expect_named(as_dummy(data, x, .names = "index"), c("x", "x_1", "x_2"))
 })
+
+test_that("removed source names can be reused by indicators", {
+  inputs <- list(
+    data.frame(x = 1:2, x_1 = c(3, 4)),
+    tibble::tibble(x = 1:2, x_1 = c(3, 4))
+  )
+  if (requireNamespace("data.table", quietly = TRUE)) {
+    inputs <- c(inputs, list(data.table::as.data.table(inputs[[1L]])))
+  }
+  expected <- list(
+    x_1 = structure(c(1L, 0L), label = "x==1"),
+    x_2 = structure(c(0L, 1L), label = "x==2"),
+    x_1_3 = structure(c(1L, 0L), label = "x_1==3"),
+    x_1_4 = structure(c(0L, 1L), label = "x_1==4")
+  )
+  for (data in inputs) {
+    before <- if (inherits(data, "data.table")) data.table::copy(data) else data
+    out <- as_dummy(data, x, x_1, .remove = TRUE)
+    expect_identical(class(out), class(data))
+    expect_identical(as.list(out), expected)
+    expect_identical(data, before)
+    expect_error(as_dummy(data, x, .remove = TRUE), "already exists")
+  }
+})
+
+test_that("data.table results cannot silently lose rows with no columns", {
+  skip_if_not_installed("data.table")
+  data <- data.table::data.table(x = c(NA, NA))
+  before <- data.table::copy(data)
+  expect_error(
+    as_dummy(data, x, .remove = TRUE),
+    "retain.*source|identifier"
+  )
+  expect_identical(data, before)
+  expect_identical(as_dummy(data, x), data)
+  empty <- as_dummy(data[0, ], x, .remove = TRUE)
+  expect_s3_class(empty, "data.table")
+  expect_identical(dim(empty), c(0L, 0L))
+  with_id <- data.table::data.table(id = 1:2, x = c(NA, NA))
+  expect_identical(
+    as_dummy(with_id, x, .remove = TRUE),
+    data.table::data.table(id = 1:2)
+  )
+  # A temporary absence of columns is safe when indicators supply the result.
+  observed <- as_dummy(data.table::data.table(x = 1:2), x, .remove = TRUE)
+  expect_identical(dim(observed), c(2L, 2L))
+})

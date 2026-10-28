@@ -8,7 +8,7 @@
 #' * `variables_search()`: Search that list by name or variable label, rather
 #'   than by the values stored in the columns.
 #'
-#' @param .data The input data frame, tibble, or data.table.
+#' @param .data A data frame, tibble, or data.table.
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to select or
 #'   rename before listing or searching. Omit to include all columns. Computed
 #'   columns are not created by this argument.
@@ -54,12 +54,12 @@
 #' variables_search(lifeexp, "n")
 #'
 #' variables_search(lifeexp, "^country$")
-#'
 #' @family inspection functions
 
 #' @rdname variables
 #' @export
 variables <- function(.data, ...) {
+  check_data_frame(.data)
   if (!missing(...)) {
     .data <- dplyr::select(.data, ...)
   }
@@ -77,6 +77,7 @@ variables <- function(.data, ...) {
 #' @rdname variables
 #' @export
 variables_search <- function(.data, string, ...) {
+  check_data_frame(.data)
   check_string(string)
   if (is.character(string)) {
     string <- varlist_wildcards(string) |>

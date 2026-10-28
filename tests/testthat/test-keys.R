@@ -174,6 +174,28 @@ test_that("duplicates treat missing values as equal, as Stata does", {
   expect_identical(duplicates_tag(data)$dup, c(1L, 1L, 0L))
 })
 
+test_that("duplicate identity distinguishes NaN and stored SPSS missing codes", {
+  tagged <- tibble::tibble(
+    id = c(NA, haven::tagged_na("a"), haven::tagged_na("b"), NaN, NaN, 1)
+  )
+  expect_identical(duplicates_tag(tagged, id)$dup, c(2L, 2L, 2L, 1L, 1L, 0L))
+  expect_error(isid(tagged, id, .missing = TRUE), "does not uniquely identify")
+  spss <- tibble::tibble(
+    id = haven::labelled_spss(
+      c(98, 99, 98, 97, 99, NA),
+      na_values = 99,
+      na_range = c(97, 98)
+    )
+  )
+  expect_identical(duplicates_tag(spss, id)$dup, c(1L, 1L, 1L, 0L, 1L, 0L))
+  distinct_codes <- spss[c(1, 2, 4, 6), ]
+  expect_error(isid(distinct_codes, id), "should never be missing")
+  expect_identical(
+    suppressMessages(isid(distinct_codes, id, .missing = TRUE)),
+    distinct_codes
+  )
+})
+
 test_that("key functions keep data.frame and data.table containers", {
   frame <- as.data.frame(panel)
   expect_s3_class(suppressMessages(duplicates_drop(frame)), "data.frame")

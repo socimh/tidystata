@@ -512,7 +512,7 @@ test_that("select_or_transmute reports both failed branches without replaying th
   expect_match(conditionMessage(err), "branch failure", fixed = TRUE)
 })
 
-test_that("select_or_transmute evaluates computed expressions exactly once", {
+test_that("select_or_transmute evaluates computed expressions once when selection succeeds", {
   local({
     old <- get0(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     on.exit(
@@ -538,6 +538,17 @@ test_that("select_or_transmute evaluates computed expressions exactly once", {
     expect_identical(calls, 1L)
     expect_identical(.Random.seed, expected_state)
   })
+})
+
+test_that("select_or_transmute reruns computed expressions in a successful fallback", {
+  calls <- 0L
+  compute <- function(x) {
+    calls <<- calls + 1L
+    x * 2 + calls
+  }
+  out <- select_or_transmute(tibble::tibble(x = 1:2), a = x, a = compute(x))
+  expect_identical(calls, 2L)
+  expect_identical(out, tibble::tibble(a = c(4, 6)))
 })
 
 test_that("select_or_transmute emits successful selector warnings exactly once", {

@@ -1338,3 +1338,19 @@ test_that("tabulation reports invalid input", {
   })
   expect_snapshot(out <- tab(tibble::tibble(n = 1:2), n))
 })
+
+
+test_that("frequency group order uses weighted totals after missing keys", {
+  data <- data.frame(
+    g = c("a", "b", "b", NA, NA),
+    x = c(1, 1, 2, 1, 2),
+    w = c(5, 1, 1, 10, 10)
+  )
+  for (fun in list(tab, fre)) {
+    out <- fun(data, x, .by = g, .wt = w, .group_order = "frequency")
+    expect_identical(unique(out$g), c("a", "b", NA_character_))
+    expect_equal(out$n[out$g %in% "a" & out$x %in% c(1, 2)], 5)
+    expect_equal(out$n[out$g %in% "b" & out$x %in% c(1, 2)], c(1, 1))
+    expect_equal(out$n[is.na(out$g) & out$x %in% c(1, 2)], c(10, 10))
+  }
+})

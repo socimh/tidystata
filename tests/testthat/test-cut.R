@@ -15,10 +15,6 @@ cut_test_warnings <- function(code) {
   })
   messages
 }
-cut_empty_range_warnings <- c(
-  "no non-missing arguments to min; returning Inf",
-  "no non-missing arguments to max; returning -Inf"
-)
 
 # ============================================================================
 # CHALLENGING TESTS - xtile
@@ -278,8 +274,12 @@ test_that("all cut functions: handle Inf values", {
   expect_false(is.na(result_q[4]))
   expect_false(is.na(result_b[4]))
 
-  # cut_length doesn't support Inf values
-  expect_error(cut_length(x, n = 4))
+  # cut_length() needs a finite range
+  expect_error(
+    cut_length(x, n = 4),
+    "only finite values",
+    class = "rlang_error"
+  )
 })
 
 test_that("all cut functions: handle -Inf values", {
@@ -293,8 +293,17 @@ test_that("all cut functions: handle -Inf values", {
   expect_false(is.na(result_q[1]))
   expect_false(is.na(result_b[1]))
 
-  # cut_length doesn't support Inf values
-  expect_error(cut_length(x, n = 4))
+  # cut_length() needs a finite range
+  expect_error(
+    cut_length(x, n = 4),
+    "only finite values",
+    class = "rlang_error"
+  )
+  # NaN is missing, as for is.na(), and does not block equal-width bins.
+  expect_identical(
+    as.integer(cut_length(c(1, NaN, 3, 5), n = 2)),
+    c(1L, NA, 2L, 2L)
+  )
 })
 
 # ============================================================================
@@ -368,15 +377,16 @@ test_that("all cut functions: empty vector errors or handles gracefully", {
   # Quantiles require at least one observed value.
   expect_error(xtile(x, n = 4), "non-missing")
   expect_identical(
-    cut_test_warnings(expect_error(cut_length(x, n = 4), "finite")),
-    cut_empty_range_warnings
+    cut_test_warnings(expect_error(cut_length(x, n = 4), "non-missing")),
+    character()
   )
   expect_identical(
     cut_test_warnings(result <- cut_breaks(x, breaks = 50)),
-    cut_empty_range_warnings
+    character()
   )
   expect_s3_class(result, "ordered")
   expect_length(result, 0)
+  expect_identical(levels(result), c("[-Inf,50)", "[50, Inf]"))
 })
 
 test_that("all cut functions: all NA errors", {
@@ -887,4 +897,20 @@ test_that("binning requires deliberate conversion of integer64 payloads", {
     cut_breaks(1:4, breaks = bit64::as.integer64(2)),
     "integer64.*explicitly|explicitly.*integer64"
   )
+})
+
+test_that("xtile() recycles scalar weights and codes zero-weight rows", {
+  expect_identical(
+    xtile(1:4, 2, wt = 2, labels = FALSE),
+    c(1L, 1L, 2L, 2L)
+  )
+  # The positive-weight values 0 and 10 set the median at 5. Values with
+  # zero weight still receive codes on either side of that boundary.
+  expect_identical(
+    xtile(c(0, 1, 3, 4, 10), 2, wt = c(1, 0, 0, 0, 1), labels = FALSE),
+    c(1L, 1L, 1L, 1L, 2L)
+  )
+  for (weight in c(Inf, -Inf)) {
+    expect_error(xtile(1:4, 2, wt = weight), "must be finite")
+  }
 })

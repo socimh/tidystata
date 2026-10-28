@@ -7,16 +7,19 @@
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> Existing columns to select or
 #'   rename. Omit to include all columns. Computed columns are not created by
 #'   this argument.
-#' @param .type `"vector"` (the default) returns the names as a character
-#'   vector, like Stata's `ds`; `"table"` returns them as a one-column table.
+#' @param .type Output form. `"vector"` (default) returns the selected names as
+#'   a character vector, like Stata's `ds`. `"table"` returns a one-column table
+#'   in the input's table class, or a tibble for a character inventory.
+#'   `"tibble"` always returns a one-column tibble.
 #'
-#' @returns `ds()` returns a character vector. `ds(.type = "table")` returns a
-#'   table with one character column, `name`, and one row per selected name, in
-#'   selection order. On ungrouped data, an empty selection returns a
-#'   zero-length vector or zero-row table. Tables preserve the input's
+#' @returns `ds()` returns a character vector. With `.type = "table"` or
+#'   `"tibble"`, it returns one character column, `name`, and one row per
+#'   selected name, in selection order. On ungrouped data, an empty selection
+#'   returns a zero-length vector or zero-row table. Tables preserve the input's
 #'   data.frame, tibble, or data.table container and supported preview settings,
 #'   without grouping or arbitrary subclasses; character inventories return a
-#'   tibble in table mode.
+#'   tibble in table mode. Explicit `.type = "tibble"` overrides the input's
+#'   table class and preview settings.
 #'
 #' @details
 #' Selection order and renamed column names follow [dplyr::select()]. On a
@@ -40,6 +43,8 @@
 #' starwars <- dplyr::starwars
 #' ds(starwars, ends_with("color"), .type = "table")
 #'
+#' ds(starwars, ends_with("color"), .type = "tibble")
+#'
 #' # Save a programmatic selection for later stages of a pipeline.
 #' numeric_names <- ds(lifeexp, where(is.numeric))
 #' dplyr::select(lifeexp, dplyr::all_of(numeric_names))
@@ -49,11 +54,18 @@
 
 #' @rdname names
 #' @export
-ds <- function(.data, ..., .type = c("vector", "table")) {
+ds <- function(.data, ..., .type = c("vector", "table", "tibble")) {
+  if (!is.data.frame(.data) && !(is.character(.data) && is.null(dim(.data)))) {
+    stop_input_type(.data, "a data frame or a character vector")
+  }
   .type <- rlang::arg_match(.type)
-  if (.type == "table") {
+  if (.type != "vector") {
     out <- tibble::as_tibble_col(ds(table_working_data(.data), ...), "name")
-    return(table_restore(out, .data))
+    return(table_restore(
+      out,
+      .data,
+      if (.type == "tibble") "tibble" else "auto"
+    ))
   }
   if (is.character(.data) && is.null(dim(.data))) {
     if (anyNA(.data) || any(!nzchar(trimws(.data))) || anyDuplicated(.data)) {

@@ -651,9 +651,9 @@ test_that("vctrs record types and complete element identities remain intact", {
   expect_identical(out$unique, 1L)
 })
 
-test_that("S4 metadata uses pillar descriptions without interpreting class substrings", {
+test_that("S4 metadata retains full fallback classes without interpreting substrings", {
   x <- methods::getClass("numeric")
-  expect_identical(var_type(x), pillar::type_sum(x))
+  expect_identical(var_type(x), class(x)[[1L]])
   expect_identical(var_type(x, abbr = TRUE), pillar::type_sum(x))
   expect_identical(var_unit(x), NA_character_)
 })
@@ -730,4 +730,120 @@ test_that("var_type returns visible type names for empty and named vectors", {
 
 test_that("abbr must be TRUE or FALSE", {
   expect_error(var_type(1, abbr = NA), "`abbr` must be `TRUE` or `FALSE`")
+})
+
+test_that("descriptive fallback retains full S3 and qualified class names", {
+  for (class_name in c(
+    "tidystata_long_measurement",
+    "example::LongMeasurement"
+  )) {
+    for (values in list(c(1, NA, 2), numeric(), c(NA_real_, NA_real_))) {
+      x <- structure(values, class = class_name)
+      before <- serialize(x, NULL)
+      expect_identical(var_type(x, abbr = TRUE), pillar::type_sum(x))
+      expect_identical(var_type(x), class_name)
+      expect_identical(
+        withVisible(var_type(x)),
+        list(value = class_name, visible = TRUE)
+      )
+      expect_identical(serialize(x, NULL), before)
+    }
+  }
+})
+
+test_that("descriptive fallback retains full S4 class names", {
+  class_name <- "tidystata_long_s4_measurement"
+  generator <- methods::setClass(class_name, slots = c(value = "numeric"))
+  withr::defer(methods::removeClass(class_name))
+  for (values in list(c(1, NA, 2), numeric(), c(NA_real_, NA_real_))) {
+    x <- generator(value = values)
+    before <- serialize(x, NULL)
+    expect_identical(var_type(x, abbr = TRUE), pillar::type_sum(x))
+    expect_identical(var_type(x), class_name)
+    expect_identical(serialize(x, NULL), before)
+  }
+})
+
+test_that("registered display methods preserve default-looking custom labels", {
+  for (package in c("pillar", "vctrs")) {
+    local({
+      generic <- if (package == "pillar") "type_sum" else "vec_ptype_abbr"
+      class_name <- paste0("tidystata_", package, "_display")
+      label <- unname(abbreviate(class_name, 8L))
+      namespace <- asNamespace(package)
+      registry <- get(".__S3MethodsTable__.", envir = namespace)
+      registerS3method(
+        generic,
+        class_name,
+        function(x, ...) label,
+        envir = namespace
+      )
+      withr::defer(rm(
+        list = paste(generic, class_name, sep = "."),
+        envir = registry
+      ))
+      x <- structure(1:3, class = class_name)
+      expect_identical(var_type(x, abbr = TRUE), label)
+      expect_identical(var_type(x), label)
+    })
+  }
+})
+
+test_that("inherited display methods remain authoritative for S3 and S4 classes", {
+  parent <- "tidystata_display_parent"
+  child <- "tidystata_display_child"
+  methods::setClass(parent, slots = c(value = "numeric"))
+  generator <- methods::setClass(child, contains = parent)
+  withr::defer({
+    methods::removeClass(child)
+    methods::removeClass(parent)
+  })
+  for (package in c("pillar", "vctrs")) {
+    local({
+      generic <- if (package == "pillar") "type_sum" else "vec_ptype_abbr"
+      namespace <- asNamespace(package)
+      registry <- get(".__S3MethodsTable__.", envir = namespace)
+      label <- unname(abbreviate(child, 8L))
+      registerS3method(
+        generic,
+        parent,
+        function(x, ...) label,
+        envir = namespace
+      )
+      withr::defer(rm(
+        list = paste(generic, parent, sep = "."),
+        envir = registry
+      ))
+      objects <- list(
+        structure(1:3, class = c(child, parent)),
+        generator(value = 1:3)
+      )
+      for (x in objects) {
+        compact <- var_type(x, abbr = TRUE)
+        expect_identical(var_type(x), compact)
+      }
+    })
+  }
+})
+
+test_that("explicit pillar labels remain authoritative with and without dimensions", {
+  class_name <- "tidystata_explicit_display"
+  label <- unname(abbreviate(class_name, 8L))
+  for (values in list(1:3, matrix(1:4, 2))) {
+    x <- structure(values, class = class_name, pillar = list(label = label))
+    compact <- var_type(x, abbr = TRUE)
+    expect_identical(var_type(x), compact)
+  }
+})
+
+test_that("descriptive labels improve codebook without changing numeric eligibility", {
+  x <- structure(c(1, NA, 2), class = "tidystata_long_measurement")
+  data <- tibble::tibble(value = x)
+  out <- codebook(data)
+  expect_identical(out$type, "tidystata_long_measurement")
+  expect_identical(out$n, 2L)
+  expect_identical(out$unique, 2L)
+  expect_identical(as_numeric(x), rep(NA_real_, 3L))
+  expect_warning(expect_error(summ(data), "None"), "non-numeric")
+  expect_equal(tab(data)$n, c(1L, 1L, 1L))
 })
