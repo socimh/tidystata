@@ -217,7 +217,7 @@ test_that("capture gives one failure notice with the cause and partial-effect ca
   expect_match(messages, "missing {score}", fixed = TRUE)
   expect_match(
     messages,
-    "Earlier changes, if any, were not undone.",
+    "Changes made before the error may persist.",
     fixed = TRUE
   )
   expect_no_message(capture(stop("hidden failure"), quiet = TRUE))

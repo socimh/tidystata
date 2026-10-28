@@ -19,7 +19,7 @@
       # merge() [base]: Merge two data frames (base R)
         Related Stata: merge
       
-      # 17 more examples. To see them all: findit("merge 1:1 id, keep(match)") |> print(n = Inf)
+      # 12 broader merge examples. Browse the family: findit(merge)
 
 ---
 
@@ -36,10 +36,25 @@
       R:     pivot_wider(data, names_from = year, values_from = var, names_prefix = "var")
       # Note: Duplicate keys can create list-columns in pivot_wider(); Stata reshape wide rejects duplicate i()/j() combinations. Validate keys first.
       
+      # Convert a wide measurement stub to long rows [tidyr]
+      Stata: reshape long x, i(id) j(wave)
+      R:     data <- tidyr::pivot_longer(data,cols=c(x1,x2),names_to='wave',names_prefix='x',names_transform=list(wave=as.integer),values_to='x')
+      # Note: Fixed x1/x2 stub example; source names, stub and output names must be changed together.
+      
+      # Convert unique long measurements to wide columns [tidyr]
+      Stata: reshape wide x, i(id) j(wave)
+      R:     data <- tidyr::pivot_wider(data,id_cols=id,names_from=wave,values_from=x,names_prefix='x')
+      # Note: Requires unique id-wave pairs; duplicates must be resolved explicitly rather than silently aggregated.
+      
+      # Reshape multiple parallel measurement stubs [tidyr]
+      Stata: reshape long x y, i(id) j(wave)
+      R:     data <- tidyr::pivot_longer(data,cols=c(x1,x2,y1,y2),names_to=c('.value','wave'),names_pattern='([xy])([12])',names_transform=list(wave=as.integer))
+      # Note: Fixed two-stub example; all name patterns and source names must be changed together.
+      
       # reshape() [stats]: Reshape Grouped Data
         Related Stata: icc
       
-      # 7 more examples. To see them all: findit(reshape) |> print(n = Inf)
+      # 4 more relevant examples. To see them all: findit(reshape) |> print(n = Inf)
 
 # closest entries print under their own heading
 
@@ -54,14 +69,14 @@
       # Source: https://www.stata.com/manuals/dduplicates.pdf
       # R reference: https://socimh.github.io/tidystata/reference/
       
-      # Keep the first row for each key [tidystata]
-      Stata: duplicates drop x1 x2, force
-      R:     duplicates_drop(data, x1, x2, .force = TRUE)
-      # Note: distinct(data, x1, x2, .keep_all = TRUE) is the dplyr version.
-      # Source: https://www.stata.com/manuals/dduplicates.pdf
-      # R reference: https://socimh.github.io/tidystata/reference/
+      # Retain the first observation per duplicated key [tidystata]
+      Stata: duplicates drop id, force
+      R:     data <- tidystata::duplicates_drop(data, id, .force = TRUE)
+      # Source: https://www.stata.com/manuals/d.pdf
+      # R reference: https://socimh.github.io/tidystata/reference/keys.html
       
-      # 8 more examples. To see them all: findit("how do I remove duplicate rows") |> print(n = Inf)
+      # 8 more relevant examples. To see them all: findit("how do I remove duplicate rows") |> print(n = Inf)
+      # Only the 10 best candidates are retained; refine the query for a closer match.
 
 ---
 
@@ -82,7 +97,9 @@
       # Source: https://www.stata.com/manuals/dcontract.pdf
       # R reference: https://dplyr.tidyverse.org/reference/index.html
       
-      # 20 more examples. To see them all: findit("count how many people in each category") |> print(n = Inf)
+      # 8 more relevant examples. To see them all: findit("count how many people in each category") |> print(n = Inf)
+      # Only the 10 best candidates are retained; refine the query for a closer match.
+      # 10 broader count examples. Browse the family: findit(count)
 
 # printing colours headings, Stata code and R code
 
@@ -97,5 +114,5 @@
       [36m[1m# merge() [base]: Merge two data frames (base R)[22m[39m
         Related Stata: merge
       
-      # 17 more examples. To see them all: findit("merge 1:1 id, keep(match)") |> print(n = Inf)
+      # 12 broader merge examples. Browse the family: findit(merge)
 

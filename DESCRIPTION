@@ -16,6 +16,7 @@ Imports:
     cli,
     dplyr (>= 1.1.4),
     haven (>= 2.5.3),
+    lifecycle (>= 1.0.0),
     magrittr,
     pillar (>= 1.9.0),
     readr (>= 1.4.0),

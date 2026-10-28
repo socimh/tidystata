@@ -1,4 +1,7 @@
-#' List column names by tidyselect
+#' Select and list column names
+#'
+#' Select or rename existing columns and return their names, like Stata's `ds`.
+#' Use tidyselect helpers to filter a dataset or a character inventory of names.
 #'
 #' @param .data A data frame, tibble, or data.table. `ds()` also accepts a
 #'   character vector representing a name inventory, such as an earlier `ds()`
@@ -12,10 +15,11 @@
 #'   in the input's table class, or a tibble for a character inventory.
 #'   `"tibble"` always returns a one-column tibble.
 #'
-#' @returns `ds()` returns a character vector. With `.type = "table"` or
-#'   `"tibble"`, it returns one character column, `name`, and one row per
-#'   selected name, in selection order. On ungrouped data, an empty selection
-#'   returns a zero-length vector or zero-row table. Tables preserve the input's
+#' @returns A character vector of selected names by default. With
+#'   `.type = "table"` or `"tibble"`, a table with one character column,
+#'   `name`, and one row per selected name, in selection order. On ungrouped
+#'   data, an empty selection returns a zero-length vector or zero-row table.
+#'   Tables preserve the input's
 #'   data.frame, tibble, or data.table container and supported preview settings,
 #'   without grouping or arbitrary subclasses; character inventories return a
 #'   tibble in table mode. Explicit `.type = "tibble"` overrides the input's
@@ -38,20 +42,15 @@
 #'
 #' ds(lifeexp, country:lexp)
 #'
-#' ds(lifeexp, where(is.character), .type = "table")
-#'
-#' starwars <- dplyr::starwars
-#' ds(starwars, ends_with("color"), .type = "table")
-#'
-#' ds(starwars, ends_with("color"), .type = "tibble")
+#' ds(lifeexp, where(is.numeric))
 #'
 #' # Save a programmatic selection for later stages of a pipeline.
 #' numeric_names <- ds(lifeexp, where(is.numeric))
 #' dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 #'
-#' ds(numeric_names, dplyr::starts_with("pop"))
+#' ds(numeric_names, dplyr::contains("o"))
 #' @family inspection functions
-
+#'
 #' @rdname names
 #' @export
 ds <- function(.data, ..., .type = c("vector", "table", "tibble")) {

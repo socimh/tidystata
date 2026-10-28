@@ -306,10 +306,4 @@ attr(result, "chi2")
 survey <- tibble::tibble(response = c("yes", "no", "yes"), w = c(2, 1, 3))
 tab(survey, response, .wt = w)
 }
-\seealso{
-Other tabulation functions:
-\code{\link[=corr]{corr()}},
-\code{\link[=pwcorr]{pwcorr()}},
-\code{\link[=spearman]{spearman()}}
-}
 \concept{tabulation functions}

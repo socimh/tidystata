@@ -3,30 +3,35 @@
 #' @description
 #' Keep a compact console display while retaining every row and column.
 #'
-#' * `preview()`: Choose a head/tail or interval display.
-#' * `preview_headtail()`: Show the first and last rows.
-#' * `preview_interval()`: Show evenly spaced rows.
-#' * `unpreview()`: Restore ordinary printing.
+#' * `preview()`: Store a head/tail or interval display preference.
+#' * `preview_headtail()`: Store a preference for the first and last rows.
+#' * `preview_interval()`: Store a preference for evenly spaced rows.
+#' * `unpreview()`: Remove preview preferences and restore ordinary printing.
 #'
 #' @param .data An in-memory data frame, data.table, ordinary/grouped/rowwise
-#'   tibble, or `sf` data frame. Collect lazy tables and convert other subclasses
-#'   explicitly first. Apply previews separately to lists of tables.
-#' @param style Either `"headtail"` (default) or `"interval"`.
+#'   tibble, or `sf` data frame. Collect lazy tables and convert other
+#'   subclasses explicitly first. Apply previews separately to lists of tables.
+#' @param style For `preview()`, either `"headtail"` (default) or `"interval"`.
 #' @param n Total number of data rows to display, defaulting to 10. Supply a
 #'   positive whole number or `Inf` for all rows; omission markers do not count.
 #'
 #' @returns A data frame, tibble, data.table, or `sf` data frame with the same
-#'   rows, columns, values, and grouping as `.data`. The preview functions add a
-#'   `tidystata_preview` class and print preferences; `unpreview()` removes them.
+#'   rows, columns, values, row names, and grouping as `.data`. The preview
+#'   functions add a `tidystata_preview` class and print preferences;
+#'   `unpreview()` removes them.
 #'
 #' @details
 #' **Display**
 #'
 #' Head/tail previews split `n` between the beginning and end, giving an odd
 #' row to the beginning. One row of vertical dots marks an omitted middle,
-#' using periods without Unicode output. Interval previews show approximately
-#' evenly spaced positions without separator rows. An omission footer counts
-#' undisplayed rows.
+#' using periods without Unicode output. Numeric markers align with printed
+#' decimal points, or the last significand digit when no decimal is shown.
+#' Row-number markers align with the last digit. Other columns, including
+#' dates, times, factors, logicals and lists, use centered markers. Numeric
+#' columns without displayed numbers also use centered markers.
+#' Interval previews show approximately evenly spaced positions without
+#' separator rows. An omission footer counts undisplayed rows.
 #' With `n = 1`, both styles show the first row; short tables do not repeat rows.
 #'
 #' Row numbers refer to the current table after filtering or sorting. Grouped
@@ -285,7 +290,8 @@ ctl_new_rowid_pillar.tidystata_preview_view <- function(
       type = out$type,
       data = preview_gap_component(
         pillar::pillar_component(shaft),
-        attr(controller, "preview_gap_after", exact = TRUE)
+        attr(controller, "preview_gap_after", exact = TRUE),
+        numeric = TRUE
       )
     ),
     width = id_width
@@ -304,18 +310,22 @@ ctl_new_pillar.tidystata_preview_view <- function(
   if (!is.null(out)) {
     out$data <- preview_gap_component(
       out$data,
-      attr(controller, "preview_gap_after", exact = TRUE)
+      attr(controller, "preview_gap_after", exact = TRUE),
+      # Lubridate time spans are numeric despite their calendar/time display.
+      numeric = is.numeric(x) &&
+        !is.complex(x) &&
+        !inherits(x, c("Duration", "Period"))
     )
   }
   out
 }
 
-preview_gap_component <- function(component, after) {
+preview_gap_component <- function(component, after, numeric = FALSE) {
   if (length(after) == 0L) {
     return(component)
   }
   content <- structure(
-    list(shaft = component[[1L]], after = after),
+    list(shaft = component[[1L]], after = after, numeric = numeric),
     class = "tidystata_preview_gap"
   )
   pillar::new_pillar_component(
@@ -333,12 +343,34 @@ format.tidystata_preview_gap <- function(x, width, ...) {
     alignment <- "left"
   }
   lines <- cli::ansi_align(as.character(original), width, align = alignment)
-  marker <- if (cli::is_utf8_output()) "\u22ee" else "."
+  symbol <- if (cli::is_utf8_output()) "\u22ee" else "."
   marker <- cli::ansi_align(
-    pillar::style_subtle(marker),
+    pillar::style_subtle(symbol),
     width,
     align = "center"
   )
+  if (x$numeric) {
+    plain <- cli::ansi_strip(lines)
+    # Match only a leading numeric significand, not labels or exponents.
+    number <- regmatches(plain, regexpr("^ *[+-]?[0-9]+([.,][0-9]*)?", plain))
+    decimal <- regexpr("[.,]", number)
+    positions <- unique(
+      if (any(decimal > 0L)) {
+        as.integer(decimal[decimal > 0L])
+      } else {
+        nchar(number)
+      }
+    )
+    # Custom formatters without a shared numeric anchor keep the center.
+    if (length(positions) == 1L) {
+      position <- positions[[1L]]
+      marker <- paste0(
+        strrep(" ", position - 1L),
+        pillar::style_subtle(symbol),
+        strrep(" ", width - position)
+      )
+    }
+  }
   pillar::new_ornament(
     append(lines, marker, after = x$after),
     width = width,
@@ -377,82 +409,6 @@ tbl_format_footer.tidystata_preview_view <- function(x, setup, ...) {
   }
   omission <- pillar::style_subtle(paste0("# ", strwrap(text, width = width)))
   utils::head(c(omission, footer), setup$max_footer_lines)
-}
-
-#' Print selected rows once
-#'
-#' @description
-#' Display selected rows in the console without storing print preferences.
-#'
-#' * `print_headtail()`: Print the first and last rows.
-#' * `print_interval()`: Print evenly spaced rows.
-#'
-#' @inheritParams preview
-#' @param width Console width passed to tibble formatting. `NULL` (default)
-#'   uses the current console width; `Inf` shows every column.
-#' @param ... Additional arguments passed to tibble formatting.
-#' @param max_extra_cols,max_footer_lines Maximum number of additional columns
-#'   to describe and footer lines to print, respectively. `NULL` uses tibble's
-#'   defaults.
-#'
-#' @returns `.data`, unchanged and invisibly, including all rows, columns,
-#'   classes, grouping, and any existing preview preferences.
-#'
-#' @details
-#' Row budgets and omission markers follow [preview()]: head/tail output marks
-#' an omitted middle with one row of dots; interval output has no separator
-#' rows. Use `n = Inf` and `width = Inf` to print every row and column.
-#'
-#' @seealso [preview()] for persistent print preferences.
-#'
-#' @examples
-#' print_headtail(lifeexp, n = 6)
-#'
-#' print_interval(lifeexp, n = 6)
-#'
-#' print_headtail(lifeexp, n = Inf, width = Inf)
-#' @name special-print
-#' @family one-time printing functions
-NULL
-
-#' @rdname special-print
-#' @export
-print_headtail <- function(
-  .data,
-  n = 10,
-  width = NULL,
-  ...,
-  max_extra_cols = NULL,
-  max_footer_lines = NULL
-) {
-  print(
-    preview(.data, "headtail", n),
-    width = width,
-    ...,
-    max_extra_cols = max_extra_cols,
-    max_footer_lines = max_footer_lines
-  )
-  invisible(.data)
-}
-
-#' @rdname special-print
-#' @export
-print_interval <- function(
-  .data,
-  n = 10,
-  width = NULL,
-  ...,
-  max_extra_cols = NULL,
-  max_footer_lines = NULL
-) {
-  print(
-    preview(.data, "interval", n),
-    width = width,
-    ...,
-    max_extra_cols = max_extra_cols,
-    max_footer_lines = max_footer_lines
-  )
-  invisible(.data)
 }
 
 #' @export

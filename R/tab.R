@@ -527,7 +527,7 @@ tab2_tables <- function(.data, weights, template, .flip, .total, .type, .chi2) {
 # "g = a" for one key, "g = a, h = b" for several; missing keys print as NA.
 tab2_group_labels <- function(keys) {
   parts <- lapply(names(keys), function(name) {
-    paste(name, "=", tostring(as_character(keys[[name]])))
+    paste(name, "=", tostring(decode(keys[[name]])))
   })
   do.call(paste, c(parts, sep = ", "))
 }

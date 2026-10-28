@@ -12,16 +12,18 @@ var_unit(x)
 \arguments{
 \item{x}{An object.}
 
-\item{abbr}{If \code{TRUE}, return an abbreviated type. Defaults to \code{FALSE},
-expanding known abbreviations and retaining full class names for default
-class abbreviations. Custom display labels may remain abbreviated.}
+\item{abbr}{For \code{var_type()}, if \code{TRUE}, return an abbreviated type.
+Defaults to \code{FALSE}: expand known abbreviations and use full class names
+for default class abbreviations. Custom display labels are preserved.}
 }
 \value{
-A character string. \code{var_type()} gives the type description,
-including \code{"units"} for measured vectors in either abbreviation mode.
-\code{var_unit()} gives the unit string for measured or duration vectors,
-including empty or all-missing measured vectors, and \code{NA_character_} for
-vectors without units.
+\itemize{
+\item \code{var_type()}: One character string describing the type, including
+\code{"units"} for measured vectors in either abbreviation mode.
+\item \code{var_unit()}: The unit string for measured or duration vectors, including
+empty or all-missing measured vectors, or \code{NA_character_} when no unit is
+available.
+}
 }
 \description{
 Inspect an object's type and measurement metadata:
@@ -103,20 +105,18 @@ objects <- list(
   recorded = as.POSIXct("2026-01-01", tz = "UTC"),
   answer = haven::labelled(c(1, 2), labels = c(Yes = 1, No = 2))
 )
-t(vapply(objects, function(x) {
-  c(
-    typeof = typeof(x), class = paste(class(x), collapse = ", "),
-    var_type = var_type(x)
-  )
-}, character(3)))
 
-# Full fallback class names, with compact display available separately
-measurement <- structure(c(1, 2, NA), class = "survey_measurement")
-c(compact = var_type(measurement, abbr = TRUE),
-  descriptive = var_type(measurement))
+purrr::map(objects, \(x) tibble::tibble(
+  typeof = typeof(x),
+  class = paste(class(x), collapse = ", "),
+  var_type = var_type(x)
+)) |>
+  purrr::list_rbind(names_to = "variable")
 
 # Type and unit describe different properties of the same object
 elapsed <- as.difftime(c(1, 2, 3), units = "hours")
+elapsed
+
 var_type(elapsed)
 
 var_unit(elapsed)

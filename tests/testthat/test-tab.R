@@ -1090,7 +1090,7 @@ test_that("data-frame sf objects keep added grouping columns", {
   )
   grouped <- dplyr::group_by(d, grp)
   expect_equal(tab(grouped, big), tab(plain, big, .by = grp))
-  expect_warning(counts <- summ(d, .stat = "n"), "non-numeric")
+  expect_message(counts <- summ(d, .stat = "n"), "non-numeric")
   expect_identical(counts$name, c("BIR74", "big"))
 })
 
@@ -1245,6 +1245,27 @@ test_that("cross-tabs reject one-way sorting controls", {
   )
 })
 
+test_that("totals and group labels still display category text", {
+  data <- tibble::tibble(
+    x = haven::labelled(c(10, 20, 10), c(No = 10, Yes = 20)),
+    y = factor(c("a", "b", "a")),
+    g = haven::labelled(c(1, 1, 1), c(Group = 1))
+  )
+  expect_identical(fre(data, x)$x, c("No", "Yes", "Total"))
+  expect_identical(
+    tab2(data, x, y, .total = TRUE)[[1L]],
+    c("No", "Yes", "total")
+  )
+  expect_identical(names(tab2(data, x, y, .by = g)), "g = Group")
+})
+
+test_that("formatted frequency tables still display value labels", {
+  skip_if_not_installed("flextable")
+  data <- tibble::tibble(x = haven::labelled(c(10, 20), c(No = 10, Yes = 20)))
+  table <- fre(data, x, .type = "flextable")
+  expect_identical(table$body$dataset$x, c("No", "Yes", "Total"))
+})
+
 test_that("stacked labelled variables keep their own labels", {
   d <- tibble::tibble(
     a = haven::labelled(c(1, 2), c(A = 1, B = 2)),
@@ -1287,18 +1308,18 @@ test_that("reserved-name messages are consistent and only rename collisions", {
   )
 })
 
-test_that("as_character handles tagged missing values without a labels attribute", {
+test_that("decode handles tagged missing values without a labels attribute", {
   x <- haven::labelled(c(1, haven::tagged_na("a"), NA, 1))
   before <- x
-  expect_identical(as_character(x), c("1", NA_character_, NA_character_, "1"))
+  expect_identical(decode(x), c("1", NA_character_, NA_character_, "1"))
   expect_identical(x, before)
 })
 
-test_that("as_character retains labels when tagged missing values have labels", {
+test_that("decode retains labels when tagged missing values have labels", {
   x <- haven::labelled(c(1, 2, haven::tagged_na("a"), NA), c(one = 1, two = 2))
   before <- x
   expect_identical(
-    as_character(x),
+    decode(x),
     c("one", "two", NA_character_, NA_character_)
   )
   expect_identical(x, before)

@@ -39,7 +39,7 @@ test_that("first-row syntax outranks lag syntax regardless of spacing", {
   )) {
     found <- findit(!!query)
     expect_match(found$stata[1L], "first\\s*=\\s*_n\\s*==\\s*1")
-    expect_identical(nrow(found), nrow(findit(gen)))
+    expect_identical(nrow(found), 1L)
     data <- data.frame(
       id = c(2, 1, 2, NA, 1, NA),
       year = c(2003, 2001, 2001, 2001, 2001, 2000)

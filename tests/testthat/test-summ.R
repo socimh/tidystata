@@ -19,7 +19,7 @@ test_that("summ: list mode with multiple variable types", {
     datetime_var = seq(as.POSIXct("2024-01-01"), by = "hour", length.out = 100),
     char_var = sample(letters[1:5], 100, replace = TRUE)
   )
-  expect_warning(result <- summ(df, .type = "list"), "char_var.*non-numeric")
+  expect_message(result <- summ(df, .type = "list"), "char_var.*non-numeric")
   expect_type(result, "list")
 })
 
@@ -369,8 +369,26 @@ test_that("summ: haven labelled numeric", {
   df <- tibble::tibble(
     x = haven::labelled(rnorm(100), labels = c("Low" = -1, "High" = 1))
   )
-  expect_warning(result <- summ(df, x), "x.*labelled variable")
+  expect_message(result <- summ(df, x), "x.*labelled variable")
   expect_s3_class(result, "data.frame")
+})
+
+test_that("summ: routine notes are messages; all-missing columns still warn", {
+  messages <- character()
+  expect_no_warning(withCallingHandlers(
+    summ(lifeexp),
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  ))
+  expect_match(messages, "country is non-numeric", all = FALSE)
+  expect_match(messages, "region is a labelled variable", all = FALSE)
+  df <- tibble::tibble(x = c(NA_real_, NA_real_), f = factor(c("a", "b")))
+  expect_warning(
+    expect_message(summ(df), "f is a factor"),
+    "x is entirely missing"
+  )
 })
 
 test_that("summ: integer vs double distinction", {
@@ -460,7 +478,7 @@ test_that("summ: NULL input should error", {
 
 test_that("summ: character only data frame should error or skip", {
   df <- tibble::tibble(x = letters[1:10], y = letters[11:20])
-  expect_warning(expect_error(summ(df)), "non-numeric")
+  expect_message(expect_error(summ(df)), "non-numeric")
 })
 
 test_that("summ: non-existent column should error", {
@@ -706,8 +724,8 @@ test_that("aggregation excludes alternate and additional geometry columns", {
   expect_equal(summ(d, x, .by = g), summ(attributes_only, x, .by = g))
   expect_equal(tab(d, x, .by = g), tab(attributes_only, x, .by = g))
   expect_equal(tab1(d), tab1(attributes_only))
-  expect_warning(spatial_summary <- summ(d), "g is non-numeric")
-  expect_warning(attribute_summary <- summ(attributes_only), "g is non-numeric")
+  expect_message(spatial_summary <- summ(d), "g is non-numeric")
+  expect_message(attribute_summary <- summ(attributes_only), "g is non-numeric")
   expect_equal(spatial_summary, attribute_summary)
   expect_error(tab(d, shape), "shape")
   expect_error(summ(d, x, .by = shape), "shape")
@@ -753,7 +771,7 @@ test_that("summary percentile names retain requested order and Stata values", {
   moment <- as.POSIXct("2024-01-01", tz = "UTC") + c(0, 3600)
   expect_equal(summ(moment, .stat = "p2.5")$p2.5, "2024-01-01 00:00")
   labelled <- haven::labelled_spss(c(0, 100, 999), na_values = 999)
-  expect_warning(
+  expect_message(
     observed <- summ(labelled, .stat = c("p2.5", "p97.5")),
     "labelled"
   )
@@ -949,7 +967,7 @@ test_that("weight vectors match the input when missing keys are dropped", {
 test_that("list columns count missing values as misstable() does", {
   data <- tibble::tibble(l = list(NULL, NA, NA, 1))
   expect_identical(misstable(data)$miss_n, 2L)
-  expect_identical(suppressWarnings(summ(data, l, .keep_all = TRUE))$n, 2L)
+  expect_identical(suppressMessages(summ(data, l, .keep_all = TRUE))$n, 2L)
   fre_out <- fre(data, l)
   expect_true(is.na(fre_out$valid[fre_out$l == "NA"]))
   expect_false(is.na(fre_out$valid[fre_out$l == "NULL"]))

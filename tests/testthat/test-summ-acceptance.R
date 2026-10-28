@@ -264,7 +264,7 @@ for (function_name in c("summ", "tabstat")) {
       ),
       {
         df <- tibble::tibble(x = c("1", "3", "3", NA_character_))
-        expect_warning(
+        expect_message(
           out <- api(
             df,
             .keep_all = TRUE,
@@ -283,7 +283,7 @@ for (function_name in c("summ", "tabstat")) {
     )
     test_that(paste(function_name, "keeps list-column counts and identities"), {
       df <- tibble::tibble(x = list(c(1, 2), c(1, 2), c(3, 4), NA))
-      expect_warning(
+      expect_message(
         out <- api(
           df,
           .keep_all = TRUE,
@@ -303,7 +303,7 @@ for (function_name in c("summ", "tabstat")) {
       paste(function_name, "mixed nonnumeric columns keep missing statistics"),
       {
         df <- tibble::tibble(x = c(1, 3, 5), text = c("10", "20", "30"))
-        expect_warning(
+        expect_message(
           out <- api(df, .keep_all = TRUE, .stat = "mean"),
           "non-numeric"
         )

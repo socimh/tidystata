@@ -15,36 +15,36 @@ test_that("as_character: basic character vector (no change)", {
   expect_equal(result, c("a", "b", "c"))
 })
 
-test_that("as_character: factor to character", {
+test_that("decode: factor to character", {
   x <- factor(c("apple", "banana", "cherry"))
-  result <- as_character(x)
+  result <- decode(x)
   expect_type(result, "character")
   expect_equal(result, c("apple", "banana", "cherry"))
 })
 
-test_that("as_character: ordered factor to character", {
+test_that("decode: ordered factor to character", {
   x <- ordered(c("low", "medium", "high"))
-  result <- as_character(x)
+  result <- decode(x)
   expect_type(result, "character")
   expect_equal(result, c("low", "medium", "high"))
 })
 
-test_that("as_character: haven labelled to character", {
+test_that("decode: haven labelled to character", {
   x <- haven::labelled(
     c(1, 2, 1, 3),
     labels = c(Yes = 1, No = 2, Maybe = 3)
   )
-  result <- as_character(x)
+  result <- decode(x)
   expect_type(result, "character")
   expect_equal(result, c("Yes", "No", "Yes", "Maybe"))
 })
 
-test_that("as_character: haven labelled with partial labels", {
+test_that("decode: haven labelled with partial labels", {
   x <- haven::labelled(
     c(1, 2, 99, 1),
     labels = c(Yes = 1, No = 2)
   )
-  result <- as_character(x)
+  result <- decode(x)
   expect_type(result, "character")
   expect_identical(result, c("Yes", "No", "99", "Yes"))
 })
@@ -81,13 +81,13 @@ test_that("as_character: empty vector", {
   expect_type(result, "character")
 })
 
-test_that("as_character: within mutate context", {
+test_that("decode: within mutate context", {
   df <- tibble::tibble(
     num = 1:5,
     lbl = haven::labelled(c(1, 2, 1, 2, 1), labels = c(A = 1, B = 2))
   )
   result <- df |>
-    dplyr::mutate(num_chr = as_character(num), lbl_chr = as_character(lbl))
+    dplyr::mutate(num_chr = decode(num), lbl_chr = decode(lbl))
   expect_type(result$num_chr, "character")
   expect_type(result$lbl_chr, "character")
   expect_equal(result$lbl_chr, c("A", "B", "A", "B", "A"))
@@ -248,7 +248,7 @@ test_that("type conversion: haven labelled preserves labels in character", {
     labels = c(Yes = 1, No = 2, Maybe = 3)
   )
 
-  char_result <- as_character(x)
+  char_result <- decode(x)
   num_result <- as_numeric(x)
 
   expect_equal(char_result, c("Yes", "No", "Yes", "Maybe"))
@@ -319,7 +319,7 @@ test_that("type conversion: all NA handling", {
 test_that("type conversion: NaN handling", {
   x <- c(1, NaN, 3)
   result <- as_character(x)
-  expect_identical(result, c("1", "NaN", "3"))
+  expect_identical(result, c("1", NA_character_, "3"))
 
   result_num <- as_numeric(c("1", "NaN", "3"))
   expect_true(is.nan(result_num[2]))
@@ -347,8 +347,8 @@ test_that("type conversion: survey data import workflow", {
   # Convert for analysis
   analysis_data <- survey_data |>
     dplyr::mutate(
-      gender_chr = as_character(gender),
-      age_chr = as_character(age_group),
+      gender_chr = decode(gender),
+      age_chr = decode(age_group),
       satisfaction_num = as_numeric(satisfaction)
     )
 
@@ -553,4 +553,37 @@ test_that("tostring() writes numbers without exponents", {
     )
   )
   expect_identical(tostring(c(100000L, NA)), c("100000", NA))
+})
+
+test_that("tostring() keeps large whole numbers distinct", {
+  expect_identical(
+    tostring(c(2^53, 2^53 + 2, 1e22)),
+    c("9007199254740992", "9007199254740994", "10000000000000000000000")
+  )
+})
+
+test_that("conversion functions reject data frames", {
+  data <- data.frame(a = "1", b = "2")
+  expect_error(destring(data), "not a data frame")
+  expect_error(tostring(data), "not a data frame")
+  expect_error(as_character(data), "not a data frame")
+  expect_error(decode(data), "not a data frame")
+})
+
+test_that("destring() treats non-breaking spaces as spaces", {
+  expect_identical(
+    destring(c(
+      "\u00a05\u00a0",
+      "$\u00a012",
+      "50\u202f%",
+      "\u00a0NaN",
+      "\u00a0"
+    )),
+    c(5, 12, 50, NaN, NA)
+  )
+})
+
+test_that("destring() problems drop input names", {
+  expect_warning(out <- destring(c(a = "x", b = "1")), "not a number")
+  expect_identical(readr::problems(out)$actual, "x")
 })

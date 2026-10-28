@@ -5,14 +5,17 @@
 #' the original data invisibly.
 #'
 #' @inheritParams tidystata_args
-#' @param ... Logical conditions using columns of `.data`. Every condition
-#'   must be `TRUE` for every row.
+#' @param ... <[`data-masking`][args_data_masking]> One or more logical
+#'   conditions using columns of `.data`. Each must return one value per row,
+#'   or one value recycled across the current group. Every condition must be
+#'   `TRUE` for every row.
 #' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping variables.
 #'   Summaries such as `mean(x)` are evaluated within each group. Existing
 #'   groups are used when omitted. To supply `.by` for grouped data, first call
 #'   [dplyr::ungroup()], as required by [dplyr::mutate()].
 #'
-#' @returns `.data`, unchanged and invisibly, if all conditions pass.
+#' @returns `.data`, unchanged and invisibly, including its classes, grouping,
+#'   and attributes, if all conditions pass. Failed conditions raise an error.
 #'
 #' @details
 #' Both `FALSE` and `NA` count as failures. Errors report the number of
@@ -28,6 +31,7 @@
 #'   class = c("A", "A", "B", "B"),
 #'   score = c(80, 90, 55, NA_real_)
 #' )
+#' scores
 #'
 #' # Pass: every nonmissing score is at least 50
 #' assert(scores, is.na(score) | score >= 50)

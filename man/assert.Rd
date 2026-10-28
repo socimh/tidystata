@@ -9,8 +9,10 @@ assert(.data, ..., .by = NULL)
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
-\item{...}{Logical conditions using columns of \code{.data}. Every condition
-must be \code{TRUE} for every row.}
+\item{...}{<\code{\link[rlang:args_data_masking]{data-masking}}> One or more logical
+conditions using columns of \code{.data}. Each must return one value per row,
+or one value recycled across the current group. Every condition must be
+\code{TRUE} for every row.}
 
 \item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables.
 Summaries such as \code{mean(x)} are evaluated within each group. Existing
@@ -18,7 +20,8 @@ groups are used when omitted. To supply \code{.by} for grouped data, first call
 \code{\link[dplyr:ungroup]{dplyr::ungroup()}}, as required by \code{\link[dplyr:mutate]{dplyr::mutate()}}.}
 }
 \value{
-\code{.data}, unchanged and invisibly, if all conditions pass.
+\code{.data}, unchanged and invisibly, including its classes, grouping,
+and attributes, if all conditions pass. Failed conditions raise an error.
 }
 \description{
 Verify that every row satisfies all specified conditions, like Stata's
@@ -39,6 +42,7 @@ scores <- data.frame(
   class = c("A", "A", "B", "B"),
   score = c(80, 90, 55, NA_real_)
 )
+scores
 
 # Pass: every nonmissing score is at least 50
 assert(scores, is.na(score) | score >= 50)

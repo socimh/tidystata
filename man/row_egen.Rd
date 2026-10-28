@@ -40,7 +40,8 @@ row_non_miss(...)
 \arguments{
 \item{...}{A data frame or tibble, or
 <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> expressions inside
-\code{\link[dplyr:mutate]{dplyr::mutate()}}. Each selected column must be one-dimensional.}
+\code{\link[dplyr:mutate]{dplyr::mutate()}}. Each selected column must be one-dimensional. Inside
+grouped \code{mutate()}, selections and values refer to the current group.}
 
 \item{na.rm}{For arithmetic and extrema helpers, if \code{TRUE} (the default),
 omit missing values; if \code{FALSE}, any missing input makes that row's result
@@ -57,12 +58,17 @@ are not counted, as in egenmore's \code{rownvals()}; if \code{TRUE}, they count 
 one value, as in \code{row_unique()}.}
 }
 \value{
-A vector with one value per input row. Extrema retain the compatible
-common type; arithmetic returns doubles or a supported class as described
-under Arithmetic; unique and missing-value counts return integers. Zero-row
-inputs return typed empty vectors. All-missing rows return a typed \code{NA} for
-arithmetic and extrema, except \code{row_sum(na.rm = TRUE)} returns zero; an
-all-missing row's mean is \code{NA}, not \code{NaN}.
+A vector with one value per input row, in input order:
+\itemize{
+\item \code{row_min()} and \code{row_max()} retain the compatible common type.
+\item Arithmetic helpers return doubles or the supported calendar, duration or
+measured class described under Arithmetic.
+\item Distinct-value and missing-value counts return integers.
+}
+
+Zero-row inputs return typed empty vectors. All-missing rows return a typed
+\code{NA} for arithmetic and extrema, except \code{row_sum(na.rm = TRUE)} returns zero;
+an all-missing row's mean is \code{NA}, not \code{NaN}.
 }
 \description{
 Summarize selected columns within each row using arithmetic, extrema,
@@ -140,12 +146,14 @@ combinations are rejected. Measured arithmetic requires units >= 1.0.0.
 
 \section{Counts}{
 
-\code{row_unique()} combines compatible column types and counts distinct values
-without dropping their identities through numeric conversion. This includes
-compatible factors, labelled vectors, calendar/measured vectors, \code{integer64},
-list columns, and complex vectors. Missing values count as one category. List
-elements are compared as whole values rather than flattened. For extrema and
-distinct counts, common-type conversion must preserve each original value's
+\code{row_unique()} and \code{row_nvals()} combine compatible column types and count
+distinct values without dropping their identities through numeric
+conversion. This includes compatible factors, labelled vectors,
+calendar/measured vectors, \code{integer64},
+list columns, and complex vectors. Missing values count as one category in
+\code{row_unique()} and are omitted by \code{row_nvals()} unless \code{.missing = TRUE}.
+List elements are compared as whole values rather than flattened. For extrema
+and distinct counts, common-type conversion must preserve each original value's
 missingness. Conflicting SPSS missing-value definitions that would turn an
 observed value into a missing value produce an error; harmonize those
 definitions explicitly before combining the columns.
@@ -161,6 +169,8 @@ row_mean(tb)
 
 row_sum(tb)
 
+row_sum(tb, na.rm = FALSE)
+
 row_non_miss(tb)
 
 tb |>
@@ -169,15 +179,17 @@ tb |>
 tb |>
   dplyr::mutate(capped = row_min(x, .values = 0.5))
 
-row_sum(tb, na.rm = FALSE)
-
 flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
-row_max(flags) # TRUE, FALSE, NA, with logical type
+flags
+
+row_max(flags)
 
 dates <- tibble::tibble(
   start = as.Date(c("2024-01-01", NA)),
   end = as.Date(c("2024-01-03", "2024-01-05"))
 )
+dates
+
 row_min(dates)
 
 row_mean(dates)
@@ -185,7 +197,7 @@ row_mean(dates)
 \seealso{
 Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
-\code{\link{cut}},
+\code{\link[=cut_quantile]{cut_quantile()}},
 \code{\link{panel}},
 \code{\link[=stata_recode]{stata_recode()}},
 \code{\link[=std]{std()}}

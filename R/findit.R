@@ -21,28 +21,36 @@
 #' @returns A tibble of class `tidystata_findit` with one row per matching Stata
 #'   idiom and five columns: `match` (match type), `stata` (Stata code), `r`
 #'   (equivalent R code), `package` (primary R package), and `task`
-#'   (description). All matches are returned, even when fewer are printed. If
-#'   nothing matches, an empty tibble is returned invisibly with an explanatory
-#'   message.
+#'   (description). The returned object contains every selected match, including
+#'   any hidden by printing. If nothing matches, a zero-row result with the same
+#'   columns and class is returned invisibly with an explanatory message.
 #'
 #' @details
 #' **Matching**
+#'
+#' A clear specific query returns one preferred answer; ambiguous queries
+#' return up to ten relevant candidates. Bare Stata commands return the
+#' complete command family, and an omitted query returns the whole reference.
 #'
 #' * Stata abbreviations are recognized (`reg`, `regr`, `regress`), while R
 #'   functions require their full names. Exact-case matches take priority.
 #'   Shared names, such as `log`, show both Stata and R interpretations.
 #' * Stata command matches appear before R function matches. Keyword searches
 #'   are used when neither matches. Additional syntax and hints refine the
-#'   ranking without discarding matches. `by` and `bysort` prefixes prioritize
-#'   grouped operations.
-#' * Plain-language questions use deterministic keyword and synonym matching in
-#'   English or Chinese, without a language model.
+#'   ranking. Within the relevant operation, tidystata functions take priority,
+#'   followed by tidyverse functions, then other packages or base R.
+#'   `by` and `bysort` prefixes prioritize grouped operations.
+#' * Plain-language questions match curated keywords and synonyms in English
+#'   or Chinese.
 #'
 #' **Output**
 #'
 #' * Results print as readable Stata/R code pairs. A single clear match is shown
-#'   alone; otherwise, up to five representative examples appear. The print
-#'   method's `n` argument sets how many matches are printed; use
+#'   alone; otherwise, up to five representative examples appear. Bare commands
+#'   browse their whole family; specific queries omit unrelated family entries.
+#'   Footers distinguish hidden relevant candidates from broader family examples
+#'   and report when the ten-candidate limit applies. The print method's `n`
+#'   argument sets how many matches are printed; use
 #'   `print(n = Inf)` to display all matches.
 #' * The `match` column identifies the lookup type: `"stata"`, `"r"`,
 #'   `"keyword"`, `"nearest"`, or `"all"`.
@@ -88,10 +96,12 @@ findit <- function(command = NULL, ...) {
   expr <- rlang::enexpr(command)
   extra <- rlang::enexprs(..., .ignore_empty = "none")
   findit_check_arguments(expr, extra)
-  found <- withVisible(findit_lookup(findit_query(expr)))
+  query <- findit_query(expr)
+  found <- withVisible(findit_lookup(query))
   if (length(extra)) {
     found$value <- findit_customize(found$value, extra)
   }
+  found$value <- findit_select(found$value, query, length(extra) > 0L)
   # The call as typed, so the printed hint can be run as it stands.
   attr(found$value, "input") <- paste0(
     "findit(",
@@ -172,17 +182,25 @@ findit_lookup <- function(query) {
       findit_rank(entries[r_hit, ], terms, "r"),
       make.row.names = FALSE
     )
-    show <- if (findit_single_best(found, terms)) 1L
-    leaders <- if (length(terms) && nrow(found)) {
-      which(found$.score == found$.score[1] & found$.extra == found$.extra[1])
+    show <- if (
+      findit_single_best(found, terms) &&
+        !findit_ambiguous_option(original, found$stata)
+    ) {
+      1L
     }
-    found <- found[setdiff(names(found), c(".score", ".extra"))]
+    leaders <- if (length(terms) && nrow(found)) {
+      which(
+        found$.score == found$.score[1] & found$.context == found$.context[1]
+      )
+    }
+    found <- found[setdiff(names(found), c(".score", ".extra", ".context"))]
     # A plain question that starts with a command word, such as "count how
     # many people in each group", gets the closest entries first.
     if (findit_plain(original, words, found)) {
       nearest <- findit_nearest(original, entries)
       found <- rbind(nearest, found[!found$id %in% nearest$id, ])
       attr(found, "relevance") <- attr(nearest, "relevance")
+      attr(found, "candidate_count") <- attr(nearest, "candidate_count")
       show <- NULL
       leaders <- NULL
     }
@@ -230,7 +248,9 @@ findit_lookup <- function(query) {
 
   keyword <- findit_keyword(original, entries)
   if (any(keyword)) {
-    return(findit_result(entries[keyword, ], "keyword"))
+    found <- entries[keyword, ]
+    found <- found[order(findit_package_priority(found$package)), ]
+    return(findit_result(found, "keyword"))
   }
 
   nearest <- findit_nearest(original, entries)
@@ -295,11 +315,14 @@ findit_nearest <- function(query, entries) {
     specialized <- grepl(context, tolower(entries$section), perl = TRUE)
     score[specialized] <- score[specialized] / 3
   }
-  keep <- order(-score)[seq_len(min(10L, sum(score >= 0.4 * max(score))))]
+  keep <- order(-score, findit_package_priority(entries$package))[
+    seq_len(min(10L, sum(score >= 0.4 * max(score))))
+  ]
   keep <- keep[score[keep] > 0]
   found <- entries[keep, ]
   found$match <- rep("nearest", nrow(found))
   attr(found, "relevance") <- score[keep]
+  attr(found, "candidate_count") <- sum(score > 0 & score >= 0.4 * max(score))
   found
 }
 
@@ -488,19 +511,163 @@ findit_rank <- function(found, terms, match) {
   } else {
     numeric(nrow(found))
   }
-  ordered <- order(-score, extra, seq_along(score))
+  row_tokens <- intersect(terms, c("_n", "_N"))
+  row_mismatch <- if (length(row_tokens)) {
+    vapply(text, function(tokens) !all(row_tokens %in% tokens), logical(1))
+  } else {
+    rep(FALSE, nrow(found))
+  }
+  # keep if missing(x) and keep if !missing(x) select opposite rows, so a
+  # negation mismatch outweighs package preference.
+  negated <- vapply(
+    findit_rank_tokens(found$stata),
+    function(tokens) "!" %in% tokens,
+    logical(1)
+  )
+  context <- 2L *
+    (row_mismatch | (length(terms) > 0L & negated != ("!" %in% terms))) +
+    (grepl("^by(s|so|sor|sort)? .*:", found$stata) != ("by" %in% terms))
+  ordered <- order(
+    -score,
+    context,
+    findit_package_priority(found$package),
+    extra,
+    seq_along(score)
+  )
   found <- found[ordered, ]
   found$match <- rep(match, nrow(found))
   found$.score <- score[ordered]
   found$.extra <- extra[ordered]
+  found$.context <- context[ordered]
   found
+}
+
+# An option name alone does not choose between e.g. keep(match) and
+# keep(master match), even when one of those examples happens to be shorter.
+findit_ambiguous_option <- function(query, stata) {
+  options <- sub("^[^,]*,", "", stata)
+  options[!grepl(",", stata, fixed = TRUE)] <- ""
+  calls <- unique(unlist(regmatches(
+    options,
+    gregexpr("[A-Za-z_][A-Za-z0-9_]*[(][^()]*[)]", options)
+  )))
+  names <- sub("[(].*$", "", calls)
+  terms <- findit_rank_tokens(query)[[1L]]
+  any(vapply(
+    unique(names),
+    function(name) {
+      name %in%
+        terms &&
+        !grepl(paste0("\\b", name, "\\s*[(]"), query, perl = TRUE) &&
+        sum(names == name) > 1L
+    },
+    logical(1)
+  ))
+}
+
+findit_package_priority <- function(package) {
+  tidyverse <- c(
+    "dplyr",
+    "tidyr",
+    "tibble",
+    "readr",
+    "purrr",
+    "stringr",
+    "forcats",
+    "ggplot2",
+    "tidyselect",
+    "lubridate",
+    "haven",
+    "hms",
+    "readxl",
+    "broom",
+    "modelr",
+    "magrittr"
+  )
+  ifelse(package == "tidystata", 0L, ifelse(package %in% tidyverse, 1L, 2L))
+}
+
+# Narrow only after comma hints and variable requirements have been resolved.
+# Bare Stata commands remain complete family browsers.
+findit_select <- function(x, query, customized = FALSE) {
+  if (is.null(query) || !nrow(x)) {
+    return(x)
+  }
+  query <- gsub("\\s+", " ", trimws(query))
+  entries <- findit_entries()
+  rows <- match(attr(x, "entry_ids"), entries$id)
+  commands <- unique(entries$command[rows[x$match == "stata"]])
+  bare <- !customized &&
+    !grepl("[[:space:]:(),]", query) &&
+    any(findit_command_hit(tolower(query), entries))
+  if (bare) {
+    templates <- findit_templates()[attr(x, "entry_ids")]
+    meaning <- vapply(templates, function(t) t$meaning, character(1))
+    egen <- grepl("^egen .*=[[:space:]]*[A-Za-z_]+[(]", x$stata)
+    meaning[egen] <- sub(
+      "^egen .*=[[:space:]]*([A-Za-z_]+)[(].*$",
+      "\\1",
+      x$stata[egen]
+    )
+    defaults <- attr(x, "default_rows")
+    remaining <- setdiff(seq_len(nrow(x)), defaults)
+    candidates <- c(defaults, remaining)
+    defaults <- utils::head(candidates[!duplicated(meaning[candidates])], 5L)
+    attr(x, "default_rows") <- defaults
+    attr(x, "show") <- length(defaults)
+    return(x)
+  }
+  candidates <- attr(x, "candidate_rows")
+  if (is.null(candidates)) {
+    candidates <- attr(x, "query_rows")
+  }
+  if (is.null(candidates)) {
+    candidates <- seq_len(nrow(x))
+  }
+  defaults <- attr(x, "default_rows")
+  nearest <- any(x$match == "nearest")
+  if (nearest) {
+    candidates <- which(x$match == "nearest")
+  } else {
+    candidates <- c(
+      intersect(defaults, candidates),
+      setdiff(candidates, defaults)
+    )
+  }
+  clear <- if (customized) {
+    length(defaults) == 1L &&
+      isTRUE(attr(x, "matched_hints")) &&
+      !isTRUE(attr(x, "unmatched_hints"))
+  } else {
+    isTRUE(attr(x, "single_best"))
+  }
+  clear <- clear && !isTRUE(attr(x, "unrepresented_options")) && !nearest
+  relevant <- attr(x, "entry_ids")[candidates]
+  selected <- if (clear) {
+    utils::head(candidates, 1L)
+  } else {
+    utils::head(candidates, 10L)
+  }
+  total <- attr(x, "candidate_count")
+  x <- x[selected, ]
+  attr(x, "candidate_rows") <- NULL
+  attr(x, "single_best") <- NULL
+  attr(x, "truncated") <- !clear &&
+    (length(candidates) > 10L || (length(total) && total > 10L))
+  if (length(commands) == 1L) {
+    broader <- sum(entries$command == commands & !entries$id %in% relevant)
+    if (broader > 0L) {
+      attr(x, "broader") <- list(command = commands, count = broader)
+    }
+  }
+  x
 }
 
 # Rank syntax tokens, so x cannot match exp() and Stata's row index _n stays
 # distinct from the group size _N. Spacing around operators is immaterial.
 findit_rank_tokens <- function(text) {
   matches <- gregexpr(
-    "[1m]:[1m]|[A-Za-z_][A-Za-z0-9_]*|[0-9]+(?:[.][0-9]+)?|==|!=|<=|>=|[=<>+*/^-]",
+    "[1m]:[1m]|[A-Za-z_][A-Za-z0-9_]*|[0-9]+(?:[.][0-9]+)?|==|!=|<=|>=|[=<>+*/^!-]",
     text,
     perl = TRUE
   )
@@ -612,12 +779,14 @@ findit_result <- function(
   ]
   described$used <- described$`function` %in% unlist(findit_entries()$functions)
   attr(out, "r_functions") <- described
-  query_rows <- if (!is.null(show)) seq_len(show) else attr(entries, "leaders")
+  query_rows <- attr(entries, "leaders")
   relevance <- attr(entries, "relevance")
   if (length(relevance)) {
     query_rows <- which(relevance == max(relevance))
   }
   attr(out, "query_rows") <- query_rows
+  attr(out, "candidate_count") <- attr(entries, "candidate_count")
+  attr(out, "single_best") <- !is.null(show)
   if (any(out$match == "nearest")) {
     attr(out, "query") <- query
   }
@@ -667,12 +836,37 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
       "\n# ",
       hidden,
       if (hidden == 1L) {
-        " more example. To see them all: "
+        " more relevant example. To see them all: "
       } else {
-        " more examples. To see them all: "
+        " more relevant examples. To see them all: "
       },
       input,
       " |> print(n = Inf)\n",
+      sep = ""
+    )
+  }
+  if (
+    hidden == 0L &&
+      (isTRUE(attr(x, "truncated")) || !is.null(attr(x, "broader")))
+  ) {
+    cat("\n")
+  }
+  if (isTRUE(attr(x, "truncated"))) {
+    cat(
+      "# Only the 10 best candidates are retained; refine the query for a closer match.\n"
+    )
+  }
+  broader <- attr(x, "broader")
+  if (!is.null(broader)) {
+    cat(
+      "# ",
+      broader$count,
+      " broader ",
+      broader$command,
+      if (broader$count == 1L) " example" else " examples",
+      ". Browse the family: findit(",
+      broader$command,
+      ")\n",
       sep = ""
     )
   }

@@ -17,28 +17,23 @@ is_summable_chr <- function(chr) {
   )
 }
 
-summ_warn_vars <- function(vars, suffix) {
+# Routine notes (omitted columns, output markers) are messages; possible data
+# problems such as entirely missing columns pass `signal = cli::cli_warn`.
+summ_note_vars <- function(vars, suffix, signal = cli::cli_inform) {
   if (length(vars) == 0) {
     return()
   } else if (length(vars) == 1) {
     message <- paste0(vars, " is ", suffix)
-    cli::cli_warn("{message}")
   } else if (nchar(vars[1]) + nchar(vars[2]) > 40) {
-    message <- paste0(
-      vars[1],
-      ", ... are ",
-      suffix
-    )
-    cli::cli_warn("{message}")
+    message <- paste0(vars[1], ", ... are ", suffix)
   } else if (length(vars) > 2) {
     message <- paste(vars[1:2], collapse = ", ") |>
       paste0(", ... are ", suffix)
-    cli::cli_warn("{message}")
   } else {
     message <- paste(vars, collapse = " and ") |>
       paste0(" are ", suffix)
-    cli::cli_warn("{message}")
   }
+  signal("{message}")
 }
 
 summ_metadata <- function(data, keep_all) {
@@ -62,7 +57,7 @@ summ_check_metadata <- function(
 ) {
   types <- vapply(metadata, `[[`, character(1), "type")
   summable <- vapply(metadata, `[[`, logical(1), "summable")
-  summ_warn_vars(
+  summ_note_vars(
     names(metadata)[!summable],
     if (keep_all) {
       "non-numeric (***)."
@@ -77,13 +72,14 @@ summ_check_metadata <- function(
     },
     logical(1)
   )
-  summ_warn_vars(
+  summ_note_vars(
     names(metadata)[entirely_missing],
     if (keep_all) {
       "entirely missing."
     } else {
       "entirely missing; retained with n = 0."
-    }
+    },
+    signal = cli::cli_warn
   )
   if (!any(summable) && !(keep_all && length(metadata))) {
     cli::cli_abort(
@@ -92,7 +88,7 @@ summ_check_metadata <- function(
     )
   }
   factors <- names(metadata)[summable & types %in% c("fct", "ord")]
-  summ_warn_vars(
+  summ_note_vars(
     factors,
     if (length(factors) == 1L) {
       "a factor (**)."
@@ -101,7 +97,7 @@ summ_check_metadata <- function(
     }
   )
   labelled <- names(metadata)[summable & grepl("lbl$", types)]
-  summ_warn_vars(
+  summ_note_vars(
     labelled,
     if (length(labelled) == 1L) {
       "a labelled variable (*)."

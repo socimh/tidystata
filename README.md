@@ -36,17 +36,17 @@ findit("reg, robust")
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
 #> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
-#> # 17 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
+#> # 16 broader regress examples. Browse the family: findit(regress)
 
 findit("egen rowmean")
-#> # Average available values across columns [base]
+#> # Average available values across columns [tidystata]
 #> Stata: egen z = rowmean(x y)
-#> R:     data$z <- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] <- NA_real_
+#> R:     mutate(data, z = row_mean(x, y))
 #> 
-#> # 59 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
+#> # 70 broader egen examples. Browse the family: findit(egen)
 ```
 
-A bare command such as `findit(reg)` shows one clear example; `findit(reg) |> print(n = Inf)` shows every match. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
+A bare command such as `findit(egen)` browses the whole family and shows up to five operations. A specific query such as `findit("egen rowmean")` returns one clear answer; ambiguous queries retain up to ten relevant candidates. `print(n = Inf)` expands the returned results; use `findit(egen)` to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
 
@@ -149,7 +149,7 @@ tab(lifeexp, lexp) |> print_headtail()
 #>  3    62     2    2.94   5.88  2.94      5.88
 #>  4    63     1    1.47   7.35  1.47      7.35
 #>  5    64     3    4.41  11.8   4.41     11.8 
-#>  .     .     .      .     .      .        .  
+#>  .     .     .     .      .     .         .  
 #> 16    75     4    5.88  72.1   5.88     72.1 
 #> 17    76     4    5.88  77.9   5.88     77.9 
 #> 18    77     5    7.35  85.3   7.35     85.3 
@@ -177,7 +177,7 @@ tab(lifeexp, lexp) |> print_interval()
 
 ## Learn more
 
-tidystata also covers row calculations (`row_mean()`), panel operators (`stata_lag()`), correlations (`corr()` for complete cases and `pwcorr()` for pairwise samples), missing values (`misstable()`), keys and merging (`isid()`, `stata_merge()`) and binning (`xtile()`). See the guides below for examples and output conventions.
+tidystata also includes `stata_recode()`, `destring()`, `encode()`, `decode()`, `tostring()`, the `row_*()` and `duplicates_*()` families, `stata_lag()`, `stata_lead()`, `stata_diff()`, `corr()`, `pwcorr()`, `misstable()`, `isid()`, `stata_merge()`, `xtile()` and `preview()`. See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.

@@ -59,7 +59,7 @@ for (function_name in c("summ", "tabstat")) {
       input <- tibble::tibble(x = x)
       before <- input
       expected <- summary_reference(c(1, 2, NA_real_, NA_real_))
-      expect_warning(out <- fn(input, .stat = names(expected)), "labelled")
+      expect_message(out <- fn(input, .stat = names(expected)), "labelled")
       expect_equal(
         unlist(out[names(expected)], use.names = FALSE),
         unname(expected),
@@ -73,7 +73,7 @@ for (function_name in c("summ", "tabstat")) {
         c(1, 2, 97, 98, 99, NA_real_),
         na_range = c(97, 99)
       )
-      expect_warning(
+      expect_message(
         out <- fn(
           tibble::tibble(x = x),
           .stat = c("n", "unique", "missing", "valid_pct", "mean", "sum")
@@ -91,7 +91,7 @@ for (function_name in c("summ", "tabstat")) {
     test_that(paste(fn_name, "retains all-user-missing SPSS rows as missing"), {
       x <- haven::labelled_spss(c(99, 99, NA_real_), na_values = 99)
       expect_warning(
-        expect_warning(
+        expect_message(
           out <- fn(tibble::tibble(x = x), .detail = TRUE, .stat = character()),
           "labelled"
         ),
@@ -117,7 +117,7 @@ for (function_name in c("summ", "tabstat")) {
           g = c("observed", "observed", "missing", "missing"),
           x = haven::labelled_spss(c(1, 99, 99, NA_real_), na_values = 99)
         )
-        expect_warning(
+        expect_message(
           out <- fn(
             input,
             x,

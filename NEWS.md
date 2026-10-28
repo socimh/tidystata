@@ -1,5 +1,52 @@
 # tidystata 0.4.0
 
+* `destring()` and `tostring()` ignore AsIs wrappers on non-character input.
+  `tostring()` writes measured values and durations without exponents in their
+  existing units; its help clarifies that large numeric IDs can lose digits.
+
+* `as_character()` is now an exact alias of `tostring()`, converting stored
+  codes to text without reading value labels. Use `decode()` for the previous
+  label-reading behavior. New `encode()` creates labelled integer codes from
+  character categories, or preserves factor codes and levels as value labels.
+  Re-encoding decoded text assigns fresh codes and need not restore old codes.
+
+* `destring()` accepts non-breaking spaces and drops input names from
+  `problems()`. `destring()`, `tostring()` and `decode()` now reject data
+  frames instead of returning one value per column.
+
+* `pct()` is removed; use `pc()` for percentages of a total. `findit()` distinguishes z-scores,
+  total shares and percentile ranks, with executable examples using
+  `dplyr::percent_rank()` on 0-1 and 0-100 scales.
+
+* `as_dummy()` (`tab_gen()`) supports `.names = "label"` for value-label names.
+  The default `"value"` uses original values (raw codes for labelled vectors),
+  while `"index"` uses consecutive category numbers.
+
+* `corr()`, `pwcorr()` and `spearman()` share one help page and a dedicated
+  correlation section in the website reference, with guidance on their
+  different defaults and supported options.
+
+* Head/tail preview omission markers align with printed numeric decimal points,
+  or the last significand digit when no decimal is displayed. Row-number
+  markers align with the last digit; other column types keep centered markers.
+  Unicode output uses vertical ellipses, with periods as the fallback.
+
+* `findit()` separates family browsing from specific queries, retains at most
+  ten ambiguous candidates, and prefers matching tidystata helpers before
+  tidyverse and other implementations. Row recipes now use `row_mean()` and
+  related helpers; footers distinguish relevant results from broader operations.
+  About 90 common data-management lookups that previously offered only base R,
+  such as `tabstat`, `isid`, `misstable`, `sort`, `keep`/`drop if` and `egen`
+  summaries, now recommend tidystata or tidyverse code and keep base R as an
+  alternative. `drop if` and `replace ... if` recipes use dplyr 1.2's
+  `filter_out()` and `replace_when()`, with notes for older dplyr. Negated
+  conditions such as `keep if !missing(x)` no longer match their opposite.
+
+* `summ()` and `tabstat()` report omitted non-numeric columns and the `*`/`**`/
+  `***` markers for labelled, factor and retained non-numeric variables as
+  messages rather than warnings; silence them with `suppressMessages()`.
+  Entirely missing columns and skipped date statistics still warn.
+
 * `summ()` and `tabstat()` reuse native scratch storage for numerical summaries,
   weighted statistics and grouped distinct counts, reducing temporary allocation.
   Large two-column categorical tabulations use bounded native counting when a

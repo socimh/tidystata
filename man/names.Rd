@@ -3,7 +3,7 @@
 \name{names}
 \alias{names}
 \alias{ds}
-\title{List column names by tidyselect}
+\title{Select and list column names}
 \usage{
 ds(.data, ..., .type = c("vector", "table", "tibble"))
 }
@@ -23,17 +23,19 @@ in the input's table class, or a tibble for a character inventory.
 \code{"tibble"} always returns a one-column tibble.}
 }
 \value{
-\code{ds()} returns a character vector. With \code{.type = "table"} or
-\code{"tibble"}, it returns one character column, \code{name}, and one row per
-selected name, in selection order. On ungrouped data, an empty selection
-returns a zero-length vector or zero-row table. Tables preserve the input's
+A character vector of selected names by default. With
+\code{.type = "table"} or \code{"tibble"}, a table with one character column,
+\code{name}, and one row per selected name, in selection order. On ungrouped
+data, an empty selection returns a zero-length vector or zero-row table.
+Tables preserve the input's
 data.frame, tibble, or data.table container and supported preview settings,
 without grouping or arbitrary subclasses; character inventories return a
 tibble in table mode. Explicit \code{.type = "tibble"} overrides the input's
 table class and preview settings.
 }
 \description{
-List column names by tidyselect
+Select or rename existing columns and return their names, like Stata's \code{ds}.
+Use tidyselect helpers to filter a dataset or a character inventory of names.
 }
 \details{
 Selection order and renamed column names follow \code{\link[dplyr:select]{dplyr::select()}}. On a
@@ -49,18 +51,13 @@ ds(lifeexp) # equivalent to names(lifeexp)
 
 ds(lifeexp, country:lexp)
 
-ds(lifeexp, where(is.character), .type = "table")
-
-starwars <- dplyr::starwars
-ds(starwars, ends_with("color"), .type = "table")
-
-ds(starwars, ends_with("color"), .type = "tibble")
+ds(lifeexp, where(is.numeric))
 
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))
 dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 
-ds(numeric_names, dplyr::starts_with("pop"))
+ds(numeric_names, dplyr::contains("o"))
 }
 \seealso{
 \code{\link[=variables]{variables()}}, \code{\link[=codebook]{codebook()}}, \code{\link[=browse]{browse()}}

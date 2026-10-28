@@ -69,7 +69,7 @@ test_that("package qualification constrains R function matches", {
 })
 
 test_that("reference metadata follows examples through customization", {
-  x <- findit(tab, sex)
+  x <- findit_customize(findit_lookup("tab"), rlang::exprs(sex))
   metadata <- findit_metadata(x)
   expect_identical(metadata$id, attr(x, "entry_ids"))
   expect_identical(metadata$stata, x$stata)
@@ -77,7 +77,7 @@ test_that("reference metadata follows examples through customization", {
   expect_true(all(c("source", "r_source", "equivalence") %in% names(metadata)))
   selected <- x[2L, ]
   expect_identical(findit_metadata(selected)$id, metadata$id[2L])
-  dropped <- findit(drop, "one", "two")
+  dropped <- findit_customize(findit_lookup("drop"), rlang::exprs("one", "two"))
   expect_identical(findit_metadata(dropped)$id, attr(dropped, "entry_ids"))
   index <- which(attr(dropped, "entry_ids") == "legacy-0184")
   expect_identical(findit_metadata(dropped[index, ])$id, "legacy-0184")
@@ -237,12 +237,12 @@ test_that("axis-label customization preserves fixed ggplot argument names", {
 test_that("egen summaries keep all-missing inputs missing", {
   entries <- findit_entries()
   examples <- c("egen z = min(x)", "egen z = max(x)", "egen z = lastnm(x)")
-  for (code in examples) {
-    row <- which(entries$stata == code)
-    expect_length(row, 1L)
+  # Every alternative for these commands, base and tidyverse alike.
+  for (row in which(entries$stata %in% examples)) {
     scope <- new.env(parent = globalenv())
     scope$data <- data.frame(x = rep(NA_real_, 3L))
     expect_warning(eval(parse(text = entries$r[row]), scope), NA)
-    expect_identical(scope$data$z, rep(NA_real_, 3L))
+    expect_identical(scope$data$z, rep(NA_real_, 3L), info = entries$r[row])
   }
+  expect_setequal(entries$stata[entries$stata %in% examples], examples)
 })

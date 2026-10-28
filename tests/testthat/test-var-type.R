@@ -560,8 +560,8 @@ test_that("custom numeric-looking labels remain unsupported in summaries", {
   )
   expect_identical(var_type(x), "interval")
   expect_identical(as_numeric(x), rep(NA_real_, 3))
-  expect_warning(expect_error(summ(tibble::tibble(x = x)), "None"), "numeric")
-  expect_warning(
+  expect_message(expect_error(summ(tibble::tibble(x = x)), "None"), "numeric")
+  expect_message(
     out <- summ(
       tibble::tibble(x = x),
       .keep_all = TRUE,
@@ -844,6 +844,6 @@ test_that("descriptive labels improve codebook without changing numeric eligibil
   expect_identical(out$n, 2L)
   expect_identical(out$unique, 2L)
   expect_identical(as_numeric(x), rep(NA_real_, 3L))
-  expect_warning(expect_error(summ(data), "None"), "non-numeric")
+  expect_message(expect_error(summ(data), "None"), "non-numeric")
   expect_equal(tab(data)$n, c(1L, 1L, 1L))
 })

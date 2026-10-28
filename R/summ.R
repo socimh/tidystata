@@ -16,13 +16,14 @@
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> or
 #'   <[`data-masking`][args_data_masking]> Variables to summarise, or named
 #'   expressions such as `income_k = income / 1000`. Defaults to all
-#'   nongrouping columns.
+#'   nongrouping columns except the weight column. Matrix and nested data-frame
+#'   columns are not supported.
 #' @param .by <[`tidy-select`][dplyr_tidy_select]> Optional grouping columns.
 #'   Existing [dplyr::group_by()] groups are used unless `.by` is supplied.
 #'   Grouping columns are excluded from the variables being summarised.
 #' @param .keep_all If `TRUE`, retain character and list columns for counts and
 #'   distinct values; other statistics for these columns are `NA`.
-#'   By default, unsupported columns are omitted with a warning.
+#'   By default, unsupported columns are omitted with a message.
 #' @param .detail If `TRUE`, report all supported statistics unless `.stat`
 #'   is supplied explicitly. Defaults to `FALSE`.
 #' @param .stat Character vector of statistics to report. See Details for the
@@ -46,8 +47,9 @@
 #' @param .drop_empty If `TRUE`, omit variable-group rows with `n = 0`,
 #'   including rows with no observed measured values or zero total weight.
 #'   Defaults to `FALSE`.
-#' @param .wt Optional numeric weights, supplied as a column or a vector.
-#'   Rows with missing weights are excluded; negative weights are invalid.
+#' @param .wt Optional finite, nonnegative numeric weights, supplied as a
+#'   column, one value per input row, or a scalar recycled to all rows. Rows
+#'   with missing weights are excluded with a message.
 #' @param .wt_type `"frequency"` (default) treats weights as frequencies;
 #'   `"analytic"` rescales weights to the number of observed values within
 #'   each variable and group. See Details for the calculation differences.
@@ -146,7 +148,7 @@
 #'
 #' Missingness follows `is.na()`, including SPSS user-missing codes. Logical
 #' variables are treated as 0/1; factors use their underlying numeric codes;
-#' labelled numeric variables use their stored values. Warnings flag such
+#' labelled numeric variables use their stored values. Messages note such
 #' conversions. Variable names are marked with `*` for labelled variables,
 #' `**` for factors, and `***` for retained nonnumeric variables. Numeric
 #' calculations use double precision, which may affect large `integer64` values.
@@ -155,11 +157,12 @@
 #' `skew`, or `kurtosis`. Calendar locations are displayed as dates or times;
 #' their spreads (`sd`, `se`, `mad`, `iqr`) are `difftime` values in list mode.
 #' With `.type = "table"` or `"tibble"`, calendar locations are text and spreads
-#' are numeric durations (days for Dates, seconds for datetimes and times of day).
+#' are numeric durations (days for Dates, seconds for datetimes and times of
+#' day).
 #'
-#' Expressions in `...` are evaluated before statistics are calculated by
-#' group. For group-specific expressions, first create columns with grouped
-#' [dplyr::mutate()].
+#' Expressions in `...` are evaluated on ungrouped working data before
+#' statistics are calculated by group. For group-specific expressions, first
+#' create columns with grouped [dplyr::mutate()].
 #'
 #' @name summ
 #' @family summary functions

@@ -21,10 +21,20 @@ navbar:
     stata_to_r:
       text: "Stata to R"
       href: articles/coming-from-stata.html
+    articles:
+      text: Articles
+      menu:
+      - text: "Getting started with tidystata"
+        href: articles/getting-started.html
+      - text: "Containers, grouping and missing values"
+        href: articles/containers-and-missing-values.html
+      - text: "Coming from Stata"
+        href: articles/coming-from-stata.html
+      - text: "从 Stata 到 R"
+        href: articles/coming-from-stata-zh.html
 
 articles:
 - title: "Learn tidystata"
-  navbar: ~
   contents:
   - getting-started
   - containers-and-missing-values
@@ -45,6 +55,9 @@ reference:
   contents:
   - has_concept("tabulation functions")
   - has_concept("summary functions")
+- title: "Correlation functions"
+  contents:
+  - has_concept("correlation functions")
 - title: "Check and combine data"
   contents:
   - has_concept("data checking functions")
@@ -60,8 +73,6 @@ reference:
 - title: "Preview tables"
   contents:
   - has_concept("persistent preview functions")
-- title: "Print tables once"
-  contents:
   - has_concept("one-time printing functions")
 - title: "Small tools"
   contents:

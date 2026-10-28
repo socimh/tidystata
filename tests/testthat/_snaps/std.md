@@ -1,4 +1,4 @@
-# std() and pct() report invalid inputs
+# std() and pc() report invalid inputs
 
     Code
       std(letters)
@@ -21,13 +21,13 @@
       Error in `std()`:
       ! `sd` must be a finite number, not a double vector.
     Code
-      pct(1:3, prop = NA)
+      pc(1:3, prop = NA)
     Condition
-      Error in `pct()`:
+      Error in `pc()`:
       ! `prop` must be `TRUE` or `FALSE`, not `NA`.
     Code
-      pct(as.Date("2020-01-01"))
+      pc(as.Date("2020-01-01"))
     Condition
-      Error in `pct()`:
+      Error in `pc()`:
       ! `x` must be a numeric or logical vector, not a <Date> object.
 

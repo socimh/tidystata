@@ -21,7 +21,8 @@
 #'
 #' @param ... A data frame or tibble, or
 #'   <[`tidy-select`][dplyr::dplyr_tidy_select]> expressions inside
-#'   [dplyr::mutate()]. Each selected column must be one-dimensional.
+#'   [dplyr::mutate()]. Each selected column must be one-dimensional. Inside
+#'   grouped `mutate()`, selections and values refer to the current group.
 #' @param na.rm For arithmetic and extrema helpers, if `TRUE` (the default),
 #'   omit missing values; if `FALSE`, any missing input makes that row's result
 #'   missing. Count helpers (`row_unique()`, `row_nvals()`, `row_miss()`,
@@ -86,12 +87,14 @@
 #' combinations are rejected. Measured arithmetic requires units >= 1.0.0.
 #'
 #' @section Counts:
-#' `row_unique()` combines compatible column types and counts distinct values
-#' without dropping their identities through numeric conversion. This includes
-#' compatible factors, labelled vectors, calendar/measured vectors, `integer64`,
-#' list columns, and complex vectors. Missing values count as one category. List
-#' elements are compared as whole values rather than flattened. For extrema and
-#' distinct counts, common-type conversion must preserve each original value's
+#' `row_unique()` and `row_nvals()` combine compatible column types and count
+#' distinct values without dropping their identities through numeric
+#' conversion. This includes compatible factors, labelled vectors,
+#' calendar/measured vectors, `integer64`,
+#' list columns, and complex vectors. Missing values count as one category in
+#' `row_unique()` and are omitted by `row_nvals()` unless `.missing = TRUE`.
+#' List elements are compared as whole values rather than flattened. For extrema
+#' and distinct counts, common-type conversion must preserve each original value's
 #' missingness. Conflicting SPSS missing-value definitions that would turn an
 #' observed value into a missing value produce an error; harmonize those
 #' definitions explicitly before combining the columns.
@@ -100,12 +103,16 @@
 #' result. Scalar missing list elements are missing; `NULL` and empty list
 #' elements are observed.
 #'
-#' @returns A vector with one value per input row. Extrema retain the compatible
-#'   common type; arithmetic returns doubles or a supported class as described
-#'   under Arithmetic; unique and missing-value counts return integers. Zero-row
-#'   inputs return typed empty vectors. All-missing rows return a typed `NA` for
-#'   arithmetic and extrema, except `row_sum(na.rm = TRUE)` returns zero; an
-#'   all-missing row's mean is `NA`, not `NaN`.
+#' @returns A vector with one value per input row, in input order:
+#'
+#' * `row_min()` and `row_max()` retain the compatible common type.
+#' * Arithmetic helpers return doubles or the supported calendar, duration or
+#'   measured class described under Arithmetic.
+#' * Distinct-value and missing-value counts return integers.
+#'
+#' Zero-row inputs return typed empty vectors. All-missing rows return a typed
+#' `NA` for arithmetic and extrema, except `row_sum(na.rm = TRUE)` returns zero;
+#' an all-missing row's mean is `NA`, not `NaN`.
 #' @name row_egen
 #'
 #' @examples
@@ -113,6 +120,8 @@
 #' row_mean(tb)
 #'
 #' row_sum(tb)
+#'
+#' row_sum(tb, na.rm = FALSE)
 #'
 #' row_non_miss(tb)
 #'
@@ -122,15 +131,17 @@
 #' tb |>
 #'   dplyr::mutate(capped = row_min(x, .values = 0.5))
 #'
-#' row_sum(tb, na.rm = FALSE)
-#'
 #' flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
-#' row_max(flags) # TRUE, FALSE, NA, with logical type
+#' flags
+#' 
+#' row_max(flags)
 #'
 #' dates <- tibble::tibble(
 #'   start = as.Date(c("2024-01-01", NA)),
 #'   end = as.Date(c("2024-01-03", "2024-01-05"))
 #' )
+#' dates
+#' 
 #' row_min(dates)
 #'
 #' row_mean(dates)

@@ -5,19 +5,23 @@
 \alias{tab_gen}
 \title{Create indicator (dummy) variables}
 \usage{
-as_dummy(.data, ..., .names = c("value", "index"), .remove = FALSE)
+as_dummy(.data, ..., .names = c("value", "label", "index"), .remove = FALSE)
 
-tab_gen(.data, ..., .names = c("value", "index"), .remove = FALSE)
+tab_gen(.data, ..., .names = c("value", "label", "index"), .remove = FALSE)
 }
 \arguments{
 \item{.data}{A data frame, tibble, or data.table.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The categorical variables to
-expand.}
+expand. Select at least one existing column; renaming, computed columns,
+list columns, and matrix columns are not supported.}
 
 \item{.names}{How to name the new columns: \code{"value"} (default) appends the
-category, as in \code{sex_male}; \code{"index"} numbers the categories, as in
-\code{sex_1}, like Stata's \code{generate()} option.}
+original value (the code for labelled vectors); \code{"label"} appends its
+value label, falling back to the original value when no label is available;
+\code{"index"} numbers the observed categories from 1, like Stata's \code{generate()}
+option. Factor values use their level text in both \code{"value"} and \code{"label"}
+modes.}
 
 \item{.remove}{If \code{TRUE}, drop the source variables. Defaults to \code{FALSE}.}
 }
@@ -29,16 +33,25 @@ source values. New columns have a \code{"label"} attribute such as
 \code{"sex==male"}; for labelled vectors, this uses the value label.
 }
 \description{
-\code{as_dummy()} (\code{tab_gen()}) expands categorical variables into indicator
-columns, like Stata's \verb{tabulate x, generate(x_)}. It adds one 0/1 column per
-observed category of each selected variable, placed right after its source
-variable.
+Expand categorical variables into indicator columns, like Stata's
+\verb{tabulate x, generate(x_)}:
+\itemize{
+\item \code{as_dummy()} (\code{tab_gen()}): Add one 0/1 column per observed category of
+each selected variable, immediately after its source variable.
+}
 }
 \details{
+Categories are determined across the whole input, regardless of grouping.
+Existing groups are retained in the result, and the input is not modified.
+
 Categories are the observed, non-missing values: factor levels in level order
 (unused levels are skipped), and other values in ascending order. For
-labelled vectors, \code{.names = "value"} uses the codes, such as \code{region_1}.
-Missing values include tagged and SPSS user-missing values. New names must
+labelled vectors, \code{.names = "value"} uses the codes, such as \code{region_1};
+\code{.names = "label"} uses value labels, such as \verb{region_Europe & C. Asia}.
+Label text is used as is, so names may require backticks when referenced.
+Naming does not change the categories or the indicators' label attributes.
+Missing values include tagged and SPSS user-missing values. A selected
+column with no observed categories adds no indicators. New names must
 not collide with retained columns; source names may be reused when
 \code{.remove = TRUE}. Grouping keys cannot be removed. A positive-row data.table
 result must retain at least one column: if selected variables have no
@@ -49,11 +62,13 @@ when the indicator columns themselves are needed.
 \examples{
 as_dummy(lifeexp, region)
 
-as_dummy(lifeexp, region, .names = "index", .remove = TRUE)
+as_dummy(lifeexp, region, .remove = TRUE)
+
+as_dummy(lifeexp, region, .names = "label")
 }
 \seealso{
 Other variable generation functions:
-\code{\link{cut}},
+\code{\link[=cut_quantile]{cut_quantile()}},
 \code{\link{panel}},
 \code{\link{row_egen}},
 \code{\link[=stata_recode]{stata_recode()}},

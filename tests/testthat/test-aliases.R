@@ -21,8 +21,7 @@ test_that("aliases are exported and identical to their primary functions", {
   same <- list(
     cut_quantile = "xtile",
     as_numeric = "destring",
-    as_character = "decode",
-    pct = "pc",
+    as_character = "tostring",
     tab_gen = "as_dummy"
   )
   exports <- getNamespaceExports("tidystata")
@@ -64,7 +63,7 @@ test_that("wrapper aliases give the same results as their primary functions", {
   expect_identical(value_if_na(x, 0), mvencode(x, 0))
   labelled <- haven::labelled(c(1, 2, NA), c(Low = 1, High = 2))
   expect_identical(destring(c("1,000", "2.5")), as_numeric(c("1,000", "2.5")))
-  expect_identical(decode(labelled), as_character(labelled))
+  expect_identical(tostring(labelled), as_character(labelled))
   data <- tibble::tibble(a = 1, b = 2)
   expect_identical(ds(data, .type = "vector"), ds(data))
   rows <- list(c(1, 1, NA), c(2, 1, NA), c(NA, 1, 3))

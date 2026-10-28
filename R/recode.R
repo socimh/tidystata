@@ -16,18 +16,21 @@
 #'   or a vector as long as `x`. By default, keep the input values after SPSS
 #'   user-missing codes have been converted to `NA`.
 #'
-#' @returns A vector with the length and order of `x`, using the common integer
-#'   or double type of the input, codes, and `.default`. Integer input stays
-#'   integer when every code and `.default` is a whole number within integer
-#'   range, so `1:5 ~ 1` does not promote it to double. Double input stays
-#'   double. Fractions, out-of-range numbers, infinities, `NaN`, and tagged
-#'   missing codes or defaults require double output; ordinary `NA` does not
-#'   promote integer input. Named rules produce a
-#'   [haven::labelled()] vector; otherwise the result is numeric without value
-#'   labels. Names and the variable label are kept; previous value labels, SPSS
-#'   missing-value metadata, and other input attributes are dropped.
+#' @returns An integer or double vector with the length and order of `x`.
+#'   Named rules produce a [haven::labelled()] vector; otherwise the result is
+#'   numeric without value labels. Names and the variable label are kept;
+#'   previous value labels, SPSS missing-value metadata, and other input
+#'   attributes are dropped. See Details for integer preservation.
 #'
 #' @details
+#' **Output type**
+#'
+#' Integer input stays integer when every code and `.default` is a whole
+#' number within integer range, so `1:5 ~ 1` does not promote it to double.
+#' Double input stays double. Fractions, out-of-range numbers, infinities,
+#' `NaN`, and tagged missing codes or defaults require double output; ordinary
+#' `NA` does not promote integer input. The input is not modified.
+#'
 #' **Matching**
 #'
 #' The left side of each rule is read before evaluation:
@@ -119,7 +122,7 @@
 #'   items,
 #'   dplyr::across(
 #'     dplyr::everything(),
-#'     function(v) stata_recode(v, 1:5 ~ 1, 6:10 ~ 2),
+#'     function(v) stata_recode(v, 1:5 ~ 1, 6:10 ~ 2, 11:15 ~ 3),
 #'     .names = "r_{.col}"
 #'   )
 #' )

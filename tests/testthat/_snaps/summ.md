@@ -33,9 +33,9 @@
       i Create the grouping column first, e.g. `mutate(group = toupper(g))`, then use `.by = group`.
     Code
       summ(d, g)
-    Condition
-      Warning:
+    Message
       g is non-numeric and thus removed.
+    Condition
       Error in `summ()`:
       ! None of the provided variable(s) is suitable for `summ()`.
 

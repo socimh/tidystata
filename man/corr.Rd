@@ -2,7 +2,9 @@
 % Please edit documentation in R/corr.R
 \name{corr}
 \alias{corr}
-\title{Calculate complete-case Pearson correlations}
+\alias{pwcorr}
+\alias{spearman}
+\title{Calculate Pearson and Spearman correlations}
 \usage{
 corr(
   .data,
@@ -11,6 +13,27 @@ corr(
   .wide = FALSE,
   .wt = NULL,
   .wt_type = c("frequency", "analytic")
+)
+
+pwcorr(
+  .data,
+  ...,
+  .by = NULL,
+  .method = c("pearson", "spearman"),
+  .wide = FALSE,
+  .wt = NULL,
+  .wt_type = c("frequency", "analytic"),
+  .listwise = FALSE,
+  .adjust = c("none", "bonferroni", "sidak")
+)
+
+spearman(
+  .data,
+  ...,
+  .by = NULL,
+  .pairwise = FALSE,
+  .wide = FALSE,
+  .adjust = c("none", "bonferroni", "sidak")
 )
 }
 \arguments{
@@ -21,85 +44,167 @@ corr(
 \code{\link[=select_or_transmute]{select_or_transmute()}}. Existing columns, selection helpers, and named
 expressions can be mixed. Results must be numeric or logical vector
 columns. Matrix columns are unsupported. Omit to use every numeric or
-logical vector column; other columns are then skipped. Selecting another
-type is an error.}
+logical vector column except grouping keys and the weight column; other
+columns are then skipped. Explicitly selecting another type is an error.}
 
 \item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping variables.
 Grouped data use their groups unless \code{.by} is supplied. Select existing
 columns only; create new grouping columns with \code{\link[dplyr:mutate]{dplyr::mutate()}} first.}
 
-\item{.wide}{If \code{TRUE}, return a lower-triangular correlation table with
-one row per variable, like Stata's display. The default is a long table.}
+\item{.wide}{If \code{TRUE}, return a lower-triangular correlation table, like
+Stata's display, without counts or p-values. Defaults to \code{FALSE} (long).}
 
-\item{.wt}{Optional weights: a numeric column of \code{.data} (or a vector with
-one value per row), like Stata's \code{corr [fweight/aweight]}. Rows with a
-missing weight are excluded with a message.}
+\item{.wt}{Optional numeric weights for \code{corr()} and Pearson \code{pwcorr()},
+given as a column of \code{.data} or one value per row, like Stata's
+\verb{[fweight/aweight]}. Missing weights exclude rows with a message; negative
+weights are invalid. Spearman correlations do not support weights.}
 
-\item{.wt_type}{\code{"frequency"} (default) reports the sum of weights as \code{n};
-\code{"analytic"} reports the number of complete observations with positive
-weights. Both give the same weighted correlation. Zero-weight rows are
-excluded. Like \code{\link[=pwcorr]{pwcorr()}}, fractional frequency weights are accepted,
-extending Stata's integer frequency-weight convention.}
+\item{.wt_type}{For \code{corr()} and Pearson \code{pwcorr()}, \code{"frequency"} (default)
+reports summed weights as \code{n}; \code{"analytic"} reports the number of observed
+rows. Both give the same weighted correlation. In \code{pwcorr()}, the choice
+also affects p-values. See Details for zero-weight handling.}
+
+\item{.method}{For \code{pwcorr()}, \code{"pearson"} (default) or \code{"spearman"}.
+\code{corr()} always uses Pearson correlations; \code{spearman()} always uses ranks.}
+
+\item{.listwise}{For \code{pwcorr()}, use one common complete sample if \code{TRUE},
+like Stata's \code{listwise} (\code{casewise}). Defaults to \code{FALSE} (pairwise).
+\code{corr()} always uses a common sample; \code{spearman()} does so by default.}
+
+\item{.adjust}{For \code{pwcorr()} and \code{spearman()}, \code{"none"} (default),
+\code{"bonferroni"} or \code{"sidak"}, like Stata's corresponding options. Adjust
+p-values separately within each group; not available with \code{.wide = TRUE}.}
+
+\item{.pairwise}{For \code{spearman()}, use a separate sample for each pair if
+\code{TRUE}, like Stata's \code{pw}. Defaults to \code{FALSE} (one common complete
+sample).}
 }
 \value{
-An ungrouped tibble with one row per distinct variable pair and
-group: any grouping keys, \code{var1}, \code{var2}, \code{r} (Pearson correlation), and
-\code{n} (complete observations or summed frequency weight). Every pair within
-a group uses the same sample and has the same \code{n}. P-values are omitted.
-With \code{.wide = TRUE}, columns are grouping keys, \code{variable}, and one
-correlation column per variable; the diagonal is 1 and the upper triangle
-is \code{NA}. Undefined correlations are \code{NA}.
+An ungrouped tibble with:
+\itemize{
+\item By default, one row per distinct variable pair and group, with grouping
+keys, \code{var1}, \code{var2}, \code{r} (Pearson correlation or Spearman's rho), and \code{n}
+(observations or summed frequency weights). \code{pwcorr()} and \code{spearman()}
+also return \code{p} (two-sided p-value); \code{corr()} omits it.
+\item With \code{.wide = TRUE}, one row per variable and group, with grouping keys,
+\code{variable}, and one correlation column per variable. The diagonal is 1 and
+the upper triangle is \code{NA}; \code{n} and \code{p} are omitted.
+}
+
+Variables and pairs follow selection order within each group. Undefined
+correlations and p-values are \code{NA}. With \code{n < 3}, \code{p} is \code{NA} even
+when the correlation is defined; frequency-weighted \code{n} is the summed weight.
+Empty grouped inputs return zero rows. The input is not modified.
 }
 \description{
-Calculate correlations using one common sample, like Stata's \code{corr}
-(\code{correlate}). Rows missing any selected variable are excluded from every
-correlation. Use \code{\link[=pwcorr]{pwcorr()}} to use a separate sample for each pair instead.
+Calculate correlations between selected variables, with optional grouping:
+\itemize{
+\item \code{corr()}: Calculate Pearson correlations on one common complete sample,
+like Stata's \code{corr} (\code{correlate}), reporting correlations and counts.
+\item \code{pwcorr()}: Calculate Pearson correlations using a separate sample for each
+pair by default, like Stata's \verb{pwcorr, sig obs}, reporting correlations,
+counts and p-values. Spearman correlations and a common sample are
+optional.
+\item \code{spearman()}: Calculate Spearman rank correlations on one common complete
+sample by default, like Stata's \verb{spearman, stats(rho obs p)}, reporting
+correlations, counts and p-values. Pairwise samples are optional.
+}
 }
 \details{
-Select at least two numeric or logical vector columns. When \code{...} is
-omitted, nonnumeric columns and grouping keys are skipped, as in \code{\link[=pwcorr]{pwcorr()}}.
-Labelled numeric columns use their codes; tagged and SPSS user-missing values
-are excluded before determining the common sample. Missing values in
-unselected columns do not affect the sample.
+\strong{Selection, samples and groups}
 
-Computed columns are evaluated on ungrouped working data before complete
-cases and groups are processed. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}
-first for calculations that need to run separately within each group.
-Groups with fewer than two complete observations retain their pairs with
-correlations of \code{NA}; empty grouped inputs return zero rows. The input is
-not modified.
+Select at least two numeric or logical vector columns. Labelled numeric
+columns use their codes; tagged and SPSS user-missing values are excluded
+before determining samples. Missing values in unselected columns do not
+affect the sample.
+Grouping keys must not conflict with output column names; wide output also
+reserves \code{variable} and the selected variable names for its columns.
 
-Like Stata's correlation mode, this function computes Pearson correlations.
+Listwise deletion excludes rows missing any selected variable, so every
+pair within a group uses the same sample and has the same \code{n}. Pairwise
+deletion uses every row where both variables in that pair are observed.
+Groups with fewer than two observations retain their pairs with undefined
+correlations (\code{NA}).
+
+Computed columns are evaluated on ungrouped working data before samples and
+groups are processed. Create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} first for
+calculations that need to run separately within each group.
+
+With the same selections and weights, Pearson \code{pwcorr(.listwise = TRUE)}
+gives the same correlations and counts as \code{corr()}, retaining p-values.
+\code{spearman()} is equivalent to
+\code{pwcorr(.method = "spearman", .listwise = TRUE)}; with \code{.pairwise = TRUE},
+it is equivalent to \code{pwcorr(.method = "spearman")}.
+
+\strong{Weights}
+
+Weights must be finite and nonnegative. Fractional frequency weights are
+accepted, extending Stata's integer frequency-weight convention. Zero-weight
+rows do not contribute to the correlation. With pairwise Pearson samples,
+analytic \code{n} includes complete zero-weight rows; with a common sample, these
+rows are excluded from both the sample and \code{n}. This also affects p-values.
+
+\strong{Inference}
+
+Pearson p-values use \code{t = r * sqrt((n - 2) / (1 - r^2))} with \code{n - 2}
+degrees of freedom. For unweighted data this matches \code{\link[stats:cor.test]{stats::cor.test()}}.
+
+Spearman ties receive average ranks, computed within each sample used for
+a correlation. P-values test independence as Stata 18 and later do: a beta
+distribution is fitted to the first four exact permutation moments of the
+statistic, with a normal approximation, \code{sqrt(n - 1) * r}, when \code{n = 3} or
+no valid fit exists. Earlier Stata versions and \code{\link[stats:cor.test]{stats::cor.test()}} use
+other approximations, so their p-values can differ. A constant variable
+gives \code{NA}, where Stata's \code{spearman} reports a correlation of 1.
+
+With \code{k} distinct variable pairs within a group, Bonferroni and Sidak
+adjustments are \code{min(1, k * p)} and \code{min(1, 1 - (1 - p)^k)}, respectively.
+Each group's \code{k} includes pairs whose p-value is \code{NA}; adjustment does not
+combine tests across groups.
+
+\strong{Stata options}
+
 Stata's \code{covariance}, \code{means}, and display-formatting options are not
 implemented. Use \code{\link[stats:cov]{stats::cov()}} for covariance and \code{\link[=summ]{summ()}} for summaries.
 The tidy long table is an R interface choice; Stata prints a matrix.
+Display options \code{star()} and \code{print()} are also omitted: filter the result
+instead, for example with \code{dplyr::filter(p < 0.05)}.
 }
 \examples{
 corr(lifeexp, lexp, gnppc, safewater)
 
-corr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
+pwcorr(lifeexp, lexp, gnppc, safewater)
 
-corr(lifeexp, lexp, gnppc, safewater, .by = region)
+spearman(lifeexp, lexp, gnppc, safewater)
 
-corr(lifeexp, lexp, gnppc_thousands = gnppc / 1000)
+# Return a correlation table, or calculate correlations by group
+pwcorr(lifeexp, lexp, gnppc, safewater, .wide = TRUE)
 
-# Compare listwise and pairwise samples
-survey <- tibble::tibble(
-  x = c(1, 2, 3, 4), y = c(2, 3, NA, 5), z = c(1, NA, 4, 3)
+pwcorr(lifeexp, lexp, gnppc, .by = region)
+
+# Correlate an existing column with a computed column
+corr(lifeexp, lexp, gnppc_k = gnppc / 1000)
+
+# Pairwise Spearman correlations with adjusted p-values
+spearman(lifeexp, lexp, gnppc, safewater,
+  .pairwise = TRUE, .adjust = "bonferroni"
 )
-corr(survey)
 
-pwcorr(survey)
+# Spearman correlations on one common sample using pwcorr()
+pwcorr(lifeexp, lexp, gnppc, safewater,
+  .method = "spearman", .listwise = TRUE
+)
+
+# Pearson correlations on one common sample, retaining adjusted p-values
+pwcorr(lifeexp, lexp, gnppc, safewater,
+  .listwise = TRUE, .adjust = "bonferroni"
+)
 }
 \references{
-\href{https://www.stata.com/manuals/rcorrelate.pdf}{Stata correlate manual}.
+\href{https://www.stata.com/manuals/rcorrelate.pdf}{Stata correlate manual},
+\href{https://www.stata.com/manuals/rspearman.pdf}{Stata spearman manual}.
 }
 \seealso{
-\code{\link[=pwcorr]{pwcorr()}}, \code{\link[stats:cor]{stats::cor()}}
-
-Other tabulation functions:
-\code{\link[=pwcorr]{pwcorr()}},
-\code{\link[=spearman]{spearman()}},
-\code{\link[=tab]{tab()}}
+\code{\link[stats:cor]{stats::cor()}}, \code{\link[stats:cor.test]{stats::cor.test()}}
 }
-\concept{tabulation functions}
+\concept{correlation functions}

@@ -319,8 +319,9 @@ test_that("shared summary groups retain calendar and nonnumeric families", {
     w = c(1, 2, 3)
   )
   before <- data
-  expect_warning(
-    out <- suppressMessages(summ(
+  # The list-mode notice is also a message; keep only the non-numeric one.
+  suppressMessages(expect_message(
+    out <- summ(
       data,
       x,
       day,
@@ -329,9 +330,9 @@ test_that("shared summary groups retain calendar and nonnumeric families", {
       .by = g,
       .wt = w,
       .stat = c("mean", "unique")
-    )),
+    ),
     "non-numeric"
-  )
+  ))
   expect_equal(out$numeric$mean, c(3, NA, 4, NA))
   expect_identical(out$numeric$unique, c(1L, 1L, 2L, 1L))
   expect_identical(out$date$mean, c("2024-01-03", "2024-01-04"))
@@ -351,7 +352,7 @@ test_that("excluded custom columns do not evaluate missingness methods", {
     x = 1:3,
     opaque = structure(letters[1:3], class = "tidystata_aggregation_opaque")
   )
-  expect_warning(
+  expect_message(
     out <- summ(data, .stat = "mean"),
     "opaque is non-numeric and thus removed"
   )

@@ -53,7 +53,7 @@ test_that("analytic weights rescale to the rows of each group", {
 test_that("the weight column is not tabulated or summarised by default", {
   expect_false("w" %in% names(tab(weighted, .wt = w)))
   # `g` is dropped as non-numeric; `w` must not be summarised either.
-  summary <- suppressWarnings(summ(weighted, .wt = w, .name = TRUE))
+  summary <- suppressMessages(summ(weighted, .wt = w, .name = TRUE))
   expect_identical(summary$name, "x")
   expect_true("w" %in% names(tab(weighted, x, w, .wt = w)))
 })

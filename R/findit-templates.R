@@ -60,6 +60,8 @@ findit_defaults <- function(entries, described = character()) {
   meaning <- vapply(templates, function(x) x$meaning, character(1))
   if (any(entries$match[candidates] == "stata")) {
     stata <- candidates[entries$match[candidates] == "stata"]
+    package <- findit_package_priority(entries$package[stata])
+    stata <- stata[package == min(package)]
     primary <- stata[priority[stata] == min(priority[stata])]
     functions <- unlist(findit_calls(entries$r[entries$match == "stata"]))
     r <- candidates[entries$match[candidates] == "r"]
@@ -91,6 +93,8 @@ findit_defaults <- function(entries, described = character()) {
     if (any(preferred[candidates])) {
       candidates <- candidates[preferred[candidates]]
     }
+    package <- findit_package_priority(entries$package[candidates])
+    candidates <- candidates[package == min(package)]
     candidates <- candidates[priority[candidates] == min(priority[candidates])]
   }
   candidates <- candidates[!duplicated(meaning[candidates])]
@@ -189,6 +193,7 @@ findit_customize <- function(x, arguments) {
     if (length(variables) && any(fits[candidates])) {
       candidates <- candidates[fits[candidates]]
     }
+    attr(x, "candidate_rows") <- candidates
     priority <- vapply(templates, function(t) t$priority, integer(1))
     meaning <- vapply(templates, function(t) t$meaning, character(1))
     interpretations <- rep("", length(candidates))
@@ -224,6 +229,16 @@ findit_customize <- function(x, arguments) {
           )
           if (any(preferred)) group <- group[preferred]
         }
+        package <- findit_package_priority(x$package[group])
+        group <- group[package == min(package)]
+        if (length(hints)) {
+          size <- lengths(findit_rank_tokens(vapply(
+            templates[group],
+            function(t) t$stata,
+            character(1)
+          )))
+          group <- group[size == min(size)]
+        }
         group <- group[priority[group] == min(priority[group])]
         group[!duplicated(meaning[group])]
       }),
@@ -234,6 +249,7 @@ findit_customize <- function(x, arguments) {
     customized <- attr(x, "customized")
     ids <- attr(x, "entry_ids")
     x <- x[order, ]
+    attr(x, "candidate_rows") <- match(candidates, order)
     attr(x, "entry_ids") <- ids[order]
     if (!is.null(customized)) {
       attr(x, "customized") <- customized[order]
@@ -243,6 +259,15 @@ findit_customize <- function(x, arguments) {
   }
   attr(x, "unmatched_hints") <- length(hints) > 0L &&
     (!length(score) || max(score[pool]) < length(hints))
+  attr(x, "matched_hints") <- length(hints) > 0L &&
+    length(unique(vapply(
+      templates[candidates],
+      function(t) {
+        findit_render(t, rep("VAR", length(t$variables)))$stata
+      },
+      character(1)
+    ))) ==
+      1L
   x
 }
 

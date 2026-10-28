@@ -135,7 +135,7 @@ test_that("survey preparation, key checks, joins and panel summaries compose", {
     .by = id
   )
   expect_identical(out$change, c(2, NA, NA, NA, 5, NA))
-  expect_warning(
+  expect_message(
     summary <- summ(out, score, .by = region, .stat = c("n", "mean", "miss_n")),
     "labelled variable"
   )

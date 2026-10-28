@@ -29,11 +29,15 @@ findit("merge 1:1 id, keep(match)")
 ```
 
 也可以查询 R 函数（`findit(left_join)`），或直接提问（`findit("如何删除重复行")`）。
-控制台显示最相关的结果，返回的表保留全部匹配项；不带参数的 `findit()` 返回完整列表。
+单独查询命令（例如 `findit(egen)`）时，返回整个命令族，默认显示最多五种操作。
+具体查询（例如 `findit("egen rowmean")`）在答案明确时返回一个结果；有歧义的查询
+最多保留十个相关候选。不带参数的 `findit()` 返回完整列表。
 
-逗号分隔的变量名会填入兼容的示例，例如 `findit(tab, sex, region)`。任务明确时默认只显示
-一个优先推荐的答案；`findit(tab) |> print(n = Inf)` 展开全部变体、精选的 R 实现、
-差异说明和参考链接。`findit(dplyr::filter)` 这样的包限定查询可以区分同名函数。
+逗号分隔的变量名会填入兼容的示例，例如 `findit(tab, sex, region)`。匹配的提示词
+（例如 `findit(tab, gen)`）可将结果缩小到一个答案。`print(n = Inf)` 展开返回的候选、
+差异说明和参考链接。末尾提示分别列出尚未显示的相关结果和命令族中更广泛的操作；
+使用 `findit(egen)` 浏览整个命令族。同一操作内依次优先推荐 tidystata、tidyverse、
+其他包或基础 R。`findit(dplyr::filter)` 这样的包限定查询可以区分同名函数。
 
 本指南包含 `r counts$commands` 个命令族、`r counts$functions` 个 Stata 函数和
 `r counts$operators` 个运算符，共有 `r counts$stata_examples` 个不同的 Stata 示例和
@@ -41,6 +45,13 @@ findit("merge 1:1 id, keep(match)")
 R 函数索引包含 `r counts$r_functions` 个函数与包的组合。
 
 ## 使用命令对照表 {#use-the-command-tables}
+
+`destring()`（`as_numeric()`）将数值文本转换为数字，`tostring()`
+（`as_character()`）将底层编码转换为文本。分类变量使用 `encode()` 将字符串
+转换为带值标签的整数编码，使用 `decode()` 将值标签读为文本。字符输入按排序顺序
+从 1 开始分配新编码；因子输入保留现有整数编号及全部水平。
+`encode(decode(x))` 不一定恢复原编码。字符列应在分组之前编码，以便所有行使用
+同一套编码与标签。
 
 下表涵盖 tidystata 和其他常用 R 包，包括建模、长宽转换、调查分析和作图。
 面板滞后、超前和差分可使用 tidystata 的 `stata_lag()`、`stata_lead()` 和

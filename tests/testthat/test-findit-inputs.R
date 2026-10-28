@@ -1,9 +1,9 @@
-test_that("clear commands show one default and offer every remaining example", {
+test_that("family commands show up to five defaults and offer remaining examples", {
   withr::local_envvar(LANGUAGE = "en")
   for (query in c("tab", "reg", "su", "codebook", "lm")) {
     found <- findit(!!query)
     out <- capture.output(print(found))
-    expect_identical(sum(startsWith(out, "Stata: ")), 1L, info = query)
+    expect_true(sum(startsWith(out, "Stata: ")) %in% 1:5, info = query)
     expect_identical(
       sum(startsWith(capture.output(print(found, n = Inf)), "Stata: ")),
       nrow(found)
@@ -14,18 +14,18 @@ test_that("clear commands show one default and offer every remaining example", {
   expect_true(
     paste0(
       "# ",
-      nrow(findit(tab)) - 1L,
-      " more examples. To see them all: findit(tab) |> print(n = Inf)"
+      nrow(findit(tab)) - 5L,
+      " more relevant examples. To see them all: findit(tab) |> print(n = Inf)"
     ) %in%
       out
   )
   expect_identical(
     sum(startsWith(capture.output(print(findit(reshape))), "Stata: ")),
-    2L
+    5L
   )
   expect_identical(
     sum(startsWith(capture.output(print(findit(log))), "Stata: ")),
-    2L
+    5L
   )
 })
 
@@ -34,7 +34,7 @@ test_that("comma arguments select tabulation examples without evaluation", {
   two <- findit(tab, sex, region)
   expect_identical(two$stata[1], "tabulate sex region")
   expect_identical(two$r[1], "tab2(data, sex, region)")
-  expect_identical(nrow(two), nrow(findit(tab)))
+  expect_lte(nrow(two), 10L)
   expect_named(two, c("match", "stata", "r", "package", "task"))
   expect_identical(findit(ta, sex, region)$r[1], two$r[1])
   expect_identical(findit("tabulate", "sex", "region")$r[1], two$r[1])
@@ -97,7 +97,7 @@ test_that("supplied names bind in Stata operand order across command families", 
 })
 
 test_that("customization is simultaneous and leaves incompatible examples intact", {
-  found <- findit(tab, sex, region)
+  found <- findit_customize(findit_lookup("tab"), rlang::exprs(sex, region))
   expect_true("tab(data, x)" %in% found$r)
   full <- capture.output(print(found, n = Inf))
   expect_identical(sum(startsWith(full, "Stata: ")), nrow(findit(tab)))

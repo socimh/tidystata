@@ -31,14 +31,20 @@ findit("merge 1:1 id, keep(match)")
 ```
 
 You can also look up an R function (`findit(left_join)`) or ask a question
-(`findit("how do I remove duplicate rows")`). The console shows the best matches;
-the returned table contains all matches. Call `findit()` for the whole list.
+(`findit("how do I remove duplicate rows")`). A bare command such as
+`findit(egen)` returns the whole command family and shows up to five operations.
+A specific query such as `findit("egen rowmean")` returns one clear answer;
+ambiguous queries retain up to ten relevant candidates. Call `findit()` for the
+whole catalogue.
 Descriptions follow R's language setting; English and Chinese queries both work.
 
 Comma-separated names customize compatible examples, such as
-`findit(tab, sex, region)`. The default shows one preferred answer when the task
-is clear; `findit(tab) |> print(n = Inf)` shows all variants, selected alternative
-R approaches, qualifications and source links. Package-qualified lookups such as
+`findit(tab, sex, region)`. A matching hint such as `findit(tab, gen)` can narrow
+the result to one answer. `print(n = Inf)` expands the returned candidates,
+qualifications and source links. The footer counts additional relevant results
+separately from broader operations; use `findit(egen)` to browse the broader
+family. Within a matching operation, recommendations prefer tidystata, then
+tidyverse, then other packages or base R. Package-qualified lookups such as
 `findit(dplyr::filter)` distinguish functions with the same name.
 
 This reference contains `r counts$commands` command families,
@@ -48,6 +54,14 @@ R examples. Abbreviations and alternative R implementations do not increase the
 command count. The R index describes `r counts$r_functions` function/package pairs.
 
 ## Use the command tables
+
+Use `destring()` (`as_numeric()`) to read numbers from text and `tostring()`
+(`as_character()`) to write stored codes as text. For categories, `encode()`
+creates labelled integer codes from strings, and `decode()` reads value labels
+back as text. Character encoding assigns fresh sorted codes starting at 1;
+encoding factors preserves their existing integer indices and all levels.
+`encode(decode(x))` need not recover the original codes. Encode character
+columns before grouping so all rows use the same dictionary.
 
 The tables cover tidystata and other R packages, including modelling, reshaping,
 survey analysis and graphics. For panel lags and leads, tidystata provides

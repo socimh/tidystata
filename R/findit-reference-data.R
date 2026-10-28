@@ -295,7 +295,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-20db735fe786f203" = list(
+      variables = c("x", "y"),
+      meaning = "missings: Report missing-value counts by numeric variable",
+      priority = 0L,
+      hints = c("report"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-15fab4cbfe304b51" = list(
+      variables = c("x", "y", "nmiss"),
+      meaning = "missings: Count numeric missing values within each row",
+      priority = 0L,
+      hints = c("tag"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-3e7422e3a4dbcfc2" = list(
       variables = c("x", "y", "nmiss"),
       meaning = "missings: Count numeric missing values within each row",
       priority = 0L,
@@ -315,7 +335,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-6f341c1733c4fc23" = list(
+      variables = character(),
+      meaning = "missings: Drop entirely missing numeric columns",
+      priority = 0L,
+      hints = c("dropvars"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-1935ad2e5ccddb4a" = list(
+      variables = c("x", "y"),
+      meaning = "missings: Drop rows missing on every selected numeric variable",
+      priority = 0L,
+      hints = c("dropobs"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-4535d57e51285bc6" = list(
       variables = c("x", "y"),
       meaning = "missings: Drop rows missing on every selected numeric variable",
       priority = 0L,
@@ -375,7 +415,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-3900022f31b3bcfc" = list(
+      variables = c("x"),
+      meaning = "keep: Keep observed values above a threshold",
+      priority = 100L,
+      hints = c("if", "missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-cb3d1916f7f7ee00" = list(
+      variables = c("x"),
+      meaning = "keep: Keep rows missing a value",
+      priority = 100L,
+      hints = c("if", "missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-066c80be3a0884dd" = list(
       variables = c("x"),
       meaning = "keep: Keep rows missing a value",
       priority = 100L,
@@ -395,7 +455,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-e3218783c67f3d68" = list(
+      variables = c("x", "y"),
+      meaning = "keep: Keep complete rows on selected columns",
+      priority = 100L,
+      hints = c("if", "complete"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-b3d9863d11c2a9c9" = list(
+      variables = character(),
+      meaning = "keep: Keep a row interval by position",
+      priority = 100L,
+      hints = c("in"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-a03a34c804f5f373" = list(
       variables = character(),
       meaning = "keep: Keep a row interval by position",
       priority = 100L,
@@ -415,6 +495,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-89b0020cd64da926" = list(
+      variables = c("g"),
+      meaning = "keep: Keep a set of categories",
+      priority = 100L,
+      hints = c("inlist"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-96e83a66825e2724" = list(
       variables = c("id", "x"),
       meaning = "keep: Keep named columns in order",
@@ -425,7 +515,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-614856b35d04ea35" = list(
+      variables = c("id", "x"),
+      meaning = "keep: Keep named columns in order",
+      priority = 100L,
+      hints = c("varlist"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-6fe54dda6e567ec4" = list(
+      variables = c("s"),
+      meaning = "keep: Keep nonempty strings",
+      priority = 100L,
+      hints = c("string"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-bb3ef88577a6af4a" = list(
       variables = c("s"),
       meaning = "keep: Keep nonempty strings",
       priority = 100L,
@@ -465,6 +575,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-6983af4fb7205548" = list(
+      variables = c("g"),
+      meaning = "drop: Drop a category of rows",
+      priority = 100L,
+      hints = c("if"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-458dcc6dd8931635" = list(
       variables = character(),
       meaning = "drop: Drop a row interval",
@@ -475,7 +595,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-d0b64c0bb4f65778" = list(
+      variables = character(),
+      meaning = "drop: Drop a row interval",
+      priority = 100L,
+      hints = c("in"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-c74fa8df7ccab199" = list(
+      variables = c("s", "y"),
+      meaning = "drop: Remove selected columns",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-f57368ffaa8b4a18" = list(
       variables = c("s", "y"),
       meaning = "drop: Remove selected columns",
       priority = 100L,
@@ -515,6 +655,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-d1ede6286239c7d1" = list(
+      variables = c("y", "id"),
+      meaning = "order: Move selected columns to the front",
+      priority = 100L,
+      hints = c("first"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-3f926000d59ebc1c" = list(
       variables = c("id"),
       meaning = "order: Move a column to the end",
@@ -545,7 +695,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-0a3c1270c7f78230" = list(
+      variables = character(),
+      meaning = "order: Alphabetize column order",
+      priority = 100L,
+      hints = c("alphabetic"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-2f0763d5ccb83304" = list(
+      variables = c("x", "y", "income", "hours"),
+      meaning = "rename: Rename several columns together",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-3346d98f2e839655" = list(
       variables = c("x", "y", "income", "hours"),
       meaning = "rename: Rename several columns together",
       priority = 100L,
@@ -575,6 +745,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-9f33e9274feb0346" = list(
+      variables = character(),
+      meaning = "rename: Uppercase all column names",
+      priority = 100L,
+      hints = c("upper"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-73dfeb54a9562fb2" = list(
       variables = character(),
       meaning = "rename: Lowercase all column names",
@@ -595,7 +775,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-4bc541af95dfbec6" = list(
+      variables = character(),
+      meaning = "rename: Replace a column-name prefix",
+      priority = 100L,
+      hints = c("prefix"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-f8d303594f2bed7c" = list(
+      variables = c("x"),
+      meaning = "sort: Sort a numeric column with missing last",
+      priority = 100L,
+      hints = c("missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-1c99b848060a409f" = list(
       variables = c("x"),
       meaning = "sort: Sort a numeric column with missing last",
       priority = 100L,
@@ -615,6 +815,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-217d7fbbd707e6f7" = list(
+      variables = c("g", "x"),
+      meaning = "sort: Sort lexicographically on two columns",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-3088243486310971" = list(
       variables = c("g"),
       meaning = "sort: Keep original order within equal keys",
@@ -625,7 +835,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-c177dc9526e70759" = list(
+      variables = c("g"),
+      meaning = "sort: Keep original order within equal keys",
+      priority = 100L,
+      hints = c("stable"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-e4b5fba81c47157e" = list(
+      variables = c("x"),
+      meaning = "gsort: Sort descending with Stata missing first",
+      priority = 100L,
+      hints = c("descending", "missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-1e23fce6d716c102" = list(
       variables = c("x"),
       meaning = "gsort: Sort descending with Stata missing first",
       priority = 100L,
@@ -655,7 +885,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-304f6e1ab6bc8d9a" = list(
+      variables = c("x"),
+      meaning = "count: Count missing values",
+      priority = 100L,
+      hints = c("missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-e0229a615c1f4aaa" = list(
+      variables = c("x"),
+      meaning = "count: Count observed values above a threshold",
+      priority = 100L,
+      hints = c("if"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-4e06f94788f9b8d9" = list(
       variables = c("x"),
       meaning = "count: Count observed values above a threshold",
       priority = 100L,
@@ -675,7 +925,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-4a7920b4ccc206cf" = list(
+      variables = c("x", "y"),
+      meaning = "count: Count rows complete on selected columns",
+      priority = 100L,
+      hints = c("complete"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-5cd811c7502d7b20" = list(
+      variables = character(),
+      meaning = "count: Count a row interval",
+      priority = 100L,
+      hints = c("in"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-2f9821a65c6672f1" = list(
       variables = character(),
       meaning = "count: Count a row interval",
       priority = 100L,
@@ -695,7 +965,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-fb8dc014ff4d1e99" = list(
+      variables = c("id", "x"),
+      meaning = "list: Show selected columns from the first rows",
+      priority = 100L,
+      hints = c("in"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-735c01b835874d96" = list(
+      variables = c("id", "x", "g"),
+      meaning = "list: Inspect selected rows and columns",
+      priority = 100L,
+      hints = c("if"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-bcae10343dab46a0" = list(
       variables = c("id", "x", "g"),
       meaning = "list: Inspect selected rows and columns",
       priority = 100L,
@@ -715,7 +1005,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-5615bf81eb9e8d73" = list(
+      variables = character(),
+      meaning = "list: Show the last rows",
+      priority = 100L,
+      hints = c("last"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-2eb172ffc5c5bc33" = list(
+      variables = c("z", "x"),
+      meaning = "generate: Square a variable preserving missing values",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-dcf1272aa113e77b" = list(
       variables = c("z", "x"),
       meaning = "generate: Square a variable preserving missing values",
       priority = 100L,
@@ -735,7 +1045,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-4faf033975b872e1" = list(
+      variables = c("observed", "x"),
+      meaning = "generate: Create a nonmissing indicator",
+      priority = 100L,
+      hints = c("missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-38472e5be1d5227e" = list(
+      variables = c("high", "x"),
+      meaning = "generate: Create a binary indicator retaining missing values",
+      priority = 100L,
+      hints = c("if"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-8fd05fc8f591761b" = list(
       variables = c("high", "x"),
       meaning = "generate: Create a binary indicator retaining missing values",
       priority = 100L,
@@ -755,7 +1085,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-b74f9deecad8371c" = list(
+      variables = c("row"),
+      meaning = "generate: Create row numbers",
+      priority = 100L,
+      hints = c("_n"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-25d161d3a53aeb92" = list(
+      variables = c("n"),
+      meaning = "generate: Repeat the total row count",
+      priority = 100L,
+      hints = c("_N"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-ab0d3b30a3d47e53" = list(
       variables = c("n"),
       meaning = "generate: Repeat the total row count",
       priority = 100L,
@@ -775,7 +1125,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-166f6510796bafcc" = list(
+      variables = c("z", "x", "y"),
+      meaning = "generate: Add columns with missing propagation",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-a50c0f27dadc7e0d" = list(
+      variables = c("cumulative", "x"),
+      meaning = "generate: Create a running sum ignoring missing values",
+      priority = 100L,
+      hints = c("sum"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-480d875caa0d3a80" = list(
       variables = c("cumulative", "x"),
       meaning = "generate: Create a running sum ignoring missing values",
       priority = 100L,
@@ -805,7 +1175,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-6883388e4efcfd5c" = list(
+      variables = c("x"),
+      meaning = "replace: Replace numeric missing by zero",
+      priority = 100L,
+      hints = c("missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-df93a1bdd3b4fb8f" = list(
+      variables = c("x"),
+      meaning = "replace: Convert a sentinel to missing",
+      priority = 100L,
+      hints = c("missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-20623dcfdb72c2d8" = list(
       variables = c("x"),
       meaning = "replace: Convert a sentinel to missing",
       priority = 100L,
@@ -825,6 +1215,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-098b5b88200264f9" = list(
+      variables = c("x", "g"),
+      meaning = "replace: Modify values only inside a category",
+      priority = 100L,
+      hints = c("if"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-86fc9ac5a79b4d6f" = list(
       variables = c("x", "y"),
       meaning = "replace: Fill missing values from another column",
@@ -835,7 +1235,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-d0cd77dac45b5947" = list(
+      variables = c("x", "y"),
+      meaning = "replace: Fill missing values from another column",
+      priority = 100L,
+      hints = c("missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-bd9376e383b17fae" = list(
+      variables = c("s"),
+      meaning = "replace: Replace empty text without replacing NA",
+      priority = 100L,
+      hints = c("string"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-493d9b58982423c4" = list(
       variables = c("s"),
       meaning = "replace: Replace empty text without replacing NA",
       priority = 100L,
@@ -877,7 +1297,7 @@ findit_reference_specs <- function() {
     ),
     "ref-d0dd21fae1a3453f" = list(
       variables = c("x", "binary"),
-      meaning = "recode: Collapse integer categories to two groups",
+      meaning = "recode-closed-ranges",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -995,7 +1415,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-809ccaef4a94caea" = list(
+      variables = c("s", "x"),
+      meaning = "destring: Convert percentage text to proportions",
+      priority = 100L,
+      hints = c("percent"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-587dea67f6a396cf" = list(
+      variables = c("s", "x"),
+      meaning = "destring: Parse a decimal-comma field",
+      priority = 100L,
+      hints = c("dpcomma"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-5c73dfb6b45f74c4" = list(
       variables = c("s", "x"),
       meaning = "destring: Parse a decimal-comma field",
       priority = 100L,
@@ -1035,7 +1475,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-3c6038c11958675c" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Repeat the mean in a column",
+      priority = 100L,
+      hints = c("mean"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-a85120c2e7f46590" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Repeat the sum in a column",
+      priority = 100L,
+      hints = c("total"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-595544a4776f505e" = list(
       variables = c("z", "x"),
       meaning = "egen: Repeat the sum in a column",
       priority = 100L,
@@ -1075,7 +1535,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-0700cdadd9de69e5" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Repeat the median in a column",
+      priority = 100L,
+      hints = c("median"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-ff4e791537e164c6" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Repeat the nonmissing count in a column",
+      priority = 100L,
+      hints = c("count"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-4f413b4eef2d4f85" = list(
       variables = c("z", "x"),
       meaning = "egen: Repeat the nonmissing count in a column",
       priority = 100L,
@@ -1095,9 +1575,19 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-7092bce2b7532682" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Repeat the sample standard deviation in a column",
+      priority = 100L,
+      hints = c("sd"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-9ced89f8da86feb5" = list(
       variables = c("z", "x", "y"),
-      meaning = "egen: Sum available values across columns",
+      meaning = "egen-row_sum",
       priority = 100L,
       hints = c("rowtotal"),
       strings = character(),
@@ -1107,7 +1597,7 @@ findit_reference_specs <- function() {
     ),
     "ref-e3fdfca719ea1d2e" = list(
       variables = c("z", "x", "y"),
-      meaning = "egen: Return missing for entirely missing row totals",
+      meaning = "egen-row_sum-missing",
       priority = 100L,
       hints = c("rowtotal", "missing"),
       strings = character(),
@@ -1117,17 +1607,18 @@ findit_reference_specs <- function() {
     ),
     "ref-038e8cc6375ff627" = list(
       variables = c("z", "x", "y"),
-      meaning = "egen: Average available values across columns",
+      meaning = "egen-row_mean",
       priority = 100L,
       hints = c("rowmean"),
       strings = character(),
       aliases = list(),
       derived = list(),
-      varlist = NULL
+      varlist = NULL,
+      r_default = c("row_mean")
     ),
     "ref-7735c1a2733e8be5" = list(
       variables = c("z", "x", "y"),
-      meaning = "egen: Count missing cells in each row",
+      meaning = "egen-row_miss",
       priority = 100L,
       hints = c("rowmiss"),
       strings = character(),
@@ -1137,7 +1628,7 @@ findit_reference_specs <- function() {
     ),
     "ref-b50bc182f37f5862" = list(
       variables = c("z", "x", "y"),
-      meaning = "egen: Count observed cells in each row",
+      meaning = "egen-row_non_miss",
       priority = 100L,
       hints = c("rownonmiss"),
       strings = character(),
@@ -1147,7 +1638,7 @@ findit_reference_specs <- function() {
     ),
     "ref-5641b7f81ce6212c" = list(
       variables = c("z", "x", "y"),
-      meaning = "egen: Find the available row minimum",
+      meaning = "egen-row_min",
       priority = 100L,
       hints = c("rowmin"),
       strings = character(),
@@ -1157,7 +1648,7 @@ findit_reference_specs <- function() {
     ),
     "ref-7af87a24fcf6bea1" = list(
       variables = c("z", "x", "y"),
-      meaning = "egen: Find the available row maximum",
+      meaning = "egen-row_max",
       priority = 100L,
       hints = c("rowmax"),
       strings = character(),
@@ -1176,6 +1667,16 @@ findit_reference_specs <- function() {
       varlist = NULL
     ),
     "ref-d6c268b9a0a3beff" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Rank highest value first with competition ties",
+      priority = 100L,
+      hints = c("rank", "field"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-fab5a276c2baf163" = list(
       variables = c("z", "x"),
       meaning = "egen: Rank highest value first with competition ties",
       priority = 100L,
@@ -1235,7 +1736,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-c20ee0ac174e32f9" = list(
+      variables = c("z", "x", "y"),
+      meaning = "egen: Count listed values across columns",
+      priority = 100L,
+      hints = c("anycount"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-cbb09aabdd80fecd" = list(
+      variables = c("z", "x", "y"),
+      meaning = "egen: Flag any listed value across columns",
+      priority = 100L,
+      hints = c("anymatch"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-4cdb8bbbc0c7273c" = list(
       variables = c("z", "x", "y"),
       meaning = "egen: Flag any listed value across columns",
       priority = 100L,
@@ -1275,6 +1796,26 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-95613708a1b5c8bb" = list(
+      variables = c("p", "x"),
+      meaning = "egen: Percentile ranks on a 0-1 scale",
+      priority = 100L,
+      hints = c("percent_rank", "percentile rank", "percent rank"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-722a7a0cc055a619" = list(
+      variables = c("p", "x"),
+      meaning = "egen: Percentile ranks on a 0-100 scale",
+      priority = 101L,
+      hints = c("percent_rank", "percentile rank", "percent rank"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-e3ba219eac676e42" = list(
       variables = c("z", "x"),
       meaning = "egen: Repeat the interquartile range",
@@ -1305,7 +1846,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-d13b7eefc41ac97c" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Repeat the first nonmissing value",
+      priority = 100L,
+      hints = c("firstnm"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-91a3165dfc22639e" = list(
+      variables = c("z", "x"),
+      meaning = "egen: Repeat the last nonmissing value",
+      priority = 100L,
+      hints = c("lastnm"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-eb5380a8c54e1cd8" = list(
       variables = c("z", "x"),
       meaning = "egen: Repeat the last nonmissing value",
       priority = 100L,
@@ -2745,7 +3306,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-c07a3ba2f3989e95" = list(
+      variables = c("x"),
+      meaning = "codebook: Describe observed count, distinct count and range",
+      priority = 100L,
+      hints = c("compact"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-4d45bec71fcf55fb" = list(
+      variables = character(),
+      meaning = "ds: Find names of numeric columns",
+      priority = 100L,
+      hints = c("has", "numeric"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-3683ae420cdad504" = list(
       variables = character(),
       meaning = "ds: Find names of numeric columns",
       priority = 100L,
@@ -2765,7 +3346,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-5d8c59a601635d9b" = list(
+      variables = character(),
+      meaning = "ds: Find names of character columns",
+      priority = 100L,
+      hints = c("has", "string"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-1605560f90402bef" = list(
+      variables = c("id", "g"),
+      meaning = "ds: Find columns outside an exclusion list",
+      priority = 100L,
+      hints = c("not"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-2123c9dbe2f77331" = list(
       variables = c("id", "g"),
       meaning = "ds: Find columns outside an exclusion list",
       priority = 100L,
@@ -2825,6 +3426,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-6f14da3211ec5ae7" = list(
+      variables = c("x", "y"),
+      meaning = "misstable: Count missing values for each selected column",
+      priority = 100L,
+      hints = c("summarize"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-46657a0aeb934d93" = list(
       variables = c("x", "y"),
       meaning = "misstable: Count joint missingness patterns",
@@ -2835,7 +3446,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-2e5b58ea38b64660" = list(
+      variables = c("x", "y"),
+      meaning = "misstable: Count joint missingness patterns",
+      priority = 100L,
+      hints = c("patterns"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-fe467e3ccb068dc8" = list(
+      variables = c("x"),
+      meaning = "summarize: Compute mean-only summary components",
+      priority = 100L,
+      hints = c("meanonly"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-90fa37b44c688f45" = list(
       variables = c("x"),
       meaning = "summarize: Compute mean-only summary components",
       priority = 100L,
@@ -2865,6 +3496,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-dcb484bac3083786" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the nonmissing count as a descriptive statistic",
+      priority = 100L,
+      hints = c("n"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-84e061d10b8d1444" = list(
       variables = c("x"),
       meaning = "tabstat: Return the mean as a descriptive statistic",
@@ -2875,7 +3516,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-2b33630ea67fece9" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the mean as a descriptive statistic",
+      priority = 100L,
+      hints = c("mean"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-7e3487855b5c48fd" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the sample standard deviation as a descriptive statistic",
+      priority = 100L,
+      hints = c("sd"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-dc57434a32e7a6b6" = list(
       variables = c("x"),
       meaning = "tabstat: Return the sample standard deviation as a descriptive statistic",
       priority = 100L,
@@ -2905,7 +3566,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-49b46f38c02eb11f" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the minimum as a descriptive statistic",
+      priority = 100L,
+      hints = c("min"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-38a7959b55076bbc" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the maximum as a descriptive statistic",
+      priority = 100L,
+      hints = c("max"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-f6af7a3fafd09efc" = list(
       variables = c("x"),
       meaning = "tabstat: Return the maximum as a descriptive statistic",
       priority = 100L,
@@ -2935,7 +3616,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-820a9fe829a4f3d7" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the sum as a descriptive statistic",
+      priority = 100L,
+      hints = c("sum"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-a9b529d29ef68e06" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the 25th percentile as a descriptive statistic",
+      priority = 100L,
+      hints = c("p25"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-800ab753d61a20f2" = list(
       variables = c("x"),
       meaning = "tabstat: Return the 25th percentile as a descriptive statistic",
       priority = 100L,
@@ -2955,6 +3656,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-1474b144cf24a990" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the median as a descriptive statistic",
+      priority = 100L,
+      hints = c("p50"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-629657314d1a28d0" = list(
       variables = c("x"),
       meaning = "tabstat: Return the 75th percentile as a descriptive statistic",
@@ -2965,7 +3676,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-0a148a26e554fa80" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the 75th percentile as a descriptive statistic",
+      priority = 100L,
+      hints = c("p75"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-716db0330e7d1169" = list(
+      variables = c("x"),
+      meaning = "tabstat: Return the interquartile range as a descriptive statistic",
+      priority = 100L,
+      hints = c("iqr"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-e0bcd01e014210a9" = list(
       variables = c("x"),
       meaning = "tabstat: Return the interquartile range as a descriptive statistic",
       priority = 100L,
@@ -2986,6 +3717,16 @@ findit_reference_specs <- function() {
       varlist = NULL
     ),
     "ref-d0ede7dc7e087e68" = list(
+      variables = c("x", "y"),
+      meaning = "tabstat: Compare count, mean and spread across numeric columns",
+      priority = 100L,
+      hints = c("columns", "statistics"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-c04cdb9f7f3632f1" = list(
       variables = c("x", "y"),
       meaning = "tabstat: Compare count, mean and spread across numeric columns",
       priority = 100L,
@@ -3125,7 +3866,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-3a44238c7dec736d" = list(
+      variables = c("x", "w"),
+      meaning = "collapse: Collapse integer-frequency-weighted values to a mean",
+      priority = 100L,
+      hints = c("fweight"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-11fe36b0ec29856c" = list(
+      variables = c("g"),
+      meaning = "tabulate: Count a single categorical variable",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-684c291d0dd08392" = list(
       variables = c("g"),
       meaning = "tabulate: Count a single categorical variable",
       priority = 100L,
@@ -3145,7 +3906,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-84b3e28ba7b6c7ab" = list(
+      variables = c("g", "h"),
+      meaning = "tabulate: Count a two-way contingency table",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-7e2e530194e3bdab" = list(
+      variables = c("g", "h"),
+      meaning = "tabulate: Compute percentages within each table row",
+      priority = 100L,
+      hints = c("row"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-ca2b27857e231699" = list(
       variables = c("g", "h"),
       meaning = "tabulate: Compute percentages within each table row",
       priority = 100L,
@@ -3165,7 +3946,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-55b76cb83d97ecce" = list(
+      variables = c("g", "h"),
+      meaning = "tabulate: Compute percentages within each table column",
+      priority = 100L,
+      hints = c("column"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-71f788dadb246b6e" = list(
+      variables = c("g", "h"),
+      meaning = "tabulate: Compute percentages of all table cells",
+      priority = 100L,
+      hints = c("cell"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-5f7f70a1eeb62494" = list(
       variables = c("g", "h"),
       meaning = "tabulate: Compute percentages of all table cells",
       priority = 100L,
@@ -3185,7 +3986,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-bde7b7930d074933" = list(
+      variables = c("g"),
+      meaning = "tabulate: Include missing categories in a frequency table",
+      priority = 100L,
+      hints = c("missing"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-0f961f60ffa7dfb1" = list(
+      variables = c("g", "w"),
+      meaning = "tabulate: Tabulate integer frequency weights",
+      priority = 100L,
+      hints = c("fweight"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-ece9771fae04cf89" = list(
       variables = c("g", "w"),
       meaning = "tabulate: Tabulate integer frequency weights",
       priority = 100L,
@@ -3215,7 +4036,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-aca0d79d0ecda104" = list(
+      variables = c("g", "h"),
+      meaning = "tab1: Make separate one-way frequency tables",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-fcb66fb2265bb596" = list(
+      variables = c("g", "h", "k"),
+      meaning = "tab2: Make each pairwise contingency table",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-fb1a9c6da55f7099" = list(
       variables = c("g", "h", "k"),
       meaning = "tab2: Make each pairwise contingency table",
       priority = 100L,
@@ -3246,6 +4087,16 @@ findit_reference_specs <- function() {
       varlist = NULL
     ),
     "ref-6c427f54a2c862c0" = list(
+      variables = c("g", "h", "n"),
+      meaning = "contract: Include unobserved combinations with zero frequency",
+      priority = 0L,
+      hints = c("zero"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-dde961bc93be2ab0" = list(
       variables = c("g", "h", "n"),
       meaning = "contract: Include unobserved combinations with zero frequency",
       priority = 0L,
@@ -3575,6 +4426,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-c9f6aeccf20b56d7" = list(
+      variables = c("id"),
+      meaning = "isid: Assert a key is unique and nonmissing",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-fd78874b476977eb" = list(
       variables = c("g", "h"),
       meaning = "isid: Assert a compound key uniquely identifies rows",
@@ -3585,7 +4446,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-0c5aef9201a84046" = list(
+      variables = c("g", "h"),
+      meaning = "isid: Assert a compound key uniquely identifies rows",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-357df42ff267902f" = list(
+      variables = c("id"),
+      meaning = "isid: Allow one ordinary missing value in a unique key",
+      priority = 100L,
+      hints = c("missok"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-ccd794aa8981acc9" = list(
       variables = c("id"),
       meaning = "isid: Allow one ordinary missing value in a unique key",
       priority = 100L,
@@ -3695,7 +4576,27 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-d74b2f8c21a029d1" = list(
+      variables = c("z", "s"),
+      meaning = "substr: Extract an ASCII prefix by length",
+      priority = 100L,
+      hints = c("prefix"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-34216fd699050286" = list(
+      variables = c("z", "s"),
+      meaning = "substr: Extract ASCII text using start and length",
+      priority = 100L,
+      hints = c("length"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-421471812e316e3e" = list(
       variables = c("z", "s"),
       meaning = "substr: Extract ASCII text using start and length",
       priority = 100L,
@@ -3996,6 +4897,16 @@ findit_reference_specs <- function() {
       varlist = NULL
     ),
     "ref-63e239d19772dd93" = list(
+      variables = c("s"),
+      meaning = "split: Split two-component delimited strings",
+      priority = 100L,
+      hints = c("parse"),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-5e66d0400fc11a09" = list(
       variables = c("s"),
       meaning = "split: Split two-component delimited strings",
       priority = 100L,
@@ -7923,6 +8834,16 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
+    "ref-d76fadc09076e61b" = list(
+      variables = c("g", "b"),
+      meaning = "test association in a two-way count table",
+      priority = 100L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
     "ref-89c2a3aedd4bd9fa" = list(
       variables = c("g", "b"),
       meaning = "run a fisher exact test for a two-way table",
@@ -8045,7 +8966,7 @@ findit_reference_specs <- function() {
     ),
     "ref-6e3973ff3ac031d5" = list(
       variables = c("q1", "q2", "q3", "score"),
-      meaning = "generate a mean score from a reliability scale",
+      meaning = "alpha-complete-item-mean-score",
       priority = 0L,
       hints = character(),
       strings = character(),

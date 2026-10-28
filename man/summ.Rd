@@ -46,7 +46,8 @@ only attributes are summarised; geometry columns are excluded.}
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> or
 <\code{\link[rlang:args_data_masking]{data-masking}}> Variables to summarise, or named
 expressions such as \code{income_k = income / 1000}. Defaults to all
-nongrouping columns.}
+nongrouping columns except the weight column. Matrix and nested data-frame
+columns are not supported.}
 
 \item{.by}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Optional grouping columns.
 Existing \code{\link[dplyr:group_by]{dplyr::group_by()}} groups are used unless \code{.by} is supplied.
@@ -54,7 +55,7 @@ Grouping columns are excluded from the variables being summarised.}
 
 \item{.keep_all}{If \code{TRUE}, retain character and list columns for counts and
 distinct values; other statistics for these columns are \code{NA}.
-By default, unsupported columns are omitted with a warning.}
+By default, unsupported columns are omitted with a message.}
 
 \item{.detail}{If \code{TRUE}, report all supported statistics unless \code{.stat}
 is supplied explicitly. Defaults to \code{FALSE}.}
@@ -87,8 +88,9 @@ preserve the order in which groups appear in the data.}
 including rows with no observed measured values or zero total weight.
 Defaults to \code{FALSE}.}
 
-\item{.wt}{Optional numeric weights, supplied as a column or a vector.
-Rows with missing weights are excluded; negative weights are invalid.}
+\item{.wt}{Optional finite, nonnegative numeric weights, supplied as a
+column, one value per input row, or a scalar recycled to all rows. Rows
+with missing weights are excluded with a message.}
 
 \item{.wt_type}{\code{"frequency"} (default) treats weights as frequencies;
 \code{"analytic"} rescales weights to the number of observed values within
@@ -206,7 +208,7 @@ design. For survey inference, use functions such as \code{survey::svymean()}.
 
 Missingness follows \code{is.na()}, including SPSS user-missing codes. Logical
 variables are treated as 0/1; factors use their underlying numeric codes;
-labelled numeric variables use their stored values. Warnings flag such
+labelled numeric variables use their stored values. Messages note such
 conversions. Variable names are marked with \code{*} for labelled variables,
 \verb{**} for factors, and \verb{***} for retained nonnumeric variables. Numeric
 calculations use double precision, which may affect large \code{integer64} values.
@@ -215,11 +217,12 @@ Dates and datetimes support location and spread statistics, but not \code{sum},
 \code{skew}, or \code{kurtosis}. Calendar locations are displayed as dates or times;
 their spreads (\code{sd}, \code{se}, \code{mad}, \code{iqr}) are \code{difftime} values in list mode.
 With \code{.type = "table"} or \code{"tibble"}, calendar locations are text and spreads
-are numeric durations (days for Dates, seconds for datetimes and times of day).
+are numeric durations (days for Dates, seconds for datetimes and times of
+day).
 
-Expressions in \code{...} are evaluated before statistics are calculated by
-group. For group-specific expressions, first create columns with grouped
-\code{\link[dplyr:mutate]{dplyr::mutate()}}.
+Expressions in \code{...} are evaluated on ungrouped working data before
+statistics are calculated by group. For group-specific expressions, first
+create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}.
 }
 \examples{
 summ(lifeexp)

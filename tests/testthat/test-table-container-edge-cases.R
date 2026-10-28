@@ -50,7 +50,7 @@ test_that("empty and missing labelled inputs retain containers and counts", {
     expect_equal(book$n, 0)
     expect_equal(variables(input)$label, "Answer")
     empty <- input[0, , drop = FALSE]
-    expect_warning(empty_summary <- summ(empty, x), "labelled variable")
+    expect_message(empty_summary <- summ(empty, x), "labelled variable")
     for (result in list(tab(empty, x), empty_summary, codebook(empty))) {
       expect_identical(class(result), class(input))
     }

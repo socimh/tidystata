@@ -3,20 +3,18 @@
 \name{std}
 \alias{std}
 \alias{pc}
-\alias{pct}
 \title{Standardise a variable or scale it to a percentage}
 \usage{
 std(x, mean = 0, sd = 1)
 
 pc(x, prop = FALSE)
-
-pct(x, prop = FALSE)
 }
 \arguments{
 \item{x}{A numeric or logical vector. Labelled numeric vectors are used
 through their codes.}
 
-\item{mean, sd}{The target mean and signed scale multiplier, like Stata's
+\item{mean, sd}{For \code{std()}, finite numeric scalars giving the target mean
+(default 0) and signed scale multiplier (default 1), like Stata's
 \verb{egen std(x), mean() std()} options. The result has standard deviation
 \code{abs(sd)}; a negative \code{sd} reverses the ordering and zero makes all
 observed values equal to \code{mean} when the input spread is defined.}
@@ -25,7 +23,9 @@ observed values equal to \code{mean} when the input spread is defined.}
 percentages (summing to 100). Defaults to \code{FALSE}.}
 }
 \value{
-A double vector the same length as \code{x}. Missing values stay missing.
+A double vector with the length and order of \code{x}. Input classes,
+names, and labels are dropped; tagged and SPSS user-missing values are
+treated as missing. Missing inputs remain missing.
 \code{std()} returns all \code{NA} when the standard deviation is zero or undefined
 (fewer than two observed values), and \code{pc()} when the total is zero or
 infinite, as Stata gives missing values there.
@@ -34,13 +34,16 @@ infinite, as Stata gives missing values there.
 Vector helpers for \code{\link[dplyr:mutate]{dplyr::mutate()}}, following Stata's \code{egen}:
 \itemize{
 \item \code{std()}: Standardise to mean 0 and standard deviation 1, like \verb{egen z = std(x)}. Unlike \code{\link[=scale]{scale()}}, it returns a plain vector.
-\item \code{pc()} (\code{pct()}): Express each value as a percentage of the total, like
+\item \code{pc()}: Express each value as a percentage of the total, like
 \verb{egen p = pc(x)}, or as a proportion with \code{prop = TRUE}.
 }
 }
 \details{
-The gt package also exports a \code{pct()} (for column widths), so prefer \code{pc()}
-when gt is attached. In grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}), the mean,
+By default, \code{std(x)} computes \code{(x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)} using the sample standard deviation.
+\code{pc(x)} computes \code{100 * x / sum(x, na.rm = TRUE)}, not percentile ranks.
+Use \code{\link[dplyr:percent_rank]{dplyr::percent_rank()}} for ranks on a 0-1 scale, or multiply them by
+100 for a 0-100 scale.
+In grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} (or with \code{.by}), the mean,
 standard deviation and total come from each group, like Stata's \verb{by g: egen}.
 }
 \examples{
@@ -60,7 +63,7 @@ lifeexp |>
 \seealso{
 Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
-\code{\link{cut}},
+\code{\link[=cut_quantile]{cut_quantile()}},
 \code{\link{panel}},
 \code{\link{row_egen}},
 \code{\link[=stata_recode]{stata_recode()}}

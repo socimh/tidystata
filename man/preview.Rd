@@ -17,26 +17,27 @@ unpreview(.data)
 }
 \arguments{
 \item{.data}{An in-memory data frame, data.table, ordinary/grouped/rowwise
-tibble, or \code{sf} data frame. Collect lazy tables and convert other subclasses
-explicitly first. Apply previews separately to lists of tables.}
+tibble, or \code{sf} data frame. Collect lazy tables and convert other
+subclasses explicitly first. Apply previews separately to lists of tables.}
 
-\item{style}{Either \code{"headtail"} (default) or \code{"interval"}.}
+\item{style}{For \code{preview()}, either \code{"headtail"} (default) or \code{"interval"}.}
 
 \item{n}{Total number of data rows to display, defaulting to 10. Supply a
 positive whole number or \code{Inf} for all rows; omission markers do not count.}
 }
 \value{
 A data frame, tibble, data.table, or \code{sf} data frame with the same
-rows, columns, values, and grouping as \code{.data}. The preview functions add a
-\code{tidystata_preview} class and print preferences; \code{unpreview()} removes them.
+rows, columns, values, row names, and grouping as \code{.data}. The preview
+functions add a \code{tidystata_preview} class and print preferences;
+\code{unpreview()} removes them.
 }
 \description{
 Keep a compact console display while retaining every row and column.
 \itemize{
-\item \code{preview()}: Choose a head/tail or interval display.
-\item \code{preview_headtail()}: Show the first and last rows.
-\item \code{preview_interval()}: Show evenly spaced rows.
-\item \code{unpreview()}: Restore ordinary printing.
+\item \code{preview()}: Store a head/tail or interval display preference.
+\item \code{preview_headtail()}: Store a preference for the first and last rows.
+\item \code{preview_interval()}: Store a preference for evenly spaced rows.
+\item \code{unpreview()}: Remove preview preferences and restore ordinary printing.
 }
 }
 \details{
@@ -44,9 +45,13 @@ Keep a compact console display while retaining every row and column.
 
 Head/tail previews split \code{n} between the beginning and end, giving an odd
 row to the beginning. One row of vertical dots marks an omitted middle,
-using periods without Unicode output. Interval previews show approximately
-evenly spaced positions without separator rows. An omission footer counts
-undisplayed rows.
+using periods without Unicode output. Numeric markers align with printed
+decimal points, or the last significand digit when no decimal is shown.
+Row-number markers align with the last digit. Other columns, including
+dates, times, factors, logicals and lists, use centered markers. Numeric
+columns without displayed numbers also use centered markers.
+Interval previews show approximately evenly spaced positions without
+separator rows. An omission footer counts undisplayed rows.
 With \code{n = 1}, both styles show the first row; short tables do not repeat rows.
 
 Row numbers refer to the current table after filtering or sorting. Grouped

@@ -1,3 +1,35 @@
+test_that("conversion ignores AsIs wrappers while retaining underlying semantics", {
+  inputs <- list(
+    c(a = 12, b = NA_real_, c = 34),
+    matrix(c(12, NA, 34, 56), 2),
+    factor(c("10", "20", NA)),
+    as.Date(c("2024-01-01", NA))
+  )
+  for (x in inputs) {
+    wrapped <- I(x)
+    before <- wrapped
+    expect_identical(destring(wrapped), destring(x))
+    expect_identical(tostring(wrapped), tostring(x))
+    expect_identical(wrapped, before)
+  }
+  expect_identical(tostring(I(c(1e10, 1e-8))), c("10000000000", "0.00000001"))
+  expect_identical(destring(I(c(TRUE, NA))), c(1, NA_real_))
+})
+
+test_that("measured numbers and durations use fixed notation in their own units", {
+  values <- c(1e10, 1e-8, NA_real_)
+  expected <- c("10000000000", "0.00000001", NA_character_)
+  duration <- as.difftime(values, units = "hours")
+  before <- duration
+  expect_identical(tostring(duration), expected)
+  expect_identical(duration, before)
+  skip_if_not_installed("units")
+  measured <- units::set_units(values, "m")
+  before <- measured
+  expect_identical(tostring(measured), expected)
+  expect_identical(measured, before)
+})
+
 test_that("conversion drops vector metadata without modifying inputs", {
   x <- structure(c(a = 1, b = NA_real_), label = "Measurement")
   original <- x
@@ -41,7 +73,10 @@ test_that("conversion returns typed empty vectors", {
 test_that("conversion distinguishes numeric missing values from their text", {
   x <- c(NA_real_, NaN, Inf, -Inf)
 
-  expect_identical(as_character(x), c(NA_character_, "NaN", "Inf", "-Inf"))
+  expect_identical(
+    as_character(x),
+    c(NA_character_, NA_character_, "Inf", "-Inf")
+  )
   expect_identical(as_numeric(x), x)
   expect_identical(
     as_numeric(c("NaN", " NaN ", "NA", "", NA)),
@@ -65,7 +100,7 @@ test_that("number parsing retains exact diagnostic rows and positions", {
 test_that("factor conversion uses level text and level codes", {
   x <- ordered(c("20", "10", NA, "20"), levels = c("20", "10", "unused"))
 
-  expect_identical(as_character(x), c("20", "10", NA_character_, "20"))
+  expect_identical(decode(x), c("20", "10", NA_character_, "20"))
   # A text level, even unused, keeps level codes.
   expect_identical(as_numeric(x), c(1, 2, NA_real_, 1))
   numeric_levels <- ordered(c("20", "10", NA), levels = c("20", "10"))
@@ -76,7 +111,7 @@ test_that("labelled conversion preserves raw values and partial labels", {
   x <- haven::labelled(c(1, 99, NA), labels = c(Yes = 1), label = "Question")
   original <- x
 
-  expect_identical(as_character(x), c("Yes", "99", NA_character_))
+  expect_identical(decode(x), c("Yes", "99", NA_character_))
   expect_identical(as_numeric(x), c(1, 99, NA_real_))
   expect_identical(x, original)
 })
@@ -85,7 +120,7 @@ test_that("tagged missing labels are displayed while numeric tags survive", {
   missing <- haven::tagged_na("a")
   x <- haven::labelled(c(1, missing, NA), c(Yes = 1, Refused = missing))
 
-  expect_identical(as_character(x), c("Yes", "Refused", NA_character_))
+  expect_identical(decode(x), c("Yes", "Refused", NA_character_))
   result <- as_numeric(x)
   expect_identical(result[1], 1)
   expect_identical(haven::na_tag(result), c(NA_character_, "a", NA_character_))
@@ -95,7 +130,7 @@ test_that("tagged missing labels are displayed while numeric tags survive", {
 test_that("tagged missing values without labels use ordinary character coercion", {
   x <- haven::labelled(c(1, haven::tagged_na("b"), NA_real_))
 
-  expect_identical(as_character(x), c("1", NA_character_, NA_character_))
+  expect_identical(decode(x), c("1", NA_character_, NA_character_))
   expect_identical(
     haven::na_tag(as_numeric(x)),
     c(NA_character_, "b", NA_character_)
@@ -111,7 +146,7 @@ test_that("SPSS user missing codes remain values during conversion", {
   )
   original <- x
 
-  expect_identical(as_character(x), c("Yes", "Missing", "95", NA_character_))
+  expect_identical(decode(x), c("Yes", "Missing", "95", NA_character_))
   expect_identical(as_numeric(x), c(1, 99, 95, NA_real_))
   expect_identical(is.na(x), c(FALSE, TRUE, TRUE, TRUE))
   expect_identical(x, original)
@@ -120,7 +155,7 @@ test_that("SPSS user missing codes remain values during conversion", {
 test_that("labelled character values are read like plain text", {
   x <- haven::labelled(c("10", "20", NA), c(Ten = "10"))
 
-  expect_identical(as_character(x), c("Ten", "20", NA_character_))
+  expect_identical(decode(x), c("Ten", "20", NA_character_))
   expect_identical(as_numeric(x), c(10, 20, NA_real_))
   expect_identical(
     as_numeric(haven::labelled(c("1,234", "$5", " 7 "), c(a = "1,234"))),
@@ -144,7 +179,7 @@ test_that("labelled character values are read like plain text", {
 test_that("lists and unsupported numeric inputs retain element count", {
   x <- list(1, NA_real_, NULL, c(2, 3))
 
-  expect_identical(as_character(x), c("1", "NA", "NULL", "c(2, 3)"))
+  expect_identical(decode(x), c("1", "NA", "NULL", "c(2, 3)"))
   expect_identical(as_numeric(x), rep(NA_real_, 4))
   expect_identical(as_numeric(as.raw(c(1, 2))), rep(NA_real_, 2))
   expect_identical(as_numeric(c(1 + 2i, NA_complex_)), rep(NA_real_, 2))
@@ -267,7 +302,7 @@ test_that("conversion composes in research preparation without mutating source",
   original <- survey
   result <- survey |>
     dplyr::mutate(
-      response_text = as_character(response),
+      response_text = decode(response),
       income_numeric = as_numeric(income),
       code = na_if_value(code, 99L),
       response_text = value_if_na(response_text, "Unknown")

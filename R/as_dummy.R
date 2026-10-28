@@ -1,17 +1,22 @@
 #' Create indicator (dummy) variables
 #'
 #' @description
-#' `as_dummy()` (`tab_gen()`) expands categorical variables into indicator
-#' columns, like Stata's `tabulate x, generate(x_)`. It adds one 0/1 column per
-#' observed category of each selected variable, placed right after its source
-#' variable.
+#' Expand categorical variables into indicator columns, like Stata's
+#' `tabulate x, generate(x_)`:
+#'
+#' * `as_dummy()` (`tab_gen()`): Add one 0/1 column per observed category of
+#'   each selected variable, immediately after its source variable.
 #'
 #' @inheritParams tidystata_args
 #' @param ... <[`tidy-select`][dplyr_tidy_select]> The categorical variables to
-#'   expand.
+#'   expand. Select at least one existing column; renaming, computed columns,
+#'   list columns, and matrix columns are not supported.
 #' @param .names How to name the new columns: `"value"` (default) appends the
-#'   category, as in `sex_male`; `"index"` numbers the categories, as in
-#'   `sex_1`, like Stata's `generate()` option.
+#'   original value (the code for labelled vectors); `"label"` appends its
+#'   value label, falling back to the original value when no label is available;
+#'   `"index"` numbers the observed categories from 1, like Stata's `generate()`
+#'   option. Factor values use their level text in both `"value"` and `"label"`
+#'   modes.
 #' @param .remove If `TRUE`, drop the source variables. Defaults to `FALSE`.
 #'
 #' @returns `.data` with integer indicator columns, keeping its data.frame,
@@ -21,10 +26,17 @@
 #'   `"sex==male"`; for labelled vectors, this uses the value label.
 #'
 #' @details
+#' Categories are determined across the whole input, regardless of grouping.
+#' Existing groups are retained in the result, and the input is not modified.
+#'
 #' Categories are the observed, non-missing values: factor levels in level order
 #' (unused levels are skipped), and other values in ascending order. For
-#' labelled vectors, `.names = "value"` uses the codes, such as `region_1`.
-#' Missing values include tagged and SPSS user-missing values. New names must
+#' labelled vectors, `.names = "value"` uses the codes, such as `region_1`;
+#' `.names = "label"` uses value labels, such as `region_Europe & C. Asia`.
+#' Label text is used as is, so names may require backticks when referenced.
+#' Naming does not change the categories or the indicators' label attributes.
+#' Missing values include tagged and SPSS user-missing values. A selected
+#' column with no observed categories adds no indicators. New names must
 #' not collide with retained columns; source names may be reused when
 #' `.remove = TRUE`. Grouping keys cannot be removed. A positive-row data.table
 #' result must retain at least one column: if selected variables have no
@@ -35,7 +47,9 @@
 #' @examples
 #' as_dummy(lifeexp, region)
 #'
-#' as_dummy(lifeexp, region, .names = "index", .remove = TRUE)
+#' as_dummy(lifeexp, region, .remove = TRUE)
+#'
+#' as_dummy(lifeexp, region, .names = "label")
 #' @name as_dummy
 #' @family variable generation functions
 NULL
@@ -45,7 +59,7 @@ NULL
 as_dummy <- function(
   .data,
   ...,
-  .names = c("value", "index"),
+  .names = c("value", "label", "index"),
   .remove = FALSE
 ) {
   check_data_frame(.data)
@@ -154,7 +168,12 @@ dummy_columns <- function(x, var, names, call = rlang::caller_env()) {
   } else {
     keys
   }
-  suffix <- if (names == "value") keys else seq_along(keys)
+  suffix <- switch(
+    names,
+    value = keys,
+    label = display,
+    index = seq_along(keys)
+  )
   out <- lapply(seq_along(keys), function(i) {
     hit <- as.integer(vctrs::vec_equal(x, vctrs::vec_slice(values, i)))
     hit[missing] <- NA_integer_

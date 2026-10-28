@@ -295,7 +295,7 @@ test_that("tabstat forwards grouped selections, weights and output controls", {
     tabstat(mixed, .type = "list", .duration_format = "compact"),
     summ(mixed, .stat = "mean", .type = "list", .duration_format = "compact")
   )
-  expect_warning(
+  expect_message(
     out <- tabstat(tibble::tibble(text = c("a", NA)), .keep_all = TRUE),
     "non-numeric"
   )
@@ -352,7 +352,7 @@ test_that("labelled columns summarise their codes in place", {
   for (args in list(list(.detail = TRUE), list(.by = quote(g)))) {
     call <- function(d) rlang::inject(summ(d, spss, tagged, !!!args))
     # summ() notes that labelled variables are summarised by their codes.
-    expect_warning(out <- call(data), "labelled")
+    expect_message(out <- call(data), "labelled")
     expect_identical(drop_type(out), drop_type(call(reference)))
   }
 })

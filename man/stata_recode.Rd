@@ -23,16 +23,11 @@ or a vector as long as \code{x}. By default, keep the input values after SPSS
 user-missing codes have been converted to \code{NA}.}
 }
 \value{
-A vector with the length and order of \code{x}, using the common integer
-or double type of the input, codes, and \code{.default}. Integer input stays
-integer when every code and \code{.default} is a whole number within integer
-range, so \code{1:5 ~ 1} does not promote it to double. Double input stays
-double. Fractions, out-of-range numbers, infinities, \code{NaN}, and tagged
-missing codes or defaults require double output; ordinary \code{NA} does not
-promote integer input. Named rules produce a
-\code{\link[haven:labelled]{haven::labelled()}} vector; otherwise the result is numeric without value
-labels. Names and the variable label are kept; previous value labels, SPSS
-missing-value metadata, and other input attributes are dropped.
+An integer or double vector with the length and order of \code{x}.
+Named rules produce a \code{\link[haven:labelled]{haven::labelled()}} vector; otherwise the result is
+numeric without value labels. Names and the variable label are kept;
+previous value labels, SPSS missing-value metadata, and other input
+attributes are dropped. See Details for integer preservation.
 }
 \description{
 Recode individual values, sets, or closed numeric ranges using ordered rules.
@@ -42,6 +37,14 @@ replaces them, and use named rules to assign value labels.
 }
 }
 \details{
+\strong{Output type}
+
+Integer input stays integer when every code and \code{.default} is a whole
+number within integer range, so \code{1:5 ~ 1} does not promote it to double.
+Double input stays double. Fractions, out-of-range numbers, infinities,
+\code{NaN}, and tagged missing codes or defaults require double output; ordinary
+\code{NA} does not promote integer input. The input is not modified.
+
 \strong{Matching}
 
 The left side of each rule is read before evaluation:
@@ -133,7 +136,7 @@ dplyr::mutate(
   items,
   dplyr::across(
     dplyr::everything(),
-    function(v) stata_recode(v, 1:5 ~ 1, 6:10 ~ 2),
+    function(v) stata_recode(v, 1:5 ~ 1, 6:10 ~ 2, 11:15 ~ 3),
     .names = "r_{.col}"
   )
 )
@@ -141,7 +144,7 @@ dplyr::mutate(
 \seealso{
 Other variable generation functions:
 \code{\link[=as_dummy]{as_dummy()}},
-\code{\link{cut}},
+\code{\link[=cut_quantile]{cut_quantile()}},
 \code{\link{panel}},
 \code{\link{row_egen}},
 \code{\link[=std]{std()}}

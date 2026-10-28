@@ -194,7 +194,7 @@ tab_add_total <- function(data, group_vars = character(0), groups) {
   narrow_data <- length(values) <= 11
   if (narrow_data) {
     label <- values[[match("n", values) - 1L]]
-    data[[label]] <- as_character(data[[label]])
+    data[[label]] <- decode(data[[label]])
   } else {
     label <- "...tmp"
     data[[label]] <- ""
@@ -320,7 +320,7 @@ append_tab_list <- function(.data, blank_row = FALSE) {
 
   if (vec_types > 1 || !compatible_types) {
     out <- lapply(out, function(table) {
-      dplyr::mutate(table, value = as_character(.data$value))
+      dplyr::mutate(table, value = decode(.data$value))
     })
   }
 
@@ -448,7 +448,7 @@ tab2_add_total <- function(out, .data, call = rlang::caller_env()) {
         ~ replace_missing(.x, 0)
       )
     )
-  out[[1L]] <- as_character(out[[1L]])
+  out[[1L]] <- decode(out[[1L]])
 
   out_sum <- out[1L, , drop = FALSE]
   out_sum[[1L]] <- "total"
@@ -492,7 +492,7 @@ result_to_flextable <- function(
       dplyr::mutate(
         dplyr::across(
           1,
-          ~ replace_missing(as_character(.x), "NA")
+          ~ replace_missing(decode(.x), "NA")
         )
       )
   } else if (fre1) {
@@ -505,7 +505,7 @@ result_to_flextable <- function(
           ~ ifelse(
             is.na(variable),
             NA,
-            replace_missing(as_character(.x), "NA")
+            replace_missing(decode(.x), "NA")
           )
         )
       )
@@ -516,7 +516,7 @@ result_to_flextable <- function(
           -dplyr::any_of(
             c("n", "percent", "cum", "valid", "valid_cum")
           ),
-          ~ replace_missing(as_character(.x), "NA")
+          ~ replace_missing(decode(.x), "NA")
         )
       )
   }

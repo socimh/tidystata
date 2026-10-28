@@ -136,7 +136,7 @@ for (function_name in "summ") {
       ),
       {
         x <- factor(c("high", "low", "high", NA), levels = c("low", "high"))
-        expect_warning(
+        expect_message(
           out <- api(tibble::tibble(x = x), .stat = c("n", "mean", "sum")),
           "factor"
         )
@@ -157,7 +157,7 @@ for (function_name in "summ") {
       ),
       {
         x <- ordered(c("low", "high", "high"), levels = c("low", "mid", "high"))
-        expect_warning(
+        expect_message(
           out <- api(
             tibble::tibble(x = x),
             .stat = c("unique", "median", "mean")
@@ -183,7 +183,7 @@ for (function_name in "summ") {
       {
         x <- haven::labelled(c(10, 20, 20, NA), labels = c(Low = 10, High = 20))
         before <- x
-        expect_warning(
+        expect_message(
           out <- api(tibble::tibble(x = x), .stat = c("n", "unique", "mean")),
           "labelled"
         )
@@ -231,7 +231,7 @@ for (function_name in "summ") {
           na_range = c(90, 95),
           na_values = 99
         )
-        expect_warning(
+        expect_message(
           out <- api(
             tibble::tibble(x = x),
             .stat = c("n", "missing", "valid_pct", "sum", "mean")
@@ -319,7 +319,7 @@ for (function_name in "summ") {
       ),
       {
         x <- c("", "", "42", NA_character_)
-        expect_warning(
+        expect_message(
           out <- api(
             tibble::tibble(x = x),
             .keep_all = TRUE,
@@ -345,7 +345,7 @@ for (function_name in "summ") {
       ),
       {
         x <- list(c(1, 2), c(1, 2), c(2, 1), NA_real_)
-        expect_warning(
+        expect_message(
           out <- api(
             tibble::tibble(x = x),
             .keep_all = TRUE,
@@ -912,7 +912,7 @@ for (function_name in "summ") {
         "unsupported only selections warn and fail with keep all disabled"
       ),
       {
-        expect_warning(
+        expect_message(
           expect_error(api(tibble::tibble(x = c("a", "b"))), "None.*suitable"),
           "non-numeric.*removed"
         )
@@ -1017,7 +1017,7 @@ for (function_name in "summ") {
       ),
       {
         x <- list(NULL, NULL, list(a = 1), list(a = 1), NA_real_)
-        expect_warning(
+        expect_message(
           out <- api(
             tibble::tibble(x = x),
             .keep_all = TRUE,

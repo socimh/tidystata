@@ -50,6 +50,93 @@ test_that("as_dummy() labels labelled codes with their value labels", {
   )
 })
 
+test_that("as_dummy() distinguishes values, labels and category indices", {
+  data <- tibble::tibble(
+    x = haven::labelled(
+      c(30, 10, NA, 30),
+      labels = c(Low = 10, High = 30)
+    )
+  )
+  before <- data
+  suffixes <- list(
+    value = c("10", "30"),
+    label = c("Low", "High"),
+    index = c("1", "2")
+  )
+  expected <- list(
+    structure(c(0L, 1L, NA, 0L), label = "x==Low"),
+    structure(c(1L, 0L, NA, 1L), label = "x==High")
+  )
+  for (mode in names(suffixes)) {
+    out <- as_dummy(data, x, .names = mode)
+    expect_named(out, c("x", paste0("x_", suffixes[[mode]])))
+    expect_identical(unname(as.list(out[-1])), expected)
+    expect_identical(out$x, data$x)
+    expect_identical(tab_gen(data, x, .names = mode), out)
+    expect_identical(as_dummy(data[0, ], x, .names = mode), data[0, ])
+  }
+  expect_identical(data, before)
+  expect_named(
+    as_dummy(lifeexp, region, .names = "label"),
+    c(
+      "region",
+      "region_Europe & C. Asia",
+      "region_North America",
+      "region_South America",
+      names(lifeexp)[-1]
+    )
+  )
+})
+
+test_that("label names fall back to original values without value labels", {
+  inputs <- list(
+    c(30, 10, NA),
+    c("b", "a", NA),
+    c(TRUE, FALSE, NA),
+    ordered(c("b", "a", NA), levels = c("b", "unused", "a")),
+    haven::labelled(c(30, 10, NA), labels = c(Low = 10)),
+    haven::labelled(c("b", "a", NA), labels = c(Alpha = "a")),
+    haven::labelled_spss(
+      c(30, 10, 99, 97, NA),
+      labels = c(Low = 10, High = 30, Refused = 99),
+      na_values = 99,
+      na_range = c(97, 98)
+    ),
+    haven::labelled(c(NA_real_, haven::tagged_na("a")))
+  )
+  suffixes <- list(
+    c("10", "30"),
+    c("a", "b"),
+    c("FALSE", "TRUE"),
+    c("b", "a"),
+    c("Low", "30"),
+    c("Alpha", "b"),
+    c("Low", "High"),
+    character()
+  )
+  for (i in seq_along(inputs)) {
+    data <- tibble::tibble(x = inputs[[i]])
+    out <- as_dummy(data, x, .names = "label")
+    expect_named(out, c("x", paste0("x_", suffixes[[i]], recycle0 = TRUE)))
+    value <- as_dummy(data, x, .names = "value")
+    expect_identical(unname(as.list(out)), unname(as.list(value)))
+  }
+})
+
+test_that("label names use the existing collision checks", {
+  data <- tibble::tibble(
+    x = haven::labelled(c(10, 30), labels = c(Same = 10, Same = 30))
+  )
+  expect_error(
+    as_dummy(data, x, .names = "label"),
+    "Several values would create the same column `x_Same`"
+  )
+  expect_named(as_dummy(data, x, .names = "value"), c("x", "x_10", "x_30"))
+  expect_named(as_dummy(data, x, .names = "index"), c("x", "x_1", "x_2"))
+  data$x_Same <- 1:2
+  expect_error(as_dummy(data, x, .names = "label"), "`x_Same` already exists")
+})
+
 test_that("as_dummy() treats SPSS user-missing codes as missing", {
   data <- tibble::tibble(
     answer = haven::labelled_spss(

@@ -24,9 +24,9 @@ strings are accepted.}
 A tibble of class \code{tidystata_findit} with one row per matching Stata
 idiom and five columns: \code{match} (match type), \code{stata} (Stata code), \code{r}
 (equivalent R code), \code{package} (primary R package), and \code{task}
-(description). All matches are returned, even when fewer are printed. If
-nothing matches, an empty tibble is returned invisibly with an explanatory
-message.
+(description). The returned object contains every selected match, including
+any hidden by printing. If nothing matches, a zero-row result with the same
+columns and class is returned invisibly with an explanatory message.
 }
 \description{
 \code{findit()} looks up Stata commands and their R equivalents, including
@@ -36,23 +36,31 @@ query to browse all entries.
 }
 \details{
 \strong{Matching}
+
+A clear specific query returns one preferred answer; ambiguous queries
+return up to ten relevant candidates. Bare Stata commands return the
+complete command family, and an omitted query returns the whole reference.
 \itemize{
 \item Stata abbreviations are recognized (\code{reg}, \code{regr}, \code{regress}), while R
 functions require their full names. Exact-case matches take priority.
 Shared names, such as \code{log}, show both Stata and R interpretations.
 \item Stata command matches appear before R function matches. Keyword searches
 are used when neither matches. Additional syntax and hints refine the
-ranking without discarding matches. \code{by} and \code{bysort} prefixes prioritize
-grouped operations.
-\item Plain-language questions use deterministic keyword and synonym matching in
-English or Chinese, without a language model.
+ranking. Within the relevant operation, tidystata functions take priority,
+followed by tidyverse functions, then other packages or base R.
+\code{by} and \code{bysort} prefixes prioritize grouped operations.
+\item Plain-language questions match curated keywords and synonyms in English
+or Chinese.
 }
 
 \strong{Output}
 \itemize{
 \item Results print as readable Stata/R code pairs. A single clear match is shown
-alone; otherwise, up to five representative examples appear. The print
-method's \code{n} argument sets how many matches are printed; use
+alone; otherwise, up to five representative examples appear. Bare commands
+browse their whole family; specific queries omit unrelated family entries.
+Footers distinguish hidden relevant candidates from broader family examples
+and report when the ten-candidate limit applies. The print method's \code{n}
+argument sets how many matches are printed; use
 \code{print(n = Inf)} to display all matches.
 \item The \code{match} column identifies the lookup type: \code{"stata"}, \code{"r"},
 \code{"keyword"}, \code{"nearest"}, or \code{"all"}.

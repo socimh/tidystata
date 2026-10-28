@@ -406,6 +406,7 @@ stress_registry <- function() {
     destring = mutate_cell(tidystata::destring(x)),
     tostring = mutate_cell(tidystata::tostring(x)),
     decode = mutate_cell(tidystata::decode(x)),
+    encode = mutate_cell(tidystata::encode(x)),
     mvdecode = mutate_cell(tidystata::mvdecode(x, 1)),
     mvencode = mutate_cell(tidystata::mvencode(x, 0)),
     na_if_value = mutate_cell(tidystata::na_if_value(x, 1)),
@@ -468,19 +469,17 @@ stress_unregistered_exports <- list(
   capture = "expression wrapper; covered by test-capture.R",
   timer = "expression wrapper; covered by test-timer.R",
   set_seed = "RNG wrapper; covered by test-set_seed.R",
-  as_character = "alias of decode()",
+  as_character = "alias of tostring()",
   as_numeric = "alias of destring()",
   cut_quantile = "alias of xtile()",
-  pct = "alias of pc()",
   recode = "alias of stata_recode()",
   tab_gen = "alias of as_dummy()"
 )
 
 stress_aliases <- c(
-  as_character = "decode",
+  as_character = "tostring",
   as_numeric = "destring",
   cut_quantile = "xtile",
-  pct = "pc",
   recode = "stata_recode",
   tab_gen = "as_dummy"
 )

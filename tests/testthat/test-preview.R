@@ -88,6 +88,158 @@ test_that("headtail markers preserve pillar numeric alignment", {
   }
 })
 
+test_that("numeric omission markers follow printed decimals and integer digits", {
+  withr::local_options(cli.unicode = FALSE, cli.num_colors = 1L)
+  values <- list(
+    c(1.47, 11.8, rep(NA_real_, 8), 100, 8.82),
+    c(-1.47, NA, rep(0, 8), -100, 8.82),
+    (1:12) * 1.234e20,
+    haven::labelled((1:12) / 100, c(first = 0.01)),
+    pillar::num((1:12) / 100, digits = 2, label = "%"),
+    1:12,
+    as.double(1:12)
+  )
+  for (value in values) {
+    output <- format(
+      preview_headtail(tibble::tibble(long_column_name = value), n = 4),
+      width = Inf
+    )
+    gap <- grep("^ *\\. +\\.", output, value = TRUE)
+    first <- grep("^ *1 +", output, value = TRUE)
+    decimal <- regexpr(".", first, fixed = TRUE)[[1L]]
+    expected <- if (decimal > 0L) decimal else nchar(sub(" +$", "", first))
+    expect_length(gap, 1L)
+    expect_equal(tail(gregexpr(".", gap, fixed = TRUE)[[1L]], 1L), expected)
+    # The row-number marker follows the last digit of the row index.
+    last <- grep("^ *12 +", output, value = TRUE)
+    expect_equal(
+      regexpr(".", gap, fixed = TRUE)[[1L]],
+      regexpr("12", last)[[1L]] + 1L
+    )
+  }
+})
+
+test_that("non-numeric and all-missing columns retain centered omission markers", {
+  withr::local_options(cli.unicode = FALSE, cli.num_colors = 1L)
+  values <- list(
+    rep(c("1.23", "text"), 6),
+    factor(rep(c("1.23", "other"), 6)),
+    ordered(rep(c("1.23", "other"), 6)),
+    rep(c(TRUE, FALSE, NA), 4),
+    as.Date("2026-10-01") + 0:11,
+    as.POSIXct("2026-10-01", tz = "UTC") + 0:11 / 10,
+    as.difftime((1:12) / 10, units = "secs"),
+    (1:12) + 1.5i,
+    as.raw(1:12),
+    rep(list(1:2, NULL), 6),
+    rep(NA_real_, 12),
+    rep(c(NA_real_, NaN, Inf, -Inf), 3)
+  )
+  positions <- c(6L, 6L, 6L, 6L, 9L, 13L, 8L, 7L, 5L, 8L, 19L, 18L)
+  for (i in seq_along(values)) {
+    output <- format(
+      preview_headtail(tibble::tibble(long_column_name = values[[i]]), n = 4),
+      width = Inf
+    )
+    gap <- grep("^ *\\. +\\.", output, value = TRUE)
+    expect_equal(
+      tail(gregexpr(".", gap, fixed = TRUE)[[1L]], 1L),
+      positions[[i]]
+    )
+  }
+})
+
+test_that("numeric markers handle Unicode, colour and narrow output", {
+  withr::local_locale(c(
+    LC_CTYPE = if (.Platform$OS.type == "windows") {
+      "English_United States.utf8"
+    } else {
+      "C.UTF-8"
+    }
+  ))
+  input <- tibble::tibble(value = (1:12) * 1.234e20)
+  for (unicode in c(FALSE, TRUE)) {
+    for (colors in c(1L, 256L)) {
+      withr::local_options(cli.unicode = unicode, cli.num_colors = colors)
+      for (width in c(18, Inf)) {
+        output <- cli::ansi_strip(format(
+          preview_headtail(input, n = 4),
+          width = width
+        ))
+        symbol <- if (unicode) "\u22ee" else "."
+        pattern <- if (unicode) "^ *\u22ee +\u22ee" else "^ *\\. +\\."
+        gap <- grep(pattern, output, value = TRUE)
+        first <- grep("^ *1 +", output, value = TRUE)
+        expected <- regexpr("[.,]", first)[[1L]]
+        expect_equal(
+          tail(gregexpr(symbol, gap, fixed = TRUE)[[1L]], 1L),
+          expected
+        )
+      }
+    }
+  }
+})
+
+test_that("frequency-table markers align with decimals across mixed precisions", {
+  withr::local_options(cli.unicode = FALSE, cli.num_colors = 1L)
+  output <- capture.output(tab(lifeexp, lexp) |> print_headtail())
+  gap <- grep("^ *\\.( +\\.)+ *$", output, value = TRUE)
+  first <- grep("^ *1 +", output, value = TRUE)
+  expect_equal(
+    as.integer(gregexpr(".", gap, fixed = TRUE)[[1L]][4:7]),
+    as.integer(gregexpr(".", first, fixed = TRUE)[[1L]])
+  )
+  output <- format(preview_headtail(tibble::tibble(id = 1:120), n = 4))
+  gap <- grep("^ *\\. +\\.", output, value = TRUE)
+  expect_equal(regexpr(".", gap, fixed = TRUE)[[1L]], 3L)
+})
+
+test_that("numeric extension classes use numeric anchors", {
+  withr::local_options(cli.unicode = FALSE, cli.num_colors = 1L)
+  values <- list(haven::labelled_spss((1:12) / 10, na_values = 0.2))
+  if (requireNamespace("bit64", quietly = TRUE)) {
+    values <- c(values, list(bit64::as.integer64(1:12)))
+  }
+  if (requireNamespace("units", quietly = TRUE)) {
+    values <- c(values, list(units::set_units((1:12) / 10, "m")))
+  }
+  for (value in values) {
+    output <- format(
+      preview_headtail(tibble::tibble(long_column_name = value), n = 4),
+      width = Inf
+    )
+    gap <- grep("^ *\\. +\\.", output, value = TRUE)
+    first <- grep("^ *1 +", output, value = TRUE)
+    decimal <- regexpr(".", first, fixed = TRUE)[[1L]]
+    expected <- if (decimal > 0L) decimal else nchar(sub(" +$", "", first))
+    expect_equal(tail(gregexpr(".", gap, fixed = TRUE)[[1L]], 1L), expected)
+  }
+})
+
+test_that("lubridate time spans retain centered omission markers", {
+  skip_on_cran()
+  skip_if_not_installed("lubridate")
+  withr::local_options(cli.unicode = FALSE, cli.num_colors = 1L)
+  as_duration <- getExportedValue("lubridate", "as.duration")
+  as_period <- getExportedValue("lubridate", "as.period")
+  values <- list(
+    as_duration(rep(c(1, 2), 6)),
+    as_period(rep(c(1, 2), 6))
+  )
+  for (i in seq_along(values)) {
+    output <- format(
+      preview_headtail(tibble::tibble(long_name = values[[i]]), n = 4),
+      width = Inf
+    )
+    gap <- grep("^ *\\. +\\.", output, value = TRUE)
+    expect_equal(
+      tail(gregexpr(".", gap, fixed = TRUE)[[1L]], 1L),
+      # Center the two-character 1s/1S display after the row-number field.
+      5L
+    )
+  }
+})
+
 test_that("mixed-language markers follow pillar column widths and formatting", {
   withr::local_locale(c(
     LC_CTYPE = if (.Platform$OS.type == "windows") {
