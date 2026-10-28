@@ -133,7 +133,7 @@
 #'
 #' flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
 #' flags
-#' 
+#'
 #' row_max(flags)
 #'
 #' dates <- tibble::tibble(
@@ -141,7 +141,7 @@
 #'   end = as.Date(c("2024-01-03", "2024-01-05"))
 #' )
 #' dates
-#' 
+#'
 #' row_min(dates)
 #'
 #' row_mean(dates)
