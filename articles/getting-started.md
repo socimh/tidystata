@@ -1,269 +1,181 @@
 # Getting started with tidystata
 
-This tutorial follows a small survey from inspection to tabulation,
-grouped summaries and new variables. Results are ordinary R objects that
-you can save, filter and join. Install tidystata as shown on the
-[package homepage](https://socimh.github.io/tidystata/) before starting.
+Did participants enjoy the community course? How did their assessment
+scores compare across centres? tidystata helps answer these first
+questions inside a tidyverse workflow: start with a tibble, inspect it,
+prepare columns with
+[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html), and
+pass results to the next step with `|>`.
 
-## Load data and inspect variables
+Install tidystata using the instructions on the [package
+homepage](https://socimh.github.io/tidystata/). We attach dplyr and
+tibble individually; the full tidyverse package is not required.
+
+## Meet the survey
+
+Twelve participants attended courses at Riverside and Hilltop. Each
+answered a yes/no satisfaction question and two assessment items. Some
+answers are missing, and income arrived as text.
 
 ``` r
 
-library(tidystata)
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following object is masked from 'package:tidystata':
-#> 
-#>     recode
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
+library(tibble)
+library(tidystata)
 
-survey <- tibble(
-  id = 1:6,
-  group = c("A", "A", "A", "B", "B", NA),
-  response = c("yes", "no", NA, "yes", "yes", "no"),
-  score1 = c(2, 4, NA, 6, 8, 10),
-  score2 = c(4, NA, NA, 8, 10, 12)
+survey <- tribble(
+  ~id, ~centre,     ~satisfied, ~income_text, ~score1, ~score2,
+    1, "Riverside", "Yes",     "1,200",           2,       4,
+    2, "Riverside", "Yes",     "1,500",           4,      NA,
+    3, "Riverside", "No",      "",               NA,      NA,
+    4, "Riverside", NA,        "-99",             6,       8,
+    5, "Riverside", "Yes",     "2,200",           8,      10,
+    6, "Riverside", "Yes",     "1,800",           4,       6,
+    7, "Hilltop",   "No",      "1,400",           3,       5,
+    8, "Hilltop",   "Yes",     "2,100",           5,       7,
+    9, "Hilltop",   "No",      "2,600",           7,       9,
+   10, "Hilltop",   "Yes",     NA,                9,      NA,
+   11, "Hilltop",   "Yes",     "2,300",          NA,       8,
+   12, "Hilltop",   NA,        "1,700",           6,       8
 )
-attr(survey$score1, "label") <- "First assessment score"
 
-codebook(survey)
-#> # A tibble: 5 × 5
-#>   variable label                  type          n unique
-#>   <chr>    <chr>                  <chr>     <int>  <int>
-#> 1 id       NA                     integer       6      6
-#> 2 group    NA                     character     5      2
-#> 3 response NA                     character     5      2
-#> 4 score1   First assessment score double        5      5
-#> 5 score2   NA                     double        4      4
-variables(survey)
-#> # A tibble: 5 × 2
-#>   name     label                 
-#>   <chr>    <chr>                 
-#> 1 id       NA                    
-#> 2 group    NA                    
-#> 3 response NA                    
-#> 4 score1   First assessment score
-#> 5 score2   NA
-ds(survey, starts_with("score"))
-#> [1] "score1" "score2"
-```
-
-[`codebook()`](https://socimh.github.io/tidystata/reference/codebook.md)
-gives one row per variable.
-[`variables()`](https://socimh.github.io/tidystata/reference/variables.md)
-reports names and variable labels, while
-[`ds()`](https://socimh.github.io/tidystata/reference/names.md) returns
-a character vector of names.
-[`variables_search()`](https://socimh.github.io/tidystata/reference/variables.md)
-searches names and labels, so it can find a variable from its
-description:
-
-``` r
-
-variables_search(survey, "assessment")
-#> # A tibble: 1 × 2
-#>   name   label                 
-#>   <chr>  <chr>                 
-#> 1 score1 First assessment score
-select_or_transmute(survey, id, starts_with("score"))
-#> # A tibble: 6 × 3
-#>      id score1 score2
-#>   <int>  <dbl>  <dbl>
-#> 1     1      2      4
-#> 2     2      4     NA
-#> 3     3     NA     NA
-#> 4     4      6      8
-#> 5     5      8     10
-#> 6     6     10     12
-```
-
-## Count categories
-
-``` r
-
-counts <- tab(survey, response)
-counts
-#> # A tibble: 3 × 6
-#>   response     n percent   cum valid valid_cum
-#>   <chr>    <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 no           2    33.3  33.3    40        40
-#> 2 yes          3    50    83.3    60       100
-#> 3 NA           1    16.7 100      NA        NA
-sum(counts$n)
-#> [1] 6
-
-fre(survey, response)
-#> # A tibble: 5 × 6
-#>   response        n percent   cum valid valid_cum
-#>   <chr>       <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 no              2    33.3  33.3    40        40
-#> 2 yes             3    50    83.3    60       100
-#> 3 Valid Total     5    83.3  NA     100        NA
-#> 4 NA              1    16.7 100      NA        NA
-#> 5 Total           6   100    NA      NA        NA
-tab2(survey, group, response)
-#> # A tibble: 3 × 4
-#>   `group \\ response`    no   yes  `NA`
-#>   <chr>               <int> <int> <int>
-#> 1 A                       1     1     1
-#> 2 B                       0     2     0
-#> 3 NA                      1     0     0
-```
-
-The counts sum to six, including the missing response.
-[`tab()`](https://socimh.github.io/tidystata/reference/tab.md) returns
-observed categories with counts and percentages.
-[`fre()`](https://socimh.github.io/tidystata/reference/tab.md) adds
-total rows;
-[`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) puts the
-categories of its second variable into columns. Use
-[`tab1()`](https://socimh.github.io/tidystata/reference/tab.md) when you
-want separate one-way tables instead of a joint table:
-
-``` r
-
-tables <- tab1(survey, group, response)
-tables$response
-#> # A tibble: 3 × 6
-#>   value     n percent   cum valid valid_cum
-#>   <chr> <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 no        2    33.3  33.3    40        40
-#> 2 yes       3    50    83.3    60       100
-#> 3 NA        1    16.7 100      NA        NA
-```
-
-The returned objects contain data. For example, select categories
-occurring more than once with an ordinary pipeline:
-
-``` r
-
-tab(survey, response) |>
-  filter(n > 1)
-#> # A tibble: 2 × 6
-#>   response     n percent   cum valid valid_cum
-#>   <chr>    <int>   <dbl> <dbl> <dbl>     <dbl>
-#> 1 no           2    33.3  33.3    40        40
-#> 2 yes          3    50    83.3    60       100
-```
-
-## Summarise measurements
-
-Select numeric measurements deliberately. Codes attached to categories
-are not automatically meaningful measurements.
-
-``` r
-
-summ(survey, score1, score2, .stat = c("n", "mean", "sd", "missing"))
-#> # A tibble: 2 × 6
-#>   name   type      n  mean    sd missing
-#>   <chr>  <chr> <int> <dbl> <dbl>   <int>
-#> 1 score1 dbl       5   6    3.16       1
-#> 2 score2 dbl       4   8.5  3.42       2
-tabstat(survey, score1, score2, .by = group)
+survey |> codebook()
 #> # A tibble: 6 × 4
-#>   group name   type   mean
-#>   <chr> <chr>  <chr> <dbl>
-#> 1 A     score1 dbl       3
-#> 2 A     score2 dbl       4
-#> 3 B     score1 dbl       7
-#> 4 B     score2 dbl       9
-#> 5 NA    score1 dbl      10
-#> 6 NA    score2 dbl      12
-mean(survey$score1, na.rm = TRUE)
-#> [1] 6
+#>   variable    type          n unique
+#>   <chr>       <chr>     <int>  <int>
+#> 1 id          double       12     12
+#> 2 centre      character    12      2
+#> 3 satisfied   character    10      2
+#> 4 income_text character    11     11
+#> 5 score1      double       10      8
+#> 6 score2      double        9      7
 ```
 
-[`summ()`](https://socimh.github.io/tidystata/reference/summ.md) can
-return several statistics.
-[`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md)
-selects means by default. Both omit missing measured values from numeric
-calculations. Missing grouping keys remain as a group unless you request
-`.missing = FALSE`:
+There are six participants per centre. The codebook shows which columns
+contain text, how many values are observed, and where the gaps are. An
+identifier is numeric too, but we will select assessment items
+deliberately when summarising.
 
-``` r
+## Prepare measurements with `mutate()`
 
-summ(survey, score1, .by = group, .missing = FALSE, .stat = c("n", "mean"))
-#> # A tibble: 2 × 4
-#>   group type      n  mean
-#>   <chr> <chr> <int> <dbl>
-#> 1 A     dbl       2     3
-#> 2 B     dbl       2     7
-```
-
-Numeric-only summaries return a table. When numeric and calendar
-measurements are combined, the default can be a list of tables. The
-companion
-[`vignette("containers-and-missing-values", package = "tidystata")`](https://socimh.github.io/tidystata/articles/containers-and-missing-values.md)
-explains those types and their missing-value conventions.
-
-## Prepare new variables
-
-Row helpers return vectors, making them convenient in
-[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
-[`pick()`](https://dplyr.tidyverse.org/reference/pick.html) makes the
-columns being combined explicit.
+The survey form uses `-99` for an undisclosed income. Read the numeric
+text, turn that code into `NA`, and calculate an average across the two
+assessment items.
 
 ``` r
 
 prepared <- survey |>
   mutate(
-    average = row_mean(pick(score1, score2)),
-    observed = row_non_miss(pick(score1, score2))
+    income = destring(income_text) |> mvdecode(-99),
+    score = row_mean(pick(score1, score2)),
+    answered = row_non_miss(pick(score1, score2))
   )
-prepared
-#> # A tibble: 6 × 7
-#>      id group response score1 score2 average observed
-#>   <int> <chr> <chr>     <dbl>  <dbl>   <dbl>    <int>
-#> 1     1 A     yes           2      4       3        2
-#> 2     2 A     no            4     NA       4        1
-#> 3     3 A     NA           NA     NA      NA        0
-#> 4     4 B     yes           6      8       7        2
-#> 5     5 B     yes           8     10       9        2
-#> 6     6 NA    no           10     12      11        2
+
+prepared |> select(id, income, score, answered)
+#> # A tibble: 12 × 4
+#>       id income score answered
+#>    <dbl>  <dbl> <dbl>    <int>
+#>  1     1   1200     3        2
+#>  2     2   1500     4        1
+#>  3     3     NA    NA        0
+#>  4     4     NA     7        2
+#>  5     5   2200     9        2
+#>  6     6   1800     5        2
+#>  7     7   1400     4        2
+#>  8     8   2100     6        2
+#>  9     9   2600     8        2
+#> 10    10     NA     9        1
+#> 11    11   2300     8        1
+#> 12    12   1700     7        2
 ```
 
-The third row has no observed score, so its average is `NA` and its
-observed count is zero. Row sums use zero for an all-missing row, while
-column summaries use `NA` for a sum with no observations.
+Participant 2 has one assessment answer, so the average uses that
+answer. Participant 3 has none: the average is `NA` and `answered` is
+zero.
+[`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+also reads the thousands separators; blank text becomes missing.
 
-Character measurements can be parsed explicitly, and sentinel values can
-be replaced before calculations:
+## Count responses
+
+How many participants were satisfied?
 
 ``` r
 
-destring(c("1,200", "2,500", NA))
-#> [1] 1200 2500   NA
-mvdecode(c(1, -99, 3), -99)
-#> [1]  1 NA  3
-xtile(1:8, 4)
-#> [1] [1,2.5]   [1,2.5]   (2.5,4.5] (2.5,4.5] (4.5,6.5] (4.5,6.5] (6.5,8]  
-#> [8] (6.5,8]  
-#> Levels: [1,2.5] < (2.5,4.5] < (4.5,6.5] < (6.5,8]
-stata_recode(c(2, 4.5, 7, 12), 1:5 ~ 1, 6:10 ~ 2)
-#> [1]  1  1  2 12
+prepared |> tab(satisfied)
+#> # A tibble: 3 × 6
+#>   satisfied     n percent   cum valid valid_cum
+#>   <chr>     <int>   <dbl> <dbl> <dbl>     <dbl>
+#> 1 No            3    25    25      30        30
+#> 2 Yes           7    58.3  83.3    70       100
+#> 3 NA            2    16.7 100      NA        NA
 ```
 
-[`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
-reads numbers with currency symbols, thousands separators and percent
-signs; other text, such as `"10 kg"`, becomes `NA` with a warning unless
-you remove it with `ignore = "kg"`.
-[`xtile()`](https://socimh.github.io/tidystata/reference/cut.md) uses
-Stata’s percentile cutpoints and keeps tied values together; ties can
-leave some groups empty.
-[`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)
-follows Stata’s `recode`: `1:5` is the range from 1 to 5, including
-decimals, and values that no rule matches are kept.
+Seven said yes. That is 58.3% of all twelve participants, or 70% of the
+ten who answered. The `percent` and `valid` columns make both
+denominators visible. The two missing answers remain a category.
 
-## Next steps
+Results are tibbles here, so ordinary dplyr verbs can answer a follow-up
+question:
 
-Read [Containers and missing
-values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.md)
-for output conventions, or [Coming from
-Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.md)
-to find the R equivalent of a Stata command.
+``` r
+
+prepared |>
+  tab(satisfied, .by = centre) |>
+  filter(satisfied == "Yes") |>
+  select(centre, n, valid)
+#> # A tibble: 2 × 3
+#>   centre        n valid
+#>   <chr>     <int> <dbl>
+#> 1 Hilltop       3    60
+#> 2 Riverside     4    80
+```
+
+## Compare measurements
+
+Now compare the assessment average across centres.
+
+``` r
+
+prepared |>
+  summ(score, .by = centre, .stat = c("n", "mean", "sd"))
+#> # A tibble: 2 × 5
+#>   centre    type      n  mean    sd
+#>   <chr>     <chr> <int> <dbl> <dbl>
+#> 1 Hilltop   dbl       6   7    1.79
+#> 2 Riverside dbl       5   5.6  2.41
+```
+
+Each mean uses the observed scores in that centre. The returned table is
+ready for another pipeline; no results need to be copied out of console
+output. Use
+[`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md) when
+a compact table of means is enough.
+
+## Choose the next question
+
+- [Inspect and prepare
+  data](https://socimh.github.io/tidystata/articles/inspect-and-prepare.md)
+  follows the survey from unfamiliar columns to clean measurements,
+  checked keys and follow-up records.
+- [Tabulate and compare
+  categories](https://socimh.github.io/tidystata/articles/tabulation.md)
+  explains
+  [`tab()`](https://socimh.github.io/tidystata/reference/tab.md),
+  [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md),
+  [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md) and
+  the [`fre()`](https://socimh.github.io/tidystata/reference/tab.md)
+  family in more depth.
+- [Summarise
+  measurements](https://socimh.github.io/tidystata/articles/summary-statistics.md)
+  develops
+  [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and
+  [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md),
+  then introduces correlations.
+- [Containers, grouping and missing
+  values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.md)
+  explains output conventions and special cases when you need them.
+
+Coming from Stata? The [Stata
+guide](https://socimh.github.io/tidystata/articles/coming-from-stata.html)
+and `findit("tab satisfied")` help locate a familiar command’s R
+equivalent.

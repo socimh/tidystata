@@ -13,7 +13,7 @@
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Getting started with tidystata">
+<script src="../extra.js"></script><meta property="og:title" content="Getting started with tidystata">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -38,9 +38,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with tidystata</a></li>
+    <li><a class="dropdown-item" href="../articles/inspect-and-prepare.html">Inspect and prepare data</a></li>
+    <li><a class="dropdown-item" href="../articles/tabulation.html">Tabulate and compare categories</a></li>
+    <li><a class="dropdown-item" href="../articles/summary-statistics.html">Summarise measurements</a></li>
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
-    <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
-    <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -72,231 +73,161 @@
 
     
     
-<p>This tutorial follows a small survey from inspection to tabulation,
-grouped summaries and new variables. Results are ordinary R objects that
-you can save, filter and join. Install tidystata as shown on the <a href="https://socimh.github.io/tidystata/">package homepage</a> before
-starting.</p>
+<p>Did participants enjoy the community course? How did their assessment
+scores compare across centres? tidystata helps answer these first
+questions inside a tidyverse workflow: start with a tibble, inspect it,
+prepare columns with <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>, and pass results to the next
+step with <code>|&gt;</code>.</p>
+<p>Install tidystata using the instructions on the <a href="https://socimh.github.io/tidystata/">package homepage</a>. We
+attach dplyr and tibble individually; the full tidyverse package is not
+required.</p>
 <div class="section level2">
-<h2 id="load-data-and-inspect-variables">Load data and inspect variables<a class="anchor" aria-label="anchor" href="#load-data-and-inspect-variables"></a>
+<h2 id="meet-the-survey">Meet the survey<a class="anchor" aria-label="anchor" href="#meet-the-survey"></a>
 </h2>
+<p>Twelve participants attended courses at Riverside and Hilltop. Each
+answered a yes/no satisfaction question and two assessment items. Some
+answers are missing, and income arrived as text.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/socimh/tidystata" class="external-link">tidystata</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:tidystata':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     recode</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/socimh/tidystata" class="external-link">tidystata</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">survey</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,</span>
-<span>  group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"yes"</span>, <span class="st">"no"</span>, <span class="cn">NA</span>, <span class="st">"yes"</span>, <span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span>,</span>
-<span>  score1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span>, <span class="cn">NA</span>, <span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">10</span><span class="op">)</span>,</span>
-<span>  score2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="fl">8</span>, <span class="fl">10</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="va">survey</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
+<span>  <span class="op">~</span><span class="va">id</span>, <span class="op">~</span><span class="va">centre</span>,     <span class="op">~</span><span class="va">satisfied</span>, <span class="op">~</span><span class="va">income_text</span>, <span class="op">~</span><span class="va">score1</span>, <span class="op">~</span><span class="va">score2</span>,</span>
+<span>    <span class="fl">1</span>, <span class="st">"Riverside"</span>, <span class="st">"Yes"</span>,     <span class="st">"1,200"</span>,           <span class="fl">2</span>,       <span class="fl">4</span>,</span>
+<span>    <span class="fl">2</span>, <span class="st">"Riverside"</span>, <span class="st">"Yes"</span>,     <span class="st">"1,500"</span>,           <span class="fl">4</span>,      <span class="cn">NA</span>,</span>
+<span>    <span class="fl">3</span>, <span class="st">"Riverside"</span>, <span class="st">"No"</span>,      <span class="st">""</span>,               <span class="cn">NA</span>,      <span class="cn">NA</span>,</span>
+<span>    <span class="fl">4</span>, <span class="st">"Riverside"</span>, <span class="cn">NA</span>,        <span class="st">"-99"</span>,             <span class="fl">6</span>,       <span class="fl">8</span>,</span>
+<span>    <span class="fl">5</span>, <span class="st">"Riverside"</span>, <span class="st">"Yes"</span>,     <span class="st">"2,200"</span>,           <span class="fl">8</span>,      <span class="fl">10</span>,</span>
+<span>    <span class="fl">6</span>, <span class="st">"Riverside"</span>, <span class="st">"Yes"</span>,     <span class="st">"1,800"</span>,           <span class="fl">4</span>,       <span class="fl">6</span>,</span>
+<span>    <span class="fl">7</span>, <span class="st">"Hilltop"</span>,   <span class="st">"No"</span>,      <span class="st">"1,400"</span>,           <span class="fl">3</span>,       <span class="fl">5</span>,</span>
+<span>    <span class="fl">8</span>, <span class="st">"Hilltop"</span>,   <span class="st">"Yes"</span>,     <span class="st">"2,100"</span>,           <span class="fl">5</span>,       <span class="fl">7</span>,</span>
+<span>    <span class="fl">9</span>, <span class="st">"Hilltop"</span>,   <span class="st">"No"</span>,      <span class="st">"2,600"</span>,           <span class="fl">7</span>,       <span class="fl">9</span>,</span>
+<span>   <span class="fl">10</span>, <span class="st">"Hilltop"</span>,   <span class="st">"Yes"</span>,     <span class="cn">NA</span>,                <span class="fl">9</span>,      <span class="cn">NA</span>,</span>
+<span>   <span class="fl">11</span>, <span class="st">"Hilltop"</span>,   <span class="st">"Yes"</span>,     <span class="st">"2,300"</span>,          <span class="cn">NA</span>,       <span class="fl">8</span>,</span>
+<span>   <span class="fl">12</span>, <span class="st">"Hilltop"</span>,   <span class="cn">NA</span>,        <span class="st">"1,700"</span>,           <span class="fl">6</span>,       <span class="fl">8</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">survey</span><span class="op">$</span><span class="va">score1</span>, <span class="st">"label"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"First assessment score"</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/codebook.html">codebook</a></span><span class="op">(</span><span class="va">survey</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 5</span></span></span>
-<span><span class="co">#&gt;   variable label                  type          n unique</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> id       <span style="color: #BB0000;">NA</span>                     integer       6      6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> group    <span style="color: #BB0000;">NA</span>                     character     5      2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> response <span style="color: #BB0000;">NA</span>                     character     5      2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> score1   First assessment score double        5      5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> score2   <span style="color: #BB0000;">NA</span>                     double        4      4</span></span>
-<span><span class="fu"><a href="../reference/variables.html">variables</a></span><span class="op">(</span><span class="va">survey</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
-<span><span class="co">#&gt;   name     label                 </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> id       <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> group    <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> response <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> score1   First assessment score</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> score2   <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="fu"><a href="../reference/names.html">ds</a></span><span class="op">(</span><span class="va">survey</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"score"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "score1" "score2"</span></span></code></pre></div>
-<p><code><a href="../reference/codebook.html">codebook()</a></code> gives one row per variable.
-<code><a href="../reference/variables.html">variables()</a></code> reports names and variable labels, while
-<code><a href="../reference/names.html">ds()</a></code> returns a character vector of names.
-<code><a href="../reference/variables.html">variables_search()</a></code> searches names and labels, so it can
-find a variable from its description:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/variables.html">variables_search</a></span><span class="op">(</span><span class="va">survey</span>, <span class="st">"assessment"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
-<span><span class="co">#&gt;   name   label                 </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> score1 First assessment score</span></span>
-<span><span class="fu"><a href="../reference/select_or_transmute.html">select_or_transmute</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">id</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"score"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
-<span><span class="co">#&gt;      id score1 score2</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1      2      4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2      4     <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4      6      8</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5      8     10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6     10     12</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="count-categories">Count categories<a class="anchor" aria-label="anchor" href="#count-categories"></a>
-</h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">response</span><span class="op">)</span></span>
-<span><span class="va">counts</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 6</span></span></span>
-<span><span class="co">#&gt;   response     n percent   cum valid valid_cum</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> no           2    33.3  33.3    40        40</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> yes          3    50    83.3    60       100</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #BB0000;">NA</span>           1    16.7 100      <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">counts</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 6</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/tab.html">fre</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">response</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
-<span><span class="co">#&gt;   response        n percent   cum valid valid_cum</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> no              2    33.3  33.3    40        40</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> yes             3    50    83.3    60       100</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Valid Total     5    83.3  <span style="color: #BB0000;">NA</span>     100        <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> <span style="color: #BB0000;">NA</span>              1    16.7 100      <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Total           6   100    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span></span></span>
-<span><span class="fu"><a href="../reference/tab.html">tab2</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">group</span>, <span class="va">response</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 4</span></span></span>
-<span><span class="co">#&gt;   `group \\ response`    no   yes  `NA`</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A                       1     1     1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> B                       0     2     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #BB0000;">NA</span>                      1     0     0</span></span></code></pre></div>
-<p>The counts sum to six, including the missing response.
-<code><a href="../reference/tab.html">tab()</a></code> returns observed categories with counts and
-percentages. <code><a href="../reference/tab.html">fre()</a></code> adds total rows; <code><a href="../reference/tab.html">tab2()</a></code>
-puts the categories of its second variable into columns. Use
-<code><a href="../reference/tab.html">tab1()</a></code> when you want separate one-way tables instead of a
-joint table:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tables</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tab.html">tab1</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">group</span>, <span class="va">response</span><span class="op">)</span></span>
-<span><span class="va">tables</span><span class="op">$</span><span class="va">response</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 6</span></span></span>
-<span><span class="co">#&gt;   value     n percent   cum valid valid_cum</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> no        2    33.3  33.3    40        40</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> yes       3    50    83.3    60       100</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #BB0000;">NA</span>        1    16.7 100      <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
-<p>The returned objects contain data. For example, select categories
-occurring more than once with an ordinary pipeline:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">response</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 6</span></span></span>
-<span><span class="co">#&gt;   response     n percent   cum valid valid_cum</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> no           2    33.3  33.3    40        40</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> yes          3    50    83.3    60       100</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="summarise-measurements">Summarise measurements<a class="anchor" aria-label="anchor" href="#summarise-measurements"></a>
-</h2>
-<p>Select numeric measurements deliberately. Codes attached to
-categories are not automatically meaningful measurements.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">score1</span>, <span class="va">score2</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span>, <span class="st">"sd"</span>, <span class="st">"missing"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 6</span></span></span>
-<span><span class="co">#&gt;   name   type      n  mean    sd missing</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> score1 dbl       5   6    3.16       1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> score2 dbl       4   8.5  3.42       2</span></span>
-<span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">score1</span>, <span class="va">score2</span>, .by <span class="op">=</span> <span class="va">group</span><span class="op">)</span></span>
+<span><span class="va">survey</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/codebook.html">codebook</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
-<span><span class="co">#&gt;   group name   type   mean</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A     score1 dbl       3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A     score2 dbl       4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> B     score1 dbl       7</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> B     score2 dbl       9</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> <span style="color: #BB0000;">NA</span>    score1 dbl      10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> <span style="color: #BB0000;">NA</span>    score2 dbl      12</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">survey</span><span class="op">$</span><span class="va">score1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 6</span></span></code></pre></div>
-<p><code><a href="../reference/summ.html">summ()</a></code> can return several statistics.
-<code><a href="../reference/summ.html">tabstat()</a></code> selects means by default. Both omit missing
-measured values from numeric calculations. Missing grouping keys remain
-as a group unless you request <code>.missing = FALSE</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">survey</span>, <span class="va">score1</span>, .by <span class="op">=</span> <span class="va">group</span>, .missing <span class="op">=</span> <span class="cn">FALSE</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
-<span><span class="co">#&gt;   group type      n  mean</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A     dbl       2     3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> B     dbl       2     7</span></span></code></pre></div>
-<p>Numeric-only summaries return a table. When numeric and calendar
-measurements are combined, the default can be a list of tables. The
-companion
-<code><a href="../articles/containers-and-missing-values.html">vignette("containers-and-missing-values", package = "tidystata")</a></code>
-explains those types and their missing-value conventions.</p>
+<span><span class="co">#&gt;   variable    type          n unique</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> id          double       12     12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> centre      character    12      2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> satisfied   character    10      2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> income_text character    11     11</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> score1      double       10      8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> score2      double        9      7</span></span></code></pre></div>
+<p>There are six participants per centre. The codebook shows which
+columns contain text, how many values are observed, and where the gaps
+are. An identifier is numeric too, but we will select assessment items
+deliberately when summarising.</p>
 </div>
 <div class="section level2">
-<h2 id="prepare-new-variables">Prepare new variables<a class="anchor" aria-label="anchor" href="#prepare-new-variables"></a>
+<h2 id="prepare-measurements-with-mutate">Prepare measurements with <code>mutate()</code><a class="anchor" aria-label="anchor" href="#prepare-measurements-with-mutate"></a>
 </h2>
-<p>Row helpers return vectors, making them convenient in
-<code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>. <code><a href="https://dplyr.tidyverse.org/reference/pick.html" class="external-link">pick()</a></code> makes the columns being
-combined explicit.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>The survey form uses <code>-99</code> for an undisclosed income. Read
+the numeric text, turn that code into <code>NA</code>, and calculate an
+average across the two assessment items.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prepared</span> <span class="op">&lt;-</span> <span class="va">survey</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    average <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_mean</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pick.html" class="external-link">pick</a></span><span class="op">(</span><span class="va">score1</span>, <span class="va">score2</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    observed <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_non_miss</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pick.html" class="external-link">pick</a></span><span class="op">(</span><span class="va">score1</span>, <span class="va">score2</span><span class="op">)</span><span class="op">)</span></span>
+<span>    income <span class="op">=</span> <span class="fu"><a href="../reference/type_conversion.html">destring</a></span><span class="op">(</span><span class="va">income_text</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/na_conversion.html">mvdecode</a></span><span class="op">(</span><span class="op">-</span><span class="fl">99</span><span class="op">)</span>,</span>
+<span>    score <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_mean</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pick.html" class="external-link">pick</a></span><span class="op">(</span><span class="va">score1</span>, <span class="va">score2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    answered <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_non_miss</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pick.html" class="external-link">pick</a></span><span class="op">(</span><span class="va">score1</span>, <span class="va">score2</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="va">prepared</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;      id group response score1 score2 average observed</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 A     yes           2      4       3        2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 A     no            4     <span style="color: #BB0000;">NA</span>       4        1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 A     <span style="color: #BB0000;">NA</span>           <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>        0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4 B     yes           6      8       7        2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 B     yes           8     10       9        2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6 <span style="color: #BB0000;">NA</span>    no           10     12      11        2</span></span></code></pre></div>
-<p>The third row has no observed score, so its average is
-<code>NA</code> and its observed count is zero. Row sums use zero for an
-all-missing row, while column summaries use <code>NA</code> for a sum
-with no observations.</p>
-<p>Character measurements can be parsed explicitly, and sentinel values
-can be replaced before calculations:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/type_conversion.html">destring</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1,200"</span>, <span class="st">"2,500"</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1200 2500   NA</span></span>
-<span><span class="fu"><a href="../reference/na_conversion.html">mvdecode</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">99</span>, <span class="fl">3</span><span class="op">)</span>, <span class="op">-</span><span class="fl">99</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]  1 NA  3</span></span>
-<span><span class="fu"><a href="../reference/cut.html">xtile</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] [1,2.5]   [1,2.5]   (2.5,4.5] (2.5,4.5] (4.5,6.5] (4.5,6.5] (6.5,8]  </span></span>
-<span><span class="co">#&gt; [8] (6.5,8]  </span></span>
-<span><span class="co">#&gt; Levels: [1,2.5] &lt; (2.5,4.5] &lt; (4.5,6.5] &lt; (6.5,8]</span></span>
-<span><span class="fu"><a href="../reference/stata_recode.html">stata_recode</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4.5</span>, <span class="fl">7</span>, <span class="fl">12</span><span class="op">)</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">~</span> <span class="fl">1</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">10</span> <span class="op">~</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]  1  1  2 12</span></span></code></pre></div>
-<p><code><a href="../reference/type_conversion.html">destring()</a></code> reads numbers with currency symbols,
-thousands separators and percent signs; other text, such as
-<code>"10 kg"</code>, becomes <code>NA</code> with a warning unless you
-remove it with <code>ignore = "kg"</code>. <code><a href="../reference/cut.html">xtile()</a></code> uses
-Stata’s percentile cutpoints and keeps tied values together; ties can
-leave some groups empty. <code><a href="../reference/stata_recode.html">stata_recode()</a></code> follows Stata’s
-<code>recode</code>: <code>1:5</code> is the range from 1 to 5,
-including decimals, and values that no rule matches are kept.</p>
+<span></span>
+<span><span class="va">prepared</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">income</span>, <span class="va">score</span>, <span class="va">answered</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 4</span></span></span>
+<span><span class="co">#&gt;       id income score answered</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1   <span style="text-decoration: underline;">1</span>200     3        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2   <span style="text-decoration: underline;">1</span>500     4        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3     <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4     <span style="color: #BB0000;">NA</span>     7        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5   <span style="text-decoration: underline;">2</span>200     9        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6   <span style="text-decoration: underline;">1</span>800     5        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7   <span style="text-decoration: underline;">1</span>400     4        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8   <span style="text-decoration: underline;">2</span>100     6        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9   <span style="text-decoration: underline;">2</span>600     8        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10     <span style="color: #BB0000;">NA</span>     9        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>    11   <span style="text-decoration: underline;">2</span>300     8        1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>    12   <span style="text-decoration: underline;">1</span>700     7        2</span></span></code></pre></div>
+<p>Participant 2 has one assessment answer, so the average uses that
+answer. Participant 3 has none: the average is <code>NA</code> and
+<code>answered</code> is zero. <code><a href="../reference/type_conversion.html">destring()</a></code> also reads the
+thousands separators; blank text becomes missing.</p>
 </div>
 <div class="section level2">
-<h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+<h2 id="count-responses">Count responses<a class="anchor" aria-label="anchor" href="#count-responses"></a>
 </h2>
-<p>Read <a href="containers-and-missing-values.html">Containers and
-missing values</a> for output conventions, or <a href="coming-from-stata.html">Coming from Stata</a> to find the R
-equivalent of a Stata command.</p>
+<p>How many participants were satisfied?</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prepared</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">satisfied</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 6</span></span></span>
+<span><span class="co">#&gt;   satisfied     n percent   cum valid valid_cum</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> No            3    25    25      30        30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Yes           7    58.3  83.3    70       100</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #BB0000;">NA</span>            2    16.7 100      <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+<p>Seven said yes. That is 58.3% of all twelve participants, or 70% of
+the ten who answered. The <code>percent</code> and <code>valid</code>
+columns make both denominators visible. The two missing answers remain a
+category.</p>
+<p>Results are tibbles here, so ordinary dplyr verbs can answer a
+follow-up question:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prepared</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">satisfied</span>, .by <span class="op">=</span> <span class="va">centre</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">satisfied</span> <span class="op">==</span> <span class="st">"Yes"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">centre</span>, <span class="va">n</span>, <span class="va">valid</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 3</span></span></span>
+<span><span class="co">#&gt;   centre        n valid</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hilltop       3    60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Riverside     4    80</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="compare-measurements">Compare measurements<a class="anchor" aria-label="anchor" href="#compare-measurements"></a>
+</h2>
+<p>Now compare the assessment average across centres.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prepared</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">score</span>, .by <span class="op">=</span> <span class="va">centre</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span>, <span class="st">"sd"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
+<span><span class="co">#&gt;   centre    type      n  mean    sd</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hilltop   dbl       6   7    1.79</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Riverside dbl       5   5.6  2.41</span></span></code></pre></div>
+<p>Each mean uses the observed scores in that centre. The returned table
+is ready for another pipeline; no results need to be copied out of
+console output. Use <code><a href="../reference/summ.html">tabstat()</a></code> when a compact table of means
+is enough.</p>
+</div>
+<div class="section level2">
+<h2 id="choose-the-next-question">Choose the next question<a class="anchor" aria-label="anchor" href="#choose-the-next-question"></a>
+</h2>
+<ul>
+<li>
+<a href="inspect-and-prepare.html">Inspect and prepare data</a>
+follows the survey from unfamiliar columns to clean measurements,
+checked keys and follow-up records.</li>
+<li>
+<a href="tabulation.html">Tabulate and compare categories</a>
+explains <code><a href="../reference/tab.html">tab()</a></code>, <code><a href="../reference/tab.html">tab1()</a></code>, <code><a href="../reference/tab.html">tab2()</a></code>
+and the <code><a href="../reference/tab.html">fre()</a></code> family in more depth.</li>
+<li>
+<a href="summary-statistics.html">Summarise measurements</a>
+develops <code><a href="../reference/summ.html">summ()</a></code> and <code><a href="../reference/summ.html">tabstat()</a></code>, then introduces
+correlations.</li>
+<li>
+<a href="containers-and-missing-values.html">Containers, grouping
+and missing values</a> explains output conventions and special cases
+when you need them.</li>
+</ul>
+<p>Coming from Stata? The <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Stata
+guide</a> and <code>findit("tab satisfied")</code> help locate a
+familiar command’s R equivalent.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -59,6 +59,13 @@ R。可以用逗号添加变量名或提示，例如 `findit(tab, sex, region)` 
 时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到
 R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
 
+也可以输入 Stata 文本：`` findit(`tab sex region`, row) `` 和
+`findit("tab sex region, row")` 会用指定变量生成相同的行百分比示例。
+查询 do-file 中的一条命令时，可选中文本后运行 **Find Stata equivalent**
+插件（[`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)），或复制文本后运行
+[`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)。
+两者均在控制台显示结果，分别需要可选的 rstudioapi 和 clipr 包。
+
 ### codebook()：描述每个变量
 
 ``` r
@@ -194,6 +201,15 @@ tidystata 还提供
 
 - [Getting
   started](https://socimh.github.io/tidystata/articles/getting-started.html)：简短的工作流程。
+- [Inspect and prepare
+  data](https://socimh.github.io/tidystata/articles/inspect-and-prepare.html)：清理变量、检查标识符与合并记录。
+- [Tabulate and compare
+  categories](https://socimh.github.io/tidystata/articles/tabulation.html)：[`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
+  与 [`fre()`](https://socimh.github.io/tidystata/reference/tab.md)
+  系列。
+- [Summarise
+  measurements](https://socimh.github.io/tidystata/articles/summary-statistics.html)：[`summ()`](https://socimh.github.io/tidystata/reference/summ.md)、[`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md)
+  与相关分析。
 - [Containers and missing
   values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html)：返回类型、分组和标签。
 - [Reference](https://socimh.github.io/tidystata/reference/index.html)：全部函数。

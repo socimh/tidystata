@@ -13,7 +13,7 @@
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
-<meta property="og:title" content="Tidy Tools Inspired by Stata">
+<script src="extra.js"></script><meta property="og:title" content="Tidy Tools Inspired by Stata">
 <meta name="description" content="Tools inspired by Stata for exploring and preparing data in R. Provides frequency tables, summary statistics, variable inspection, column selection, row calculations, and binning with tidyverse-style interfaces and support for labelled data.">
 <meta property="og:description" content="Tools inspired by Stata for exploring and preparing data in R. Provides frequency tables, summary statistics, variable inspection, column selection, row calculations, and binning with tidyverse-style interfaces and support for labelled data.">
 </head>
@@ -40,9 +40,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/getting-started.html">Getting started with tidystata</a></li>
+    <li><a class="dropdown-item" href="articles/inspect-and-prepare.html">Inspect and prepare data</a></li>
+    <li><a class="dropdown-item" href="articles/tabulation.html">Tabulate and compare categories</a></li>
+    <li><a class="dropdown-item" href="articles/summary-statistics.html">Summarise measurements</a></li>
     <li><a class="dropdown-item" href="articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
-    <li><a class="dropdown-item" href="articles/coming-from-stata.html">Coming from Stata</a></li>
-    <li><a class="dropdown-item" href="articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -98,7 +99,7 @@
 <span><span class="co">#&gt; R:     mutate(data, z = row_mean(x, y))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; # 70 broader egen examples. Browse the family: findit(egen)</span></span></code></pre></div>
-<p>A bare command such as <code>findit(egen)</code> browses the whole family and shows up to five operations. A specific query such as <code>findit("egen rowmean")</code> returns one clear answer; ambiguous queries retain up to ten relevant candidates. <code>print(n = Inf)</code> expands the returned results; use <code>findit(egen)</code> to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in <code>findit(tab, sex, region)</code> or <code>findit(tab, gen)</code>. Every entry is listed by topic in <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a>.</p>
+<p>A bare command such as <code>findit(egen)</code> browses the whole family and shows up to five operations. A specific query such as <code>findit("egen rowmean")</code> returns one clear answer; ambiguous queries retain up to ten relevant candidates. <code>print(n = Inf)</code> expands the returned results; use <code>findit(egen)</code> to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in <code>findit(tab, sex, region)</code> or <code>findit(tab, gen)</code>. You can also supply Stata text: <code>findit(`tab sex region`, row)</code> and <code>findit("tab sex region, row")</code> customize the same row-percentage example. To look up one command from a do-file, highlight it and run the <strong>Find Stata equivalent</strong> addin (<code><a href="reference/findit_selection.html">findit_selection()</a></code>), or copy it and run <code><a href="reference/findit_selection.html">findit_clip()</a></code>. These helpers print results in the console and require the optional rstudioapi and clipr packages, respectively. Every entry is listed by topic in <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="codebook-describe-every-variable">codebook(): describe every variable<a class="anchor" aria-label="anchor" href="#codebook-describe-every-variable"></a>
@@ -223,6 +224,12 @@
 <ul>
 <li>
 <a href="https://socimh.github.io/tidystata/articles/getting-started.html">Getting started</a>: a short workflow.</li>
+<li>
+<a href="https://socimh.github.io/tidystata/articles/inspect-and-prepare.html">Inspect and prepare data</a>: clean measurements, check keys and combine records.</li>
+<li>
+<a href="https://socimh.github.io/tidystata/articles/tabulation.html">Tabulate and compare categories</a>: the <code><a href="reference/tab.html">tab()</a></code> and <code><a href="reference/tab.html">fre()</a></code> families.</li>
+<li>
+<a href="https://socimh.github.io/tidystata/articles/summary-statistics.html">Summarise measurements</a>: <code><a href="reference/summ.html">summ()</a></code>, <code><a href="reference/summ.html">tabstat()</a></code> and correlations.</li>
 <li>
 <a href="https://socimh.github.io/tidystata/articles/containers-and-missing-values.html">Containers and missing values</a>: return types, grouping and labels.</li>
 <li>

@@ -134,12 +134,14 @@ objects <- list(
   answer = haven::labelled(c(1, 2), labels = c(Yes = 1, No = 2))
 )
 
-purrr::map(objects, \(x) tibble::tibble(
-  typeof = typeof(x),
-  class = paste(class(x), collapse = ", "),
-  var_type = var_type(x)
-)) |>
-  purrr::list_rbind(names_to = "variable")
+lapply(objects, function(x) {
+  tibble::tibble(
+    typeof = typeof(x),
+    class = paste(class(x), collapse = ", "),
+    var_type = var_type(x)
+  )
+}) |>
+  dplyr::bind_rows(.id = "variable")
 #> # A tibble: 4 × 4
 #>   variable typeof  class                              var_type    
 #>   <chr>    <chr>   <chr>                              <chr>       

@@ -19,7 +19,9 @@ findit(command = NULL, ...)
   (`findit(reg)`, `findit(left_join)`) or a quoted string for full
   syntax (`findit("merge 1:1 id, keep(match)")`). R function names may
   include `()` or a namespace prefix. Use `!!cmd` to look up a string
-  stored in `cmd`. Defaults to `NULL` (all entries).
+  stored in `cmd`. Stata text can also be enclosed in backticks, as in
+  `` findit(`tab sex region`, row) ``. Recognized variable names and
+  options customize matching examples. Defaults to `NULL` (all entries).
 
 - ...:
 
@@ -72,6 +74,12 @@ reference.
   ten-candidate limit applies. The print method's `n` argument sets how
   many matches are printed; use `print(n = Inf)` to display all matches.
 
+- Printing omits package labels and unnecessary namespace prefixes for
+  R's default packages. Conflicting names, such as
+  [`stats::filter()`](https://rdrr.io/r/stats/filter.html), remain
+  qualified. The returned code and package metadata retain their
+  originals.
+
 - The `match` column identifies the lookup type: `"stata"`, `"r"`,
   `"keyword"`, `"nearest"`, or `"all"`.
 
@@ -82,6 +90,17 @@ reference.
 
 - Quote multiword Stata syntax, reserved words (`"if"`), and names that
   are not valid R symbols (`"_n"`).
+
+- Backticks and strings accept the same Stata text. Supported syntax
+  uses catalogue variable annotations; unfamiliar syntax retains generic
+  examples. Internal Stata quotation marks are preserved. Use an R
+  string or raw string when the Stata text itself contains backticks.
+
+- [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+  and
+  [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+  read one command from the source editor or clipboard and print the
+  equivalent lookup result.
 
 - Lookup works offline. External packages such as fixest, modelsummary,
   and srvyr are needed only when running their examples.
@@ -96,29 +115,29 @@ reference.
 
 ``` r
 findit(reg)
-#> # Linear regression [stats]
+#> # Linear regression
 #> Stata: regress y x1 x2
 #> R:     fit <- lm(y ~ x1 + x2, data = data)
 #> # Note: summary(fit) shows the coefficient table; broom::tidy(fit) returns it as a data frame.
 #> 
-#> # Fit linear regression through the origin [stats]
+#> # Fit linear regression through the origin
 #> Stata: regress y x z, noconstant
-#> R:     stats::lm(y ~ x + z - 1, data=data)
+#> R:     lm(y ~ x + z - 1, data=data)
 #> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
 #> 
-#> # Include two continuous main effects and their interaction [stats]
+#> # Include two continuous main effects and their interaction
 #> Stata: regress y c.x##c.z
-#> R:     stats::lm(y ~ x * z, data=data)
+#> R:     lm(y ~ x * z, data=data)
 #> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
 #> 
-#> # Fit a quadratic regression [stats]
+#> # Fit a quadratic regression
 #> Stata: regress y c.x##c.x
-#> R:     stats::lm(y ~ x + I(x^2), data=data)
+#> R:     lm(y ~ x + I(x^2), data=data)
 #> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
 #> 
-#> # Adjust regression for a categorical predictor [stats]
+#> # Adjust regression for a categorical predictor
 #> Stata: regress y i.g c.x
-#> R:     stats::lm(y ~ factor(g) + x, data=data)
+#> R:     lm(y ~ factor(g) + x, data=data)
 #> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
 #> 
 #> # 13 more relevant examples. To see them all: findit(reg) |> print(n = Inf)
@@ -142,16 +161,34 @@ findit(tab, sex, region)
 #> # Only the 10 best candidates are retained; refine the query for a closer match.
 #> # 8 broader tabulate examples. Browse the family: findit(tabulate)
 
+findit(`tab sex region`, row)
+#> # Compute percentages within each table row [dplyr]
+#> Stata: tabulate sex region, row
+#> R:     dplyr::mutate(dplyr::count(data, sex, region), percent = 100 * n / sum(n), .by = sex)
+#> # Note: Returns one row per observed combination; empty cells are omitted.
+#> 
+#> # 26 broader tabulate examples. Browse the family: findit(tabulate)
+
+findit("tab sex region, row")
+#> # Compute percentages within each table row [dplyr]
+#> Stata: tabulate sex region, row
+#> R:     dplyr::mutate(dplyr::count(data, sex, region), percent = 100 * n / sum(n), .by = sex)
+#> # Note: Returns one row per observed combination; empty cells are omitted.
+#> 
+#> # 26 broader tabulate examples. Browse the family: findit(tabulate)
+
 findit("merge 1:1 id, keep(match)")
 #> # Keep matched rows only [dplyr]
 #> Stata: merge 1:1 id using data2, keep(match)
 #> R:     inner_join(data1, data2, by = "id")
 #> # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.
 #> 
-#> # merge() [base]: Merge two data frames (base R)
+#> # merge(): Merge two data frames (base R)
 #>   Related Stata: merge
 #> 
 #> # 12 broader merge examples. Browse the family: findit(merge)
+#> 
+#> # This syntax could not be customized; examples retain generic placeholders.
 
 findit("how do I remove duplicate rows")
 #> # Closest entries for "how do I remove duplicate rows"

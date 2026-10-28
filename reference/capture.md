@@ -76,10 +76,13 @@ capture(mean(1:10))
 #> [1] 5.5
 
 # Suppress warnings and messages
-capture({
-  message("Calculating")
-  mean(1:10)
-}, quiet = TRUE)
+capture(
+  {
+    message("Calculating")
+    mean(1:10)
+  },
+  quiet = TRUE
+)
 #> [1] 5.5
 
 # A new object receives NULL on error, with a failure message
@@ -101,7 +104,8 @@ capture(data <- dplyr::mutate(data, y = missing_var * 2))
 #> ℹ In argument: `y = missing_var * 2`.
 #> Caused by error:
 #> ! object 'missing_var' not found
-data  # Still contains only x
+
+data
 #> # A tibble: 3 × 1
 #>       x
 #>   <int>
@@ -120,7 +124,8 @@ capture({
 #> ℹ In argument: `z = missing_var * 2`.
 #> Caused by error:
 #> ! object 'missing_var' not found
-data  # Contains x and y
+
+data
 #> # A tibble: 3 × 2
 #>       x     y
 #>   <int> <dbl>
@@ -140,7 +145,8 @@ capture(
 #> ℹ In argument: `w = missing_var * 2`.
 #> Caused by error:
 #> ! object 'missing_var' not found
-data  # Still contains x and y
+
+data
 #> # A tibble: 3 × 2
 #>       x     y
 #>   <int> <dbl>

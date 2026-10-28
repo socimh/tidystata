@@ -48,7 +48,7 @@ Other utility functions:
 ``` r
 x <- seq_len(1e6)
 mean(x) |> timer()
-#> Time spent: 0.006s
+#> Time spent: 0.004s
 
 try(timer(stop("failure")))
 #> Failed execution. Time spent: 0.000s

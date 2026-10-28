@@ -2,6 +2,34 @@
 
 ## tidystata 0.4.0
 
+- [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
+  and the bilingual Stata-to-R reference correct advanced statistical
+  mappings and omit pairs without a close R counterpart. Bayesian
+  examples use explicit posterior summaries and fitted-model prediction
+  methods; IPW examples estimate treatment effects with joint
+  uncertainty.
+
+- The bilingual Stata-to-R reference opens as smaller subject chapters
+  within the package website, with chapter navigation and expandable
+  alternatives.
+
+- [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
+  customizes catalogue examples from Stata text enclosed in backticks or
+  strings, including `` findit(`tab sex region`, row) `` and
+  `findit("tab sex region, row")`. New
+  [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+  and
+  [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+  look up one command from the source editor or clipboard and print the
+  result. The selection helper is registered as the Find Stata
+  equivalent addin.
+
+- [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
+  omits built-in package labels and unnecessary namespace prefixes from
+  printed examples, retaining qualification for conflicting names.
+  Returned code and package metadata are preserved. Moving averages use
+  `zoo::rollapply()` with partial windows and nonmissing values.
+
 - [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
   and
   [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)

@@ -52,8 +52,17 @@ candidates. `print(n = Inf)` expands the returned results; use
 `findit(egen)` to browse broader operations. Within a matching
 operation, recommendations prefer tidystata, then tidyverse, then other
 packages or base R. Add variable names or hints with commas, as in
-`findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed
-by topic in [Coming from
+`findit(tab, sex, region)` or `findit(tab, gen)`. You can also supply
+Stata text: `` findit(`tab sex region`, row) `` and
+`findit("tab sex region, row")` customize the same row-percentage
+example. To look up one command from a do-file, highlight it and run the
+**Find Stata equivalent** addin
+([`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)),
+or copy it and run
+[`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md).
+These helpers print results in the console and require the optional
+rstudioapi and clipr packages, respectively. Every entry is listed by
+topic in [Coming from
 Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
@@ -233,6 +242,19 @@ See the guides below for examples and output conventions.
 - [Getting
   started](https://socimh.github.io/tidystata/articles/getting-started.html):
   a short workflow.
+- [Inspect and prepare
+  data](https://socimh.github.io/tidystata/articles/inspect-and-prepare.html):
+  clean measurements, check keys and combine records.
+- [Tabulate and compare
+  categories](https://socimh.github.io/tidystata/articles/tabulation.html):
+  the [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) and
+  [`fre()`](https://socimh.github.io/tidystata/reference/tab.md)
+  families.
+- [Summarise
+  measurements](https://socimh.github.io/tidystata/articles/summary-statistics.html):
+  [`summ()`](https://socimh.github.io/tidystata/reference/summ.md),
+  [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md)
+  and correlations.
 - [Containers and missing
   values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html):
   return types, grouping and labels.
