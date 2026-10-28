@@ -50,22 +50,13 @@ findit("egen rowmean")
 #> # 70 broader egen examples. Browse the family: findit(egen)
 ```
 
-单独查询命令（如
-`findit(egen)`）返回整个命令族，默认显示最多五种操作。具体查询（如
-`findit("egen rowmean")`）返回一个明确的推荐；含义不明确时保留最多十个相关候选项。`print(n = Inf)`
-展开已返回的结果；查询命令族可浏览更广的操作。同一任务优先推荐
-tidystata，其次是 tidyverse，最后是其他包或 base
-R。可以用逗号添加变量名或提示，例如 `findit(tab, sex, region)` 或
-`findit(tab, gen)`。在中文环境下运行 R
-时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到
-R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
+[`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
+会推荐 R 中对应的函数。一般查询（如
+`findit(egen)`）会列出相关操作，而更具体的查询则会返回针对性的推荐结果。也可以直接输入完整的
+Stata 命令，例如 `findit("tab sex region, row")`。
 
-也可以输入 Stata 文本：`` findit(`tab sex region`, row) `` 和
-`findit("tab sex region, row")` 会用指定变量生成相同的行百分比示例。
-查询 do-file 中的一条命令时，可选中文本后运行 **Find Stata equivalent**
-插件（[`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)），或复制文本后运行
-[`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md)。
-两者均在控制台显示结果，分别需要可选的 rstudioapi 和 clipr 包。
+完整的命令对照表请参阅[从 Stata 转向
+R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)。
 
 ### codebook()：描述每个变量
 

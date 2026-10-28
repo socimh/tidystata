@@ -76,8 +76,8 @@
 <span><span class="co">#&gt; R:     mutate(data, z = row_mean(x, y))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; # 70 broader egen examples. Browse the family: findit(egen)</span></span></code></pre></div>
-<p>单独查询命令（如 <code>findit(egen)</code>）返回整个命令族，默认显示最多五种操作。具体查询（如 <code>findit("egen rowmean")</code>）返回一个明确的推荐；含义不明确时保留最多十个相关候选项。<code>print(n = Inf)</code> 展开已返回的结果；查询命令族可浏览更广的操作。同一任务优先推荐 tidystata，其次是 tidyverse，最后是其他包或 base R。可以用逗号添加变量名或提示，例如 <code>findit(tab, sex, region)</code> 或 <code>findit(tab, gen)</code>。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在<a href="https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html">从 Stata 到 R</a>中。</p>
-<p>也可以输入 Stata 文本：<code>findit(`tab sex region`, row)</code> 和 <code>findit("tab sex region, row")</code> 会用指定变量生成相同的行百分比示例。 查询 do-file 中的一条命令时，可选中文本后运行 <strong>Find Stata equivalent</strong> 插件（<code><a href="reference/findit.html">findit_selection()</a></code>），或复制文本后运行 <code><a href="reference/findit.html">findit_clip()</a></code>。 两者均在控制台显示结果，分别需要可选的 rstudioapi 和 clipr 包。</p>
+<p><code><a href="reference/findit.html">findit()</a></code> 会推荐 R 中对应的函数。一般查询（如 <code>findit(egen)</code>）会列出相关操作，而更具体的查询则会返回针对性的推荐结果。也可以直接输入完整的 Stata 命令，例如 <code>findit("tab sex region, row")</code>。</p>
+<p>完整的命令对照表请参阅<a href="https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html">从 Stata 转向 R</a>。</p>
 </div>
 <div class="section level3">
 <h3 id="codebook描述每个变量">codebook()：描述每个变量<a class="anchor" aria-label="anchor" href="#codebook%E6%8F%8F%E8%BF%B0%E6%AF%8F%E4%B8%AA%E5%8F%98%E9%87%8F"></a></h3>
