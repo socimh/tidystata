@@ -46,7 +46,9 @@ findit("egen rowmean")
 #> # 70 broader egen examples. Browse the family: findit(egen)
 ```
 
-A bare command such as `findit(egen)` browses the whole family and shows up to five operations. A specific query such as `findit("egen rowmean")` returns one clear answer; ambiguous queries retain up to ten relevant candidates. `print(n = Inf)` expands the returned results; use `findit(egen)` to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. You can also supply Stata text: `` findit(`tab sex region`, row) `` and `findit("tab sex region, row")` customize the same row-percentage example. To look up one command from a do-file, highlight it and run the **Find Stata equivalent** addin (`findit_selection()`), or copy it and run `findit_clip()`. These helpers print results in the console and require the optional rstudioapi and clipr packages, respectively. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
+`findit()` recommends matching R functions. A general query such as `findit(egen)` lists related operations, while a more specific query returns targeted recommendations. You can also enter a complete Stata command, such as `findit("tab sex region, row")`.
+
+See [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html) for the full command reference.
 
 ### codebook(): describe every variable
 
