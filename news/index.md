@@ -6,6 +6,7 @@
   under
   [`findit()`](https://socimh.github.io/tidystata/reference/findit.md).
 - Clearer README examples and frequency-table headings.
+- Removed the unused `lifecycle` dependency.
 
 ## tidystata 0.4.0
 
