@@ -184,10 +184,10 @@ and displaying row-category labels. Column headers retain category codes.
 \details{
 \strong{Counts and percentages}
 
-The following five columns are produced by \code{tab()}, \code{tab1()}, \code{fre()}, and
-\code{fre1()}. For each group, let \code{n_i} be the count for category (or category
-combination) \code{i}, \code{N} the count across all categories, and \code{N_valid} the
-count excluding observations missing any measured variable. All percentages
+\code{tab()}, \code{tab1()}, \code{fre()} and \code{fre1()} report the five statistics below.
+Within each group, \code{n_i} counts category (or combination) \code{i}, \code{N} counts
+all observations, and \code{N_valid} counts those complete on every measured
+variable. All percentages
 are on a \strong{0–100 scale}.
 \itemize{
 \item \code{n}: Number of observations in the category, or sum of weights if weighted.
@@ -200,9 +200,9 @@ This is \code{NA} for categories with missing measured values.
 measured categories.
 }
 
-Thus \code{percent} corresponds to Stata's \verb{tabulate, missing}, while \code{valid}
-uses the denominator from \code{tabulate} without \code{missing}. A missing grouping
-key does not by itself make a measured value invalid.
+\code{percent} uses Stata's \verb{tabulate, missing} denominator; \code{valid} uses the
+denominator from \code{tabulate} without \code{missing}. Missing grouping keys do
+not make otherwise complete measured values invalid.
 
 \strong{Missing values and category order}
 
@@ -214,7 +214,7 @@ order. List-column elements are counted as complete values, not flattened.
 
 \strong{Weighted counts and percentages}
 
-Let \code{w_j} be the weight for observation \code{j} in a group.
+With weight \code{w_j} for observation \code{j}:
 \itemize{
 \item \strong{Frequency weights} (\code{.wt_type = "frequency"}): Category counts are
 \code{n_i = sum(w_j)} over observations in that category. Weights need not be
@@ -269,10 +269,9 @@ reserved names such as \code{"total"} may require recoding.
 
 \strong{Computed variables and groups}
 
-Named expressions in \code{...} are evaluated on ungrouped data, before counts
-are calculated within groups. Use grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} first for
-group-specific computations. Input column names that conflict with output
-columns are renamed in the result; the input data are unchanged.
+Named expressions in \code{...} are evaluated before grouping. Use grouped
+\code{\link[dplyr:mutate]{dplyr::mutate()}} first for group-specific computations. Names that conflict
+with output columns are renamed in the result; the input is unchanged.
 }
 \examples{
 # Compare the three approaches using the same variables

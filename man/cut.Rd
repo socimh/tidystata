@@ -78,40 +78,40 @@ equal-width command (\verb{egen cut(), group()} is not equal-width).
 }
 }
 \details{
-For \code{cut_quantile(method = "quantile")}, cutpoints are the percentiles at
-\verb{1/n, 2/n, ...}, using Stata's percentile rule (see \code{\link[=summ]{summ()}}), and each value
-joins the first group whose cutpoint is at least that value. Equal values
-stay in the same group; different values may share a group. Ties can leave
-groups empty; as in Stata, their codes are skipped (codes 1, 3 and 4, say)
-and a warning is given.
-Factor levels are the occupied groups. Default labels describe the contiguous
-intervals covered by each group, for example \code{"[0,0]"} and \code{"(0,1]"}. Custom
-labels must match the effective number of groups.
+\strong{Quantile and rank groups}
 
-\code{cut_quantile()} rejects empty and all-missing vectors; it rejects constants
-in quantile mode but accepts them in rank mode. \code{cut_length()} and
-\code{cut_breaks()} reject constants and all-missing vectors; \code{cut_length()} also
-rejects infinite values, because equal-width intervals need a finite range.
+In quantile mode, \code{cut_quantile()} uses Stata's percentiles at \verb{1/n, 2/n, ...}
+(see \code{\link[=summ]{summ()}}). Each value joins the first group whose cutpoint is at least
+that value. Equal values stay together; different values may share a group.
+Ties can leave empty groups, whose codes are skipped (for example 1, 3, 4),
+with a warning. Factor levels contain only occupied groups.
 
-Interval labels always use a decimal point, whatever \code{options(OutDec)}
-says, so that \code{"[2.8,6.6]"} cannot be read as four numbers.
+Rank mode omits missing values while ranking and restores their missing
+output positions afterward. If \code{n} exceeds the observed count, it warns
+and uses one group per observation.
 
-\code{cut_breaks()} differs from \verb{egen cut(), at()} at the ends: Stata leaves
-values outside the breaks (and at the last break) missing, while
-\code{cut_breaks()} extends the end intervals to the observed range.
+\strong{Labels and grouped use}
 
-Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its own cutpoints and
-interval labels, which cannot be combined, so \code{cut_quantile()} defaults to
-integer codes within each group (like Stata's \verb{xtile, by()}). Supply
-\code{labels = TRUE} to request labels there anyway. \code{cut_length()} and
-\code{cut_breaks()} keep their factor output inside grouped data masks; use a
-character vector for custom
-labels or \code{FALSE} for integer codes.
+Quantile labels describe contiguous intervals, such as \code{"[0,0]"} and \code{"(0,1]"};
+rank labels run from \code{"1"} to the effective group count. Custom labels must
+match the effective number of groups. Interval labels always use a decimal
+point, regardless of \code{options(OutDec)}, to avoid ambiguity with commas.
 
-Rank groups omit missing observations when ranking, then restore missing
-output positions. If \code{n} exceeds the observed count, use one group per
-observation and warn. Default rank labels are \code{"1"} through the effective
-group count; custom labels must match that count.
+Inside grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}, each group has its own cutpoints and labels.
+Because those labels cannot be combined, \code{cut_quantile()} defaults to integer
+codes, like Stata's \verb{xtile, by()}; \code{labels = TRUE} requests labels explicitly.
+\code{cut_length()} and \code{cut_breaks()} retain factor output in grouped data masks.
+For these functions, supply character labels or use \code{FALSE} for integer codes.
+
+\strong{Limits and interval endpoints}
+
+\code{cut_quantile()} rejects empty and all-missing inputs; constants are allowed
+only in rank mode. \code{cut_length()} and \code{cut_breaks()} reject constants and
+all-missing inputs. Equal-width intervals also require finite values.
+
+\code{cut_breaks()} extends end intervals to the observed range. Stata's
+\verb{egen cut(), at()} instead leaves values outside the breaks, including
+values at the last break, missing.
 }
 \examples{
 cut_quantile(1:20)

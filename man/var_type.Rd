@@ -35,61 +35,47 @@ when the object has no unit.
 }
 }
 \details{
-\subsection{Comparison with other type inspectors}{
+\strong{Reading types and units}
 
-\code{var_type()} gives one readable label per object, useful for column audits
-with \code{vapply(data, var_type, character(1))} or
-\code{dplyr::summarise(data, dplyr::across(dplyr::everything(), var_type))}.
-It combines storage and class information in a display label:
+\code{var_type()} returns one display label per object, useful for column audits
+such as \code{vapply(data, var_type, character(1))}. It describes storage and class
+metadata, so empty and all-missing vectors retain their type. Haven-labelled
+vectors add \code{+lbl} in abbreviation mode and \code{+label} otherwise.
+
+Plain matrices and arrays report their element type; data frames report their
+container name. Dimensions are omitted. \code{var_unit()} reads units or duration
+metadata, including hms times, and returns \code{NA_character_} otherwise. It also
+respects custom unit methods for classes described as \code{units}, \code{drtn} or \code{time}.
+
+\strong{Choosing an inspector}
+
+Use \code{var_type()} for readable reports. For exact type information in code:
 \itemize{
-\item \code{\link[=typeof]{typeof()}} reports the internal storage type. Factors are \code{"integer"},
-while ordinary double vectors, POSIXct date-times and double-backed
-haven-labelled vectors are all \code{"double"}. \code{var_type()} distinguishes
-\code{"factor"}, \code{"double"}, \code{"datetime"} and \code{"double+label"}.
-\item \code{\link[=class]{class()}} reports the class names used for method dispatch and may return
-several strings, such as \code{c("ordered", "factor")}. \code{var_type()} reduces
-this to one label, \code{"ordered"}. Use \code{class()} to inspect the full class
-vector and \code{\link[=inherits]{inherits()}} to test class membership in program logic.
-\item \code{\link[=mode]{mode()}} reports a broader category: both integer and double vectors have
-mode \code{"numeric"}. \code{var_type()} keeps that storage distinction.
-\item \code{\link[utils:str]{utils::str()}} displays structure and example values. \code{var_type()} returns
-a character string that can be collected into an audit table.
-\item \code{\link[pillar:type_sum]{pillar::type_sum()}} supplies compact display labels for classed objects.
-\code{var_type()} builds on those labels, expands recognized abbreviations by
-default, marks haven value labels and omits container dimensions.
+\item \code{\link[=typeof]{typeof()}} gives storage type: factors, for example, are \code{"integer"}.
+\code{var_type()} distinguishes doubles, date-times and labelled doubles even
+though all three can have \code{"double"} storage.
+\item \code{\link[=class]{class()}} gives the full class vector; \code{\link[=inherits]{inherits()}} tests membership.
+\code{var_type()} reduces \code{c("ordered", "factor")} to \code{"ordered"}.
+\item \code{\link[=mode]{mode()}} combines integers and doubles as \code{"numeric"}; \code{var_type()} keeps
+them distinct. \code{\link[utils:str]{utils::str()}} shows structure and example values rather
+than returning a single label.
 }
 
-Custom classes can provide a \code{pillar::type_sum()} method to control their
-display label without changes to \code{var_type()}.
+A display label does not retain full classes, attributes or structure.
+A numeric-looking label alone does not imply support for numeric summaries.
 
-Use \code{var_type()} for reporting; use storage or class inspectors when exact
-R type information is needed. Its display label does not retain the full
-class hierarchy, attributes or structure.
-}
+\strong{Custom classes}
 
-\subsection{Type and unit metadata}{
+Classed objects use \code{\link[pillar:type_sum]{pillar::type_sum()}} labels. With \code{abbr = FALSE}, known
+abbreviations expand exactly (\code{int64} becomes \code{integer64}), and default class
+abbreviations become full primary class names, such as \code{"dgCMatrix"}.
+Registered or inherited display methods and explicit pillar labels take
+precedence. Custom labels, including \verb{I<int>}, \verb{list<int>} and punctuation,
+are preserved in both modes.
 
-Types describe storage and class metadata, not the observed values: empty and
-all-missing vectors retain their type. Known scalar abbreviations expand
-exactly, including \code{int64} to \code{integer64}. Haven-labelled vectors append
-\code{+lbl} in abbreviation mode and \code{+label} otherwise.
-
-Plain matrices and arrays retain their element-type description, and data
-frames retain their container name without dimensions. Other classed objects
-use their pillar type description. With \code{abbr = FALSE}, a default class-name
-abbreviation is replaced by the full primary class name, for example
-\code{"dgCMatrix"} for a sparse matrix of that class. Registered or inherited
-display methods and explicit pillar labels take precedence. Custom labels,
-including punctuation and structured descriptions such as \verb{I<int>} and
-\verb{list<int>}, are preserved in both modes. An empty or missing custom
-description falls back to the first class name; errors in custom methods are
-propagated. A numeric-looking type description does not imply support for
-numeric summaries.
-
-\code{var_unit()} reads actual units/difftime metadata (including hms times), and
-retains custom unit methods for classes describing themselves as \code{units},
-\code{drtn} or \code{time}. Other objects return \code{NA_character_}.
-}
+A custom \code{pillar::type_sum()} method can control the label. An empty or
+missing description falls back to the first class name; method errors
+propagate.
 }
 \examples{
 var_type(1:10)

@@ -30,13 +30,14 @@ library(dplyr)
 ### findit()：查找 Stata 命令对应的 R 代码
 
 ``` r
-findit("reg, robust")
+findit(reg, robust)
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
 #> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
-#> # 16 broader regress examples. Browse the family: findit(regress)
+#> # 17 broader regress examples. Browse the family: findit(regress)
+
 findit("egen rowmean")
 #> # Average available values across columns [tidystata]
 #> Stata: egen z = rowmean(x y)
@@ -84,7 +85,7 @@ summ(lifeexp, lexp:safewater, .by = region)
 #> 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91
 ```
 
-### tab()、tab1() 和 tab2()：比较频数表
+### tab()、tab1() 和 tab2()：频数表
 
 用 `lifeexp` 中的地区和一个新类别作比较：预期寿命是否达到 70 岁。`region:lexp_70` 选择这两列。
 

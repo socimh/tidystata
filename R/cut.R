@@ -39,40 +39,40 @@
 #'   and `TRUE` explicitly requests labels.
 #'
 #' @details
-#' For `cut_quantile(method = "quantile")`, cutpoints are the percentiles at
-#' `1/n, 2/n, ...`, using Stata's percentile rule (see [summ()]), and each value
-#' joins the first group whose cutpoint is at least that value. Equal values
-#' stay in the same group; different values may share a group. Ties can leave
-#' groups empty; as in Stata, their codes are skipped (codes 1, 3 and 4, say)
-#' and a warning is given.
-#' Factor levels are the occupied groups. Default labels describe the contiguous
-#' intervals covered by each group, for example `"[0,0]"` and `"(0,1]"`. Custom
-#' labels must match the effective number of groups.
+#' **Quantile and rank groups**
 #'
-#' `cut_quantile()` rejects empty and all-missing vectors; it rejects constants
-#' in quantile mode but accepts them in rank mode. `cut_length()` and
-#' `cut_breaks()` reject constants and all-missing vectors; `cut_length()` also
-#' rejects infinite values, because equal-width intervals need a finite range.
+#' In quantile mode, `cut_quantile()` uses Stata's percentiles at `1/n, 2/n, ...`
+#' (see [summ()]). Each value joins the first group whose cutpoint is at least
+#' that value. Equal values stay together; different values may share a group.
+#' Ties can leave empty groups, whose codes are skipped (for example 1, 3, 4),
+#' with a warning. Factor levels contain only occupied groups.
 #'
-#' Interval labels always use a decimal point, whatever `options(OutDec)`
-#' says, so that `"[2.8,6.6]"` cannot be read as four numbers.
+#' Rank mode omits missing values while ranking and restores their missing
+#' output positions afterward. If `n` exceeds the observed count, it warns
+#' and uses one group per observation.
 #'
-#' `cut_breaks()` differs from `egen cut(), at()` at the ends: Stata leaves
-#' values outside the breaks (and at the last break) missing, while
-#' `cut_breaks()` extends the end intervals to the observed range.
+#' **Labels and grouped use**
 #'
-#' Inside grouped [dplyr::mutate()], each group has its own cutpoints and
-#' interval labels, which cannot be combined, so `cut_quantile()` defaults to
-#' integer codes within each group (like Stata's `xtile, by()`). Supply
-#' `labels = TRUE` to request labels there anyway. `cut_length()` and
-#' `cut_breaks()` keep their factor output inside grouped data masks; use a
-#' character vector for custom
-#' labels or `FALSE` for integer codes.
+#' Quantile labels describe contiguous intervals, such as `"[0,0]"` and `"(0,1]"`;
+#' rank labels run from `"1"` to the effective group count. Custom labels must
+#' match the effective number of groups. Interval labels always use a decimal
+#' point, regardless of `options(OutDec)`, to avoid ambiguity with commas.
 #'
-#' Rank groups omit missing observations when ranking, then restore missing
-#' output positions. If `n` exceeds the observed count, use one group per
-#' observation and warn. Default rank labels are `"1"` through the effective
-#' group count; custom labels must match that count.
+#' Inside grouped [dplyr::mutate()], each group has its own cutpoints and labels.
+#' Because those labels cannot be combined, `cut_quantile()` defaults to integer
+#' codes, like Stata's `xtile, by()`; `labels = TRUE` requests labels explicitly.
+#' `cut_length()` and `cut_breaks()` retain factor output in grouped data masks.
+#' For these functions, supply character labels or use `FALSE` for integer codes.
+#'
+#' **Limits and interval endpoints**
+#'
+#' `cut_quantile()` rejects empty and all-missing inputs; constants are allowed
+#' only in rank mode. `cut_length()` and `cut_breaks()` reject constants and
+#' all-missing inputs. Equal-width intervals also require finite values.
+#'
+#' `cut_breaks()` extends end intervals to the observed range. Stata's
+#' `egen cut(), at()` instead leaves values outside the breaks, including
+#' values at the last break, missing.
 #'
 #' @returns An ordered factor, or integer interval codes when `labels = FALSE`
 #'   or when `cut_quantile()` runs in a grouped data mask with default labels.

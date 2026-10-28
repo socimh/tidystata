@@ -48,7 +48,8 @@ library(dplyr)
 ### findit()：查找 Stata 命令对应的 R 代码
 
 ```{r}
-findit("reg, robust")
+findit(reg, robust)
+
 findit("egen rowmean")
 ```
 
@@ -74,7 +75,7 @@ codebook(lifeexp)
 summ(lifeexp, lexp:safewater, .by = region)
 ```
 
-### tab()、tab1() 和 tab2()：比较频数表
+### tab()、tab1() 和 tab2()：频数表
 
 用 `lifeexp` 中的地区和一个新类别作比较：预期寿命是否达到 70 岁。`region:lexp_70` 选择这两列。
 

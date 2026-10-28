@@ -121,10 +121,12 @@ Both support \code{.detail = TRUE} for a fuller summary or \code{.stat} to selec
 statistics.
 }
 \details{
-Statistics are calculated separately for each selected variable and group.
-The formulas below use non-missing measured values \verb{x1, ..., xn}, with
-\code{n} denoting their count and \code{xbar} their arithmetic mean. Unless weights
-are supplied, calculations are unweighted.
+Each variable is summarised separately within each group. Expressions in
+\code{...} are evaluated before grouping; use grouped \code{\link[dplyr:mutate]{dplyr::mutate()}} first
+for group-specific computations.
+
+The formulas below use non-missing values \verb{x1, ..., xn}, their count \code{n},
+and their mean \code{xbar}. Calculations are unweighted unless weights are supplied.
 
 \strong{Counts and completeness}
 \itemize{
@@ -173,9 +175,9 @@ Define \code{mk = sum((x - xbar)^k) / n}, the \code{k}th population central mome
 kurtosis 3, not 0 (this is not excess kurtosis).
 }
 
-Undefined statistics are \code{NA} (for example, \code{sd} when \code{n < 2} and the
-shape statistics for constant variables). Columns with no observed values
-have \code{n = 0}, \code{unique = 0}, and \code{NA} for numeric statistics, including \code{sum}.
+Undefined statistics are \code{NA}: for example, \code{sd} with fewer than two values,
+or shape statistics for constant variables. With no observed values,
+\code{n} and \code{unique} are 0; numeric statistics, including \code{sum}, are \code{NA}.
 
 \strong{When weights are supplied}
 
@@ -204,7 +206,7 @@ unrescaled weights, even for analytic weights. \code{unique}, \code{miss_n}, and
 The reported \code{se} is descriptive and does not account for a complex survey
 design. For survey inference, use functions such as \code{survey::svymean()}.
 
-\strong{Data types and grouping}
+\strong{Data types and display}
 
 Missingness follows \code{is.na()}, including SPSS user-missing codes. Logical
 variables are treated as 0/1; factors use their underlying numeric codes;
@@ -219,10 +221,6 @@ their spreads (\code{sd}, \code{se}, \code{mad}, \code{iqr}) are \code{difftime}
 With \code{.type = "table"} or \code{"tibble"}, calendar locations are text and spreads
 are numeric durations (days for Dates, seconds for datetimes and times of
 day).
-
-Expressions in \code{...} are evaluated on ungrouped working data before
-statistics are calculated by group. For group-specific expressions, first
-create columns with grouped \code{\link[dplyr:mutate]{dplyr::mutate()}}.
 }
 \examples{
 summ(lifeexp)

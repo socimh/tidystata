@@ -37,56 +37,51 @@ replaces them, and use named rules to assign value labels.
 }
 }
 \details{
-\strong{Output type}
+\strong{Matching rules}
 
-Integer input stays integer when every code and \code{.default} is a whole
-number within integer range, so \code{1:5 ~ 1} does not promote it to double.
-Double input stays double. Fractions, out-of-range numbers, infinities,
-\code{NaN}, and tagged missing codes or defaults require double output; ordinary
-\code{NA} does not promote integer input. The input is not modified.
+Rules apply to the original input, after SPSS missing-value conversion.
+The first match wins: \verb{1 ~ 2, 2 ~ 1} swaps the codes. Unmatched values stay
+unchanged unless \code{.default} replaces them, including unmatched missing values.
 
-\strong{Matching}
-
-The left side of each rule is read before evaluation:
+The left side of a rule accepts:
 \itemize{
-\item \code{a:b} selects the closed range \verb{a <= x <= b}, including decimals, like
-Stata's \code{a/b}. Thus \code{1:5} matches \code{4.5}, rather than enumerating integers.
-Bounds must be single non-missing numbers, with the lower bound no greater
-than the upper bound. \code{lo:hi} uses the formula's environment.
-\item \code{c(...)} combines values and ranges, for example \code{c(1, 3:5)}.
-\item Other expressions are evaluated as value sets. Non-missing values match
-exactly; a missing value in a set matches every missing type, as below.
+\item \code{a:b}: A closed range, including decimals. Like Stata's \code{a/b}, \code{1:5}
+matches 4.5. Bounds must be single non-missing numbers in increasing order
+(equal bounds are allowed); \code{lo:hi} reads them from the formula's environment.
+\item \code{c(...)}: A combination of values and ranges, such as \code{c(1, 3:5)}.
+\item Other expressions: An evaluated set of values to match exactly. Missing
+selectors match all missing types, as described below.
 }
 
-Rules match the input before any replacements, after SPSS missing-value
-conversion. The first matching rule wins, so \verb{1 ~ 2, 2 ~ 1} swaps the codes.
-Supply \code{.default} to replace all unmatched elements, including missing ones.
-
-On the left side, bare \code{min} and \code{max} mean \code{-Inf} and \code{Inf}. Unlike Stata's
-keywords, they do not refer to observed extrema: \code{min:min} does not select
-the smallest observed code. Calls such as \code{min(x)} still evaluate normally.
-Bounds, like value sets, must be ordinary integer or double numbers;
-convert classed numbers such as \code{integer64} explicitly.
+Bare \code{min} and \code{max} on the left mean \code{-Inf} and \code{Inf}, not observed extrema:
+\code{min:min} does not select the smallest observed value. Calls such as \code{min(x)}
+evaluate normally. Bounds and value sets must use ordinary integer or double
+numbers; convert classed numbers such as \code{integer64} explicitly.
 
 \strong{Missing values and labels}
 
-\code{NA ~ code} matches \code{NA}, \code{NaN}, and all tagged missing values, like Stata's
-\code{missing} keyword. The same applies to any missing selector: for example,
-\code{haven::tagged_na("a") ~ 0} also replaces other tags and ordinary \code{NA}.
-Individual missing types cannot be selected separately. Unmatched tagged
-missing values keep their tags when \code{.default} is omitted.
+Any missing selector matches \code{NA}, \code{NaN} and every tagged missing value.
+Thus \code{NA ~ 0} and \code{haven::tagged_na("a") ~ 0} both replace all missing types;
+individual tags cannot be selected separately. Unmatched tags survive when
+\code{.default} is omitted. SPSS user-missing codes and ranges become \code{NA} before
+matching, so their stored codes cannot be matched as ordinary numbers.
 
-SPSS user-missing codes and ranges become \code{NA} before matching, so their
-stored codes cannot be selected as ordinary numbers. Old value labels are
-removed even when no values change. Named rules supply new labels, which
-are kept even if their codes are unobserved. A code cannot have two labels,
-a label cannot name two codes, and a missing code cannot be labelled.
+Old value labels are removed even if no values change. Named rules create
+new labels, including for unobserved codes. Labels and codes must correspond
+one-to-one, and missing codes cannot be labelled.
+
+\strong{Output type}
+
+Integer input stays integer if all replacement codes and defaults are whole
+numbers within integer range: \code{1:5 ~ 1} does not force double output.
+Fractions, out-of-range values, infinities, \code{NaN} and tagged missing values
+require doubles; ordinary \code{NA} does not. Double input stays double, and the
+input is never modified.
 
 \strong{Stata and other R functions}
 
-Use \code{\link[dplyr:mutate]{dplyr::mutate()}} to replace a variable or create a new one, as with
-Stata's \code{generate()} option. Use \code{\link[dplyr:across]{dplyr::across()}} to apply rules to several
-variables. Common rule translations are:\tabular{ll}{
+Use \code{\link[dplyr:mutate]{dplyr::mutate()}} to replace or create a variable (Stata's \code{generate()}),
+and \code{\link[dplyr:across]{dplyr::across()}} to recode several columns. Common translations are:\tabular{ll}{
    Stata rule \tab R rule or argument \cr
    \code{(1/5 = 1)} \tab \code{1:5 ~ 1} \cr
    \verb{(1 3 7 = 0)} \tab \code{c(1, 3, 7) ~ 0} \cr
@@ -97,14 +92,13 @@ variables. Common rule translations are:\tabular{ll}{
 }
 
 
-Like Stata's \code{recode}, these functions operate on numeric values. For text,
-use \code{dplyr::recode_values()} or \code{dplyr::replace_values()} in dplyr 1.2.0 and
-later, or \code{\link[dplyr:case_match]{dplyr::case_match()}} with older versions. For factors, use
-\code{forcats::fct_recode()} or \code{forcats::fct_collapse()}.
+These functions recode numeric values. For text, use \code{dplyr::recode_values()}
+or \code{dplyr::replace_values()} in dplyr 1.2.0 or later, or \code{\link[dplyr:case_match]{dplyr::case_match()}}
+in older versions. For factors, use \code{forcats::fct_recode()} or
+\code{forcats::fct_collapse()}.
 
-The alias \code{recode()} shares its name with \code{\link[dplyr:recode]{dplyr::recode()}}. Whichever
-package is attached last masks the other. Prefer \code{stata_recode()} or an
-explicit namespace to avoid attach-order ambiguity.
+The alias \code{recode()} conflicts with \code{\link[dplyr:recode]{dplyr::recode()}}. Use \code{stata_recode()}
+or an explicit namespace to avoid depending on which package was attached last.
 }
 \examples{
 # Keep unmatched values

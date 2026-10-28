@@ -62,90 +62,80 @@ vectors and level text for factors.
 }
 }
 \details{
-\strong{Reading numbers}
+\strong{Reading numbers with \code{destring()}}
 
-\code{destring()} reads text the way Stata's \code{destring} does. A value must be a
-number, optionally with a sign, exponent, currency symbol (dollar, euro,
-pound, yen), thousands separators (\verb{1,234}), a trailing percent sign (\verb{50\%}
-gives 50) and surrounding spaces, including non-breaking spaces. Anything
-else, such as \code{"12abc"}, \code{"10 kg"} or a date, becomes \code{NA} with a warning,
-like Stata's \code{force} option; the
-positions and original values are kept in \code{\link[readr:problems]{readr::problems()}}. Use \code{ignore}
-to remove other characters first, like Stata's \code{ignore()}: \code{destring(x, ignore = "kg")} reads \code{"10 kg"} as 10. Empty strings, \code{"NA"} and Stata's
-\code{"."} are missing without a warning; the text \code{"NaN"} becomes \code{NaN}. Date
-strings become \code{NA}; parse them with \code{\link[=as.Date]{as.Date()}} or \code{lubridate::ymd()}
-instead.
+Text must contain a complete number. Signs, exponents, dollar/euro/pound/yen
+symbols, thousands separators (\code{"1,234"}), trailing percent signs (\code{"50\%"}
+gives 50) and surrounding spaces, including non-breaking spaces, are accepted.
+Use \code{ignore} to remove other characters first: \code{ignore = "kg"} lets
+\code{"10 kg"} become 10.
 
-A factor whose levels are all numbers, such as \code{factor(c("1990", "2000"))},
-gives those numbers (1990, 2000). Other factors give their level codes.
-Labelled numeric variables return their values; labelled text is read from
-its values like plain text.
-Unsupported numeric-conversion inputs, such as lists, raw vectors and complex
-vectors, return missing values of the same length.
+Invalid text becomes \code{NA} with a warning, like Stata's \code{force} option.
+\code{\link[readr:problems]{readr::problems()}} gives its positions and original values. Empty strings,
+\code{"NA"} and \code{"."} become missing without a warning; \code{"NaN"} becomes \code{NaN}.
+Date strings are invalid; parse them with \code{\link[=as.Date]{as.Date()}} or \code{lubridate::ymd()}.
 
-\strong{Labels, missing values, and units}
+Factors give their numeric level values only when every level, including
+unused levels, parses as a number. Otherwise they give their integer codes.
+Labelled vectors use their stored values, parsing text as above. SPSS
+user-missing codes remain values, and tagged missing values retain their tags.
+Lists, raw vectors and complex vectors give \code{NA} for each element.
 
-\code{decode()} uses value labels when a labelled vector has a nonempty \code{labels}
-attribute. Without value labels, it uses ordinary character conversion,
-including for tagged missing values, so 100000 gives \code{"1e+05"}; use
-\code{tostring()} to write numbers in full.
+Dates become days since 1970-01-01; date-times become seconds since the Unix
+epoch. Durations and measured values keep their numbers in the existing
+units. Large \code{integer64} values can lose precision when converted to double,
+with a warning from the underlying conversion.
 
-\code{destring()} and \code{decode()} keep SPSS user-missing codes as values or labels.
-Numeric conversion preserves tagged missing values. Dates become days since
-1970-01-01; date-times become seconds since the Unix epoch. Durations and
-measured vectors retain their numeric values in their existing units.
-Conversion of large \code{integer64} values to double can lose precision and emits
-the underlying conversion warning.
+\strong{Creating labels with \code{encode()}}
 
-\strong{Encoding categories}
+Character categories receive codes 1, 2, 3, ... in UTF-8 radix order, which
+is reproducible but may differ from Stata's locale-based ordering.
+Numeric-looking text is still a category: \code{"10"}, \code{"20"}, \code{"3"} receive
+codes 1, 2, 3. \code{NA} and \code{""} become missing; spaces are retained.
 
-\code{encode()} assigns codes 1, 2, 3, ... to distinct nonempty character values
-in UTF-8 radix order. Numeric-looking text is a category: \code{"10"}, \code{"20"},
-\code{"3"} get codes 1, 2, 3, not the numbers 10, 20, 3. \code{NA} and \code{""} become
-missing; spaces are retained. Radix ordering is reproducible but can differ
-from locale-specific alphabetical ordering in Stata.
+Factors keep their integer codes and use all levels as labels, including
+unused, empty-string and explicit \code{NA} levels. For example,
+\code{factor(c(10, 20))} keeps codes 1 and 2. Ordered factors lose their ordering
+metadata.
 
-For factors and ordered factors, \code{encode()} preserves the stored integer
-indices and uses all levels as value labels, including unused levels and
-explicit empty-string and \code{NA} levels. Numeric level text does not replace
-indices: \code{factor(c(10, 20))} has codes 1 and 2. Ordering metadata is dropped.
+Encode character columns before grouping so every group uses the same
+codes. Separate calls can assign different codes; factors with shared
+levels keep consistent codes in grouped \code{dplyr::mutate()}. You cannot supply
+an existing label dictionary. Re-encoding decoded text creates a new
+dictionary, so \code{encode(decode(x))} may change the original codes.
 
-\code{encode(decode(x))} need not recover the original codes: decoding discards
-the dictionary, so re-encoding character text creates new codes starting
-at 1. Existing dictionaries cannot be supplied to \code{encode()}. Encode
-character columns before grouping to use one dictionary across groups;
-separate calls can assign conflicting codes. Factors with shared levels
-retain a common dictionary within grouped \code{dplyr::mutate()}.
+\strong{Reading labels with \code{decode()}}
 
-\code{decode()} follows Stata's value-label conversion but also accepts factors,
-labelled character vectors and unlabelled inputs as an R convenience. It
-falls back to ordinary character conversion when no value labels exist.
-For partial dictionaries, unlabelled values remain as text, whereas Stata
-returns empty strings for them.
+\code{decode()} uses value labels when available and factor levels for factors.
+Values without a label remain as text, whereas Stata turns them into empty
+strings. SPSS user-missing codes remain values or labels.
 
-\strong{Text formatting}
+Inputs without value labels use ordinary \code{\link[=as.character]{as.character()}} conversion,
+including for tagged missing values. Thus 100000 may become \code{"1e+05"};
+use \code{tostring()} to write numbers in full. Unlike Stata's \code{decode}, this
+function also accepts factors, labelled character vectors and unlabelled
+inputs.
 
-\code{tostring()} and its alias \code{as_character()} ignore value labels: labelled
-numeric vectors and factors give their codes. For non-character input, values
-flagged by \code{is.na()}, including \code{NaN}, tagged missing values, and SPSS
-user-missing codes, become \code{NA}.
-Character input is returned unchanged. Numbers are written in full, so 100000
-gives \code{"100000"}, not \code{"1e+05"}, with the significant digits of
-\code{\link[=as.character]{as.character()}} and a decimal point whatever \code{options(OutDec)} says.
-This precision policy can map distinct large numbers to the same text;
-keep identifiers as character or \code{integer64} vectors when exact digits matter.
-AsIs wrappers are ignored for non-character input. Measured values and
-durations are written as numbers in their existing units.
-Dates use \code{\link[=as.character]{as.character()}}, giving \code{"2024-01-31"} rather than day numbers.
-Unlike Stata's \code{tostring}, missing values remain \code{NA} rather than becoming
-the strings \code{"."} or \code{".a"} through \code{".z"}.
+\strong{Writing text with \code{tostring()}}
 
-The sjlabelled package also exports \code{as_numeric()} and \code{as_character()}. They
-differ: sjlabelled's \code{as_numeric()} turns non-numeric text into factor codes,
-and its \code{as_character()} gives \code{NA} for unlabelled values. Whichever package
-is attached last masks the other; write \code{tidystata::as_numeric()} to be
-explicit, or use \code{destring()} and \code{tostring()}, which do not clash. To read
-value labels as text, use \code{decode()}.
+\code{tostring()} ignores value labels and converts factor codes to text.
+Numbers are written in full (\code{100000} becomes \code{"100000"}), with the
+significant digits of \code{\link[=as.character]{as.character()}} and a decimal point regardless of
+\code{options(OutDec)}. Distinct large numbers can produce the same text; keep
+identifiers as character or \code{integer64} vectors when exact digits matter.
+
+For non-character input, values flagged by \code{is.na()} become \code{NA}, including
+\code{NaN}, tagged missing values and SPSS user-missing codes. Stata instead
+writes missing values as \code{"."} or \code{".a"} through \code{".z"}. Character input is
+unchanged. AsIs wrappers are ignored for other inputs; durations and
+measured values use their existing units. Dates use \code{\link[=as.character]{as.character()}},
+for example \code{"2024-01-31"}.
+
+The aliases \code{as_numeric()} and \code{as_character()} also exist in sjlabelled,
+with different behavior: its numeric conversion codes non-numeric text as
+factors, and its character conversion makes unlabelled values \code{NA}. Use
+\code{tidystata::as_numeric()} or the names \code{destring()} and \code{tostring()} to
+avoid depending on which package was attached last.
 }
 \examples{
 lifeexp |>
@@ -159,9 +149,13 @@ lifeexp |>
 
 category <- encode(c("beta", "alpha", "beta", "", NA))
 category
-tostring(category) # integer codes as text
-decode(category) # category text
-encode(factor(c("Yes", "No"), levels = c("Unused", "No", "Yes")))
+
+# integer codes as text
+tostring(category)
+
+# category text
+decode(category)
+
 }
 \seealso{
 Other conversion functions:
