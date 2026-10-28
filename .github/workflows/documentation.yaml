@@ -35,7 +35,8 @@ jobs:
         run: |
           lib <- tempfile("tidystata-doc-library-")
           dir.create(lib)
-          remotes::install_local(".", lib = lib, upgrade = "never", build_vignettes = FALSE)
+          remotes::install_local(".", lib = lib, upgrade = "never",
+                                 build_vignettes = FALSE, force = TRUE)
           .libPaths(c(lib, .libPaths()))
           roxygen2::roxygenise(load_code = roxygen2::load_installed)
           options(crayon.enabled = FALSE, cli.num_colors = 1L, width = 80L)
