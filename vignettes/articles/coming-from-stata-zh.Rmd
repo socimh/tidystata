@@ -2,80 +2,50 @@
 title: "从 Stata 到 R"
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(tidystata)
+<a id="stata-language-toggle" href="coming-from-stata.html" hreflang="en">English version</a>
 
-counts <- tidystata:::findit_reference_counts()
+本指南并列展示 Stata 命令与对应的 R 代码，并说明两者的差异。
+
+## 浏览章节 {#browse-the-chapters}
+
+选择下方主题，或通过 Stata 和 R 索引查找。
+
+```{r, echo = FALSE, results = "asis"}
+contents <- file.path(
+  dirname(knitr::current_input(dir = TRUE)), "..", "..", "pkgdown",
+  "stata-reference-generated", "contents-zh.html"
+)
+knitr::asis_output(
+  paste(readLines(contents, encoding = "UTF-8", warn = FALSE), collapse = "\n")
+)
 ```
-
-[English version](coming-from-stata.html)
-
-本完整参考指南属于 tidystata 网站。可通过顶部导航返回函数文档或其他文章，
-通过目录跳转到所需章节。上方语言链接可在中英文版本之间切换。
-
-熟悉 Stata 的用户已经知道自己想做什么，需要的只是知道在 R 中怎么写。本页把 Stata
-命令和完成同样任务的 R 代码并列：tidystata 中有 Stata 风格函数的，使用 tidystata；其他情况使用常用的
-R 包。
 
 ## 在 R 中直接查询 {#look-it-up-in-r}
 
-`findit()` 在 R 中查询同一份列表。单个 Stata 命令可以不加引号，更长的内容需要加引号；支持
-Stata 的标准缩写。说明文字随 R 的语言设置显示为中文或英文，两种语言的查询都可使用。
+加载 tidystata 后，用 `findit()` 查询同一份目录。单个命令可不加引号，
+较长语法需要引号；也可以传入自己的变量名：
 
-```{r}
+```r
 findit(reg)
 findit("merge 1:1 id, keep(match)")
+findit(tab, sex, region)
 ```
 
-也可以查询 R 函数（`findit(left_join)`），或直接提问（`findit("如何删除重复行")`）。
-单独查询命令（例如 `findit(egen)`）时，返回整个命令族，默认显示最多五种操作。
-具体查询（例如 `findit("egen rowmean")`）在答案明确时返回一个结果；有歧义的查询
-最多保留十个相关候选。不带参数的 `findit()` 返回完整列表。
+也支持 R 函数及中英文问题。追加 `|> print(n = Inf)` 可查看返回的全部示例、
+注释与来源。完整用法见 [`findit()`](../reference/findit.html)。
 
-逗号分隔的变量名会填入兼容的示例，例如 `findit(tab, sex, region)`。匹配的提示词
-（例如 `findit(tab, gen)`）可将结果缩小到一个答案。`print(n = Inf)` 展开返回的候选、
-差异说明和参考链接。末尾提示分别列出尚未显示的相关结果和命令族中更广泛的操作；
-使用 `findit(egen)` 浏览整个命令族。同一操作内依次优先推荐 tidystata、tidyverse、
-其他包或基础 R。`findit(dplyr::filter)` 这样的包限定查询可以区分同名函数。
+## 改写示例 {#adapt-an-example}
 
-本指南包含 `r counts$commands` 个命令族、`r counts$functions` 个 Stata 函数和
-`r counts$operators` 个运算符，共有 `r counts$stata_examples` 个不同的 Stata 示例和
-`r counts$examples` 条 R 对照示例。缩写及同一任务的其他 R 实现不会增加命令数量。
-R 函数索引包含 `r counts$r_functions` 个函数与包的组合。
+请将示例变量名替换为自己的变量。`data` 表示数据集，`data1` 和 `data2`
+表示合并时的两份数据，`fit` 表示已拟合的模型。
 
-## 使用命令对照表 {#use-the-command-tables}
+R 标签注明主要使用的包。未加包名前缀的函数需要先加载相应包；许多数据准备示例
+使用 `library(dplyr)`。`findit()` 本身不会加载或安装这些包。
 
-`destring()`（`as_numeric()`）将数值文本转换为数字，`tostring()`
-（`as_character()`）将底层编码转换为文本。分类变量使用 `encode()` 将字符串
-转换为带值标签的整数编码，使用 `decode()` 将值标签读为文本。字符输入按排序顺序
-从 1 开始分配新编码；因子输入保留现有整数编号及全部水平。
-`encode(decode(x))` 不一定恢复原编码。字符列应在分组之前编码，以便所有行使用
-同一套编码与标签。
+## 关于注释 {#example-labels}
 
-下表涵盖 tidystata 和其他常用 R 包，包括建模、长宽转换、调查分析和作图。
-面板滞后、超前和差分可使用 tidystata 的 `stata_lag()`、`stata_lead()` 和
-`stata_diff()`；指定时间列，并用 `.by` 区分面板。
+**与 Stata 有差异** 表示默认设置、缺失值处理、估计方法或输出形式存在差异，
+具体差异见注释。其余注释是使用提示。
 
-索引按字母顺序排列，对照表按主题分组，并依次按命令、推荐顺序和示例排序。
-运行某个示例需要其标注的 R 包；`findit()` 本身不会加载或安装这些参考包。
-包标签只列出主要实现包，并不列出所有辅助依赖；R 函数索引标明其他函数及其所属包。
-
-以 **与 Stata 有差异** 开头的说明表示 R 代码完成相同任务，但默认设置、缺失值处理、
-估计方法或输出形式有所不同，说明会列出具体差异。其余说明是使用提示。多数 R 示例在构建目录时
-运行核验，检查的是 R 代码本身，并非与 Stata 的数值一致性检验。缺失值比较、权重、因子参照组、连接规则和标准误修正尤其需要核对。
-已知缺口会明确说明，相关搜索结果不代表已经实现查询中尚未支持的语法。
-
-下表中，`data` 是你的数据，`data1` 和 `data2` 是合并时的主数据和被合并数据，`fit`
-是已估计的模型。大部分条目使用 dplyr，请先用 `library(dplyr)` 或 `library(tidyverse)` 加载。
-
-```{r, echo = FALSE, results = "asis"}
-cat(tidystata:::findit_reference_html(TRUE), sep = "\n")
-```
-
-## 分章版本
-
-如需按独立章节浏览，可打开
-[独立的 Stata 转 R 参考手册](https://www.socimh.com/stata-to-r/zh/){target="_blank" rel="noopener"}，
-其中提供章节导航和可展开的替代实现。该版本位于另一网站，会在新标签页打开，
-保留当前的 tidystata 网站供继续查阅。
+执行核验检查 R 代码本身，并不证明结果与 Stata 数值一致。改写示例前，请核对
+缺失值、权重、因子参照组、连接规则和标准误设置。搜索结果也不代表支持命令的全部选项。

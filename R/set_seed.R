@@ -24,7 +24,7 @@
 #' @examples
 #' sample(1:10, 8) |>
 #'   set_seed(123)
-#' 
+#'
 #' # Set seeds for multiple operations in a pipeline
 #' sample(1:10, 8) |>
 #'   set_seed(123) |>
@@ -40,8 +40,6 @@
 #' # Set seeds without a pipeline
 #' set_seed(123)
 #' result <- sample(1:10, 8)
-#' result
-#' 
 #' set_seed(456)
 #' sample(result, 5)
 set_seed <- function(x, seed) {

@@ -60,10 +60,13 @@ Invalid \code{quiet} values raise an error before \code{x} is evaluated.
 capture(mean(1:10))
 
 # Suppress warnings and messages
-capture({
-  message("Calculating")
-  mean(1:10)
-}, quiet = TRUE)
+capture(
+  {
+    message("Calculating")
+    mean(1:10)
+  },
+  quiet = TRUE
+)
 
 # A new object receives NULL on error, with a failure message
 result <- capture(stop("Cannot calculate"))
@@ -73,14 +76,16 @@ result
 # A failed assignment leaves the original data unchanged
 data <- tibble::tibble(x = 1:3)
 capture(data <- dplyr::mutate(data, y = missing_var * 2))
-data  # Still contains only x
+
+data
 
 # Successful assignments are preserved before an error
 capture({
   data <- dplyr::mutate(data, y = x * 2)
   data <- dplyr::mutate(data, z = missing_var * 2)
 })
-data  # Contains x and y
+
+data
 
 # A pipeline updates the data only if all steps succeed
 capture(
@@ -88,7 +93,8 @@ capture(
     dplyr::mutate(z = x + 1) |>
     dplyr::mutate(w = missing_var * 2)
 )
-data  # Still contains x and y
+
+data
 }
 \seealso{
 Other utility functions:

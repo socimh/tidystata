@@ -11,241 +11,198 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-This guide explains the types of objects tidystata returns, how groups and
-missing values affect calculations, and how to preview a table without changing
-its data. Start with [Getting started](getting-started.html) for a short workflow.
+Most workflows can begin with [Getting started](getting-started.html), followed
+by [category tables](tabulation.html) or
+[measurement summaries](summary-statistics.html). This companion explains what
+to expect when a result is a list, a group is missing, or a display shows only
+some rows.
 
-## Container types and lists
+## Start with a tibble
 
-```{r containers}
-library(tidystata)
+This small illustration adapts the course survey, including a deliberately
+missing centre to show how grouping works.
+
+```{r survey, message=FALSE}
 library(dplyr)
+library(tibble)
+library(tidystata)
 
-df <- data.frame(
-  group = c("A", "A", "B", NA),
-  answer = c("yes", NA, "no", "yes"),
+survey <- tibble(
+  centre = c("Riverside", "Riverside", "Hilltop", NA),
+  satisfied = c("Yes", NA, "No", "Yes"),
   score = c(2, NA, 6, 8)
 )
-tbl <- tibble::as_tibble(df)
 
-class(tab(df, answer))
-class(tab(tbl, answer))
-class(summ(df, score))
-class(summ(tbl, score))
+survey |> tab(satisfied)
 ```
 
-New tables from the `tab`, `summ`, `codebook` and `variables` families preserve
-a base data frame, tibble or data.table input. A list result remains a list, and
-each table inside follows the same rule. An explicit output option takes
-precedence. `corr()`, `pwcorr()`, `spearman()`, `misstable()` and
-`duplicates_report()` are exceptions: they always return tibbles.
+With tibble inputs, the `tab`, `summ`, `codebook` and `variables` families
+return tibbles, including tables inside lists. Base data frames and data.table
+inputs retain their respective table class where supported. Other subclasses
+are not reconstructed on newly shaped tables; data.table summaries do not
+retain keys or indexes.
 
-Where supported, `.type` selects an output form:
+`corr()`, `pwcorr()`, `spearman()`, `misstable()` and `duplicates_report()`
+always return tibbles. Functions designed to return vectors, such as `ds()`
+and `row_mean()`, still return vectors.
 
-| Value | Meaning |
-|-------|---------|
-| `"vector"` | A character vector of names from `ds()`. |
-| `"list"` | Separate tables for variables or summary families. `summ()` and `tabstat()` return one table when only one family is present. |
-| `"table"` | One table in the input's table class where supported, used by `ds()`, `summ()`, and `tabstat()`. |
-| `"auto"` | Retain the input's table class in `fre()`, `tab2()`, and `fre2()`. |
-| `"tibble"` | Make each returned table a tibble; combine variable tables in `tab1()` and `fre1()`, or summary families in `summ()` and `tabstat()`. Also supported by `ds()`. |
-| `"flextable"` | Format each returned table with the optional flextable package. |
+## Choose tables or lists deliberately
 
-Not every function accepts every value. `tab2()` and `fre2()` still return
-lists for multiple pairs or explicit `.by` groups, even with
-`.type = "tibble"` or `.type = "flextable"`. `corr()`, `pwcorr()` and `spearman()`
-use `.wide` to choose a layout; both layouts return tibbles.
+Separate one-way tabulations return a named list by default. Extract a table
+by its name:
 
-```{r list-and-override}
-base_tables <- tab1(df, answer, group)
-class(base_tables)
-class(base_tables$answer)
-class(fre(df, answer, .type = "tibble"))
-class(ds(df, .type = "tibble"))
-class(summ(df, score, .type = "tibble"))
-class(tabstat(df, score, .type = "tibble"))
+```{r list-result}
+tables <- survey |> tab1(centre, satisfied)
+
+tables[["satisfied"]]
 ```
 
-Other data-frame subclasses are not reconstructed on newly shaped tables.
-Vectors, such as the result of `ds()` or `row_mean()`, keep their intentional
-vector output. New data.table summaries do not retain input keys or indexes.
-`as_dummy(.remove = TRUE)` reports an error if its result would be a data.table
-with rows but no columns; retain a source or identifier column in that case.
+To work with one tibble instead, combine the variable tables:
 
-data.table inputs follow the same rule:
-
-```{r data-table}
-if (requireNamespace("data.table", quietly = TRUE)) {
-  dt <- data.table::as.data.table(df)
-  class(tab(dt, answer))
-  class(summ(dt, score))
-}
+```{r combined-result}
+survey |> tab1(centre, satisfied, .type = "tibble")
 ```
 
-For a formatted table, install flextable and request `.type = "flextable"`:
+Output options vary by function:
 
-```{r rich-output}
-if (requireNamespace("flextable", quietly = TRUE)) {
-  rich <- fre(tbl, answer, .type = "flextable")
-  class(rich)
-}
+| Option | Where it is useful |
+|--------|--------------------|
+| `"vector"` | The default vector of names from `ds()`. |
+| `"list"` | Separate variable tables in `tab1()`/`fre1()`, or type families in summaries. A single summary family returns one table. |
+| `"table"` | One table in the input's table class for `ds()`, `summ()` and `tabstat()`. |
+| `"auto"` | Preserve the input's table class in `fre()`, `tab2()` and `fre2()`. |
+| `"tibble"` | Explicit tibble output where supported; combines one-way variable tables or summary families. |
+| `"flextable"` | Formatted output from supported tabulation functions, requiring the optional flextable package. |
+
+`tab()` has no `.type` argument. Multiple-pair or explicitly grouped
+`tab2()`/`fre2()` calls still return lists: `.type` controls each table
+inside. Correlations use `.wide` for layout; both layouts are tibbles.
+
+## Separate grouping keys from measurements
+
+A missing centre is still a group, and does not make its observed response
+invalid:
+
+```{r groups}
+survey |> tab(satisfied, .by = centre)
 ```
 
-## Grouping and denominators
+The one-way/joint tabulation and summary families inherit `group_by()` groups
+unless `.by` replaces them. Their results are ungrouped.
+Cross-tabulations require an explicit `.by` to split by group.
 
-```{r grouping}
-grouped <- group_by(tbl, group)
-tab(grouped, answer)
-summary <- summ(grouped, score, .stat = c("n", "mean", "missing"))
-summary
-group_vars(summary)
-```
+In summaries, `.missing = FALSE` drops missing grouping keys. Numeric
+calculations always omit missing measured values. Tabulation percentages use
+a 0-100 scale, while summary `valid_pct` uses 0-1. The dedicated
+[tab](tabulation.html) and [summ](summary-statistics.html) articles demonstrate
+the denominators.
 
-Summary and inventory results are ungrouped. Grouping keys remain ordinary
-columns where reported. For `tab()`, `tab1()`, `fre()`, `fre1()`, `summ()` and
-`tabstat()`, `.by = NULL` inherits existing groups; an explicit `.by` replaces
-them. `tab2()` and `fre2()` require explicit `.by` for grouped cross-tabulations;
-otherwise, they tabulate the whole input regardless of existing groups.
+## Handle empty and all-missing measurements
 
-```{r group-override}
-summ(grouped, score, .by = answer, .stat = c("n", "mean"))
-```
-
-Cross-tabulation with `tab2()` or `fre2()` returns one table per group, in a
-list named after each group:
-
-```{r grouped-cross}
-crossed <- tab2(df, answer, score, .by = group)
-names(crossed)
-```
-
-One-way tabulations use all observations within a group for `percent` and `cum`,
-on a zero-to-100 scale. `valid` and `valid_cum` exclude missing measured values.
-Missing grouping keys are ordinary groups. In summaries, `valid_pct` is instead
-a fraction from zero to one. `summ(.missing = FALSE)` removes missing
-grouping keys; numeric calculations always omit missing measured values.
-
-```{r denominators}
-tab(tbl, answer)
-summ(tbl, score, .stat = c("n", "miss_n", "valid_pct", "mean"))
-summ(tbl, score, .by = group, .missing = FALSE, .stat = c("n", "mean"))
-```
-
-## Empty and all-missing measurements
+An empty input and an all-missing measurement have no observed values.
+They retain `n = 0` and undefined statistics, including `sum = NA`:
 
 ```{r empty}
-empty <- tbl[0, ]
-summ(empty, score, .stat = c("n", "sum", "mean"))
-tab1(tbl, starts_with("absent"))
-
-missing <- tibble(a = c(NA_real_, NA_real_), b = c(NA_real_, 4))
-summ(missing, a, .stat = c("n", "sum", "mean"))
-row_sum(missing)
-row_mean(missing)
+survey |>
+  slice_head(n = 0) |>
+  summ(score, .stat = c("n", "sum", "mean"))
 ```
 
-An ungrouped numeric column with no observations remains in a summary with
-`n = 0` and `NA` statistics, including `sum`. An all-missing row instead has a
-row sum of zero and a row mean of `NA`. Empty selections give empty results for
-tabulation; row helpers require at least one column. Matrix columns are not
-supported by the tabulation and column-summary interfaces.
+Entirely missing summary columns emit a warning. A row sum follows a different
+convention: adding no observed items gives zero. A row mean stays missing.
 
-## Labels and special missing values
+```{r missing-row}
+tibble(item1 = c(NA_real_, 4), item2 = c(NA_real_, 6)) |>
+  mutate(
+    total = row_sum(pick(starts_with("item"))),
+    average = row_mean(pick(starts_with("item")))
+  )
+```
 
-Variable labels describe columns; value labels describe particular values.
-Numeric calculations exclude SPSS user-missing codes and Stata tagged missing
-values. Tabulations report missing categories alongside observed values.
+Empty selections produce empty tabulation results; row helpers need at least
+one column. Matrix columns are unsupported by tabulation and column summaries.
+
+## Understand labels and special missing values
+
+Variable labels describe columns; value labels describe particular codes.
+An SPSS-style export might distinguish a refusal from an unanswered question:
 
 ```{r labels}
-labelled <- tibble(
-  response = haven::labelled_spss(
+imported <- tibble(
+  answer = haven::labelled_spss(
     c(1, 2, 99, NA),
     labels = c(Yes = 1, No = 2, Refused = 99),
     na_values = 99,
-    label = "Interview response"
+    label = "Course satisfaction"
   )
 )
-variables(labelled)
-codebook(labelled)
-tab(labelled, response)
-decode(labelled$response)
+
+imported |> fre(answer)
 ```
 
-Summary statistics for labelled numeric measurements use their underlying
-values and exclude SPSS user-missing codes. Factors use level codes and warn;
-choose measurements deliberately instead of averaging category codes.
-`decode()` displays value labels when present, but does not itself recode
-every labelled refusal into an ordinary `NA`.
+Tabulations recognise ordinary, tagged and SPSS user-missing values as missing.
+Numeric summaries exclude them from calculations. `decode()` reads value
+labels, but does not itself turn every labelled refusal into ordinary `NA`.
+For calculations outside haven-aware functions, explicitly normalise special
+missing values with `haven::zap_missing()`.
 
-`misstable()` also accepts matrix and nested data-frame columns, using vctrs
-missingness for complete rows. Ordinary list columns count scalar `NA` elements
-as missing and `NULL` as observed. Structured list-backed matrices instead
-follow vctrs cell rules: `NULL` cells are missing and scalar `NA` cells are
-observed. See [`misstable()`](../reference/misstable.html) for both output forms.
+`misstable()` also accepts matrix and nested data-frame columns. Ordinary list
+columns count scalar `NA` elements as missing and `NULL` as observed.
+Structured columns use vctrs row-missingness rules; list-backed matrices have
+different cell conventions, detailed in the
+[missingness reference](https://socimh.github.io/tidystata/reference/misstable.html).
 
-## Numeric and calendar summary tables
+## Keep calendar units visible
+
+When numeric and calendar measurements occur together, default summaries
+separate the type families. Here the date table's SD retains duration units:
 
 ```{r calendar}
-mixed <- tibble(score = c(2, 4), day = as.Date("2024-01-01") + c(0, 2))
-separate <- summ(mixed, .stat = c("n", "min", "mean", "sd", "max"))
-names(separate)
-separate$numeric
-separate$date
-class(separate$date$sd)
-combined <- summ(mixed, .type = "table", .stat = c("n", "min", "mean", "sd", "max"))
-combined
-class(combined$sd)
+visits <- tibble(
+  score = c(4, 8),
+  day = readr::parse_date(c("2026-09-01", "2026-09-03"))
+)
+separate <- visits |> summ(.stat = c("n", "mean", "sd"))
+
+separate[["date"]]
 ```
 
-Default list mode keeps numeric statistics numeric in their own table. Calendar
-locations such as `min`, `mean` and `max` are formatted dates or date-times,
-while a spread such as `sd` stays a `difftime`. Table mode combines families.
-A location column shared by numeric and calendar rows becomes character, and the
-spread column becomes a plain number of days for dates or seconds for
-date-times, with the unit shown in the `type` column.
+The numeric table keeps numeric statistics. In combined `.type = "table"` or
+`"tibble"` output, shared location columns become character. Spread columns
+become plain numbers: days for dates and seconds for date-times, with units
+shown in `type`.
 
-SD uses the sample denominator. Percentiles use Stata's rule; for example,
-the quartiles of `1:4` are 1.5 and 3.5. See
-[`summ()`](../reference/summ.html) for formulas, weights and other statistics.
+## Preview a table without removing rows
 
-## A preview retains every row
+A longer course register is easier to inspect at its beginning and end:
 
-```{r previews}
-long <- tibble(id = 1:12, value = (1:12)^2)
-view <- preview_headtail(long, n = 4)
+```{r preview}
+register <- tibble(id = 1:12, points = (1:12)^2)
+view <- register |> preview_headtail(n = 4)
+
 view
-nrow(view)
-sum(view$value)
 ```
 
-The preview still contains all 12 rows. `n` is the total display budget,
-split between the beginning and end. A single row of dots marks an omitted
-middle. Interval previews show approximately evenly spaced positions without
-separator rows; sort first when position should represent a meaningful order.
-Both styles report how many rows are omitted from the display.
+The display budget is four data rows, with an omission marker between the
+beginning and end. All twelve rows remain available for calculations:
 
-```{r remove-preview}
-preview_interval(long, n = 4)
-ordinary <- unpreview(view)
-identical(ordinary, long)
+```{r complete-data}
+view |> summarise(participants = n(), total_points = sum(points))
 ```
+
+For a view across the whole ordered register, use interval previews:
+
+```{r interval}
+register |> preview_interval(n = 4)
+```
+
+Sort first when position should represent a meaningful order.
+`unpreview()` removes the persistent display setting. Supported dplyr/tidyr
+operations carry preview settings forward while following their own grouping
+and container rules.
 
 `print_headtail()` and `print_interval()` print once and invisibly return the
-complete input. They are useful when tabulating a continuous variable with many
-distinct values. `tab()` counts each distinct value separately and sorts values
-in ascending order by default:
-
-```{r continuous-tabulation}
-lifeexp_counts <- tab(lifeexp, lexp)
-print_interval(lifeexp_counts, n = 6)
-print_headtail(lifeexp_counts, n = 6)
-```
-
-`print_interval()` shows evenly spaced rows across the sorted table;
-`print_headtail()` shows its beginning and end. Neither helper bins values,
-removes rows from the returned table, or changes counts and percentages.
-
-`unpreview()` removes the persistent display setting.
-Supported dplyr/tidyr operations carry preview settings forward while following
-their own container and grouping rules. Wrapping and unwrapping a data.table
-copies it; later native data.table mutations retain ordinary reference semantics.
+complete input. Wrapping and unwrapping data.table inputs copies them; later
+native data.table mutations follow ordinary reference semantics. If removing
+source columns with `as_dummy(.remove = TRUE)` would leave a data.table with
+rows but no columns, retain an identifier or another source column.

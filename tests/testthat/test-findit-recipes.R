@@ -9,6 +9,58 @@ findit_recipe_eval <- function(id, data) {
   list(row = row, value = value, data = scope$data)
 }
 
+test_that("moving-average lookups retain partial and nonmissing windows", {
+  skip_if_not_installed("zoo")
+  queries <- c(
+    "tssmooth ma smooth = y, window(2 1 2)",
+    "tssmooth ma smooth = y, window(3 1 0)"
+  )
+  inputs <- list(
+    c(2, 7, 1, 8, 3, 6, 4),
+    c(2, 7, NA, 8, 3, 6, 4),
+    rep(NA_real_, 7),
+    rep(1000000000L, 7),
+    c(2, 7),
+    numeric()
+  )
+  for (i in seq_along(queries)) {
+    found <- findit(!!queries[i])
+    expect_identical(found$package[1], "zoo")
+    for (y in inputs) {
+      data <- data.frame(y = y, t = seq_along(y))
+      original <- data
+      result <- findit_recipe_eval(attr(found, "entry_ids")[1], data)$value
+      expected <- vapply(
+        seq_along(y),
+        function(j) {
+          positions <- if (i == 1L) (j - 2L):(j + 2L) else (j - 3L):j
+          positions <- positions[positions >= 1L & positions <= length(y)]
+          values <- y[positions]
+          if (all(is.na(values))) {
+            NA_real_
+          } else {
+            mean(values, na.rm = TRUE)
+          }
+        },
+        numeric(1)
+      )
+      expect_equal(result$smooth, expected)
+      expect_identical(result$y, y)
+      expect_identical(result$t, data$t)
+      expect_identical(data, original)
+    }
+  }
+  bandpass <- findit(
+    "tsfilter bk cycle = y, minperiod(6) maxperiod(32) smaorder(12)"
+  )
+  expect_true(any(grepl("stats::filter(", bandpass$r, fixed = TRUE)))
+  expect_true(any(grepl(
+    "stats::filter(",
+    capture.output(print(bandpass)),
+    fixed = TRUE
+  )))
+})
+
 test_that("encode recipes retain value labels and use the package helper", {
   cases <- list(
     list(id = "legacy-0103", input = "str_x", output = "x"),
@@ -90,11 +142,8 @@ test_that("duplicates report recipes include ordinary missing keys", {
   expect_identical(result$value$surplus, c(0L, 2L))
 })
 
-test_that("alpha score recipes preserve the complete-item calculation", {
-  data <- data.frame(q1 = c(1, 1, NA), q2 = c(2, NA, NA), q3 = c(3, 3, NA))
-  result <- findit_recipe_eval("ref-6e3973ff3ac031d5", data)
-  expect_identical(result$row$package, "tidystata")
-  expect_identical(result$value, c(2, NA, NA))
+test_that("alpha mappings do not replace reliability estimation with row means", {
+  expect_false("ref-6e3973ff3ac031d5" %in% findit_entries()$id)
 })
 
 test_that("percentile-rank recipes retain missing values and minimum ties", {

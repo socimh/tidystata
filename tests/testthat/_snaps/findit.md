@@ -16,10 +16,12 @@
       R:     inner_join(data1, data2, by = "id")
       # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.
       
-      # merge() [base]: Merge two data frames (base R)
+      # merge(): Merge two data frames (base R)
         Related Stata: merge
       
       # 12 broader merge examples. Browse the family: findit(merge)
+      
+      # This syntax could not be customized; examples retain generic placeholders.
 
 ---
 
@@ -51,7 +53,7 @@
       R:     data <- tidyr::pivot_longer(data,cols=c(x1,x2,y1,y2),names_to=c('.value','wave'),names_pattern='([xy])([12])',names_transform=list(wave=as.integer))
       # Note: Fixed two-stub example; all name patterns and source names must be changed together.
       
-      # reshape() [stats]: Reshape Grouped Data
+      # reshape(): Reshape Grouped Data
         Related Stata: icc
       
       # 4 more relevant examples. To see them all: findit(reshape) |> print(n = Inf)
@@ -111,8 +113,10 @@
       [32m[1mR:     [22minner_join(data1, data2, by = "id")[39m
       # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.
       
-      [36m[1m# merge() [base]: Merge two data frames (base R)[22m[39m
+      [36m[1m# merge(): Merge two data frames (base R)[22m[39m
         Related Stata: merge
       
       # 12 broader merge examples. Browse the family: findit(merge)
+      
+      # This syntax could not be customized; examples retain generic placeholders.
 

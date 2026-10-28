@@ -1,0 +1,241 @@
+---
+title: "Tabulate and compare categories"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tabulate and compare categories}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+The course coordinator wants to know whether participants were satisfied, and
+whether the two centres tell the same story. Start with a frequency table,
+then choose the layout that answers each follow-up question. Results remain
+ordinary tables that work with dplyr.
+
+## Start with one question
+
+These are the same twelve participants used in
+[Getting started](getting-started.html), keeping only the columns needed here.
+
+```{r survey, message=FALSE}
+library(dplyr)
+library(tibble)
+library(tidystata)
+
+survey <- tribble(
+  ~id, ~centre,     ~satisfied,
+    1, "Riverside", "Yes",
+    2, "Riverside", "Yes",
+    3, "Riverside", "No",
+    4, "Riverside", NA,
+    5, "Riverside", "Yes",
+    6, "Riverside", "Yes",
+    7, "Hilltop",   "No",
+    8, "Hilltop",   "Yes",
+    9, "Hilltop",   "No",
+   10, "Hilltop",   "Yes",
+   11, "Hilltop",   "Yes",
+   12, "Hilltop",   NA
+)
+
+survey |> tab(satisfied)
+```
+
+Seven participants said yes, three said no, and two did not answer. Read the
+columns in terms of the question you want to answer:
+
+| Column | Question |
+|--------|----------|
+| `n` | How many participants gave this answer? |
+| `percent` | What percentage of **all twelve** participants is that? |
+| `valid` | What percentage of the **ten who answered** is that? |
+| `cum`, `valid_cum` | What percentage have we reached in the displayed order? |
+
+All four percentage columns use a 0-100 scale. Thus the yes share is 58.3%
+of everyone and 70% of respondents. Missing categories have no valid percentage.
+Cumulative percentages are most useful for categories with a meaningful order.
+
+## Choose joint, separate or cross-tabulated counts
+
+The three `tab` functions answer different questions using the same columns.
+
+### Which combinations occur?
+
+`tab()` counts combinations in one long table. With two columns, each row
+is a centre-answer combination:
+
+```{r joint}
+survey |> tab(centre, satisfied)
+```
+
+Here `percent` and `cum` use all twelve participants; `valid` and `valid_cum`
+use the ten with both centre and satisfaction observed. Adding a third variable
+would count three-way combinations.
+
+### What is each variable's distribution?
+
+`tab1()` makes separate one-way tables. Use `.type = "tibble"` to stack them
+into one table with a `variable` column:
+
+```{r separate}
+survey |> tab1(centre, satisfied, .type = "tibble")
+```
+
+Each variable has its own denominator. The default instead returns a named
+list, convenient when the tables will be used separately.
+
+### How do the centres compare side by side?
+
+`tab2()` puts the second variable's categories in columns. Cells contain
+counts, rather than the percentages from `tab()`:
+
+```{r cross}
+survey |> tab2(centre, satisfied)
+```
+
+With more than two selected variables, `tab2()` returns a list of tables for
+every pair, rather than one higher-dimensional table. Use `.flip = TRUE`
+to exchange rows and columns.
+
+## Compare percentages within each centre
+
+To compare satisfaction rates, put the centre in `.by` instead of counting
+it as another measured variable:
+
+```{r within-centres}
+survey |> tab(satisfied, .by = centre)
+```
+
+Both centres have six participants and five observed answers. Riverside's
+yes share is 80% of respondents; Hilltop's is 60%. The missing answers still
+appear, so the difference between all-participant and valid shares stays visible.
+
+One-way and joint tables also inherit `group_by()` groups:
+
+```{r inherited-groups}
+survey |>
+  group_by(centre) |>
+  tab(satisfied) |>
+  filter(satisfied == "Yes") |>
+  select(centre, n, percent, valid)
+```
+
+The result is ungrouped. An explicit `.by` replaces inherited groups.
+`tab2()` and `fre2()` require an explicit `.by` to make separate cross-tables
+by group; `group_by()` alone does not split their results.
+
+## Add totals and readable labels
+
+`fre()` adds total rows. Here we encode the answer to illustrate imported
+numeric categories with value labels:
+
+```{r labelled-totals}
+labelled <- survey |> mutate(answer_code = encode(satisfied))
+
+labelled |> fre(answer_code)
+```
+
+`tab()` retains stored category codes and types; `fre()` displays value labels.
+Distinct codes remain distinct even when they share a label. `fre1()` adds
+totals to separate one-way tables; `fre2()` adds row and column totals to a
+cross-tabulation:
+
+```{r cross-totals}
+survey |> fre2(centre, satisfied)
+```
+
+`fre2()` displays labels for row categories; column headers retain category
+codes. You can also request totals with `.total = TRUE` in the `tab` family.
+Totals are useful for presentation, but use tables without total rows for
+further arithmetic so observations are not counted twice.
+
+## Order and reuse the results
+
+Which answer is most common? `.desc = TRUE` sorts by decreasing count,
+keeping missing values last:
+
+```{r frequency-order}
+survey |> tab(satisfied, .desc = TRUE)
+```
+
+Factors follow their level order by default; other categories sort by value.
+`.group_order = "frequency"` separately orders group blocks by their totals.
+Use dplyr to keep the categories relevant to a report:
+
+```{r reuse}
+survey |>
+  tab(satisfied, .by = centre) |>
+  filter(!is.na(satisfied)) |>
+  arrange(centre, desc(n)) |>
+  select(centre, satisfied, n, valid)
+```
+
+Filtering here keeps the percentages already calculated. To change a
+denominator, filter the source observations **before** calling `tab()`.
+Empty strings count as observed answers, so clean blank text first if it
+means nonresponse.
+
+## Count a file that already contains frequencies
+
+Suppose a second coordinator sends an aggregate file: one row represents
+several people. Use the frequency column as `.wt`:
+
+```{r weights}
+register <- tribble(
+  ~satisfied, ~people,
+  "Yes",           7,
+  "No",            3,
+  NA,              2
+)
+
+register |> tab(satisfied, .wt = people)
+```
+
+This reproduces the individual-level table. Frequency weights sum to the
+reported counts. Analytic weights (`.wt_type = "analytic"`) instead rescale
+weights within each group to its number of rows; their percentages agree,
+but their counts have a different interpretation. Missing weights exclude
+rows, and negative weights are invalid. These options do not account for a
+complex survey design.
+
+## Association tests and longer tables
+
+For an association test, `.chi2 = TRUE` adds Pearson's chi-square and Cramer's V.
+Remove missing answers first when nonresponse should not enter the test:
+
+```{r association}
+association <- survey |>
+  filter(!is.na(satisfied)) |>
+  tab2(centre, satisfied, .chi2 = TRUE)
+```
+
+The test is reported as a message. Its numerical results are also available
+on the returned table:
+
+```{r association-results}
+attr(association, "chi2")
+```
+
+This tiny teaching sample has small expected cell counts, so use the example
+to learn the interface, rather than draw an inference about the programme.
+Analytic weights are not supported for this test.
+
+Score variables can produce long tables because every distinct value is
+counted. Add the first assessment item from our survey and shorten its display
+with a one-time printer, which still returns every row:
+
+```{r long-table}
+survey |>
+  mutate(score = c(2, 4, NA, 6, 8, 4, 3, 5, 7, 9, NA, 6)) |>
+  tab(score) |>
+  print_interval(n = 6)
+```
+
+For formatted reports, the `fre` family supports `.type = "flextable"` when
+that optional package is installed. See the
+[output conventions](containers-and-missing-values.html) for lists and table
+classes, or continue to [measurement summaries](summary-statistics.html).

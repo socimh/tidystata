@@ -28,12 +28,14 @@ Imports:
     vctrs (>= 0.6.4)
 Suggests: 
     bit64,
+    clipr,
     data.table,
     flextable,
     ggplot2,
     hms,
     knitr,
     rmarkdown,
+    rstudioapi,
     sf,
     testthat (>= 3.2.0),
     tidyr (>= 1.2.0),

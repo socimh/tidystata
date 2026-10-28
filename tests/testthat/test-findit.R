@@ -1,5 +1,59 @@
 entries <- findit()
 
+test_that("printing omits default-package labels without changing the result", {
+  withr::local_envvar(LANGUAGE = "en")
+  found <- findit(reg)
+  original <- found
+  out <- capture.output(printed <- withVisible(print(found, n = Inf)))
+  expect_false(any(grepl("\\[(base|stats|utils)\\]|stats::", out)))
+  expect_true(any(grepl("R:     lm(", out, fixed = TRUE)))
+  expect_identical(found, original)
+  expect_identical(printed$value, found)
+  expect_false(printed$visible)
+  expect_true(any(grepl("stats::lm(", found$r, fixed = TRUE)))
+  expect_true(any(found$package == "stats"))
+  merged <- capture.output(print(findit(merge)))
+  expect_true(any(startsWith(merged, "# merge(): ")))
+  expect_false(any(grepl("[base]", merged, fixed = TRUE)))
+  expect_true(any(grepl("[tidystata]", merged, fixed = TRUE)))
+  expect_true(any(grepl(
+    "[dplyr]",
+    capture.output(print(findit(left_join))),
+    fixed = TRUE
+  )))
+})
+
+test_that("printed code preserves strings, comments and conflicting namespaces", {
+  found <- findit(reg)[1L, ]
+  code <- paste0(
+    "dplyr::mutate(data, x = stats::lm(y ~ z)$fitted.values); ",
+    "print('stats::lm'); print(\"utils::head\"); ",
+    "print(r\"--(a \"stats::lm(y)\" b)--\"); ",
+    "stats::filter(y, 1); stats::lag(y); base::union(x, y); ",
+    "stats::`filter`(y, 1); stats::\"filter\"(y, 1); ",
+    "stats::'fil\\x74er'(y, 1); ",
+    "tools::md5sum(path); # stats::lm(y)"
+  )
+  found$r <- code
+  out <- capture.output(print(found))
+  expected <- sub("stats::lm(y ~ z)", "lm(y ~ z)", code, fixed = TRUE)
+  expect_true(paste0("R:     ", expected) %in% out)
+  expect_identical(found$r, code)
+  # Other default packages, whitespace, Unicode and triple-colon access.
+  found$r <- paste0(
+    "utils :: head(x); graphics::plot(x); grDevices::rgb(1, 0, 0); ",
+    "methods::is(x); datasets::iris; stats:::lm; ",
+    "print('\u4e2d');\tstats::sd(x)"
+  )
+  out <- capture.output(print(found))
+  expected <- paste0(
+    "head(x); plot(x); rgb(1, 0, 0); is(x); iris; ",
+    "stats:::lm; print('\u4e2d');\tsd(x)"
+  )
+  expect_identical(findit_print_code(found$r), expected)
+  expect_true(capture.output(cat("R:     ", expected, sep = "")) %in% out)
+})
+
 test_that("findit() returns every entry when called without a command", {
   expect_s3_class(entries, "tidystata_findit")
   expect_s3_class(entries, "tbl_df")
@@ -56,10 +110,7 @@ test_that("extra words and by prefixes put the closest entries first", {
   expect_identical(nrow(merged), 1L)
   expect_identical(
     findit("reg y x, robust")$r[1],
-    paste0(
-      "{ fit <- stats::lm(y~x+z,data=data); ",
-      'lmtest::coeftest(fit, vcov.=sandwich::vcovHC(fit,type="HC1")) }'
-    )
+    'fixest::feols(y ~ x, data = data, vcov = "hetero")'
   )
   expect_identical(findit("bys g: sum x")$r[1], "summ(data, x, .by = group)")
   expect_identical(findit("svy: regress y x")$r[1], findit(svy)$r[3])

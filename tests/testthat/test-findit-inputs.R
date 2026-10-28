@@ -88,11 +88,15 @@ test_that("supplied names bind in Stata operand order across command families", 
   )
   expect_identical(
     findit(sem, outcome, first, second)$r[1],
-    'lavaan::sem("outcome ~ first + second", data = data)'
+    paste0(
+      'lavaan::sem("outcome ~ first + second", data = data, ',
+      'estimator = "ML", meanstructure = TRUE, fixed.x = FALSE, ',
+      'missing = "listwise")'
+    )
   )
   expect_identical(
     findit(test, first, second)$r[1],
-    'marginaleffects::hypotheses(fit, "first = second")'
+    'car::linearHypothesis(fit, "first = second", test = "F")'
   )
 })
 
@@ -144,13 +148,16 @@ test_that("lists, panel context and derived output names preserve their roles", 
   )
   expect_identical(
     findit(xtreg, income, education, fe)$r[1],
-    "fixest::feols(income ~ education | id, data = data)"
+    paste0(
+      'fixest::feols(income ~ education | id, data = data, ',
+      'vcov = "iid", fixef.rm = "none")'
+    )
   )
   expect_identical(
     findit(xtreg, income, education, re)$r[1],
     paste0(
       'plm::plm(income ~ education, data = data, ',
-      'index = c("id", "year"), model = "random")'
+      'index = c("id", "year"), model = "random", random.method = "swar")'
     )
   )
   expect_identical(
@@ -229,7 +236,10 @@ test_that("variable-list sites preserve direction, exclusion and model terms", {
   )
   expect_identical(
     findit(stcox, age, income)$r[1],
-    "survival::coxph(survival::Surv(time, died) ~ age + income, data = data)"
+    paste0(
+      "survival::coxph(survival::Surv(time, died) ~ age + income, ",
+      'data = data, ties = "breslow")'
+    )
   )
   expect_identical(
     findit(drop, age, income)$r[1],

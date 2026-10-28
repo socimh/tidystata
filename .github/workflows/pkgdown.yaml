@@ -48,7 +48,13 @@ jobs:
         run: R CMD INSTALL --preclean .
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        run: |
+          source("pkgdown/build-stata-reference.R")
+          testthat::test_file("pkgdown/tests/test-stata-reference.R", stop_on_failure = TRUE)
+          build_stata_reference(".")
+          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+          finalize_stata_reference(".", "docs")
+          check_stata_reference(".", "docs")
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀

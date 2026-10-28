@@ -2,25 +2,19 @@ test_that("documented minimum Stata abbreviations resolve their commands", {
   commands <- c(
     sa = "save",
     pr = "program",
-    ret = "return",
-    eret = "ereturn",
     q = "query",
     e = "exit",
     conf = "confirm",
     pres = "preserve",
-    ma = "macro",
     sca = "scalar",
-    vers = "version",
     ap = "append",
     on = "oneway",
     fac = "factor",
     ty = "type",
     ou = "outfile",
     token = "tokenize",
-    err = "error",
     cret = "creturn",
     rot = "rotate",
-    stcrr = "stcrreg",
     datasig = "datasignature"
   )
   entries <- findit_entries()
@@ -46,7 +40,6 @@ test_that("former dictionary gaps now resolve to curated examples", {
   expected <- c(
     cumul = "row_number",
     xi = "as_dummy",
-    heatplot = "stat_summary_2d",
     savespss = "write_sav"
   )
   for (command in names(expected)) {

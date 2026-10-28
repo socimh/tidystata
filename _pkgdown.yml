@@ -26,58 +26,84 @@ navbar:
       menu:
       - text: "Getting started with tidystata"
         href: articles/getting-started.html
+      - text: "Inspect and prepare data"
+        href: articles/inspect-and-prepare.html
+      - text: "Tabulate and compare categories"
+        href: articles/tabulation.html
+      - text: "Summarise measurements"
+        href: articles/summary-statistics.html
       - text: "Containers, grouping and missing values"
         href: articles/containers-and-missing-values.html
-      - text: "Coming from Stata"
-        href: articles/coming-from-stata.html
-      - text: "从 Stata 到 R"
-        href: articles/coming-from-stata-zh.html
 
 articles:
 - title: "Learn tidystata"
   contents:
   - getting-started
+  - inspect-and-prepare
+  - tabulation
+  - summary-statistics
   - containers-and-missing-values
-  - articles/coming-from-stata
-  - articles/coming-from-stata-zh
 - title: internal
   contents:
+  - articles/coming-from-stata
+  - articles/coming-from-stata-zh
   - articles/migration
+  - starts_with("articles/stata-")
 
 reference:
 - title: "Coming from Stata"
   contents:
   - findit
+  - findit_selection
 - title: "Inspect variables"
   contents:
-  - has_concept("inspection functions")
-- title: "Tabulate and summarise"
-  contents:
-  - has_concept("tabulation functions")
-  - has_concept("summary functions")
-- title: "Correlation functions"
-  contents:
-  - has_concept("correlation functions")
-- title: "Check and combine data"
-  contents:
-  - has_concept("data checking functions")
-- title: "Generate variables"
-  contents:
-  - has_concept("variable generation functions")
-- title: "Convert types"
-  contents:
-  - has_concept("conversion functions")
+  - codebook
+  - browse
+  - misstable
+  - var_type
+  - names
+  - variables
 - title: "Select columns"
   contents:
-  - has_concept("selection and preview functions")
+  - select_or_transmute
+  - varlist
+- title: "Convert types"
+  contents:
+  - type_conversion
+  - na_conversion
+- title: "Check and combine data"
+  contents:
+  - keys
+  - assert
+  - is_first
+  - stata_merge
+- title: "Create and transform variables"
+  contents:
+  - stata_recode
+  - cut_quantile
+  - as_dummy
+  - std
+  - row_egen
+- title: "Panel operations"
+  contents:
+  - panel
+- title: "Tabulate and summarise"
+  contents:
+  - tab
+  - summ
+- title: "Correlations"
+  contents:
+  - corr
 - title: "Preview tables"
   contents:
-  - has_concept("persistent preview functions")
-  - has_concept("one-time printing functions")
-- title: "Small tools"
+  - preview
+  - print_headtail
+- title: "Workflow utilities"
   contents:
-  - has_concept("utility functions")
+  - set_seed
+  - capture
+  - timer
   - "%>%"
-- title: "Sample Data"
+- title: "Sample data"
   contents:
   - lifeexp
