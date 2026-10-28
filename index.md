@@ -29,13 +29,13 @@ library(dplyr)
 
 ``` r
 
-findit("reg, robust")
+findit(reg, robust)
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
 #> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
-#> # 16 broader regress examples. Browse the family: findit(regress)
+#> # 17 broader regress examples. Browse the family: findit(regress)
 
 findit("egen rowmean")
 #> # Average available values across columns [tidystata]
@@ -57,9 +57,9 @@ Stata text: `` findit(`tab sex region`, row) `` and
 `findit("tab sex region, row")` customize the same row-percentage
 example. To look up one command from a do-file, highlight it and run the
 **Find Stata equivalent** addin
-([`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)),
+([`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)),
 or copy it and run
-[`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md).
+[`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md).
 These helpers print results in the console and require the optional
 rstudioapi and clipr packages, respectively. Every entry is listed by
 topic in [Coming from
@@ -110,7 +110,7 @@ summ(lifeexp, lexp:safewater, .by = region)
 #> 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91
 ```
 
-### tab(), tab1() and tab2(): compare frequency tables
+### tab(), tab1() and tab2(): frequency tables
 
 Use region and a second category derived from `lifeexp`: whether life
 expectancy is at least 70 years. `region:lexp_70` selects these two

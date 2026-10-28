@@ -34,13 +34,14 @@ library(dplyr)
 
 ``` r
 
-findit("reg, robust")
+findit(reg, robust)
 #> # Heteroskedasticity-robust standard errors [fixest]
 #> Stata: regress y x1 x2, robust
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
 #> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
-#> # 16 broader regress examples. Browse the family: findit(regress)
+#> # 17 broader regress examples. Browse the family: findit(regress)
+
 findit("egen rowmean")
 #> # Average available values across columns [tidystata]
 #> Stata: egen z = rowmean(x y)
@@ -62,8 +63,8 @@ R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
 也可以输入 Stata 文本：`` findit(`tab sex region`, row) `` 和
 `findit("tab sex region, row")` 会用指定变量生成相同的行百分比示例。
 查询 do-file 中的一条命令时，可选中文本后运行 **Find Stata equivalent**
-插件（[`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)），或复制文本后运行
-[`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)。
+插件（[`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)），或复制文本后运行
+[`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md)。
 两者均在控制台显示结果，分别需要可选的 rstudioapi 和 clipr 包。
 
 ### codebook()：描述每个变量
@@ -107,7 +108,7 @@ summ(lifeexp, lexp:safewater, .by = region)
 #> 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91
 ```
 
-### tab()、tab1() 和 tab2()：比较频数表
+### tab()、tab1() 和 tab2()：频数表
 
 用 `lifeexp` 中的地区和一个新类别作比较：预期寿命是否达到 70
 岁。`region:lexp_70` 选择这两列。

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,10 +42,16 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.1" id="tidystata-041">tidystata 0.4.1<a class="anchor" aria-label="anchor" href="#tidystata-041"></a></h2>
+<ul><li><p><code><a href="../reference/findit.html">findit()</a></code>, <code><a href="../reference/findit.html">findit_selection()</a></code> and <code><a href="../reference/findit.html">findit_clip()</a></code> share one help topic, including editor and clipboard guidance.</p></li>
+<li><p><code><a href="../reference/capture.html">capture()</a></code> and the preparation, summary, correlation and preview helpers have shorter help organized around practical tasks.</p></li>
+<li><p>Both READMEs use the bare-command form <code>findit(reg, robust)</code> and simpler frequency-table headings.</p></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="tidystata-040">tidystata 0.4.0<a class="anchor" aria-label="anchor" href="#tidystata-040"></a></h2>
 <ul><li><p><code><a href="../reference/findit.html">findit()</a></code> and the bilingual Stata-to-R reference correct advanced statistical mappings and omit pairs without a close R counterpart. Bayesian examples use explicit posterior summaries and fitted-model prediction methods; IPW examples estimate treatment effects with joint uncertainty.</p></li>
 <li><p>The bilingual Stata-to-R reference opens as smaller subject chapters within the package website, with chapter navigation and expandable alternatives.</p></li>
-<li><p><code><a href="../reference/findit.html">findit()</a></code> customizes catalogue examples from Stata text enclosed in backticks or strings, including <code>findit(`tab sex region`, row)</code> and <code>findit("tab sex region, row")</code>. New <code><a href="../reference/findit_selection.html">findit_selection()</a></code> and <code><a href="../reference/findit_selection.html">findit_clip()</a></code> look up one command from the source editor or clipboard and print the result. The selection helper is registered as the Find Stata equivalent addin.</p></li>
+<li><p><code><a href="../reference/findit.html">findit()</a></code> customizes catalogue examples from Stata text enclosed in backticks or strings, including <code>findit(`tab sex region`, row)</code> and <code>findit("tab sex region, row")</code>. New <code><a href="../reference/findit.html">findit_selection()</a></code> and <code><a href="../reference/findit.html">findit_clip()</a></code> look up one command from the source editor or clipboard and print the result. The selection helper is registered as the Find Stata equivalent addin.</p></li>
 <li><p><code><a href="../reference/findit.html">findit()</a></code> omits built-in package labels and unnecessary namespace prefixes from printed examples, retaining qualification for conflicting names. Returned code and package metadata are preserved. Moving averages use <code>zoo::rollapply()</code> with partial windows and nonmissing values.</p></li>
 <li><p><code><a href="../reference/type_conversion.html">destring()</a></code> and <code><a href="../reference/type_conversion.html">tostring()</a></code> ignore AsIs wrappers on non-character input. <code><a href="../reference/type_conversion.html">tostring()</a></code> writes measured values and durations without exponents in their existing units; its help clarifies that large numeric IDs can lose digits.</p></li>
 <li><p><code><a href="../reference/type_conversion.html">as_character()</a></code> is now an exact alias of <code><a href="../reference/type_conversion.html">tostring()</a></code>, converting stored codes to text without reading value labels. Use <code><a href="../reference/type_conversion.html">decode()</a></code> for the previous label-reading behavior. New <code><a href="../reference/type_conversion.html">encode()</a></code> creates labelled integer codes from character categories, or preserves factor codes and levels as value labels. Re-encoding decoded text assigns fresh codes and need not restore old codes.</p></li>

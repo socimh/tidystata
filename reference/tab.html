@@ -37,7 +37,7 @@ and displaying row-category labels. Column headers retain category codes.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -265,10 +265,10 @@ Flextables display these results in a footer instead.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>Counts and percentages</strong></p>
-<p>The following five columns are produced by <code>tab()</code>, <code>tab1()</code>, <code>fre()</code>, and
-<code>fre1()</code>. For each group, let <code>n_i</code> be the count for category (or category
-combination) <code>i</code>, <code>N</code> the count across all categories, and <code>N_valid</code> the
-count excluding observations missing any measured variable. All percentages
+<p><code>tab()</code>, <code>tab1()</code>, <code>fre()</code> and <code>fre1()</code> report the five statistics below.
+Within each group, <code>n_i</code> counts category (or combination) <code>i</code>, <code>N</code> counts
+all observations, and <code>N_valid</code> counts those complete on every measured
+variable. All percentages
 are on a <strong>0–100 scale</strong>.</p><ul><li><p><code>n</code>: Number of observations in the category, or sum of weights if weighted.</p></li>
 <li><p><code>percent</code>: Percentage of all observations, <code>100 * n_i / N</code>, <strong>including</strong>
 missing measured values in the denominator.</p></li>
@@ -277,9 +277,9 @@ missing measured values in the denominator.</p></li>
 This is <code>NA</code> for categories with missing measured values.</p></li>
 <li><p><code>valid_cum</code>: Cumulative <code>valid</code>, in displayed order, omitting missing
 measured categories.</p></li>
-</ul><p>Thus <code>percent</code> corresponds to Stata's <code>tabulate, missing</code>, while <code>valid</code>
-uses the denominator from <code>tabulate</code> without <code>missing</code>. A missing grouping
-key does not by itself make a measured value invalid.</p>
+</ul><p><code>percent</code> uses Stata's <code>tabulate, missing</code> denominator; <code>valid</code> uses the
+denominator from <code>tabulate</code> without <code>missing</code>. Missing grouping keys do
+not make otherwise complete measured values invalid.</p>
 <p><strong>Missing values and category order</strong></p>
 <p>Missing measured values are kept as categories and shown last. Missingness
 includes <code>NA</code>, <code>NaN</code>, tagged missing values, and SPSS user-missing codes or
@@ -287,7 +287,7 @@ ranges; empty strings are observed values. Factors follow their level order;
 other categories are sorted by value unless <code>.desc</code> requests frequency
 order. List-column elements are counted as complete values, not flattened.</p>
 <p><strong>Weighted counts and percentages</strong></p>
-<p>Let <code>w_j</code> be the weight for observation <code>j</code> in a group.</p><ul><li><p><strong>Frequency weights</strong> (<code>.wt_type = "frequency"</code>): Category counts are
+<p>With weight <code>w_j</code> for observation <code>j</code>:</p><ul><li><p><strong>Frequency weights</strong> (<code>.wt_type = "frequency"</code>): Category counts are
 <code>n_i = sum(w_j)</code> over observations in that category. Weights need not be
 integers.</p></li>
 <li><p><strong>Analytic weights</strong> (<code>.wt_type = "analytic"</code>): Weights are rescaled
@@ -327,10 +327,9 @@ not supported; for complex survey designs, use <code>survey::svychisq()</code>.
 Cross-tabulation category values become column names, so conflicts with
 reserved names such as <code>"total"</code> may require recoding.</p>
 <p><strong>Computed variables and groups</strong></p>
-<p>Named expressions in <code>...</code> are evaluated on ungrouped data, before counts
-are calculated within groups. Use grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> first for
-group-specific computations. Input column names that conflict with output
-columns are renamed in the result; the input data are unchanged.</p>
+<p>Named expressions in <code>...</code> are evaluated before grouping. Use grouped
+<code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> first for group-specific computations. Names that conflict
+with output columns are renamed in the result; the input is unchanged.</p>
     </div>
 
     <div class="section level2">

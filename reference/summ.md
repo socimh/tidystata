@@ -154,10 +154,14 @@ tibble.
 
 ## Details
 
-Statistics are calculated separately for each selected variable and
-group. The formulas below use non-missing measured values `x1, ..., xn`,
-with `n` denoting their count and `xbar` their arithmetic mean. Unless
-weights are supplied, calculations are unweighted.
+Each variable is summarised separately within each group. Expressions in
+`...` are evaluated before grouping; use grouped
+[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+first for group-specific computations.
+
+The formulas below use non-missing values `x1, ..., xn`, their count
+`n`, and their mean `xbar`. Calculations are unweighted unless weights
+are supplied.
 
 **Counts and completeness**
 
@@ -218,10 +222,10 @@ moment.
 - `kurtosis`: Pearson kurtosis, `m4 / m2^2`. A normal distribution has
   kurtosis 3, not 0 (this is not excess kurtosis).
 
-Undefined statistics are `NA` (for example, `sd` when `n < 2` and the
-shape statistics for constant variables). Columns with no observed
-values have `n = 0`, `unique = 0`, and `NA` for numeric statistics,
-including `sum`.
+Undefined statistics are `NA`: for example, `sd` with fewer than two
+values, or shape statistics for constant variables. With no observed
+values, `n` and `unique` are 0; numeric statistics, including `sum`, are
+`NA`.
 
 **When weights are supplied**
 
@@ -258,7 +262,7 @@ The reported `se` is descriptive and does not account for a complex
 survey design. For survey inference, use functions such as
 `survey::svymean()`.
 
-**Data types and grouping**
+**Data types and display**
 
 Missingness follows [`is.na()`](https://rdrr.io/r/base/NA.html),
 including SPSS user-missing codes. Logical variables are treated as 0/1;
@@ -274,11 +278,6 @@ or times; their spreads (`sd`, `se`, `mad`, `iqr`) are `difftime` values
 in list mode. With `.type = "table"` or `"tibble"`, calendar locations
 are text and spreads are numeric durations (days for Dates, seconds for
 datetimes and times of day).
-
-Expressions in `...` are evaluated on ungrouped working data before
-statistics are calculated by group. For group-specific expressions,
-first create columns with grouped
-[`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 
 ## Examples
 

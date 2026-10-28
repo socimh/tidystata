@@ -50,45 +50,42 @@ functions add a `tidystata_preview` class and print preferences;
 
 ## Details
 
-**Display**
+**Reading a preview**
 
-Head/tail previews split `n` between the beginning and end, giving an
-odd row to the beginning. One row of vertical dots marks an omitted
-middle, using periods without Unicode output. Numeric markers align with
-printed decimal points, or the last significand digit when no decimal is
-shown. Row-number markers align with the last digit. Other columns,
-including dates, times, factors, logicals and lists, use centered
-markers. Numeric columns without displayed numbers also use centered
-markers. Interval previews show approximately evenly spaced positions
-without separator rows. An omission footer counts undisplayed rows. With
-`n = 1`, both styles show the first row; short tables do not repeat
-rows.
+Head/tail previews divide `n` between the first and last rows, giving
+any extra row to the beginning. Dots mark an omitted middle. Interval
+previews show approximately evenly spaced rows without separators. Both
+styles show the first row when `n = 1`, avoid repeating rows in short
+tables, and report the number of omitted rows in a footer.
 
 Row numbers refer to the current table after filtering or sorting.
-Grouped tables use one display budget across all groups.
-`print(x, n = Inf, width = Inf)` shows every row and column without
-changing stored preferences. Previews control console printing, not HTML
-widgets or GUI viewers.
+Grouped tables share one display budget. Use
+`print(x, n = Inf, width = Inf)` to show all rows and columns without
+changing preferences. Previews affect console printing, not HTML widgets
+or GUI viewers.
 
-**Working with previews**
+Omission dots align with numeric decimal points (or the last significand
+digit when no decimal is shown) and the last row-number digit. Other
+columns, including numeric columns without displayed numbers, use
+centered dots. Without Unicode output, the markers use periods.
+
+**Keeping or removing preferences**
 
 Settings follow supported base subsetting/replacement, dplyr row and
-column operations, grouping (including rowwise operations), summaries
-and reframing, and tidyr pivots. These operations determine the result's
-container and grouping. Joins inherit the left input's settings;
+column operations, grouping (including rowwise), summaries, reframing
+and tidyr pivots. Those operations determine the resulting container and
+groups. Joins use the left input's settings;
 [`bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
-inherits the first input's settings. Arbitrary third-party
-transformations and direct
+uses the first input's. Arbitrary third-party transformations and direct
 [`vctrs::vec_rbind()`](https://vctrs.r-lib.org/reference/vec_bind.html)
-are not covered by this guarantee.
+calls are not covered.
 
-Converting with
-[`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
-or [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html), or
-extracting a column, removes the preview. Wrapping and unwrapping a
-data.table makes an independent copy; subsequent native operations such
-as `:=` retain ordinary reference semantics. Column classes and labels
-are preserved.
+[`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html),
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) and
+column extraction remove the preview. Wrapping or unwrapping a
+data.table creates an independent copy; subsequent native operations
+such as `:=` keep ordinary reference semantics. Column classes and
+labels are preserved.
 
 ## See also
 

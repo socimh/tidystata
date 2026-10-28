@@ -30,37 +30,37 @@ attributes. On error, `NULL` invisibly.
 
 ## Details
 
-Like Stata's `capture`, this lets a script continue after an error.
-Unlike Stata's command, it returns the successful value, keeps printed
-output and reports a caught error as a message by default. The failure
-notice is not a formal R warning and does not become an error under
-`options(warn = 2)`. Warnings and messages from `x` propagate unless
-`quiet = TRUE`; suppressing them does not stop evaluation. With
-`options(warn = 2)`, an unsuppressed warning from `x` becomes an error
-and is caught. User interrupts are not caught.
+Like Stata's `capture`, this lets a script continue after an error. It
+also returns successful results and, by default, reports errors as
+messages.
 
-A successful `FALSE`, `NA`, `NULL` or object inheriting from `try-error`
-is returned unchanged. A successful `NULL` and a caught error have the
-same value. Use [`tryCatch()`](https://rdrr.io/r/base/conditions.html)
-when you need to distinguish them programmatically or retain the error
-object. The return value is not a success/failure flag and cannot
-reliably serve as the condition in `if (capture(...))`.
+**Updating objects**
 
-When updating an existing object, put the assignment inside `capture()`:
-`capture(data <- update(data))`. Writing `data <- capture(update(data))`
-overwrites `data` with `NULL` if the update fails.
+Put an assignment inside `capture()` to keep the existing object if the
+right-hand side fails: `capture(data <- update(data))`. Assigning
+outside, as in `data <- capture(update(data))`, replaces `data` with
+`NULL` on error. A successful `NULL` result is assigned in either case.
 
-An assignment inside `capture()` updates its target only after the
-right-hand side succeeds. A successful `NULL` is still assigned. A block
-of separate assignments retains the last completed update and skips
-steps after the first error, as Stata's capture blocks do. A single
-assignment around a pipeline retains its original target on error;
-intermediate pipeline results are not saved.
+In a block, completed assignments remain and the first error skips the
+remaining steps. A single assignment around a pipeline saves only the
+final result, so a failed pipeline leaves its target unchanged. Earlier
+side effects are never undone: changes by reference (such as data.table
+or environment updates), written files and printed output remain.
 
-`capture()` is not all-or-nothing: earlier effects are not rolled back.
-In particular, changes by reference (such as data.table updates or
-modified environments), files written and printed output before an error
-remain. Invalid `quiet` values raise an error before `x` is evaluated.
+**Errors, warnings and return values**
+
+`quiet = TRUE` suppresses warnings and messages without stopping
+evaluation; printed output remains. Under `options(warn = 2)`, an
+unsuppressed warning becomes an error and is caught. The failure notice
+from `capture()` is a message, so this option does not turn it into an
+error. User interrupts are never caught. Invalid `quiet` values fail
+before `x` is evaluated.
+
+Successful values, including `FALSE`, `NA`, `NULL` and `try-error`
+objects, are returned unchanged. The result is therefore unsuitable as a
+success flag in `if (capture(...))`. Use
+[`tryCatch()`](https://rdrr.io/r/base/conditions.html) to retain the
+error object or distinguish an error from a successful `NULL` result.
 
 ## See also
 

@@ -1950,9 +1950,9 @@ R 函数按包分组。已关联的 Stata
   `encode`](https://socimh.github.io/tidystata/articles/stata-zh-labels.html#example-legacy-0103)
 - [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) —
   查找 Stata 命令对应的 R 函数
-- [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+- [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md)
   — 查询剪贴板中一条 Stata 命令对应的 R 代码
-- [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+- [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)
   — 查询源代码编辑器中选中的一条 Stata 命令对应的 R 代码
 - [`fre()`](https://socimh.github.io/tidystata/reference/tab.md) — 与
   tab() 相同的联合频数表，增加合计并显示值标签

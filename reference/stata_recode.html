@@ -15,7 +15,7 @@ replaces them, and use named rules to assign value labels.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,49 +94,43 @@ attributes are dropped. See Details for integer preservation.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>Output type</strong></p>
-<p>Integer input stays integer when every code and <code>.default</code> is a whole
-number within integer range, so <code>1:5 ~ 1</code> does not promote it to double.
-Double input stays double. Fractions, out-of-range numbers, infinities,
-<code>NaN</code>, and tagged missing codes or defaults require double output; ordinary
-<code>NA</code> does not promote integer input. The input is not modified.</p>
-<p><strong>Matching</strong></p>
-<p>The left side of each rule is read before evaluation:</p><ul><li><p><code>a:b</code> selects the closed range <code>a &lt;= x &lt;= b</code>, including decimals, like
-Stata's <code>a/b</code>. Thus <code>1:5</code> matches <code>4.5</code>, rather than enumerating integers.
-Bounds must be single non-missing numbers, with the lower bound no greater
-than the upper bound. <code>lo:hi</code> uses the formula's environment.</p></li>
-<li><p><code>c(...)</code> combines values and ranges, for example <code>c(1, 3:5)</code>.</p></li>
-<li><p>Other expressions are evaluated as value sets. Non-missing values match
-exactly; a missing value in a set matches every missing type, as below.</p></li>
-</ul><p>Rules match the input before any replacements, after SPSS missing-value
-conversion. The first matching rule wins, so <code>1 ~ 2, 2 ~ 1</code> swaps the codes.
-Supply <code>.default</code> to replace all unmatched elements, including missing ones.</p>
-<p>On the left side, bare <code>min</code> and <code>max</code> mean <code>-Inf</code> and <code>Inf</code>. Unlike Stata's
-keywords, they do not refer to observed extrema: <code>min:min</code> does not select
-the smallest observed code. Calls such as <code>min(x)</code> still evaluate normally.
-Bounds, like value sets, must be ordinary integer or double numbers;
-convert classed numbers such as <code>integer64</code> explicitly.</p>
+    <p><strong>Matching rules</strong></p>
+<p>Rules apply to the original input, after SPSS missing-value conversion.
+The first match wins: <code>1 ~ 2, 2 ~ 1</code> swaps the codes. Unmatched values stay
+unchanged unless <code>.default</code> replaces them, including unmatched missing values.</p>
+<p>The left side of a rule accepts:</p><ul><li><p><code>a:b</code>: A closed range, including decimals. Like Stata's <code>a/b</code>, <code>1:5</code>
+matches 4.5. Bounds must be single non-missing numbers in increasing order
+(equal bounds are allowed); <code>lo:hi</code> reads them from the formula's environment.</p></li>
+<li><p><code>c(...)</code>: A combination of values and ranges, such as <code>c(1, 3:5)</code>.</p></li>
+<li><p>Other expressions: An evaluated set of values to match exactly. Missing
+selectors match all missing types, as described below.</p></li>
+</ul><p>Bare <code>min</code> and <code>max</code> on the left mean <code>-Inf</code> and <code>Inf</code>, not observed extrema:
+<code>min:min</code> does not select the smallest observed value. Calls such as <code>min(x)</code>
+evaluate normally. Bounds and value sets must use ordinary integer or double
+numbers; convert classed numbers such as <code>integer64</code> explicitly.</p>
 <p><strong>Missing values and labels</strong></p>
-<p><code>NA ~ code</code> matches <code>NA</code>, <code>NaN</code>, and all tagged missing values, like Stata's
-<code>missing</code> keyword. The same applies to any missing selector: for example,
-<code>haven::tagged_na("a") ~ 0</code> also replaces other tags and ordinary <code>NA</code>.
-Individual missing types cannot be selected separately. Unmatched tagged
-missing values keep their tags when <code>.default</code> is omitted.</p>
-<p>SPSS user-missing codes and ranges become <code>NA</code> before matching, so their
-stored codes cannot be selected as ordinary numbers. Old value labels are
-removed even when no values change. Named rules supply new labels, which
-are kept even if their codes are unobserved. A code cannot have two labels,
-a label cannot name two codes, and a missing code cannot be labelled.</p>
+<p>Any missing selector matches <code>NA</code>, <code>NaN</code> and every tagged missing value.
+Thus <code>NA ~ 0</code> and <code>haven::tagged_na("a") ~ 0</code> both replace all missing types;
+individual tags cannot be selected separately. Unmatched tags survive when
+<code>.default</code> is omitted. SPSS user-missing codes and ranges become <code>NA</code> before
+matching, so their stored codes cannot be matched as ordinary numbers.</p>
+<p>Old value labels are removed even if no values change. Named rules create
+new labels, including for unobserved codes. Labels and codes must correspond
+one-to-one, and missing codes cannot be labelled.</p>
+<p><strong>Output type</strong></p>
+<p>Integer input stays integer if all replacement codes and defaults are whole
+numbers within integer range: <code>1:5 ~ 1</code> does not force double output.
+Fractions, out-of-range values, infinities, <code>NaN</code> and tagged missing values
+require doubles; ordinary <code>NA</code> does not. Double input stays double, and the
+input is never modified.</p>
 <p><strong>Stata and other R functions</strong></p>
-<p>Use <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> to replace a variable or create a new one, as with
-Stata's <code>generate()</code> option. Use <code><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">dplyr::across()</a></code> to apply rules to several
-variables. Common rule translations are:</p><table class="table table"><tr><td>Stata rule</td><td>R rule or argument</td></tr><tr><td><code>(1/5 = 1)</code></td><td><code>1:5 ~ 1</code></td></tr><tr><td><code>(1 3 7 = 0)</code></td><td><code>c(1, 3, 7) ~ 0</code></td></tr><tr><td><code>(9 = .)</code></td><td><code>9 ~ NA</code></td></tr><tr><td><code>(missing = 0)</code></td><td><code>NA ~ 0</code></td></tr><tr><td><code>(else = .)</code></td><td><code>.default = NA</code></td></tr><tr><td><code>(1/5 = 1 "Low")</code></td><td><code>Low = 1:5 ~ 1</code></td></tr></table><p>Like Stata's <code>recode</code>, these functions operate on numeric values. For text,
-use <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::recode_values()</a></code> or <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::replace_values()</a></code> in dplyr 1.2.0 and
-later, or <code><a href="https://dplyr.tidyverse.org/reference/case_match.html" class="external-link">dplyr::case_match()</a></code> with older versions. For factors, use
-<code><a href="https://forcats.tidyverse.org/reference/fct_recode.html" class="external-link">forcats::fct_recode()</a></code> or <code><a href="https://forcats.tidyverse.org/reference/fct_collapse.html" class="external-link">forcats::fct_collapse()</a></code>.</p>
-<p>The alias <code>recode()</code> shares its name with <code><a href="https://dplyr.tidyverse.org/reference/recode.html" class="external-link">dplyr::recode()</a></code>. Whichever
-package is attached last masks the other. Prefer <code>stata_recode()</code> or an
-explicit namespace to avoid attach-order ambiguity.</p>
+<p>Use <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> to replace or create a variable (Stata's <code>generate()</code>),
+and <code><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">dplyr::across()</a></code> to recode several columns. Common translations are:</p><table class="table table"><tr><td>Stata rule</td><td>R rule or argument</td></tr><tr><td><code>(1/5 = 1)</code></td><td><code>1:5 ~ 1</code></td></tr><tr><td><code>(1 3 7 = 0)</code></td><td><code>c(1, 3, 7) ~ 0</code></td></tr><tr><td><code>(9 = .)</code></td><td><code>9 ~ NA</code></td></tr><tr><td><code>(missing = 0)</code></td><td><code>NA ~ 0</code></td></tr><tr><td><code>(else = .)</code></td><td><code>.default = NA</code></td></tr><tr><td><code>(1/5 = 1 "Low")</code></td><td><code>Low = 1:5 ~ 1</code></td></tr></table><p>These functions recode numeric values. For text, use <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::recode_values()</a></code>
+or <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::replace_values()</a></code> in dplyr 1.2.0 or later, or <code><a href="https://dplyr.tidyverse.org/reference/case_match.html" class="external-link">dplyr::case_match()</a></code>
+in older versions. For factors, use <code><a href="https://forcats.tidyverse.org/reference/fct_recode.html" class="external-link">forcats::fct_recode()</a></code> or
+<code><a href="https://forcats.tidyverse.org/reference/fct_collapse.html" class="external-link">forcats::fct_collapse()</a></code>.</p>
+<p>The alias <code>recode()</code> conflicts with <code><a href="https://dplyr.tidyverse.org/reference/recode.html" class="external-link">dplyr::recode()</a></code>. Use <code>stata_recode()</code>
+or an explicit namespace to avoid depending on which package was attached last.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

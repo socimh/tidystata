@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,13 +85,13 @@
 <h3 id="findit-find-the-r-equivalent-of-a-stata-command">findit(): find the R equivalent of a Stata command<a class="anchor" aria-label="anchor" href="#findit-find-the-r-equivalent-of-a-stata-command"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"reg, robust"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="va">reg</span>, <span class="va">robust</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Heteroskedasticity-robust standard errors [fixest]</span></span>
 <span><span class="co">#&gt; Stata: regress y x1 x2, robust</span></span>
 <span><span class="co">#&gt; R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")</span></span>
 <span><span class="co">#&gt; # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 16 broader regress examples. Browse the family: findit(regress)</span></span>
+<span><span class="co">#&gt; # 17 broader regress examples. Browse the family: findit(regress)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"egen rowmean"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Average available values across columns [tidystata]</span></span>
@@ -99,7 +99,7 @@
 <span><span class="co">#&gt; R:     mutate(data, z = row_mean(x, y))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; # 70 broader egen examples. Browse the family: findit(egen)</span></span></code></pre></div>
-<p>A bare command such as <code>findit(egen)</code> browses the whole family and shows up to five operations. A specific query such as <code>findit("egen rowmean")</code> returns one clear answer; ambiguous queries retain up to ten relevant candidates. <code>print(n = Inf)</code> expands the returned results; use <code>findit(egen)</code> to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in <code>findit(tab, sex, region)</code> or <code>findit(tab, gen)</code>. You can also supply Stata text: <code>findit(`tab sex region`, row)</code> and <code>findit("tab sex region, row")</code> customize the same row-percentage example. To look up one command from a do-file, highlight it and run the <strong>Find Stata equivalent</strong> addin (<code><a href="reference/findit_selection.html">findit_selection()</a></code>), or copy it and run <code><a href="reference/findit_selection.html">findit_clip()</a></code>. These helpers print results in the console and require the optional rstudioapi and clipr packages, respectively. Every entry is listed by topic in <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a>.</p>
+<p>A bare command such as <code>findit(egen)</code> browses the whole family and shows up to five operations. A specific query such as <code>findit("egen rowmean")</code> returns one clear answer; ambiguous queries retain up to ten relevant candidates. <code>print(n = Inf)</code> expands the returned results; use <code>findit(egen)</code> to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in <code>findit(tab, sex, region)</code> or <code>findit(tab, gen)</code>. You can also supply Stata text: <code>findit(`tab sex region`, row)</code> and <code>findit("tab sex region, row")</code> customize the same row-percentage example. To look up one command from a do-file, highlight it and run the <strong>Find Stata equivalent</strong> addin (<code><a href="reference/findit.html">findit_selection()</a></code>), or copy it and run <code><a href="reference/findit.html">findit_clip()</a></code>. These helpers print results in the console and require the optional rstudioapi and clipr packages, respectively. Every entry is listed by topic in <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="codebook-describe-every-variable">codebook(): describe every variable<a class="anchor" aria-label="anchor" href="#codebook-describe-every-variable"></a>
@@ -136,7 +136,7 @@
 <span><span class="co">#&gt; 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="tab-tab1-and-tab2-compare-frequency-tables">tab(), tab1() and tab2(): compare frequency tables<a class="anchor" aria-label="anchor" href="#tab-tab1-and-tab2-compare-frequency-tables"></a>
+<h3 id="tab-tab1-and-tab2-frequency-tables">tab(), tab1() and tab2(): frequency tables<a class="anchor" aria-label="anchor" href="#tab-tab1-and-tab2-frequency-tables"></a>
 </h3>
 <p>Use region and a second category derived from <code>lifeexp</code>: whether life expectancy is at least 70 years. <code>region:lexp_70</code> selects these two columns.</p>
 <p><code><a href="reference/tab.html">tab()</a></code> counts each observed combination, with percentages.</p>

@@ -19,7 +19,7 @@ when the object has no unit.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,60 +93,36 @@ available.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-
-<div class="section">
-<h3 id="comparison-with-other-type-inspectors">Comparison with other type inspectors<a class="anchor" aria-label="anchor" href="#comparison-with-other-type-inspectors"></a></h3>
-
-
-<p><code>var_type()</code> gives one readable label per object, useful for column audits
-with <code>vapply(data, var_type, character(1))</code> or
-<code>dplyr::summarise(data, dplyr::across(dplyr::everything(), var_type))</code>.
-It combines storage and class information in a display label:</p><ul><li><p><code><a href="https://rdrr.io/r/base/typeof.html" class="external-link">typeof()</a></code> reports the internal storage type. Factors are <code>"integer"</code>,
-while ordinary double vectors, POSIXct date-times and double-backed
-haven-labelled vectors are all <code>"double"</code>. <code>var_type()</code> distinguishes
-<code>"factor"</code>, <code>"double"</code>, <code>"datetime"</code> and <code>"double+label"</code>.</p></li>
-<li><p><code><a href="https://rdrr.io/r/base/class.html" class="external-link">class()</a></code> reports the class names used for method dispatch and may return
-several strings, such as <code>c("ordered", "factor")</code>. <code>var_type()</code> reduces
-this to one label, <code>"ordered"</code>. Use <code><a href="https://rdrr.io/r/base/class.html" class="external-link">class()</a></code> to inspect the full class
-vector and <code><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits()</a></code> to test class membership in program logic.</p></li>
-<li><p><code><a href="https://rdrr.io/r/base/mode.html" class="external-link">mode()</a></code> reports a broader category: both integer and double vectors have
-mode <code>"numeric"</code>. <code>var_type()</code> keeps that storage distinction.</p></li>
-<li><p><code><a href="https://rdrr.io/r/utils/str.html" class="external-link">utils::str()</a></code> displays structure and example values. <code>var_type()</code> returns
-a character string that can be collected into an audit table.</p></li>
-<li><p><code><a href="https://pillar.r-lib.org/reference/type_sum.html" class="external-link">pillar::type_sum()</a></code> supplies compact display labels for classed objects.
-<code>var_type()</code> builds on those labels, expands recognized abbreviations by
-default, marks haven value labels and omits container dimensions.</p></li>
-</ul><p>Custom classes can provide a <code><a href="https://pillar.r-lib.org/reference/type_sum.html" class="external-link">pillar::type_sum()</a></code> method to control their
-display label without changes to <code>var_type()</code>.</p>
-<p>Use <code>var_type()</code> for reporting; use storage or class inspectors when exact
-R type information is needed. Its display label does not retain the full
-class hierarchy, attributes or structure.</p>
-</div>
-
-<div class="section">
-<h3 id="type-and-unit-metadata">Type and unit metadata<a class="anchor" aria-label="anchor" href="#type-and-unit-metadata"></a></h3>
-
-
-<p>Types describe storage and class metadata, not the observed values: empty and
-all-missing vectors retain their type. Known scalar abbreviations expand
-exactly, including <code>int64</code> to <code>integer64</code>. Haven-labelled vectors append
-<code>+lbl</code> in abbreviation mode and <code>+label</code> otherwise.</p>
-<p>Plain matrices and arrays retain their element-type description, and data
-frames retain their container name without dimensions. Other classed objects
-use their pillar type description. With <code>abbr = FALSE</code>, a default class-name
-abbreviation is replaced by the full primary class name, for example
-<code>"dgCMatrix"</code> for a sparse matrix of that class. Registered or inherited
-display methods and explicit pillar labels take precedence. Custom labels,
-including punctuation and structured descriptions such as <code>I&lt;int&gt;</code> and
-<code>list&lt;int&gt;</code>, are preserved in both modes. An empty or missing custom
-description falls back to the first class name; errors in custom methods are
-propagated. A numeric-looking type description does not imply support for
-numeric summaries.</p>
-<p><code>var_unit()</code> reads actual units/difftime metadata (including hms times), and
-retains custom unit methods for classes describing themselves as <code>units</code>,
-<code>drtn</code> or <code>time</code>. Other objects return <code>NA_character_</code>.</p>
-</div>
-
+    <p><strong>Reading types and units</strong></p>
+<p><code>var_type()</code> returns one display label per object, useful for column audits
+such as <code>vapply(data, var_type, character(1))</code>. It describes storage and class
+metadata, so empty and all-missing vectors retain their type. Haven-labelled
+vectors add <code>+lbl</code> in abbreviation mode and <code>+label</code> otherwise.</p>
+<p>Plain matrices and arrays report their element type; data frames report their
+container name. Dimensions are omitted. <code>var_unit()</code> reads units or duration
+metadata, including hms times, and returns <code>NA_character_</code> otherwise. It also
+respects custom unit methods for classes described as <code>units</code>, <code>drtn</code> or <code>time</code>.</p>
+<p><strong>Choosing an inspector</strong></p>
+<p>Use <code>var_type()</code> for readable reports. For exact type information in code:</p><ul><li><p><code><a href="https://rdrr.io/r/base/typeof.html" class="external-link">typeof()</a></code> gives storage type: factors, for example, are <code>"integer"</code>.
+<code>var_type()</code> distinguishes doubles, date-times and labelled doubles even
+though all three can have <code>"double"</code> storage.</p></li>
+<li><p><code><a href="https://rdrr.io/r/base/class.html" class="external-link">class()</a></code> gives the full class vector; <code><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits()</a></code> tests membership.
+<code>var_type()</code> reduces <code>c("ordered", "factor")</code> to <code>"ordered"</code>.</p></li>
+<li><p><code><a href="https://rdrr.io/r/base/mode.html" class="external-link">mode()</a></code> combines integers and doubles as <code>"numeric"</code>; <code>var_type()</code> keeps
+them distinct. <code><a href="https://rdrr.io/r/utils/str.html" class="external-link">utils::str()</a></code> shows structure and example values rather
+than returning a single label.</p></li>
+</ul><p>A display label does not retain full classes, attributes or structure.
+A numeric-looking label alone does not imply support for numeric summaries.</p>
+<p><strong>Custom classes</strong></p>
+<p>Classed objects use <code><a href="https://pillar.r-lib.org/reference/type_sum.html" class="external-link">pillar::type_sum()</a></code> labels. With <code>abbr = FALSE</code>, known
+abbreviations expand exactly (<code>int64</code> becomes <code>integer64</code>), and default class
+abbreviations become full primary class names, such as <code>"dgCMatrix"</code>.
+Registered or inherited display methods and explicit pillar labels take
+precedence. Custom labels, including <code>I&lt;int&gt;</code>, <code>list&lt;int&gt;</code> and punctuation,
+are preserved in both modes.</p>
+<p>A custom <code><a href="https://pillar.r-lib.org/reference/type_sum.html" class="external-link">pillar::type_sum()</a></code> method can control the label. An empty or
+missing description falls back to the first class name; method errors
+propagate.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

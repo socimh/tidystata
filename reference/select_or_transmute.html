@@ -11,7 +11,7 @@ returned."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,28 +80,27 @@ columns use their expression as the name.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Each argument is classified before evaluation. Column names, strings, numeric
-positions, selection syntax (<code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>, <code>:</code>, <code>!</code>, <code>&amp;</code>, <code>|</code>, unary <code>-</code>) and
-tidyselect helpers such as <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with()</a></code>, <code><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where()</a></code>, <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of()</a></code> or
-<code><a href="varlist.html">varlist()</a></code> select existing columns, as do calls that use no column names
-(for example <code>all_of(vars)</code> or <code>seq_len(2)</code>). Any other expression that uses
-columns, such as <code>lexp &gt;= 70</code> or <code>gnp_thousands = gnppc / 1000</code>, is computed
-with <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> and then selected, so arithmetic is never misread as
-column positions. Selections and computed values can be mixed; output follows
-argument order.</p>
-<p>A named constant such as <code>one = 1</code>, <code>label = "x"</code> or <code>y = c(1, 2)</code> creates a
-constant column; it never selects or renames columns by position. Unnamed
-names, strings and positions must identify existing columns. If they do not,
-an error lists every unmatched name instead of evaluating them as
-expressions, so a misspelled column is never replaced by an object of the
-same name in the calling environment. (A symbol naming a character vector in
-the calling environment is still passed to tidyselect, which deprecates that
-form in favour of <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of()</a></code>.)</p>
-<p>If selection itself fails for another reason (for example, duplicate output
-names), the arguments are evaluated sequentially with <code><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">dplyr::transmute()</a></code>;
-if that also fails, the error reports both attempts. Computed expressions are
-evaluated once when selection succeeds. Grouping columns are retained
-according to dplyr's selection rules.</p>
+    <p><strong>Selecting and computing</strong></p>
+<p>Selections and computations can be mixed; columns follow argument order.
+Column names, strings, positions, tidyselect helpers and <code><a href="varlist.html">varlist()</a></code> select
+existing columns. Selection syntax includes <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>, <code>:</code>, <code>!</code>, <code>&amp;</code>, <code>|</code> and
+unary <code>-</code>. Calls without column names, such as <code>all_of(vars)</code> or <code>seq_len(2)</code>,
+also act as selections.</p>
+<p>Other expressions using columns, such as <code>lexp &gt;= 70</code> or
+<code>gnp_thousands = gnppc / 1000</code>, are computed with <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> and then
+selected. Arithmetic is therefore not interpreted as column positions.
+Named constants (<code>one = 1</code>, <code>label = "x"</code>, <code>y = c(1, 2)</code>) create columns;
+they do not select or rename existing columns by position.</p>
+<p><strong>Names and fallback evaluation</strong></p>
+<p>Unnamed names, strings and positions must identify existing columns. An
+error lists unmatched names; a misspelling never falls back to a same-named
+object in the calling environment. A symbol holding a character vector is
+still passed to tidyselect, which deprecates this use; write <code>all_of(vars)</code>.</p>
+<p>If selection fails for another reason, such as duplicate output names, the
+arguments are retried sequentially with <code><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">dplyr::transmute()</a></code>. If both attempts
+fail, the error reports both. Computations run once when selection succeeds;
+a fallback can evaluate them again. Grouping columns follow dplyr's selection
+rules.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

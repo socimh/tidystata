@@ -1,5 +1,20 @@
 # Changelog
 
+## tidystata 0.4.1
+
+- [`findit()`](https://socimh.github.io/tidystata/reference/findit.md),
+  [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)
+  and
+  [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md)
+  share one help topic, including editor and clipboard guidance.
+
+- [`capture()`](https://socimh.github.io/tidystata/reference/capture.md)
+  and the preparation, summary, correlation and preview helpers have
+  shorter help organized around practical tasks.
+
+- Both READMEs use the bare-command form `findit(reg, robust)` and
+  simpler frequency-table headings.
+
 ## tidystata 0.4.0
 
 - [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
@@ -17,9 +32,9 @@
   customizes catalogue examples from Stata text enclosed in backticks or
   strings, including `` findit(`tab sex region`, row) `` and
   `findit("tab sex region, row")`. New
-  [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+  [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)
   and
-  [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+  [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md)
   look up one command from the source editor or clipboard and print the
   result. The selection helper is registered as the Find Stata
   equivalent addin.

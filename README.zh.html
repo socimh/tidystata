@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,13 +62,14 @@
 <div class="section level3">
 <h3 id="findit查找-stata-命令对应的-r-代码">findit()：查找 Stata 命令对应的 R 代码<a class="anchor" aria-label="anchor" href="#findit%E6%9F%A5%E6%89%BE-stata-%E5%91%BD%E4%BB%A4%E5%AF%B9%E5%BA%94%E7%9A%84-r-%E4%BB%A3%E7%A0%81"></a></h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"reg, robust"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="va">reg</span>, <span class="va">robust</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Heteroskedasticity-robust standard errors [fixest]</span></span>
 <span><span class="co">#&gt; Stata: regress y x1 x2, robust</span></span>
 <span><span class="co">#&gt; R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")</span></span>
 <span><span class="co">#&gt; # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 16 broader regress examples. Browse the family: findit(regress)</span></span>
+<span><span class="co">#&gt; # 17 broader regress examples. Browse the family: findit(regress)</span></span>
+<span></span>
 <span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"egen rowmean"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Average available values across columns [tidystata]</span></span>
 <span><span class="co">#&gt; Stata: egen z = rowmean(x y)</span></span>
@@ -76,7 +77,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; # 70 broader egen examples. Browse the family: findit(egen)</span></span></code></pre></div>
 <p>单独查询命令（如 <code>findit(egen)</code>）返回整个命令族，默认显示最多五种操作。具体查询（如 <code>findit("egen rowmean")</code>）返回一个明确的推荐；含义不明确时保留最多十个相关候选项。<code>print(n = Inf)</code> 展开已返回的结果；查询命令族可浏览更广的操作。同一任务优先推荐 tidystata，其次是 tidyverse，最后是其他包或 base R。可以用逗号添加变量名或提示，例如 <code>findit(tab, sex, region)</code> 或 <code>findit(tab, gen)</code>。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在<a href="https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html">从 Stata 到 R</a>中。</p>
-<p>也可以输入 Stata 文本：<code>findit(`tab sex region`, row)</code> 和 <code>findit("tab sex region, row")</code> 会用指定变量生成相同的行百分比示例。 查询 do-file 中的一条命令时，可选中文本后运行 <strong>Find Stata equivalent</strong> 插件（<code><a href="reference/findit_selection.html">findit_selection()</a></code>），或复制文本后运行 <code><a href="reference/findit_selection.html">findit_clip()</a></code>。 两者均在控制台显示结果，分别需要可选的 rstudioapi 和 clipr 包。</p>
+<p>也可以输入 Stata 文本：<code>findit(`tab sex region`, row)</code> 和 <code>findit("tab sex region, row")</code> 会用指定变量生成相同的行百分比示例。 查询 do-file 中的一条命令时，可选中文本后运行 <strong>Find Stata equivalent</strong> 插件（<code><a href="reference/findit.html">findit_selection()</a></code>），或复制文本后运行 <code><a href="reference/findit.html">findit_clip()</a></code>。 两者均在控制台显示结果，分别需要可选的 rstudioapi 和 clipr 包。</p>
 </div>
 <div class="section level3">
 <h3 id="codebook描述每个变量">codebook()：描述每个变量<a class="anchor" aria-label="anchor" href="#codebook%E6%8F%8F%E8%BF%B0%E6%AF%8F%E4%B8%AA%E5%8F%98%E9%87%8F"></a></h3>
@@ -111,7 +112,7 @@
 <span><span class="co">#&gt; 9 3 [South America]    safewater dbl       6      6    45    65.3    17.0     91</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="tabtab1-和-tab2比较频数表">tab()、tab1() 和 tab2()：比较频数表<a class="anchor" aria-label="anchor" href="#tabtab1-%E5%92%8C-tab2%E6%AF%94%E8%BE%83%E9%A2%91%E6%95%B0%E8%A1%A8"></a></h3>
+<h3 id="tabtab1-和-tab2频数表">tab()、tab1() 和 tab2()：频数表<a class="anchor" aria-label="anchor" href="#tabtab1-%E5%92%8C-tab2%E9%A2%91%E6%95%B0%E8%A1%A8"></a></h3>
 <p>用 <code>lifeexp</code> 中的地区和一个新类别作比较：预期寿命是否达到 70 岁。<code>region:lexp_70</code> 选择这两列。</p>
 <p><code><a href="reference/tab.html">tab()</a></code> 统计每种实际出现的组合的频数，并给出百分比。</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">

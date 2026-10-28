@@ -19,7 +19,7 @@ unpreview(): Remove preview preferences and restore ordinary printing.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,31 +100,31 @@ functions add a <code>tidystata_preview</code> class and print preferences;
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>Display</strong></p>
-<p>Head/tail previews split <code>n</code> between the beginning and end, giving an odd
-row to the beginning. One row of vertical dots marks an omitted middle,
-using periods without Unicode output. Numeric markers align with printed
-decimal points, or the last significand digit when no decimal is shown.
-Row-number markers align with the last digit. Other columns, including
-dates, times, factors, logicals and lists, use centered markers. Numeric
-columns without displayed numbers also use centered markers.
-Interval previews show approximately evenly spaced positions without
-separator rows. An omission footer counts undisplayed rows.
-With <code>n = 1</code>, both styles show the first row; short tables do not repeat rows.</p>
+    <p><strong>Reading a preview</strong></p>
+<p>Head/tail previews divide <code>n</code> between the first and last rows, giving any
+extra row to the beginning. Dots mark an omitted middle. Interval previews
+show approximately evenly spaced rows without separators. Both styles show
+the first row when <code>n = 1</code>, avoid repeating rows in short tables, and report
+the number of omitted rows in a footer.</p>
 <p>Row numbers refer to the current table after filtering or sorting. Grouped
-tables use one display budget across all groups. <code>print(x, n = Inf, width = Inf)</code> shows every row and column without changing stored preferences.
-Previews control console printing, not HTML widgets or GUI viewers.</p>
-<p><strong>Working with previews</strong></p>
+tables share one display budget. Use <code>print(x, n = Inf, width = Inf)</code> to show
+all rows and columns without changing preferences. Previews affect console
+printing, not HTML widgets or GUI viewers.</p>
+<p>Omission dots align with numeric decimal points (or the last significand
+digit when no decimal is shown) and the last row-number digit. Other columns,
+including numeric columns without displayed numbers, use centered dots.
+Without Unicode output, the markers use periods.</p>
+<p><strong>Keeping or removing preferences</strong></p>
 <p>Settings follow supported base subsetting/replacement, dplyr row and column
-operations, grouping (including rowwise operations), summaries and reframing,
-and tidyr pivots. These operations determine the result's container and
-grouping. Joins inherit the left input's settings; <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows()</a></code> inherits the
-first input's settings. Arbitrary third-party transformations and direct
-<code><a href="https://vctrs.r-lib.org/reference/vec_bind.html" class="external-link">vctrs::vec_rbind()</a></code> are not covered by this guarantee.</p>
-<p>Converting with <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">tibble::as_tibble()</a></code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, or extracting a
-column, removes the preview. Wrapping and unwrapping a data.table makes an
-independent copy; subsequent native operations such as <code>:=</code> retain ordinary
-reference semantics. Column classes and labels are preserved.</p>
+operations, grouping (including rowwise), summaries, reframing and tidyr
+pivots. Those operations determine the resulting container and groups.
+Joins use the left input's settings; <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows()</a></code> uses the first input's.
+Arbitrary third-party transformations and direct <code><a href="https://vctrs.r-lib.org/reference/vec_bind.html" class="external-link">vctrs::vec_rbind()</a></code> calls
+are not covered.</p>
+<p><code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">tibble::as_tibble()</a></code>, <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> and column extraction remove the
+preview. Wrapping or unwrapping a data.table creates an independent copy;
+subsequent native operations such as <code>:=</code> keep ordinary reference semantics.
+Column classes and labels are preserved.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

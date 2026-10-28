@@ -47,65 +47,59 @@ integer preservation.
 
 ## Details
 
-**Output type**
+**Matching rules**
 
-Integer input stays integer when every code and `.default` is a whole
-number within integer range, so `1:5 ~ 1` does not promote it to double.
-Double input stays double. Fractions, out-of-range numbers, infinities,
-`NaN`, and tagged missing codes or defaults require double output;
-ordinary `NA` does not promote integer input. The input is not modified.
+Rules apply to the original input, after SPSS missing-value conversion.
+The first match wins: `1 ~ 2, 2 ~ 1` swaps the codes. Unmatched values
+stay unchanged unless `.default` replaces them, including unmatched
+missing values.
 
-**Matching**
+The left side of a rule accepts:
 
-The left side of each rule is read before evaluation:
+- `a:b`: A closed range, including decimals. Like Stata's `a/b`, `1:5`
+  matches 4.5. Bounds must be single non-missing numbers in increasing
+  order (equal bounds are allowed); `lo:hi` reads them from the
+  formula's environment.
 
-- `a:b` selects the closed range `a <= x <= b`, including decimals, like
-  Stata's `a/b`. Thus `1:5` matches `4.5`, rather than enumerating
-  integers. Bounds must be single non-missing numbers, with the lower
-  bound no greater than the upper bound. `lo:hi` uses the formula's
-  environment.
+- `c(...)`: A combination of values and ranges, such as `c(1, 3:5)`.
 
-- `c(...)` combines values and ranges, for example `c(1, 3:5)`.
+- Other expressions: An evaluated set of values to match exactly.
+  Missing selectors match all missing types, as described below.
 
-- Other expressions are evaluated as value sets. Non-missing values
-  match exactly; a missing value in a set matches every missing type, as
-  below.
-
-Rules match the input before any replacements, after SPSS missing-value
-conversion. The first matching rule wins, so `1 ~ 2, 2 ~ 1` swaps the
-codes. Supply `.default` to replace all unmatched elements, including
-missing ones.
-
-On the left side, bare `min` and `max` mean `-Inf` and `Inf`. Unlike
-Stata's keywords, they do not refer to observed extrema: `min:min` does
-not select the smallest observed code. Calls such as `min(x)` still
-evaluate normally. Bounds, like value sets, must be ordinary integer or
-double numbers; convert classed numbers such as `integer64` explicitly.
+Bare `min` and `max` on the left mean `-Inf` and `Inf`, not observed
+extrema: `min:min` does not select the smallest observed value. Calls
+such as `min(x)` evaluate normally. Bounds and value sets must use
+ordinary integer or double numbers; convert classed numbers such as
+`integer64` explicitly.
 
 **Missing values and labels**
 
-`NA ~ code` matches `NA`, `NaN`, and all tagged missing values, like
-Stata's `missing` keyword. The same applies to any missing selector: for
-example, `haven::tagged_na("a") ~ 0` also replaces other tags and
-ordinary `NA`. Individual missing types cannot be selected separately.
-Unmatched tagged missing values keep their tags when `.default` is
-omitted.
+Any missing selector matches `NA`, `NaN` and every tagged missing value.
+Thus `NA ~ 0` and `haven::tagged_na("a") ~ 0` both replace all missing
+types; individual tags cannot be selected separately. Unmatched tags
+survive when `.default` is omitted. SPSS user-missing codes and ranges
+become `NA` before matching, so their stored codes cannot be matched as
+ordinary numbers.
 
-SPSS user-missing codes and ranges become `NA` before matching, so their
-stored codes cannot be selected as ordinary numbers. Old value labels
-are removed even when no values change. Named rules supply new labels,
-which are kept even if their codes are unobserved. A code cannot have
-two labels, a label cannot name two codes, and a missing code cannot be
-labelled.
+Old value labels are removed even if no values change. Named rules
+create new labels, including for unobserved codes. Labels and codes must
+correspond one-to-one, and missing codes cannot be labelled.
+
+**Output type**
+
+Integer input stays integer if all replacement codes and defaults are
+whole numbers within integer range: `1:5 ~ 1` does not force double
+output. Fractions, out-of-range values, infinities, `NaN` and tagged
+missing values require doubles; ordinary `NA` does not. Double input
+stays double, and the input is never modified.
 
 **Stata and other R functions**
 
 Use
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-to replace a variable or create a new one, as with Stata's `generate()`
-option. Use
+to replace or create a variable (Stata's `generate()`), and
 [`dplyr::across()`](https://dplyr.tidyverse.org/reference/across.html)
-to apply rules to several variables. Common rule translations are:
+to recode several columns. Common translations are:
 
 |                   |                    |
 |-------------------|--------------------|
@@ -117,23 +111,21 @@ to apply rules to several variables. Common rule translations are:
 | `(else = .)`      | `.default = NA`    |
 | `(1/5 = 1 "Low")` | `Low = 1:5 ~ 1`    |
 
-Like Stata's `recode`, these functions operate on numeric values. For
-text, use
+These functions recode numeric values. For text, use
 [`dplyr::recode_values()`](https://dplyr.tidyverse.org/reference/recode-and-replace-values.html)
 or
 [`dplyr::replace_values()`](https://dplyr.tidyverse.org/reference/recode-and-replace-values.html)
-in dplyr 1.2.0 and later, or
+in dplyr 1.2.0 or later, or
 [`dplyr::case_match()`](https://dplyr.tidyverse.org/reference/case_match.html)
-with older versions. For factors, use
+in older versions. For factors, use
 [`forcats::fct_recode()`](https://forcats.tidyverse.org/reference/fct_recode.html)
 or
 [`forcats::fct_collapse()`](https://forcats.tidyverse.org/reference/fct_collapse.html).
 
-The alias `recode()` shares its name with
+The alias `recode()` conflicts with
 [`dplyr::recode()`](https://dplyr.tidyverse.org/reference/recode.html).
-Whichever package is attached last masks the other. Prefer
-`stata_recode()` or an explicit namespace to avoid attach-order
-ambiguity.
+Use `stata_recode()` or an explicit namespace to avoid depending on
+which package was attached last.
 
 ## See also
 

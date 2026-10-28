@@ -23,7 +23,7 @@ statistics."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -206,10 +206,11 @@ except that <code>.type = "tibble"</code> always returns a tibble.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Statistics are calculated separately for each selected variable and group.
-The formulas below use non-missing measured values <code>x1, ..., xn</code>, with
-<code>n</code> denoting their count and <code>xbar</code> their arithmetic mean. Unless weights
-are supplied, calculations are unweighted.</p>
+    <p>Each variable is summarised separately within each group. Expressions in
+<code>...</code> are evaluated before grouping; use grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code> first
+for group-specific computations.</p>
+<p>The formulas below use non-missing values <code>x1, ..., xn</code>, their count <code>n</code>,
+and their mean <code>xbar</code>. Calculations are unweighted unless weights are supplied.</p>
 <p><strong>Counts and completeness</strong></p><ul><li><p><code>type</code>: Variable type (metadata, not a calculated statistic).</p></li>
 <li><p><code>n</code>: Number of non-missing values.</p></li>
 <li><p><code>unique</code>: Number of distinct non-missing values.</p></li>
@@ -240,9 +241,9 @@ as in <code><a href="https://rdrr.io/r/stats/mad.html" class="external-link">sta
 <p>Define <code>mk = sum((x - xbar)^k) / n</code>, the <code>k</code>th population central moment.</p><ul><li><p><code>skew</code>: Skewness, <code>m3 / m2^(3/2)</code>.</p></li>
 <li><p><code>kurtosis</code>: Pearson kurtosis, <code>m4 / m2^2</code>. A normal distribution has
 kurtosis 3, not 0 (this is not excess kurtosis).</p></li>
-</ul><p>Undefined statistics are <code>NA</code> (for example, <code>sd</code> when <code>n &lt; 2</code> and the
-shape statistics for constant variables). Columns with no observed values
-have <code>n = 0</code>, <code>unique = 0</code>, and <code>NA</code> for numeric statistics, including <code>sum</code>.</p>
+</ul><p>Undefined statistics are <code>NA</code>: for example, <code>sd</code> with fewer than two values,
+or shape statistics for constant variables. With no observed values,
+<code>n</code> and <code>unique</code> are 0; numeric statistics, including <code>sum</code>, are <code>NA</code>.</p>
 <p><strong>When weights are supplied</strong></p>
 <p>Let <code>w</code> be the weights and <code>W = sum(w)</code> over non-missing measured values.</p><ul><li><p><strong>Frequency weights</strong> (<code>.wt_type = "frequency"</code>) use weights as given.
 The reported <code>n</code> is <code>W</code>; non-integer weights are permitted.</p></li>
@@ -264,7 +265,7 @@ unrescaled weights, even for analytic weights. <code>unique</code>, <code>miss_n
 <code>valid_pct</code> continue to use unweighted row counts.</p></li>
 </ul><p>The reported <code>se</code> is descriptive and does not account for a complex survey
 design. For survey inference, use functions such as <code>survey::svymean()</code>.</p>
-<p><strong>Data types and grouping</strong></p>
+<p><strong>Data types and display</strong></p>
 <p>Missingness follows <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code>, including SPSS user-missing codes. Logical
 variables are treated as 0/1; factors use their underlying numeric codes;
 labelled numeric variables use their stored values. Messages note such
@@ -277,9 +278,6 @@ their spreads (<code>sd</code>, <code>se</code>, <code>mad</code>, <code>iqr</co
 With <code>.type = "table"</code> or <code>"tibble"</code>, calendar locations are text and spreads
 are numeric durations (days for Dates, seconds for datetimes and times of
 day).</p>
-<p>Expressions in <code>...</code> are evaluated on ungrouped working data before
-statistics are calculated by group. For group-specific expressions, first
-create columns with grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>.</p>
     </div>
 
     <div class="section level2">

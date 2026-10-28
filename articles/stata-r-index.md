@@ -2091,9 +2091,9 @@ examples; this is not an installation list.
   `encode`](https://socimh.github.io/tidystata/articles/stata-labels.html#example-legacy-0103)
 - [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) —
   Find the R equivalent of a Stata command
-- [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+- [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md)
   — Look up one Stata command from the clipboard
-- [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
+- [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)
   — Look up one selected Stata command in the source editor
 - [`fre()`](https://socimh.github.io/tidystata/reference/tab.md) — Joint
   frequency table like tab(), adding totals and displaying value labels

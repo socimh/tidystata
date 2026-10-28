@@ -27,7 +27,7 @@ vectors and level text for factors.
 
     <a class="navbar-brand me-2" href="../index.html">tidystata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,77 +120,65 @@ typed empty results. None of these functions modifies the input.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>Reading numbers</strong></p>
-<p><code>destring()</code> reads text the way Stata's <code>destring</code> does. A value must be a
-number, optionally with a sign, exponent, currency symbol (dollar, euro,
-pound, yen), thousands separators (<code>1,234</code>), a trailing percent sign (<code>50%</code>
-gives 50) and surrounding spaces, including non-breaking spaces. Anything
-else, such as <code>"12abc"</code>, <code>"10 kg"</code> or a date, becomes <code>NA</code> with a warning,
-like Stata's <code>force</code> option; the
-positions and original values are kept in <code><a href="https://readr.tidyverse.org/reference/problems.html" class="external-link">readr::problems()</a></code>. Use <code>ignore</code>
-to remove other characters first, like Stata's <code>ignore()</code>: <code>destring(x, ignore = "kg")</code> reads <code>"10 kg"</code> as 10. Empty strings, <code>"NA"</code> and Stata's
-<code>"."</code> are missing without a warning; the text <code>"NaN"</code> becomes <code>NaN</code>. Date
-strings become <code>NA</code>; parse them with <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> or <code>lubridate::ymd()</code>
-instead.</p>
-<p>A factor whose levels are all numbers, such as <code>factor(c("1990", "2000"))</code>,
-gives those numbers (1990, 2000). Other factors give their level codes.
-Labelled numeric variables return their values; labelled text is read from
-its values like plain text.
-Unsupported numeric-conversion inputs, such as lists, raw vectors and complex
-vectors, return missing values of the same length.</p>
-<p><strong>Labels, missing values, and units</strong></p>
-<p><code>decode()</code> uses value labels when a labelled vector has a nonempty <code>labels</code>
-attribute. Without value labels, it uses ordinary character conversion,
-including for tagged missing values, so 100000 gives <code>"1e+05"</code>; use
-<code>tostring()</code> to write numbers in full.</p>
-<p><code>destring()</code> and <code>decode()</code> keep SPSS user-missing codes as values or labels.
-Numeric conversion preserves tagged missing values. Dates become days since
-1970-01-01; date-times become seconds since the Unix epoch. Durations and
-measured vectors retain their numeric values in their existing units.
-Conversion of large <code>integer64</code> values to double can lose precision and emits
-the underlying conversion warning.</p>
-<p><strong>Encoding categories</strong></p>
-<p><code>encode()</code> assigns codes 1, 2, 3, ... to distinct nonempty character values
-in UTF-8 radix order. Numeric-looking text is a category: <code>"10"</code>, <code>"20"</code>,
-<code>"3"</code> get codes 1, 2, 3, not the numbers 10, 20, 3. <code>NA</code> and <code>""</code> become
-missing; spaces are retained. Radix ordering is reproducible but can differ
-from locale-specific alphabetical ordering in Stata.</p>
-<p>For factors and ordered factors, <code>encode()</code> preserves the stored integer
-indices and uses all levels as value labels, including unused levels and
-explicit empty-string and <code>NA</code> levels. Numeric level text does not replace
-indices: <code>factor(c(10, 20))</code> has codes 1 and 2. Ordering metadata is dropped.</p>
-<p><code>encode(decode(x))</code> need not recover the original codes: decoding discards
-the dictionary, so re-encoding character text creates new codes starting
-at 1. Existing dictionaries cannot be supplied to <code>encode()</code>. Encode
-character columns before grouping to use one dictionary across groups;
-separate calls can assign conflicting codes. Factors with shared levels
-retain a common dictionary within grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>.</p>
-<p><code>decode()</code> follows Stata's value-label conversion but also accepts factors,
-labelled character vectors and unlabelled inputs as an R convenience. It
-falls back to ordinary character conversion when no value labels exist.
-For partial dictionaries, unlabelled values remain as text, whereas Stata
-returns empty strings for them.</p>
-<p><strong>Text formatting</strong></p>
-<p><code>tostring()</code> and its alias <code>as_character()</code> ignore value labels: labelled
-numeric vectors and factors give their codes. For non-character input, values
-flagged by <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code>, including <code>NaN</code>, tagged missing values, and SPSS
-user-missing codes, become <code>NA</code>.
-Character input is returned unchanged. Numbers are written in full, so 100000
-gives <code>"100000"</code>, not <code>"1e+05"</code>, with the significant digits of
-<code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code> and a decimal point whatever <code>options(OutDec)</code> says.
-This precision policy can map distinct large numbers to the same text;
-keep identifiers as character or <code>integer64</code> vectors when exact digits matter.
-AsIs wrappers are ignored for non-character input. Measured values and
-durations are written as numbers in their existing units.
-Dates use <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>, giving <code>"2024-01-31"</code> rather than day numbers.
-Unlike Stata's <code>tostring</code>, missing values remain <code>NA</code> rather than becoming
-the strings <code>"."</code> or <code>".a"</code> through <code>".z"</code>.</p>
-<p>The sjlabelled package also exports <code>as_numeric()</code> and <code>as_character()</code>. They
-differ: sjlabelled's <code>as_numeric()</code> turns non-numeric text into factor codes,
-and its <code>as_character()</code> gives <code>NA</code> for unlabelled values. Whichever package
-is attached last masks the other; write <code>tidystata::as_numeric()</code> to be
-explicit, or use <code>destring()</code> and <code>tostring()</code>, which do not clash. To read
-value labels as text, use <code>decode()</code>.</p>
+    <p><strong>Reading numbers with <code>destring()</code></strong></p>
+<p>Text must contain a complete number. Signs, exponents, dollar/euro/pound/yen
+symbols, thousands separators (<code>"1,234"</code>), trailing percent signs (<code>"50%"</code>
+gives 50) and surrounding spaces, including non-breaking spaces, are accepted.
+Use <code>ignore</code> to remove other characters first: <code>ignore = "kg"</code> lets
+<code>"10 kg"</code> become 10.</p>
+<p>Invalid text becomes <code>NA</code> with a warning, like Stata's <code>force</code> option.
+<code><a href="https://readr.tidyverse.org/reference/problems.html" class="external-link">readr::problems()</a></code> gives its positions and original values. Empty strings,
+<code>"NA"</code> and <code>"."</code> become missing without a warning; <code>"NaN"</code> becomes <code>NaN</code>.
+Date strings are invalid; parse them with <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code> or <code>lubridate::ymd()</code>.</p>
+<p>Factors give their numeric level values only when every level, including
+unused levels, parses as a number. Otherwise they give their integer codes.
+Labelled vectors use their stored values, parsing text as above. SPSS
+user-missing codes remain values, and tagged missing values retain their tags.
+Lists, raw vectors and complex vectors give <code>NA</code> for each element.</p>
+<p>Dates become days since 1970-01-01; date-times become seconds since the Unix
+epoch. Durations and measured values keep their numbers in the existing
+units. Large <code>integer64</code> values can lose precision when converted to double,
+with a warning from the underlying conversion.</p>
+<p><strong>Creating labels with <code>encode()</code></strong></p>
+<p>Character categories receive codes 1, 2, 3, ... in UTF-8 radix order, which
+is reproducible but may differ from Stata's locale-based ordering.
+Numeric-looking text is still a category: <code>"10"</code>, <code>"20"</code>, <code>"3"</code> receive
+codes 1, 2, 3. <code>NA</code> and <code>""</code> become missing; spaces are retained.</p>
+<p>Factors keep their integer codes and use all levels as labels, including
+unused, empty-string and explicit <code>NA</code> levels. For example,
+<code>factor(c(10, 20))</code> keeps codes 1 and 2. Ordered factors lose their ordering
+metadata.</p>
+<p>Encode character columns before grouping so every group uses the same
+codes. Separate calls can assign different codes; factors with shared
+levels keep consistent codes in grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>. You cannot supply
+an existing label dictionary. Re-encoding decoded text creates a new
+dictionary, so <code>encode(decode(x))</code> may change the original codes.</p>
+<p><strong>Reading labels with <code>decode()</code></strong></p>
+<p><code>decode()</code> uses value labels when available and factor levels for factors.
+Values without a label remain as text, whereas Stata turns them into empty
+strings. SPSS user-missing codes remain values or labels.</p>
+<p>Inputs without value labels use ordinary <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code> conversion,
+including for tagged missing values. Thus 100000 may become <code>"1e+05"</code>;
+use <code>tostring()</code> to write numbers in full. Unlike Stata's <code>decode</code>, this
+function also accepts factors, labelled character vectors and unlabelled
+inputs.</p>
+<p><strong>Writing text with <code>tostring()</code></strong></p>
+<p><code>tostring()</code> ignores value labels and converts factor codes to text.
+Numbers are written in full (<code>100000</code> becomes <code>"100000"</code>), with the
+significant digits of <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code> and a decimal point regardless of
+<code>options(OutDec)</code>. Distinct large numbers can produce the same text; keep
+identifiers as character or <code>integer64</code> vectors when exact digits matter.</p>
+<p>For non-character input, values flagged by <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code> become <code>NA</code>, including
+<code>NaN</code>, tagged missing values and SPSS user-missing codes. Stata instead
+writes missing values as <code>"."</code> or <code>".a"</code> through <code>".z"</code>. Character input is
+unchanged. AsIs wrappers are ignored for other inputs; durations and
+measured values use their existing units. Dates use <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>,
+for example <code>"2024-01-31"</code>.</p>
+<p>The aliases <code>as_numeric()</code> and <code>as_character()</code> also exist in sjlabelled,
+with different behavior: its numeric conversion codes non-numeric text as
+factors, and its character conversion makes unlabelled values <code>NA</code>. Use
+<code>tidystata::as_numeric()</code> or the names <code>destring()</code> and <code>tostring()</code> to
+avoid depending on which package was attached last.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -232,19 +220,15 @@ value labels as text, use <code>decode()</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  value label</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      1 alpha</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      2  beta</span>
-<span class="r-in"><span><span class="fu">tostring</span><span class="op">(</span><span class="va">category</span><span class="op">)</span> <span class="co"># integer codes as text</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># integer codes as text</span></span></span>
+<span class="r-in"><span><span class="fu">tostring</span><span class="op">(</span><span class="va">category</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2" "1" "2" NA  NA </span>
-<span class="r-in"><span><span class="fu">decode</span><span class="op">(</span><span class="va">category</span><span class="op">)</span> <span class="co"># category text</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># category text</span></span></span>
+<span class="r-in"><span><span class="fu">decode</span><span class="op">(</span><span class="va">category</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "beta"  "alpha" "beta"  NA      NA     </span>
-<span class="r-in"><span><span class="fu">encode</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Yes"</span>, <span class="st">"No"</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Unused"</span>, <span class="st">"No"</span>, <span class="st">"Yes"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;labelled&lt;integer&gt;[2]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Labels:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  value  label</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1 Unused</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      2     No</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      3    Yes</span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

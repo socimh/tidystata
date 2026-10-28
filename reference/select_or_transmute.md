@@ -35,39 +35,38 @@ computed columns use their expression as the name.
 
 ## Details
 
-Each argument is classified before evaluation. Column names, strings,
-numeric positions, selection syntax
-([`c()`](https://rdrr.io/r/base/c.html), `:`, `!`, `&`, `|`, unary `-`)
-and tidyselect helpers such as
-[`starts_with()`](https://tidyselect.r-lib.org/reference/starts_with.html),
-[`where()`](https://tidyselect.r-lib.org/reference/where.html),
-[`all_of()`](https://tidyselect.r-lib.org/reference/all_of.html) or
+**Selecting and computing**
+
+Selections and computations can be mixed; columns follow argument order.
+Column names, strings, positions, tidyselect helpers and
 [`varlist()`](https://socimh.github.io/tidystata/reference/varlist.md)
-select existing columns, as do calls that use no column names (for
-example `all_of(vars)` or `seq_len(2)`). Any other expression that uses
-columns, such as `lexp >= 70` or `gnp_thousands = gnppc / 1000`, is
-computed with
+select existing columns. Selection syntax includes
+[`c()`](https://rdrr.io/r/base/c.html), `:`, `!`, `&`, `|` and unary
+`-`. Calls without column names, such as `all_of(vars)` or `seq_len(2)`,
+also act as selections.
+
+Other expressions using columns, such as `lexp >= 70` or
+`gnp_thousands = gnppc / 1000`, are computed with
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
-and then selected, so arithmetic is never misread as column positions.
-Selections and computed values can be mixed; output follows argument
-order.
+and then selected. Arithmetic is therefore not interpreted as column
+positions. Named constants (`one = 1`, `label = "x"`, `y = c(1, 2)`)
+create columns; they do not select or rename existing columns by
+position.
 
-A named constant such as `one = 1`, `label = "x"` or `y = c(1, 2)`
-creates a constant column; it never selects or renames columns by
-position. Unnamed names, strings and positions must identify existing
-columns. If they do not, an error lists every unmatched name instead of
-evaluating them as expressions, so a misspelled column is never replaced
-by an object of the same name in the calling environment. (A symbol
-naming a character vector in the calling environment is still passed to
-tidyselect, which deprecates that form in favour of
-[`all_of()`](https://tidyselect.r-lib.org/reference/all_of.html).)
+**Names and fallback evaluation**
 
-If selection itself fails for another reason (for example, duplicate
-output names), the arguments are evaluated sequentially with
-[`dplyr::transmute()`](https://dplyr.tidyverse.org/reference/transmute.html);
-if that also fails, the error reports both attempts. Computed
-expressions are evaluated once when selection succeeds. Grouping columns
-are retained according to dplyr's selection rules.
+Unnamed names, strings and positions must identify existing columns. An
+error lists unmatched names; a misspelling never falls back to a
+same-named object in the calling environment. A symbol holding a
+character vector is still passed to tidyselect, which deprecates this
+use; write `all_of(vars)`.
+
+If selection fails for another reason, such as duplicate output names,
+the arguments are retried sequentially with
+[`dplyr::transmute()`](https://dplyr.tidyverse.org/reference/transmute.html).
+If both attempts fail, the error reports both. Computations run once
+when selection succeeds; a fallback can evaluate them again. Grouping
+columns follow dplyr's selection rules.
 
 ## See also
 

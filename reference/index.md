@@ -2,11 +2,10 @@
 
 ## Coming from Stata
 
-- [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) :
-  Find R equivalents of Stata commands
-- [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
-  [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit_selection.md)
-  : Look up Stata text from the editor or clipboard
+- [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
+  [`findit_selection()`](https://socimh.github.io/tidystata/reference/findit.md)
+  [`findit_clip()`](https://socimh.github.io/tidystata/reference/findit.md)
+  : Find R equivalents of Stata commands
 
 ## Inspect variables
 

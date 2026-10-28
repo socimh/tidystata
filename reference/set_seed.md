@@ -69,8 +69,6 @@ sample(1:10, 8) |>
 
 # Set seeds without a pipeline
 set_seed(123)
-result <- sample(1:10, 8)
-set_seed(456)
-sample(result, 5)
-#> [1] 6 7 2 1 8
+sample(1:10, 8)
+#> [1]  3 10  2  8  6  9  1  7
 ```
