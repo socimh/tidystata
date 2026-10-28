@@ -62,7 +62,9 @@ tabstat(
   or
   \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
   Variables to summarise, or named expressions such as
-  `income_k = income / 1000`. Defaults to all nongrouping columns.
+  `income_k = income / 1000`. Defaults to all nongrouping columns except
+  the weight column. Matrix and nested data-frame columns are not
+  supported.
 
 - .by:
 
@@ -76,7 +78,7 @@ tabstat(
 
   If `TRUE`, retain character and list columns for counts and distinct
   values; other statistics for these columns are `NA`. By default,
-  unsupported columns are omitted with a warning.
+  unsupported columns are omitted with a message.
 
 - .detail:
 
@@ -126,8 +128,9 @@ tabstat(
 
 - .wt:
 
-  Optional numeric weights, supplied as a column or a vector. Rows with
-  missing weights are excluded; negative weights are invalid.
+  Optional finite, nonnegative numeric weights, supplied as a column,
+  one value per input row, or a scalar recycled to all rows. Rows with
+  missing weights are excluded with a message.
 
 - .wt_type:
 
@@ -260,7 +263,7 @@ survey design. For survey inference, use functions such as
 Missingness follows [`is.na()`](https://rdrr.io/r/base/NA.html),
 including SPSS user-missing codes. Logical variables are treated as 0/1;
 factors use their underlying numeric codes; labelled numeric variables
-use their stored values. Warnings flag such conversions. Variable names
+use their stored values. Messages note such conversions. Variable names
 are marked with `*` for labelled variables, `**` for factors, and `***`
 for retained nonnumeric variables. Numeric calculations use double
 precision, which may affect large `integer64` values.
@@ -272,16 +275,17 @@ in list mode. With `.type = "table"` or `"tibble"`, calendar locations
 are text and spreads are numeric durations (days for Dates, seconds for
 datetimes and times of day).
 
-Expressions in `...` are evaluated before statistics are calculated by
-group. For group-specific expressions, first create columns with grouped
+Expressions in `...` are evaluated on ungrouped working data before
+statistics are calculated by group. For group-specific expressions,
+first create columns with grouped
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 
 ## Examples
 
 ``` r
 summ(lifeexp)
-#> Warning: country is non-numeric and thus removed.
-#> Warning: region is a labelled variable (*).
+#> country is non-numeric and thus removed.
+#> region is a labelled variable (*).
 #> # A tibble: 5 × 8
 #>   name      type        n unique   min     mean        sd     max
 #>   <chr>     <chr>   <int>  <int> <dbl>    <dbl>     <dbl>   <dbl>
@@ -292,7 +296,7 @@ summ(lifeexp)
 #> 5 safewater dbl        54     32  36     77.2      20.6     100  
 
 summ(lifeexp, .by = region)
-#> Warning: country is non-numeric and thus removed.
+#> country is non-numeric and thus removed.
 #> # A tibble: 12 × 9
 #>    region               name     type      n unique   min    mean      sd    max
 #>    <dbl+lbl>            <chr>    <chr> <int>  <int> <dbl>   <dbl>   <dbl>  <dbl>
@@ -310,7 +314,7 @@ summ(lifeexp, .by = region)
 #> 12 3 [South America]    safewat… dbl       6      6  45   6.53e+1 1.70e+1 9.1 e1
 
 tabstat(lifeexp, .by = region)
-#> Warning: country is non-numeric and thus removed.
+#> country is non-numeric and thus removed.
 #> # A tibble: 12 × 4
 #>    region               name      type        mean
 #>    <dbl+lbl>            <chr>     <chr>      <dbl>
@@ -365,7 +369,7 @@ lifeexp |>
 
 # Exclude rows with missing group keys
 summ(lifeexp, .by = region, .missing = FALSE)
-#> Warning: country is non-numeric and thus removed.
+#> country is non-numeric and thus removed.
 #> # A tibble: 12 × 9
 #>    region               name     type      n unique   min    mean      sd    max
 #>    <dbl+lbl>            <chr>    <chr> <int>  <int> <dbl>   <dbl>   <dbl>  <dbl>

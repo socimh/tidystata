@@ -27,7 +27,27 @@ findit(reg)
 #> R:     fit <- lm(y ~ x1 + x2, data = data)
 #> # Note: summary(fit) shows the coefficient table; broom::tidy(fit) returns it as a data frame.
 #> 
-#> # 17 more examples. To see them all: findit(reg) |> print(n = Inf)
+#> # Fit linear regression through the origin [stats]
+#> Stata: regress y x z, noconstant
+#> R:     stats::lm(y ~ x + z - 1, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Include two continuous main effects and their interaction [stats]
+#> Stata: regress y c.x##c.z
+#> R:     stats::lm(y ~ x * z, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Fit a quadratic regression [stats]
+#> Stata: regress y c.x##c.x
+#> R:     stats::lm(y ~ x + I(x^2), data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Adjust regression for a categorical predictor [stats]
+#> Stata: regress y i.g c.x
+#> R:     stats::lm(y ~ factor(g) + x, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # 13 more relevant examples. To see them all: findit(reg) |> print(n = Inf)
 findit("merge 1:1 id, keep(match)")
 #> # Keep matched rows only [dplyr]
 #> Stata: merge 1:1 id using data2, keep(match)
@@ -37,26 +57,43 @@ findit("merge 1:1 id, keep(match)")
 #> # merge() [base]: Merge two data frames (base R)
 #>   Related Stata: merge
 #> 
-#> # 17 more examples. To see them all: findit("merge 1:1 id, keep(match)") |> print(n = Inf)
+#> # 12 broader merge examples. Browse the family: findit(merge)
 ```
 
 也可以查询 R
 函数（`findit(left_join)`），或直接提问（`findit("如何删除重复行")`）。
-控制台显示最相关的结果，返回的表保留全部匹配项；不带参数的
+单独查询命令（例如
+`findit(egen)`）时，返回整个命令族，默认显示最多五种操作。
+具体查询（例如
+`findit("egen rowmean")`）在答案明确时返回一个结果；有歧义的查询
+最多保留十个相关候选。不带参数的
 [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
 返回完整列表。
 
 逗号分隔的变量名会填入兼容的示例，例如
-`findit(tab, sex, region)`。任务明确时默认只显示
-一个优先推荐的答案；`findit(tab) |> print(n = Inf)` 展开全部变体、精选的
-R 实现、 差异说明和参考链接。`findit(dplyr::filter)`
+`findit(tab, sex, region)`。匹配的提示词 （例如
+`findit(tab, gen)`）可将结果缩小到一个答案。`print(n = Inf)`
+展开返回的候选、
+差异说明和参考链接。末尾提示分别列出尚未显示的相关结果和命令族中更广泛的操作；
+使用 `findit(egen)` 浏览整个命令族。同一操作内依次优先推荐
+tidystata、tidyverse、 其他包或基础 R。`findit(dplyr::filter)`
 这样的包限定查询可以区分同名函数。
 
-本指南包含 514 个命令族、181 个 Stata 函数和 3 个运算符，共有 1719
-个不同的 Stata 示例和 1785 条 R 对照示例。缩写及同一任务的其他 R
-实现不会增加命令数量。 R 函数索引包含 964 个函数与包的组合。
+本指南包含 514 个命令族、181 个 Stata 函数和 3 个运算符，共有 1721
+个不同的 Stata 示例和 1877 条 R 对照示例。缩写及同一任务的其他 R
+实现不会增加命令数量。 R 函数索引包含 969 个函数与包的组合。
 
 ## 使用命令对照表
+
+[`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)（[`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md)）将数值文本转换为数字，[`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+（[`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md)）将底层编码转换为文本。分类变量使用
+[`encode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+将字符串 转换为带值标签的整数编码，使用
+[`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+将值标签读为文本。字符输入按排序顺序 从 1
+开始分配新编码；因子输入保留现有整数编号及全部水平。 `encode(decode(x))`
+不一定恢复原编码。字符列应在分组之前编码，以便所有行使用
+同一套编码与标签。
 
 下表涵盖 tidystata 和其他常用 R 包，包括建模、长宽转换、调查分析和作图。
 面板滞后、超前和差分可使用 tidystata 的
@@ -1063,7 +1100,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html) | dplyr |  | 把数据上下拼接 |
 | [`c_across()`](https://dplyr.tidyverse.org/reference/c_across.html) | dplyr | egen rowtotal() | 在 rowwise() 中组合多列 |
 | [`case_match()`](https://dplyr.tidyverse.org/reference/case_match.html) | dplyr | recode | 按取值匹配重新编码 |
-| [`case_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html) | dplyr |  | 一次写多个条件分支 |
+| [`case_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html) | dplyr | recode | 一次写多个条件分支 |
 | [`coalesce()`](https://dplyr.tidyverse.org/reference/coalesce.html) | dplyr |  | 多个向量中第一个非缺失值 |
 | [`consecutive_id()`](https://dplyr.tidyverse.org/reference/consecutive_id.html) | dplyr | tsspell | 对连续相同的取值编号 |
 | [`contains()`](https://tidyselect.r-lib.org/reference/starts_with.html) | dplyr |  | 选择名称包含某段文本的列 |
@@ -1079,6 +1116,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`ends_with()`](https://tidyselect.r-lib.org/reference/starts_with.html) | dplyr |  | 选择名称以某段文本结尾的列 |
 | [`everything()`](https://tidyselect.r-lib.org/reference/everything.html) | dplyr | \_all | 选择所有列 |
 | [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) | dplyr |  | 保留满足条件的行 |
+| [`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html) | dplyr | drop if | 删除满足条件的行，保留条件为缺失的行 |
 | [`first()`](https://dplyr.tidyverse.org/reference/nth.html) | dplyr | x\[1\] | 第一个值 |
 | [`full_join()`](https://dplyr.tidyverse.org/reference/mutate-joins.html) | dplyr |  | 合并并保留两个数据的所有行 |
 | [`glimpse()`](https://pillar.r-lib.org/reference/glimpse.html) | dplyr | describe | 紧凑地查看所有列 |
@@ -1101,18 +1139,19 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) | dplyr |  | 生成或修改列 |
 | [`n()`](https://dplyr.tidyverse.org/reference/context.html) | dplyr |  | 当前组的行数 |
 | [`n_distinct()`](https://dplyr.tidyverse.org/reference/n_distinct.html) | dplyr | distinct | 不同取值的个数 |
-| [`na_if()`](https://dplyr.tidyverse.org/reference/na_if.html) | dplyr |  | 把某个取值改为缺失值 |
+| [`na_if()`](https://dplyr.tidyverse.org/reference/na_if.html) | dplyr | mvdecode | 把某个取值改为缺失值 |
 | [`near()`](https://dplyr.tidyverse.org/reference/near.html) | dplyr | reldif() | 带容差地比较数值 |
 | [`nth()`](https://dplyr.tidyverse.org/reference/nth.html) | dplyr | x\[5\] | 指定位置的值 |
 | [`ntile()`](https://dplyr.tidyverse.org/reference/ntile.html) | dplyr | xtile | 分成 n 个大小相近的组 |
 | [`num_range()`](https://tidyselect.r-lib.org/reference/starts_with.html) | dplyr | keep x1-x5 | 按编号选择 x1、x2 等列 |
-| [`percent_rank()`](https://dplyr.tidyverse.org/reference/percent_rank.html) | dplyr | egen rank() | 缩放到 0 到 1 的秩 |
+| [`percent_rank()`](https://dplyr.tidyverse.org/reference/percent_rank.html) | dplyr | egen rank() | 百分位秩：（最小秩 - 1）/（非缺失值个数 - 1）；乘以 100 转为百分数 |
 | [`pick()`](https://dplyr.tidyverse.org/reference/pick.html) | dplyr | varlist | 在 mutate() 或 summarise() 中选取列 |
 | [`pull()`](https://dplyr.tidyverse.org/reference/pull.html) | dplyr |  | 把一列提取为向量 |
 | [`reframe()`](https://dplyr.tidyverse.org/reference/reframe.html) | dplyr | collapse | 每组汇总为任意行数 |
 | [`relocate()`](https://dplyr.tidyverse.org/reference/relocate.html) | dplyr |  | 移动列的位置 |
 | [`rename()`](https://dplyr.tidyverse.org/reference/rename.html) | dplyr |  | 重命名列（新名 = 旧名） |
 | [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html) | dplyr |  | 用函数（如 toupper）批量重命名列 |
+| [`replace_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html) | dplyr | replace if | 在条件成立处替换取值，其余保持不变 |
 | [`right_join()`](https://dplyr.tidyverse.org/reference/mutate-joins.html) | dplyr |  | 合并并保留第二个数据的所有行 |
 | [`row_number()`](https://dplyr.tidyverse.org/reference/row_number.html) | dplyr |  | 行号 |
 | [`rows_update()`](https://dplyr.tidyverse.org/reference/rows.html) | dplyr | merge, update replace | 用另一个数据更新行 |
@@ -1392,6 +1431,8 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `rddensity()` | rddensity | rddensity | 示例用途：处理阈值处密度连续性 |
 | `rdbwselect()` | rdrobust | rdbwselect | 示例用途：断点带宽选择：mserd |
 | `rdrobust()` | rdrobust |  | 断点回归 |
+| `locale()` | readr |  | 指定解析时的小数点、编码和日期约定 |
+| `parse_double()` | readr | destring, dpcomma | 把文本解析为小数，可指定地区的小数点符号 |
 | `parse_number()` | readr | destring, ignore() | 从 \$1,200 这样的文本中提取数字 |
 | `read_csv()` | readr |  | 读取 CSV 文件 |
 | `read_delim()` | readr | import delimited | 读取任意分隔符的文件 |
@@ -1663,7 +1704,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | `uncount()` | tidyr |  | 把每行重复指定次数 |
 | `unite()` | tidyr | egen concat() | 把多列合并为一列 |
 | `unnest()` | tidyr | expand | 把列表列展开为行 |
-| [`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | decode | decode() 的别名 |
+| [`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | tostring | tostring() 的别名：将底层编码转换为文本 |
 | [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata |  | 为每个类别生成虚拟变量 |
 | [`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | destring | destring() 的别名 |
 | [`assert()`](https://socimh.github.io/tidystata/reference/assert.md) | tidystata |  | 逐行验证所有条件；不满足时报告失败行并停止 |
@@ -1681,6 +1722,7 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`duplicates_list()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | 列出重复行 |
 | [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | 统计重复行 |
 | [`duplicates_tag()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | 标记重复行 |
+| [`encode()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | encode | 将字符类别转换为带值标签的整数编码；保留因子编码 |
 | [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) | tidystata |  | 查找 Stata 命令对应的 R 函数 |
 | [`fre()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 与 tab() 相同的联合频数表，增加合计并显示值标签 |
 | [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata | tab1 | 与 tab1() 相同，每个变量一张单向表，增加合计并显示值标签 |
@@ -1691,14 +1733,14 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`mvdecode()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata |  | 把指定代码改为缺失值 |
 | [`mvencode()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata |  | 把缺失值替换为指定代码 |
 | [`na_if_value()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata | mvdecode | mvdecode() 的别名 |
-| [`pc()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | 占总和的百分比 |
-| [`pct()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata | egen pc() | pc() 的别名 |
+| [`pc()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | 占总和的百分比，不是百分位秩；prop = TRUE 返回比例 |
+| `pct()` | tidystata | egen pc() | 已移除的 pc() 别名；总和份额使用 pc()，百分位秩使用 dplyr::percent_rank() |
 | [`preview()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | 保存首尾行或等间隔控制台预览（默认显示 10 行数据），保留全部行和列 |
 | [`preview_headtail()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | 保存首尾行预览，用一行省略号标记省略的中间部分，保留全部数据 |
 | [`preview_interval()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | 保存近似等间隔行预览，不插入分隔行，保留全部数据 |
 | [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md) | tidystata |  | 单次打印首尾行，用一行省略号标记省略部分；不可见地返回完整输入，不改变已有预览偏好 |
 | [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md) | tidystata |  | 单次打印近似等间隔行，不插入分隔行；不可见地返回完整输入，不改变已有预览偏好 |
-| [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) | tidystata |  | 默认使用成对完整样本计算 Pearson 或 Spearman 相关；.listwise 使用同一完整样本并保留 p 值，可在各组内做 Bonferroni 或 Sidak 校正 |
+| [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md) | tidystata |  | 默认使用成对完整样本计算 Pearson 或 Spearman 相关；.listwise 使用同一完整样本并保留 p 值，可在各组内做 Bonferroni 或 Sidak 校正 |
 | [`recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md) | tidystata | recode | stata_recode() 的别名 |
 | [`row_max()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行求多个变量的最大值 |
 | [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行求多个变量的均值 |
@@ -1713,13 +1755,13 @@ dplyr，请先用 [`library(dplyr)`](https://dplyr.tidyverse.org) 或
 | [`row_var()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | 逐行计算各变量的样本方差 |
 | [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md) | tidystata |  | 返回选定列和计算列，同时保留分组列 |
 | [`set_seed()`](https://socimh.github.io/tidystata/reference/set_seed.md) | tidystata |  | 设定随机数种子，可单独使用或放在管道末尾 |
-| [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md) | tidystata |  | 默认使用同一完整样本计算不加权的 Spearman 秩相关；.pairwise 改用各对变量的完整样本；返回 r、n 和 Stata 18 起的 p 值，可在各组内校正 |
+| [`spearman()`](https://socimh.github.io/tidystata/reference/corr.md) | tidystata |  | 默认使用同一完整样本计算不加权的 Spearman 秩相关；.pairwise 改用各对变量的完整样本；返回 r、n 和 Stata 18 起的 p 值，可在各组内校正 |
 | [`stata_diff()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | 与上一期的差分（考虑时间间隔） |
 | [`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | 前若干期的值（考虑时间间隔） |
 | [`stata_lead()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | 后若干期的值（考虑时间间隔） |
 | [`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md) | tidystata |  | 合并两个数据并报告匹配结果，类似 Stata 的 merge |
 | [`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md) | tidystata |  | 按 Stata 风格的区间、取值集合和值标签重编码数值；未匹配的取值保持不变 |
-| [`std()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | 标准化为均值 0、标准差 1 |
+| [`std()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | Z 分数：减去非缺失值的均值，再除以样本标准差 |
 | [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) | tidystata |  | 变量的描述统计 |
 | [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | 在一张长表中统计类别组合的频数和百分比 |
 | [`tab_gen()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata | tabulate, generate() | as_dummy() 的别名 |

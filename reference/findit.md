@@ -35,13 +35,19 @@ findit(command = NULL, ...)
 A tibble of class `tidystata_findit` with one row per matching Stata
 idiom and five columns: `match` (match type), `stata` (Stata code), `r`
 (equivalent R code), `package` (primary R package), and `task`
-(description). All matches are returned, even when fewer are printed. If
-nothing matches, an empty tibble is returned invisibly with an
+(description). The returned object contains every selected match,
+including any hidden by printing. If nothing matches, a zero-row result
+with the same columns and class is returned invisibly with an
 explanatory message.
 
 ## Details
 
 **Matching**
+
+A clear specific query returns one preferred answer; ambiguous queries
+return up to ten relevant candidates. Bare Stata commands return the
+complete command family, and an omitted query returns the whole
+reference.
 
 - Stata abbreviations are recognized (`reg`, `regr`, `regress`), while R
   functions require their full names. Exact-case matches take priority.
@@ -49,18 +55,22 @@ explanatory message.
 
 - Stata command matches appear before R function matches. Keyword
   searches are used when neither matches. Additional syntax and hints
-  refine the ranking without discarding matches. `by` and `bysort`
-  prefixes prioritize grouped operations.
+  refine the ranking. Within the relevant operation, tidystata functions
+  take priority, followed by tidyverse functions, then other packages or
+  base R. `by` and `bysort` prefixes prioritize grouped operations.
 
-- Plain-language questions use deterministic keyword and synonym
-  matching in English or Chinese, without a language model.
+- Plain-language questions match curated keywords and synonyms in
+  English or Chinese.
 
 **Output**
 
 - Results print as readable Stata/R code pairs. A single clear match is
-  shown alone; otherwise, up to five representative examples appear. The
-  print method's `n` argument sets how many matches are printed; use
-  `print(n = Inf)` to display all matches.
+  shown alone; otherwise, up to five representative examples appear.
+  Bare commands browse their whole family; specific queries omit
+  unrelated family entries. Footers distinguish hidden relevant
+  candidates from broader family examples and report when the
+  ten-candidate limit applies. The print method's `n` argument sets how
+  many matches are printed; use `print(n = Inf)` to display all matches.
 
 - The `match` column identifies the lookup type: `"stata"`, `"r"`,
   `"keyword"`, `"nearest"`, or `"all"`.
@@ -91,7 +101,27 @@ findit(reg)
 #> R:     fit <- lm(y ~ x1 + x2, data = data)
 #> # Note: summary(fit) shows the coefficient table; broom::tidy(fit) returns it as a data frame.
 #> 
-#> # 17 more examples. To see them all: findit(reg) |> print(n = Inf)
+#> # Fit linear regression through the origin [stats]
+#> Stata: regress y x z, noconstant
+#> R:     stats::lm(y ~ x + z - 1, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Include two continuous main effects and their interaction [stats]
+#> Stata: regress y c.x##c.z
+#> R:     stats::lm(y ~ x * z, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Fit a quadratic regression [stats]
+#> Stata: regress y c.x##c.x
+#> R:     stats::lm(y ~ x + I(x^2), data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Adjust regression for a categorical predictor [stats]
+#> Stata: regress y i.g c.x
+#> R:     stats::lm(y ~ factor(g) + x, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # 13 more relevant examples. To see them all: findit(reg) |> print(n = Inf)
 
 findit(tab, gen)
 #> # Dummy variables for every category [tidystata]
@@ -99,7 +129,8 @@ findit(tab, gen)
 #> R:     as_dummy(data, x)
 #> # Note: as_dummy(data, x, .names = "index") numbers the columns x_1, x_2, ... as Stata does. Also: fastDummies::dummy_cols(data, "x"). as_dummy() defaults to value-based column names; .names = "index" gives numbered Stata-style suffixes. Check the missing-category indicator policy too.
 #> 
-#> # 20 more examples. To see them all: findit(tab, gen) |> print(n = Inf)
+#> # 1 more relevant example. To see them all: findit(tab, gen) |> print(n = Inf)
+#> # 26 broader tabulate examples. Browse the family: findit(tabulate)
 
 findit(tab, sex, region)
 #> # Two-way cross-tabulation [tidystata]
@@ -107,7 +138,9 @@ findit(tab, sex, region)
 #> R:     tab2(data, sex, region)
 #> # Note: fre2(data, x1, x2) adds row and column totals. tidystata retains missing categories by default; Stata tabulate excludes them unless missing is specified. Use .missing = FALSE to match Stata. tab2() and fre2() need explicit .by for grouped tables; inherited grouping columns otherwise remain ordinary variables. fre2() displays row value labels, while column headers retain category codes.
 #> 
-#> # 20 more examples. To see them all: findit(tab, sex, region) |> print(n = Inf)
+#> # 9 more relevant examples. To see them all: findit(tab, sex, region) |> print(n = Inf)
+#> # Only the 10 best candidates are retained; refine the query for a closer match.
+#> # 8 broader tabulate examples. Browse the family: findit(tabulate)
 
 findit("merge 1:1 id, keep(match)")
 #> # Keep matched rows only [dplyr]
@@ -118,7 +151,7 @@ findit("merge 1:1 id, keep(match)")
 #> # merge() [base]: Merge two data frames (base R)
 #>   Related Stata: merge
 #> 
-#> # 17 more examples. To see them all: findit("merge 1:1 id, keep(match)") |> print(n = Inf)
+#> # 12 broader merge examples. Browse the family: findit(merge)
 
 findit("how do I remove duplicate rows")
 #> # Closest entries for "how do I remove duplicate rows"
@@ -127,7 +160,8 @@ findit("how do I remove duplicate rows")
 #> Stata: duplicates drop
 #> R:     duplicates_drop(data)
 #> 
-#> # 9 more examples. To see them all: findit("how do I remove duplicate rows") |> print(n = Inf)
+#> # 9 more relevant examples. To see them all: findit("how do I remove duplicate rows") |> print(n = Inf)
+#> # Only the 10 best candidates are retained; refine the query for a closer match.
 
 findit(left_join)
 #> # Keep all rows of the master data [dplyr]
@@ -135,7 +169,7 @@ findit(left_join)
 #> R:     left_join(data1, data2, by = "id")
 #> # Note: dplyr retains overlapping non-key columns with suffixes instead of Stata master values, creates no _merge, and does not enforce a declared 1:1 key constraint.
 #> 
-#> # 3 more examples. To see them all: findit(left_join) |> print(n = Inf)
+#> # 3 more relevant examples. To see them all: findit(left_join) |> print(n = Inf)
 
 # Filter the complete reference
 entries <- findit()
@@ -144,7 +178,7 @@ entries |>
 #> # Find the R equivalent of a Stata command [tidystata]
 #> Stata: findit command
 #> R:     findit(command)
-#> # Note: Bare words and comma-separated names work: findit(tab, sex, region). Add hints such as findit(tab, gen), or quote full Stata syntax. One clear example is shown by default; print(n = Inf) reveals every match. findit() with no argument returns the whole list.
+#> # Note: Bare words and comma-separated names work: findit(tab, sex, region). Add hints such as findit(tab, gen), or quote full Stata syntax. A bare command browses its whole family and shows up to five operations; a clear specific query returns one answer, and ambiguous queries retain up to ten relevant candidates. print(n = Inf) expands the returned results; use the bare command for broader family operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. findit() with no argument returns the whole catalogue.
 #> 
-#> # 84 more examples. To see them all: findit() |> print(n = Inf)
+#> # 143 more relevant examples. To see them all: findit() |> print(n = Inf)
 ```

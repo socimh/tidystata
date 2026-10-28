@@ -37,19 +37,23 @@ recode(x, ..., .default = x)
 
 ## Value
 
-A vector with the length and order of `x`, using the common integer or
-double type of the input, codes, and `.default`. Integer input stays
-integer when every code and `.default` is a whole number within integer
-range, so `1:5 ~ 1` does not promote it to double. Double input stays
-double. Fractions, out-of-range numbers, infinities, `NaN`, and tagged
-missing codes or defaults require double output; ordinary `NA` does not
-promote integer input. Named rules produce a
+An integer or double vector with the length and order of `x`. Named
+rules produce a
 [`haven::labelled()`](https://haven.tidyverse.org/reference/labelled.html)
 vector; otherwise the result is numeric without value labels. Names and
 the variable label are kept; previous value labels, SPSS missing-value
-metadata, and other input attributes are dropped.
+metadata, and other input attributes are dropped. See Details for
+integer preservation.
 
 ## Details
+
+**Output type**
+
+Integer input stays integer when every code and `.default` is a whole
+number within integer range, so `1:5 ~ 1` does not promote it to double.
+Double input stays double. Fractions, out-of-range numbers, infinities,
+`NaN`, and tagged missing codes or defaults require double output;
+ordinary `NA` does not promote integer input. The input is not modified.
 
 **Matching**
 
@@ -135,7 +139,7 @@ ambiguity.
 
 Other variable generation functions:
 [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
-[`cut`](https://socimh.github.io/tidystata/reference/cut.md),
+[`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md),
 [`panel`](https://socimh.github.io/tidystata/reference/panel.md),
 [`row_egen`](https://socimh.github.io/tidystata/reference/row_egen.md),
 [`std()`](https://socimh.github.io/tidystata/reference/std.md)
@@ -187,12 +191,12 @@ dplyr::mutate(
   items,
   dplyr::across(
     dplyr::everything(),
-    function(v) stata_recode(v, 1:5 ~ 1, 6:10 ~ 2),
+    function(v) stata_recode(v, 1:5 ~ 1, 6:10 ~ 2, 11:15 ~ 3),
     .names = "r_{.col}"
   )
 )
 #>   item1 item2 r_item1 r_item2
 #> 1     1     3       1       1
 #> 2     7     8       2       2
-#> 3     9    12       2      12
+#> 3     9    12       2       3
 ```

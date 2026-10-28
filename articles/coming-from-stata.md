@@ -26,7 +26,27 @@ findit(reg)
 #> R:     fit <- lm(y ~ x1 + x2, data = data)
 #> # Note: summary(fit) shows the coefficient table; broom::tidy(fit) returns it as a data frame.
 #> 
-#> # 17 more examples. To see them all: findit(reg) |> print(n = Inf)
+#> # Fit linear regression through the origin [stats]
+#> Stata: regress y x z, noconstant
+#> R:     stats::lm(y ~ x + z - 1, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Include two continuous main effects and their interaction [stats]
+#> Stata: regress y c.x##c.z
+#> R:     stats::lm(y ~ x * z, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Fit a quadratic regression [stats]
+#> Stata: regress y c.x##c.x
+#> R:     stats::lm(y ~ x + I(x^2), data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # Adjust regression for a categorical predictor [stats]
+#> Stata: regress y i.g c.x
+#> R:     stats::lm(y ~ factor(g) + x, data=data)
+#> # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.
+#> 
+#> # 13 more relevant examples. To see them all: findit(reg) |> print(n = Inf)
 findit("merge 1:1 id, keep(match)")
 #> # Keep matched rows only [dplyr]
 #> Stata: merge 1:1 id using data2, keep(match)
@@ -36,29 +56,51 @@ findit("merge 1:1 id, keep(match)")
 #> # merge() [base]: Merge two data frames (base R)
 #>   Related Stata: merge
 #> 
-#> # 17 more examples. To see them all: findit("merge 1:1 id, keep(match)") |> print(n = Inf)
+#> # 12 broader merge examples. Browse the family: findit(merge)
 ```
 
 You can also look up an R function (`findit(left_join)`) or ask a
-question (`findit("how do I remove duplicate rows")`). The console shows
-the best matches; the returned table contains all matches. Call
+question (`findit("how do I remove duplicate rows")`). A bare command
+such as `findit(egen)` returns the whole command family and shows up to
+five operations. A specific query such as `findit("egen rowmean")`
+returns one clear answer; ambiguous queries retain up to ten relevant
+candidates. Call
 [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) for
-the whole list. Descriptions follow R’s language setting; English and
-Chinese queries both work.
+the whole catalogue. Descriptions follow R’s language setting; English
+and Chinese queries both work.
 
 Comma-separated names customize compatible examples, such as
-`findit(tab, sex, region)`. The default shows one preferred answer when
-the task is clear; `findit(tab) |> print(n = Inf)` shows all variants,
-selected alternative R approaches, qualifications and source links.
-Package-qualified lookups such as `findit(dplyr::filter)` distinguish
-functions with the same name.
+`findit(tab, sex, region)`. A matching hint such as `findit(tab, gen)`
+can narrow the result to one answer. `print(n = Inf)` expands the
+returned candidates, qualifications and source links. The footer counts
+additional relevant results separately from broader operations; use
+`findit(egen)` to browse the broader family. Within a matching
+operation, recommendations prefer tidystata, then tidyverse, then other
+packages or base R. Package-qualified lookups such as
+`findit(dplyr::filter)` distinguish functions with the same name.
 
 This reference contains 514 command families, 181 Stata functions and 3
-operators, with 1719 distinct Stata examples and 1785 paired R examples.
+operators, with 1721 distinct Stata examples and 1877 paired R examples.
 Abbreviations and alternative R implementations do not increase the
-command count. The R index describes 964 function/package pairs.
+command count. The R index describes 969 function/package pairs.
 
 ## Use the command tables
+
+Use
+[`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+([`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md))
+to read numbers from text and
+[`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+([`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md))
+to write stored codes as text. For categories,
+[`encode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+creates labelled integer codes from strings, and
+[`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+reads value labels back as text. Character encoding assigns fresh sorted
+codes starting at 1; encoding factors preserves their existing integer
+indices and all levels. `encode(decode(x))` need not recover the
+original codes. Encode character columns before grouping so all rows use
+the same dictionary.
 
 The tables cover tidystata and other R packages, including modelling,
 reshaping, survey analysis and graphics. For panel lags and leads,
@@ -1072,7 +1114,7 @@ entries use dplyr, so attach it with
 | [`bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html) | dplyr |  | Stack tables on top of each other |
 | [`c_across()`](https://dplyr.tidyverse.org/reference/c_across.html) | dplyr | egen rowtotal() | Combine columns inside rowwise() |
 | [`case_match()`](https://dplyr.tidyverse.org/reference/case_match.html) | dplyr | recode | Recode values by matching them |
-| [`case_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html) | dplyr |  | Several if-else conditions in one step |
+| [`case_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html) | dplyr | recode | Several if-else conditions in one step |
 | [`coalesce()`](https://dplyr.tidyverse.org/reference/coalesce.html) | dplyr |  | First non-missing value across vectors |
 | [`consecutive_id()`](https://dplyr.tidyverse.org/reference/consecutive_id.html) | dplyr | tsspell | Number runs of identical values |
 | [`contains()`](https://tidyselect.r-lib.org/reference/starts_with.html) | dplyr |  | Select columns whose names contain some text |
@@ -1088,6 +1130,7 @@ entries use dplyr, so attach it with
 | [`ends_with()`](https://tidyselect.r-lib.org/reference/starts_with.html) | dplyr |  | Select columns whose names end with some text |
 | [`everything()`](https://tidyselect.r-lib.org/reference/everything.html) | dplyr | \_all | Select all columns |
 | [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) | dplyr |  | Keep rows that meet a condition |
+| [`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html) | dplyr | drop if | Drop rows that meet a condition, keeping rows where it is missing |
 | [`first()`](https://dplyr.tidyverse.org/reference/nth.html) | dplyr | x\[1\] | First value |
 | [`full_join()`](https://dplyr.tidyverse.org/reference/mutate-joins.html) | dplyr |  | Merge keeping all rows of both tables |
 | [`glimpse()`](https://pillar.r-lib.org/reference/glimpse.html) | dplyr | describe | Compact view of all columns |
@@ -1110,18 +1153,19 @@ entries use dplyr, so attach it with
 | [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) | dplyr |  | Create or change columns |
 | [`n()`](https://dplyr.tidyverse.org/reference/context.html) | dplyr |  | Number of rows in the current group |
 | [`n_distinct()`](https://dplyr.tidyverse.org/reference/n_distinct.html) | dplyr | distinct | Number of distinct values |
-| [`na_if()`](https://dplyr.tidyverse.org/reference/na_if.html) | dplyr |  | Turn one value into missing |
+| [`na_if()`](https://dplyr.tidyverse.org/reference/na_if.html) | dplyr | mvdecode | Turn one value into missing |
 | [`near()`](https://dplyr.tidyverse.org/reference/near.html) | dplyr | reldif() | Compare numbers with a tolerance |
 | [`nth()`](https://dplyr.tidyverse.org/reference/nth.html) | dplyr | x\[5\] | Value at a given position |
 | [`ntile()`](https://dplyr.tidyverse.org/reference/ntile.html) | dplyr | xtile | Split into n groups of nearly equal size |
 | [`num_range()`](https://tidyselect.r-lib.org/reference/starts_with.html) | dplyr | keep x1-x5 | Select x1, x2 and so on by number |
-| [`percent_rank()`](https://dplyr.tidyverse.org/reference/percent_rank.html) | dplyr | egen rank() | Rank rescaled to 0-1 |
+| [`percent_rank()`](https://dplyr.tidyverse.org/reference/percent_rank.html) | dplyr | egen rank() | Percentile ranks: (minimum rank - 1) / (nonmissing count - 1); multiply by 100 for percentages |
 | [`pick()`](https://dplyr.tidyverse.org/reference/pick.html) | dplyr | varlist | Select columns inside mutate() or summarise() |
 | [`pull()`](https://dplyr.tidyverse.org/reference/pull.html) | dplyr |  | Extract one column as a vector |
 | [`reframe()`](https://dplyr.tidyverse.org/reference/reframe.html) | dplyr | collapse | Summarise to any number of rows per group |
 | [`relocate()`](https://dplyr.tidyverse.org/reference/relocate.html) | dplyr |  | Move columns to a new position |
 | [`rename()`](https://dplyr.tidyverse.org/reference/rename.html) | dplyr |  | Rename columns (new = old) |
 | [`rename_with()`](https://dplyr.tidyverse.org/reference/rename.html) | dplyr |  | Rename columns with a function, such as toupper |
+| [`replace_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html) | dplyr | replace if | Replace values where conditions hold, keeping the rest |
 | [`right_join()`](https://dplyr.tidyverse.org/reference/mutate-joins.html) | dplyr |  | Merge keeping all rows of the second table |
 | [`row_number()`](https://dplyr.tidyverse.org/reference/row_number.html) | dplyr |  | Row number |
 | [`rows_update()`](https://dplyr.tidyverse.org/reference/rows.html) | dplyr | merge, update replace | Update rows from another table |
@@ -1401,6 +1445,8 @@ entries use dplyr, so attach it with
 | `rddensity()` | rddensity | rddensity | Manipulation Testing Using Local Polynomial Density Estimation |
 | `rdbwselect()` | rdrobust | rdbwselect | Bandwidth Selection Procedures for Local Polynomial Regression Discontinuity Estimators |
 | `rdrobust()` | rdrobust |  | Regression discontinuity |
+| `locale()` | readr |  | Describe decimal marks, encodings and date conventions for parsing |
+| `parse_double()` | readr | destring, dpcomma | Parse text as decimal numbers, with locale-specific marks |
 | `parse_number()` | readr | destring, ignore() | Extract a number from text such as \$1,200 |
 | `read_csv()` | readr |  | Read a CSV file |
 | `read_delim()` | readr | import delimited | Read a file with any delimiter |
@@ -1672,7 +1718,7 @@ entries use dplyr, so attach it with
 | `uncount()` | tidyr |  | Repeat each row a given number of times |
 | `unite()` | tidyr | egen concat() | Join columns into one |
 | `unnest()` | tidyr | expand | Expand list-columns back into rows |
-| [`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | decode | Alias of decode() |
+| [`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | tostring | Alias of tostring(): stored codes as text |
 | [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata |  | Dummy variables for every category |
 | [`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | destring | Alias of destring() |
 | [`assert()`](https://socimh.github.io/tidystata/reference/assert.md) | tidystata |  | Verify every condition for every row; otherwise report failing rows and stop |
@@ -1690,6 +1736,7 @@ entries use dplyr, so attach it with
 | [`duplicates_list()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | List duplicated rows |
 | [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | Count duplicated rows |
 | [`duplicates_tag()`](https://socimh.github.io/tidystata/reference/keys.md) | tidystata |  | Mark duplicated rows |
+| [`encode()`](https://socimh.github.io/tidystata/reference/type_conversion.md) | tidystata | encode | Encode character categories as labelled integer codes; preserve factor codes |
 | [`findit()`](https://socimh.github.io/tidystata/reference/findit.md) | tidystata |  | Find the R equivalent of a Stata command |
 | [`fre()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | Joint frequency table like tab(), adding totals and displaying value labels |
 | [`fre1()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata | tab1 | One one-way table per variable like tab1(), adding totals and displaying value labels |
@@ -1700,14 +1747,14 @@ entries use dplyr, so attach it with
 | [`mvdecode()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata |  | Turn given codes into missing values |
 | [`mvencode()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata |  | Replace missing values with a code |
 | [`na_if_value()`](https://socimh.github.io/tidystata/reference/na_conversion.md) | tidystata | mvdecode | Alias of mvdecode() |
-| [`pc()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | Percentage of the total |
-| [`pct()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata | egen pc() | Alias of pc() |
+| [`pc()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | Percentage of the total, not a percentile rank; prop = TRUE returns proportions |
+| `pct()` | tidystata | egen pc() | Removed alias of pc(); use pc() for total shares and dplyr::percent_rank() for percentile ranks |
 | [`preview()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | Persist a head/tail or interval console preview (10 data rows by default), retaining every row and column |
 | [`preview_headtail()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | Persist a first-and-last-row preview; a row of dots marks an omitted middle; all data are retained |
 | [`preview_interval()`](https://socimh.github.io/tidystata/reference/preview.md) | tidystata |  | Persist an approximately evenly spaced row preview without separator rows, retaining all data |
 | [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md) | tidystata |  | Print first and last rows once with a dotted omission row; return the complete input invisibly without changing preview preferences |
 | [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md) | tidystata |  | Print approximately evenly spaced rows once without separator rows; return the complete input invisibly without changing preview preferences |
-| [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) | tidystata |  | Pearson or Spearman correlations with pairwise samples by default; .listwise keeps p-values on one common sample; optional Bonferroni or Sidak adjustment within each group |
+| [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md) | tidystata |  | Pearson or Spearman correlations with pairwise samples by default; .listwise keeps p-values on one common sample; optional Bonferroni or Sidak adjustment within each group |
 | [`recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md) | tidystata | recode | Alias of stata_recode() |
 | [`row_max()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | Maximum across variables in each row |
 | [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | Mean across variables in each row |
@@ -1722,13 +1769,13 @@ entries use dplyr, so attach it with
 | [`row_var()`](https://socimh.github.io/tidystata/reference/row_egen.md) | tidystata |  | Sample variance across variables in each row |
 | [`select_or_transmute()`](https://socimh.github.io/tidystata/reference/select_or_transmute.md) | tidystata |  | Return selected and computed columns, retaining grouping columns |
 | [`set_seed()`](https://socimh.github.io/tidystata/reference/set_seed.md) | tidystata |  | Set the random seed, alone or at the end of a pipe |
-| [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md) | tidystata |  | Unweighted Spearman rank correlations on one common complete-case sample by default; .pairwise uses separate samples; returns r, n and Stata 18+ p-values with optional within-group adjustment |
+| [`spearman()`](https://socimh.github.io/tidystata/reference/corr.md) | tidystata |  | Unweighted Spearman rank correlations on one common complete-case sample by default; .pairwise uses separate samples; returns r, n and Stata 18+ p-values with optional within-group adjustment |
 | [`stata_diff()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | Difference from the previous period, respecting time gaps |
 | [`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | Value from an earlier period, respecting time gaps |
 | [`stata_lead()`](https://socimh.github.io/tidystata/reference/panel.md) | tidystata |  | Value from a later period, respecting time gaps |
 | [`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md) | tidystata |  | Merge two tables and report matches, like Stata's merge |
 | [`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md) | tidystata |  | Recode numeric values with Stata-style ranges, value sets and labels; unmatched values are kept |
-| [`std()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | Standardise to mean 0 and standard deviation 1 |
+| [`std()`](https://socimh.github.io/tidystata/reference/std.md) | tidystata |  | Z-scores: subtract the observed mean and divide by the sample SD |
 | [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) | tidystata |  | Summary statistics for variables |
 | [`tab()`](https://socimh.github.io/tidystata/reference/tab.md) | tidystata |  | Count joint category combinations in one long table with frequencies and percentages |
 | [`tab_gen()`](https://socimh.github.io/tidystata/reference/as_dummy.md) | tidystata | tabulate, generate() | Alias of as_dummy() |

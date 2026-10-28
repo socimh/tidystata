@@ -27,8 +27,6 @@ the original data invisibly."></head><body>
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -67,8 +65,10 @@ the original data invisibly.</p>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Logical conditions using columns of <code>.data</code>. Every condition
-must be <code>TRUE</code> for every row.</p></dd>
+<dd><p>&lt;<code><a href="https://rlang.r-lib.org/reference/args_data_masking.html" class="external-link">data-masking</a></code>&gt; One or more logical
+conditions using columns of <code>.data</code>. Each must return one value per row,
+or one value recycled across the current group. Every condition must be
+<code>TRUE</code> for every row.</p></dd>
 
 
 <dt id="arg--by">.by<a class="anchor" aria-label="anchor" href="#arg--by"></a></dt>
@@ -80,7 +80,8 @@ groups are used when omitted. To supply <code>.by</code> for grouped data, first
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p><code>.data</code>, unchanged and invisibly, if all conditions pass.</p>
+    <p><code>.data</code>, unchanged and invisibly, including its classes, grouping,
+and attributes, if all conditions pass. Failed conditions raise an error.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -105,6 +106,12 @@ row in that group.</p>
 <span class="r-in"><span>  class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80</span>, <span class="fl">90</span>, <span class="fl">55</span>, <span class="cn">NA_real_</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">scores</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   class score</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     A    80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     A    90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     B    55</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     B    NA</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Pass: every nonmissing score is at least 50</span></span></span>
 <span class="r-in"><span><span class="fu">assert</span><span class="op">(</span><span class="va">scores</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span> <span class="op">|</span> <span class="va">score</span> <span class="op">&gt;=</span> <span class="fl">50</span><span class="op">)</span></span></span>

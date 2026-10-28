@@ -40,19 +40,22 @@ findit("reg, robust")
 #> R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")
 #> # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.
 #> 
-#> # 17 more examples. To see them all: findit("reg, robust") |> print(n = Inf)
+#> # 16 broader regress examples. Browse the family: findit(regress)
 findit("egen rowmean")
-#> # Average available values across columns [base]
+#> # Average available values across columns [tidystata]
 #> Stata: egen z = rowmean(x y)
-#> R:     data$z <- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] <- NA_real_
+#> R:     mutate(data, z = row_mean(x, y))
 #> 
-#> # 59 more examples. To see them all: findit("egen rowmean") |> print(n = Inf)
+#> # 70 broader egen examples. Browse the family: findit(egen)
 ```
 
-只写一个命令，例如
-`findit(reg)`，默认显示一个明确的例子；`findit(reg) |> print(n = Inf)`
-显示所有匹配项。可以用逗号添加变量名或提示，例如
-`findit(tab, sex, region)` 或 `findit(tab, gen)`。在中文环境下运行 R
+单独查询命令（如
+`findit(egen)`）返回整个命令族，默认显示最多五种操作。具体查询（如
+`findit("egen rowmean")`）返回一个明确的推荐；含义不明确时保留最多十个相关候选项。`print(n = Inf)`
+展开已返回的结果；查询命令族可浏览更广的操作。同一任务优先推荐
+tidystata，其次是 tidyverse，最后是其他包或 base
+R。可以用逗号添加变量名或提示，例如 `findit(tab, sex, region)` 或
+`findit(tab, gen)`。在中文环境下运行 R
 时，条目说明会显示为中文。全部条目按主题列在[从 Stata 到
 R](https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html)中。
 
@@ -182,12 +185,12 @@ tab(lifeexp, lexp) |> print_interval(n = 6)
 
 ## 了解更多
 
-tidystata
-还提供按行计算（[`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md)
-等）、面板运算（[`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)
-等）、相关系数（[`corr()`](https://socimh.github.io/tidystata/reference/corr.md)
-使用完整个案，[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)
-使用成对完整样本）、缺失值报告（[`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)）、主键检查与合并（[`isid()`](https://socimh.github.io/tidystata/reference/keys.md)、[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)）以及分组（[`xtile()`](https://socimh.github.io/tidystata/reference/cut.md)）等函数。示例和输出约定见以下指南（英文）。
+tidystata 还提供
+[`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)、[`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)、[`encode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)、[`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)、[`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)、`row_*()`
+和 `duplicates_*()`
+系列、[`stata_lag()`](https://socimh.github.io/tidystata/reference/panel.md)、[`stata_lead()`](https://socimh.github.io/tidystata/reference/panel.md)、[`stata_diff()`](https://socimh.github.io/tidystata/reference/panel.md)、[`corr()`](https://socimh.github.io/tidystata/reference/corr.md)、[`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md)、[`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)、[`isid()`](https://socimh.github.io/tidystata/reference/keys.md)、[`stata_merge()`](https://socimh.github.io/tidystata/reference/stata_merge.md)、[`xtile()`](https://socimh.github.io/tidystata/reference/cut.md)
+和
+[`preview()`](https://socimh.github.io/tidystata/reference/preview.md)。示例和输出约定见以下指南（英文）。
 
 - [Getting
   started](https://socimh.github.io/tidystata/articles/getting-started.html)：简短的工作流程。

@@ -23,8 +23,6 @@
     <li><a class="dropdown-item" href="articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -69,14 +67,14 @@
 <span><span class="co">#&gt; R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")</span></span>
 <span><span class="co">#&gt; # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 17 more examples. To see them all: findit("reg, robust") |&gt; print(n = Inf)</span></span>
+<span><span class="co">#&gt; # 16 broader regress examples. Browse the family: findit(regress)</span></span>
 <span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"egen rowmean"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # Average available values across columns [base]</span></span>
+<span><span class="co">#&gt; # Average available values across columns [tidystata]</span></span>
 <span><span class="co">#&gt; Stata: egen z = rowmean(x y)</span></span>
-<span><span class="co">#&gt; R:     data$z &lt;- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] &lt;- NA_real_</span></span>
+<span><span class="co">#&gt; R:     mutate(data, z = row_mean(x, y))</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 59 more examples. To see them all: findit("egen rowmean") |&gt; print(n = Inf)</span></span></code></pre></div>
-<p>只写一个命令，例如 <code>findit(reg)</code>，默认显示一个明确的例子；<code>findit(reg) |&gt; print(n = Inf)</code> 显示所有匹配项。可以用逗号添加变量名或提示，例如 <code>findit(tab, sex, region)</code> 或 <code>findit(tab, gen)</code>。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在<a href="https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html">从 Stata 到 R</a>中。</p>
+<span><span class="co">#&gt; # 70 broader egen examples. Browse the family: findit(egen)</span></span></code></pre></div>
+<p>单独查询命令（如 <code>findit(egen)</code>）返回整个命令族，默认显示最多五种操作。具体查询（如 <code>findit("egen rowmean")</code>）返回一个明确的推荐；含义不明确时保留最多十个相关候选项。<code>print(n = Inf)</code> 展开已返回的结果；查询命令族可浏览更广的操作。同一任务优先推荐 tidystata，其次是 tidyverse，最后是其他包或 base R。可以用逗号添加变量名或提示，例如 <code>findit(tab, sex, region)</code> 或 <code>findit(tab, gen)</code>。在中文环境下运行 R 时，条目说明会显示为中文。全部条目按主题列在<a href="https://socimh.github.io/tidystata/articles/coming-from-stata-zh.html">从 Stata 到 R</a>中。</p>
 </div>
 <div class="section level3">
 <h3 id="codebook描述每个变量">codebook()：描述每个变量<a class="anchor" aria-label="anchor" href="#codebook%E6%8F%8F%E8%BF%B0%E6%AF%8F%E4%B8%AA%E5%8F%98%E9%87%8F"></a></h3>
@@ -172,7 +170,7 @@
 </div>
 <div class="section level2">
 <h2 id="了解更多">了解更多<a class="anchor" aria-label="anchor" href="#%E4%BA%86%E8%A7%A3%E6%9B%B4%E5%A4%9A"></a></h2>
-<p>tidystata 还提供按行计算（<code><a href="reference/row_egen.html">row_mean()</a></code> 等）、面板运算（<code><a href="reference/panel.html">stata_lag()</a></code> 等）、相关系数（<code><a href="reference/corr.html">corr()</a></code> 使用完整个案，<code><a href="reference/pwcorr.html">pwcorr()</a></code> 使用成对完整样本）、缺失值报告（<code><a href="reference/misstable.html">misstable()</a></code>）、主键检查与合并（<code><a href="reference/keys.html">isid()</a></code>、<code><a href="reference/stata_merge.html">stata_merge()</a></code>）以及分组（<code><a href="reference/cut.html">xtile()</a></code>）等函数。示例和输出约定见以下指南（英文）。</p>
+<p>tidystata 还提供 <code><a href="reference/stata_recode.html">stata_recode()</a></code>、<code><a href="reference/type_conversion.html">destring()</a></code>、<code><a href="reference/type_conversion.html">encode()</a></code>、<code><a href="reference/type_conversion.html">decode()</a></code>、<code><a href="reference/type_conversion.html">tostring()</a></code>、<code>row_*()</code> 和 <code>duplicates_*()</code> 系列、<code><a href="reference/panel.html">stata_lag()</a></code>、<code><a href="reference/panel.html">stata_lead()</a></code>、<code><a href="reference/panel.html">stata_diff()</a></code>、<code><a href="reference/corr.html">corr()</a></code>、<code><a href="reference/corr.html">pwcorr()</a></code>、<code><a href="reference/misstable.html">misstable()</a></code>、<code><a href="reference/keys.html">isid()</a></code>、<code><a href="reference/stata_merge.html">stata_merge()</a></code>、<code><a href="reference/cut.html">xtile()</a></code> 和 <code><a href="reference/preview.html">preview()</a></code>。示例和输出约定见以下指南（英文）。</p>
 <ul><li>
 <a href="https://socimh.github.io/tidystata/articles/getting-started.html">Getting started</a>：简短的工作流程。</li>
 <li>

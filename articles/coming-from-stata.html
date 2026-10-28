@@ -41,8 +41,6 @@
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -95,7 +93,27 @@ word bare, or quote anything longer. Stata’s abbreviations work.</p>
 <span><span class="co">#&gt; <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">fit &lt;- lm(y ~ x1 + x2, data = data)</span></span></span>
 <span><span class="co">#&gt; # Note: summary(fit) shows the coefficient table; broom::tidy(fit) returns it as a data frame.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 17 more examples. To see them all: findit(reg) |&gt; print(n = Inf)</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;"># Fit linear regression through the origin</span><span style="color: #555555;"> [stats]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">regress y x z, noconstant</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">stats::lm(y ~ x + z - 1, data=data)</span></span></span>
+<span><span class="co">#&gt; # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;"># Include two continuous main effects and their interaction</span><span style="color: #555555;"> [stats]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">regress y c.x##c.z</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">stats::lm(y ~ x * z, data=data)</span></span></span>
+<span><span class="co">#&gt; # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;"># Fit a quadratic regression</span><span style="color: #555555;"> [stats]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">regress y c.x##c.x</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">stats::lm(y ~ x + I(x^2), data=data)</span></span></span>
+<span><span class="co">#&gt; # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;"># Adjust regression for a categorical predictor</span><span style="color: #555555;"> [stats]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">regress y i.g c.x</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00; font-weight: bold;">R:     </span><span style="color: #00BB00;">stats::lm(y ~ factor(g) + x, data=data)</span></span></span>
+<span><span class="co">#&gt; # Note: OLS coefficient correspondence requires the same complete-case sample, contrasts and weights. R returns an lm object; Stata coefficient tables and stored estimates have a different structure.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; # 13 more relevant examples. To see them all: findit(reg) |&gt; print(n = Inf)</span></span>
 <span><span class="fu"><a href="../reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"merge 1:1 id, keep(match)"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;"># Keep matched rows only</span><span style="color: #555555;"> [dplyr]</span></span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Stata: </span><span style="color: #0000BB;">merge 1:1 id using data2, keep(match)</span></span></span>
@@ -105,29 +123,46 @@ word bare, or quote anything longer. Stata’s abbreviations work.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;"># merge() [base]: Merge two data frames (base R)</span></span></span>
 <span><span class="co">#&gt;   Related Stata: merge</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 17 more examples. To see them all: findit("merge 1:1 id, keep(match)") |&gt; print(n = Inf)</span></span></code></pre></div>
+<span><span class="co">#&gt; # 12 broader merge examples. Browse the family: findit(merge)</span></span></code></pre></div>
 <p>You can also look up an R function (<code>findit(left_join)</code>)
 or ask a question
-(<code>findit("how do I remove duplicate rows")</code>). The console
-shows the best matches; the returned table contains all matches. Call
-<code><a href="../reference/findit.html">findit()</a></code> for the whole list. Descriptions follow R’s
-language setting; English and Chinese queries both work.</p>
+(<code>findit("how do I remove duplicate rows")</code>). A bare command
+such as <code>findit(egen)</code> returns the whole command family and
+shows up to five operations. A specific query such as
+<code>findit("egen rowmean")</code> returns one clear answer; ambiguous
+queries retain up to ten relevant candidates. Call <code><a href="../reference/findit.html">findit()</a></code>
+for the whole catalogue. Descriptions follow R’s language setting;
+English and Chinese queries both work.</p>
 <p>Comma-separated names customize compatible examples, such as
-<code>findit(tab, sex, region)</code>. The default shows one preferred
-answer when the task is clear;
-<code>findit(tab) |&gt; print(n = Inf)</code> shows all variants,
-selected alternative R approaches, qualifications and source links.
-Package-qualified lookups such as <code>findit(dplyr::filter)</code>
-distinguish functions with the same name.</p>
+<code>findit(tab, sex, region)</code>. A matching hint such as
+<code>findit(tab, gen)</code> can narrow the result to one answer.
+<code>print(n = Inf)</code> expands the returned candidates,
+qualifications and source links. The footer counts additional relevant
+results separately from broader operations; use
+<code>findit(egen)</code> to browse the broader family. Within a
+matching operation, recommendations prefer tidystata, then tidyverse,
+then other packages or base R. Package-qualified lookups such as
+<code>findit(dplyr::filter)</code> distinguish functions with the same
+name.</p>
 <p>This reference contains 514 command families, 181 Stata functions and
-3 operators, with 1719 distinct Stata examples and 1785 paired R
+3 operators, with 1721 distinct Stata examples and 1877 paired R
 examples. Abbreviations and alternative R implementations do not
-increase the command count. The R index describes 964 function/package
+increase the command count. The R index describes 969 function/package
 pairs.</p>
 </div>
 <div class="section level2">
 <h2 id="use-the-command-tables">Use the command tables<a class="anchor" aria-label="anchor" href="#use-the-command-tables"></a>
 </h2>
+<p>Use <code><a href="../reference/type_conversion.html">destring()</a></code> (<code><a href="../reference/type_conversion.html">as_numeric()</a></code>) to read
+numbers from text and <code><a href="../reference/type_conversion.html">tostring()</a></code>
+(<code><a href="../reference/type_conversion.html">as_character()</a></code>) to write stored codes as text. For
+categories, <code><a href="../reference/type_conversion.html">encode()</a></code> creates labelled integer codes from
+strings, and <code><a href="../reference/type_conversion.html">decode()</a></code> reads value labels back as text.
+Character encoding assigns fresh sorted codes starting at 1; encoding
+factors preserves their existing integer indices and all levels.
+<code>encode(decode(x))</code> need not recover the original codes.
+Encode character columns before grouping so all rows use the same
+dictionary.</p>
 <p>The tables cover tidystata and other R packages, including modelling,
 reshaping, survey analysis and graphics. For panel lags and leads,
 tidystata provides <code><a href="../reference/panel.html">stata_lag()</a></code>, <code><a href="../reference/panel.html">stata_lead()</a></code>
@@ -1006,10 +1041,14 @@ reference</a>
 <td>
 Find the R equivalent of a Stata command<br>Bare words and
 comma-separated names work: findit(tab, sex, region). Add hints such as
-findit(tab, gen), or quote full Stata syntax. One clear example is shown
-by default; print(n = Inf) reveals every match. findit() with no
-argument returns the whole
-list.<br><a href="https://www.stata.com/manuals/rsearch.pdf" class="external-link">Stata
+findit(tab, gen), or quote full Stata syntax. A bare command browses its
+whole family and shows up to five operations; a clear specific query
+returns one answer, and ambiguous queries retain up to ten relevant
+candidates. print(n = Inf) expands the returned results; use the bare
+command for broader family operations. Within a matching operation,
+recommendations prefer tidystata, then tidyverse, then other packages or
+base R. findit() with no argument returns the whole
+catalogue.<br><a href="https://www.stata.com/manuals/rsearch.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://socimh.github.io/tidystata/reference/">R reference</a>
 </td>
@@ -1861,7 +1900,7 @@ reference</a>
 <pre><code>pwcorr x1 x2 x3</code></pre>
 </td>
 <td>
-<pre><code><span><span class="fu"><a href="../reference/pwcorr.html">pwcorr</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span></span></code></pre>
+<pre><code><span><span class="fu"><a href="../reference/corr.html">pwcorr</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span></span></code></pre>
 <small>tidystata</small>
 </td>
 <td>
@@ -1941,7 +1980,7 @@ reference</a> ·
 <pre><code>spearman x y</code></pre>
 </td>
 <td>
-<pre><code><span><span class="fu"><a href="../reference/spearman.html">spearman</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre>
+<pre><code><span><span class="fu"><a href="../reference/corr.html">spearman</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre>
 <small>tidystata</small>
 </td>
 <td>
@@ -2618,16 +2657,17 @@ reference</a> ·
 <pre><code>encode str_x, generate(x)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">str_x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>dplyr</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu"><a href="../reference/type_conversion.html">encode</a></span><span class="op">(</span><span class="va">str_x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Turn text into labelled categories<br><strong>Differs from
-Stata:</strong> factor() creates integer level indices with an R class;
-encode creates numeric codes with a separate value-label definition.
-Collation can change code
-ordering.<br><a href="https://www.stata.com/manuals/dencode.pdf" class="external-link">Stata
-reference</a> · <a href="https://cran.r-project.org/package=dplyr" class="external-link">R
+Stata:</strong> Character input gets fresh codes from 1 in UTF-8 radix
+order; NA and empty strings are missing. Locale-specific Stata ordering
+can differ. Factor input preserves existing indices and all
+levels.<br><a href="https://www.stata.com/manuals/dencode.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/type_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -3161,9 +3201,10 @@ reference</a>
 <small>tidystata</small>
 </td>
 <td>
-Percentage of the total<br>pc(x, prop = TRUE) gives proportions, like
-the prop
-option.<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
+Percentage of the total<br>Computes 100 * x / sum(x, na.rm = TRUE).
+pc(x, prop = TRUE) gives total shares on a proportion scale;
+dplyr::percent_rank(x) gives percentile ranks. pct() is removed; use
+pc().<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://socimh.github.io/tidystata/reference/">R reference</a>
 </td>
@@ -3326,8 +3367,9 @@ reference</a> ·
 <small>tidystata</small>
 </td>
 <td>
-Standardise a variable<br>Base R: as.vector(scale(x)). Add .by = g for
-by g: egen.<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
+Standardise a variable<br>Z-score: (x - mean(x, na.rm = TRUE)) / sd(x,
+na.rm = TRUE), using the sample SD. Add .by = g for by g:
+egen.<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://socimh.github.io/tidystata/reference/">R reference</a>
 </td>
@@ -3654,8 +3696,8 @@ reference</a>
 <pre><code>recode x (1/5 = 1) (6/10 = 2) (11/15 = 3) (else = .), generate(x3g)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x3g <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">6</span>, <span class="fl">10</span><span class="op">)</span> <span class="op">~</span> <span class="fl">2</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">11</span>, <span class="fl">15</span><span class="op">)</span> <span class="op">~</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>dplyr</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x3g <span class="op">=</span> <span class="fu"><a href="../reference/stata_recode.html">stata_recode</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">~</span> <span class="fl">1</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">10</span> <span class="op">~</span> <span class="fl">2</span>, <span class="fl">11</span><span class="op">:</span><span class="fl">15</span> <span class="op">~</span> <span class="fl">3</span>, .default <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Recode ranges of values<br>Values that match no condition become NA,
@@ -3665,7 +3707,8 @@ closed range including decimals, and without .default unmatched values
 are kept. car::recode() and, from dplyr 1.2.0, replace_values() are
 other
 options.<br><a href="https://www.stata.com/manuals/drecode.pdf" class="external-link">Stata
-reference</a> · <a href="https://cran.r-project.org/package=dplyr" class="external-link">R
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/stata_recode.html">R
 reference</a>
 </td>
 </tr>
@@ -3674,14 +3717,15 @@ reference</a>
 <pre><code>recode x (9 = .)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/na_if.html" class="external-link">na_if</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>dplyr</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu"><a href="../reference/stata_recode.html">stata_recode</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">9</span> <span class="op">~</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Turn one code into missing<br>tidystata::stata_recode(x, 9 ~ NA) and
 mvdecode(x, 9) give the same
 result.<br><a href="https://www.stata.com/manuals/drecode.pdf" class="external-link">Stata
-reference</a> · <a href="https://cran.r-project.org/package=dplyr" class="external-link">R
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/stata_recode.html">R
 reference</a>
 </td>
 </tr>
@@ -3780,15 +3824,16 @@ reference</a>
 <pre><code>replace x = x^2 if x &gt; 0</code></pre>
 </td>
 <td>
-<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="va">x</span><span class="op">^</span><span class="fl">2</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">replace_when</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">x</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">~</span> <span class="va">x</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre>
 <small>dplyr</small>
 </td>
 <td>
 Change a variable under a condition<br><strong>Differs from
 Stata:</strong> Stata numeric missing values compare larger than every
-finite number; R comparisons return NA. Handle missing values explicitly
-before applying the
-condition.<br><a href="https://www.stata.com/manuals/dgenerate.pdf" class="external-link">Stata
+finite number; R comparisons return NA, and replace_when() leaves those
+rows unchanged. replace_when() needs dplyr 1.2.0 or later; with older
+dplyr, use if_else(x &gt; 0, x^2,
+x).<br><a href="https://www.stata.com/manuals/dgenerate.pdf" class="external-link">Stata
 reference</a> · <a href="https://cran.r-project.org/package=dplyr" class="external-link">R
 reference</a>
 </td>
@@ -3991,13 +4036,14 @@ Purpose, qualifications and sources
 <pre><code>drop if x == 1</code></pre>
 </td>
 <td>
-<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span> <span class="op">!=</span> <span class="fl">1</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></code></pre>
 <small>dplyr</small>
 </td>
 <td>
-Drop rows meeting a condition<br>Stata keeps rows with missing x here; |
-is.na(x) does the same in
-R.<br><a href="https://www.stata.com/manuals/ddrop.pdf" class="external-link">Stata
+Drop rows meeting a condition<br>Stata keeps rows with missing x here,
+and so does filter_out(), which needs dplyr 1.2.0 or later. With older
+dplyr, use filter(data, x != 1 |
+is.na(x)).<br><a href="https://www.stata.com/manuals/ddrop.pdf" class="external-link">Stata
 reference</a> · <a href="https://cran.r-project.org/package=dplyr" class="external-link">R
 reference</a>
 </td>
@@ -5677,6 +5723,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-5e66d0400fc11a09">
+<td>
+<pre><code>split s, parse("-") generate(part)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/separate_wider_delim.html" class="external-link">separate_wider_delim</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">s</span>, <span class="st">"-"</span>, names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"part1"</span>, <span class="st">"part2"</span><span class="op">)</span>, cols_remove <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre>
+<small>tidyr</small>
+</td>
+<td>
+Split two-component delimited strings<br><strong>Differs from
+Stata:</strong> Name each part explicitly; too few or too many pieces
+are an error by
+default.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://tidyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-47fb0cf6376ca362">
 <td>
 <pre><code>generate z = ss(t)</code></pre>
@@ -6210,6 +6274,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-d74b2f8c21a029d1">
+<td>
+<pre><code>generate z = substr(s, 1, 3)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_sub.html" class="external-link">str_sub</a></span><span class="op">(</span><span class="va">s</span>, <span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>stringr</small>
+</td>
+<td>
+Extract an ASCII prefix by
+length<br><a href="https://www.stata.com/manuals/fnstringfunctions.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://stringr.tidyverse.org/reference/str_sub.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-34216fd699050286">
 <td>
 <pre><code>generate z = substr(s, 3, 2)</code></pre>
@@ -6224,6 +6304,22 @@ R substr takes an inclusive ending
 position.<br><a href="https://www.stata.com/manuals/fnstringfunctions.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-421471812e316e3e">
+<td>
+<pre><code>generate z = substr(s, 3, 2)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_sub.html" class="external-link">str_sub</a></span><span class="op">(</span><span class="va">s</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>stringr</small>
+</td>
+<td>
+Extract ASCII text using start and
+length<br><a href="https://www.stata.com/manuals/fnstringfunctions.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://stringr.tidyverse.org/reference/str_sub.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -12688,6 +12784,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-c07a3ba2f3989e95">
+<td>
+<pre><code>codebook x, compact</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Describe observed count, distinct count and range<br><strong>Differs
+from Stata:</strong> Reports the observed count, distinct count, range,
+mean and standard
+deviation.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-8def4bd824b2adc6">
 <td>
 <pre><code>compare x y</code></pre>
@@ -12757,6 +12871,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-4a7920b4ccc206cf">
+<td>
+<pre><code>count if !missing(x, y)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidyr</small>
+</td>
+<td>
+Count rows complete on selected
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://tidyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-70fe1d1c98968402">
 <td>
 <pre><code>count if missing(x)</code></pre>
@@ -12770,6 +12900,22 @@ Count missing
 values<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-304f6e1ab6bc8d9a">
+<td>
+<pre><code>count if missing(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Count missing
+values<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -12789,6 +12935,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-4e06f94788f9b8d9">
+<td>
+<pre><code>count if x &gt; 2 &amp; x &lt; .</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span> <span class="op">&gt;</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Count observed values above a
+threshold<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-5cd811c7502d7b20">
 <td>
 <pre><code>count in 2/5</code></pre>
@@ -12803,6 +12965,22 @@ column names
 together.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-2f9821a65c6672f1">
+<td>
+<pre><code>count in 2/5</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="va">data</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Count a row
+interval<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -12933,14 +13111,14 @@ reference</a>
 <pre><code>destring s, generate(x)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">s</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/type_conversion.html">destring</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Parse clean numeric
 strings<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/type_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -12960,19 +13138,35 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-5c73dfb6b45f74c4">
+<td>
+<pre><code>destring s, generate(x) dpcomma</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_atomic.html" class="external-link">parse_double</a></span><span class="op">(</span><span class="va">s</span>, locale <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/locale.html" class="external-link">locale</a></span><span class="op">(</span>decimal_mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>readr</small>
+</td>
+<td>
+Parse a decimal-comma
+field<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://readr.tidyverse.org/reference/parse_atomic.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-d73e59a68b9dd053">
 <td>
 <pre><code>destring s, generate(x) ignore(",")</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">','</span>,<span class="st">''</span>,<span class="va">data</span><span class="op">$</span><span class="va">s</span>,fixed<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/type_conversion.html">destring</a></span><span class="op">(</span><span class="va">s</span>, ignore <span class="op">=</span> <span class="st">","</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Parse numbers containing grouping
 commas<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/type_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -12992,6 +13186,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-809ccaef4a94caea">
+<td>
+<pre><code>destring s, generate(x) percent</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_number.html" class="external-link">parse_number</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span></span></code></pre>
+<small>readr</small>
+</td>
+<td>
+Convert percentage text to
+proportions<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://readr.tidyverse.org/reference/parse_number.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-dae069349f5d2da6">
 <td>
 <pre><code>drop if g == 2</code></pre>
@@ -13005,6 +13215,23 @@ Drop a category of
 rows<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-6983af4fb7205548">
+<td>
+<pre><code>drop if g == 2</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Drop a category of rows<br>filter_out() requires dplyr 1.2.0 or later.
+Rows where the condition is missing are kept, as in
+Stata.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -13045,14 +13272,14 @@ reference</a>
 <pre><code>drop if x &lt;= 2</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">|</span> <span class="va">x</span> <span class="op">&gt;</span> <span class="fl">2</span><span class="op">)</span></span></code></pre>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span> <span class="op">&lt;=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre>
 <small>dplyr</small>
 </td>
 <td>
-Drop low values while retaining missing rows<br><strong>Differs from
-Stata:</strong> Stata numeric missing sorts above finite values; the
-explicit is.na branch preserves those
-rows.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+Drop low values while retaining missing rows<br>Stata numeric missing
+sorts above finite values. filter_out() keeps rows where the condition
+is missing and needs dplyr 1.2.0 or
+later.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
@@ -13075,6 +13302,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-d0b64c0bb4f65778">
+<td>
+<pre><code>drop in 2/4</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="va">data</span>, <span class="op">-</span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Drop a row
+interval<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-c74fa8df7ccab199">
 <td>
 <pre><code>drop s y</code></pre>
@@ -13091,6 +13334,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-f57368ffaa8b4a18">
+<td>
+<pre><code>drop s y</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">s</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Remove selected
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-1605560f90402bef">
 <td>
 <pre><code>ds id g, not</code></pre>
@@ -13104,6 +13363,22 @@ Find columns outside an exclusion
 list<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-2123c9dbe2f77331">
+<td>
+<pre><code>ds id g, not</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/names.html">ds</a></span><span class="op">(</span><span class="va">data</span>, <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">g</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Find columns outside an exclusion
+list<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/names.html">R
 reference</a>
 </td>
 </tr>
@@ -13124,6 +13399,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-3683ae420cdad504">
+<td>
+<pre><code>ds, has(type numeric)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/names.html">ds</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Find names of numeric
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/names.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-18d3670b4c4374c2">
 <td>
 <pre><code>ds, has(type string)</code></pre>
@@ -13141,19 +13432,34 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-5d8c59a601635d9b">
+<td>
+<pre><code>ds, has(type string)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/names.html">ds</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.character</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Find names of character
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/names.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-9a64ae8135f40a96">
 <td>
 <pre><code>duplicates drop id, force</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">id</span><span class="op">)</span>,,drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/keys.html">duplicates_drop</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span>, .force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Retain the first observation per duplicated
 key<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
-·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+· <a href="https://socimh.github.io/tidystata/reference/keys.html">R
 reference</a>
 </td>
 </tr>
@@ -13162,14 +13468,16 @@ reference</a>
 <pre><code>duplicates list id</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">|</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">id</span>,fromLast<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>,,drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/keys.html">duplicates_list</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
-Inspect all members of duplicated
-keys<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+Inspect all members of duplicated keys<br><strong>Differs from
+Stata:</strong> Returns duplicate rows ordered by the identifying
+columns, adding .dup_group and .row to identify sets and original row
+positions.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/keys.html">R
 reference</a>
 </td>
 </tr>
@@ -13178,14 +13486,14 @@ reference</a>
 <pre><code>duplicates report id</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>copies<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span>,observations<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span>,<span class="kw">function</span><span class="op">(</span><span class="va">k</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span><span class="va">counts</span><span class="op">==</span><span class="va">k</span><span class="op">]</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>,surplus<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span>,<span class="kw">function</span><span class="op">(</span><span class="va">k</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">counts</span><span class="op">==</span><span class="va">k</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="va">k</span><span class="op">-</span><span class="fl">1L</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/keys.html">duplicates_report</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Summarize copies, observations and duplicate
 surplus<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/keys.html">R
 reference</a>
 </td>
 </tr>
@@ -13194,14 +13502,14 @@ reference</a>
 <pre><code>duplicates tag id, generate(dup)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>,dup<span class="op">=</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">1L</span>,.by<span class="op">=</span><span class="va">id</span><span class="op">)</span></span></code></pre>
-<small>dplyr</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/keys.html">duplicates_tag</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span>, .name <span class="op">=</span> <span class="st">"dup"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Tag all group members with duplicate surplus
 count<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/keys.html">R
 reference</a>
 </td>
 </tr>
@@ -13253,6 +13561,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-c20ee0ac174e32f9">
+<td>
+<pre><code>egen z = anycount(x y), values(2 4)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/row_egen.html">row_sum</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>, <span class="op">~</span> <span class="va">.x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Count listed values across
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-cbb09aabdd80fecd">
 <td>
 <pre><code>egen z = anymatch(x y), values(2 4)</code></pre>
@@ -13266,6 +13590,22 @@ Flag any listed value across
 columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-4cdb8bbbc0c7273c">
+<td>
+<pre><code>egen z = anymatch(x y), values(2 4)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">if_any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>, <span class="op">~</span> <span class="va">.x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Flag any listed value across
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -13300,6 +13640,22 @@ Repeat the nonmissing count in a
 column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-4f413b4eef2d4f85">
+<td>
+<pre><code>egen z = count(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the nonmissing count in a
+column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -13350,6 +13706,22 @@ Repeat the first nonmissing
 value<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-d13b7eefc41ac97c">
+<td>
+<pre><code>egen z = firstnm(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">first</a></span><span class="op">(</span><span class="va">x</span>, na_rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the first nonmissing
+value<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -13404,6 +13776,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-eb5380a8c54e1cd8">
+<td>
+<pre><code>egen z = lastnm(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">last</a></span><span class="op">(</span><span class="va">x</span>, na_rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the last nonmissing
+value<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-774fc36f407d7d1d">
 <td>
 <pre><code>egen z = max(x)</code></pre>
@@ -13436,6 +13824,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-3c6038c11958675c">
+<td>
+<pre><code>egen z = mean(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the mean in a
+column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-46abc3654d2c5bf0">
 <td>
 <pre><code>egen z = median(x)</code></pre>
@@ -13449,6 +13853,22 @@ Repeat the median in a
 column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-0700cdadd9de69e5">
+<td>
+<pre><code>egen z = median(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the median in a
+column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -13473,15 +13893,17 @@ reference</a>
 <pre><code>egen z = pc(x)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fl">100</span><span class="op">*</span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span>,na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/std.html">pc</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
-Express values as percentages of the column total<br>Requires a nonzero
-observed total; this is a share calculation, not survey
-estimation.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+Express values as percentages of the column total<br>Computes 100 * x /
+sum(x, na.rm = TRUE), not percentile ranks. Use prop = TRUE for shares
+summing to 1; use dplyr::percent_rank() for percentile ranks. The
+observed total must be finite and
+nonzero.<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/std.html">R
 reference</a>
 </td>
 </tr>
@@ -13534,19 +13956,35 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-fab5a276c2baf163">
+<td>
+<pre><code>egen z = rank(x), field</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">min_rank</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Rank highest value first with competition
+ties<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-7af87a24fcf6bea1">
 <td>
 <pre><code>egen z = rowmax(x y)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span>,<span class="va">data</span><span class="op">$</span><span class="va">y</span>,na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_max</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Find the available row
-maximum<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+maximum<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -13555,14 +13993,14 @@ reference</a>
 <pre><code>egen z = rowmean(x y)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span>,na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>; <span class="va">data</span><span class="op">$</span><span class="va">z</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.nan</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">z</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA_real_</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_mean</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Average available values across
-columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+columns<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -13571,14 +14009,14 @@ reference</a>
 <pre><code>egen z = rowmin(x y)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span>,<span class="va">data</span><span class="op">$</span><span class="va">y</span>,na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_min</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Find the available row
-minimum<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+minimum<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -13587,14 +14025,14 @@ reference</a>
 <pre><code>egen z = rowmiss(x y)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_miss</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Count missing cells in each
-row<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
-·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+row<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -13603,14 +14041,14 @@ reference</a>
 <pre><code>egen z = rownonmiss(x y)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_non_miss</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Count observed cells in each
-row<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
-·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+row<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -13619,14 +14057,14 @@ reference</a>
 <pre><code>egen z = rowtotal(x y)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span>,na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="../reference/row_egen.html">row_sum</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Sum available values across
-columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+columns<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -13635,14 +14073,16 @@ reference</a>
 <pre><code>egen z = rowtotal(x y), missing</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span>,na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>; <span class="va">data</span><span class="op">$</span><span class="va">z</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">==</span><span class="fl">0</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA_real_</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="../reference/row_egen.html">row_non_miss</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0L</span>, <span class="cn">NA_real_</span>, <span class="fu"><a href="../reference/row_egen.html">row_sum</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
-Return missing for entirely missing row
-totals<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+Return missing for entirely missing row totals<br>row_sum() treats
+missing inputs as zero by default; explicitly restore NA only for rows
+with no observed
+values.<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -13662,19 +14102,37 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-7092bce2b7532682">
+<td>
+<pre><code>egen z = sd(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the sample standard deviation in a
+column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-a4561594d41a2cde">
 <td>
 <pre><code>egen z = std(x)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/std.html">std</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
-Standardize using the sample standard
-deviation<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+Standardize using the sample standard deviation<br>Z-score: (x - mean(x,
+na.rm = TRUE)) / sd(x, na.rm = TRUE), using the sample SD. Missing
+values stay
+missing.<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/std.html">R
 reference</a>
 </td>
 </tr>
@@ -13683,14 +14141,14 @@ reference</a>
 <pre><code>egen z = tag(g)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">g</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">g</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/is_first.html">is_first</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Tag the first observed row of each
-group<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+group<br><a href="https://www.stata.com/manuals/degen.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/is_first.html">R
 reference</a>
 </td>
 </tr>
@@ -13707,6 +14165,70 @@ Repeat the sum in a
 column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-595544a4776f505e">
+<td>
+<pre><code>egen z = total(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the sum in a
+column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-95613708a1b5c8bb">
+<td>
+<pre><code>tempvar x_rank x_n
+egen `x_rank' = rank(x), track
+egen `x_n' = count(x)
+generate p = (`x_rank' - 1) / (`x_n' - 1) if !missing(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, p <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/percent_rank.html" class="external-link">percent_rank</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Calculate percentile ranks (percent rank) on a 0-1 scale<br>Uses
+(minimum rank - 1) / (nonmissing count - 1). Ties receive the lowest
+rank; missing values stay missing. For c(2, 3, 5), returns c(0, 0.5, 1).
+With tied maxima the top rank can be below 1; a single observed value
+has an undefined rank. This differs from cumulative proportions computed
+by cume_dist() or
+stats::ecdf().<br><a href="https://www.stata.com/support/faqs/statistics/percentile-ranks-and-plotting-positions/" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/percent_rank.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-722a7a0cc055a619">
+<td>
+<pre><code>tempvar x_rank x_n
+egen `x_rank' = rank(x), track
+egen `x_n' = count(x)
+generate p = 100 * (`x_rank' - 1) / (`x_n' - 1) if !missing(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, p <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/percent_rank.html" class="external-link">percent_rank</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Calculate percentile ranks (percent rank) on a 0-100 scale<br>Uses
+(minimum rank - 1) / (nonmissing count - 1) * 100. Ties receive the
+lowest rank; missing values stay missing. For c(2, 3, 5), returns c(0,
+50, 100). With tied maxima the top rank can be below 100; a single
+observed value has an undefined rank. This differs from cumulative
+proportions computed by cume_dist() or
+stats::ecdf().<br><a href="https://www.stata.com/support/faqs/statistics/percentile-ranks-and-plotting-positions/" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/percent_rank.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -14262,6 +14784,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-8fd05fc8f591761b">
+<td>
+<pre><code>generate byte high = x &gt; 3 if x &lt; .</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, high <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Create a binary indicator retaining missing values<br>Comparisons with
+NA return NA, matching the if x &lt; .
+restriction.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-97a9cd423d955578">
 <td>
 <pre><code>generate byte observed = !missing(x)</code></pre>
@@ -14275,6 +14814,22 @@ Create a nonmissing
 indicator<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-4faf033975b872e1">
+<td>
+<pre><code>generate byte observed = !missing(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, observed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Create a nonmissing
+indicator<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -14295,6 +14850,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-480d875caa0d3a80">
+<td>
+<pre><code>generate cumulative = sum(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, cumulative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/coalesce.html" class="external-link">coalesce</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Create a running sum ignoring missing
+values<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-2eb172ffc5c5bc33">
 <td>
 <pre><code>generate double z = x^2</code></pre>
@@ -14311,6 +14882,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-dcf1272aa113e77b">
+<td>
+<pre><code>generate double z = x^2</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="va">x</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Square a variable preserving missing
+values<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-25d161d3a53aeb92">
 <td>
 <pre><code>generate n = _N</code></pre>
@@ -14324,6 +14911,22 @@ Repeat the total row
 count<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-ab0d3b30a3d47e53">
+<td>
+<pre><code>generate n = _N</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, n <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Repeat the total row
+count<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -14360,6 +14963,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-b74f9deecad8371c">
+<td>
+<pre><code>generate row = _n</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, row <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Create row
+numbers<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-9de2e4f37a779bc0">
 <td>
 <pre><code>generate z = x + y</code></pre>
@@ -14373,6 +14992,22 @@ Add columns with missing
 propagation<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-166f6510796bafcc">
+<td>
+<pre><code>generate z = x + y</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="va">x</span> <span class="op">+</span> <span class="va">y</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Add columns with missing
+propagation<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -14562,6 +15197,23 @@ in Stata descending order; use na.last=FALSE
 deliberately.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-1e23fce6d716c102">
+<td>
+<pre><code><span><span class="va">gsort</span> <span class="op">-</span><span class="va">x</span></span></code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">data</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Sort descending with Stata missing first<br>Sorting on !is.na(x) first
+places missing values at the top, as gsort
+does.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -14809,6 +15461,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-0c5aef9201a84046">
+<td>
+<pre><code>isid g h</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/keys.html">isid</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Assert a compound key uniquely identifies
+rows<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/keys.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-6bad777420807e88">
 <td>
 <pre><code>isid id</code></pre>
@@ -14825,6 +15493,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-c9f6aeccf20b56d7">
+<td>
+<pre><code>isid id</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/keys.html">isid</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Assert a key is unique and
+nonmissing<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/keys.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-357df42ff267902f">
 <td>
 <pre><code>isid id, missok</code></pre>
@@ -14838,6 +15522,21 @@ Allow one ordinary missing value in a unique
 key<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
 ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-ccd794aa8981acc9">
+<td>
+<pre><code>isid id, missok</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/keys.html">isid</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span>, .missing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Allow one ordinary missing value in a unique
+key<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
+· <a href="https://socimh.github.io/tidystata/reference/keys.html">R
 reference</a>
 </td>
 </tr>
@@ -14890,6 +15589,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-614856b35d04ea35">
+<td>
+<pre><code>keep id x</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">id</span>, <span class="va">x</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Keep named columns in
+order<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-b7eff18992a1aee2">
 <td>
 <pre><code>keep if !missing(x, y)</code></pre>
@@ -14903,6 +15618,22 @@ Keep complete rows on selected
 columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-e3218783c67f3d68">
+<td>
+<pre><code>keep if !missing(x, y)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre>
+<small>tidyr</small>
+</td>
+<td>
+Keep complete rows on selected
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://tidyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -14938,6 +15669,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-89b0020cd64da926">
+<td>
+<pre><code>keep if inlist(g, 1, 3)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Keep a set of
+categories<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-cb3d1916f7f7ee00">
 <td>
 <pre><code>keep if missing(x)</code></pre>
@@ -14951,6 +15698,22 @@ Keep rows missing a
 value<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-066c80be3a0884dd">
+<td>
+<pre><code>keep if missing(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Keep rows missing a
+value<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -14971,6 +15734,23 @@ NA.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-bb3ef88577a6af4a">
+<td>
+<pre><code>keep if s != ""</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">s</span> <span class="op">!=</span> <span class="st">""</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Keep nonempty strings<br><strong>Differs from Stata:</strong> R NA
+strings are dropped as well, because the condition is
+missing.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-9f5944cb01314dca">
 <td>
 <pre><code>keep if x &gt; 2 &amp; x &lt; .</code></pre>
@@ -14984,6 +15764,23 @@ Keep observed values above a
 threshold<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-3900022f31b3bcfc">
+<td>
+<pre><code>keep if x &gt; 2 &amp; x &lt; .</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span> <span class="op">&gt;</span> <span class="fl">2</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Keep observed values above a threshold<br>filter() drops rows where the
+condition is
+missing.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15001,6 +15798,22 @@ object and column names
 together.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-a03a34c804f5f373">
+<td>
+<pre><code>keep in 2/4</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="va">data</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Keep a row interval by
+position<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15052,6 +15865,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-bcae10343dab46a0">
+<td>
+<pre><code>list id x if g == 2</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span>, <span class="va">id</span>, <span class="va">x</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Inspect selected rows and
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-b855f3bad31883ff">
 <td>
 <pre><code>list id x in 1/3</code></pre>
@@ -15065,6 +15894,22 @@ Show selected columns from the first
 rows<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-fb8dc014ff4d1e99">
+<td>
+<pre><code>list id x in 1/3</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span><span class="va">data</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="va">id</span>, <span class="va">x</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Show selected columns from the first
+rows<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15082,6 +15927,22 @@ column names
 together.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-5615bf81eb9e8d73">
+<td>
+<pre><code>list in -2/l</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_tail</a></span><span class="op">(</span><span class="va">data</span>, n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Show the last
+rows<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15290,6 +16151,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-4535d57e51285bc6">
+<td>
+<pre><code>missings dropobs x y, force</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">if_all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>, <span class="va">is.na</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Drop rows missing on every selected numeric variable<br>filter_out()
+requires dplyr 1.2.0 or
+later.<br><a href="https://journals.sagepub.com/doi/pdf/10.1177/1536867X1501500413" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-6a083b5f435d0928">
 <td>
 <pre><code>missings dropvars, force</code></pre>
@@ -15305,6 +16183,24 @@ and would require an additional R test for empty
 strings.<br><a href="https://journals.sagepub.com/doi/pdf/10.1177/1536867X1501500413" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-6f341c1733c4fc23">
+<td>
+<pre><code>missings dropvars, force</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="op">!</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Drop entirely missing numeric columns<br><strong>Differs from
+Stata:</strong> Drops entirely missing columns of every type, not only
+numeric
+ones.<br><a href="https://journals.sagepub.com/doi/pdf/10.1177/1536867X1501500413" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15326,6 +16222,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-20db735fe786f203">
+<td>
+<pre><code>missings report x y</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/misstable.html">misstable</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Report missing-value counts by numeric variable<br><strong>Differs from
+Stata:</strong> Lists variables with missing values, with counts and
+percentages.<br><a href="https://journals.sagepub.com/doi/pdf/10.1177/1536867X1501500413" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/misstable.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-15fab4cbfe304b51">
 <td>
 <pre><code>missings tag x y, generate(nmiss)</code></pre>
@@ -15339,6 +16252,22 @@ Count numeric missing values within each
 row<br><a href="https://journals.sagepub.com/doi/pdf/10.1177/1536867X1501500413" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-3e7422e3a4dbcfc2">
+<td>
+<pre><code>missings tag x y, generate(nmiss)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, nmiss <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/row_egen.html">row_miss</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Count numeric missing values within each
+row<br><a href="https://journals.sagepub.com/doi/pdf/10.1177/1536867X1501500413" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -15360,6 +16289,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-2e5b58ea38b64660">
+<td>
+<pre><code>misstable patterns x y</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/misstable.html">misstable</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span>, .patterns <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Count joint missingness patterns<br><strong>Differs from Stata:</strong>
+Columns cover variables with missing values; 1 marks an observed
+value.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/misstable.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-5c6d7a53c0b5459e">
 <td>
 <pre><code>misstable summarize x y</code></pre>
@@ -15376,19 +16322,36 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-6f14da3211ec5ae7">
+<td>
+<pre><code>misstable summarize x y</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/misstable.html">misstable</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Count missing values for each selected column<br><strong>Differs from
+Stata:</strong> Lists only variables with missing values, with counts
+and percentages.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/misstable.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-f017d7d27b2c46a0">
 <td>
 <pre><code>mvdecode x, mv(-99 -98)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">[</span><span class="va">data</span><span class="op">$</span><span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">99</span>,<span class="op">-</span><span class="fl">98</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA_real_</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/na_conversion.html">mvdecode</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">99</span>, <span class="op">-</span><span class="fl">98</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Convert multiple sentinel codes to
 missing<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/na_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -15415,14 +16378,14 @@ reference</a>
 <pre><code>mvencode x, mv(-99)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">99</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/na_conversion.html">mvencode</a></span><span class="op">(</span><span class="va">x</span>, <span class="op">-</span><span class="fl">99</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Encode missing values with a
 sentinel<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/na_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -15456,6 +16419,22 @@ column names
 together.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-0a3c1270c7f78230">
+<td>
+<pre><code>order _all, alphabetic</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/names.html">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Alphabetize column
+order<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15503,6 +16482,22 @@ Move selected columns to the
 front<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-d1ede6286239c7d1">
+<td>
+<pre><code>order y id, first</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">relocate</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">y</span>, <span class="va">id</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Move selected columns to the
+front<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15722,16 +16717,15 @@ reference</a>
 <pre><code>recode x (1/2=0) (3/6=1), generate(binary)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">binary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">)</span>,<span class="cn">NA_real_</span>,<span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">&lt;=</span><span class="fl">2</span>,<span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, binary <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/stata_recode.html">stata_recode</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span> <span class="op">~</span> <span class="fl">0</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">6</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
-Collapse integer categories to two groups<br><strong>Differs from
-Stata:</strong> Fixture values are integers 1 through 6; specify
-additional branches for values outside those
-ranges.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+Collapse closed numeric ranges to two groups<br>Rules include both
+endpoints and decimal values; unmatched values stay
+unchanged.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/stata_recode.html">R
 reference</a>
 </td>
 </tr>
@@ -15740,14 +16734,14 @@ reference</a>
 <pre><code>recode x (1=10) (2=20), generate(z)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">z</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">$</span><span class="va">x</span>; <span class="va">data</span><span class="op">$</span><span class="va">z</span><span class="op">[</span><span class="va">data</span><span class="op">$</span><span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">10</span>; <span class="va">data</span><span class="op">$</span><span class="va">z</span><span class="op">[</span><span class="va">data</span><span class="op">$</span><span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">20</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, z <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/stata_recode.html">stata_recode</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span> <span class="op">~</span> <span class="fl">10</span>, <span class="fl">2</span> <span class="op">~</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Recode selected values and retain all
 others<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/stata_recode.html">R
 reference</a>
 </td>
 </tr>
@@ -15787,6 +16781,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-3346d98f2e839655">
+<td>
+<pre><code>rename (x y) (income hours)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="va">data</span>, income <span class="op">=</span> <span class="va">x</span>, hours <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Rename several columns
+together<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-73dfeb54a9562fb2">
 <td>
 <pre><code>rename *, lower</code></pre>
@@ -15821,6 +16831,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-9f33e9274feb0346">
+<td>
+<pre><code>rename *, upper</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">toupper</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Uppercase all column
+names<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-45c93cc32dca3312">
 <td>
 <pre><code>rename old* new*</code></pre>
@@ -15835,6 +16861,22 @@ and column names
 together.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-4bc541af95dfbec6">
+<td>
+<pre><code>rename old* new*</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span><span class="va">data</span>, <span class="op">~</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_replace.html" class="external-link">str_replace</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"^old"</span>, <span class="st">"new"</span><span class="op">)</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"old"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Replace a column-name
+prefix<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -15871,6 +16913,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-493d9b58982423c4">
+<td>
+<pre><code>replace s = "unknown" if s == ""</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, s <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">replace_when</a></span><span class="op">(</span><span class="va">s</span>, <span class="va">s</span> <span class="op">==</span> <span class="st">""</span> <span class="op">~</span> <span class="st">"unknown"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Replace empty text without replacing NA<br><strong>Differs from
+Stata:</strong> replace_when() requires dplyr 1.2.0 or later. R NA
+strings stay
+missing.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-df93a1bdd3b4fb8f">
 <td>
 <pre><code>replace x = . if x == 2</code></pre>
@@ -15884,6 +16944,22 @@ Convert a sentinel to
 missing<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-20623dcfdb72c2d8">
+<td>
+<pre><code>replace x = . if x == 2</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/na_conversion.html">mvdecode</a></span><span class="op">(</span><span class="va">x</span>, mv <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Convert a sentinel to
+missing<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/na_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -15903,6 +16979,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-6883388e4efcfd5c">
+<td>
+<pre><code>replace x = 0 if missing(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/na_conversion.html">mvencode</a></span><span class="op">(</span><span class="va">x</span>, mv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Replace numeric missing by
+zero<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/na_conversion.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-0617f386e6e060d6">
 <td>
 <pre><code>replace x = x * 100 if g == 1</code></pre>
@@ -15919,6 +17011,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-098b5b88200264f9">
+<td>
+<pre><code>replace x = x * 100 if g == 1</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">replace_when</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">g</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="va">x</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Modify values only inside a category<br>replace_when() requires dplyr
+1.2.0 or later. Rows where the condition is missing keep their
+values.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-86fc9ac5a79b4d6f">
 <td>
 <pre><code>replace x = y if missing(x)</code></pre>
@@ -15932,6 +17041,22 @@ Fill missing values from another
 column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-d0cd77dac45b5947">
+<td>
+<pre><code>replace x = y if missing(x)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/coalesce.html" class="external-link">coalesce</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Fill missing values from another
+column<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -16119,6 +17244,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-217d7fbbd707e6f7">
+<td>
+<pre><code>sort g x</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">x</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Sort lexicographically on two
+columns<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-3088243486310971">
 <td>
 <pre><code>sort g, stable</code></pre>
@@ -16135,6 +17276,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-c177dc9526e70759">
+<td>
+<pre><code>sort g, stable</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Keep original order within equal keys<br>arrange() is stable, so tied
+rows keep their
+order.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-f8d303594f2bed7c">
 <td>
 <pre><code>sort x</code></pre>
@@ -16148,6 +17306,22 @@ Sort a numeric column with missing
 last<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-1c99b848060a409f">
+<td>
+<pre><code>sort x</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Sort a numeric column with missing
+last<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -17335,14 +18509,14 @@ reference</a>
 <pre><code>decode x, generate(text)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">text</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu">haven</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>haven</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, text <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/type_conversion.html">decode</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Decode numeric value labels to
 text<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://haven.tidyverse.org/reference/index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/type_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -17351,16 +18525,17 @@ reference</a>
 <pre><code>encode s, generate(code)</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">data</span><span class="op">$</span><span class="va">code</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">s</span>,levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">s</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">s</span><span class="op">)</span><span class="op">&amp;</span><span class="va">data</span><span class="op">$</span><span class="va">s</span><span class="op">!=</span><span class="st">''</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">data</span>, code <span class="op">=</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/type_conversion.html">encode</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Encode nonempty categories in sorted order<br><strong>Differs from
-Stata:</strong> Creates integer codes only. Add a labelled vector or
-keep the factor to retain category labels; collation is
-locale-dependent.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+Stata:</strong> Character input gets fresh codes from 1 in UTF-8 radix
+order; NA and empty strings are missing. Locale-specific Stata ordering
+can differ. Factor input preserves existing indices and all
+levels.<br><a href="https://www.stata.com/manuals/dencode.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/type_conversion.html">R
 reference</a>
 </td>
 </tr>
@@ -17736,6 +18911,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-3a44238c7dec736d">
+<td>
+<pre><code>collapse (mean) x [fw=w]</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span><span class="va">data</span>, x <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">w</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Collapse integer-frequency-weighted values to a
+mean<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-9e398c0f692b686b">
 <td>
 <pre><code>collapse (mean) x y, cw by(g)</code></pre>
@@ -17864,6 +19055,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-dde961bc93be2ab0">
+<td>
+<pre><code>contract g h, freq(n) zero</code></pre>
+</td>
+<td>
+<pre><code><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html" class="external-link">complete</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span>, name <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span>, <span class="va">g</span>, <span class="va">h</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidyr</small>
+</td>
+<td>
+Include unobserved combinations with zero
+frequency<br><a href="https://www.stata.com/manuals/dcontract.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://tidyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-a545745f4db2f606">
 <td>
 <pre><code>contract g, freq(n)</code></pre>
@@ -17964,6 +19171,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-90fa37b44c688f45">
+<td>
+<pre><code>summarize x, meanonly</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">summ</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Compute mean-only summary components<br><strong>Differs from
+Stata:</strong> Also reports the distinct count and standard
+deviation.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-eec678c1f169c639">
 <td>
 <pre><code>tab1 g h</code></pre>
@@ -17980,6 +19204,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-aca0d79d0ecda104">
+<td>
+<pre><code>tab1 g h</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/tab.html">tab1</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Make separate one-way frequency
+tables<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/tab.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-fcb66fb2265bb596">
 <td>
 <pre><code>tab2 g h k</code></pre>
@@ -17993,6 +19233,22 @@ Make each pairwise contingency
 table<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-fb1a9c6da55f7099">
+<td>
+<pre><code>tab2 g h k</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/tab.html">tab2</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span>, <span class="va">k</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Make each pairwise contingency
+table<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/tab.html">R
 reference</a>
 </td>
 </tr>
@@ -18030,6 +19286,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-c04cdb9f7f3632f1">
+<td>
+<pre><code>tabstat x y, statistics(n mean sd) columns(statistics)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span>, .stat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"mean"</span>, <span class="st">"sd"</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Compare count, mean and spread across numeric columns<br><strong>Differs
+from Stata:</strong> Rows are variables and columns are statistics, as
+with
+columns(statistics).<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-6f3045f9b5fec45a">
 <td>
 <pre><code>tabstat x, by(g) statistics(n mean)</code></pre>
@@ -18064,6 +19338,24 @@ empirical percentile rule through R quantile type
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-e0bcd01e014210a9">
+<td>
+<pre><code>tabstat x, statistics(iqr)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"iqr"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the interquartile range as a descriptive
+statistic<br><strong>Differs from Stata:</strong> Returns a one-row
+summary table rather than a bare number; use the base R version when a
+scalar is needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-38a7959b55076bbc">
 <td>
 <pre><code>tabstat x, statistics(max)</code></pre>
@@ -18079,6 +19371,24 @@ sampling-design correction is
 applied.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-f6af7a3fafd09efc">
+<td>
+<pre><code>tabstat x, statistics(max)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"max"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the maximum as a descriptive statistic<br><strong>Differs from
+Stata:</strong> Returns a one-row summary table rather than a bare
+number; use the base R version when a scalar is
+needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
 reference</a>
 </td>
 </tr>
@@ -18100,6 +19410,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-2b33630ea67fece9">
+<td>
+<pre><code>tabstat x, statistics(mean)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the mean as a descriptive statistic<br><strong>Differs from
+Stata:</strong> Returns a one-row summary table rather than a bare
+number; use the base R version when a scalar is
+needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-b69287fd052957de">
 <td>
 <pre><code>tabstat x, statistics(min)</code></pre>
@@ -18115,6 +19443,24 @@ sampling-design correction is
 applied.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-49b46f38c02eb11f">
+<td>
+<pre><code>tabstat x, statistics(min)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"min"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the minimum as a descriptive statistic<br><strong>Differs from
+Stata:</strong> Returns a one-row summary table rather than a bare
+number; use the base R version when a scalar is
+needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
 reference</a>
 </td>
 </tr>
@@ -18136,6 +19482,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-dcb484bac3083786">
+<td>
+<pre><code>tabstat x, statistics(n)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the nonmissing count as a descriptive
+statistic<br><strong>Differs from Stata:</strong> Returns a one-row
+summary table rather than a bare number; use the base R version when a
+scalar is needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-a9b529d29ef68e06">
 <td>
 <pre><code>tabstat x, statistics(p25)</code></pre>
@@ -18151,6 +19515,24 @@ through R quantile type
 2.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
 ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-800ab753d61a20f2">
+<td>
+<pre><code>tabstat x, statistics(p25)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"p25"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the 25th percentile as a descriptive statistic<br><strong>Differs
+from Stata:</strong> Returns a one-row summary table rather than a bare
+number; use the base R version when a scalar is
+needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
 reference</a>
 </td>
 </tr>
@@ -18172,6 +19554,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-1474b144cf24a990">
+<td>
+<pre><code>tabstat x, statistics(p50)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"p50"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the median as a descriptive statistic<br><strong>Differs from
+Stata:</strong> Returns a one-row summary table rather than a bare
+number; use the base R version when a scalar is
+needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-629657314d1a28d0">
 <td>
 <pre><code>tabstat x, statistics(p75)</code></pre>
@@ -18187,6 +19587,24 @@ through R quantile type
 2.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
 ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-0a148a26e554fa80">
+<td>
+<pre><code>tabstat x, statistics(p75)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"p75"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the 75th percentile as a descriptive statistic<br><strong>Differs
+from Stata:</strong> Returns a one-row summary table rather than a bare
+number; use the base R version when a scalar is
+needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
 reference</a>
 </td>
 </tr>
@@ -18226,6 +19644,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-dc57434a32e7a6b6">
+<td>
+<pre><code>tabstat x, statistics(sd)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"sd"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the sample standard deviation as a descriptive
+statistic<br><strong>Differs from Stata:</strong> Returns a one-row
+summary table rather than a bare number; use the base R version when a
+scalar is needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-cbc16d168b3101ef">
 <td>
 <pre><code>tabstat x, statistics(semean)</code></pre>
@@ -18259,6 +19695,24 @@ sampling-design correction is
 applied.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-820a9fe829a4f3d7">
+<td>
+<pre><code>tabstat x, statistics(sum)</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/summ.html">tabstat</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, .stat <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Return the sum as a descriptive statistic<br><strong>Differs from
+Stata:</strong> Returns a one-row summary table rather than a bare
+number; use the base R version when a scalar is
+needed.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/summ.html">R
 reference</a>
 </td>
 </tr>
@@ -18296,6 +19750,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-684c291d0dd08392">
+<td>
+<pre><code>tabulate g</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Count a single categorical variable<br><strong>Differs from
+Stata:</strong> Missing values, when present, appear as a separate row
+with valid percentages beside the overall
+percentages.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/tab.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-0f961f60ffa7dfb1">
 <td>
 <pre><code>tabulate g [fw=w]</code></pre>
@@ -18309,6 +19781,22 @@ Tabulate integer frequency
 weights<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-ece9771fae04cf89">
+<td>
+<pre><code>tabulate g [fw=w]</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, .wt <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Tabulate integer frequency
+weights<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/tab.html">R
 reference</a>
 </td>
 </tr>
@@ -18328,6 +19816,22 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-84b3e28ba7b6c7ab">
+<td>
+<pre><code>tabulate g h</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/tab.html">tab2</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Count a two-way contingency
+table<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/tab.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-71f788dadb246b6e">
 <td>
 <pre><code>tabulate g h, cell</code></pre>
@@ -18341,6 +19845,23 @@ Compute percentages of all table
 cells<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-5f7f70a1eeb62494">
+<td>
+<pre><code>tabulate g h, cell</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span><span class="op">)</span>, percent <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Compute percentages of all table cells<br><strong>Differs from
+Stata:</strong> Returns one row per observed combination; empty cells
+are omitted.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -18360,6 +19881,23 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-55b76cb83d97ecce">
+<td>
+<pre><code>tabulate g h, column</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span><span class="op">)</span>, percent <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, .by <span class="op">=</span> <span class="va">h</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Compute percentages within each table column<br><strong>Differs from
+Stata:</strong> Returns one row per observed combination; empty cells
+are omitted.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-7e2e530194e3bdab">
 <td>
 <pre><code>tabulate g h, row</code></pre>
@@ -18373,6 +19911,23 @@ Compute percentages within each table
 row<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata reference</a>
 ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-ca2b27857e231699">
+<td>
+<pre><code>tabulate g h, row</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">h</span><span class="op">)</span>, percent <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, .by <span class="op">=</span> <span class="va">g</span><span class="op">)</span></span></code></pre>
+<small>dplyr</small>
+</td>
+<td>
+Compute percentages within each table row<br><strong>Differs from
+Stata:</strong> Returns one row per observed combination; empty cells
+are omitted.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://dplyr.tidyverse.org/reference/index.html" class="external-link">R
 reference</a>
 </td>
 </tr>
@@ -18410,6 +19965,22 @@ strings remain a separate R
 value.<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
 reference</a> ·
 <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html" class="external-link">R
+reference</a>
+</td>
+</tr>
+<tr id="example-ref-bde7b7930d074933">
+<td>
+<pre><code>tabulate g, missing</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/tab.html">tab</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Include missing categories in a frequency
+table<br><a href="https://www.stata.com/manuals/d.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/tab.html">R
 reference</a>
 </td>
 </tr>
@@ -23743,6 +25314,24 @@ reference</a> ·
 reference</a>
 </td>
 </tr>
+<tr id="example-ref-d76fadc09076e61b">
+<td>
+<pre><code>tabulate g b, chi2</code></pre>
+</td>
+<td>
+<pre><code><span><span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/tab.html">tab2</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">g</span>, <span class="va">b</span>, .chi2 <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
+</td>
+<td>
+Test association in a two-way count table<br><strong>Differs from
+Stata:</strong> Prints Pearson's chi-squared test and Cramer's V below
+the
+table.<br><a href="https://www.stata.com/manuals/rtabulatetwoway.pdf" class="external-link">Stata
+reference</a> ·
+<a href="https://socimh.github.io/tidystata/reference/tab.html">R
+reference</a>
+</td>
+</tr>
 <tr id="example-ref-89c2a3aedd4bd9fa">
 <td>
 <pre><code>tabulate g b, exact</code></pre>
@@ -23920,16 +25509,18 @@ reference</a>
 <pre><code>alpha q1 q2 q3, generate(score) asis</code></pre>
 </td>
 <td>
-<pre><code><span><span class="va">score</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"q1"</span>,<span class="st">"q2"</span>,<span class="st">"q3"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre>
-<small>base</small>
+<pre><code><span><span class="va">score</span> <span class="op">&lt;-</span> <span class="fu">tidystata</span><span class="fu">::</span><span class="fu"><a href="../reference/row_egen.html">row_mean</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"q1"</span>, <span class="st">"q2"</span>, <span class="st">"q3"</span><span class="op">)</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre>
+<small>tidystata</small>
 </td>
 <td>
 Generate a mean score from a reliability scale<br><strong>Differs from
-Stata:</strong> asis disables Stata item-direction reversal;
-check.keys=FALSE makes the R direction rule
-explicit.<br><a href="https://www.stata.com/manuals/mvalpha.pdf" class="external-link">Stata
+Stata:</strong> This computes only the unstandardized, unreversed item
+mean for complete rows, preserving the complete-item calculation with
+na.rm = FALSE; it does not fit a reliability model or reproduce every
+alpha scoring
+option.<br><a href="https://www.stata.com/manuals/mvalpha.pdf" class="external-link">Stata
 reference</a> ·
-<a href="https://cran.r-project.org/web/packages/psych/psych.pdf" class="external-link">R
+<a href="https://socimh.github.io/tidystata/reference/row_egen.html">R
 reference</a>
 </td>
 </tr>
@@ -36558,6 +38149,7 @@ Recode values by matching them
 dplyr
 </td>
 <td>
+recode
 </td>
 <td>
 Several if-else conditions in one step
@@ -36762,6 +38354,20 @@ dplyr
 </td>
 <td>
 Keep rows that meet a condition
+</td>
+</tr>
+<tr>
+<td>
+<code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter_out()</a></code>
+</td>
+<td>
+dplyr
+</td>
+<td>
+drop if
+</td>
+<td>
+Drop rows that meet a condition, keeping rows where it is missing
 </td>
 </tr>
 <tr>
@@ -37070,6 +38676,7 @@ Number of distinct values
 dplyr
 </td>
 <td>
+mvdecode
 </td>
 <td>
 Turn one value into missing
@@ -37142,7 +38749,8 @@ dplyr
 egen rank()
 </td>
 <td>
-Rank rescaled to 0-1
+Percentile ranks: (minimum rank - 1) / (nonmissing count - 1); multiply
+by 100 for percentages
 </td>
 </tr>
 <tr>
@@ -37223,6 +38831,20 @@ dplyr
 </td>
 <td>
 Rename columns with a function, such as toupper
+</td>
+</tr>
+<tr>
+<td>
+<code><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">replace_when()</a></code>
+</td>
+<td>
+dplyr
+</td>
+<td>
+replace if
+</td>
+<td>
+Replace values where conditions hold, keeping the rest
 </td>
 </tr>
 <tr>
@@ -41055,6 +42677,33 @@ Regression discontinuity
 </tr>
 <tr>
 <td>
+<code>locale()</code>
+</td>
+<td>
+readr
+</td>
+<td>
+</td>
+<td>
+Describe decimal marks, encodings and date conventions for parsing
+</td>
+</tr>
+<tr>
+<td>
+<code>parse_double()</code>
+</td>
+<td>
+readr
+</td>
+<td>
+destring, dpcomma
+</td>
+<td>
+Parse text as decimal numbers, with locale-specific marks
+</td>
+</tr>
+<tr>
+<td>
 <code>parse_number()</code>
 </td>
 <td>
@@ -44782,10 +46431,10 @@ Expand list-columns back into rows
 tidystata
 </td>
 <td>
-decode
+tostring
 </td>
 <td>
-Alias of decode()
+Alias of tostring(): stored codes as text
 </td>
 </tr>
 <tr>
@@ -45018,6 +46667,21 @@ Mark duplicated rows
 </tr>
 <tr>
 <td>
+<code><a href="../reference/type_conversion.html">encode()</a></code>
+</td>
+<td>
+tidystata
+</td>
+<td>
+encode
+</td>
+<td>
+Encode character categories as labelled integer codes; preserve factor
+codes
+</td>
+</tr>
+<tr>
+<td>
 <code><a href="../reference/findit.html">findit()</a></code>
 </td>
 <td>
@@ -45163,12 +46827,13 @@ tidystata
 <td>
 </td>
 <td>
-Percentage of the total
+Percentage of the total, not a percentile rank; prop = TRUE returns
+proportions
 </td>
 </tr>
 <tr>
 <td>
-<code><a href="../reference/std.html">pct()</a></code>
+<code>pct()</code>
 </td>
 <td>
 tidystata
@@ -45177,7 +46842,8 @@ tidystata
 egen pc()
 </td>
 <td>
-Alias of pc()
+Removed alias of pc(); use pc() for total shares and
+dplyr::percent_rank() for percentile ranks
 </td>
 </tr>
 <tr>
@@ -45252,7 +46918,7 @@ return the complete input invisibly without changing preview preferences
 </tr>
 <tr>
 <td>
-<code><a href="../reference/pwcorr.html">pwcorr()</a></code>
+<code><a href="../reference/corr.html">pwcorr()</a></code>
 </td>
 <td>
 tidystata
@@ -45451,7 +47117,7 @@ Set the random seed, alone or at the end of a pipe
 </tr>
 <tr>
 <td>
-<code><a href="../reference/spearman.html">spearman()</a></code>
+<code><a href="../reference/corr.html">spearman()</a></code>
 </td>
 <td>
 tidystata
@@ -45540,7 +47206,7 @@ tidystata
 <td>
 </td>
 <td>
-Standardise to mean 0 and standard deviation 1
+Z-scores: subtract the observed mean and divide by the sample SD
 </td>
 </tr>
 <tr>

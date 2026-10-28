@@ -64,7 +64,9 @@ row_non_miss(...)
   \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
   expressions inside
   [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
-  Each selected column must be one-dimensional.
+  Each selected column must be one-dimensional. Inside grouped
+  [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
+  selections and values refer to the current group.
 
 - na.rm:
 
@@ -90,13 +92,18 @@ row_non_miss(...)
 
 ## Value
 
-A vector with one value per input row. Extrema retain the compatible
-common type; arithmetic returns doubles or a supported class as
-described under Arithmetic; unique and missing-value counts return
-integers. Zero-row inputs return typed empty vectors. All-missing rows
-return a typed `NA` for arithmetic and extrema, except
-`row_sum(na.rm = TRUE)` returns zero; an all-missing row's mean is `NA`,
-not `NaN`.
+A vector with one value per input row, in input order:
+
+- `row_min()` and `row_max()` retain the compatible common type.
+
+- Arithmetic helpers return doubles or the supported calendar, duration
+  or measured class described under Arithmetic.
+
+- Distinct-value and missing-value counts return integers.
+
+Zero-row inputs return typed empty vectors. All-missing rows return a
+typed `NA` for arithmetic and extrema, except `row_sum(na.rm = TRUE)`
+returns zero; an all-missing row's mean is `NA`, not `NaN`.
 
 ## Details
 
@@ -164,16 +171,17 @@ arithmetic requires units \>= 1.0.0.
 
 ## Counts
 
-`row_unique()` combines compatible column types and counts distinct
-values without dropping their identities through numeric conversion.
-This includes compatible factors, labelled vectors, calendar/measured
-vectors, `integer64`, list columns, and complex vectors. Missing values
-count as one category. List elements are compared as whole values rather
-than flattened. For extrema and distinct counts, common-type conversion
-must preserve each original value's missingness. Conflicting SPSS
-missing-value definitions that would turn an observed value into a
-missing value produce an error; harmonize those definitions explicitly
-before combining the columns.
+`row_unique()` and `row_nvals()` combine compatible column types and
+count distinct values without dropping their identities through numeric
+conversion. This includes compatible factors, labelled vectors,
+calendar/measured vectors, `integer64`, list columns, and complex
+vectors. Missing values count as one category in `row_unique()` and are
+omitted by `row_nvals()` unless `.missing = TRUE`. List elements are
+compared as whole values rather than flattened. For extrema and distinct
+counts, common-type conversion must preserve each original value's
+missingness. Conflicting SPSS missing-value definitions that would turn
+an observed value into a missing value produce an error; harmonize those
+definitions explicitly before combining the columns.
 
 `row_miss()` and `row_non_miss()` use each original column's
 [`is.na()`](https://rdrr.io/r/base/NA.html) result. Scalar missing list
@@ -183,7 +191,7 @@ elements are missing; `NULL` and empty list elements are observed.
 
 Other variable generation functions:
 [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
-[`cut`](https://socimh.github.io/tidystata/reference/cut.md),
+[`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md),
 [`panel`](https://socimh.github.io/tidystata/reference/panel.md),
 [`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md),
 [`std()`](https://socimh.github.io/tidystata/reference/std.md)
@@ -197,6 +205,9 @@ row_mean(tb)
 
 row_sum(tb)
 #> [1] 4 2 0
+
+row_sum(tb, na.rm = FALSE)
+#> [1]  4 NA NA
 
 row_non_miss(tb)
 #> [1] 2 1 0
@@ -219,17 +230,29 @@ tb |>
 #> 2     2    NA    0.5
 #> 3    NA    NA   NA  
 
-row_sum(tb, na.rm = FALSE)
-#> [1]  4 NA NA
-
 flags <- tibble::tibble(a = c(TRUE, FALSE, NA), b = c(FALSE, NA, NA))
-row_max(flags) # TRUE, FALSE, NA, with logical type
+flags
+#> # A tibble: 3 × 2
+#>   a     b    
+#>   <lgl> <lgl>
+#> 1 TRUE  FALSE
+#> 2 FALSE NA   
+#> 3 NA    NA   
+
+row_max(flags)
 #> [1]  TRUE FALSE    NA
 
 dates <- tibble::tibble(
   start = as.Date(c("2024-01-01", NA)),
   end = as.Date(c("2024-01-03", "2024-01-05"))
 )
+dates
+#> # A tibble: 2 × 2
+#>   start      end       
+#>   <date>     <date>    
+#> 1 2024-01-01 2024-01-03
+#> 2 NA         2024-01-05
+
 row_min(dates)
 #> [1] "2024-01-01" "2024-01-05"
 

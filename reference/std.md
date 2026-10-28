@@ -9,8 +9,8 @@ following Stata's `egen`:
   [`scale()`](https://rdrr.io/r/base/scale.html), it returns a plain
   vector.
 
-- `pc()` (`pct()`): Express each value as a percentage of the total,
-  like `egen p = pc(x)`, or as a proportion with `prop = TRUE`.
+- `pc()`: Express each value as a percentage of the total, like
+  `egen p = pc(x)`, or as a proportion with `prop = TRUE`.
 
 ## Usage
 
@@ -18,8 +18,6 @@ following Stata's `egen`:
 std(x, mean = 0, sd = 1)
 
 pc(x, prop = FALSE)
-
-pct(x, prop = FALSE)
 ```
 
 ## Arguments
@@ -31,7 +29,8 @@ pct(x, prop = FALSE)
 
 - mean, sd:
 
-  The target mean and signed scale multiplier, like Stata's
+  For `std()`, finite numeric scalars giving the target mean (default 0)
+  and signed scale multiplier (default 1), like Stata's
   `egen std(x), mean() std()` options. The result has standard deviation
   `abs(sd)`; a negative `sd` reverses the ordering and zero makes all
   observed values equal to `mean` when the input spread is defined.
@@ -43,15 +42,22 @@ pct(x, prop = FALSE)
 
 ## Value
 
-A double vector the same length as `x`. Missing values stay missing.
-`std()` returns all `NA` when the standard deviation is zero or
-undefined (fewer than two observed values), and `pc()` when the total is
-zero or infinite, as Stata gives missing values there.
+A double vector with the length and order of `x`. Input classes, names,
+and labels are dropped; tagged and SPSS user-missing values are treated
+as missing. Missing inputs remain missing. `std()` returns all `NA` when
+the standard deviation is zero or undefined (fewer than two observed
+values), and `pc()` when the total is zero or infinite, as Stata gives
+missing values there.
 
 ## Details
 
-The gt package also exports a `pct()` (for column widths), so prefer
-`pc()` when gt is attached. In grouped
+By default, `std(x)` computes
+`(x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)` using the sample
+standard deviation. `pc(x)` computes `100 * x / sum(x, na.rm = TRUE)`,
+not percentile ranks. Use
+[`dplyr::percent_rank()`](https://dplyr.tidyverse.org/reference/percent_rank.html)
+for ranks on a 0-1 scale, or multiply them by 100 for a 0-100 scale. In
+grouped
 [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
 (or with `.by`), the mean, standard deviation and total come from each
 group, like Stata's `by g: egen`.
@@ -60,7 +66,7 @@ group, like Stata's `by g: egen`.
 
 Other variable generation functions:
 [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
-[`cut`](https://socimh.github.io/tidystata/reference/cut.md),
+[`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md),
 [`panel`](https://socimh.github.io/tidystata/reference/panel.md),
 [`row_egen`](https://socimh.github.io/tidystata/reference/row_egen.md),
 [`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)

@@ -35,8 +35,6 @@ when the object has no unit.
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -78,19 +76,20 @@ when the object has no unit.</p></li>
 
 
 <dt id="arg-abbr">abbr<a class="anchor" aria-label="anchor" href="#arg-abbr"></a></dt>
-<dd><p>If <code>TRUE</code>, return an abbreviated type. Defaults to <code>FALSE</code>,
-expanding known abbreviations and retaining full class names for default
-class abbreviations. Custom display labels may remain abbreviated.</p></dd>
+<dd><p>For <code>var_type()</code>, if <code>TRUE</code>, return an abbreviated type.
+Defaults to <code>FALSE</code>: expand known abbreviations and use full class names
+for default class abbreviations. Custom display labels are preserved.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A character string. <code>var_type()</code> gives the type description,
-including <code>"units"</code> for measured vectors in either abbreviation mode.
-<code>var_unit()</code> gives the unit string for measured or duration vectors,
-including empty or all-missing measured vectors, and <code>NA_character_</code> for
-vectors without units.</p>
-    </div>
+
+<ul><li><p><code>var_type()</code>: One character string describing the type, including
+<code>"units"</code> for measured vectors in either abbreviation mode.</p></li>
+<li><p><code>var_unit()</code>: The unit string for measured or duration vectors, including
+empty or all-missing measured vectors, or <code>NA_character_</code> when no unit is
+available.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
 
@@ -176,27 +175,27 @@ retains custom unit methods for classes describing themselves as <code>units</co
 <span class="r-in"><span>  recorded <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="st">"2026-01-01"</span>, tz <span class="op">=</span> <span class="st">"UTC"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  answer <span class="op">=</span> <span class="fu">haven</span><span class="fu">::</span><span class="fu"><a href="https://haven.tidyverse.org/reference/labelled.html" class="external-link">labelled</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Yes <span class="op">=</span> <span class="fl">1</span>, No <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">objects</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    typeof <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/typeof.html" class="external-link">typeof</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    var_type <span class="op">=</span> <span class="fu">var_type</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          typeof    class                                var_type      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> score    "double"  "numeric"                            "double"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> grade    "integer" "ordered, factor"                    "ordered"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> recorded "double"  "POSIXct, POSIXt"                    "datetime"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> answer   "double"  "haven_labelled, vctrs_vctr, double" "double+label"</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Full fallback class names, with compact display available separately</span></span></span>
-<span class="r-in"><span><span class="va">measurement</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="cn">NA</span><span class="op">)</span>, class <span class="op">=</span> <span class="st">"survey_measurement"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>compact <span class="op">=</span> <span class="fu">var_type</span><span class="op">(</span><span class="va">measurement</span>, abbr <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  descriptive <span class="op">=</span> <span class="fu">var_type</span><span class="op">(</span><span class="va">measurement</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              compact          descriptive </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           "srvy_msr" "survey_measurement" </span>
+<span class="r-in"><span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">objects</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  typeof <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/typeof.html" class="external-link">typeof</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  var_type <span class="op">=</span> <span class="fu">var_type</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"variable"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   variable typeof  class                              var_type    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> score    double  numeric                            double      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> grade    integer ordered, factor                    ordered     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> recorded double  POSIXct, POSIXt                    datetime    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> answer   double  haven_labelled, vctrs_vctr, double double+label</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Type and unit describe different properties of the same object</span></span></span>
 <span class="r-in"><span><span class="va">elapsed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">as.difftime</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"hours"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">elapsed</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time differences in hours</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">var_type</span><span class="op">(</span><span class="va">elapsed</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "duration"</span>
 <span class="r-in"><span></span></span>

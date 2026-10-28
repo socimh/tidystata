@@ -17,8 +17,8 @@
 - [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
   : Tabulate missing values
 
-- [`ds()`](https://socimh.github.io/tidystata/reference/names.md) : List
-  column names by tidyselect
+- [`ds()`](https://socimh.github.io/tidystata/reference/names.md) :
+  Select and list column names
 
 - [`var_type()`](https://socimh.github.io/tidystata/reference/var_type.md)
   [`var_unit()`](https://socimh.github.io/tidystata/reference/var_type.md)
@@ -30,12 +30,6 @@
 
 ## Tabulate and summarise
 
-- [`corr()`](https://socimh.github.io/tidystata/reference/corr.md) :
-  Calculate complete-case Pearson correlations
-- [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) :
-  Calculate pairwise correlations
-- [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
-  : Calculate Spearman rank correlations
 - [`tab()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab1()`](https://socimh.github.io/tidystata/reference/tab.md)
   [`tab2()`](https://socimh.github.io/tidystata/reference/tab.md)
@@ -46,6 +40,13 @@
 - [`summ()`](https://socimh.github.io/tidystata/reference/summ.md)
   [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md) :
   Summary statistics
+
+## Correlation functions
+
+- [`corr()`](https://socimh.github.io/tidystata/reference/corr.md)
+  [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md)
+  [`spearman()`](https://socimh.github.io/tidystata/reference/corr.md) :
+  Calculate Pearson and Spearman correlations
 
 ## Check and combine data
 
@@ -67,8 +68,8 @@
 - [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md)
   [`tab_gen()`](https://socimh.github.io/tidystata/reference/as_dummy.md)
   : Create indicator (dummy) variables
-- [`xtile()`](https://socimh.github.io/tidystata/reference/cut.md)
-  [`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md)
+- [`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md)
+  [`xtile()`](https://socimh.github.io/tidystata/reference/cut.md)
   [`cut_length()`](https://socimh.github.io/tidystata/reference/cut.md)
   [`cut_breaks()`](https://socimh.github.io/tidystata/reference/cut.md)
   : Cut a numeric vector into groups
@@ -92,8 +93,7 @@
   [`recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md)
   : Recode numeric values with Stata-style rules
 - [`std()`](https://socimh.github.io/tidystata/reference/std.md)
-  [`pc()`](https://socimh.github.io/tidystata/reference/std.md)
-  [`pct()`](https://socimh.github.io/tidystata/reference/std.md) :
+  [`pc()`](https://socimh.github.io/tidystata/reference/std.md) :
   Standardise a variable or scale it to a percentage
 
 ## Convert types
@@ -105,6 +105,7 @@
   : Replace values with missing values or fill missing values
 - [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
   [`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  [`encode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
   [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
   [`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
   [`as_numeric()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
@@ -124,9 +125,6 @@
   [`preview_interval()`](https://socimh.github.io/tidystata/reference/preview.md)
   [`unpreview()`](https://socimh.github.io/tidystata/reference/preview.md)
   : Set persistent table previews
-
-## Print tables once
-
 - [`print_headtail()`](https://socimh.github.io/tidystata/reference/special-print.md)
   [`print_interval()`](https://socimh.github.io/tidystata/reference/special-print.md)
   : Print selected rows once

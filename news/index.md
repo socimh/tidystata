@@ -2,6 +2,87 @@
 
 ## tidystata 0.4.0
 
+- [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  and
+  [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  ignore AsIs wrappers on non-character input.
+  [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  writes measured values and durations without exponents in their
+  existing units; its help clarifies that large numeric IDs can lose
+  digits.
+
+- [`as_character()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  is now an exact alias of
+  [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md),
+  converting stored codes to text without reading value labels. Use
+  [`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  for the previous label-reading behavior. New
+  [`encode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  creates labelled integer codes from character categories, or preserves
+  factor codes and levels as value labels. Re-encoding decoded text
+  assigns fresh codes and need not restore old codes.
+
+- [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  accepts non-breaking spaces and drops input names from `problems()`.
+  [`destring()`](https://socimh.github.io/tidystata/reference/type_conversion.md),
+  [`tostring()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  and
+  [`decode()`](https://socimh.github.io/tidystata/reference/type_conversion.md)
+  now reject data frames instead of returning one value per column.
+
+- `pct()` is removed; use
+  [`pc()`](https://socimh.github.io/tidystata/reference/std.md) for
+  percentages of a total.
+  [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
+  distinguishes z-scores, total shares and percentile ranks, with
+  executable examples using
+  [`dplyr::percent_rank()`](https://dplyr.tidyverse.org/reference/percent_rank.html)
+  on 0-1 and 0-100 scales.
+
+- [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md)
+  ([`tab_gen()`](https://socimh.github.io/tidystata/reference/as_dummy.md))
+  supports `.names = "label"` for value-label names. The default
+  `"value"` uses original values (raw codes for labelled vectors), while
+  `"index"` uses consecutive category numbers.
+
+- [`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
+  [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md) and
+  [`spearman()`](https://socimh.github.io/tidystata/reference/corr.md)
+  share one help page and a dedicated correlation section in the website
+  reference, with guidance on their different defaults and supported
+  options.
+
+- Head/tail preview omission markers align with printed numeric decimal
+  points, or the last significand digit when no decimal is displayed.
+  Row-number markers align with the last digit; other column types keep
+  centered markers. Unicode output uses vertical ellipses, with periods
+  as the fallback.
+
+- [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
+  separates family browsing from specific queries, retains at most ten
+  ambiguous candidates, and prefers matching tidystata helpers before
+  tidyverse and other implementations. Row recipes now use
+  [`row_mean()`](https://socimh.github.io/tidystata/reference/row_egen.md)
+  and related helpers; footers distinguish relevant results from broader
+  operations. About 90 common data-management lookups that previously
+  offered only base R, such as `tabstat`, `isid`, `misstable`, `sort`,
+  `keep`/`drop if` and `egen` summaries, now recommend tidystata or
+  tidyverse code and keep base R as an alternative. `drop if` and
+  `replace ... if` recipes use dplyr 1.2’s
+  [`filter_out()`](https://dplyr.tidyverse.org/reference/filter.html)
+  and
+  [`replace_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html),
+  with notes for older dplyr. Negated conditions such as
+  `keep if !missing(x)` no longer match their opposite.
+
+- [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and
+  [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md)
+  report omitted non-numeric columns and the `*`/`**`/ `***` markers for
+  labelled, factor and retained non-numeric variables as messages rather
+  than warnings; silence them with
+  [`suppressMessages()`](https://rdrr.io/r/base/message.html). Entirely
+  missing columns and skipped date statistics still warn.
+
 - [`summ()`](https://socimh.github.io/tidystata/reference/summ.md) and
   [`tabstat()`](https://socimh.github.io/tidystata/reference/summ.md)
   reuse native scratch storage for numerical summaries, weighted
@@ -11,9 +92,9 @@
   tabulations retain the general counting path. Public interfaces and
   statistical rules are unchanged.
 
-- [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
+- [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md),
   [`corr()`](https://socimh.github.io/tidystata/reference/corr.md) and
-  [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
+  [`spearman()`](https://socimh.github.io/tidystata/reference/corr.md)
   compute every variable pair natively instead of allocating a row mask
   and subsets for each pair. Pearson and Spearman results, including
   p-values, are identical; Spearman tables on 100,000 rows and 30
@@ -145,12 +226,11 @@
   [`findit()`](https://socimh.github.io/tidystata/reference/findit.md)
   descriptions distinguish variable labels from value labels.
 
-- [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)
-  and
-  [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
+- [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md) and
+  [`spearman()`](https://socimh.github.io/tidystata/reference/corr.md)
   preserve very small nonzero p-values under Sidak adjustment. Weighted
-  [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)
-  and [`corr()`](https://socimh.github.io/tidystata/reference/corr.md)
+  [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md) and
+  [`corr()`](https://socimh.github.io/tidystata/reference/corr.md)
   retain defined correlations when unequal weights make the variance
   product underflow.
 
@@ -168,7 +248,7 @@
   Persistent previews and one-time printers have separate help topics.
 
 - New
-  [`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
+  [`spearman()`](https://socimh.github.io/tidystata/reference/corr.md)
   computes Spearman rank correlations like Stata’s `spearman`: one
   common complete sample by default, `.pairwise = TRUE` for
   `spearman, pw`, and Stata 18’s beta-approximation p-values. The
@@ -176,7 +256,7 @@
   method instead of the t approximation of earlier Stata versions, so
   they change slightly.
 
-- [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)
+- [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md)
   gains `.listwise` (Stata’s `pwcorr, listwise`) and `.adjust`
   (`"bonferroni"` or `"sidak"`, Stata’s options of the same names).
 
@@ -238,7 +318,7 @@
 
 - [`summ()`](https://socimh.github.io/tidystata/reference/summ.md), the
   tabulation family and
-  [`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md)
+  [`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md)
   retain a grouping column when it is also the weight column in an
   implicit all-column selection.
 

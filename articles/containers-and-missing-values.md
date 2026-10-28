@@ -46,8 +46,8 @@ preserve a base data frame, tibble or data.table input. A list result
 remains a list, and each table inside follows the same rule. An explicit
 output option takes precedence.
 [`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
-[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
-[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md),
+[`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md),
+[`spearman()`](https://socimh.github.io/tidystata/reference/corr.md),
 [`misstable()`](https://socimh.github.io/tidystata/reference/misstable.md)
 and
 [`duplicates_report()`](https://socimh.github.io/tidystata/reference/keys.md)
@@ -70,9 +70,9 @@ Not every function accepts every value.
 return lists for multiple pairs or explicit `.by` groups, even with
 `.type = "tibble"` or `.type = "flextable"`.
 [`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
-[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md) and
-[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
-use `.wide` to choose a layout; both layouts return tibbles.
+[`pwcorr()`](https://socimh.github.io/tidystata/reference/corr.md) and
+[`spearman()`](https://socimh.github.io/tidystata/reference/corr.md) use
+`.wide` to choose a layout; both layouts return tibbles.
 
 ``` r
 
@@ -361,7 +361,7 @@ view
 #>    <int> <dbl>
 #>  1     1     1
 #>  2     2     4
-#>  ⋮     ⋮    ⋮ 
+#>  ⋮     ⋮     ⋮
 #> 11    11   121
 #> 12    12   144
 #> # ... 8 rows omitted in the middle; use print(x, n = Inf) to show all rows.
@@ -426,7 +426,7 @@ print_headtail(lifeexp_counts, n = 6)
 #>  1    57     1    1.47   1.47  1.47      1.47
 #>  2    61     1    1.47   2.94  1.47      2.94
 #>  3    62     2    2.94   5.88  2.94      5.88
-#>  ⋮     ⋮     ⋮      ⋮     ⋮      ⋮        ⋮  
+#>  ⋮     ⋮     ⋮     ⋮      ⋮     ⋮         ⋮  
 #> 18    77     5    7.35  85.3   7.35     85.3 
 #> 19    78     4    5.88  91.2   5.88     91.2 
 #> 20    79     6    8.82 100     8.82    100   

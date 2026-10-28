@@ -31,8 +31,6 @@ replaces them, and use named rules to assign value labels.
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -87,20 +85,21 @@ user-missing codes have been converted to <code>NA</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A vector with the length and order of <code>x</code>, using the common integer
-or double type of the input, codes, and <code>.default</code>. Integer input stays
-integer when every code and <code>.default</code> is a whole number within integer
-range, so <code>1:5 ~ 1</code> does not promote it to double. Double input stays
-double. Fractions, out-of-range numbers, infinities, <code>NaN</code>, and tagged
-missing codes or defaults require double output; ordinary <code>NA</code> does not
-promote integer input. Named rules produce a
-<code><a href="https://haven.tidyverse.org/reference/labelled.html" class="external-link">haven::labelled()</a></code> vector; otherwise the result is numeric without value
-labels. Names and the variable label are kept; previous value labels, SPSS
-missing-value metadata, and other input attributes are dropped.</p>
+    <p>An integer or double vector with the length and order of <code>x</code>.
+Named rules produce a <code><a href="https://haven.tidyverse.org/reference/labelled.html" class="external-link">haven::labelled()</a></code> vector; otherwise the result is
+numeric without value labels. Names and the variable label are kept;
+previous value labels, SPSS missing-value metadata, and other input
+attributes are dropped. See Details for integer preservation.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>Matching</strong></p>
+    <p><strong>Output type</strong></p>
+<p>Integer input stays integer when every code and <code>.default</code> is a whole
+number within integer range, so <code>1:5 ~ 1</code> does not promote it to double.
+Double input stays double. Fractions, out-of-range numbers, infinities,
+<code>NaN</code>, and tagged missing codes or defaults require double output; ordinary
+<code>NA</code> does not promote integer input. The input is not modified.</p>
+<p><strong>Matching</strong></p>
 <p>The left side of each rule is read before evaluation:</p><ul><li><p><code>a:b</code> selects the closed range <code>a &lt;= x &lt;= b</code>, including decimals, like
 Stata's <code>a/b</code>. Thus <code>1:5</code> matches <code>4.5</code>, rather than enumerating integers.
 Bounds must be single non-missing numbers, with the lower bound no greater
@@ -142,7 +141,7 @@ explicit namespace to avoid attach-order ambiguity.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other variable generation functions:
 <code><a href="as_dummy.html">as_dummy()</a></code>,
-<code><a href="cut.html">cut</a></code>,
+<code><a href="cut.html">cut_quantile()</a></code>,
 <code><a href="panel.html">panel</a></code>,
 <code><a href="row_egen.html">row_egen</a></code>,
 <code><a href="std.html">std()</a></code></p></div>
@@ -194,14 +193,14 @@ explicit namespace to avoid attach-order ambiguity.</p>
 <span class="r-in"><span>  <span class="va">items</span>,</span></span>
 <span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fu">stata_recode</span><span class="op">(</span><span class="va">v</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">~</span> <span class="fl">1</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">10</span> <span class="op">~</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fu">stata_recode</span><span class="op">(</span><span class="va">v</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">~</span> <span class="fl">1</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">10</span> <span class="op">~</span> <span class="fl">2</span>, <span class="fl">11</span><span class="op">:</span><span class="fl">15</span> <span class="op">~</span> <span class="fl">3</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    .names <span class="op">=</span> <span class="st">"r_{.col}"</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   item1 item2 r_item1 r_item2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     1     3       1       1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2     7     8       2       2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     9    12       2      12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     9    12       2       3</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

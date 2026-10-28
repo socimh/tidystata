@@ -1,6 +1,8 @@
-# List column names by tidyselect
+# Select and list column names
 
-List column names by tidyselect
+Select or rename existing columns and return their names, like Stata's
+`ds`. Use tidyselect helpers to filter a dataset or a character
+inventory of names.
 
 ## Usage
 
@@ -32,14 +34,15 @@ ds(.data, ..., .type = c("vector", "table", "tibble"))
 
 ## Value
 
-`ds()` returns a character vector. With `.type = "table"` or `"tibble"`,
-it returns one character column, `name`, and one row per selected name,
-in selection order. On ungrouped data, an empty selection returns a
-zero-length vector or zero-row table. Tables preserve the input's
-data.frame, tibble, or data.table container and supported preview
-settings, without grouping or arbitrary subclasses; character
-inventories return a tibble in table mode. Explicit `.type = "tibble"`
-overrides the input's table class and preview settings.
+A character vector of selected names by default. With `.type = "table"`
+or `"tibble"`, a table with one character column, `name`, and one row
+per selected name, in selection order. On ungrouped data, an empty
+selection returns a zero-length vector or zero-row table. Tables
+preserve the input's data.frame, tibble, or data.table container and
+supported preview settings, without grouping or arbitrary subclasses;
+character inventories return a tibble in table mode. Explicit
+`.type = "tibble"` overrides the input's table class and preview
+settings.
 
 ## Details
 
@@ -75,28 +78,8 @@ ds(lifeexp) # equivalent to names(lifeexp)
 ds(lifeexp, country:lexp)
 #> [1] "country"   "popgrowth" "lexp"     
 
-ds(lifeexp, where(is.character), .type = "table")
-#> # A tibble: 1 × 1
-#>   name   
-#>   <chr>  
-#> 1 country
-
-starwars <- dplyr::starwars
-ds(starwars, ends_with("color"), .type = "table")
-#> # A tibble: 3 × 1
-#>   name      
-#>   <chr>     
-#> 1 hair_color
-#> 2 skin_color
-#> 3 eye_color 
-
-ds(starwars, ends_with("color"), .type = "tibble")
-#> # A tibble: 3 × 1
-#>   name      
-#>   <chr>     
-#> 1 hair_color
-#> 2 skin_color
-#> 3 eye_color 
+ds(lifeexp, where(is.numeric))
+#> [1] "region"    "popgrowth" "lexp"      "gnppc"     "safewater"
 
 # Save a programmatic selection for later stages of a pipeline.
 numeric_names <- ds(lifeexp, where(is.numeric))
@@ -116,6 +99,6 @@ dplyr::select(lifeexp, dplyr::all_of(numeric_names))
 #> 10 1 [Europe & C. Asia]      -0.1    75  6140        95
 #> # ℹ 58 more rows
 
-ds(numeric_names, dplyr::starts_with("pop"))
-#> [1] "popgrowth"
+ds(numeric_names, dplyr::contains("o"))
+#> [1] "region"    "popgrowth"
 ```

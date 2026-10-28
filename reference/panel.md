@@ -129,7 +129,7 @@ such as `0.1` should be rescaled to whole numbers first.
 
 Other variable generation functions:
 [`as_dummy()`](https://socimh.github.io/tidystata/reference/as_dummy.md),
-[`cut`](https://socimh.github.io/tidystata/reference/cut.md),
+[`cut_quantile()`](https://socimh.github.io/tidystata/reference/cut.md),
 [`row_egen`](https://socimh.github.io/tidystata/reference/row_egen.md),
 [`stata_recode()`](https://socimh.github.io/tidystata/reference/stata_recode.md),
 [`std()`](https://socimh.github.io/tidystata/reference/std.md)

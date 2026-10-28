@@ -23,8 +23,6 @@
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -93,7 +91,7 @@
           <code><a href="names.html">ds()</a></code>
 
         </dt>
-        <dd>List column names by tidyselect</dd>
+        <dd>Select and list column names</dd>
 
         <dt>
 
@@ -120,27 +118,6 @@
 
       <dl><dt>
 
-          <code><a href="corr.html">corr()</a></code>
-
-        </dt>
-        <dd>Calculate complete-case Pearson correlations</dd>
-
-        <dt>
-
-          <code><a href="pwcorr.html">pwcorr()</a></code>
-
-        </dt>
-        <dd>Calculate pairwise correlations</dd>
-
-        <dt>
-
-          <code><a href="spearman.html">spearman()</a></code>
-
-        </dt>
-        <dd>Calculate Spearman rank correlations</dd>
-
-        <dt>
-
           <code><a href="tab.html">tab()</a></code> <code><a href="tab.html">tab1()</a></code> <code><a href="tab.html">tab2()</a></code> <code><a href="tab.html">fre2()</a></code> <code><a href="tab.html">fre()</a></code> <code><a href="tab.html">fre1()</a></code>
 
         </dt>
@@ -152,6 +129,22 @@
 
         </dt>
         <dd>Summary statistics</dd>
+      </dl></div><div class="section level2">
+      <h2 id="correlation-functions">Correlation functions<a class="anchor" aria-label="anchor" href="#correlation-functions"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="corr.html">corr()</a></code> <code><a href="corr.html">pwcorr()</a></code> <code><a href="corr.html">spearman()</a></code>
+
+        </dt>
+        <dd>Calculate Pearson and Spearman correlations</dd>
       </dl></div><div class="section level2">
       <h2 id="check-and-combine-data">Check and combine data<a class="anchor" aria-label="anchor" href="#check-and-combine-data"></a></h2>
 
@@ -208,7 +201,7 @@
 
         <dt>
 
-          <code><a href="cut.html">xtile()</a></code> <code><a href="cut.html">cut_quantile()</a></code> <code><a href="cut.html">cut_length()</a></code> <code><a href="cut.html">cut_breaks()</a></code>
+          <code><a href="cut.html">cut_quantile()</a></code> <code><a href="cut.html">xtile()</a></code> <code><a href="cut.html">cut_length()</a></code> <code><a href="cut.html">cut_breaks()</a></code>
 
         </dt>
         <dd>Cut a numeric vector into groups</dd>
@@ -236,7 +229,7 @@
 
         <dt>
 
-          <code><a href="std.html">std()</a></code> <code><a href="std.html">pc()</a></code> <code><a href="std.html">pct()</a></code>
+          <code><a href="std.html">std()</a></code> <code><a href="std.html">pc()</a></code>
 
         </dt>
         <dd>Standardise a variable or scale it to a percentage</dd>
@@ -259,7 +252,7 @@
 
         <dt>
 
-          <code><a href="type_conversion.html">destring()</a></code> <code><a href="type_conversion.html">decode()</a></code> <code><a href="type_conversion.html">tostring()</a></code> <code><a href="type_conversion.html">as_character()</a></code> <code><a href="type_conversion.html">as_numeric()</a></code>
+          <code><a href="type_conversion.html">destring()</a></code> <code><a href="type_conversion.html">decode()</a></code> <code><a href="type_conversion.html">encode()</a></code> <code><a href="type_conversion.html">tostring()</a></code> <code><a href="type_conversion.html">as_character()</a></code> <code><a href="type_conversion.html">as_numeric()</a></code>
 
         </dt>
         <dd>Convert vectors for data preparation</dd>
@@ -302,17 +295,8 @@
 
         </dt>
         <dd>Set persistent table previews</dd>
-      </dl></div><div class="section level2">
-      <h2 id="print-tables-once">Print tables once<a class="anchor" aria-label="anchor" href="#print-tables-once"></a></h2>
 
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
+        <dt>
 
           <code><a href="special-print.html">print_headtail()</a></code> <code><a href="special-print.html">print_interval()</a></code>
 

@@ -25,8 +25,6 @@ set_seed(123)."></head><body>
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -65,19 +63,20 @@ omitted, <code>x</code> is the seed itself, as in <code>set_seed(123)</code>.</p
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>An integer for reproducibility.</p></dd>
+<dd><p>Seed passed to <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>. Normally a single integer;
+finite non-integer numbers are truncated as in <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The expression's result, preserving its visibility. Used alone,
-<code>set_seed()</code> returns <code>NULL</code> invisibly.</p>
+as <code>set_seed(123)</code> or <code>set_seed(seed = 123)</code>, returns <code>NULL</code> invisibly.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Calls <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> before evaluating <code>x</code> once. The global random-number state
-is changed and is not restored, including when <code>x</code> fails. Subsequent random
-draws continue from the state left by <code>x</code>.</p>
+    <p>Sets the seed before evaluating <code>x</code> once in its calling environment. The
+global random-number state is changed and is not restored, including when
+<code>x</code> fails. Subsequent random draws continue from the state left by <code>x</code>.</p>
 <p>With only one argument, that argument is the seed and must be a single finite
 number. A pipeline that forgets the seed therefore errors, unless its result
 happens to be a single number, which is then used as the seed.</p>
@@ -95,15 +94,29 @@ happens to be a single number, which is then used as the seed.</p>
 <span class="r-in"><span>  <span class="fu">set_seed</span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  3 10  2  8  6  9  1  7</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Repeating the seed reproduces the result</span></span></span>
+<span class="r-in"><span><span class="co"># Set seeds for multiple operations in a pipeline</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">8</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">set_seed</span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">set_seed</span><span class="op">(</span><span class="fl">123</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">set_seed</span><span class="op">(</span><span class="fl">456</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  9  3 10  2  8</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Repeating the pipeline reproduces the result</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">8</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">set_seed</span><span class="op">(</span><span class="fl">123</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">set_seed</span><span class="op">(</span><span class="fl">456</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  9  3 10  2  8</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Set seeds without a pipeline</span></span></span>
+<span class="r-in"><span><span class="fu">set_seed</span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">8</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">result</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  3 10  2  8  6  9  1  7</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Alone, like Stata's set seed 123</span></span></span>
-<span class="r-in"><span><span class="fu">set_seed</span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">8</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  3 10  2  8  6  9  1  7</span>
+<span class="r-in"><span><span class="fu">set_seed</span><span class="op">(</span><span class="fl">456</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">result</span>, <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6 7 2 1 8</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

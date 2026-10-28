@@ -30,10 +30,6 @@ attributes. On error, `NULL` invisibly.
 
 ## Details
 
-When updating an existing object, put the assignment inside `capture()`:
-`capture(data <- update(data))`. Writing `data <- capture(update(data))`
-overwrites `data` with `NULL` if the update fails.
-
 Like Stata's `capture`, this lets a script continue after an error.
 Unlike Stata's command, it returns the successful value, keeps printed
 output and reports a caught error as a message by default. The failure
@@ -47,8 +43,12 @@ A successful `FALSE`, `NA`, `NULL` or object inheriting from `try-error`
 is returned unchanged. A successful `NULL` and a caught error have the
 same value. Use [`tryCatch()`](https://rdrr.io/r/base/conditions.html)
 when you need to distinguish them programmatically or retain the error
-object. This function no longer returns a success/failure flag, so do
-not use it as the condition in `if (capture(...))`.
+object. The return value is not a success/failure flag and cannot
+reliably serve as the condition in `if (capture(...))`.
+
+When updating an existing object, put the assignment inside `capture()`:
+`capture(data <- update(data))`. Writing `data <- capture(update(data))`
+overwrites `data` with `NULL` if the update fails.
 
 An assignment inside `capture()` updates its target only after the
 right-hand side succeeds. A successful `NULL` is still assigned. A block
@@ -57,9 +57,10 @@ steps after the first error, as Stata's capture blocks do. A single
 assignment around a pipeline retains its original target on error;
 intermediate pipeline results are not saved.
 
-Earlier effects are not rolled back. In particular, changes by reference
-(such as data.table updates) and printed output before an error remain.
-Invalid `quiet` values raise an error before `x` is evaluated.
+`capture()` is not all-or-nothing: earlier effects are not rolled back.
+In particular, changes by reference (such as data.table updates or
+modified environments), files written and printed output before an error
+remain. Invalid `quiet` values raise an error before `x` is evaluated.
 
 ## See also
 
@@ -70,10 +71,11 @@ Other utility functions:
 ## Examples
 
 ``` r
+# Keep a successful result
 capture(mean(1:10))
 #> [1] 5.5
 
-# Keep a successful result while suppressing warnings and messages
+# Suppress warnings and messages
 capture({
   message("Calculating")
   mean(1:10)
@@ -83,19 +85,42 @@ capture({
 # A new object receives NULL on error, with a failure message
 result <- capture(stop("Cannot calculate"))
 #> Captured expression did not complete.
-#> ℹ Earlier changes, if any, were not undone.
+#> ℹ Changes made before the error may persist.
 #> Caused by error:
 #> ! Cannot calculate
 
-# An existing object is kept if its replacement fails
+result
+#> NULL
+
+# A failed assignment leaves the original data unchanged
 data <- tibble::tibble(x = 1:3)
-capture(data <- dplyr::mutate(data, y = x * 2))
-capture(data <- stop("Update failed"))
+capture(data <- dplyr::mutate(data, y = missing_var * 2))
 #> Captured expression did not complete.
-#> ℹ Earlier changes, if any, were not undone.
+#> ℹ Changes made before the error may persist.
+#> Caused by error in `dplyr::mutate()`:
+#> ℹ In argument: `y = missing_var * 2`.
 #> Caused by error:
-#> ! Update failed
-data
+#> ! object 'missing_var' not found
+data  # Still contains only x
+#> # A tibble: 3 × 1
+#>       x
+#>   <int>
+#> 1     1
+#> 2     2
+#> 3     3
+
+# Successful assignments are preserved before an error
+capture({
+  data <- dplyr::mutate(data, y = x * 2)
+  data <- dplyr::mutate(data, z = missing_var * 2)
+})
+#> Captured expression did not complete.
+#> ℹ Changes made before the error may persist.
+#> Caused by error in `dplyr::mutate()`:
+#> ℹ In argument: `z = missing_var * 2`.
+#> Caused by error:
+#> ! object 'missing_var' not found
+data  # Contains x and y
 #> # A tibble: 3 × 2
 #>       x     y
 #>   <int> <dbl>
@@ -103,39 +128,23 @@ data
 #> 2     2     4
 #> 3     3     6
 
-# Separate assignments keep the last completed update
-capture({
-  data <- dplyr::mutate(data, z = x + 1)
-  data <- stop("Second update failed")
-  data <- dplyr::mutate(data, later = TRUE)
-})
+# A pipeline updates the data only if all steps succeed
+capture(
+  data <- data |>
+    dplyr::mutate(z = x + 1) |>
+    dplyr::mutate(w = missing_var * 2)
+)
 #> Captured expression did not complete.
-#> ℹ Earlier changes, if any, were not undone.
-#> Caused by error:
-#> ! Second update failed
-data
-#> # A tibble: 3 × 3
-#>       x     y     z
-#>   <int> <dbl> <dbl>
-#> 1     1     2     2
-#> 2     2     4     3
-#> 3     3     6     4
-
-# A single assignment keeps the original target if any pipeline step fails
-capture(data <- data |>
-  dplyr::mutate(temporary = x * 10) |>
-  dplyr::mutate(failed = stop("Pipeline failed")))
-#> Captured expression did not complete.
-#> ℹ Earlier changes, if any, were not undone.
+#> ℹ Changes made before the error may persist.
 #> Caused by error in `dplyr::mutate()`:
-#> ℹ In argument: `failed = stop("Pipeline failed")`.
+#> ℹ In argument: `w = missing_var * 2`.
 #> Caused by error:
-#> ! Pipeline failed
-data
-#> # A tibble: 3 × 3
-#>       x     y     z
-#>   <int> <dbl> <dbl>
-#> 1     1     2     2
-#> 2     2     4     3
-#> 3     3     6     4
+#> ! object 'missing_var' not found
+data  # Still contains x and y
+#> # A tibble: 3 × 2
+#>       x     y
+#>   <int> <dbl>
+#> 1     1     2
+#> 2     2     4
+#> 3     3     6
 ```

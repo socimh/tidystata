@@ -57,8 +57,6 @@ row_non_miss(): Count non-missing values within each row.
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -127,7 +125,8 @@ default; use <code>.missing = TRUE</code> to count missing values as one categor
 <dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>A data frame or tibble, or
 &lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; expressions inside
-<code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>. Each selected column must be one-dimensional.</p></dd>
+<code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>. Each selected column must be one-dimensional. Inside
+grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>, selections and values refer to the current group.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
@@ -152,12 +151,13 @@ one value, as in <code>row_unique()</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A vector with one value per input row. Extrema retain the compatible
-common type; arithmetic returns doubles or a supported class as described
-under Arithmetic; unique and missing-value counts return integers. Zero-row
-inputs return typed empty vectors. All-missing rows return a typed <code>NA</code> for
-arithmetic and extrema, except <code>row_sum(na.rm = TRUE)</code> returns zero; an
-all-missing row's mean is <code>NA</code>, not <code>NaN</code>.</p>
+    <p>A vector with one value per input row, in input order:</p><ul><li><p><code>row_min()</code> and <code>row_max()</code> retain the compatible common type.</p></li>
+<li><p>Arithmetic helpers return doubles or the supported calendar, duration or
+measured class described under Arithmetic.</p></li>
+<li><p>Distinct-value and missing-value counts return integers.</p></li>
+</ul><p>Zero-row inputs return typed empty vectors. All-missing rows return a typed
+<code>NA</code> for arithmetic and extrema, except <code>row_sum(na.rm = TRUE)</code> returns zero;
+an all-missing row's mean is <code>NA</code>, not <code>NaN</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -218,12 +218,14 @@ combinations are rejected. Measured arithmetic requires units &gt;= 1.0.0.</p>
     <h2 id="counts">Counts<a class="anchor" aria-label="anchor" href="#counts"></a></h2>
 
 
-<p><code>row_unique()</code> combines compatible column types and counts distinct values
-without dropping their identities through numeric conversion. This includes
-compatible factors, labelled vectors, calendar/measured vectors, <code>integer64</code>,
-list columns, and complex vectors. Missing values count as one category. List
-elements are compared as whole values rather than flattened. For extrema and
-distinct counts, common-type conversion must preserve each original value's
+<p><code>row_unique()</code> and <code>row_nvals()</code> combine compatible column types and count
+distinct values without dropping their identities through numeric
+conversion. This includes compatible factors, labelled vectors,
+calendar/measured vectors, <code>integer64</code>,
+list columns, and complex vectors. Missing values count as one category in
+<code>row_unique()</code> and are omitted by <code>row_nvals()</code> unless <code>.missing = TRUE</code>.
+List elements are compared as whole values rather than flattened. For extrema
+and distinct counts, common-type conversion must preserve each original value's
 missingness. Conflicting SPSS missing-value definitions that would turn an
 observed value into a missing value produce an error; harmonize those
 definitions explicitly before combining the columns.</p>
@@ -235,7 +237,7 @@ elements are observed.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other variable generation functions:
 <code><a href="as_dummy.html">as_dummy()</a></code>,
-<code><a href="cut.html">cut</a></code>,
+<code><a href="cut.html">cut_quantile()</a></code>,
 <code><a href="panel.html">panel</a></code>,
 <code><a href="stata_recode.html">stata_recode()</a></code>,
 <code><a href="std.html">std()</a></code></p></div>
@@ -249,6 +251,9 @@ elements are observed.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">row_sum</span><span class="op">(</span><span class="va">tb</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4 2 0</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">row_sum</span><span class="op">(</span><span class="va">tb</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  4 NA NA</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">row_non_miss</span><span class="op">(</span><span class="va">tb</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 1 0</span>
@@ -271,17 +276,29 @@ elements are observed.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     2    <span style="color: #BB0000;">NA</span>    0.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>    <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #BB0000;">NA</span>  </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">row_sum</span><span class="op">(</span><span class="va">tb</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  4 NA NA</span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">flags</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">NA</span><span class="op">)</span>, b <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">row_max</span><span class="op">(</span><span class="va">flags</span><span class="op">)</span> <span class="co"># TRUE, FALSE, NA, with logical type</span></span></span>
+<span class="r-in"><span><span class="va">flags</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   a     b    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> TRUE  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> FALSE <span style="color: #BB0000;">NA</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">row_max</span><span class="op">(</span><span class="va">flags</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE    NA</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">dates</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2024-01-01"</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2024-01-03"</span>, <span class="st">"2024-01-05"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dates</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   start      end       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 2024-01-01 2024-01-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> <span style="color: #BB0000;">NA</span>         2024-01-05</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">row_min</span><span class="op">(</span><span class="va">dates</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2024-01-01" "2024-01-05"</span>
 <span class="r-in"><span></span></span>

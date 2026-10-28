@@ -319,13 +319,6 @@ first for group-specific computations. Input column names that conflict
 with output columns are renamed in the result; the input data are
 unchanged.
 
-## See also
-
-Other tabulation functions:
-[`corr()`](https://socimh.github.io/tidystata/reference/corr.md),
-[`pwcorr()`](https://socimh.github.io/tidystata/reference/pwcorr.md),
-[`spearman()`](https://socimh.github.io/tidystata/reference/spearman.md)
-
 ## Examples
 
 ``` r
@@ -408,7 +401,7 @@ tab(lifeexp, lexp) |> print_headtail(n = 6)
 #>  1    57     1    1.47   1.47  1.47      1.47
 #>  2    61     1    1.47   2.94  1.47      2.94
 #>  3    62     2    2.94   5.88  2.94      5.88
-#>  ⋮     ⋮     ⋮      ⋮     ⋮      ⋮        ⋮  
+#>  ⋮     ⋮     ⋮     ⋮      ⋮     ⋮         ⋮  
 #> 18    77     5    7.35  85.3   7.35     85.3 
 #> 19    78     4    5.88  91.2   5.88     91.2 
 #> 20    79     6    8.82 100     8.82    100   

@@ -39,8 +39,6 @@ statistics."></head><body>
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -118,7 +116,8 @@ only attributes are summarised; geometry columns are excluded.</p></dd>
 <dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; or
 &lt;<code><a href="https://rlang.r-lib.org/reference/args_data_masking.html" class="external-link">data-masking</a></code>&gt; Variables to summarise, or named
 expressions such as <code>income_k = income / 1000</code>. Defaults to all
-nongrouping columns.</p></dd>
+nongrouping columns except the weight column. Matrix and nested data-frame
+columns are not supported.</p></dd>
 
 
 <dt id="arg--by">.by<a class="anchor" aria-label="anchor" href="#arg--by"></a></dt>
@@ -130,7 +129,7 @@ Grouping columns are excluded from the variables being summarised.</p></dd>
 <dt id="arg--keep-all">.keep_all<a class="anchor" aria-label="anchor" href="#arg--keep-all"></a></dt>
 <dd><p>If <code>TRUE</code>, retain character and list columns for counts and
 distinct values; other statistics for these columns are <code>NA</code>.
-By default, unsupported columns are omitted with a warning.</p></dd>
+By default, unsupported columns are omitted with a message.</p></dd>
 
 
 <dt id="arg--detail">.detail<a class="anchor" aria-label="anchor" href="#arg--detail"></a></dt>
@@ -181,8 +180,9 @@ Defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg--wt">.wt<a class="anchor" aria-label="anchor" href="#arg--wt"></a></dt>
-<dd><p>Optional numeric weights, supplied as a column or a vector.
-Rows with missing weights are excluded; negative weights are invalid.</p></dd>
+<dd><p>Optional finite, nonnegative numeric weights, supplied as a
+column, one value per input row, or a scalar recycled to all rows. Rows
+with missing weights are excluded with a message.</p></dd>
 
 
 <dt id="arg--wt-type">.wt_type<a class="anchor" aria-label="anchor" href="#arg--wt-type"></a></dt>
@@ -266,7 +266,7 @@ design. For survey inference, use functions such as <code>survey::svymean()</cod
 <p><strong>Data types and grouping</strong></p>
 <p>Missingness follows <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na()</a></code>, including SPSS user-missing codes. Logical
 variables are treated as 0/1; factors use their underlying numeric codes;
-labelled numeric variables use their stored values. Warnings flag such
+labelled numeric variables use their stored values. Messages note such
 conversions. Variable names are marked with <code>*</code> for labelled variables,
 <code>**</code> for factors, and <code>***</code> for retained nonnumeric variables. Numeric
 calculations use double precision, which may affect large <code>integer64</code> values.</p>
@@ -274,17 +274,18 @@ calculations use double precision, which may affect large <code>integer64</code>
 <code>skew</code>, or <code>kurtosis</code>. Calendar locations are displayed as dates or times;
 their spreads (<code>sd</code>, <code>se</code>, <code>mad</code>, <code>iqr</code>) are <code>difftime</code> values in list mode.
 With <code>.type = "table"</code> or <code>"tibble"</code>, calendar locations are text and spreads
-are numeric durations (days for Dates, seconds for datetimes and times of day).</p>
-<p>Expressions in <code>...</code> are evaluated before statistics are calculated by
-group. For group-specific expressions, first create columns with grouped
-<code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>.</p>
+are numeric durations (days for Dates, seconds for datetimes and times of
+day).</p>
+<p>Expressions in <code>...</code> are evaluated on ungrouped working data before
+statistics are calculated by group. For group-specific expressions, first
+create columns with grouped <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">lifeexp</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>region is a labelled variable (*).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> country is non-numeric and thus removed.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> region is a labelled variable (*).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name      type        n unique   min     mean        sd     max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -295,7 +296,7 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> safewater dbl        54     32  36     77.2      20.6     100  </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">lifeexp</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> country is non-numeric and thus removed.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               name     type      n unique   min    mean      sd    max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -313,7 +314,7 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> 3<span style="color: #949494;"> [South America]</span>    safewat… dbl       6      6  45   6.53<span style="color: #949494;">e</span>+1 1.70<span style="color: #949494;">e</span>+1 9.1 <span style="color: #949494;">e</span>1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tabstat</span><span class="op">(</span><span class="va">lifeexp</span>, .by <span class="op">=</span> <span class="va">region</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> country is non-numeric and thus removed.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               name      type        mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -368,7 +369,7 @@ group. For group-specific expressions, first create columns with grouped
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Exclude rows with missing group keys</span></span></span>
 <span class="r-in"><span><span class="fu">summ</span><span class="op">(</span><span class="va">lifeexp</span>, .by <span class="op">=</span> <span class="va">region</span>, .missing <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>country is non-numeric and thus removed.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> country is non-numeric and thus removed.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    region               name     type      n unique   min    mean      sd    max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>

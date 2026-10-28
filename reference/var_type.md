@@ -24,17 +24,18 @@ var_unit(x)
 
 - abbr:
 
-  If `TRUE`, return an abbreviated type. Defaults to `FALSE`, expanding
-  known abbreviations and retaining full class names for default class
-  abbreviations. Custom display labels may remain abbreviated.
+  For `var_type()`, if `TRUE`, return an abbreviated type. Defaults to
+  `FALSE`: expand known abbreviations and use full class names for
+  default class abbreviations. Custom display labels are preserved.
 
 ## Value
 
-A character string. `var_type()` gives the type description, including
-`"units"` for measured vectors in either abbreviation mode. `var_unit()`
-gives the unit string for measured or duration vectors, including empty
-or all-missing measured vectors, and `NA_character_` for vectors without
-units.
+- `var_type()`: One character string describing the type, including
+  `"units"` for measured vectors in either abbreviation mode.
+
+- `var_unit()`: The unit string for measured or duration vectors,
+  including empty or all-missing measured vectors, or `NA_character_`
+  when no unit is available.
 
 ## Details
 
@@ -132,27 +133,27 @@ objects <- list(
   recorded = as.POSIXct("2026-01-01", tz = "UTC"),
   answer = haven::labelled(c(1, 2), labels = c(Yes = 1, No = 2))
 )
-t(vapply(objects, function(x) {
-  c(
-    typeof = typeof(x), class = paste(class(x), collapse = ", "),
-    var_type = var_type(x)
-  )
-}, character(3)))
-#>          typeof    class                                var_type      
-#> score    "double"  "numeric"                            "double"      
-#> grade    "integer" "ordered, factor"                    "ordered"     
-#> recorded "double"  "POSIXct, POSIXt"                    "datetime"    
-#> answer   "double"  "haven_labelled, vctrs_vctr, double" "double+label"
 
-# Full fallback class names, with compact display available separately
-measurement <- structure(c(1, 2, NA), class = "survey_measurement")
-c(compact = var_type(measurement, abbr = TRUE),
-  descriptive = var_type(measurement))
-#>              compact          descriptive 
-#>           "srvy_msr" "survey_measurement" 
+purrr::map(objects, \(x) tibble::tibble(
+  typeof = typeof(x),
+  class = paste(class(x), collapse = ", "),
+  var_type = var_type(x)
+)) |>
+  purrr::list_rbind(names_to = "variable")
+#> # A tibble: 4 × 4
+#>   variable typeof  class                              var_type    
+#>   <chr>    <chr>   <chr>                              <chr>       
+#> 1 score    double  numeric                            double      
+#> 2 grade    integer ordered, factor                    ordered     
+#> 3 recorded double  POSIXct, POSIXt                    datetime    
+#> 4 answer   double  haven_labelled, vctrs_vctr, double double+label
 
 # Type and unit describe different properties of the same object
 elapsed <- as.difftime(c(1, 2, 3), units = "hours")
+elapsed
+#> Time differences in hours
+#> [1] 1 2 3
+
 var_type(elapsed)
 #> [1] "duration"
 

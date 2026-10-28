@@ -43,8 +43,6 @@
     <li><a class="dropdown-item" href="articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="articles/index.html">More articles...</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -92,15 +90,15 @@
 <span><span class="co">#&gt; R:     fixest::feols(y ~ x1 + x2, data = data, vcov = "hetero")</span></span>
 <span><span class="co">#&gt; # Note: Match fixest covariance small-sample corrections and singleton handling with Stata; the same formula does not guarantee identical standard errors or retained observations.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 17 more examples. To see them all: findit("reg, robust") |&gt; print(n = Inf)</span></span>
+<span><span class="co">#&gt; # 16 broader regress examples. Browse the family: findit(regress)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/findit.html">findit</a></span><span class="op">(</span><span class="st">"egen rowmean"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # Average available values across columns [base]</span></span>
+<span><span class="co">#&gt; # Average available values across columns [tidystata]</span></span>
 <span><span class="co">#&gt; Stata: egen z = rowmean(x y)</span></span>
-<span><span class="co">#&gt; R:     data$z &lt;- rowMeans(data[c('x','y')],na.rm=TRUE); data$z[is.nan(data$z)] &lt;- NA_real_</span></span>
+<span><span class="co">#&gt; R:     mutate(data, z = row_mean(x, y))</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # 59 more examples. To see them all: findit("egen rowmean") |&gt; print(n = Inf)</span></span></code></pre></div>
-<p>A bare command such as <code>findit(reg)</code> shows one clear example; <code>findit(reg) |&gt; print(n = Inf)</code> shows every match. Add variable names or hints with commas, as in <code>findit(tab, sex, region)</code> or <code>findit(tab, gen)</code>. Every entry is listed by topic in <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a>.</p>
+<span><span class="co">#&gt; # 70 broader egen examples. Browse the family: findit(egen)</span></span></code></pre></div>
+<p>A bare command such as <code>findit(egen)</code> browses the whole family and shows up to five operations. A specific query such as <code>findit("egen rowmean")</code> returns one clear answer; ambiguous queries retain up to ten relevant candidates. <code>print(n = Inf)</code> expands the returned results; use <code>findit(egen)</code> to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in <code>findit(tab, sex, region)</code> or <code>findit(tab, gen)</code>. Every entry is listed by topic in <a href="https://socimh.github.io/tidystata/articles/coming-from-stata.html">Coming from Stata</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="codebook-describe-every-variable">codebook(): describe every variable<a class="anchor" aria-label="anchor" href="#codebook-describe-every-variable"></a>
@@ -192,7 +190,7 @@
 <span><span class="co">#&gt;  3    62     2    2.94   5.88  2.94      5.88</span></span>
 <span><span class="co">#&gt;  4    63     1    1.47   7.35  1.47      7.35</span></span>
 <span><span class="co">#&gt;  5    64     3    4.41  11.8   4.41     11.8 </span></span>
-<span><span class="co">#&gt;  .     .     .      .     .      .        .  </span></span>
+<span><span class="co">#&gt;  .     .     .     .      .     .         .  </span></span>
 <span><span class="co">#&gt; 16    75     4    5.88  72.1   5.88     72.1 </span></span>
 <span><span class="co">#&gt; 17    76     4    5.88  77.9   5.88     77.9 </span></span>
 <span><span class="co">#&gt; 18    77     5    7.35  85.3   7.35     85.3 </span></span>
@@ -221,7 +219,7 @@
 <div class="section level2">
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
-<p>tidystata also covers row calculations (<code><a href="reference/row_egen.html">row_mean()</a></code>), panel operators (<code><a href="reference/panel.html">stata_lag()</a></code>), correlations (<code><a href="reference/corr.html">corr()</a></code> for complete cases and <code><a href="reference/pwcorr.html">pwcorr()</a></code> for pairwise samples), missing values (<code><a href="reference/misstable.html">misstable()</a></code>), keys and merging (<code><a href="reference/keys.html">isid()</a></code>, <code><a href="reference/stata_merge.html">stata_merge()</a></code>) and binning (<code><a href="reference/cut.html">xtile()</a></code>). See the guides below for examples and output conventions.</p>
+<p>tidystata also includes <code><a href="reference/stata_recode.html">stata_recode()</a></code>, <code><a href="reference/type_conversion.html">destring()</a></code>, <code><a href="reference/type_conversion.html">encode()</a></code>, <code><a href="reference/type_conversion.html">decode()</a></code>, <code><a href="reference/type_conversion.html">tostring()</a></code>, the <code>row_*()</code> and <code>duplicates_*()</code> families, <code><a href="reference/panel.html">stata_lag()</a></code>, <code><a href="reference/panel.html">stata_lead()</a></code>, <code><a href="reference/panel.html">stata_diff()</a></code>, <code><a href="reference/corr.html">corr()</a></code>, <code><a href="reference/corr.html">pwcorr()</a></code>, <code><a href="reference/misstable.html">misstable()</a></code>, <code><a href="reference/keys.html">isid()</a></code>, <code><a href="reference/stata_merge.html">stata_merge()</a></code>, <code><a href="reference/cut.html">xtile()</a></code> and <code><a href="reference/preview.html">preview()</a></code>. See the guides below for examples and output conventions.</p>
 <ul>
 <li>
 <a href="https://socimh.github.io/tidystata/articles/getting-started.html">Getting started</a>: a short workflow.</li>

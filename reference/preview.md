@@ -2,13 +2,14 @@
 
 Keep a compact console display while retaining every row and column.
 
-- `preview()`: Choose a head/tail or interval display.
+- `preview()`: Store a head/tail or interval display preference.
 
-- `preview_headtail()`: Show the first and last rows.
+- `preview_headtail()`: Store a preference for the first and last rows.
 
-- `preview_interval()`: Show evenly spaced rows.
+- `preview_interval()`: Store a preference for evenly spaced rows.
 
-- `unpreview()`: Restore ordinary printing.
+- `unpreview()`: Remove preview preferences and restore ordinary
+  printing.
 
 ## Usage
 
@@ -32,7 +33,7 @@ unpreview(.data)
 
 - style:
 
-  Either `"headtail"` (default) or `"interval"`.
+  For `preview()`, either `"headtail"` (default) or `"interval"`.
 
 - n:
 
@@ -43,9 +44,9 @@ unpreview(.data)
 ## Value
 
 A data frame, tibble, data.table, or `sf` data frame with the same rows,
-columns, values, and grouping as `.data`. The preview functions add a
-`tidystata_preview` class and print preferences; `unpreview()` removes
-them.
+columns, values, row names, and grouping as `.data`. The preview
+functions add a `tidystata_preview` class and print preferences;
+`unpreview()` removes them.
 
 ## Details
 
@@ -53,10 +54,15 @@ them.
 
 Head/tail previews split `n` between the beginning and end, giving an
 odd row to the beginning. One row of vertical dots marks an omitted
-middle, using periods without Unicode output. Interval previews show
-approximately evenly spaced positions without separator rows. An
-omission footer counts undisplayed rows. With `n = 1`, both styles show
-the first row; short tables do not repeat rows.
+middle, using periods without Unicode output. Numeric markers align with
+printed decimal points, or the last significand digit when no decimal is
+shown. Row-number markers align with the last digit. Other columns,
+including dates, times, factors, logicals and lists, use centered
+markers. Numeric columns without displayed numbers also use centered
+markers. Interval previews show approximately evenly spaced positions
+without separator rows. An omission footer counts undisplayed rows. With
+`n = 1`, both styles show the first row; short tables do not repeat
+rows.
 
 Row numbers refer to the current table after filtering or sorting.
 Grouped tables use one display budget across all groups.
@@ -119,7 +125,7 @@ ht
 #>  3     3     9
 #>  4     4    16
 #>  5     5    25
-#>  ⋮     ⋮    ⋮ 
+#>  ⋮     ⋮     ⋮
 #> 26    26   676
 #> 27    27   729
 #> 28    28   784
@@ -136,7 +142,7 @@ dplyr::filter(ht, id > 10)
 #>  3    13   169
 #>  4    14   196
 #>  5    15   225
-#>  ⋮     ⋮    ⋮ 
+#>  ⋮     ⋮     ⋮
 #> 16    26   676
 #> 17    27   729
 #> 18    28   784

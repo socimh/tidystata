@@ -41,8 +41,6 @@
     <li><a class="dropdown-item" href="../articles/containers-and-missing-values.html">Containers, grouping and missing values</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata.html">Coming from Stata</a></li>
     <li><a class="dropdown-item" href="../articles/coming-from-stata-zh.html">从 Stata 到 R</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -115,8 +113,8 @@ workflow.</p>
 <code>codebook</code> and <code>variables</code> families preserve a
 base data frame, tibble or data.table input. A list result remains a
 list, and each table inside follows the same rule. An explicit output
-option takes precedence. <code><a href="../reference/corr.html">corr()</a></code>, <code><a href="../reference/pwcorr.html">pwcorr()</a></code>,
-<code><a href="../reference/spearman.html">spearman()</a></code>, <code><a href="../reference/misstable.html">misstable()</a></code> and
+option takes precedence. <code><a href="../reference/corr.html">corr()</a></code>, <code><a href="../reference/corr.html">pwcorr()</a></code>,
+<code><a href="../reference/corr.html">spearman()</a></code>, <code><a href="../reference/misstable.html">misstable()</a></code> and
 <code><a href="../reference/keys.html">duplicates_report()</a></code> are exceptions: they always return
 tibbles.</p>
 <p>Where supported, <code>.type</code> selects an output form:</p>
@@ -167,7 +165,7 @@ only one family is present.</td>
 <code><a href="../reference/tab.html">fre2()</a></code> still return lists for multiple pairs or explicit
 <code>.by</code> groups, even with <code>.type = "tibble"</code> or
 <code>.type = "flextable"</code>. <code><a href="../reference/corr.html">corr()</a></code>,
-<code><a href="../reference/pwcorr.html">pwcorr()</a></code> and <code><a href="../reference/spearman.html">spearman()</a></code> use <code>.wide</code>
+<code><a href="../reference/corr.html">pwcorr()</a></code> and <code><a href="../reference/corr.html">spearman()</a></code> use <code>.wide</code>
 to choose a layout; both layouts return tibbles.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">base_tables</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tab.html">tab1</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">answer</span>, <span class="va">group</span><span class="op">)</span></span>
@@ -414,7 +412,7 @@ weights and other statistics.</p>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt;  1     1     1</span></span>
 <span><span class="co">#&gt;  2     2     4</span></span>
-<span><span class="co">#&gt;  <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>    <span style="color: #949494;">⋮</span> </span></span>
+<span><span class="co">#&gt;  <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span></span></span>
 <span><span class="co">#&gt; 11    11   121</span></span>
 <span><span class="co">#&gt; 12    12   144</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ... 8 rows omitted in the middle; use print(x, n = Inf) to show all rows.</span></span></span>
@@ -468,7 +466,7 @@ values in ascending order by default:</p>
 <span><span class="co">#&gt;  1    57     1    1.47   1.47  1.47      1.47</span></span>
 <span><span class="co">#&gt;  2    61     1    1.47   2.94  1.47      2.94</span></span>
 <span><span class="co">#&gt;  3    62     2    2.94   5.88  2.94      5.88</span></span>
-<span><span class="co">#&gt;  <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>      <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>      <span style="color: #949494;">⋮</span>        <span style="color: #949494;">⋮</span>  </span></span>
+<span><span class="co">#&gt;  <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>      <span style="color: #949494;">⋮</span>     <span style="color: #949494;">⋮</span>         <span style="color: #949494;">⋮</span>  </span></span>
 <span><span class="co">#&gt; 18    77     5    7.35  85.3   7.35     85.3 </span></span>
 <span><span class="co">#&gt; 19    78     4    5.88  91.2   5.88     91.2 </span></span>
 <span><span class="co">#&gt; 20    79     6    8.82 100     8.82    100   </span></span>

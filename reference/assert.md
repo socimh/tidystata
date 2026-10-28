@@ -18,8 +18,10 @@ assert(.data, ..., .by = NULL)
 
 - ...:
 
-  Logical conditions using columns of `.data`. Every condition must be
-  `TRUE` for every row.
+  \<[`data-masking`](https://rlang.r-lib.org/reference/args_data_masking.html)\>
+  One or more logical conditions using columns of `.data`. Each must
+  return one value per row, or one value recycled across the current
+  group. Every condition must be `TRUE` for every row.
 
 - .by:
 
@@ -33,7 +35,8 @@ assert(.data, ..., .by = NULL)
 
 ## Value
 
-`.data`, unchanged and invisibly, if all conditions pass.
+`.data`, unchanged and invisibly, including its classes, grouping, and
+attributes, if all conditions pass. Failed conditions raise an error.
 
 ## Details
 
@@ -59,6 +62,12 @@ scores <- data.frame(
   class = c("A", "A", "B", "B"),
   score = c(80, 90, 55, NA_real_)
 )
+scores
+#>   class score
+#> 1     A    80
+#> 2     A    90
+#> 3     B    55
+#> 4     B    NA
 
 # Pass: every nonmissing score is at least 50
 assert(scores, is.na(score) | score >= 50)

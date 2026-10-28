@@ -19,19 +19,21 @@ set_seed(x, seed)
 
 - seed:
 
-  An integer for reproducibility.
+  Seed passed to [`set.seed()`](https://rdrr.io/r/base/Random.html).
+  Normally a single integer; finite non-integer numbers are truncated as
+  in [`set.seed()`](https://rdrr.io/r/base/Random.html).
 
 ## Value
 
-The expression's result, preserving its visibility. Used alone,
-`set_seed()` returns `NULL` invisibly.
+The expression's result, preserving its visibility. Used alone, as
+`set_seed(123)` or `set_seed(seed = 123)`, returns `NULL` invisibly.
 
 ## Details
 
-Calls [`set.seed()`](https://rdrr.io/r/base/Random.html) before
-evaluating `x` once. The global random-number state is changed and is
-not restored, including when `x` fails. Subsequent random draws continue
-from the state left by `x`.
+Sets the seed before evaluating `x` once in its calling environment. The
+global random-number state is changed and is not restored, including
+when `x` fails. Subsequent random draws continue from the state left by
+`x`.
 
 With only one argument, that argument is the seed and must be a single
 finite number. A pipeline that forgets the seed therefore errors, unless
@@ -51,13 +53,27 @@ sample(1:10, 8) |>
   set_seed(123)
 #> [1]  3 10  2  8  6  9  1  7
 
-# Repeating the seed reproduces the result
+# Set seeds for multiple operations in a pipeline
 sample(1:10, 8) |>
-  set_seed(123)
+  set_seed(123) |>
+  sample(5) |>
+  set_seed(456)
+#> [1]  9  3 10  2  8
+
+# Repeating the pipeline reproduces the result
+sample(1:10, 8) |>
+  set_seed(123) |>
+  sample(5) |>
+  set_seed(456)
+#> [1]  9  3 10  2  8
+
+# Set seeds without a pipeline
+set_seed(123)
+result <- sample(1:10, 8)
+result
 #> [1]  3 10  2  8  6  9  1  7
 
-# Alone, like Stata's set seed 123
-set_seed(123)
-sample(1:10, 8)
-#> [1]  3 10  2  8  6  9  1  7
+set_seed(456)
+sample(result, 5)
+#> [1] 6 7 2 1 8
 ```
