@@ -3,6 +3,7 @@
 * Shorter, task-focused help, with editor and clipboard lookup guidance under
   `findit()`.
 * Clearer README examples and frequency-table headings.
+* Removed the unused `lifecycle` dependency.
 
 # tidystata 0.4.0
 
