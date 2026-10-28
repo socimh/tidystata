@@ -147,27 +147,18 @@ test_that("ordered and imputation examples use valid explicit Stata options", {
   }
 })
 
-test_that("matching and PCSE select the stated replacement and covariance", {
-  for (id in c(
-    "ref-d771d8f68ffce120",
-    "ref-bb84c8eaef72fa40",
-    "ref-5be2caf7dd24047c"
-  )) {
-    expect_match(findit_audit_row(id)$r, "replace = TRUE", fixed = TRUE)
-  }
+test_that("PCSE selects the stated covariance and incomplete matching is omitted", {
+  expect_false(any(
+    findit_entries()$id %in%
+      c(
+        "ref-d771d8f68ffce120",
+        "ref-bb84c8eaef72fa40",
+        "ref-5be2caf7dd24047c"
+      )
+  ))
   expect_match(
     findit_audit_row("ref-cdfe1eb8bf691f28")$r,
     'cluster = "time"',
-    fixed = TRUE
-  )
-  expect_false(grepl(
-    "transform(data",
-    findit_audit_row("ref-4184d867c9dce07d")$r,
-    fixed = TRUE
-  ))
-  expect_match(
-    findit_audit_row("ref-4184d867c9dce07d")$r,
-    "random = ~ x + z | id",
     fixed = TRUE
   )
 })
@@ -213,23 +204,8 @@ test_that("first-row indicators sort observations and retain missing groups", {
   expect_identical(result$first, c(1L, 0L, 1L, 0L, 1L, 0L))
 })
 
-test_that("random-coefficient mappings fit every coefficient on new panel data", {
-  skip_on_cran()
-  skip_if_not_installed("nlme")
-  set.seed(211)
-  data <- expand.grid(time = 1:15, id = factor(1:20))
-  data$x <- stats::rnorm(300)
-  data$z <- stats::rnorm(300)
-  slopes <- matrix(stats::rnorm(60), 20, 3)
-  i <- as.integer(data$id)
-  data$y <- 1 +
-    slopes[i, 1] +
-    (2 + slopes[i, 2]) * data$x +
-    (1 + slopes[i, 3]) * data$z +
-    stats::rnorm(300, sd = 0.4)
-  fit <- findit_audit_eval("ref-4184d867c9dce07d", data)$value
-  expect_identical(dim(stats::coef(fit)), c(20L, 3L))
-  expect_identical(fit$data$y, data$y)
+test_that("random-coefficient ML is not advertised as Swamy GLS", {
+  expect_false("ref-4184d867c9dce07d" %in% findit_entries()$id)
 })
 
 test_that("cluster reference degrees of freedom handle numeric groups", {
@@ -269,11 +245,7 @@ test_that("discriminant priors use only classes in the analysis sample", {
 
 test_that("multi-command Stata examples have default line-delimiter boundaries", {
   ids <- c(
-    "ref-e1c643750656e4eb",
-    "ref-33cc8179ec0b57f9",
     "ref-78b116fdd30db59f",
-    "ref-528a9ec17d19d485",
-    "ref-35598c46383b3503",
     "ref-94e1922bc712c2c6",
     "ref-cb46256750cceaaf"
   )
@@ -286,6 +258,6 @@ test_that("multi-command Stata examples have default line-delimiter boundaries",
   }
   expect_identical(
     strsplit(findit_audit_row("ref-94e1922bc712c2c6")$stata, "\n")[[1L]],
-    c("var y x, lags(1)", "vargranger")
+    c("var y x, lags(1) dfk small", "vargranger")
   )
 })

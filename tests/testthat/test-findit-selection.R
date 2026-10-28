@@ -46,7 +46,10 @@ test_that("specific candidates are bounded after hints and customization", {
       5L
     )
   }
-  expect_match(findit("reg y x, robust")$r[1], "coeftest", fixed = TRUE)
+  expect_identical(
+    findit("reg y x, robust")$r[1],
+    'fixest::feols(y ~ x, data = data, vcov = "hetero")'
+  )
   explicit <- findit("base::merge")
   expect_true(all(vapply(
     findit_calls(explicit$r),

@@ -11,130 +11,114 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-This tutorial follows a small survey from inspection to tabulation, grouped
-summaries and new variables. Results are ordinary R objects that you can save,
-filter and join. Install tidystata as shown on the
-[package homepage](https://socimh.github.io/tidystata/) before starting.
+Did participants enjoy the community course? How did their assessment scores
+compare across centres? tidystata helps answer these first questions inside a
+tidyverse workflow: start with a tibble, inspect it, prepare columns with
+`mutate()`, and pass results to the next step with `|>`.
 
-## Load data and inspect variables
+Install tidystata using the instructions on the
+[package homepage](https://socimh.github.io/tidystata/). We attach dplyr and
+tibble individually; the full tidyverse package is not required.
 
-```{r data}
-library(tidystata)
+## Meet the survey
+
+Twelve participants attended courses at Riverside and Hilltop. Each answered
+a yes/no satisfaction question and two assessment items. Some answers are missing,
+and income arrived as text.
+
+```{r survey, message=FALSE}
 library(dplyr)
+library(tibble)
+library(tidystata)
 
-survey <- tibble(
-  id = 1:6,
-  group = c("A", "A", "A", "B", "B", NA),
-  response = c("yes", "no", NA, "yes", "yes", "no"),
-  score1 = c(2, 4, NA, 6, 8, 10),
-  score2 = c(4, NA, NA, 8, 10, 12)
+survey <- tribble(
+  ~id, ~centre,     ~satisfied, ~income_text, ~score1, ~score2,
+    1, "Riverside", "Yes",     "1,200",           2,       4,
+    2, "Riverside", "Yes",     "1,500",           4,      NA,
+    3, "Riverside", "No",      "",               NA,      NA,
+    4, "Riverside", NA,        "-99",             6,       8,
+    5, "Riverside", "Yes",     "2,200",           8,      10,
+    6, "Riverside", "Yes",     "1,800",           4,       6,
+    7, "Hilltop",   "No",      "1,400",           3,       5,
+    8, "Hilltop",   "Yes",     "2,100",           5,       7,
+    9, "Hilltop",   "No",      "2,600",           7,       9,
+   10, "Hilltop",   "Yes",     NA,                9,      NA,
+   11, "Hilltop",   "Yes",     "2,300",          NA,       8,
+   12, "Hilltop",   NA,        "1,700",           6,       8
 )
-attr(survey$score1, "label") <- "First assessment score"
 
-codebook(survey)
-variables(survey)
-ds(survey, starts_with("score"))
+survey |> codebook()
 ```
 
-`codebook()` gives one row per variable. `variables()` reports names and variable
-labels, while `ds()` returns a character vector of names. `variables_search()`
-searches names and labels, so it can find a variable from its description:
+There are six participants per centre. The codebook shows which columns contain
+text, how many values are observed, and where the gaps are. An identifier is
+numeric too, but we will select assessment items deliberately when summarising.
 
-```{r select}
-variables_search(survey, "assessment")
-select_or_transmute(survey, id, starts_with("score"))
-```
+## Prepare measurements with `mutate()`
 
-## Count categories
+The survey form uses `-99` for an undisclosed income. Read the numeric text, turn
+that code into `NA`, and calculate an average across the two assessment items.
 
-```{r count}
-counts <- tab(survey, response)
-counts
-sum(counts$n)
-
-fre(survey, response)
-tab2(survey, group, response)
-```
-
-The counts sum to six, including the missing response. `tab()` returns observed
-categories with counts and percentages. `fre()` adds total rows; `tab2()` puts
-the categories of its second variable into columns. Use `tab1()` when you want
-separate one-way tables instead of a joint table:
-
-```{r count-list}
-tables <- tab1(survey, group, response)
-tables$response
-```
-
-The returned objects contain data. For example, select categories occurring
-more than once with an ordinary pipeline:
-
-```{r count-pipeline}
-tab(survey, response) |>
-  filter(n > 1)
-```
-
-## Summarise measurements
-
-Select numeric measurements deliberately. Codes attached to categories are not
-automatically meaningful measurements.
-
-```{r summary}
-summ(survey, score1, score2, .stat = c("n", "mean", "sd", "missing"))
-tabstat(survey, score1, score2, .by = group)
-mean(survey$score1, na.rm = TRUE)
-```
-
-`summ()` can return several statistics. `tabstat()` selects means by default.
-Both omit missing measured values from numeric calculations. Missing grouping
-keys remain as a group unless you request `.missing = FALSE`:
-
-```{r groups}
-summ(survey, score1, .by = group, .missing = FALSE, .stat = c("n", "mean"))
-```
-
-Numeric-only summaries return a table. When numeric and calendar measurements
-are combined, the default can be a list of tables. The companion
-`vignette("containers-and-missing-values", package = "tidystata")` explains those
-types and their missing-value conventions.
-
-## Prepare new variables
-
-Row helpers return vectors, making them convenient in `mutate()`. `pick()` makes
-the columns being combined explicit.
-
-```{r rows}
+```{r prepare}
 prepared <- survey |>
   mutate(
-    average = row_mean(pick(score1, score2)),
-    observed = row_non_miss(pick(score1, score2))
+    income = destring(income_text) |> mvdecode(-99),
+    score = row_mean(pick(score1, score2)),
+    answered = row_non_miss(pick(score1, score2))
   )
-prepared
+
+prepared |> select(id, income, score, answered)
 ```
 
-The third row has no observed score, so its average is `NA` and its observed
-count is zero. Row sums use zero for an all-missing row, while column summaries
-use `NA` for a sum with no observations.
+Participant 2 has one assessment answer, so the average uses that answer.
+Participant 3 has none: the average is `NA` and `answered` is zero.
+`destring()` also reads the thousands separators; blank text becomes missing.
 
-Character measurements can be parsed explicitly, and sentinel values can be
-replaced before calculations:
+## Count responses
 
-```{r conversion}
-destring(c("1,200", "2,500", NA))
-mvdecode(c(1, -99, 3), -99)
-xtile(1:8, 4)
-stata_recode(c(2, 4.5, 7, 12), 1:5 ~ 1, 6:10 ~ 2)
+How many participants were satisfied?
+
+```{r count}
+prepared |> tab(satisfied)
 ```
 
-`destring()` reads numbers with currency symbols, thousands separators and
-percent signs; other text, such as `"10 kg"`, becomes `NA` with a warning
-unless you remove it with `ignore = "kg"`. `xtile()` uses Stata's percentile
-cutpoints and keeps tied values together; ties can leave some groups empty.
-`stata_recode()` follows Stata's `recode`: `1:5` is the range from 1 to 5,
-including decimals, and values that no rule matches are kept.
+Seven said yes. That is 58.3% of all twelve participants, or 70% of the ten
+who answered. The `percent` and `valid` columns make both denominators visible.
+The two missing answers remain a category.
 
-## Next steps
+Results are tibbles here, so ordinary dplyr verbs can answer a follow-up question:
 
-Read [Containers and missing values](containers-and-missing-values.html) for
-output conventions, or [Coming from Stata](coming-from-stata.html) to find
-the R equivalent of a Stata command.
+```{r reuse-counts}
+prepared |>
+  tab(satisfied, .by = centre) |>
+  filter(satisfied == "Yes") |>
+  select(centre, n, valid)
+```
+
+## Compare measurements
+
+Now compare the assessment average across centres.
+
+```{r summarise}
+prepared |>
+  summ(score, .by = centre, .stat = c("n", "mean", "sd"))
+```
+
+Each mean uses the observed scores in that centre. The returned table is ready
+for another pipeline; no results need to be copied out of console output.
+Use `tabstat()` when a compact table of means is enough.
+
+## Choose the next question
+
+- [Inspect and prepare data](inspect-and-prepare.html) follows the survey from
+  unfamiliar columns to clean measurements, checked keys and follow-up records.
+- [Tabulate and compare categories](tabulation.html) explains `tab()`, `tab1()`,
+  `tab2()` and the `fre()` family in more depth.
+- [Summarise measurements](summary-statistics.html) develops `summ()` and
+  `tabstat()`, then introduces correlations.
+- [Containers, grouping and missing values](containers-and-missing-values.html)
+  explains output conventions and special cases when you need them.
+
+Coming from Stata? The
+[Stata guide](https://socimh.github.io/tidystata/articles/coming-from-stata.html) and
+`findit("tab satisfied")` help locate a familiar command's R equivalent.

@@ -1,0 +1,4 @@
+Name: Find Stata equivalent
+Description: Look up the selected Stata command and print its R equivalent.
+Binding: findit_selection
+Interactive: true

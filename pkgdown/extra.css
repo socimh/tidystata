@@ -115,3 +115,155 @@ footer {
   padding-top: 1.5rem;
   padding-bottom: 1rem;
 }
+
+/* Chaptered Stata reference. Keep these rules local to the guide. */
+.template-article:has(.stata-reference) > .row > main {
+  width: 100%;
+  max-width: none;
+}
+.template-article:has(.stata-reference) > .row > aside {
+  display: none;
+}
+.stata-reference {
+  display: grid;
+  grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+  --reference-border: var(--bs-border-color, #dce2eb);
+}
+.stata-reference-content {
+  min-width: 0;
+}
+.stata-chapters {
+  position: sticky;
+  top: 6rem;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  padding-right: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.stata-chapters summary {
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.stata-chapters ul {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+.stata-chapters li {
+  margin-bottom: 0.65rem;
+}
+.stata-chapters a[aria-current="page"] {
+  font-weight: 700;
+  text-decoration-thickness: 2px;
+}
+.stata-tools {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.stata-page-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--reference-border);
+}
+.stata-reference .reference-example {
+  border: 1px solid var(--reference-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  scroll-margin-top: 6rem;
+}
+.stata-reference .example-task {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+.stata-reference .comparison {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 1rem;
+}
+.stata-reference .comparison > div {
+  min-width: 0;
+}
+.stata-reference .comparison pre,
+.stata-reference .comparison pre code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.stata-reference .comparison pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-right: 2.5rem;
+}
+.stata-reference .col-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+.stata-reference .comparison-stata .col-label {
+  color: #b42318;
+}
+.stata-reference .comparison-r .col-label {
+  color: #1d5fae;
+}
+.stata-reference .col-label code {
+  color: inherit;
+}
+.stata-reference .example-note {
+  margin: 0.9rem 0 0.3rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--bs-secondary-color, #6b7280);
+  background: var(--bs-tertiary-bg, #f1f3f6);
+  font-size: 0.95rem;
+}
+.stata-reference .caveat-tag {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-right: 0.4rem;
+}
+.stata-reference .example-sources {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+}
+.stata-reference .reference-variants {
+  margin: 1rem 0 2rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--reference-border);
+  border-radius: 0.5rem;
+}
+.stata-reference .reference-variants > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.stata-reference .reference-variants .reference-example {
+  border: 0;
+  border-top: 1px solid var(--reference-border);
+  border-radius: 0;
+  padding: 1rem 0 0;
+}
+.stata-subjects {
+  columns: 2;
+  column-gap: 2rem;
+}
+.stata-subjects li {
+  break-inside: avoid;
+}
+@media (max-width: 767px) {
+  .stata-reference,
+  .stata-reference .comparison {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stata-chapters {
+    position: static;
+    max-height: 50vh;
+  }
+  .stata-subjects {
+    columns: 1;
+  }
+}

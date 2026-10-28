@@ -46,7 +46,7 @@ findit("egen rowmean")
 #> # 70 broader egen examples. Browse the family: findit(egen)
 ```
 
-A bare command such as `findit(egen)` browses the whole family and shows up to five operations. A specific query such as `findit("egen rowmean")` returns one clear answer; ambiguous queries retain up to ten relevant candidates. `print(n = Inf)` expands the returned results; use `findit(egen)` to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
+A bare command such as `findit(egen)` browses the whole family and shows up to five operations. A specific query such as `findit("egen rowmean")` returns one clear answer; ambiguous queries retain up to ten relevant candidates. `print(n = Inf)` expands the returned results; use `findit(egen)` to browse broader operations. Within a matching operation, recommendations prefer tidystata, then tidyverse, then other packages or base R. Add variable names or hints with commas, as in `findit(tab, sex, region)` or `findit(tab, gen)`. You can also supply Stata text: `` findit(`tab sex region`, row) `` and `findit("tab sex region, row")` customize the same row-percentage example. To look up one command from a do-file, highlight it and run the **Find Stata equivalent** addin (`findit_selection()`), or copy it and run `findit_clip()`. These helpers print results in the console and require the optional rstudioapi and clipr packages, respectively. Every entry is listed by topic in [Coming from Stata](https://socimh.github.io/tidystata/articles/coming-from-stata.html).
 
 ### codebook(): describe every variable
 
@@ -180,6 +180,9 @@ tab(lifeexp, lexp) |> print_interval()
 tidystata also includes `stata_recode()`, `destring()`, `encode()`, `decode()`, `tostring()`, the `row_*()` and `duplicates_*()` families, `stata_lag()`, `stata_lead()`, `stata_diff()`, `corr()`, `pwcorr()`, `misstable()`, `isid()`, `stata_merge()`, `xtile()` and `preview()`. See the guides below for examples and output conventions.
 
 - [Getting started](https://socimh.github.io/tidystata/articles/getting-started.html): a short workflow.
+- [Inspect and prepare data](https://socimh.github.io/tidystata/articles/inspect-and-prepare.html): clean measurements, check keys and combine records.
+- [Tabulate and compare categories](https://socimh.github.io/tidystata/articles/tabulation.html): the `tab()` and `fre()` families.
+- [Summarise measurements](https://socimh.github.io/tidystata/articles/summary-statistics.html): `summ()`, `tabstat()` and correlations.
 - [Containers and missing values](https://socimh.github.io/tidystata/articles/containers-and-missing-values.html): return types, grouping and labels.
 - [Reference](https://socimh.github.io/tidystata/reference/index.html): every function.
 

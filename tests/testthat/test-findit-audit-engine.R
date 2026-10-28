@@ -116,7 +116,6 @@ test_that("compact printing includes legacy qualification notes", {
 
 test_that("fixture-bound workflows do not claim to customize unused roles", {
   examples <- list(
-    list(query = "marginsplot", variables = "income", id = "legacy-0339"),
     list(
       query = "bootstrap",
       variables = c("income", "age"),

@@ -2,98 +2,54 @@
 title: "Coming from Stata"
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(tidystata)
+<a id="stata-language-toggle" href="coming-from-stata-zh.html" hreflang="zh">中文版</a>
 
-counts <- tidystata:::findit_reference_counts()
+This reference pairs familiar Stata commands with R code and notes on differences.
+
+## Browse the chapters
+
+Choose a subject below, or use the Stata and R indexes.
+
+```{r, echo = FALSE, results = "asis"}
+contents <- file.path(
+  dirname(knitr::current_input(dir = TRUE)), "..", "..", "pkgdown",
+  "stata-reference-generated", "contents-en.html"
+)
+knitr::asis_output(
+  paste(readLines(contents, encoding = "UTF-8", warn = FALSE), collapse = "\n")
+)
 ```
-
-[中文版](coming-from-stata-zh.html)
-
-This complete reference is part of the tidystata website. Use the header to
-return to function help or other articles, and the contents to jump to a section.
-The language link above switches between the English and Chinese editions.
-
-If you know Stata, you already know what you want to do; the question is how
-to say it in R. This page lists Stata commands next to the R code that does the
-same job, using tidystata where it has a Stata-style function and the standard
-package everywhere else.
 
 ## Look it up from the console
 
-`findit()` searches the same list from R. Type one Stata word bare, or quote
-anything longer. Stata's abbreviations work.
+With tidystata loaded, `findit()` searches the same catalogue. Use a bare command,
+quote longer syntax, or supply variable names:
 
-```{r}
+```r
 findit(reg)
 findit("merge 1:1 id, keep(match)")
+findit(tab, sex, region)
 ```
 
-You can also look up an R function (`findit(left_join)`) or ask a question
-(`findit("how do I remove duplicate rows")`). A bare command such as
-`findit(egen)` returns the whole command family and shows up to five operations.
-A specific query such as `findit("egen rowmean")` returns one clear answer;
-ambiguous queries retain up to ten relevant candidates. Call `findit()` for the
-whole catalogue.
-Descriptions follow R's language setting; English and Chinese queries both work.
+R functions and English or Chinese questions also work. Append
+`|> print(n = Inf)` to see all returned examples, notes and sources.
+See [`findit()`](../reference/findit.html) for details.
 
-Comma-separated names customize compatible examples, such as
-`findit(tab, sex, region)`. A matching hint such as `findit(tab, gen)` can narrow
-the result to one answer. `print(n = Inf)` expands the returned candidates,
-qualifications and source links. The footer counts additional relevant results
-separately from broader operations; use `findit(egen)` to browse the broader
-family. Within a matching operation, recommendations prefer tidystata, then
-tidyverse, then other packages or base R. Package-qualified lookups such as
-`findit(dplyr::filter)` distinguish functions with the same name.
+## Adapt an example
 
-This reference contains `r counts$commands` command families,
-`r counts$functions` Stata functions and `r counts$operators` operators, with
-`r counts$stata_examples` distinct Stata examples and `r counts$examples` paired
-R examples. Abbreviations and alternative R implementations do not increase the
-command count. The R index describes `r counts$r_functions` function/package pairs.
+Replace illustrative variable names with yours. `data` is your dataset;
+`data1` and `data2` are merge inputs, and `fit` is a fitted model.
 
-## Use the command tables
+The R label names the main package. Load any packages needed for unqualified
+calls; many data-preparation examples use `library(dplyr)`.
+`findit()` does not load or install packages.
 
-Use `destring()` (`as_numeric()`) to read numbers from text and `tostring()`
-(`as_character()`) to write stored codes as text. For categories, `encode()`
-creates labelled integer codes from strings, and `decode()` reads value labels
-back as text. Character encoding assigns fresh sorted codes starting at 1;
-encoding factors preserves their existing integer indices and all levels.
-`encode(decode(x))` need not recover the original codes. Encode character
-columns before grouping so all rows use the same dictionary.
+## About the notes {#example-labels}
 
-The tables cover tidystata and other R packages, including modelling, reshaping,
-survey analysis and graphics. For panel lags and leads, tidystata provides
-`stata_lag()`, `stata_lead()` and `stata_diff()`; specify the time column and
-use `.by` to identify panels.
+**Differs from Stata** flags a difference in defaults, missing-value handling,
+estimation or output; the note explains it. Other notes offer practical tips.
 
-The index is alphabetical; tables are grouped by subject and sorted by command,
-preferred answer and example. A package named beside a snippet is needed to run
-that snippet, but `findit()` itself does not load or install reference packages.
-The label names the primary package, rather than every helper dependency;
-the R function index identifies additional functions and their packages.
-
-A note that begins **Differs from Stata** means the R code does the same job,
-but a default, the missing-value handling, an estimator or the output layout
-differs; the note says how. Other notes are practical tips. Most R snippets are
-run against controlled checks when the catalogue is built; this tests the R code
-itself, not numerical agreement with Stata. Missing-value comparisons, weights, factor
-reference levels, join rules and standard-error corrections need particular care.
-Known gaps are explained explicitly, and related search results are not a
-translation of unsupported syntax.
-
-In the tables below, `data` is your dataset, `data1` and `data2` are the master
-and using data of a merge, and `fit` is a fitted model. Most entries use dplyr,
-so attach it with `library(dplyr)` or `library(tidyverse)`.
-
-```{r, echo = FALSE, results = "asis"}
-cat(tidystata:::findit_reference_html(FALSE), sep = "\n")
-```
-
-## Chaptered edition
-
-Prefer separate chapters? The
-[standalone Stata to R reference](https://www.socimh.com/stata-to-r/){target="_blank" rel="noopener"}
-provides chapter navigation and expandable alternatives on a separate website.
-It opens in a new tab, keeping the tidystata website available here.
+Execution checks test the R code, rather than numerical equivalence with Stata.
+Check missing values, weights, factor reference levels, join rules and standard
+errors before adapting an example. A search match does not imply support for
+every option.

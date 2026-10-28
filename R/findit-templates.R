@@ -2433,12 +2433,6 @@ findit_template_specs <- function() {
         priority = 0L,
         hints = c("quietly")
       ),
-      "legacy-0264" = list(
-        variables = character(),
-        meaning = "timer",
-        priority = 0L,
-        hints = c("timer")
-      ),
       "legacy-0265" = list(
         variables = character(),
         meaning = "set:1",
@@ -2469,18 +2463,6 @@ findit_template_specs <- function() {
         meaning = "matrix",
         priority = 0L,
         hints = c("matrix")
-      ),
-      "legacy-0270" = list(
-        variables = character(),
-        meaning = "return",
-        priority = 0L,
-        hints = c("return")
-      ),
-      "legacy-0271" = list(
-        variables = character(),
-        meaning = "ereturn",
-        priority = 0L,
-        hints = c("ereturn")
       ),
       "legacy-0272" = list(
         variables = c("x"),
@@ -2520,18 +2502,6 @@ findit_template_specs <- function() {
         priority = 0L,
         hints = c("tempfile")
       ),
-      "legacy-0278" = list(
-        variables = character(),
-        meaning = "set:2",
-        priority = 0L,
-        hints = c("set", "trace")
-      ),
-      "legacy-0279" = list(
-        variables = character(),
-        meaning = "clear",
-        priority = 2L,
-        hints = c("clear")
-      ),
       "legacy-0280" = list(
         variables = character(),
         meaning = "frame",
@@ -2550,23 +2520,11 @@ findit_template_specs <- function() {
         priority = 0L,
         hints = c("ado")
       ),
-      "legacy-0283" = list(
-        variables = character(),
-        meaning = "version",
-        priority = 0L,
-        hints = c("version")
-      ),
       "legacy-0284" = list(
         variables = character(),
         meaning = "cls",
         priority = 0L,
         hints = c("cls")
-      ),
-      "legacy-0285" = list(
-        variables = character(),
-        meaning = "macro",
-        priority = 0L,
-        hints = c("macro")
       ),
       "legacy-0286" = list(
         variables = c("y", "x1", "x2"),
@@ -2685,11 +2643,11 @@ findit_template_specs <- function() {
         hints = c("dydx", "margins")
       ),
       "legacy-0299" = list(
-        variables = c("group"),
+        variables = c("g"),
         meaning = "margins:1",
         priority = 0L,
         hints = c("margins"),
-        strings = c("group")
+        strings = c("g")
       ),
       "legacy-0300" = list(
         variables = c("yhat"),
@@ -2824,13 +2782,6 @@ findit_template_specs <- function() {
         hints = c("qreg"),
         varlist = list(names = c("x"), stata = "x", r = "x", style = "formula")
       ),
-      "legacy-0318" = list(
-        variables = c("y", "x"),
-        meaning = "rreg",
-        priority = 0L,
-        hints = c("rreg"),
-        varlist = list(names = c("x"), stata = "x", r = "x", style = "formula")
-      ),
       "legacy-0319" = list(
         variables = c("y", "x", "id"),
         meaning = "areg",
@@ -2897,12 +2848,6 @@ findit_template_specs <- function() {
         priority = 0L,
         hints = c("bootstrap", "reps")
       ),
-      "legacy-0328" = list(
-        variables = character(),
-        meaning = "jackknife",
-        priority = 0L,
-        hints = c("jackknife")
-      ),
       "legacy-0329" = list(
         variables = c("x1", "x2"),
         meaning = "lincom",
@@ -2965,12 +2910,6 @@ findit_template_specs <- function() {
         priority = 0L,
         hints = c("avplots")
       ),
-      "legacy-0339" = list(
-        variables = character(),
-        meaning = "marginsplot",
-        priority = 0L,
-        hints = c("marginsplot")
-      ),
       "legacy-0340" = list(
         variables = c("m1", "m2"),
         meaning = "estimates:1",
@@ -2989,72 +2928,17 @@ findit_template_specs <- function() {
         priority = 0L,
         hints = c("etable")
       ),
-      "legacy-0343" = list(
-        variables = character(),
-        meaning = "putexcel",
-        priority = 0L,
-        hints = c("putexcel")
-      ),
-      "legacy-0344" = list(
-        variables = character(),
-        meaning = "putdocx",
-        priority = 0L,
-        hints = c("putdocx")
-      ),
-      "legacy-0345" = list(
-        variables = character(),
-        meaning = "teffects:0",
-        priority = 0L,
-        hints = c("psmatch", "teffects")
-      ),
-      "legacy-0346" = list(
-        variables = character(),
-        meaning = "teffects:1",
-        priority = 0L,
-        hints = c("ipw", "teffects")
-      ),
-      "legacy-0347" = list(
-        variables = character(),
-        meaning = "synth",
-        priority = 0L,
-        hints = c("synth", "trperiod", "trunit")
-      ),
       "legacy-0348" = list(
         variables = c("y", "treated", "id", "year"),
         meaning = "didregress",
         priority = 0L,
         hints = c("didregress", "group", "time")
       ),
-      "legacy-0349" = list(
-        variables = c("y", "id", "year", "first_treat"),
-        meaning = "csdid",
-        priority = 0L,
-        hints = c("csdid", "gvar", "ivar", "time"),
-        strings = c("y", "id", "year", "first_treat")
-      ),
       "legacy-0350" = list(
         variables = c("y", "x"),
         meaning = "rdrobust",
         priority = 0L,
         hints = c("c", "rdrobust")
-      ),
-      "legacy-0351" = list(
-        variables = c("y", "x1", "x2", "z"),
-        meaning = "ivreg2",
-        priority = 0L,
-        hints = c("ivreg2", "robust")
-      ),
-      "legacy-0352" = list(
-        variables = c("y", "x1", "x2", "group"),
-        meaning = "oaxaca",
-        priority = 0L,
-        hints = c("by", "oaxaca"),
-        varlist = list(
-          names = c("x1", "x2"),
-          stata = "x1 x2",
-          r = "x1 + x2",
-          style = "formula"
-        )
       ),
       "legacy-0353" = list(
         variables = c("y", "x"),
@@ -3118,18 +3002,6 @@ findit_template_specs <- function() {
         priority = 2L,
         hints = c("l.")
       ),
-      "legacy-0363" = list(
-        variables = character(),
-        meaning = "xtdescribe",
-        priority = 0L,
-        hints = c("xtdescribe")
-      ),
-      "legacy-0364" = list(
-        variables = c("x"),
-        meaning = "xtsum",
-        priority = 0L,
-        hints = c("xtsum")
-      ),
       "legacy-0365" = list(
         variables = c("y"),
         meaning = "tsline",
@@ -3172,12 +3044,6 @@ findit_template_specs <- function() {
         meaning = "sts:1",
         priority = 0L,
         hints = c("sts", "test")
-      ),
-      "legacy-0372" = list(
-        variables = character(),
-        meaning = "stsum",
-        priority = 0L,
-        hints = c("stsum")
       ),
       "legacy-0373" = list(
         variables = c("x1", "x2"),
@@ -3300,12 +3166,6 @@ findit_template_specs <- function() {
         meaning = "graph:2",
         priority = 0L,
         hints = c("export", "graph")
-      ),
-      "legacy-0392" = list(
-        variables = c("y", "x"),
-        meaning = "binscatter",
-        priority = 0L,
-        hints = c("binscatter")
       ),
       "legacy-0393" = list(
         variables = character(),

@@ -9,7 +9,9 @@
 #'   name (`findit(reg)`, `findit(left_join)`) or a quoted string for full
 #'   syntax (`findit("merge 1:1 id, keep(match)")`). R function names may
 #'   include `()` or a namespace prefix. Use `!!cmd` to look up a string stored
-#'   in `cmd`. Defaults to `NULL` (all entries).
+#'   in `cmd`. Stata text can also be enclosed in backticks, as in
+#'   ``findit(`tab sex region`, row)``. Recognized variable names and options
+#'   customize matching examples. Defaults to `NULL` (all entries).
 #'
 #' @param ... Optional variable names or command hints, captured without
 #'   evaluation. Names customize examples in Stata operand order, while hints
@@ -52,6 +54,9 @@
 #'   and report when the ten-candidate limit applies. The print method's `n`
 #'   argument sets how many matches are printed; use
 #'   `print(n = Inf)` to display all matches.
+#' * Printing omits package labels and unnecessary namespace prefixes for R's
+#'   default packages. Conflicting names, such as `stats::filter()`, remain
+#'   qualified. The returned code and package metadata retain their originals.
 #' * The `match` column identifies the lookup type: `"stata"`, `"r"`,
 #'   `"keyword"`, `"nearest"`, or `"all"`.
 #' * Supplied variable names customize compatible examples. Unresolved
@@ -61,6 +66,12 @@
 #'
 #' * Quote multiword Stata syntax, reserved words (`"if"`), and names that are
 #'   not valid R symbols (`"_n"`).
+#' * Backticks and strings accept the same Stata text. Supported syntax uses
+#'   catalogue variable annotations; unfamiliar syntax retains generic examples.
+#'   Internal Stata quotation marks are preserved. Use an R string or raw string
+#'   when the Stata text itself contains backticks.
+#' * [findit_selection()] and [findit_clip()] read one command from the source
+#'   editor or clipboard and print the equivalent lookup result.
 #' * Lookup works offline. External packages such as fixest, modelsummary, and
 #'   srvyr are needed only when running their examples.
 #' * Chinese descriptions follow R's language settings. Use `Sys.setenv(LANGUAGE
@@ -82,6 +93,10 @@
 #'
 #' findit(tab, sex, region)
 #'
+#' findit(`tab sex region`, row)
+#'
+#' findit("tab sex region, row")
+#'
 #' findit("merge 1:1 id, keep(match)")
 #'
 #' findit("how do I remove duplicate rows")
@@ -97,11 +112,20 @@ findit <- function(command = NULL, ...) {
   extra <- rlang::enexprs(..., .ignore_empty = "none")
   findit_check_arguments(expr, extra)
   query <- findit_query(expr)
-  found <- withVisible(findit_lookup(query))
-  if (length(extra)) {
-    found$value <- findit_customize(found$value, extra)
+  input <- findit_text_input(query, extra)
+  found <- withVisible(findit_lookup(input$query))
+  if (length(input$rows)) {
+    attr(found$value, "query_rows") <- which(
+      attr(found$value, "entry_ids") %in% input$rows
+    )
   }
-  found$value <- findit_select(found$value, query, length(extra) > 0L)
+  if (length(input$arguments)) {
+    found$value <- findit_customize(found$value, input$arguments)
+  }
+  found$value <- findit_select(found$value, query, length(input$arguments) > 0L)
+  if (input$generic) {
+    attr(found$value, "generic_text") <- TRUE
+  }
   # The call as typed, so the printed hint can be run as it stands.
   attr(found$value, "input") <- paste0(
     "findit(",
@@ -269,16 +293,38 @@ findit_plain <- function(original, words, found) {
   if (length(words) < 3L || grepl("[=,:()\"]", original)) {
     return(FALSE)
   }
-  phrases <- paste0(
-    "\\b(how (do|can|many)|values with|data into|the data|statistics of|",
-    "of all|only (rows|columns)|a (bar|line|scatter) chart)\\b"
-  )
-  if (grepl(phrases, tolower(original), perl = TRUE)) {
+  if (findit_question(original)) {
     return(TRUE)
   }
   rest <- unlist(findit_tokens(paste(words[-1], collapse = " ")))
   code <- unlist(findit_tokens(found$stata))
   length(rest) > 0L && !any(rest %in% code)
+}
+
+findit_question <- function(original) {
+  phrases <- paste0(
+    "\\b(how (do|can|many)|values with|data into|the data|statistics of|",
+    "of all|only (rows|columns)|a (bar|line|scatter) chart|",
+    "duplicat(e|ed) (rows|records|observations)|complete cases|",
+    "missing (values|observations|cases))\\b"
+  )
+  words <- strsplit(tolower(original), "[^a-z]+")[[1L]]
+  grammar <- c("the", "with", "without", "only", "from", "into", "of", "all")
+  subjects <- c(
+    "data",
+    "dataset",
+    "rows",
+    "records",
+    "observations",
+    "cases",
+    "values",
+    "variables",
+    "columns",
+    "missing",
+    "duplicates"
+  )
+  grepl(phrases, tolower(original), perl = TRUE) ||
+    (any(words %in% grammar) && any(words %in% subjects))
 }
 
 # The closest entries to a question in plain English or Chinese, scored with
@@ -895,6 +941,11 @@ print.tidystata_findit <- function(x, n = NULL, ...) {
   if (isTRUE(attr(x, "unrepresented_options"))) {
     cat("\n# These examples do not implement every supplied option.\n")
   }
+  if (isTRUE(attr(x, "generic_text"))) {
+    cat(
+      "\n# This syntax could not be customized; examples retain generic placeholders.\n"
+    )
+  }
   invisible(x)
 }
 
@@ -919,11 +970,14 @@ findit_print_body <- function(x, shown, details = FALSE) {
     lines <- paste0(
       "\n\n",
       cli::style_bold(paste0("# ", shown$task)),
-      cli::col_grey(paste0(" [", shown$package, "]")),
+      cli::col_grey(findit_package_label(shown$package)),
       "\n",
       cli::col_blue(paste0(cli::style_bold("Stata: "), shown$stata)),
       "\n",
-      cli::col_green(paste0(cli::style_bold("R:     "), shown$r))
+      cli::col_green(paste0(
+        cli::style_bold("R:     "),
+        findit_print_code(shown$r)
+      ))
     )
     metadata <- findit_metadata(shown)
     note <- if (findit_chinese()) metadata$detail_zh else metadata$detail
@@ -975,9 +1029,9 @@ findit_print_body <- function(x, shown, details = FALSE) {
         findit_heading(paste0(
           "# ",
           functions$`function`,
-          "() [",
-          functions$package,
-          "]: ",
+          "()",
+          findit_package_label(functions$package),
+          ": ",
           functions$description
         )),
         related
@@ -998,6 +1052,81 @@ findit_print_body <- function(x, shown, details = FALSE) {
   if (length(lines) || headed || any(nearest)) {
     cat("\n")
   }
+}
+
+findit_default_packages <- function() {
+  c("base", "stats", "utils", "graphics", "grDevices", "methods", "datasets")
+}
+
+findit_package_label <- function(package) {
+  ifelse(package %in% findit_default_packages(), "", paste0(" [", package, "]"))
+}
+
+findit_print_code <- function(code) {
+  vapply(
+    code,
+    function(text) {
+      if (!grepl("::", text, fixed = TRUE)) {
+        return(text)
+      }
+      parsed <- tryCatch(
+        parse(text = text, keep.source = TRUE, encoding = "UTF-8"),
+        error = function(e) NULL
+      )
+      if (is.null(parsed)) {
+        return(text)
+      }
+      tokens <- utils::getParseData(parsed)
+      tokens <- tokens[tokens$terminal, ]
+      tokens <- tokens[order(tokens$line1, tokens$col1), ]
+      # Locate original tokens rather than deparsing: quoted strings, raw strings,
+      # comments, Unicode and spacing must survive exactly as written.
+      starts <- ends <- integer(nrow(tokens))
+      cursor <- 1L
+      for (i in seq_len(nrow(tokens))) {
+        token <- tokens$text[i]
+        offset <- regexpr(token, substring(text, cursor), fixed = TRUE)[1L]
+        if (!nzchar(token) || offset < 0L) {
+          return(text)
+        }
+        starts[i] <- cursor + offset - 1L
+        ends[i] <- starts[i] + nchar(token) - 1L
+        cursor <- ends[i] + 1L
+      }
+      conflicts <- c(
+        "filter",
+        "lag",
+        "union",
+        "intersect",
+        "setdiff",
+        "setequal"
+      )
+      packages <- which(
+        tokens$token == "SYMBOL_PACKAGE" &
+          tokens$text %in% findit_default_packages()
+      )
+      for (i in rev(packages)) {
+        if (tokens$token[i + 1L] != "NS_GET") {
+          next
+        }
+        name <- as.character(parse(
+          text = tokens$text[i + 2L],
+          keep.source = FALSE,
+          encoding = "UTF-8"
+        )[[1L]])
+        if (name %in% conflicts) {
+          next
+        }
+        text <- paste0(
+          substr(text, 1L, starts[i] - 1L),
+          substring(text, starts[i + 2L])
+        )
+      }
+      text
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
 }
 
 # Section headings stand out in cyan where the console has colour. A query,

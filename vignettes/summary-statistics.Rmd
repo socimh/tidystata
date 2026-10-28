@@ -1,0 +1,237 @@
+---
+title: "Summarise measurements"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Summarise measurements}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+After counting satisfaction, the coordinator asks about assessment scores and
+income. `summ()` gives a first look at measurements; `tabstat()` makes a compact
+table of means. Both fit into dplyr pipelines and return results you can reuse.
+
+## Start with meaningful measurements
+
+Here are the same twelve participants from
+[Getting started](getting-started.html), with income already cleaned and
+the two assessment items retained. Income is monthly; scores run from 0 to 10.
+
+```{r survey, message=FALSE}
+library(dplyr)
+library(tibble)
+library(tidystata)
+
+survey <- tribble(
+  ~id, ~centre,     ~income, ~score1, ~score2,
+    1, "Riverside",    1200,       2,       4,
+    2, "Riverside",    1500,       4,      NA,
+    3, "Riverside",      NA,      NA,      NA,
+    4, "Riverside",      NA,       6,       8,
+    5, "Riverside",    2200,       8,      10,
+    6, "Riverside",    1800,       4,       6,
+    7, "Hilltop",      1400,       3,       5,
+    8, "Hilltop",      2100,       5,       7,
+    9, "Hilltop",      2600,       7,       9,
+   10, "Hilltop",        NA,       9,      NA,
+   11, "Hilltop",      2300,      NA,       8,
+   12, "Hilltop",      1700,       6,       8
+)
+
+survey |> summ(income, starts_with("score"))
+```
+
+The default columns show observed counts, distinct values, minimum, mean,
+sample standard deviation and maximum. The selected measurements have
+different observed counts because missingness differs across items.
+We leave out `id`: being stored as a number does not make a column a measurement.
+
+## Ask for just the statistics you need
+
+If the question is simply how average scores compare, start with `tabstat()`:
+
+```{r means}
+survey |> tabstat(starts_with("score"), .by = centre)
+```
+
+It uses the same calculations as `summ()`, but reports only the mean by default.
+For a reporting table, choose statistics and their order explicitly:
+
+```{r selected-statistics}
+survey |>
+  summ(income, .by = centre, .stat = c("n", "mean", "median", "sd"))
+```
+
+Missing measured values are omitted from each calculation. `sd` uses the sample
+denominator, and undefined statistics are `NA`, for example an SD based on
+one observation. Use `.detail = TRUE` to explore the full supported set;
+`.stat` takes precedence when you supply it.
+
+For completeness, ask for counts and the observed proportion together:
+
+```{r completeness}
+survey |>
+  summ(starts_with("score"), .stat = c("n", "miss_n", "valid_pct", "mean"))
+```
+
+`miss_n` (also called `missing`) counts missing measurements. `valid_pct`
+is a **0-1 proportion**, unlike the 0-100 percentages from `tab()`.
+
+## Calculate first, then summarise
+
+Named expressions can create a column for this summary without changing the
+source tibble:
+
+```{r computed}
+survey |> summ(income_thousands = income / 1000, .by = centre)
+```
+
+For a measurement that you will reuse, create it in `mutate()`. The row average
+uses whichever assessment items are observed; it stays missing when neither is.
+
+```{r reusable-score}
+scored <- survey |>
+  mutate(score = row_mean(pick(score1, score2)))
+
+scored |>
+  summ(score, .by = centre, .stat = c("n", "mean", "sd")) |>
+  arrange(desc(mean))
+```
+
+The centre comparison now uses one score per participant. An explicit `.name =
+TRUE` retains a `name` column even when summarising a single variable.
+
+## Make grouping choices explicit
+
+`summ()` and `tabstat()` inherit `group_by()` groups, or accept `.by` for one
+operation. Their results are ungrouped. An explicit `.by` replaces inherited
+groups. Computed expressions inside `summ()` are evaluated before grouping;
+use grouped `mutate()` first for calculations that depend on each group's values.
+
+Suppose participant 12's centre was not recorded. Keep that participant's
+measurement visible as a separate group:
+
+```{r missing-centre}
+unknown_centre <- scored |>
+  mutate(centre = if_else(id == 12, NA_character_, centre))
+
+unknown_centre |> summ(score, .by = centre, .stat = c("n", "mean"))
+```
+
+Use `.missing = FALSE` to exclude missing **grouping keys**:
+
+```{r exclude-missing-centre}
+unknown_centre |>
+  summ(score, .by = centre, .missing = FALSE, .stat = c("n", "mean"))
+```
+
+That option does not change how missing measurements are handled.
+
+## Read percentiles using Stata's rule
+
+Percentiles are useful when a mean hides a wide income distribution. Request
+`median`, `q1`, `q3`, or percentiles such as `p10` and `p90`:
+
+```{r percentiles}
+survey |> summ(income, .stat = c("n", "p10", "q1", "median", "q3", "p90"))
+```
+
+These follow Stata's percentile rule, which can differ from R's default
+`quantile()`. A small example makes the difference visible:
+
+```{r percentile-rule}
+tibble(score = 1:4) |> summ(score, .stat = c("p25", "p50", "p75"))
+```
+
+The quartiles are 1.5 and 3.5. For percentile-rank columns, use
+`dplyr::percent_rank()`; for quantile groups, use `xtile()`.
+`pc()` instead calculates each value's percentage of a total.
+
+## Distinguish frequency and analytic weights
+
+Suppose an aggregate register has three score values and their frequencies.
+Frequency weights reproduce the expanded participants:
+
+```{r frequency-weights}
+register <- tribble(
+  ~score, ~people,
+       2,       3,
+       6,       1,
+      10,       1
+)
+
+register |>
+  summ(score, .wt = people, .stat = c("n", "mean", "sd", "p50"))
+```
+
+The reported `n` is five. Analytic weights rescale to the observed row count
+within each variable and group, changing the reported count and sample SD:
+
+```{r analytic-weights}
+register |>
+  summ(
+    score, .wt = people, .wt_type = "analytic",
+    .stat = c("n", "mean", "sd")
+  )
+```
+
+The mean agrees, but `n` is now three. Weights must be finite and nonnegative;
+missing weights exclude rows with a message. These are descriptive weighting
+rules, not design-based standard errors for a complex survey.
+
+## Choose a convenient return form
+
+Numeric and calendar variables have different units, so the default separates
+their summaries into a list when both families occur. Request `.type = "tibble"`
+when you need one combined table:
+
+```{r calendar}
+visits <- tibble(
+  score = c(4, 8),
+  day = readr::parse_date(c("2026-09-01", "2026-09-03"))
+)
+
+visits |> summ(.type = "tibble", .stat = c("n", "min", "mean", "max"))
+```
+
+Shared location columns become character so they can hold numbers and dates.
+The default separate tables preserve each family's statistic types. See the
+[conventions guide](containers-and-missing-values.html) for calendar spread
+units and container preservation.
+
+Unsupported non-numeric columns are omitted with a message. `.keep_all = TRUE`
+keeps them for counts and distinct values. Labelled numeric variables use
+their codes; factors use level codes and produce a message. Select meaningful
+measurements instead of averaging category codes. Entirely missing columns
+still warn and remain with `n = 0` and `NA` statistics, including `sum`;
+`.drop_empty = TRUE` omits those rows.
+
+## Look at relationships next
+
+Do income and the two assessment items move together? `corr()` uses one common
+complete sample across all selected columns:
+
+```{r correlation}
+survey |> corr(income, score1, score2)
+```
+
+`pwcorr()` instead uses the available observations for each pair, reporting
+counts and p-values:
+
+```{r pairwise-correlation}
+survey |> pwcorr(income, score1, score2)
+```
+
+Compare the `n` columns: changing the missing-data rule changes which participants
+contribute. `pwcorr(.listwise = TRUE)` uses a common sample. `spearman()` computes
+rank correlations on a common sample by default, with `.pairwise = TRUE` for
+pairwise samples. The tiny survey illustrates the interfaces, not evidence
+about programme effects. See the [correlation reference](https://socimh.github.io/tidystata/reference/corr.html)
+for additional options.
+
+Return to [data preparation](inspect-and-prepare.html) to build measurements,
+or use [category tables](tabulation.html) for responses that are categories.

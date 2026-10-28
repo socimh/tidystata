@@ -2176,16 +2176,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-3496cf3ffcb648d4" = list(
-      variables = c("x", "y"),
-      meaning = "getmata: Convert a matrix into named data columns",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-5a43d9dffb5f4fb8" = list(
       variables = character(),
       meaning = "snapshot: Save a temporary on-disk data snapshot",
@@ -2916,31 +2906,11 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-41d57dcb2eb002c2" = list(
-      variables = character(),
-      meaning = "gettoken: Split the first simple token from the remaining text",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-9068d7ab60f2d27c" = list(
       variables = character(),
       meaning = "tokenize: Split simple whitespace-separated tokens",
       priority = 0L,
       hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-03148a8fd16fa3db" = list(
-      variables = character(),
-      meaning = "tokenize: Tokenize a quoted phrase and a word",
-      priority = 0L,
-      hints = c("quotes"),
       strings = character(),
       aliases = list(),
       derived = list(),
@@ -2986,26 +2956,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-c43f3f6ae503d480" = list(
-      variables = character(),
-      meaning = "marksample: Mark complete rows over supplied column names",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-b025093a29ec0fc9" = list(
-      variables = c("g"),
-      meaning = "markin: Find the row range enclosing a selected sample",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-6e7884162e151128" = list(
       variables = character(),
       meaning = "unab: Expand a column-name prefix wildcard",
@@ -3016,59 +2966,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-7f04a5c9610c898b" = list(
-      variables = character(),
-      meaning = "unab: Resolve an unambiguous abbreviated column name",
-      priority = 0L,
-      hints = c("abbreviation"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-f1bbecbe3e5fff51" = list(
-      variables = character(),
-      meaning = "unabcmd: Resolve a unique abbreviation among known R choices",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-c15a768824347ad4" = list(
       variables = character(),
       meaning = "args: Receive two positional arguments in a function",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1867eb9b570fd41c" = list(
-      variables = character(),
-      meaning = "syntax: Validate a numeric column argument and an optional scalar",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-e1c643750656e4eb" = list(
-      variables = character(),
-      meaning = "tempvar: Compute with a temporary vector in a local scope",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-33cc8179ec0b57f9" = list(
-      variables = character(),
-      meaning = "tempname: Use a temporary scalar inside local scope",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -3106,49 +3006,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-78fa7f8656860b4b" = list(
-      variables = character(),
-      meaning = "error: Raise a clear error from a function",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-c38d419f44b8b51e" = list(
       variables = character(),
       meaning = "exit: Return early from a function",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-cb7ba85bda9415ad" = list(
-      variables = c("id", "value"),
-      meaning = "postfile: Initialize a typed result accumulator",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-cb3abc89318d6401" = list(
-      variables = character(),
-      meaning = "post: Append one result observation",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-28168f8812c6edf8" = list(
-      variables = character(),
-      meaning = "postclose: Persist an accumulated result table",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -3176,29 +3036,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-d3ad44b694c800ff" = list(
-      variables = character(),
-      meaning = "svmat: Convert matrix columns to named variables",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-9b3a0ae16d0d625f" = list(
       variables = character(),
       meaning = "matname: Name matrix columns",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-0ed97a436faeb432" = list(
-      variables = character(),
-      meaning = "matlist: Format a numeric matrix for display",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -5316,66 +5156,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-289daa81773fd223" = list(
-      variables = character(),
-      meaning = "ftools: Inspect the R data-manipulation package version and availability",
-      priority = 0L,
-      hints = c("version"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-7d724937622b3a10" = list(
-      variables = character(),
-      meaning = "require: Require an installed R workflow dependency",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-ec300d34408ad0de" = list(
-      variables = character(),
-      meaning = "require: Require a minimum version of an R workflow dependency",
-      priority = 0L,
-      hints = c("version"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-d822762c0bd07025" = list(
-      variables = c("z", "x", "key"),
-      meaning = "rangestat: Compute a mean over each closed numeric-key neighborhood",
-      priority = 0L,
-      hints = c("mean", "interval"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1a0292ebcf5a91a3" = list(
-      variables = c("z", "x", "key"),
-      meaning = "rangestat: Compute a sum over each closed numeric-key neighborhood",
-      priority = 0L,
-      hints = c("sum", "interval"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-271f75a926030c25" = list(
-      variables = c("z", "x", "key"),
-      meaning = "rangestat: Exclude the current row from numeric-range means",
-      priority = 0L,
-      hints = c("excludeself"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-0e59df4938ea9ac2" = list(
       variables = c("x", "z"),
       meaning = "gstats: Cap both tails at explicitly selected empirical quartiles",
@@ -5848,16 +5628,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-5cd5bfd7fc64fa2c" = list(
-      variables = character(),
-      meaning = "twoway",
-      priority = 101L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-abae9ef5288ab75b" = list(
       variables = character(),
       meaning = "graph",
@@ -6118,26 +5888,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-08d9644a14ecf21f" = list(
-      variables = character(),
-      meaning = "symplot",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1319ab431bbe7e57" = list(
-      variables = character(),
-      meaning = "dotplot",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-fc39728e9d21f5a9" = list(
       variables = character(),
       meaning = "spikeplot",
@@ -6158,59 +5908,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-ddd2e9383eb21a10" = list(
-      variables = c("z", "y", "x"),
-      meaning = "heatplot: Heat map of the mean of z over binned x and y",
-      priority = 0L,
-      hints = c("heat map", "heatmap"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-3ad348490ec06004" = list(
-      variables = c("z", "y", "x"),
-      meaning = "heatplot: Heat map of the mean of z over categories of x and y",
-      priority = 1L,
-      hints = c("heat map", "categorical"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5aa7518f2ab0218c" = list(
-      variables = c("y"),
-      meaning = "compare arithmetic, geometric and harmonic means",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-3f5e57210f45e8d0" = list(
-      variables = c("y"),
-      meaning = "estimate a median and bootstrap its confidence interval",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-f23200cdd1b8ece1" = list(
       variables = c("y", "g"),
       meaning = "estimate cohen standardized mean differences for two independent groups",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-e0f877f2b7170d5f" = list(
-      variables = character(),
-      meaning = "compute a pooled-sd effect size from group summaries",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -6311,16 +6011,6 @@ findit_reference_specs <- function() {
     "ref-04f3796134ebbfd1" = list(
       variables = c("g"),
       meaning = "compare all group pairs with tukey simultaneous intervals",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-100192fe13d36928" = list(
-      variables = c("y", "g"),
-      meaning = "compare group means using bonferroni-adjusted pooled tests",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -7988,40 +7678,10 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-76ede023c9cb991d" = list(
-      variables = c("y", "x", "z"),
-      meaning = "fit several conditional quantiles together",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-d80ba0949fafd0c5" = list(
-      variables = c("y", "x", "z"),
-      meaning = "estimate slopes of the interquartile range",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-56fab71164c2051b" = list(
       variables = c("y", "x", "z"),
       meaning = "bootstrap quantile-regression inference",
       priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-158352c74fd51260" = list(
-      variables = c("y", "x", "z"),
-      meaning = "fit a resistant bisquare regression",
-      priority = 100L,
       hints = character(),
       strings = character(),
       aliases = list(),
@@ -8041,16 +7701,6 @@ findit_reference_specs <- function() {
     "ref-3366d57f680bc9fd" = list(
       variables = c("y", "x"),
       meaning = "fit a nonlinear saturating response curve",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-365246014b25ce61" = list(
-      variables = c("y", "x", "z"),
-      meaning = "profile the box-cox response transformation parameter",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -8328,16 +7978,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-eb489aa7cf8cf48d" = list(
-      variables = character(),
-      meaning = "run a white-style auxiliary-regression heteroskedasticity test",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-4c3370f9b73c7b53" = list(
       variables = character(),
       meaning = "run ramsey reset using powers of fitted values",
@@ -8422,24 +8062,26 @@ findit_reference_specs <- function() {
       varlist = NULL
     ),
     "ref-6772ad22a798fa0e" = list(
-      variables = character(),
+      variables = c("x", "z"),
       meaning = "estimate the sum of two slopes with its standard error",
       priority = 100L,
       hints = character(),
       strings = character(),
       aliases = list(),
       derived = list(),
-      varlist = NULL
+      varlist = NULL,
+      expressions = c("x + z = 0")
     ),
     "ref-6b008bc7b61a0c6d" = list(
-      variables = character(),
+      variables = c("x", "z"),
       meaning = "estimate a difference of slopes with its standard error",
       priority = 100L,
       hints = character(),
       strings = character(),
       aliases = list(),
       derived = list(),
-      varlist = NULL
+      varlist = NULL,
+      expressions = c("x - z = 0")
     ),
     "ref-8c30fbce54c28934" = list(
       variables = c("x", "z"),
@@ -8874,16 +8516,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-ea2329846cf4b268" = list(
-      variables = c("y", "x", "z"),
-      meaning = "compute the partial correlation of y and x controlling z",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-f48600799c5f8f85" = list(
       variables = c("y", "x"),
       meaning = "test spearman rank association with ties",
@@ -8957,16 +8589,6 @@ findit_reference_specs <- function() {
     "ref-280443ebfeefb5ab" = list(
       variables = c("q1", "q2", "q3"),
       meaning = "assess reliability when each item is deleted",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-6e3973ff3ac031d5" = list(
-      variables = c("q1", "q2", "q3", "score"),
-      meaning = "alpha-complete-item-mean-score",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -9525,16 +9147,6 @@ findit_reference_specs <- function() {
       varlist = NULL,
       expressions = c("visual =~ x1+x2+x3; textual =~ x4+x5+x6; speed =~ x7+x8+x9")
     ),
-    "ref-48d1d5db05f048c8" = list(
-      variables = character(),
-      meaning = "report confirmatory-factor model fit indices",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-492564cf1e0b4213" = list(
       variables = character(),
       meaning = "inspect sem modification indices",
@@ -9745,26 +9357,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-227ea8349d0b92c1" = list(
-      variables = character(),
-      meaning = "approximate a one-proportion design using cohen h",
-      priority = 0L,
-      hints = c("oneproportion"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-22e0564005c66fdb" = list(
-      variables = character(),
-      meaning = "approximate one-proportion power for a fixed sample",
-      priority = 0L,
-      hints = c("oneproportion"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-676dd7714b65d7a5" = list(
       variables = character(),
       meaning = "plan sample size for detecting a correlation",
@@ -9840,46 +9432,6 @@ findit_reference_specs <- function() {
       meaning = "calculate power for incremental explained variance",
       priority = 0L,
       hints = c("rsquared"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-e6cbcdc452abc5ff" = list(
-      variables = character(),
-      meaning = "calculate the anticipated full width of a mean interval",
-      priority = 0L,
-      hints = c("onemean"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c3557674d8870429" = list(
-      variables = character(),
-      meaning = "plan n for a target mean-interval width",
-      priority = 0L,
-      hints = c("onemean"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5023ae76021ac6bb" = list(
-      variables = character(),
-      meaning = "calculate an equal-variance difference-of-means interval width",
-      priority = 0L,
-      hints = c("twomeans"),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-927aa77789d9ccef" = list(
-      variables = character(),
-      meaning = "calculate a paired mean-difference interval width",
-      priority = 0L,
-      hints = c("pairedmeans"),
       strings = character(),
       aliases = list(),
       derived = list(),
@@ -9975,29 +9527,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-5d8a527fe06f5290" = list(
-      variables = character(),
-      meaning = "bootstrap a mean by resampling complete clusters",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-83d2b2d4c1c7f796" = list(
       variables = character(),
       meaning = "compute a percentile bootstrap interval",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-4aae82b9fa1ca890" = list(
-      variables = character(),
-      meaning = "compute a normal bootstrap interval",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -10015,20 +9547,10 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-8e67b9a3f14095e5" = list(
-      variables = character(),
-      meaning = "summarize stored bootstrap estimates, bias and standard error",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-593e614016660b82" = list(
       variables = character(),
       meaning = "jackknife the sample mean",
-      priority = 100L,
+      priority = 0L,
       hints = character(),
       strings = character(),
       aliases = list(),
@@ -10038,7 +9560,7 @@ findit_reference_specs <- function() {
     "ref-9f6ba212ddc11291" = list(
       variables = character(),
       meaning = "jackknife the sample standard deviation",
-      priority = 100L,
+      priority = 0L,
       hints = character(),
       strings = character(),
       aliases = list(),
@@ -10048,56 +9570,6 @@ findit_reference_specs <- function() {
     "ref-6085ae17a5094271" = list(
       variables = character(),
       meaning = "jackknife a regression slope",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-65044839ded0f92e" = list(
-      variables = character(),
-      meaning = "generate jackknife pseudovalues for the sample mean",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c58fb622e6c73773" = list(
-      variables = character(),
-      meaning = "enumerate delete-one-cluster jackknife replicates",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-7277e5d95b69e27a" = list(
-      variables = character(),
-      meaning = "generate a permutation distribution for a regression slope",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-e3d3d1d71df676e1" = list(
-      variables = character(),
-      meaning = "generate a permutation distribution for a correlation",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-292452b3fa489e8a" = list(
-      variables = character(),
-      meaning = "permute outcomes within fixed strata",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -10128,16 +9600,6 @@ findit_reference_specs <- function() {
     "ref-f000b6233d328ef1" = list(
       variables = character(),
       meaning = "simulate the sampling distribution of a normal sample mean",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-248ad08de8506a43" = list(
-      variables = character(),
-      meaning = "use bayesian-bootstrap dirichlet weights for a slope",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -10265,16 +9727,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-b9ce2cd62c9c5d58" = list(
-      variables = character(),
-      meaning = "fit ols with two coefficients constrained to equality",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-c91fb5a231785812" = list(
       variables = character(),
       meaning = "represent a linear equality constraint as a matrix",
@@ -10285,29 +9737,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-c7b4b3cfb82adf4c" = list(
-      variables = c("y", "x"),
-      meaning = "correct a simple regression slope for known predictor reliability",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-5826d7aebecb8834" = list(
       variables = c("y"),
       meaning = "maximize an explicitly defined normal likelihood",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-40573305fb703752" = list(
-      variables = c("b", "p"),
-      meaning = "calculate the overall brier mean probability score",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -10360,16 +9792,6 @@ findit_reference_specs <- function() {
       variables = character(),
       meaning = "extract one-row model fit statistics",
       priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-f8b73d9f6234264c" = list(
-      variables = character(),
-      meaning = "attach fitted values, residuals and influence diagnostics",
-      priority = 101L,
       hints = character(),
       strings = character(),
       aliases = list(),
@@ -10456,16 +9878,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-f42e291471b5d648" = list(
-      variables = character(),
-      meaning = "spset: Declare planar point geometry and coordinate reference system",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-d005116dfc53403e" = list(
       variables = character(),
       meaning = "spmatrix: Row-standardized inverse-distance spatial weights",
@@ -10496,16 +9908,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-5c3c72f689513489" = list(
-      variables = character(),
-      meaning = "spbalance: Balance a spatial panel by retaining common time periods",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-bb94f4e07e9e63b4" = list(
       variables = character(),
       meaning = "stgen: Mark subjects ever exposed during their observed survival history",
@@ -10516,119 +9918,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-3db32b86e08b395a" = list(
-      variables = character(),
-      meaning = "stfill: Carry observed covariates forward within survival subjects",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1f3dff5a6980ef06" = list(
-      variables = character(),
-      meaning = "stvary: Check within-subject covariate variation and missingness",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-31814126170a334b" = list(
-      variables = character(),
-      meaning = "snapspan: Convert snapshots to intervals with covariates applying forward",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-8d2acd0bb58f1da8" = list(
-      variables = character(),
-      meaning = "ltable: Actuarial life-table survival over fixed intervals",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5b93282a74b798ee" = list(
-      variables = character(),
-      meaning = "stmh: Mantel-Haenszel stratified incidence-rate-ratio point estimate",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-6c287486746d0e63" = list(
-      variables = character(),
-      meaning = "sttocc: Sample nested case-control risk sets from a cohort",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-b18b9901ce3d1478" = list(
       variables = character(),
       meaning = "cem: Coarsened exact matching on a categorical covariate",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-4c2925312c789f88" = list(
-      variables = character(),
-      meaning = "pstest: Standardized covariate balance before and after matching",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-dd1eed2ab75107c8" = list(
-      variables = character(),
-      meaning = "gencohort: Create first-treatment cohorts including never-treated units",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-9187913ae8c6e442" = list(
-      variables = character(),
-      meaning = "xtdidregress: Panel difference-in-differences with unit and period fixed effects",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-d063a9405a644477" = list(
-      variables = character(),
-      meaning = "xtdpd: One-step difference GMM for a dynamic panel",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5ba7ff3d04cd454a" = list(
-      variables = character(),
-      meaning = "xtdpdsys: System GMM with level and differenced equations",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -10659,46 +9951,6 @@ findit_reference_specs <- function() {
     "ref-69101d3864251e9b" = list(
       variables = character(),
       meaning = "pac: Partial autocorrelation function",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c2fbf01bb5085dc1" = list(
-      variables = character(),
-      meaning = "corrgram: Autocorrelation and partial-autocorrelation table",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-a889809845041fa7" = list(
-      variables = character(),
-      meaning = "xcorr: Cross-correlation at positive and negative lags",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1aeba87728d5d2a3" = list(
-      variables = character(),
-      meaning = "pergram: Raw periodogram",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-77e672182b0ffdc7" = list(
-      variables = character(),
-      meaning = "cumsp: Cumulative spectral distribution",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -10779,26 +10031,6 @@ findit_reference_specs <- function() {
     "ref-1ffc877b8c60d2c6" = list(
       variables = character(),
       meaning = "dfuller: ADF unit-root test with trend and 2 augmentation lags",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-38da088fa8a3d3e2" = list(
-      variables = character(),
-      meaning = "dfgls: DF-GLS unit-root test with constant",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-f55a0252af7cc516" = list(
-      variables = character(),
-      meaning = "dfgls: DF-GLS unit-root test with trend",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -10936,60 +10168,10 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-98d2a6a76c6952c6" = list(
-      variables = character(),
-      meaning = "arima: State-space maximum-likelihood estimation",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-30ba394c43e37ee3" = list(
       variables = character(),
       meaning = "arima: ARMA estimation using ML",
       priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-cb8fb041bb2bc11d" = list(
-      variables = character(),
-      meaning = "arima: ARMA estimation using CSS",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-9d32453886de0ca3" = list(
-      variables = character(),
-      meaning = "arimasoc: ARMA information-criterion grid",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-e96e8df2d5b61151" = list(
-      variables = character(),
-      meaning = "arfima: Fractionally integrated ARMA estimation",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1564bed3021cc0d0" = list(
-      variables = character(),
-      meaning = "arfimasoc: Fractional-ARMA order comparison",
-      priority = 0L,
       hints = character(),
       strings = character(),
       aliases = list(),
@@ -11019,6 +10201,16 @@ findit_reference_specs <- function() {
     "ref-908b5fac4a37b64e" = list(
       variables = character(),
       meaning = "tssmooth: Centered five-term moving average",
+      priority = 1L,
+      hints = character(),
+      strings = character(),
+      aliases = list(),
+      derived = list(),
+      varlist = NULL
+    ),
+    "ref-21a9596513ca3756" = list(
+      variables = character(),
+      meaning = "tssmooth: Centered five-term moving average",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -11029,76 +10221,16 @@ findit_reference_specs <- function() {
     "ref-c8c11e9696fed69b" = list(
       variables = character(),
       meaning = "tssmooth: Trailing four-term moving average",
-      priority = 0L,
+      priority = 1L,
       hints = character(),
       strings = character(),
       aliases = list(),
       derived = list(),
       varlist = NULL
     ),
-    "ref-33a54a664dcb3b5c" = list(
+    "ref-1aeb87e4de3f5a13" = list(
       variables = character(),
-      meaning = "tssmooth: Simple exponential smoothing",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-97f4cdd3076d80b8" = list(
-      variables = character(),
-      meaning = "tssmooth: Holt trend smoothing workflow",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-d62899442d6ed627" = list(
-      variables = character(),
-      meaning = "tssmooth: Additive seasonal Holt-Winters smoothing",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1cceb02cdfc4b362" = list(
-      variables = character(),
-      meaning = "sspace: Local-level state-space model",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-8d75a52acc4b187c" = list(
-      variables = character(),
-      meaning = "sspace: Local-linear-trend state-space model",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-b942cb356f40594e" = list(
-      variables = character(),
-      meaning = "forecast: Eight-period ARIMA forecast",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c0c2de502834b6b9" = list(
-      variables = character(),
-      meaning = "forecast: Forecast with ninety-percent prediction intervals",
+      meaning = "tssmooth: Trailing four-term moving average",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -11110,16 +10242,6 @@ findit_reference_specs <- function() {
       variables = character(),
       meaning = "predict: Dynamic ARIMA forecast and standard errors",
       priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-06da5a0ab81fcc2c" = list(
-      variables = character(),
-      meaning = "forecast: One-step fitted values from ARIMA",
-      priority = 0L,
       hints = character(),
       strings = character(),
       aliases = list(),
@@ -11186,49 +10308,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-2cc0eb9308e9f2b3" = list(
-      variables = character(),
-      meaning = "xtreg: Pooled panel regression benchmark",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-96504cde1d1018c8" = list(
       variables = character(),
       meaning = "xtreg: Random effects with swar variance components",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c3236900fd18c4fe" = list(
-      variables = character(),
-      meaning = "xtreg: Random effects with walhus variance components",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-ab32b3754cfea5cb" = list(
-      variables = character(),
-      meaning = "xtreg: Random effects with amemiya variance components",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-cc768e302ee27203" = list(
-      variables = character(),
-      meaning = "xtreg: Random effects with nerlove variance components",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -11286,26 +10368,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-9e3a49ccc57538be" = list(
-      variables = character(),
-      meaning = "xtregar: Random intercept with AR(1) residual correlation",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-4184d867c9dce07d" = list(
-      variables = character(),
-      meaning = "xtrc: Random-coefficient panel model workflow",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-cdfe1eb8bf691f28" = list(
       variables = character(),
       meaning = "xtpcse: Beck-Katz panel-corrected covariance",
@@ -11349,16 +10411,6 @@ findit_reference_specs <- function() {
     "ref-7dcbd35e447a3616" = list(
       variables = character(),
       meaning = "xtunitroot: Panel unit-root test: hadri",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-528a9ec17d19d485" = list(
-      variables = character(),
-      meaning = "xttest0: Breusch-Pagan test of individual random effects",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -11526,56 +10578,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-c06f9546907b38cc" = list(
-      variables = character(),
-      meaning = "stdescribe: Describe single-record survival data",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-dfddb5f206e253e3" = list(
-      variables = character(),
-      meaning = "stsum: Person-time and failure counts by group",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c96e0fe130d42704" = list(
-      variables = character(),
-      meaning = "stptime: Crude incidence rate from person-time",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-50a7cfbc2ffb51d6" = list(
-      variables = character(),
-      meaning = "strate: Group-specific rates per thousand person-time units",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-da237ea7b237b598" = list(
-      variables = character(),
-      meaning = "stir: Compare two incidence rates",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-9299369fa825295c" = list(
       variables = character(),
       meaning = "sts: Kaplan-Meier survival curve data",
@@ -11616,26 +10618,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-76c64d9b76cfd6c3" = list(
-      variables = character(),
-      meaning = "sts: Kaplan-Meier interval with plain transformation",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-89260061e8141bc4" = list(
-      variables = character(),
-      meaning = "sts: Kaplan-Meier interval with log transformation",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-7aafa343c7ed0bd7" = list(
       variables = character(),
       meaning = "sts: Kaplan-Meier interval with log-log transformation",
@@ -11656,16 +10638,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-c991df924cd85d00" = list(
-      variables = character(),
-      meaning = "stci: Median survival with confidence limits",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-0b3afc3e72970df1" = list(
       variables = character(),
       meaning = "stci: Restricted mean survival through time nine",
@@ -11679,26 +10651,6 @@ findit_reference_specs <- function() {
     "ref-694387b841854205" = list(
       variables = character(),
       meaning = "stsplit: Split risk intervals at fixed cut points",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-a33964a40512a701" = list(
-      variables = character(),
-      meaning = "stjoin: Rejoin adjacent constant-covariate spells",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5866bbda3af7c890" = list(
-      variables = character(),
-      meaning = "stbase: Keep baseline record for each subject",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -11886,16 +10838,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-d32aa6f87266a052" = list(
-      variables = character(),
-      meaning = "stcrreg: Fine-Gray subdistribution-hazard workflow",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-977a5709d8433b3d" = list(
       variables = character(),
       meaning = "estat: Cox proportional-hazards diagnostic",
@@ -11929,26 +10871,6 @@ findit_reference_specs <- function() {
     "ref-10843c0679f9557a" = list(
       variables = character(),
       meaning = "svyset: Finite-population correction in a clustered design",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-673ab93b340cac1b" = list(
-      variables = character(),
-      meaning = "svyset: Stratified delete-one jackknife replicates",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-bda5d3216e8c2ffc" = list(
-      variables = character(),
-      meaning = "svydescribe: Survey design degrees of freedom and cluster counts",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -12046,79 +10968,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-6e1707902703ec1e" = list(
-      variables = character(),
-      meaning = "svy: Weighted contingency-table counts",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-7d1ef8077ce5a3ef" = list(
-      variables = character(),
-      meaning = "svy: Survey row proportions",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5a7b20dd8a28f7aa" = list(
-      variables = character(),
-      meaning = "svy: Survey column proportions",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-3d4d2141536077db" = list(
       variables = character(),
       meaning = "svy: Survey proportion interval using logit",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-bb8a375578267bed" = list(
-      variables = character(),
-      meaning = "svy: Survey proportion interval using likelihood",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5d789515f8c6be06" = list(
-      variables = character(),
-      meaning = "svy: Survey proportion interval using asin",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-a3cedf58068880cf" = list(
-      variables = character(),
-      meaning = "svy: Survey proportion interval using beta",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-f42524ae35fdf534" = list(
-      variables = character(),
-      meaning = "svy: Survey proportion interval using mean",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -12149,16 +11001,6 @@ findit_reference_specs <- function() {
     "ref-1e701ad7879e4d0e" = list(
       variables = character(),
       meaning = "svy: Design-based categorical association: F",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-e815b78c8208e30d" = list(
-      variables = character(),
-      meaning = "svy: Design-based categorical association: Chisq",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -12366,16 +11208,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-167cf9d3edb8749a" = list(
-      variables = character(),
-      meaning = "meta: Separate random-effects estimates by study subgroup",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-f1227ad38336a539" = list(
       variables = character(),
       meaning = "meta: Cumulative fixed-effect meta-analysis by year",
@@ -12426,16 +11258,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-044aa3e507094dde" = list(
-      variables = character(),
-      meaning = "meta: Exponentiate a pooled log-effect and interval",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-dddfd3374c20231d" = list(
       variables = character(),
       meaning = "mi: Chained-equation imputation using pmm",
@@ -12476,29 +11298,9 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-00235ec285bbf42c" = list(
-      variables = character(),
-      meaning = "mi: Inspect imputed-variable distributions in each dataset",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-ac51e3b58161c3d8" = list(
       variables = character(),
       meaning = "mi: Describe multiple-imputation metadata",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-705b296ba0cf5e42" = list(
-      variables = character(),
-      meaning = "mi: Identify variables varying across imputations",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -12676,236 +11478,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-3d92257c82685078" = list(
-      variables = character(),
-      meaning = "estat: Random-intercept intraclass correlation",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c17d647491b15283" = list(
-      variables = character(),
-      meaning = "cs: Risk ratio and risk difference",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-3c8968807ca4a380" = list(
-      variables = character(),
-      meaning = "cs: Woolf odds-ratio interval in cohort table",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-007f2dfe804351c7" = list(
-      variables = character(),
-      meaning = "cs: Fisher exact association test for cohort table",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-096ba669bfcf7436" = list(
-      variables = character(),
-      meaning = "cs: Exposed and population attributable fractions",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-89ed301de4fbd054" = list(
-      variables = character(),
-      meaning = "csi: Risk ratio and risk difference",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-b95eb421b5dc5472" = list(
-      variables = character(),
-      meaning = "csi: Woolf odds-ratio interval in cohort table",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-45d34e2c21ca2b4b" = list(
-      variables = character(),
-      meaning = "csi: Fisher exact association test for cohort table",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-141303085eac5b4e" = list(
-      variables = character(),
-      meaning = "csi: Exposed and population attributable fractions",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-424c110bc6ea6371" = list(
-      variables = character(),
-      meaning = "cc: Case-control cross-product odds ratio",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1c039dfd153e576d" = list(
-      variables = character(),
-      meaning = "cc: Exact conditional odds-ratio inference",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-382b139d916532a5" = list(
-      variables = character(),
-      meaning = "cc: Approximate log-odds Wald interval",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-56ec6198a3201dac" = list(
-      variables = character(),
-      meaning = "cci: Case-control cross-product odds ratio",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-a0d18c3ce697f7a6" = list(
-      variables = character(),
-      meaning = "cci: Exact conditional odds-ratio inference",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-0a57b44ce6eb086f" = list(
-      variables = character(),
-      meaning = "cci: Approximate log-odds Wald interval",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-fa8295fd9665c707" = list(
-      variables = character(),
-      meaning = "ir: Incidence-rate ratio and rate difference",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-0db4587ea8ff9bf7" = list(
-      variables = character(),
-      meaning = "ir: Exact comparison of two Poisson incidence rates",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-f2c0ff5df78a1db2" = list(
-      variables = character(),
-      meaning = "iri: Incidence-rate ratio and rate difference",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-27abc6d5cad2dbea" = list(
-      variables = character(),
-      meaning = "iri: Exact comparison of two Poisson incidence rates",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-4011b78651ba1662" = list(
-      variables = character(),
-      meaning = "mcc: McNemar comparison of matched binary exposures",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-784db9b359cc69b2" = list(
-      variables = character(),
-      meaning = "mcc: Matched odds ratio from discordant pairs",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-bc1ec02d2a96af92" = list(
-      variables = character(),
-      meaning = "mcci: McNemar comparison of matched binary exposures",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-45e9d4cb599562c0" = list(
-      variables = character(),
-      meaning = "mcci: Matched odds ratio from discordant pairs",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-d6b7fedb7dcf6ec3" = list(
       variables = character(),
       meaning = "mhodds: Mantel-Haenszel common odds ratio",
@@ -12916,40 +11488,10 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-21bed840be991c43" = list(
-      variables = character(),
-      meaning = "tabodds: Odds of disease by exposure category",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1e52bf6f47309d39" = list(
-      variables = character(),
-      meaning = "dstdize: Direct standardization of stratum-specific rates",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-960da5d791be00b1" = list(
-      variables = character(),
-      meaning = "istdize: Indirect standardization and mortality ratio",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-99100ebe369ff83b" = list(
       variables = character(),
-      meaning = "teffects: Propensity-score weights targeting ATE",
-      priority = 100L,
+      meaning = "teffects: IPW average treatment effect with joint-estimation inference",
+      priority = 0L,
       hints = character(),
       strings = character(),
       aliases = list(),
@@ -12958,147 +11500,7 @@ findit_reference_specs <- function() {
     ),
     "ref-e5280f9a9032ba70" = list(
       variables = character(),
-      meaning = "teffects: Propensity-score weights targeting ATT",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c45b43ce78f4b194" = list(
-      variables = character(),
-      meaning = "teffects: Propensity-score weights targeting ATC",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-54dff244242566bc" = list(
-      variables = character(),
-      meaning = "teffects: Propensity-score weights targeting ATO",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-6eee0567cd396d24" = list(
-      variables = character(),
-      meaning = "teffects: Normalized IPW point effect for ATE",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-b3579b60a0c3ff9d" = list(
-      variables = character(),
-      meaning = "teffects: Normalized IPW point effect for ATT",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5deec6cccf4dd769" = list(
-      variables = character(),
-      meaning = "teffects: Regression-adjustment average treatment effect",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-f2d92412fd47238d" = list(
-      variables = character(),
-      meaning = "teffects: Regression-adjustment effect among treated units",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-be4d1fe63f8a3a59" = list(
-      variables = character(),
-      meaning = "teffects: Augmented inverse-probability ATE point estimate",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-7d3e15c6e10c74cc" = list(
-      variables = character(),
-      meaning = "teffects: Inverse-probability-weighted outcome-regression ATE",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-d771d8f68ffce120" = list(
-      variables = character(),
-      meaning = "teffects: One-to-one nearest propensity-score matching",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-bb84c8eaef72fa40" = list(
-      variables = character(),
-      meaning = "teffects: One-to-two nearest propensity-score matching",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-b338862416c36cc4" = list(
-      variables = character(),
-      meaning = "teffects: Matching with replacement",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-5be2caf7dd24047c" = list(
-      variables = character(),
-      meaning = "teffects: Mahalanobis nearest-neighbor preprocessing",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-6098501e134d0ad0" = list(
-      variables = character(),
-      meaning = "tebalance: Covariate balance before and after weighting",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-87c306b9b17d38f5" = list(
-      variables = character(),
-      meaning = "teoverlap: Propensity-score overlap summary by treatment",
+      meaning = "teffects: IPW average treatment effect on the treated with joint-estimation inference",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -13109,26 +11511,6 @@ findit_reference_specs <- function() {
     "ref-883e2b9473b75a14" = list(
       variables = character(),
       meaning = "ivregress: Two-stage least squares with HC1 covariance",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-4fb953310070faec" = list(
-      variables = character(),
-      meaning = "ivregress: Two-stage least squares with HC2 covariance",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-6ac1735167b0caaa" = list(
-      variables = character(),
-      meaning = "ivregress: Two-stage least squares with HC3 covariance",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -13159,26 +11541,6 @@ findit_reference_specs <- function() {
     "ref-c6d5b9bc1446a1aa" = list(
       variables = character(),
       meaning = "ivregress: Formula-based instrumental-variable regression",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-bd97c73ffea7ab0e" = list(
-      variables = character(),
-      meaning = "estat: First-stage instrument relevance regression",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-b8f02dd0d1962022" = list(
-      variables = character(),
-      meaning = "estat: IV weak-instrument and endogeneity diagnostics",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -13356,16 +11718,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-c5c6cb9ee82ceeeb" = list(
-      variables = character(),
-      meaning = "tssmooth: Running-median nonlinear smoother",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-9a05479152f579ab" = list(
       variables = character(),
       meaning = "ucm: Unobserved components: level",
@@ -13389,16 +11741,6 @@ findit_reference_specs <- function() {
     "ref-6da3a3ba454b9f87" = list(
       variables = character(),
       meaning = "ucm: Unobserved components: BSM",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-35598c46383b3503" = list(
-      variables = character(),
-      meaning = "psdensity: Parametric AR(1) spectral density",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -13499,56 +11841,6 @@ findit_reference_specs <- function() {
     "ref-93d64f94da919caf" = list(
       variables = character(),
       meaning = "varstable: Eigenvalues of the VAR(1) companion matrix",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-592f527a0a4f309e" = list(
-      variables = character(),
-      meaning = "irf: Reduced-form VAR(1) impulse-response matrices",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-cb73b04c7fbe89c9" = list(
-      variables = character(),
-      meaning = "irf: Cholesky-orthogonalized VAR responses",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-a303bdc04fa81a48" = list(
-      variables = character(),
-      meaning = "fcast: Iterated bivariate VAR point forecasts",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-fb273f4a13fdbb23" = list(
-      variables = character(),
-      meaning = "lpirf: Local-projection dynamic response to an external impulse",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-9df372b42d20ac42" = list(
-      variables = character(),
-      meaning = "ivlpirf: Instrumental-variable local-projection point responses",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -13796,16 +12088,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-747bf4d1e377d4aa" = list(
-      variables = character(),
-      meaning = "quadchk: Sensitivity of mixed-logit estimates to quadrature points",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-8d3ea81d5f1c5f8d" = list(
       variables = character(),
       meaning = "rddensity: Density continuity at the treatment threshold",
@@ -13886,56 +12168,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-53a32004020d27b2" = list(
-      variables = character(),
-      meaning = "psmatch2: Propensity-score nearest matching with replacement",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-23fff087255ae42e" = list(
-      variables = character(),
-      meaning = "psmatch2: Propensity-score nearest matching without replacement",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-78da7a24063994d9" = list(
-      variables = character(),
-      meaning = "psmatch2: Propensity-score matching with an absolute caliper",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-d6234204214ba5a3" = list(
-      variables = character(),
-      meaning = "psmatch2: Mahalanobis matching with replacement",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-98927d3700e44579" = list(
-      variables = character(),
-      meaning = "psmatch2: Matched ATT point contrast after propensity-score preprocessing",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-08875e78947a0f87" = list(
       variables = character(),
       meaning = "ebalance: Entropy balancing treated/control covariate moments through order 1",
@@ -13949,66 +12181,6 @@ findit_reference_specs <- function() {
     "ref-f3057f27bc426018" = list(
       variables = character(),
       meaning = "ebalance: Entropy balancing treated/control covariate moments through order 2",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-0a73210a9b8f5c6c" = list(
-      variables = character(),
-      meaning = "kmatch: Entropy balancing treated/control covariate moments through order 1",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-b4f413210c26f458" = list(
-      variables = character(),
-      meaning = "kmatch: Entropy balancing treated/control covariate moments through order 2",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-244613dd7deba35d" = list(
-      variables = character(),
-      meaning = "kmatch: Propensity-score nearest-neighbor matching",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-6e3a3098a5a3e094" = list(
-      variables = character(),
-      meaning = "kmatch: Multivariate Mahalanobis matching",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-2bfa9de367da52a8" = list(
-      variables = character(),
-      meaning = "kmatch: Inverse-probability weighting for the treated population",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-d629a21107227c5c" = list(
-      variables = character(),
-      meaning = "kmatch: Exact matching on categorical covariates",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -14066,46 +12238,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-4808655ae77fdd31" = list(
-      variables = character(),
-      meaning = "eventstudyinteract: Sun-Abraham cohort-interacted event-study estimation",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-c5ed35903218b46d" = list(
-      variables = character(),
-      meaning = "eventstudyinteract: Aggregate cohort-interacted post-treatment effects",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-13a3086b20349f0b" = list(
-      variables = character(),
-      meaning = "did_imputation: Untreated-outcome imputation effects by event time",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-582b51e66d955a85" = list(
-      variables = character(),
-      meaning = "did_imputation: Average imputation treatment effect over treated observations",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-f3c1ecaf42c12373" = list(
       variables = character(),
       meaning = "meta: Log odds ratios and variances",
@@ -14139,26 +12271,6 @@ findit_reference_specs <- function() {
     "ref-ff66d3c4c1fd45b5" = list(
       variables = character(),
       meaning = "meta: Unstandardized mean differences",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-edaf0aa6259be813" = list(
-      variables = character(),
-      meaning = "meta: Bias-corrected standardized mean differences",
-      priority = 0L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-1fd148874ecd445a" = list(
-      variables = character(),
-      meaning = "meta: Uncorrected Cohen standardized mean differences",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -14218,7 +12330,7 @@ findit_reference_specs <- function() {
     ),
     "ref-c05fa20be5881bb3" = list(
       variables = character(),
-      meaning = "meta: Categorical meta-regression with Knapp-Hartung inference",
+      meaning = "meta: Categorical REML meta-regression",
       priority = 0L,
       hints = character(),
       strings = character(),
@@ -14336,16 +12448,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-bb38fd322aab6fd6" = list(
-      variables = character(),
-      meaning = "predict: Baseline Cox survival from cumulative hazard",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-c19f163eca37cd90" = list(
       variables = character(),
       meaning = "predict: Conditional median survival after loglogistic AFT",
@@ -14389,16 +12491,6 @@ findit_reference_specs <- function() {
     "ref-466747ef668b2bdb" = list(
       variables = character(),
       meaning = "mi: Unordered-category chained-equation imputation",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-68a1dc1c83a580d8" = list(
-      variables = character(),
-      meaning = "mi: Customize the imputation predictor matrix",
       priority = 100L,
       hints = character(),
       strings = character(),
@@ -14456,16 +12548,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-c8100ab357762cb4" = list(
-      variables = character(),
-      meaning = "svyset: Survey bootstrap replicate-weight design",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-f33c1671073cea5e" = list(
       variables = character(),
       meaning = "svy: Survey mean with BRR replicate variance",
@@ -14486,16 +12568,6 @@ findit_reference_specs <- function() {
       derived = list(),
       varlist = NULL
     ),
-    "ref-b1c9b5f3882cb989" = list(
-      variables = character(),
-      meaning = "svy: Survey mean with bootstrap replicate variance",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
     "ref-ab47a66a1a635d79" = list(
       variables = character(),
       meaning = "svyset: Poststratify survey weights to population category totals",
@@ -14509,16 +12581,6 @@ findit_reference_specs <- function() {
     "ref-cf088efba6e781a2" = list(
       variables = character(),
       meaning = "svyset: Rake sample weights to known category margins",
-      priority = 100L,
-      hints = character(),
-      strings = character(),
-      aliases = list(),
-      derived = list(),
-      varlist = NULL
-    ),
-    "ref-597f7aa4102d59e5" = list(
-      variables = character(),
-      meaning = "estat: Design effect of a survey mean",
       priority = 100L,
       hints = character(),
       strings = character(),

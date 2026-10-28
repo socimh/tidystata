@@ -36,3 +36,7 @@
 /data-raw/findit/
 /data-raw/stata-parity/
 
+# Website reference chapters are regenerated from the installed catalogue.
+/vignettes/articles/stata-*.Rmd
+/pkgdown/stata-reference-generated/
+/pkgdown/assets/stata-reference-links.json

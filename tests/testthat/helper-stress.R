@@ -465,6 +465,8 @@ stress_entry_exports <- list(
 # Exports outside the data matrix, with the reason.
 stress_unregistered_exports <- list(
   findit = "Stata command lookup; no data input",
+  findit_selection = "editor lookup; covered by test-findit-text.R",
+  findit_clip = "clipboard lookup; covered by test-findit-text.R",
   varlist = "string pattern helper; no data input",
   capture = "expression wrapper; covered by test-capture.R",
   timer = "expression wrapper; covered by test-timer.R",

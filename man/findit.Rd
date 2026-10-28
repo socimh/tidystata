@@ -11,7 +11,9 @@ findit(command = NULL, ...)
 name (\code{findit(reg)}, \code{findit(left_join)}) or a quoted string for full
 syntax (\code{findit("merge 1:1 id, keep(match)")}). R function names may
 include \verb{()} or a namespace prefix. Use \code{!!cmd} to look up a string stored
-in \code{cmd}. Defaults to \code{NULL} (all entries).}
+in \code{cmd}. Stata text can also be enclosed in backticks, as in
+\code{findit(`tab sex region`, row)}. Recognized variable names and options
+customize matching examples. Defaults to \code{NULL} (all entries).}
 
 \item{...}{Optional variable names or command hints, captured without
 evaluation. Names customize examples in Stata operand order, while hints
@@ -62,6 +64,9 @@ Footers distinguish hidden relevant candidates from broader family examples
 and report when the ten-candidate limit applies. The print method's \code{n}
 argument sets how many matches are printed; use
 \code{print(n = Inf)} to display all matches.
+\item Printing omits package labels and unnecessary namespace prefixes for R's
+default packages. Conflicting names, such as \code{stats::filter()}, remain
+qualified. The returned code and package metadata retain their originals.
 \item The \code{match} column identifies the lookup type: \code{"stata"}, \code{"r"},
 \code{"keyword"}, \code{"nearest"}, or \code{"all"}.
 \item Supplied variable names customize compatible examples. Unresolved
@@ -72,6 +77,12 @@ placeholders and unsupported combinations are explained in notes.
 \itemize{
 \item Quote multiword Stata syntax, reserved words (\code{"if"}), and names that are
 not valid R symbols (\code{"_n"}).
+\item Backticks and strings accept the same Stata text. Supported syntax uses
+catalogue variable annotations; unfamiliar syntax retains generic examples.
+Internal Stata quotation marks are preserved. Use an R string or raw string
+when the Stata text itself contains backticks.
+\item \code{\link[=findit_selection]{findit_selection()}} and \code{\link[=findit_clip]{findit_clip()}} read one command from the source
+editor or clipboard and print the equivalent lookup result.
 \item Lookup works offline. External packages such as fixest, modelsummary, and
 srvyr are needed only when running their examples.
 \item Chinese descriptions follow R's language settings. Use \code{Sys.setenv(LANGUAGE = "en")} to switch to English.
@@ -85,6 +96,10 @@ findit(reg)
 findit(tab, gen)
 
 findit(tab, sex, region)
+
+findit(`tab sex region`, row)
+
+findit("tab sex region, row")
 
 findit("merge 1:1 id, keep(match)")
 
